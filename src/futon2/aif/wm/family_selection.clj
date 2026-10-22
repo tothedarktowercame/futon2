@@ -5,6 +5,7 @@
   fold under each policy's structural reading-policy key (cascade-habit-store
   policy-view); a ranked entry carries no E of its own before that."
   (:require [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.wm.family-canonical-g :as canonical-g]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
@@ -47,7 +48,7 @@
                         (assoc :class-emission (:class-emission score))
                         (assoc :g-terms (merge (get-in entry [:certificate :g-terms])
                                               g-terms)))]
-    (-> entry
+    (cond-> (-> entry
         (assoc :action (reading-action policy score)
                :reading-pin (:reading-pin policy)
                :cascade-id (:policy-id policy)
@@ -65,7 +66,10 @@
                :habit 1
                :habit-provenance {:source :pending-selector-attachment}
                :transition-kernel kernel-version
-               :certificate certificate))))
+               :certificate certificate))
+      (= :canonical-coapply (:g-law score))
+      (assoc :g-law :canonical-coapply :legacy-g (:legacy-g score)
+             :horizon-choice (:horizon-choice score)))))
 
 (defn constructed-key
   "The structural key of a family policy as constructed: the scored
@@ -350,8 +354,8 @@
   (let [families (:families field)
         target-classes (:target-classes join)
         failures (vec (mapcat #(map (partial annotate-failure (:target-id %))
-                                    (:failures %)) families))]
-      (let [rows (score-family-field (filterv #(= :computed (:status %)) families)
+                                    (:failures %)) families))
+        rows (score-family-field (filterv #(= :computed (:status %)) families)
                                      target-classes)
             {:keys [ranked]} (construct-ranked rows)
             bound (cascade-identity/bind-ranked ranked
@@ -376,7 +380,7 @@
           (assoc body :status :refused :reason :no-canonically-bound-policy)
 
           :else
-          (assoc body :status :sealed :menu-pin (sealed-menu-pin body))))))
+          (assoc body :status :sealed :menu-pin (sealed-menu-pin body)))))
 
 (defn select-over-families
   "Score every policy in each computed family, then call
@@ -402,7 +406,15 @@
         missing-targets (vec (map :target-id
                                   (remove #(= :computed (:status %)) families)))
         rows (score-family-field families)
+        canonical (when (= :canonical-coapply (:g-law opts)) (canonical-g/rescore rows))
+        rows (if canonical
+               (mapv (fn [row] (assoc row :policies (mapv (fn [[p s]] (policy-summary p s)) (:scored row))))
+                     (:rows canonical)) rows)
         {:keys [scored ranked]} (construct-ranked rows)
+        ranked (if canonical
+                 (let [ordered (sort-by :G-efe ranked)
+                       ranks (zipmap (distinct (map :G-efe ordered)) (iterate inc 1))]
+                   (mapv #(assoc % :rank (get ranks (:G-efe %))) ordered)) ranked)
         ;; Packet B pre-selector join: bind each ranked entry to the
         ;; canonical :wm/executable-cascade-v1 identity.  Entries whose
         ;; canonical construction or validation refuses are removed with a
@@ -417,7 +429,7 @@
         ranked (if attach-f (attach-f ranked) ranked)
         certified (when (and certify (seq ranked)) (certify ranked scored))
         opts (cond-> (dissoc opts :attach-f :certify :exclude
-                             :bind-cascade-identity)
+                             :bind-cascade-identity :g-law)
                (= :certified (:status certified)) (assoc :beta (:beta certified)))
         excluded (when (and exclude (= :certified (:status certified)))
                    (exclude ranked opts certified))
@@ -458,7 +470,14 @@
                                               ps)))
                               row)))
                         rows)]
-    (cond
+    (cond->
+     (cond
+      (:refusal canonical)
+      {:status :abstained :decision {:status :abstained :kind :canonical-g-refused
+                                     :refusal (:refusal canonical)}
+       :ranked [] :target-policy-families summaries :failures failures
+       :failure-count (count failures)}
+
       (seq missing-targets)
       {:status :abstained
        :decision {:status :abstained
@@ -535,4 +554,5 @@
        :ranked []
        :target-policy-families summaries
        :failures failures
-       :failure-count (count failures)})))
+       :failure-count (count failures)})
+     canonical (assoc :canonical-g (:comparison canonical)))))

@@ -19,7 +19,8 @@
   returns a precise typed absence and names the architectural gap rather
   than fabricating the missing authority."
   (:require [clojure.set :as cset]
-            [futon2.aif.cascade-observation-scoring :as scoring]))
+            [futon2.aif.cascade-observation-scoring :as scoring]
+            [futon2.aif.wm.family-canonical-g :as canonical-g]))
 
 (def receipt-schema (keyword "wm/reading-policy-preference-receipt/v1"))
 
@@ -104,7 +105,7 @@
 ;; Validation and receipt
 ;; ---------------------------------------------------------------------------
 
-(defn normalization-binding
+(defn- legacy-normalization-binding
   "The G normalization the scored RECORD declares, bound to the terms the
   scorer produced, against a SCHEDULE of horizon H; or {:refusal kind}.
   The scorer's terms (before the reading fit's ambiguity is added) must be
@@ -162,13 +163,21 @@
                                            :terms class-terms}
                           :fit-ambiguity fit-ambiguity}})))
 
+(defn normalization-binding [record sched h]
+  (if (= :canonical-coapply (:g-law record))
+    (let [receipt (canonical-g/certify-score record)]
+      (if (= :certified (:status receipt))
+        (:normalization receipt)
+        {:refusal (:kind receipt)}))
+    (legacy-normalization-binding record sched h)))
+
 (defn- refuse [record kind & extras]
   (merge {:schema receipt-schema
           :status :refused :kind kind
           :policy-id (:policy-id record) :target (:target record)}
          (apply hash-map extras)))
 
-(defn validate
+(defn- validate-legacy
   "Validate one scored reading-policy RECORD and return its typed receipt,
   a typed refusal, or a typed absence.  Checks: exactly one declared C;
   per-step normalization and finiteness; step indices exactly 1..horizon;
@@ -356,6 +365,11 @@
                                                :pins {:status :absent
                                                       :reason :no-pins-in-provenance})))
           )))))
+
+(defn validate [record]
+  (if (= :canonical-coapply (:g-law record))
+    (canonical-g/certify-score record)
+    (validate-legacy record)))
 
 (defn certify
   "Convenience: validate and return the receipt, or the typed

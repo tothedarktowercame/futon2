@@ -282,7 +282,7 @@
   (wm/generate-war-machine
    days
    (merge (wm/accumulation-config)
-          (select-keys opts [:accumulate-strategic-habit? :run-id
+          (select-keys opts [:g-law :accumulate-strategic-habit? :run-id
                              :loaded-code-identity :cascade-habit-path
                              :cascade-feedback-path :cascade-feedback-metadata
                              :observation-labels-path :flight :trace-dir

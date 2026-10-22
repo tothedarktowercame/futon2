@@ -35,6 +35,7 @@
   The carrier is computed by the decision and recomputed by the exporter
   from the persisted decision alone."
   (:require [futon2.aif.cascade-observation-scoring :as scoring]
+            [futon2.aif.cascade-shape-g :as shape]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.previous-run :as previous-run]
@@ -162,8 +163,11 @@
       {:refusal :live-c-not-diagnostic}
       (not (and (integer? h) (pos? h))) {:refusal :horizon-not-positive}
       (not= h (:model-horizon authority)) {:refusal :horizon-not-the-authority's}
-      (not= :progress-count (:kind authority)) {:refusal :preference-kind-not-recomputable}
-      (not= sched (pref/recompute-progress-preference (:progress-tokens authority) h))
+      (not= (if (= :canonical-coapply (:g-law receipt)) :class-emission :progress-count)
+            (:kind authority)) {:refusal :preference-kind-not-recomputable}
+      (not= sched (if (= :canonical-coapply (:g-law receipt))
+                    (:class-preference (shape/class-emission-model ::ruled #{} #{} h))
+                    (pref/recompute-progress-preference (:progress-tokens authority) h)))
       {:refusal :preference-not-recomputable}
       :else
       (if-let [refusal (normalization-refusal norm h sched (:g receipt) terms)]
@@ -174,8 +178,9 @@
          :horizon h
          ;; Lean indexes steps from 0; C-tau is stated for tau = 1..H
          :preference-steps (vec (sort (map dec (keys sched))))
-         :graded-steps (vec (sort (for [[tau d] sched :when (graded-step? d)] (dec tau))))
-         :semantics :progressive
+         :graded-steps (if (= :canonical-coapply (:g-law receipt)) []
+                         (vec (sort (for [[tau d] sched :when (graded-step? d)] (dec tau)))))
+         :semantics (if (= :canonical-coapply (:g-law receipt)) :terminal-class :progressive)
          :normalization (select-keys (:declaration norm) [:law :version])
          :terms (into {} (for [t [:risk :ambiguity :information-gain]]
                            [t (finite? (get terms t))]))}))))
@@ -187,9 +192,12 @@
         compared (vec (sort-by pr-str (map prefix-admission/candidate-key
                                            (keys (get-in decision [:selection-law :posterior])))))
         rows (into {} (map (fn [r] [(prefix-admission/candidate-key (:id r)) r])) (:candidates cert))
-        receipts (group-by :policy-id (:preference-receipts cert))
+        receipts (group-by :policy-id (remove #(= :canonical-coapply (:g-law %)) (:preference-receipts cert)))
+        canonical-receipts (group-by (juxt (comp str :target) :policy-id)
+                                    (filter #(= :canonical-coapply (:g-law %)) (:preference-receipts cert)))
         per (mapv (fn [k]
-                    (let [rs (get receipts (nth k 2 nil))]
+                    (let [rs (or (get canonical-receipts [(nth k 1 nil) (nth k 2 nil)])
+                                 (get receipts (nth k 2 nil)))]
                       (if (< 1 (count rs))
                         {:refusal :competing-receipts}
                         (policy-facts k (first rs) (get rows k)))))

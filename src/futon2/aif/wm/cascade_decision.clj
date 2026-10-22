@@ -976,7 +976,7 @@
        (fn [{:keys [target cascade-problem] :as problem}]
          (let [slices (slices-for problem)
                query-time-slice (first slices)
-               pins (:library-pins query-time-slice)]
+               _pins (:library-pins query-time-slice)]
            {:target target
             :slice (vec (distinct (mapcat #(map :pattern (:candidates %)) slices)))
             :construction-slice-count (count slices)
@@ -1071,6 +1071,7 @@
   [field families ranked scored]
   (let [scorer-versions (set (map (comp :scorer-version second) scored))
         kernels (set (map :transition-kernel ranked))
+        canonical? (every? #(= :canonical-coapply (:g-law (second %))) scored)
         models (map #(get-in (meta (:scorer-result (second %))) [:cascade-scoring :model])
                     scored)]
     (cond
@@ -1091,9 +1092,14 @@
                                  :transition-kernel (:transition-kernel e)
                                  :arrangement (get-in e [:action :arrangement])})
                         ranked)
-        :progress-model (assoc progress-authority
-                               :progress-tokens (sort-by pr-str (distinct (mapcat :progress-tokens models))))
-        :preference (assoc preference-authority
+        :progress-model (assoc (if canonical?
+                                  {:authority :cascade-shape-g/class-emission-model
+                                   :version "canonical co-application class model v1"}
+                                  progress-authority)
+                               :progress-tokens (sort-by pr-str (distinct (mapcat (if canonical? :universe :progress-tokens) models))))
+        :preference (assoc (if canonical?
+                              {:authority :classKernel :version "compareAtHorizonN classKernel v1"}
+                              preference-authority)
                            :horizon (reduce max 1 (keep :horizon models)))
         :beta-authority beta-authority}})))
 
@@ -1233,7 +1239,8 @@
                     families
                     #(family-selection/select-over-families
                     families
-                    {:certify (certify-reading-family field families beta opts)
+                    {:g-law (:g-law opts)
+                     :certify (certify-reading-family field families beta opts)
                      ;; Q6 before the one selector: the previous run's
                      ;; refused choice, on the same selection inputs, is
                      ;; removed from the menu
@@ -1282,7 +1289,12 @@
                        (assoc-in [:selection-certificate :reading-precision-carry]
                                  (get-in result [:refusal :carry])))}
           :abstained
-          {:decision (abstain (family-refusals (:target-policy-families result)))}
+          {:decision (if (= :canonical-coapply (:g-law opts))
+                       (-> (abstain (into (family-refusals (:target-policy-families result))
+                                          (when-let [r (get-in result [:decision :refusal])]
+                                            [(assoc r :stage :canonical-g)])))
+                           (assoc-in [:selection-certificate :canonical-g] (:canonical-g result)))
+                       (abstain (family-refusals (:target-policy-families result))))}
           (let [selected-ranked (first (filter #(= (:action (:decision result))
                                                    (:action %))
                                                (:ranked result)))
@@ -1301,9 +1313,12 @@
                              (assoc-in [:selection-certificate :policy-stages]
                                        (:policy-stages result))
                              (assoc-in [:selection-certificate :preference]
-                                       {:c :cascade-shape-g/progress-preference
-                                        :certified-by pref/receipt-schema
-                                        :live-c :observation-only})
+                                       (if (= :canonical-coapply (:g-law opts))
+                                         {:c :classKernel :certified-by :wm/canonical-reading-preference-v1
+                                          :live-c :observation-only}
+                                         {:c :cascade-shape-g/progress-preference
+                                          :certified-by pref/receipt-schema
+                                          :live-c :observation-only}))
                              (assoc-in [:selection-certificate :retired-diagnostics]
                                        retired-diagnostics)
                              (assoc-in [:selection-certificate :certificate-schema]
@@ -1315,6 +1330,9 @@
                              ;; certified preference receipts
                              (as-> d (assoc-in d [:selection-certificate :q4]
                                                (q4-preference/carrier d))))
+                decision (cond-> decision
+                           (= :canonical-coapply (:g-law opts))
+                           (assoc-in [:selection-certificate :canonical-g] (:canonical-g result)))
                 authorized (controller-authority/authorize decision (:ranked result))]
             {:decision (decision-gate/emit! authorized)
              :ranked (:ranked result)}))))))
