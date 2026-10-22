@@ -169,7 +169,12 @@
   (let [record-dir (.getPath
                     (.toFile
                      (Files/createTempDirectory
-                      "wm-run-record-test-" (make-array FileAttribute 0))))]
+                      "wm-run-record-test-" (make-array FileAttribute 0))))
+        injury-root (.getPath
+                     (.toFile
+                      (Files/createTempDirectory
+                       "wm-run-record-injury-test-" (make-array FileAttribute 0))))
+        ledger-path (str (io/file injury-root "ledger.edn"))]
     (with-redefs-fn
       {#'runner/run-opportunity-core!
        (fn [_] {:attempt-id "attempt-run-port" :outcome :grounded-change
@@ -177,12 +182,18 @@
                 :wm/route [{:node :R20 :via "scan" :at "2026-08-31T00:00:00Z"}
                            {:node :R12 :via "observe" :at "2026-08-31T00:00:01Z"}]})}
       (fn []
-       (let [assigned (runner/run-opportunity! {:run-id "run-assigned"
-                                                :click-id "click-assigned"
-                                                :run-record-dir record-dir})
-            generated (runner/run-opportunity! {:run-record-dir record-dir})
-            generated-again (runner/run-opportunity! {:run-record-dir record-dir})
-            record (edn/read-string (slurp (:run-record assigned)))]
+       (let [isolated {:run-id "run-assigned"
+                       :click-id "click-assigned"
+                       :run-record-dir record-dir
+                       ;; Explicit sinks: never fall through to the production
+                       ;; meta-injury root or sealed ledger path (2026-10-22
+                       ;; contamination, ledger ordinals 37+).
+                       :meta-injury-root injury-root
+                       :meta-injury-ledger-path ledger-path}
+             assigned (runner/run-opportunity! isolated)
+             generated (runner/run-opportunity! (dissoc isolated :run-id :click-id))
+             generated-again (runner/run-opportunity! (dissoc isolated :run-id :click-id))
+             record (edn/read-string (slurp (:run-record assigned)))]
         (is (= "run-assigned" (:run/id assigned)))
         (is (string? (:run/id generated)))
         (is (not (str/blank? (:run/id generated))))
@@ -353,6 +364,11 @@
                     (.toFile
                      (Files/createTempDirectory
                       "wm-total-run-record-test-" (make-array FileAttribute 0))))
+        injury-root (.getPath
+                     (.toFile
+                      (Files/createTempDirectory
+                       "wm-total-run-record-injury-test-" (make-array FileAttribute 0))))
+        ledger-path (str (io/file injury-root "ledger.edn"))
         requested {:status :authenticated-not-enacted
                    :identity {:series-id "run4-f11-v3"
                               :trial-id "M-f11-find-production-successor"
@@ -374,7 +390,12 @@
                    (with-redefs-fn {#'runner/run-opportunity-core! core}
                      #(runner/run-opportunity!
                        (merge {:run-id run-id :click-id (str "click-" run-id)
-                               :run-record-dir record-dir}
+                               :run-record-dir record-dir
+                               ;; Explicit sinks: never fall through to the
+                               ;; production meta-injury root or sealed ledger
+                               ;; (2026-10-22 contamination, ordinals 37-49).
+                               :meta-injury-root injury-root
+                               :meta-injury-ledger-path ledger-path}
                               opts))))]
     (testing "stop-line close carries enacted repair and requested-not-enacted pin"
       (let [result (run-with "stop" (fn [_] stop-result)
@@ -7611,3 +7632,76 @@
       (is (= 20 (get-in census [:environmental-hold :count])))
       (is (= 20 (get-in census [:closed :count])))
       (is (:reconciled? census)))))
+
+(deftest terminal-publication-ingests-into-isolated-stores-only
+  ;; 2026-10-22 contamination repair: prove the real terminal close/ingestion
+  ;; path runs to a durable append, lands ONLY in temporary stores, and leaves
+  ;; the production deposit root, sealed ledger, and transaction file
+  ;; byte-for-byte unchanged. The guard assertions live in the hermetic
+  ;; fixture, but this test pins the sinks' own returned durable paths.
+  (let [injury-root (.getPath
+                     (.toFile
+                      (Files/createTempDirectory
+                       "wm-isolation-injury-test-" (make-array FileAttribute 0))))
+        ledger-path (str (io/file injury-root "ledger.edn"))
+        record-dir (.getPath
+                    (.toFile
+                     (Files/createTempDirectory
+                      "wm-isolation-record-test-" (make-array FileAttribute 0))))
+        stop-action {:type :repair-machine-failure
+                     :target "repair-attempt-001"
+                     :repair-obligation {:repair/id "repair-attempt-001"}}
+        stop-result
+        {:attempt-id "attempt-isolation" :outcome :incomplete
+         :checkpoints {:selection {:judgment {:selected-action stop-action}}}
+         :wm/route (#'runner/packet-run-route
+                    {:selected-action stop-action} {} :incomplete nil
+                    {:selected-action stop-action
+                     :requested-pin {:status :authenticated-not-enacted
+                                     :identity {:series-id "run4-iso-v1"
+                                                :trial-id "M-isolation"
+                                                :path "runs/iso/task-pin.edn"
+                                                :sha256 (apply str (repeat 64 "a"))}}})
+         :data {:failure-kind :machine-repair-lacks-grounded-review-evidence
+                :failure-stage :stop-line-resolution}}
+        prod-injuries-before (hermetic/production-file-set
+                              hermetic/production-meta-injury-root)
+        prod-ledger-before (hermetic/production-file-set
+                            hermetic/production-meta-injury-ledger-path)
+        prod-transaction-before (hermetic/production-file-set
+                                 hermetic/production-meta-injury-transaction-path)
+        result (with-redefs-fn {#'runner/run-opportunity-core! (fn [_] stop-result)}
+                 #(runner/run-opportunity!
+                   {:run-id "isolation" :click-id "click-isolation"
+                    :run-record-dir record-dir
+                    :meta-injury-root injury-root
+                    :meta-injury-ledger-path ledger-path}))
+        ingest (:meta-terminal-injury-ingest result)
+        deposit (:meta-injury-deposit result)
+        ledger-value (edn/read-string (slurp ledger-path))]
+    (is (= :present (:run-record-status result)))
+    (is (= :appended (:status ingest))
+        "the terminal injury ingest must really transact, not merely be called")
+    (is (= :atomic-locked-one-form (:durability ingest)))
+    (is (= :open (:transition ingest)))
+    (is (= 1 (count (:entries ledger-value)))
+        "the temporary ledger holds exactly the one ingested transition")
+    (is (= :wm/meta-injury-transition-v1
+           (some->> ledger-value :entries first :schema)))
+    (is (= :open (some->> ledger-value :entries first :state)))
+    (is (.exists (io/file ledger-path)))
+    (is (string? (:head-path deposit)))
+    (is (.exists (io/file (:head-path deposit))))
+    (is (.startsWith (.getCanonicalPath (io/file (:head-path deposit)))
+                     (.getCanonicalPath (io/file injury-root)))
+        "the deposit sink wrote only under the temporary injury root")
+    (is (= prod-injuries-before
+           (hermetic/production-file-set hermetic/production-meta-injury-root))
+        "production deposit root untouched")
+    (is (= prod-ledger-before
+           (hermetic/production-file-set hermetic/production-meta-injury-ledger-path))
+        "production sealed ledger byte-for-byte untouched")
+    (is (= prod-transaction-before
+           (hermetic/production-file-set
+            hermetic/production-meta-injury-transaction-path))
+        "production transaction file untouched")))

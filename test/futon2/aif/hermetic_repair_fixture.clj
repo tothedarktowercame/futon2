@@ -4,6 +4,7 @@
             [clojure.test :refer [is testing]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.meta-injury-store :as meta-injury-store]
+            [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire])
   (:import [java.nio.file Files]
@@ -13,6 +14,8 @@
 (def production-trip-root tripwire/default-trip-root)
 (def production-phase-log runner/default-phase-log)
 (def production-meta-injury-root meta-injury-store/default-root)
+(def production-meta-injury-ledger-path meta-self-heal/default-ledger-path)
+(def production-meta-injury-transaction-path meta-self-heal/default-transaction-path)
 
 (defn- temp-root [prefix]
   (.getPath (.toFile (Files/createTempDirectory
@@ -41,20 +44,32 @@
         trips-before (file-set production-trip-root)
         phase-bytes-before (.length (io/file production-phase-log))
         injuries-before (production-file-set production-meta-injury-root)
+        ledger-before (production-file-set production-meta-injury-ledger-path)
+        transaction-before (production-file-set production-meta-injury-transaction-path)
         repair-root (temp-root "wm-repair-suite-")
         trip-root (temp-root "wm-trip-suite-")
         injury-root (str (io/file repair-root "wm-meta-injuries"))
+        ledger-path (str (io/file injury-root "ledger.edn"))
+        transaction-path (str (io/file injury-root "transaction.edn"))
         phase-log (str (io/file repair-root "wm-full-loop-phases.edn.log"))]
     (with-redefs [repair/default-root repair-root
                   tripwire/default-trip-root trip-root
                   meta-injury-store/default-root injury-root
+                  meta-self-heal/default-ledger-path ledger-path
+                  meta-self-heal/default-transaction-path transaction-path
                   runner/default-phase-log phase-log]
       (run-tests))
     (testing "the suite cannot deposit production repair or trip artifacts"
       (is (= repair-before (file-set production-repair-root)))
       (is (= trips-before (file-set production-trip-root)))
       (is (= phase-bytes-before (.length (io/file production-phase-log))))
-      (is (= injuries-before (production-file-set production-meta-injury-root))))))
+      (is (= injuries-before (production-file-set production-meta-injury-root))
+          "the deposit sink (meta-injury-store/default-root) must stay untouched")
+      (is (= ledger-before (production-file-set production-meta-injury-ledger-path))
+          "the durable ledger (meta-self-heal/default-ledger-path) must stay
+           byte-for-byte untouched: a sealed-ledger append cannot be undone")
+      (is (= transaction-before (production-file-set production-meta-injury-transaction-path))
+          "the durable terminal transaction file must stay untouched"))))
 
 (defn runner-repair-options
   "Explicit temporary store callbacks also protect direct REPL/debug callers,
