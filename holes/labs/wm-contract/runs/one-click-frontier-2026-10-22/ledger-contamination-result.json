@@ -1,0 +1,55 @@
+{
+  "result": "test contamination, not live history",
+  "origin": {
+    "source_file": "test/futon2/aif/full_loop_runner_test.clj",
+    "deftests": [
+      "run-opportunity-surfaces-stable-run-identity (line ~168, temp prefix wm-run-record-test-)",
+      "every-terminal-wrapper-category-persists-a-run-record (line ~351, temp prefix wm-total-run-record-test-; run-ids stop / initialization / cohort-complete)"
+    ],
+    "mechanism": "Both deftests call runner/run-opportunity! overriding only :run-record-dir. full_loop_runner.clj ~8348-8372 (terminal-publication sinks) then runs meta-injury-store/deposit! against meta-injury-store/default-root and meta-injury-store/ingest-record-file! against meta-self-heal/default-ledger-path because :meta-injury-root / :meta-injury-ledger-path are absent. The test run records are therefore classified by meta_terminal_injury and transacted into the production ledger data/wm-meta-injuries/ledger.edn. Three wm-total-run-record-test-* temp dirs (5158430499882562667, 1893956413671053322, 5193452385627945323) = three executions of the suite; likewise several wm-run-record-test-* dirs.",
+    "precedent": "data/wm-meta-injuries/quarantine-test-pollution-2026-10-19/README.md documents the same leak for the deposit sink (full_loop_runner.clj then line 8245) on 2026-10-19; that quarantine moved un-ingested deposit files, which does NOT apply here because this pollution is inside the sealed ledger."
+  },
+  "contaminated_entries": {
+    "opening_transitions": [
+      {"ordinal": 37, "injury-id": "injury/9f1d0c67d630a338416b53085427fb8a45b9732f", "state": "open", "failure-kind": "no-terminal-state", "cause-record-pin": "/tmp/wm-run-record-test-13774996573781603593/tick-run-record-run-assigned.edn"},
+      {"ordinal": 38, "injury-id": "injury/ff6e0452abd2c980a9c3d1b5482ca62736cc6791", "state": "open", "failure-kind": "machine-repair-lacks-grounded-review-evidence", "detected-click": "click-stop", "cause-record-pin": "/tmp/wm-total-run-record-test-5158430499882562667/tick-run-record-stop.edn"},
+      {"ordinal": 39, "injury-id": "injury/1bc0efe3d3a1a2c487e2ad28e431fb3b842ad680", "state": "open", "failure-kind": "initialization-failed", "detected-click": "click-initialization", "cause-record-pin": "/tmp/wm-total-run-record-test-5158430499882562667/tick-run-record-initialization.edn"}
+    ],
+    "derivative_observations": "ordinals 40-49 (:repeated-active-injury) pin /tmp tick-run-record-cohort-complete.edn / run-assigned.edn records against injury 9f1d0c67, ff6e0452, 1bc0efe3; observations cannot alter state but they chain the /tmp pins into the sealed history.",
+    "why_test_not_live": "cause-record-pins live under java temp dirs (now deleted), detected-click values are the test's literal run-ids (click-stop, click-initialization, run-assigned), failure kinds are the synthetic fixtures defined in the deftest, and the file names match the temp-dir prefix minted only by these tests."
+  },
+  "active_injuries_now": {
+    "rule": "meta_injury_ledger.clj:17 active-states = states minus {discharged, abandoned}; latest transition per injury",
+    "list": [
+      {"id": "injury/1bc0efe3d3a1a2c487e2ad28e431fb3b842ad680", "state": "open", "origin": "TEST"},
+      {"id": "injury/42fd2c21a403ea12cea65ce3226f5cb97823aec7", "state": "enacted", "origin": "live"},
+      {"id": "injury/75747f06b025c9c19fd9d00ad1f3a26dce76da41", "state": "open", "origin": "live (required-checkpoints-missing, click 13)"},
+      {"id": "injury/821c15d0f17f6bc5ce35eb800e6a6a04c17e183d", "state": "open", "origin": "live (no-selection)"},
+      {"id": "injury/9c998f2ebbabf2f8a011ee7e339383ac450908d4", "state": "enacted", "origin": "live"},
+      {"id": "injury/9f1d0c67d630a338416b53085427fb8a45b9732f", "state": "open", "origin": "TEST"},
+      {"id": "injury/a173047eee4078c4bab3f8a1d3305e774023dd0c", "state": "enacted", "origin": "live"},
+      {"id": "injury/ff6e0452abd2c980a9c3d1b5482ca62736cc6791", "state": "open", "origin": "TEST"}
+    ]
+  },
+  "next_selected_injury_by_production_sorting": {
+    "rule": "meta_self_heal_production.clj:955 and meta_repair_coordinator.clj:140 both use (first (sort (keys active))) — lexicographic on injury-id string",
+    "answer": "injury/1bc0efe3d3a1a2c487e2ad28e431fb3b842ad680 — the TEST-origin initialization injury; sort order 1bc0... < 42fd... < 75747... < 821c... < 9c99... < 9f1d... < a173... < ff6e..., so all three contaminated injuries (1bc0, 9f1d, ff6e) precede or interleave the legitimate open injuries 75747f06 and 821c15d0; the first two selections of any self-heal click are both test noise."
+  },
+  "existing_transition_for_erroneous_admission": "NONE. meta_injury_ledger.clj state-defects: :abandoned is valid only with :reason :attempt-limit-exhausted (attempt == attempt-limit 3) or :retry-budget-spent (requeues == retry-limit), or from previous :claimed with an author-failed :port-receipt-pin; :discharged requires a real :success/:grounded-change/:closed outcome; append-observation cannot change state. No retraction / invalidate / correct-admission transition exists.",
+  "supported_remediation_options": {
+    "forbidden": [
+      "hand-editing ledger.edn — the seal hashes the whole map; an edit fails validate-ledger as :ledger/seal and load refuses :store/tampered-ledger",
+      "fabricating a :discharged transition — violates discharge/outcome evidence",
+      "routing around or gating off the ingest"
+    ],
+    "available_today": [
+      "Stop the source: make the two deftests pass isolated :meta-injury-ledger-path and :meta-injury-root (same repair packet the 2026-10-19 quarantine README already prescribed for the deposit sink), plus a test asserting no entry/file ever lands under the default roots. Without this, every suite run re-pollutes.",
+      "Within the existing state machine the ONLY retirements are budget exhaustion or real discharge; driving three real author-port refusals per test injury to reach :abandoned attempt==3 is technically legal but spends real machinery and budget on noise — not recommended."
+    ],
+    "structural_proposal": "Add a typed ledger transition (e.g. :retracted from {:open :claimed :enacted} with :reason :nonproduction-admission) whose validation requires a pinned review record identifying the nonproduction source (the /tmp cause-record-pin and the originating deftest), keeping the entries and chain intact so history preserves exactly what was admitted and why it was retracted. This is a structural change to the ledger schema and validators, to be proposed to Joe / the packet owner — per the workspace contract the correct action here is to surface the conflict, not to extend the state machine unilaterally in this read-only task."
+  },
+  "notes": [
+    "ledger.edn is gitignored (per minus40 memory sealed-ledger-key-additions-need-live-migration), so git offers no recovery either; the sealed chain is the only history.",
+    "Independent Zai3's terminal transaction retirement work (transaction.edn.attempt-N.retired.edn) is adjacent but separate: the contamination here is in ledger.edn entries, not the terminal transaction."
+  ]
+}

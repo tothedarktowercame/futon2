@@ -1,0 +1,25 @@
+{
+  "agent": "zai-1",
+  "artifacts": [
+    {
+      "path": "ledger-contamination-dispatch.json",
+      "sha256": "35b88db43c4473dee9730f631a611520d97c4bdf4417c1d6e320970299b62665"
+    },
+    {
+      "path": "ledger-contamination-result.json",
+      "sha256": "a98983d3b48799884e7343c4fc164f69123c07b4eef7e5779e8dde34be436b07"
+    },
+    {
+      "path": "ledger-contamination-terminal.json",
+      "sha256": "4bed0696cd22c80291e5057b921d4f773a1d57d6f8c904e4c0b5b60cfa504ecf"
+    },
+    {
+      "path": "recovery-section-snapshot.json",
+      "sha256": "fce05dda4faf670f8230722aa497bad106e1dd533e0c2347d2ba9ba7f425f615"
+    }
+  ],
+  "job_id": "invoke-1792640750570-2226-6e957c8e",
+  "phase": "ledger-contamination",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}
