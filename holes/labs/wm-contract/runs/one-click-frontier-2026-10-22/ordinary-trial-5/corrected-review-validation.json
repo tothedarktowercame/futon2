@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:job-id \"invoke-1792649262785-2348-2be907db\", :agent \"zai-3\", :state \"done\", :verdict :unverifiable, :gate {:required? true, :code-files [\"scripts/build_mission_crossref_edges.py\"], :executed? true, :tool-events 4, :execution {:executed true, :tool-events 4, :command-events 0}, :execution-source :job-summary, :passed? true, :failure-kind nil}}}",
+  "err": ""
+}

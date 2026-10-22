@@ -1,3 +1,16 @@
+LATEST: corrective Zai3 job2348 independently RETRACTS approval, but production
+review-verdict parses its prose as :unverifiable (missing FULL_LOOP_REVIEW marker).
+Actual review-execution-gate passes with4 tool events. Preserve corrected-review-job.json
+and corrected-review-validation.json. Supplemental genuine reviewer job
+invoke-1792649611892-2353-b571b2b0 dispatched read-only: re-run tiny probes and emit
+own verdict in runtime format. Do not fabricate marker or edit original review.
+Same Trial5 verified HELD :reviewer-wait; review-marker-held-verification.json.
+On result, validate actual job via task-execution-evidence/review-verdict and
+review-execution-gate. Inspect supported revision path/attribution before feeding
+actual corrected job through debugger; original approval remains frozen. Existing
+run-revision-round recognizes typed REQUEST_CHANGES; default budget1. No new Trial,
+no deployment while flight, no useful close yet. FIVE Trials remain; work order open.
+
 LATEST: same Trial5 now HELD at :reviewer-wait (phase-breakpoint), actual
 runtime reviewer job2347 APPROVE captured in reviewer-wait.edn.gz/e4ee41d4d.
 Before continuing, root independently executed parser probes on futon5a9d8d6993:
