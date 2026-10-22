@@ -285,16 +285,18 @@
       (with-redefs [observation/repo-root (:root fx)
                     cascade-sources/load-declared
                     (fn [& _] (fixture-sources (assoc fx :sha (:after-sha fx))))]
-        (let [action (co-apply-action "T-fixture-closure" [[:p [:fixture-done]]])
+        (let [compiled (co-apply-action "T-fixture-closure" [[:p [:fixture-done]]])
               data {:artifact-binding (fresh-binding (:after-sha fx) (:before-sha fx))
                     :commit (:after-sha fx)}]
-          (is (= :grounded-change
-                 (runner/classify-grounded-outcome :grounded-change action data)))
-          (doseq [product [["foreign-target" :fixture-done]
-                           ["T-fixture-closure" :fixture-done :extra]]]
-            (is (= :grounded-progress
-                   (runner/classify-grounded-outcome
-                    :grounded-change
-                    (assoc-in action [:precedence :co-apply :patterns :p :produces]
-                              #{product})
-                    data)))))))))
+          (doseq [action-for [(fn [product]
+                               (assoc-in compiled [:precedence :co-apply :patterns :p :produces] #{product}))
+                             (fn [product]
+                               {:target "T-fixture-closure"
+                                :precedence [{:id :p :produces #{product}}]})]]
+            (doseq [product [:fixture-done ["T-fixture-closure" :fixture-done]]]
+              (is (= :grounded-change
+                     (runner/classify-grounded-outcome :grounded-change (action-for product) data))))
+            (doseq [product [["foreign-target" :fixture-done]
+                             ["T-fixture-closure" :fixture-done :extra]]]
+              (is (= :grounded-progress
+                     (runner/classify-grounded-outcome :grounded-change (action-for product) data))))))))))

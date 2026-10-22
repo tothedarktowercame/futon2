@@ -1,0 +1,24 @@
+{
+  "parent": "c0f35f79d",
+  "review_finding": "Claude7 job2403 legacy vector foreign-target qualifier stripped before local lookup",
+  "change": "Apply target ownership and 2-element qualified-product shape check to both precedence representations. No change to empty legacy declarations.",
+  "validation": {
+    "tests": 8,
+    "assertions": 45,
+    "failures": 0,
+    "errors": 0,
+    "log": "holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/ordinary-trial-5/closure-vector-ownership-test.log",
+    "sha256": "2aaa170888e7e746b88362c53d548d553aead17994b64ebea5d8125a6f3aa857",
+    "lint_errors": 0,
+    "lint_warnings": "2 existing runner warnings",
+    "parens": "OK"
+  },
+  "controls": [
+    "Legacy vector and coapply foreign-target pair refuse grounded-progress",
+    "Both malformed 3-element qualified products refuse",
+    "Both bare local token and selected-target-qualified token pass real locator/artifact checks"
+  ],
+  "status": "isolated-tested-not-integrated",
+  "work_order_status": "open",
+  "trials_remaining": 5
+}
