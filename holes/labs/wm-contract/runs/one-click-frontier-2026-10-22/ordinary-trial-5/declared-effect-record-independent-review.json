@@ -1,0 +1,12 @@
+{
+  "commit": "f90c614fd616ed7af7379ae326eab0a91d5ff8e4",
+  "verdict": "request-changes",
+  "probe-exit": 0,
+  "findings": [
+    "build-record accepts {:observed false} with no evidence at wrong-repo/not-a-revision as eligible",
+    "verify-record accepts bogus schema with self-consistent digest",
+    "reconstruct accepts changed target body retaining old digest because it compares only stored digests"
+  ],
+  "integration": false,
+  "deployment": false
+}
