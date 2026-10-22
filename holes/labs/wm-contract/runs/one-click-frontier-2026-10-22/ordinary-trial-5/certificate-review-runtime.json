@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:stops [{:run-id \"2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45\", :phase :selection, :condition {:kind :wm/outer-learning-not-consumed, :class \"clojure.lang.ExceptionInfo\", :message \"War Machine outer learning was not consumed\"}}], :root \"/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22\"}}",
+  "err": ""
+}

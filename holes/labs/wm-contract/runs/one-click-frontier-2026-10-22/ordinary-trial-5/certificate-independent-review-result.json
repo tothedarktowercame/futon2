@@ -1,0 +1,27 @@
+{
+  "reviewed_commit": "aee932efe5e3b590589349779fe2da3f4d3acbaf",
+  "verdict": "changes-required",
+  "checked_at": "2026-10-22T05:24:18.582206+00:00",
+  "execution": {
+    "command": "clojure -M <canonical artifact>/certificate-independent-review.clj",
+    "cwd": "/home/joe/code/futon2-learning-certificate-review",
+    "exit": 0,
+    "positive": "frozen receipt returns ordinary-provider-consumed",
+    "negative_cases_incorrectly_accepted": [
+      "missing provider source pin",
+      "refused policy evidence",
+      "corrupted objective seal",
+      "minimal status-only maps with all pins and selected identity nil"
+    ]
+  },
+  "artifacts": [
+    "certificate-independent-review.clj",
+    "certificate-independent-review.edn",
+    "certificate-independent-review.stderr",
+    "certificate-review-runtime.json"
+  ],
+  "restart_review": "run-phase! use-value returns supplied judgement without rechecking result->debugger-condition. Any replay continuation must explicitly validate corrected certificate, sealed carrier, unchanged decision and full selection-terminal-condition before use-value; no unconditional status replacement.",
+  "deployment": "not authorized by review; repair not integrated or loaded",
+  "correction_job": "invoke-1792646601323-2322-4b57f311",
+  "validation": "Reproducer executed against repair worktree; parens OK. Main lint unresolved-var warning expected because function is not integrated. No broad tests or new Trial."
+}

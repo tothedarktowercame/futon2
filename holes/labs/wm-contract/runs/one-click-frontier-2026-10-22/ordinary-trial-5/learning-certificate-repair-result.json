@@ -1,0 +1,61 @@
+{
+  "request": "learning-certificate-repair-request.txt",
+  "responder": "zai-5",
+  "date": "2026-10-22",
+  "worktree": "/home/joe/code/futon2-learning-certificate-review",
+  "base": "134373c6e (futon2 main, includes efe9e7c7d / 3f3a99279)",
+  "commit": "aee932efe wm: ordinary arm certifies pinned provider->objective consumption",
+  "frozen-evidence": {
+    "file": "selection-stop.edn.gz",
+    "sha256_gzip": "360bc93c849687b81be833e398e99040c34f6b85f5a1537bb30dac3da4d7e1e5",
+    "sufficiency": "SUFFICIENT. The retained judgement [:stop :ex-data :judgement :outer-task-selection :policy] holds the complete pinned provider->objective consumption chain: :selected-outer-cascade-policy (status :sealed, carrier/menu/evidence/objective pins, policy-id M-stack-geometry/policy-c7d7518e1e185c2e2318, target M-stack-geometry, basis-kind :strict-objective, cascade-digest c601dc56...), :policy-evidence (:computed, matching evidence-pin b630a2f5... and menu-pin 1e7500a4...), :policy-objective (:selected, same menu-pin, selected policy/target identical to carrier), :sealed-menu {:status :carried-on-carrier :menu-pin 1e7500a4...}, :evidence-provider-source-pin d9bdfbb7.... The outer-learning authority itself (belief/controller objects) is NOT retained; only its projections are: :mode :live and :re-arm-condition verbatim in [:stop :ex-data :outer-learning], and belief :produced is proven by the frozen refusal branch order in learning-certificate (the :outer-learning-state-unavailable branch precedes and did not fire). Nothing else was invented.",
+    "retained-pins": {
+      "carrier-pin": "5dd8de3b28b5654bc0d16fe8f85e1fad33676cbee75379ac8dbf7ae41bac1da7",
+      "menu-pin": "1e7500a4b377935442c9092f40158bae931137e843064474b518e35cf4db4980",
+      "evidence-pin": "b630a2f59f2fad2fb2d39bb85ddd4a680f8623f505e47fe64a8d456c3a60e6a2",
+      "objective-pin": "fd56d38d9d8a293a0bbea6108588e2275f002eb636fb0c857af6b65c02add9f6",
+      "provider-source-pin": "d9bdfbb7b7833c462797db26c786b7401c25150236fc6453d837f8e79243451b",
+      "cascade-digest": "c601dc5697a2d5d65c5c8440f08b3905cee1030b9a62dfa03e2ad5e7ab202c27"
+    }
+  },
+  "repair": {
+    "ns": "futon2.aif.meta_live_outer_selector",
+    "public-fn": "ordinary-learning-certificate (pure; callable against the retained judgement/receipt)",
+    "positive-status": ":ordinary-provider-consumed",
+    "consumption-path": "[:outer-policy-evidence-provider :policy-evidence :policy-objective :selected-outer-cascade-policy]",
+    "refusal-reasons-positive-never-abstention": [
+      ":ordinary-selected-policy-carrier-missing",
+      ":ordinary-carrier-unsealed",
+      ":ordinary-objective-unselected",
+      ":ordinary-menu-pin-mismatch",
+      ":ordinary-evidence-menu-pin-mismatch",
+      ":ordinary-objective-menu-pin-mismatch",
+      ":ordinary-evidence-pin-mismatch",
+      ":ordinary-objective-receipt-unselected",
+      ":ordinary-policy-id-mismatch",
+      ":ordinary-target-id-mismatch"
+    ],
+    "preserved": [
+      "outer-learning authority pre-checks (absent/mode/belief) identical to legacy learning-certificate",
+      "injury advisory certificate contract (learning-certificate unchanged, injury arm unchanged)",
+      "retired target comparator stays retired (:legacy-target-shadow {:status :retired :consumed false})",
+      "selection tripwire (full_loop_runner/selection-terminal-condition) untouched - trips on :refused only",
+      "selected policy unchanged - the certificate reports policy-id/target-id/basis-kind/cascade-digest, never alters them"
+    ]
+  },
+  "gates": {
+    "clj-kondo": "0 errors 0 warnings on both files (one pre-existing info at meta_live_outer_selector.clj:361 boolean coercion, present on main)",
+    "check-parens": "OK on both files",
+    "focused-tests": {
+      "futon2.aif.meta-live-outer-selector-ordinary-certificate-test": "5 tests, 37 assertions, 0 failures, 0 errors",
+      "same ns with -i :slow (real frozen selection-stop.edn.gz, sha verified)": "1 test, 11 assertions, 0 failures, 0 errors - held Trial 5 receipt certifies :ordinary-provider-consumed with all recorded pins and the complete selected policy",
+      "futon2.aif.meta-live-outer-selector-test (regression)": "33 tests, 152 assertions, 1 failure - PRE-EXISTING on unmodified main (explicit-nil-constructor-injections-use-production-defaults, :no-canonically-bound-policy), verified by stashing the change and re-running that var"
+    },
+    "full-suite": "not run (per request: focused namespaces only)"
+  },
+  "files-committed": [
+    "src/futon2/aif/meta_live_outer_selector.clj",
+    "test/futon2/aif/meta_live_outer_selector_ordinary_certificate_test.clj"
+  ],
+  "notes": "Canonical futon2 untouched; worktree branch learning-certificate-review. Codex-11 to review/deploy and resume the same held Trial; project Trials remain."
+}

@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "agent-id": "codex-11",
+  "agent": {
+    "capabilities": [
+      "edit",
+      "test",
+      "coordination/execute"
+    ],
+    "session-id": "01a16136-8ec4-7972-8723-f8afda943b96",
+    "invoke-route": "local",
+    "completion-bell-required?": true,
+    "excursion-id": null,
+    "invoke-quiet-ms": 7834,
+    "type": "codex",
+    "invoke-ws-available?": false,
+    "invoke-started-at": "2026-10-22T05:22:07.674385316Z",
+    "delivery-mode": "push",
+    "invoke-local?": true,
+    "status": "invoking",
+    "mission-id": "M-wm-wiring",
+    "id": {
+      "id/value": "codex-11",
+      "id/type": "continuity"
+    },
+    "last-active": "2026-10-22T05:14:42.228951686Z",
+    "invoke-diagnostic": "local invoke-fn registered",
+    "invoke-prompt-preview": "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: parked-resume\nTo: codex-11\nOrigin: harness\nCaller: parked-resume\nPrompt: ",
+    "registered-at": "2026-10-22T01:08:52.805032538Z",
+    "invoke-activity-at": "2026-10-22T05:23:42.727595036Z",
+    "ttl-ms": null,
+    "metadata": {
+      "agency/contracts": {
+        "bell-on-complete?": true
+      },
+      "auto-registered?": true,
+      "require-execution?": true,
+      "cwd": "/home/joe/",
+      "model": "gpt-6-astra",
+      "session-file": "/tmp/futon-codex-session-id-codex-11"
+    },
+    "campaign-id": null,
+    "invoke-ready?": true,
+    "invoke-activity": "using bash (done)"
+  }
+}

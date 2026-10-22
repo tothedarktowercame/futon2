@@ -1,3 +1,16 @@
+LATEST REVIEW: aee932efe is NOT approved/deployed. Independent executable review
+accepted frozen positive but also four invalid cases: no provider pin, refused
+evidence, corrupted objective seal, minimal status-only map with every pin/id nil.
+See ordinary-trial-5/certificate-independent-review-result.json and .clj/.edn.
+Zai5 correction job invoke-1792646601323-2322-4b57f311 has exact repro and asks
+real semantic carrier/evidence/objective validation plus provenance, preserving
+ordinary selection and valid assessed-population semantics. Await correction,
+independently run negatives and frozen positive before canonical integration.
+Same run still held at selection (certificate-review-runtime.json); FIVE Trials
+remain. Do not admit another. use-value DOES NOT recheck terminal condition:
+explicitly validate repaired judgement and unchanged decision/carrier before any
+supported resume. No fake learning status. Broad useful objective remains open.
+
 LATEST ACTIVE FRONTIER: Trial5 remains HELD at :selection with
 :wm/outer-learning-not-consumed. Source guard was repaired and retried
 successfully; do NOT repeat source repair or start a fresh Trial.
