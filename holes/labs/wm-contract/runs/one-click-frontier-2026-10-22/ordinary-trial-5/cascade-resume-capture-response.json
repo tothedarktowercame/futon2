@@ -1,0 +1,11 @@
+{
+  "response": {
+    "rc": 0,
+    "out": "{:ok true, :value {:encoding \"wm/ordered-edn-v2\", :print-roundtrip true, :run-id \"2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45\", :phase :cascade-resume, :has-value true, :path \"/home/joe/code/futon2/holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/ordinary-trial-5/cascade-resume.edn.gz\", :sha256 \"4ae560dd38886f4ab4f332b736433eaeac9af74e2245fe9e80f3a4d5942f538a\"}}",
+    "err": ""
+  },
+  "repository_heads": {
+    "futon2": "0df59129026e3706f53d519bba445e9481757285",
+    "futon3c": "e65ef06be4e797d69645667ee6d888833e5e3b35"
+  }
+}
