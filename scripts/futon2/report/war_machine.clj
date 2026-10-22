@@ -1549,6 +1549,7 @@
         selector (:outer-task-selection-fn judge-opts)
         receipt (cond
                   selector (selector {:tasks tasks :seed seed
+                                      :selection-as-of (:selection-as-of judge-opts)
                                       :meta-field-observation
                                       (:meta-field-observation judge-opts)
                                       :meta-field-source-pin
@@ -6651,7 +6652,8 @@
                   ;; actual seed is retained in the selection receipt.
                   (hash (str (or (:run-id judge-opts) wm-as-of)))))
         outer-task-selection
-        (select-outer-task judge-opts outer-task-population outer-task-seed)
+        (select-outer-task (assoc judge-opts :selection-as-of wm-as-of)
+                           outer-task-population outer-task-seed)
         selected-task-id (get-in outer-task-selection [:chosen :id])
         _outer-task-selected
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)

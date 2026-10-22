@@ -104,11 +104,28 @@
                 :source-pin (pin "wm://meta-field-observation-v1" "f")}
         receipt (live/selector
                  {:tasks tasks
+                  :selection-as-of "2026-10-22T12:34:56Z"
                   :meta-field-observation forged
                   :meta-field-source-pin (pin "wm://different-authority" "a")})]
     (is (= :meta-field-observation-unverified
            (get-in receipt [:policy :meta-selection :reason])))
     (is (nil? (:action receipt)))))
+
+(deftest production-selector-refuses-without-selection-as-of
+  ;; Only the production adapter is fail-closed here.  Direct select-live
+  ;; calls remain available to controlled SUT fixtures that do not model a
+  ;; live click clock.
+  (let [receipt (live/selector {:tasks tasks})]
+    (is (= :selection-as-of-required
+           (get-in receipt [:policy :meta-selection :reason])))
+    (is (= {:absent :selection-as-of-required} (:chosen receipt)))))
+
+(deftest live-receipt-retains-the-supplied-selection-as-of
+  (let [selection-as-of "2026-10-22T12:34:56Z"
+        receipt (live/select-live {:tasks []
+                                   :selection-as-of selection-as-of
+                                   :fetch-snapshot (constantly snapshot)})]
+    (is (= selection-as-of (:selection-as-of receipt)))))
 
 (defn- authorized-snapshot [snapshot]
   (let [agency (or (:agency snapshot) {:agents {}})

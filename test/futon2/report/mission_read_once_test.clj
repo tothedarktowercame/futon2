@@ -128,6 +128,28 @@
     (is (= 1 (count @calls)))
     (is (= #{"M-a" "M-b"} (set (:ids (first @calls)))))))
 
+(deftest selection-as-of-is-forwarded-to-the-production-selector
+  ;; The selector is the production boundary's injected port.  Its receipt
+  ;; reflects only the value supplied by select-outer-task; a fresh clock at
+  ;; any later frame cannot satisfy this assertion.
+  (let [selection-as-of "2026-10-22T12:34:56Z"
+        seen (atom nil)
+        receipt (wm/select-outer-task
+                 {:outer-task-policy :meta
+                  :selection-as-of selection-as-of
+                  :outer-task-selection-fn
+                  (fn [input]
+                    (reset! seen input)
+                    {:schema :wm/outer-task-selection-v1
+                     :policy {:kind :cascade-live-policy-menu-v1}
+                     :support [] :excluded []
+                     :draw {:absent :deterministic-meta-policy}
+                     :chosen {:absent :no-canonically-bound-policy}
+                     :selection-as-of (:selection-as-of input)})}
+                 [{:id "M-a" :kind :mission}] 17)]
+    (is (= selection-as-of (:selection-as-of @seen)))
+    (is (= selection-as-of (:selection-as-of receipt)))))
+
 (deftest meta-is-fail-closed-and-seeded-baseline-is-explicit
   (is (thrown-with-msg?
        clojure.lang.ExceptionInfo #"META outer selector is not configured"

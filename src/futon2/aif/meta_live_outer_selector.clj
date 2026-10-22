@@ -532,7 +532,7 @@
   "Run the live adapter. Dependencies are injectable for exact replay."
   [{:keys [tasks fetch-snapshot candidate-fn retain-manifest? outer-learning
            policy-field-config policy-field-fn policy-menu-fn
-           policy-menu-join outer-policy-evidence-provider]
+           policy-menu-join outer-policy-evidence-provider selection-as-of]
     :or {fetch-snapshot fetch-pipeline-snapshot
          candidate-fn task-state-candidates
          policy-field-fn family-selection/full-eligible-target-field
@@ -866,7 +866,12 @@
                                                  :selection-basis :machine-injury-repair-cost
                                                  :canonical-gs (mapv #(when (= :scored (:status %))
                                                                         (:g %))
-                                                                     learning-scores)})))]
+                                                                     learning-scores)})))
+        ;; This is the one selection time minted by generate-war-machine.
+        ;; Keep it beside the outer receipt, not inside the sealed menu whose
+        ;; contents were formed before the outer policy made its choice.
+        receipt (cond-> receipt
+                  selection-as-of (assoc :selection-as-of selection-as-of))]
     (if retain-manifest?
       (decision-manifest/attach receipt
                                 {:tasks tasks :snapshot snapshot
@@ -878,8 +883,12 @@
 (defn selector
   [{:keys [tasks meta-field-observation meta-field-source-pin
            policy-field-config policy-field-fn policy-menu-fn policy-menu-join
-           outer-policy-evidence-provider]}]
-  (let [verification (when meta-field-observation
+           outer-policy-evidence-provider selection-as-of]}]
+  (if-not selection-as-of
+    (canonical-receipt
+     tasks [] {:schema meta/schema :status :refused
+               :reason :selection-as-of-required})
+    (let [verification (when meta-field-observation
                        (field/verify meta-field-observation
                                      {:expected-snapshot-pin
                                       meta-field-source-pin}))
@@ -887,18 +896,20 @@
                      (filterv #(= :algorithm (:kind %))
                               (:rows meta-field-observation))
                      [])]
-    (if (and meta-field-observation (not= :verified (:status verification)))
-      (canonical-receipt
-       tasks [] {:schema meta/schema :status :refused
-                 :reason :meta-field-observation-unverified
-                 :details {:verification verification}})
-      (select-live {:tasks (into (vec tasks) algorithms) :retain-manifest? true
-                    :policy-field-config policy-field-config
-                    :policy-field-fn policy-field-fn
-                    :policy-menu-fn policy-menu-fn
-                    :policy-menu-join policy-menu-join
-                    :outer-policy-evidence-provider outer-policy-evidence-provider
-                    :outer-learning (outer-learning-runtime/load-shadow)}))))
+      (if (and meta-field-observation (not= :verified (:status verification)))
+        (assoc (canonical-receipt
+                tasks [] {:schema meta/schema :status :refused
+                          :reason :meta-field-observation-unverified
+                          :details {:verification verification}})
+               :selection-as-of selection-as-of)
+        (select-live {:tasks (into (vec tasks) algorithms) :retain-manifest? true
+                      :selection-as-of selection-as-of
+                      :policy-field-config policy-field-config
+                      :policy-field-fn policy-field-fn
+                      :policy-menu-fn policy-menu-fn
+                      :policy-menu-join policy-menu-join
+                      :outer-policy-evidence-provider outer-policy-evidence-provider
+                      :outer-learning (outer-learning-runtime/load-shadow)})))))
 
 (defn browser-receipt
   "Return the bounded UI projection of a canonical outer-selection receipt.
