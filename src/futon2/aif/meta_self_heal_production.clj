@@ -145,6 +145,62 @@
         (seq unresolvable) (assoc :unresolvable-vars unresolvable)
         (seq missing-files) (assoc :missing-files missing-files)))))
 
+(def diagnosis-request-budget-bytes
+  "128 KiB for the serialized request, leaving substantial room below the
+  adapter's 128k-token carried-context floor for history, tools and output."
+  131072)
+
+(defn- diagnosis-text [x]
+  (binding [*print-length* nil *print-level* nil *print-namespace-maps* false]
+    (pr-str x)))
+
+(defn- diagnosis-bytes [x]
+  (count (.getBytes (diagnosis-text x) "UTF-8")))
+
+(defn bounded-diagnosis-request
+  "Keep causal values verbatim when small, otherwise explicitly preview them.
+  The index locates every top-level value in the unchanged pinned EDN record.
+  Missing check details are not invented: the original failure's omission
+  list remains visible. Oversized metadata refuses before any producer call."
+  [injury-id source-pin record]
+  (let [causal-keys #{:failure :failed-checks :checks :reviewer-falsifier}
+        index (mapv (fn [[k v]] {:path [k] :serialized-bytes (diagnosis-bytes v)})
+                    (sort-by (comp pr-str key) record))
+        causal (into {} (filter #(contains? causal-keys (key %))) record)
+        preview (fn [path value]
+                  (let [text (diagnosis-text value)]
+                    {:status :abbreviated :reason :causal-field-over-budget
+                     :path path :serialized-bytes (count (.getBytes text "UTF-8"))
+                     ;; At most 1024 code units each, also safe with EDN escaping.
+                     :head (subs text 0 (min 1024 (count text)))
+                     :tail (subs text (max 0 (- (count text) 1024)))}))
+        retained (into {} (map (fn [[k v]]
+                                [k (if (> (diagnosis-bytes v) 16384)
+                                     (preview [k] v) v)])) causal)
+        abbreviated (mapv (fn [{:keys [path serialized-bytes]}]
+                            {:path path :serialized-bytes serialized-bytes
+                             :reason (if (contains? causal-keys (first path))
+                                       :causal-field-over-budget :available-in-pinned-record)})
+                          (filter (fn [{:keys [path serialized-bytes]}]
+                                    (or (not (contains? causal-keys (first path)))
+                                        (> serialized-bytes 16384))) index))
+        request {:schema :wm/meta-diagnosis-request-v1
+                 :injury-id injury-id :source-record-pin source-pin
+                 :injury-record retained :repair-claimed? false
+                 :record-index index :abbreviated-fields abbreviated
+                 :evidence-access {:format :edn :root :source-record-pin
+                                   :instruction "Read full values at the indexed paths from the pinned record; verify SHA256. Previews are not complete evidence."}
+                 :request-budget-bytes diagnosis-request-budget-bytes}
+        ;; Either namespace-map printer convention may be used by the adapter.
+        size (max (diagnosis-bytes request)
+                  (binding [*print-length* nil *print-level* nil *print-namespace-maps* true]
+                    (count (.getBytes (pr-str request) "UTF-8"))))]
+    (when (> size diagnosis-request-budget-bytes)
+      (throw (ex-info "Diagnosis metadata exceeds request budget"
+                      {:kind :meta-self-heal/diagnosis-request-over-budget
+                       :bytes size :budget diagnosis-request-budget-bytes})))
+    request))
+
 (defn produce-diagnosis!
   "Turn an active injury's exact opening-record pin into a diagnosis request.
   This is deliberately before, and separate from, repair coordination: it
@@ -172,11 +228,7 @@
           (if-not (= :available (:status source))
             (assoc source :injury-id injury-id :source-record-pin source-pin
                    :repair-claimed? false)
-            (let [request {:schema :wm/meta-diagnosis-request-v1
-                           :injury-id injury-id
-                           :source-record-pin source-pin
-                           :injury-record (:record source)
-                           :repair-claimed? false}
+            (let [request (bounded-diagnosis-request injury-id source-pin (:record source))
                   response (try (diagnose request)
                                 (catch Throwable _
                                   {:status :failed
