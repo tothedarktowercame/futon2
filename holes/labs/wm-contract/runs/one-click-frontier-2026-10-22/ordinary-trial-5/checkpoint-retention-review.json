@@ -1,0 +1,14 @@
+{
+  "status": "verified-bounded",
+  "source_head": "c71653956f1daacea8c257a7247563ab98924825",
+  "probe": "checkpoint-create-new-probe.clj",
+  "result": "checkpoint-create-new-probe.edn",
+  "exit": 0,
+  "findings": [
+    "Actual full-loop-cohort/write-new! rejects overwrite with FileAlreadyExistsException and preserves original bytes.",
+    "append-checkpoint! uses this writer for sequential checkpoint files.",
+    "This is API overwrite protection, not a cryptographic seal or protection against external writes."
+  ],
+  "binding_implication": "Persist and verify separate binding/record byte pins; do not infer trusted provenance from file existence or eligible status alone.",
+  "open": "C2 correction and runner wiring remain required; no Trial or deployment performed."
+}
