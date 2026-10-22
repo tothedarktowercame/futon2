@@ -51,13 +51,13 @@
     (assoc record :record/digest (digest-record record))))
 
 (defn verification [record]
-  {:status :verified :record/digest (:record/digest record)})
+  (fn [_] {:verified true :digest (:record/digest record)}))
 
 (defn inputs
   ([record] (inputs record occurrence))
   ([record occ]
    {:occurrence occ :selected-mission target :record record
-    :record-verification (verification record)
+    :record-verifier (verification record)
     :recorded-at recorded-at :bound-at bound-at}))
 
 (defn rebuild [record]
@@ -75,8 +75,8 @@
   (let [record (record-fixture)
         b (binding/build-binding (inputs record))
         v (binding/verify-binding
-           {:occurrence occurrence :binding b :record record
-            :record-verification (verification record)})]
+           {:selected-mission target :occurrence occurrence :binding b :record record
+            :record-verifier (verification record)})]
     (is (= binding/binding-keys (set (keys b))))
     (is (= :verified (:status v)))
     (is (= (:binding/digest b) (:binding/digest v)))
@@ -118,20 +118,20 @@
     (testing "eligible record with NO verification refuses"
       (is (= :record-verification-missing
              (refuse-reason #(binding/build-binding
-                              (assoc (inputs eligible) :record-verification nil))))))
+                              (assoc (inputs eligible) :record-verifier nil))))))
     (testing "producer refusal propagates (f90-style forged record rejected)"
       (is (= :record-verification-refused
              (refuse-reason #(binding/build-binding
                               (assoc (inputs (record-fixture))
-                                     :record-verification
-                                     {:status :refused :reason :forged-record}))))))
+                                     :record-verifier
+                                     (fn [_] {:verified false :reason :forged-record})))))))
     (testing "verification digest for a DIFFERENT record refuses"
       (let [other (record-fixture {:base-revision {:sha "97e17e10f2695c481c55ddaebe9026f2d245663f"
                                                    :resolved-sha "97e17e10f2695c481c55ddaebe9026f2d245663f"}})]
         (is (= :record-verification-digest-mismatch
                (refuse-reason #(binding/build-binding
                                 (assoc (inputs eligible)
-                                       :record-verification (verification other))))))))
+                                       :record-verifier (verification other))))))))
     (testing "ineligible admission never binds"
       (is (= :record-not-eligible
              (refuse-reason #(binding/build-binding
@@ -144,8 +144,8 @@
         b (rebuild record)
         v (fn [occ]
             (binding/verify-binding
-             {:occurrence occ :binding b :record record
-              :record-verification (verification record)}))]
+             {:selected-mission target :occurrence occ :binding b :record record
+              :record-verifier (verification record)}))]
     (testing "one occurrence key changed (:action-at) -> digest mismatch"
       (is (= :occurrence-digest-mismatch
              (:reason (v (assoc occurrence :action-at "2026-10-22T09:00:00Z"))))))
@@ -157,8 +157,8 @@
             self-hashed (assoc forged :binding/digest (binding/binding-digest forged))]
         (is (= :occurrence-key-mismatch
                (:reason (binding/verify-binding
-                         {:occurrence occurrence :binding self-hashed :record record
-                          :record-verification (verification record)}))))))))
+                         {:selected-mission target :occurrence occurrence :binding self-hashed :record record
+                          :record-verifier (verification record)}))))))))
 
 (deftest target-source-base-mismatch-negatives
   (let [record (record-fixture)
@@ -166,8 +166,8 @@
         other-target (str target "0")
         v (fn [binding*]
             (binding/verify-binding
-             {:occurrence occurrence :binding binding* :record record
-              :record-verification (verification record)}))
+             {:selected-mission target :occurrence occurrence :binding binding* :record record
+              :record-verifier (verification record)}))
         rehash (fn [tampered]
                  (assoc tampered :binding/digest (binding/binding-digest tampered)))]
     (testing "binding retargeted to a DIFFERENT target's record (self-hashed)"
@@ -195,19 +195,19 @@
           self-hashed (assoc forged :binding/digest (binding/binding-digest forged))]
       (is (= :record-digest-mismatch
              (:reason (binding/verify-binding
-                       {:occurrence occurrence :binding self-hashed :record record
-                        :record-verification (verification record)})))))))
+                       {:selected-mission target :occurrence occurrence :binding self-hashed :record record
+                        :record-verifier (verification record)})))))))
 
 (deftest binding-shape-and-schema-refusals
   (let [record (record-fixture)
         b (rebuild record)
         v (fn [binding*]
             (binding/verify-binding
-             {:occurrence occurrence :binding binding* :record record
-              :record-verification (verification record)}))]
+             {:selected-mission target :occurrence occurrence :binding binding* :record record
+              :record-verifier (verification record)}))]
     (is (= :verify-input-invalid
            (:reason (binding/verify-binding
-                     {:occurrence occurrence :binding b :record record}))))
+                     {:selected-mission target :occurrence occurrence :binding b :record record}))))
     (is (= :binding-shape-invalid (:reason (v (dissoc b :bound-at)))))
     (is (= :binding-schema-mismatch
            (:reason (v (assoc b :schema :wm/forged-binding-v1)))))
@@ -230,3 +230,27 @@
             :action/value-sha256 (:action/value-sha256 occurrence)
             :transition/id (:transition/id occurrence)}
            (:occurrence/key b)))))
+
+(deftest current-body-and-selection-target-are-rechecked
+  (let [r (record-fixture)
+        b (rebuild r)
+        calls (atom [])
+        verifier (fn [current]
+                   (swap! calls conj current)
+                   {:verified true :digest (:record/digest current)})
+        input {:occurrence occurrence :binding b :record r
+               :selected-mission target :record-verifier verifier}]
+    (is (= :verified (:status (binding/verify-binding input))))
+    (is (= [r] @calls))
+    (is (= :target-mismatch
+           (:reason (binding/verify-binding (assoc input :selected-mission "other")))))
+    (is (= :record-verification-refused
+           (:reason (binding/verify-binding
+                     (assoc input :record-verifier {:verified true :digest (:record/digest r)})))))
+    (is (= :record-verification-refused
+           (:reason (binding/verify-binding
+                     (assoc input :record (assoc r :horizon {:status :absent}))))))
+    (is (= 2 (count @calls)) "stale body and verdict map never invoke authority")
+    (is (= :record-body-digest-mismatch
+           (refuse-reason #(binding/build-binding
+                            (assoc (inputs r) :record (assoc r :horizon {:status :absent}))))))))

@@ -7,14 +7,21 @@
    frozen in the selection cell, with the record's source pin and base
    revision copied in.
 
-   Record authority is INJECTED, never defaulted: build and verify both
-   require a record-verification produced by the accepted (corrected) C2
-   producer's verify-record. The rejected f90c614fd verify-record
-   (digest-only, schema-blind — see declared-effect-record-independent-
-   review.json) is neither called nor duplicated here; the binding checks the
-   verification's digest against the record and refuses without it. No
-   status-only trust: an :eligible record without a matching verification
-   does not bind.
+   Record authority is INJECTED AS A FUNCTION and invoked on the CURRENT
+   record bytes at EVERY build and verify: build/verify require a
+   :record-verifier fn of one argument (the record as presented) returning
+   the producer's result map, accepted only as {:verified true :digest
+   <64-hex>}. Neither rejected C2 commit (f90c614fd, fef62e9b0) is called
+   or duplicated; a caller-supplied status map is never accepted as
+   authority for present bytes — the verifier is re-run here, per call. In
+   addition the record's recorded :record/digest is independently
+   re-derived from the current bytes (the producer's documented canonical
+   scheme) and must match before ANY verifier result is trusted, so a
+   mutated record carrying an old digest and a stale :verified result
+   refuses. The eventual production adapter must wrap the corrected C2's
+   verify/reconstruction (when sound) — never a status map, never a
+   pre-computed verdict; the fixture verifier used in tests establishes NO
+   source authority.
 
    Ordering note (NOT an atomicity claim): mint-then-bind is two steps, not
    an atomic if-and-only-if. Eventual wiring must fail the attempt
@@ -129,43 +136,47 @@
     record))
 
 (defn- record-verification!
-  "The injected authority result: {:status :verified :record/digest sha} from
-   the accepted producer's verify-record, or its typed refusal. The binding
-   never computes record-digest authority itself; a refusal or a digest
-   mismatch fails the join — :admission :eligible true is not trusted
-   without it."
-  [record record-verification]
-  (when-not (and (map? record-verification) (contains? record-verification :status))
-    (refuse! :record-verification-missing [:record-verification]))
-  (when-not (= :verified (:status record-verification))
-    (refuse! :record-verification-refused [:record-verification]
-             {:verification record-verification}))
-  (when-not (= (:record/digest record)
-               (sha-text! (:record/digest record-verification)
-                          [:record-verification :record/digest]))
-    (refuse! :record-verification-digest-mismatch [:record-verification]))
-  record-verification)
+  "Invoke a trusted verifier on the current body. A verdict map is not a
+  verifier. Production callers must reconstruct from retained pinned inputs."
+  [record verifier]
+  (when-not (fn? verifier)
+    (refuse! :record-verification-missing [:record-verifier]))
+  (let [current-digest (identity/sha256
+                       (identity/printed false
+                        [record-schema (identity/canonical
+                                        (dissoc record :record/digest))]))]
+    (when-not (= current-digest (:record/digest record))
+      (refuse! :record-body-digest-mismatch [:record :record/digest])))
+  (let [result (try (verifier record)
+                    (catch Exception e
+                      (refuse! :record-verification-refused [:record-verifier]
+                               {:message (ex-message e)})))]
+    (when-not (and (map? result) (true? (:verified result)))
+      (refuse! :record-verification-refused [:record-verifier]))
+    (when-not (= (:record/digest record) (:digest result))
+      (refuse! :record-verification-digest-mismatch [:record-verifier]))
+    result))
 
 (defn build-binding
   "Build the v1 binding from an exact input map
-   {:occurrence :selected-mission :record :record-verification
+   {:occurrence :selected-mission :record :record-verifier
     :recorded-at :bound-at}. OCCURRENCE must be a validated close-retention
    v2 occurrence; RECORD the record frozen in the selection cell;
-   RECORD-VERIFICATION the accepted producer's verify-record result;
+   RECORD-VERIFIER a trusted function invoked on the current record;
    RECORDED-AT (selection checkpoint time) and BOUND-AT supplied explicitly.
    Throws typed refusals; returns the exact-ten-key binding receipt with its
    domain-separated self-digest."
-  [{:keys [occurrence selected-mission record record-verification
+  [{:keys [occurrence selected-mission record record-verifier
            recorded-at bound-at] :as inputs}]
   (exact-map! inputs
-              #{:occurrence :selected-mission :record :record-verification
+              #{:occurrence :selected-mission :record :record-verifier
                 :recorded-at :bound-at}
               [:binding-input])
   (when-not (= retention/occurrence-schema (:schema occurrence))
     (refuse! :occurrence-v2-required [:occurrence :schema]))
   (retention/validate-occurrence occurrence)
   (record! record)
-  (record-verification! record record-verification)
+  (record-verification! record record-verifier)
   (when-not (true? (get-in record [:admission :eligible]))
     (refuse! :record-not-eligible [:record :admission :eligible]
              {:refusals (get-in record [:admission :refusals])}))
@@ -199,14 +210,14 @@
 (defn verify-binding
   "The one shared verifier every eventual site (dispatch, build, close,
    falsifier) calls; none re-implements a partial check. Re-derives the
-   occurrence digest and the binding digest, re-checks the injected record
-   verification's digest against the record, and checks every equality of
+   occurrence digest and the binding digest, invokes the trusted record verifier on the current body and checks its
+   returned digest against the record, and checks every equality of
    the binding invariant (occurrence digest, key triple, target across
-   occurrence/binding/record, declared-effect digest, source pin, base
+   occurrence/binding/record/selected-mission, declared-effect digest, source pin, base
    revision, binding self-digest, timestamps). Returns {:status :verified
    …} or a typed {:status :refused :reason …}; never a default, never a
    throw."
-  [{:keys [occurrence binding record record-verification] :as inputs}]
+  [{:keys [occurrence binding record record-verifier selected-mission] :as inputs}]
   (let [refused (fn [reason path & [data]]
                   (cond-> {:status :refused :reason reason :path path
                            :schema verification-schema}
@@ -214,11 +225,11 @@
     (or (first-refusal
          [(fn [] (when-not (map? inputs)
                    (refused :verify-input-invalid [:verify-input])))
-          (fn [] (when-not (= #{:occurrence :binding :record :record-verification}
+          (fn [] (when-not (= #{:occurrence :binding :record :record-verifier :selected-mission}
                               (set (keys inputs)))
                    (refused :verify-input-invalid [:verify-input]
                             {:expected #{:occurrence :binding :record
-                                         :record-verification}})))
+                                         :record-verifier :selected-mission}})))
           (fn [] (when-not (map? binding) (refused :binding-not-a-map [:binding])))
           (fn [] (when-not (= binding-keys (set (keys binding)))
                    (refused :binding-shape-invalid [:binding]
@@ -235,7 +246,7 @@
                       (catch clojure.lang.ExceptionInfo e
                         (refused :record-invalid [:record]
                                  {:refusal (ex-data e)}))))
-          (fn [] (try (record-verification! record record-verification) nil
+          (fn [] (try (record-verification! record record-verifier) nil
                       (catch clojure.lang.ExceptionInfo e
                         (refused :record-verification-refused [:record-verification]
                                  {:refusal (ex-data e)}))))
@@ -257,7 +268,8 @@
           (fn [] (when-not (= (:occurrence/key binding) (occurrence-key occurrence))
                    (refused :occurrence-key-mismatch [:binding :occurrence/key])))
           (fn [] (let [target (get-in occurrence [:action/value :target])]
-                   (when-not (and (= target (:target binding))
+                   (when-not (and (= target selected-mission)
+                                  (= target (:target binding))
                                   (= target (:target record)))
                      (refused :target-mismatch [:binding :target]
                               {:occurrence target :binding (:target binding)
