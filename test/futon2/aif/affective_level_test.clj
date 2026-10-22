@@ -1,6 +1,8 @@
 (ns futon2.aif.affective-level-test
   (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.affective-level :as sut]))
+            [futon2.aif.affective-level :as sut]
+            [futon2.aif.previous-run :as previous-run])
+  (:import [java.nio.file Files]))
 
 (defn- close? [x y] (< (Math/abs (- (double x) (double y))) 1.0e-12))
 (def half {:pos 0.5 :neg 0.5})
@@ -60,3 +62,37 @@
     (is (= :transition-column-not-stochastic
            (:reason (sut/step (assoc-in sut/hesp-level [:B [:pos :pos]] 0.9)
                               half 1.25 1.0))))))
+
+(deftest valence-carry-distinguishes-cold-start-predecessor-absence-and-update
+  (let [precision {:beta-posterior {:status :absent :reason :no-precision-update-on-live-route}}
+        cold (sut/valence-carry {:status :absent :reason :no-earlier-started-run} precision)
+        old (sut/valence-carry {:status :present :previous-run/id "old" :previous {}} precision)
+        unclosed (sut/valence-carry {:status :absent :reason :previous-run-not-closed
+                                     :previous-run/id "open"} precision)
+        performed (sut/valence-carry {:status :present :previous-run/id "one"
+                                      :previous {:valence-carry {:q-after half}}}
+                                     {:beta-posterior 1.0})]
+    (is (= {:pos 0.5 :neg 0.5} (:q-before cold)))
+    (is (= 1.25 (:beta-prior cold)))
+    (is (= :beta-posterior-absent (get-in cold [:update :reason])))
+    (is (= (:q-before cold) (:q-after cold)))
+    (is (= :predecessor-has-no-valence-carry (:reason (:q-before old))))
+    (is (= :previous-run-not-closed (:reason (:q-before unclosed))))
+    (is (not= half (:q-before old)))
+    (is (= :performed (get-in performed [:update :status])))
+    (is (close? 7/11 (get-in performed [:q-after :pos])))))
+
+(deftest valence-carry-crosses-the-real-sealed-q6-stream
+  (let [dir (str (Files/createTempDirectory "r20-valence-carry-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        precision {:beta-posterior {:status :absent :reason :no-precision-update-on-live-route}}
+        p0 (previous-run/start! dir "one" "2026-10-22T10:00:00Z")
+        c1 (sut/valence-carry p0 precision)
+        terminal (previous-run/terminal {:run-id "one" :started-at "2026-10-22T10:00:00Z"
+                                         :valence-carry c1})
+        _ (previous-run/close! dir terminal "run-one.edn")
+        p1 (previous-run/start! dir "two" "2026-10-22T11:00:00Z")
+        c2 (sut/valence-carry p1 precision)]
+    (is (= :present (:status p1)))
+    (is (= c1 (get-in p1 [:previous :valence-carry])))
+    (is (= (:q-after c1) (:q-before c2)))
+    (is (= "one" (get-in c2 [:source :previous-run/id])))))

@@ -133,3 +133,34 @@
              :valence-next next
              :beta-prior-next next-beta
              :charge (charge beta-prior beta-posterior)}))))))
+
+(defn valence-carry
+  "Construct the sealed-Q6 payload for the next ordinary run.  This records
+  the current absence of beta-posterior; it does not alter gamma or selection."
+  [predecessor precision-row]
+  (let [cold? (and (= :absent (:status predecessor))
+                   (= :no-earlier-started-run (:reason predecessor)))
+        prior-carry (get-in predecessor [:previous :valence-carry])
+        q-before (cond
+                   cold? {:pos 0.5 :neg 0.5}
+                   (= :present (:status predecessor))
+                   (or (:q-after prior-carry)
+                       (absent :predecessor-has-no-valence-carry))
+                   :else (absent (:reason predecessor)))
+        source (if cold?
+                 {:cold-start :declared :provenance :declared-cold-start-r20-packet}
+                 {:previous-run/id (:previous-run/id predecessor)})
+        beta-posterior (or (:beta-posterior precision-row)
+                           (absent :no-precision-row))
+        beta-prior (when-not (failure? q-before) (descend hesp-level q-before))
+        base {:schema :wm/r20-valence-carry-v1 :level :hesp-level :source source
+              :q-before q-before :beta-prior beta-prior
+              :beta-posterior beta-posterior :gamma-applied false}]
+    (if (failure? q-before)
+        (assoc base :update {:status :not-performed :reason (:reason q-before)}
+               :q-after q-before)
+        (let [s (step hesp-level q-before beta-prior beta-posterior)]
+          (if (failure? s)
+            (assoc base :update {:status :not-performed :reason (:reason s)} :q-after q-before)
+            (assoc base :update {:status :performed :charge (:charge s)}
+                   :q-after (:valence-next s)))))))

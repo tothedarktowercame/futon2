@@ -76,6 +76,7 @@
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.affective-level :as affective-level]
             [futon2.aif.q2-construction :as q2-construction]
             [futon2.aif.q8-frontier :as q8-frontier]
             [futon2.aif.q9-factorization :as q9-factorization]
@@ -1182,11 +1183,16 @@
             participants-record (participants/record-value raw-opts)
             ;; Requirements Q6: what this run read as its predecessor, and
             ;; its own terminal carrier, which closes it in the run stream
+            valence-carry (affective-level/valence-carry
+                           (:q6/predecessor raw-opts)
+                           (get-in (or decision (:decision selection-sorry))
+                                   [:selection-certificate :precision-row]))
             q6-terminal (previous-run/terminal
                          {:run-id run-id :started-at started-at
                           :decision (or decision (:decision selection-sorry))
                           :outcome (:outcome result)
-                          :downstream (:downstream-refusal selection-sorry)})
+                          :downstream (:downstream-refusal selection-sorry)
+                          :valence-carry valence-carry})
             ;; Requirements Q8: certified from the outer receipt this run
             ;; retained, its predecessor and its decision; recomputable from
             ;; the record alone (q8-frontier/verify-record)
@@ -1311,6 +1317,7 @@
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
                          :terminal q6-terminal}
+                    :valence-carry valence-carry
                     :q8 q8-carrier
                     :route route
                     :failure (run-record-failure

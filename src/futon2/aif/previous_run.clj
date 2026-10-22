@@ -296,7 +296,7 @@
   "This run's sealed terminal carrier: choice, typed outcome, the
   selection-input digest its decision computed before selecting, and its own
   Q6 refusal when it refused to repeat."
-  [{:keys [run-id started-at decision outcome downstream]}]
+  [{:keys [run-id started-at decision outcome downstream valence-carry]}]
   (let [q6 (get-in decision [:selection-certificate :q6])
         digest (when (intact? q6) (:input-digest q6))]
     (seal (cond-> {:schema terminal-schema
@@ -305,6 +305,7 @@
                    :choice (choice decision)
                    :outcome (typed-outcome outcome downstream decision)
                    :input-digest digest}
+            valence-carry (assoc :valence-carry valence-carry)
             (and digest (= :refused (:status q6)))
             (assoc :q6-refusal {:input-digest digest
                                 :excluded-key (get-in q6 [:rearm :excluded-key])})))))
