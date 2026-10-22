@@ -1,0 +1,42 @@
+{
+  "status": "proposed-awaiting-model-confirmation-and-fresh-baseline",
+  "metrics": {
+    "wiring": {
+      "numerator": "required Lean edges with accepted witness",
+      "denominator": "all edges exported from pinned Lean model",
+      "missing": "retained in denominator",
+      "details": "per-edge failures and extraction findings"
+    },
+    "identity": {
+      "numerator": "required ports carrying matching run identity",
+      "denominator": "all required ports",
+      "scope": "report static support separately from observed Trial identity"
+    },
+    "trial_certificates": {
+      "numerator": "present conforming rows",
+      "denominator": "all required rows (currently 10)",
+      "complete": "also requires Wired, RowsReadPorts and focused-selection obligations; row count alone is insufficient"
+    }
+  },
+  "pins": [
+    "Lean definitions",
+    "Lean export",
+    "futon2 source",
+    "futon3c checker",
+    "field-flow map",
+    "generated witness",
+    "logs",
+    "Trial record where applicable"
+  ],
+  "trust_boundary": "Current Clojure extractor uses heuristic source analysis over declared mapped sites. Lean checks the generated witness, not arbitrary Clojure semantics. Report mapping coverage, unconfirmed hops and live-route consumption separately.",
+  "freeze_procedure": [
+    "freeze current scored baseline",
+    "choose one missing or unconfirmed required connection",
+    "repair producer-to-consumer flow",
+    "rerun affected witness with same definitions and record score delta",
+    "retain frozen section replay evidence",
+    "confirm live Trial consumes correct artifacts when reachable"
+  ],
+  "existing_score": "historical verdict text lists 5 true of 8; not current evidence because pins differ and prose export revision is stale",
+  "baseline_job": "invoke-1792640348262-2214-2498d945"
+}
