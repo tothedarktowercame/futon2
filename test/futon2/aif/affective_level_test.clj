@@ -82,6 +82,15 @@
     (is (= :performed (get-in performed [:update :status])))
     (is (close? 7/11 (get-in performed [:q-after :pos])))))
 
+(deftest redeclared-pre-change-carry-can-perform-an-update
+  (let [c (sut/valence-carry {:status :present :previous-run/id "old" :previous {}}
+                             {:beta-posterior 1.0})]
+    (is (= {:cold-start :redeclared :after :predecessor-has-no-valence-carry}
+           (:source c)))
+    (is (= half (:q-before c)))
+    (is (= :performed (get-in c [:update :status])))
+    (is (close? 7/11 (get-in c [:q-after :pos])))))
+
 (deftest valence-carry-crosses-the-real-sealed-q6-stream
   (let [dir (str (Files/createTempDirectory "r20-valence-carry-" (make-array java.nio.file.attribute.FileAttribute 0)))
         precision {:beta-posterior {:status :absent :reason :no-precision-update-on-live-route}}
@@ -115,3 +124,23 @@
     (is (= half (:q-before c2)))
     (is (= :not-performed (get-in c2 [:update :status])))
     (is (= 1.25 (:beta-prior c2)))))
+
+(deftest redeclared-carry-recovers-through-the-next-honest-terminal
+  (let [dir (str (Files/createTempDirectory "r20-valence-recovery-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        absent-precision {:beta-posterior {:status :absent :reason :no-precision-update-on-live-route}}
+        c1 (sut/valence-carry (previous-run/start! dir "one" "2026-10-22T10:00:00Z") absent-precision)
+        forged (assoc-in (previous-run/terminal {:run-id "one" :started-at "2026-10-22T10:00:00Z"
+                                                  :valence-carry c1})
+                          [:valence-carry :q-after] {:pos 0.9 :neg 0.1})
+        _ (previous-run/close! dir forged "run-one.edn")
+        p2 (previous-run/start! dir "two" "2026-10-22T11:00:00Z")
+        c2 (sut/valence-carry p2 {:beta-posterior 1.0})
+        _ (previous-run/close! dir (previous-run/terminal {:run-id "two" :started-at "2026-10-22T11:00:00Z"
+                                                            :valence-carry c2}) "run-two.edn")
+        p3 (previous-run/start! dir "three" "2026-10-22T12:00:00Z")
+        c3 (sut/valence-carry p3 absent-precision)]
+    (is (= :previous-terminal-carrier-tampered (:reason p2)))
+    (is (close? 7/11 (get-in c2 [:q-after :pos])))
+    (is (= {:previous-run/id "two"} (:source c3)))
+    (is (= (:q-after c2) (:q-before c3)))
+    (is (not (contains? (:source c3) :cold-start)))))
