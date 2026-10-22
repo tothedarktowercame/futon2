@@ -212,3 +212,9 @@
     (is (= :refused (:status (second result))))
     (is (= :observation-model-missing (get-in result [1 :refusal :reason])))
     (is (= :scoreCascadeCoN-map (:lean-reduction (meta result))))))
+
+(deftest empty-model-map-refuses-the-family
+  (let [options (-> (opts 2 {:join counts}) (dissoc :observation-model)
+                    (assoc :observation-model-of {}))]
+    (is (= :class-observation-required
+           (:reason (g/compare-at-horizon {:cascade-belief {#{} 1}} [join] options))))))

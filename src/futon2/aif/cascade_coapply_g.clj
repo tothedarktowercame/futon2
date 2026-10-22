@@ -117,7 +117,7 @@
                    (vals model-of)
                    [(:observation-model opts)])
           preferences (map :class-preference models)]
-      (when-not (every? #(= :class-emission (:kind %)) models)
+      (when-not (and (seq models) (every? #(= :class-emission (:kind %)) models))
         (refuse! :class-observation-required {}))
       (when-not (every? #(= (:horizon-steps opts) (:horizon %)) models)
         (throw (ex-info "Canonical co-application G horizon refused"
