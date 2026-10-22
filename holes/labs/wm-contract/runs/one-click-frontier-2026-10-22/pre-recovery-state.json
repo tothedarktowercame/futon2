@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "path": "pre-recovery-ledger.edn",
+      "sha256": "c870b32046b8d61e60b83022c9fab4a7a51f860870f037c89d23fb057b7b0108"
+    },
+    {
+      "path": "pre-recovery-transaction.edn",
+      "sha256": "df74eac233dd1e6effa03e5a63608a2434e8d52afac5e10549702df99a20ad3f"
+    }
+  ]
+}

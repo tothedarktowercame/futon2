@@ -1,0 +1,25 @@
+{
+  "agent": "zai-2",
+  "artifacts": [
+    {
+      "path": "child-status-port-dispatch.json",
+      "sha256": "acd9b8f51b93275bf2096e8d389b682a71a1fa93dc5f7f04ff3f4923049faca7"
+    },
+    {
+      "path": "child-status-port-result.json",
+      "sha256": "d31f243fb72e62c925628342f0b01fe3cd92dcf1206a967c6afe53a369f0506d"
+    },
+    {
+      "path": "child-status-port-terminal.json",
+      "sha256": "fc1c9458dde70e8442c7e29fd67e9d7acff34c8391b1a484789f150a4e52547b"
+    },
+    {
+      "path": "coordinator-review-snapshot.json",
+      "sha256": "63402852e47f24f90c44e635ae651bafb14a33e9a814e3903bae12f6c54ed4e8"
+    }
+  ],
+  "job_id": "invoke-1792640057545-2205-79cce167",
+  "phase": "child-status-port",
+  "schema": "wm/frozen-agent-result-v1",
+  "semantically_accepted": false
+}

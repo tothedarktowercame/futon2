@@ -1,0 +1,42 @@
+{
+  "task": "futon3c production adapter for futon2 3e17ebedb's :retry-click-status-fn (one-click frontier 2026-10-22). Isolated sibling worktree, no clicks, no ledger/acceptance writes, no shared-JVM loads, no main-checkout edits.",
+  "worktree": {
+    "path": "/home/joe/code/futon3c-childstatus-wt",
+    "branch": "retry-click-status-port",
+    "base": "local master 36fb2c740 (no pull/rebase; local master is source of truth)"
+  },
+  "commit": {
+    "sha": "1399532d7",
+    "subject": "wm: supply futon3c :retry-click-status-fn port for futon2 coordinator",
+    "files": [
+      "src/futon3c/wm/runner_service.clj",
+      "src/futon3c/wm/meta_self_heal_adapters.clj",
+      "test/futon3c/wm/runner_service_test.clj",
+      "test/futon3c/wm/meta_self_heal_adapters_test.clj"
+    ]
+  },
+  "implementation": {
+    "port": "futon3c.wm.runner-service/retry-click-status [click-id] — read-only durable child status backed by this service's own acceptance bytes (click-status + acceptance-file).",
+    "guards": [
+      "Only :schema :wm/click-state-v1 AND stored :click-id = requested click-id AND :status :failed is reported; the evidence pin is {:path acceptance-file :sha256 <exact SHA256 of the file bytes on disk>}.",
+      "Original failure bytes preserved: the record's own :result (attempt-id nil, :outcome :service-failed, error 'Serving runner source drifts from the canonical checkout') flows through verbatim; no invented ex-data.",
+      "queued/running/completed/not-found, torn (unreadable) records, and identity-mismatched files (file reachable under requested id but naming a different click) all return nil — honestly unobserved, matching futon2's non-failure handling."
+    ],
+    "wiring": [
+      "runner_service configure-self-heal-ports: assoc :retry-click-status-fn retry-click-status into the self-heal base opts and adds it to the forwarded select-keys, so futon2 meta_self_heal_production effect-ports consumes it.",
+      "meta_self_heal_adapters ports: cond-> forwards a supplied (fn? (:retry-click-status-fn opts)) into the resolved port map; absence is not a defect (starved :awaiting-retry behavior preserved)."
+    ]
+  },
+  "tests": [
+    "retry-click-status-observes-only-the-exact-durable-failed-child — actual failed-child.edn shape written verbatim; independent MessageDigest check that the pin seals the exact file bytes; not-found / queued / running / completed / identity-mismatch / torn record all honestly nil",
+    "configure-self-heal-ports-supplies-the-retry-click-status-port — the configured self-heal opts carry this service's actual retry-click-status fn (identical?)",
+    "ports-forward-the-serving-retry-click-status-port — adapter forwards the fn; absence forwarded as absence"
+  ],
+  "validation": {
+    "clj-kondo": "0 errors, 0 warnings on all four files",
+    "check-parens": "futon4/dev/check-parens.el: OK on all four files",
+    "clojure -M:test -n futon3c.wm.meta-self-heal-adapters-test": "33 tests, 293 assertions, 0 failures, 0 errors",
+    "clojure -M:test -n futon3c.wm.runner-service-test": "43 tests, 285 assertions, 0 failures, 0 errors"
+  },
+  "scope": "Implementation and tests only. No clicks issued, no ledger or acceptance writes, no shared JVM loads, main futon3c checkout untouched (worktree added read-only to its index)."
+}

@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:status :failed, :result {:attempt-id nil, :outcome :service-failed, :error \"Serving runner source drifts from the canonical checkout\"}, :evidence-pin {:path \"/home/joe/code/futon3c/data/wm-click-acceptances/click-wm-requeue-7-4-repair_239cf98836afc977cd589141c224ec3f4bca83dc.edn\", :sha256 \"332d364532fb70b26ee1d0a338aea9ceb98853ec6ac5e72d85fff7f6ba704846\"}}}",
+  "err": ""
+}

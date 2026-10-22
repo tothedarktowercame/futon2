@@ -1,0 +1,71 @@
+{
+  "schema": "wm/repaired-section-v1",
+  "section": "durable-child-failure-observation",
+  "status": "live-transition-observed",
+  "ordinary_task_complete": false,
+  "click_id": "wm-click-2a4789f3-70f6-4a87-9919-e03e5fa94af2",
+  "before": "awaiting-retry; last ledger ordinal50 enacted",
+  "after": "ordinal51 records real failed child acceptance pin; ordinal52 abandons exhausted repair",
+  "project_trials_used": 4,
+  "project_trials_remaining": 6,
+  "implementation": {
+    "futon2": "f446e99ed",
+    "futon3c": "e19efbe7f"
+  },
+  "files": [
+    {
+      "path": "pre-recovery-ledger.edn",
+      "sha256": "c870b32046b8d61e60b83022c9fab4a7a51f860870f037c89d23fb057b7b0108"
+    },
+    {
+      "path": "pre-recovery-transaction.edn",
+      "sha256": "df74eac233dd1e6effa03e5a63608a2434e8d52afac5e10549702df99a20ad3f"
+    },
+    {
+      "path": "post-recovery-ledger.edn",
+      "sha256": "17f2b935265a0ab96cc008d49a06d3af44b427027b65705b9bc485796f876e65"
+    },
+    {
+      "path": "post-recovery-transaction.edn",
+      "sha256": "df74eac233dd1e6effa03e5a63608a2434e8d52afac5e10549702df99a20ad3f"
+    },
+    {
+      "path": "recovery-ledger-after.json",
+      "sha256": "0cdeba6d9a7422dc2500275cbebc32624d05ae9736788a0e9f67c9fdd80049ba"
+    },
+    {
+      "path": "repaired-recovery-status.json",
+      "sha256": "f43cc847fca3c5d22612f3804e0be26e49e91548991612fbf477a4a1c5d0b128"
+    },
+    {
+      "path": "repaired-recovery-click.log",
+      "sha256": "361853d15587a124470d0512c2fe8824bd3f26d5d34e214b0b9849f73562718e"
+    },
+    {
+      "path": "live-child-port.json",
+      "sha256": "0be05a4825da128357d073e9068da281e72d369b1991023d096bf780062d66b0"
+    },
+    {
+      "path": "recovery-deployment.json",
+      "sha256": "b3bf8cf16363b26c58244e179aabb5492963f9448e6728091520a55ebbe67563"
+    },
+    {
+      "path": "recovery-acceptance-budget.json",
+      "sha256": "fcd441384f6f19fcd5867a375a919f0ee131fccfb660fb21923ae981d1171538"
+    },
+    {
+      "path": "recovery-child-bytes.edn",
+      "sha256": "332d364532fb70b26ee1d0a338aea9ceb98853ec6ac5e72d85fff7f6ba704846"
+    },
+    {
+      "path": "recovery-replay.log",
+      "sha256": "876437e03a5b9d53ce793783fcf54b3adf3af4f64bad67441ddb67ccf497de51"
+    }
+  ],
+  "replay": {
+    "command": "clojure -M scripts/wm_replay_failed_child.clj",
+    "exit": 0,
+    "matches_live_transition": true,
+    "actuation_calls": 0
+  }
+}

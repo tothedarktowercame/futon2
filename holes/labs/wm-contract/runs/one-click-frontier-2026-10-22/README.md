@@ -4,6 +4,28 @@ Objective: one useful production click, retaining successful sections before
 repairing the next failure. This directory does **not** establish that objective
 as complete. Between-click learning/carry is a separate effort.
 
+## Repaired recovery section
+
+Core f446e99ed and adapter e19efbe7f are deployed. Trial
+`wm-click-2a4789f3-70f6-4a87-9919-e03e5fa94af2` consumed the actual failed
+child evidence: ordinal51 records retry-inconclusive; ordinal52 closes the
+exhausted repair as abandoned. This fixes the observation-starved section;
+it is **not** useful ordinary task completion. **Six project Trials remain.**
+
+`recovery-section-snapshot.json` pins the before/after artifacts. Reproduce
+this section without agents, live writes or a Trial:
+
+```
+clojure -M scripts/wm_replay_failed_child.clj
+```
+
+`recovery-replay.log` records matching live transition fields and zero
+actuation calls. Other injuries remain active; the next routing step includes
+an inactive persisted transaction and test-origin records requiring diagnosis.
+Zai3 is checking/repairing transaction retirement; Zai1 is investigating the
+production ledger's /tmp test-origin observations. Do not silently delete
+these entries or treat abandonment as mission progress.
+
 ## Latest requested test
 
 Joe requested another click after the initial freeze. It also stopped at
