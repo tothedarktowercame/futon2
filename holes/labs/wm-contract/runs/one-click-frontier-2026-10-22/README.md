@@ -4,6 +4,13 @@ Objective: one useful production click, retaining successful sections before
 repairing the next failure. This directory does **not** establish that objective
 as complete. Between-click learning/carry is a separate effort.
 
+## Latest requested test
+
+Joe requested another click after the initial freeze. It also stopped at
+`:awaiting-retry`, without ordinary execution. **7 project clicks remain.**
+See [requested-click-outcome.md](requested-click-outcome.md) for the subsequent
+observation; the original frozen accounting below describes the first two.
+
 ## Observed admissions
 
 Two of Joe's ten project clicks were charged:

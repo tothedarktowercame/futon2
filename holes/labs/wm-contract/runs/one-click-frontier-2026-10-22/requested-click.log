@@ -1,0 +1,46 @@
+wm_click preflight
+  agency                 up
+  click budget           9 available
+  issuing caller         codex-11 (not a cast seat)
+  tripwires              13/13 clear
+  stop-line queue        69 open obligation(s) -- recorded as evidence in the run record; selection proceeds regardless (RULING-selection-precedence-2026-09-19, futon2 8b6827da)
+
+waiting for cast seats and single-flight boundary (since 2026-10-22T03:27:37Z; max 30 min)
+  casting                zai-2 / zai-3 / zai-1 idle and invoke-ready
+  in flight              none
+
+firing click, run-id 2026-10-22-b52434a7-1a31-4833-88f2-583513896383
+{"click-id":"wm-click-2fe0dcf5-664f-4fa4-91c0-dbfcf13c9ddb","started-at":"2026-10-22T03:28:32.195857462Z","status":"queued"}
+tracking our click: wm-click-2fe0dcf5-664f-4fa4-91c0-dbfcf13c9ddb
+[20s] running=False phase=None
+
+terminal state:
+{
+    "last-result": {
+        "run-binding": "/home/joe/code/futon3c/data/wm-click-run-bindings/click-run-binding-wm-click-2fe0dcf5-664f-4fa4-91c0-dbfcf13c9ddb.edn",
+        "click-id": "wm-click-2fe0dcf5-664f-4fa4-91c0-dbfcf13c9ddb",
+        "attempt-id": null,
+        "route-check": {
+            "status": "launched",
+            "job": {
+                "id": "bg-1792639716774-69",
+                "pid": 1807756,
+                "out-file": "/tmp/futon3c-bg/bg-1792639716774-69.log",
+                "started-at": "2026-10-22T03:28:36.774Z"
+            }
+        },
+        "outcome": "unknown",
+        "binding-durability": "confirmed",
+        "binding-status": "absent",
+        "runtime-disposition": {
+            "route": "dedicated-meta-self-heal",
+            "diagnosis-observation": {
+                "status": "present",
+                "diagnosis-evidence-pin": {
+                    "path": "/home/joe/code/futon2/data/wm-meta-injuries/diagnoses/diagnosis-0f6abd3db5d054046e9e835ce9ecc81aae269d81f49f764bc471bfc316ba2716.edn",
+                    "sha256": "0f6abd3db5d054046e9e835ce9ecc81aae269d81f49f764bc471bfc316ba2716"
+
+newest repair finding, if the click opened one:
+-rw-rw-r-- 1 joe joe 29903 Oct 21 02:49 /home/joe/code/futon2/data/wm-repair-obligations/findings/repair-occ-d2f65574326c6cf91328d4061f10e695abdb63444df18c2fa78a8ead4dd54812.edn
+ALERT FOR JOE
+requirements NOT CHECKED: run record missing after completed click: /home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-b52434a7-1a31-4833-88f2-583513896383.edn

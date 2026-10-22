@@ -1,0 +1,31 @@
+{
+  "schema": "wm/frozen-requested-click-v1",
+  "end_to_end_complete": false,
+  "project_clicks_remaining": 7,
+  "files": [
+    {
+      "path": "requested-click-acceptance.json",
+      "sha256": "0b13493cbf21d79e66f32ca29acae06350f1fd8f432bc0a961ce62968e5a7da2"
+    },
+    {
+      "path": "requested-click-cast.json",
+      "sha256": "38e0b9de817f645c4bec37c0d4a3e58baecccb040f5718dc069a72c7385a0bed"
+    },
+    {
+      "path": "requested-click-outcome.md",
+      "sha256": "11643f960e279c9483dea3657a3a8736b0b92d05ba0701e85a2a1e014aad203c"
+    },
+    {
+      "path": "requested-click-reload.json",
+      "sha256": "f654cda35bf3568936424d8d7265d564a23b58af8a3ad7f81269b074a0d4ce5f"
+    },
+    {
+      "path": "requested-click-status.json",
+      "sha256": "e3d316e326c4d2c5fede47c43b6291ab5755824f14f466aca45f338446e01979"
+    },
+    {
+      "path": "requested-click.log",
+      "sha256": "5cfbfb0ea7c9005ca3a3f507e621bb9928965c665072c4d21e9e593b55261036"
+    }
+  ]
+}
