@@ -1,0 +1,72 @@
+{
+  "status": "reviewed-and-deployed",
+  "futon2_commit": "d443921e6",
+  "futon3c_commit": "e65ef06be",
+  "review_fixes": [
+    "all futon3c serving ledger/transaction fallbacks and acceptance-run default derive from authoritative root",
+    "path check iterates values and distinguishes sibling root from archive",
+    "negative control invokes real default assertions with old ledger path",
+    "first append verifies ordinal1 and both nil predecessors"
+  ],
+  "tests": {
+    "live_store": [
+      4,
+      30,
+      0,
+      0
+    ],
+    "production": [
+      55,
+      396,
+      0,
+      0
+    ],
+    "terminal_isolation": [
+      3,
+      44,
+      0,
+      0
+    ],
+    "serving_service": [
+      44,
+      291,
+      0,
+      0
+    ],
+    "serving_adapter": [
+      34,
+      294,
+      0,
+      0
+    ]
+  },
+  "test_count_columns": [
+    "tests",
+    "assertions",
+    "failures",
+    "errors"
+  ],
+  "lint": "0 errors 0 warnings on changed Clojure",
+  "parens": "passed",
+  "limitation": "Author broader runner tests have328 failures30errors; baseline330 failures30errors. Legacy store compatibility assertion also fails on baseline. No claim entire suite is green; affected-path focused checks pass. Author events retained.",
+  "runtime": "six paths under fresh root; ordinary preflight uses fresh ledger/transaction; load-ledger source new with0entries; no click running; runner source current",
+  "archive": "90 historical files unchanged; ARCHIVED.md notice updated",
+  "trials_spent": 0,
+  "project_trials_remaining": 6,
+  "sha256": {
+    "click-before.json": "f43cc847fca3c5d22612f3804e0be26e49e91548991612fbf477a4a1c5d0b128",
+    "reload-plan.json": "c2370475ee6ed69c991453c3eeb0d40177e8e3066c2e2ca652faa0bb8d52ed46",
+    "author-validation-events.json": "32ed02b2c565c1eac4199c2403339e58a6d0305a4bafe431d931d7edc464c619",
+    "archive-before.json": "9980c2a9adad7385f64fe7cf31658b5a82523a0933d4abf1b45a1cea955dc483",
+    "runtime-after.json": "e5e5c4b38d5ea5d565c9ce0c947ee73f31e893c1278f08dfb70730996e105eae",
+    "fresh-store-service-tests.log": "7991c3f4f43eaeba6936328fdcecfddd7e5d6969fcfbebd76ff902ee85f1b7ab",
+    "fresh-store-focused-tests.log": "04dde160b8ed0fd8b58bcbdabca96f9ec91c16d7fba02fe778b87bdc2a6d91af",
+    "archive-verification.json": "7a2ae389066a6673b06720430baba27f0173d4cc75aee6b6e42b18555e7a0331",
+    "fresh-store-terminal-tests.log": "7d08582f0576291bc64de35bb23c3b0ca5b7e3d0ecb9fb7e16eca09e5a080540",
+    "verify-runtime.clj": "9c635b2b387b7275e04735c148db7d0106bd48e456d53520d0bb3f02421458e0",
+    "fresh-store-production-tests.log": "38a698cae4e83dc00f16912e04cef9012c8e0435fdcc6409a55e94e27e44fdf7",
+    "reload-result.json": "f13e90f6e78eed043fab5d829c11fa49712c8210c99e9a150934d7921ddda1c1",
+    "fresh-store-adapter-tests.log": "b37eb0541136600cc4e5e4de8901b93ca1d246dfab1a834e6f43cd765dc6ba8b",
+    "runtime-before.json": "485f72271d3dba8ddc0a3c6f1a3f848b9691de3b07d94e7be7b15f3029117405"
+  }
+}

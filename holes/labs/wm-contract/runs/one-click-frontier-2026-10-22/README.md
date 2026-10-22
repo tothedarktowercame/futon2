@@ -1,3 +1,12 @@
+## Deployment completed — supersedes the pending status below
+
+Joe requested review and deployment. Futon2 `d443921e6` and futon3c `e65ef06be`
+are deployed; `fresh-store-deployment/review-result.json` records review fixes,
+focused validation and broader test limitations. Live preflight uses the new
+empty store, source identity is current, and no Trial was issued. Six remain.
+All 90 historical data files are unchanged; only `ARCHIVED.md` was updated.
+The next step is one ordinary Trial under the debugger, freezing each boundary.
+
 ## Current frontier — 2026-10-22, supersedes historical sections below
 
 One useful ordinary Trial remains unfinished. **Six of the ten project Trials

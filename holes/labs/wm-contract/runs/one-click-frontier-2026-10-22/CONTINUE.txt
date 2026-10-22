@@ -1,3 +1,16 @@
+LATEST: fresh-store review and deployment COMPLETE at Joe direct request.
+Futon2 d443921e6 and futon3c e65ef06be deployed with recorded reload.
+Read fresh-store-deployment/review-result.json and runtime-after.json.
+Serving layer stale defaults were repaired as well as Futon2 defaults.
+Live preflight uses fresh ledger/transaction, empty store source:new,0entries,
+runner source current, idle.90 historical files unchanged; archive notice updated.
+Focused validation140tests1055assertions all pass; broad pre-existing suite
+failures remain documented. No Trial spent; SIX remain. Next ordinary Trial
+may proceed after normal idle/debugger/budget checks; don't wait on obsolete
+fresh-store/retraction parks. Do not merge Zai4 draft over reviewed fixes.
+
+Historical continuation below (fresh-store blocker superseded):
+
 Continue Joe's ONE useful ordinary Trial objective, not between-click validation.
 Work order wo-da02b427-e639-4ac2-b3ed-a7e6325d665b is unfinished. SIX project
 Trials remain. Read README.md's Current frontier first; older parked payloads

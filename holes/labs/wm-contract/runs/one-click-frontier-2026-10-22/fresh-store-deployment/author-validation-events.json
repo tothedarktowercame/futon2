@@ -1,0 +1,694 @@
+{
+  "job_id": "invoke-1792641934169-2264-cdb96c5d",
+  "state": "running",
+  "events": [
+    {
+      "seq": 4,
+      "type": "text",
+      "at": "2026-10-22T04:05:41.301422504Z",
+      "text": "Let me inspect the repo."
+    },
+    {
+      "seq": 5,
+      "type": "tool_use",
+      "at": "2026-10-22T04:05:41.323116015Z",
+      "tools": [
+        "run_readonly",
+        "boot_context"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && git status -sb && git log --oneline -3",
+        "boot_context"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"## main...origin/main [ahead 5]\\n?? holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/test-isolation-result.json\\n?? scripts/wm_capture_held_section.py\\n4dae9104e wm: isolate meta-injury ledger and deposit sinks in runner tests\\nbf4709165 wm: pin test contamination evidence and dispatch isolation and correction review\\n149b69946 wm: freeze checked five-of-eight structural alignment baseline\\n\",\"err\":\"\"}}",
+        "{\"ok\":true,\"result\":{\"agent-id\":\"zai-4\",\"session-id\":\"zai-732f9534-1b8f-437c-a9e4-77d96c57aa6d\",\"cwd\":\"/home/joe/code\",\"as-of\":\"2026-10-22T04:05:41.323010138Z\",\"note\":\"snapshot at call time\",\"registry\":{\"type\":\"zai\",\"status\":\"invoking\",\"capabilities\":[\"explore\",\"edit\",\"test\",\"coordination/execute\"],\"current-peripheral\":null},\"clock\":{\"campaign-id\":null,\"mission-id\":\"M-wm-wiring\",\"excursion-id\":null},\"agents-md\":{\"path\":\"/home/joe/code/AGENTS.md\",\"size\":15267}}}"
+      ]
+    },
+    {
+      "seq": 6,
+      "type": "tool_use",
+      "at": "2026-10-22T04:05:44.308367899Z",
+      "tools": [
+        "run_readonly",
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && sed -n 1,60p src/futon2/aif/meta_injury_store.clj && echo ---- && sed -n 1,30p src/futon2/ai",
+        "run_readonly cd /home/joe/code/futon2 && grep -rn \"wm-meta-injuries\" src/ scripts/ test/ --include='*.clj' --include='*.py' --include"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"(ns futon2.aif.meta-injury-store\\n  \\\"Locked, atomic, one-form durable storage for the META injury ledger.\\\"\\n  (:require [clojure.edn :as edn]\\n            [clojure.java.io :as io]\\n            [futon2.aif.load-identity :as load-identity]\\n            [futon2.aif.meta-injury-observation :as injury]\\n            [futon2.aif.meta-injury-ledger :as ledger]\\n            [futon2.aif.meta-terminal-injury :as terminal])\\n  (:import [java.io PushbackReader StringReader]\\n           [java.nio ByteBuffer]\\n           [java.nio.channels FileChannel]\\n           [java.nio.file Files Path StandardCopyOption StandardOpenOption]\\n           [java.nio.file.attribute FileAttribute]\\n           [java.util UUID]))\\n\\n(def default-root \\\"/home/joe/code/futon2/data/wm-meta-injuries\\\")\\n\\n(def eof-token (Object.))\\n(defn- refusal [reason & [details]]\\n  (merge {:status :refused :reason reason} details))\\n\\n(defn read-one-form\\n  \\\"Total exact-one-EDN-form reader.\\\"\\n  [text]\\n  (try\\n    (with-open [reader (PushbackReader. (StringReader. text))]\\n      (let [value (edn/read {:eof eof-token} reader)\\n            trailing (edn/read {:eof eof-token} reader)]\\n        (cond\\n          (identical? eof-token value) (refusal :store/empty)\\n          (not (identical? eof-token trailing)) (refusal :store/multiple-forms)\\n          :else {:status :read :value value})))\\n    (catch Throwable t\\n      (refusal :store/malformed-edn {:detail (ex-message t)}))))\\n\\n(defn load-ledger [path]\\n  (try\\n    (let [file (io/file path)]\\n      (if-not (.exists file)\\n        {:status :loaded :ledger ledger/empty-ledger :source :new}\\n        (let [read-result (read-one-form (slurp file))\\n              value (:value read-result)\\n              checked (when (= :read (:status read-result))\\n                        (ledger/validate-ledger value))]\\n          (cond\\n            (not= :read (:status read-result)) read-result\\n            (not= :valid (:status checked))\\n            (refusal :store/tampered-ledger {:defects (:defects checked)})\\n            :else {:status :loaded :ledger value :source :disk}))))\\n    (catch Throwable t\\n      (refusal :store/read-failed {:detail (ex-message t)}))))\\n\\n(defn load-durable-ledger\\n  \\\"Load a disk-backed ledger with an exact source pin for coordinator input.\\\"\\n  [path]\\n  (try\\n    (let [file (io/file path)]\\n      (if-not (.isFile file)\\n        (refusal :store/durable-ledger-required)\\n        (let [bytes (Files/readAllBytes (.toPath file))\\n----\\n(ns futon2.aif.meta-self-heal-production\\n  \\\"Fail-closed serving arbitration for durable dedicated META repair.\\\"\\n  (:require [clojure.java.io :as io]\\n            [clojure.string :as str]\\n            [futon2.aif.meta-injury-ledger :as ledger]\\n            [futon2.aif.meta-injury-store :as store]\\n            [futon2.aif.load-identity :as load-identity]\\n            [futon2.aif.meta-repair-coordinator :as coordinator])\\n  (:import [java.nio.file Files StandardCopyOption]\\n           [java.nio.file.attribute FileAttribute]))\\n\\n(def checkpoints [:claim :author :review :enact])\\n(def default-ledger-path\\n  \\\"/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn\\\")\\n(def default-transaction-path\\n  \\\"/home/joe/code/futon2/data/wm-meta-injuries/transaction.edn\\\")\\n(def default-diagnosis-root\\n  \\\"/home/joe/code/futon2/data/wm-meta-injuries/diagnoses\\\")\\n(def default-acceptance-root\\n  \\\"/home/joe/code/futon2/data/wm-meta-injuries/acceptances\\\")\\n(defn- refusal [reason & [details]] (merge {:status :refused :reason reason} details))\\n\\n(defn- receipt-bytes [receipt]\\n  (.getBytes (str (pr-str receipt) \\\"\\\\n\\\") \\\"UTF-8\\\"))\\n\\n(defn- diagnosis-path [root receipt]\\n  ;; Receipts are evidence handed to later repair coordination.  Their path is\\n  ;; content-addressed so a later diagnosis for the same injury cannot revoke\\n  ;; a previously returned pin by replacing its bytes.\\n  (str root \\\"/diagnosis-\\\" (load-identity/sha256 (receipt-bytes receipt)) \\\".edn\\\"))\\n\",\"err\":\"\"}}",
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"src/futon2/aif/meta_self_heal_production.clj\\nsrc/futon2/aif/meta_injury_store.clj\\ntest/futon2/aif/hermetic_repair_fixture.clj\\ntest/futon2/aif/meta_self_heal_production_test.clj\\ntest/futon2/aif/full_loop_runtime_test.clj\\ntest/futon2/aif/f43_other_injury_requeue_test.clj\\ntest/futon2/test_support/runner_fixture_test.clj\\ntest/futon2/test_support/runner_fixture.clj\\n----\\n2026-10-19-04c24834-c7ae-4b0f-a377-2a5c8ba87085.edn\\n2026-10-19-051a186d-ff12-494a-adfc-646cdfa2ce66.edn\\n2026-10-19-08771834-5add-4b3e-9459-abeaab21477c.edn\\n2026-10-19-0c3e5485-45d1-431d-91bd-9957da2e9fc5.edn\\n2026-10-19-2a9810b0-3227-4b65-bc11-ef5cec1bbf3e.edn\\n2026-10-19-2b73ed90-5889-465c-a5c3-45b332a205cd.edn\\n2026-10-19-549e164c-5406-4019-9034-98724374699c.edn\\n2026-10-19-56988718-5c50-499e-a21b-ad65d77335aa.edn\\n2026-10-19-8227be68-d43d-467e-aa8d-4c988fcc7c15.edn\\n2026-10-19-8cfc97c1-aa05-40f1-8c87-e28c60d3856c.edn\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 7,
+      "type": "text",
+      "at": "2026-10-22T04:05:49.900881622Z",
+      "text": "Interesting: there's also `default-acceptance-root`. The packet only named 3 in meta_self_heal_production, but I should include acceptance root too. Let me look at scripts/ greps too (none matched in scripts?). The grep -l included scripts but no scripts files listed, so fine.\n\nCheck the fallback usages and the ledger append behavior for missing ledger. load-ledger handles missing file as empty \u2014 good, but does append write it? Check the append path."
+    },
+    {
+      "seq": 8,
+      "type": "tool_use",
+      "at": "2026-10-22T04:05:49.910237939Z",
+      "tools": [
+        "run_readonly",
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && grep -n \"wm-meta-injuries\\|default-root\\|default-ledger-path\\|default-transaction-path\\|defa",
+        "run_readonly cd /home/joe/code/futon2 && grep -n \"append\\|defn append\" src/futon2/aif/meta_injury_store.clj | head -30"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"src/futon2/aif/meta_injury_store.clj:16:(def default-root \\\"/home/joe/code/futon2/data/wm-meta-injuries\\\")\\nsrc/futon2/aif/meta_injury_store.clj:172:  ([run-record-path] (deposit! default-root run-record-path))\\nsrc/futon2/aif/meta_injury_store.clj:200:  ([] (load-authority default-root))\\nsrc/futon2/aif/meta_self_heal_production.clj:13:(def default-ledger-path\\nsrc/futon2/aif/meta_self_heal_production.clj:14:  \\\"/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn\\\")\\nsrc/futon2/aif/meta_self_heal_production.clj:15:(def default-transaction-path\\nsrc/futon2/aif/meta_self_heal_production.clj:16:  \\\"/home/joe/code/futon2/data/wm-meta-injuries/transaction.edn\\\")\\nsrc/futon2/aif/meta_self_heal_production.clj:17:(def default-diagnosis-root\\nsrc/futon2/aif/meta_self_heal_production.clj:18:  \\\"/home/joe/code/futon2/data/wm-meta-injuries/diagnoses\\\")\\nsrc/futon2/aif/meta_self_heal_production.clj:19:(def default-acceptance-root\\nsrc/futon2/aif/meta_self_heal_production.clj:20:  \\\"/home/joe/code/futon2/data/wm-meta-injuries/acceptances\\\")\\nsrc/futon2/aif/meta_self_heal_production.clj:228:                                                   default-diagnosis-root)\\nsrc/futon2/aif/meta_self_heal_production.clj:425:                                                 default-ledger-path)\\nsrc/futon2/aif/meta_self_heal_production.clj:535:                                          default-acceptance-root) receipt)\\nsrc/futon2/aif/meta_self_heal_production.clj:732:                                              default-acceptance-root) receipt)\\nsrc/futon2/aif/meta_self_heal_production.clj:919:  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)\\nsrc/futon2/aif/meta_self_heal_production.clj:970:                             default-transaction-path)\\nsrc/futon2/aif/meta_self_heal_production.clj:1064:  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)\\nsrc/futon2/aif/meta_self_heal_production.clj:1084:  (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)\\nsrc/futon2/aif/full_loop_runner.clj:2957:                 (or repair-root repair/default-root) action (:interpretation-receipts action)))\\nsrc/futon2/aif/full_loop_runner.clj:3533:              (pr-str (str (io/file repair/default-root \\\"findings\\\"\\nsrc/futon2/aif/full_loop_runner.clj:4712:  (let [file (io/file repair/default-root \\\"resolutions\\\" (str repair-id \\\".edn\\\"))]\\nsrc/futon2/aif/full_loop_runner.clj:4804:        learning (learning-ledger/record! (or (:ledger-root context) learning-ledger/default-root) learning)\\nsrc/futon2/aif/full_loop_runner.clj:5897:                          (or (:d-task-evidence-root opts) d-task/default-root)\\nsrc/futon2/aif/full_loop_runner.clj:5915:                           :ledger-root (or (:learning-trial-ledger-root opts) learning-ledger/default-root)}))\\nsrc/futon2/aif/full_loop_runner.clj:6121:                                            learning-ledger/default-root)\\nsrc/futon2/aif/full_loop_runner.clj:6292:                                              learning-ledger/default-root)})\\nsrc/futon2/aif/full_loop_runner.clj:6325:                        {:root (or (:repair-root opts) repair/default-root)\\nsrc/futon2/aif/full_loop_runner.clj:6941:               (or (:on-prod-history-root opts) on-prod-history/default-root)\\nsrc/futon2/aif/full_loop_runner.clj:8210:                     (or (:repair-root raw-opts) repair/default-root)\\nsrc/futon2/aif/full_loop_runner.clj:8348:                            (or (:meta-injury-root raw-opts) meta-injury-store/default-root)\\nsrc/futon2/aif/full_loop_runner.clj:8359:                                meta-self-heal/default-ledger-path)\\nsrc/futon2/aif/full_loop_runtime.clj:330:                                  injury-store/default-root)))\\nsrc/futon2/aif/full_loop_runtime.clj:501:                        meta-self-heal/default-ledger-path)\\nsrc/futon2/aif/full_loop_runtime.clj:504:                        meta-self-heal/default-transaction-path))\\n\",\"err\":\"\"}}",
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"129:              (if (= :appended (:status result))\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 9,
+      "type": "tool_use",
+      "at": "2026-10-22T04:05:52.238344727Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && sed -n 100,205p src/futon2/aif/meta_injury_store.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"(defn persist-ledger! [path value]\\n  (try\\n    (let [checked (ledger/validate-ledger value)]\\n      (if-not (= :valid (:status checked))\\n        (refusal :store/invalid-ledger {:defects (:defects checked)})\\n        (do (atomic-write! path value)\\n            {:status :persisted :path path :ledger-pin (:ledger-pin value)\\n             :durability :atomic-one-form})))\\n    (catch Throwable t\\n      (refusal :store/persist-failed {:detail (ex-message t)}))))\\n\\n(defn tra \u2026[trimmed]\u2026 f-not (= :loaded (:status loaded))\\n            loaded\\n            (let [result (terminal/integrate (:ledger loaded) classification)]\\n              (if (= :appended (:status result))\\n                (do (atomic-write! path (:ledger result))\\n                    (assoc result :durability :atomic-locked-one-form))\\n                result))))))\\n    (catch Throwable t\\n      (refusal :store/transaction-failed {:detail (ex-message t)}))))\\n\\n(defn ingest-record-file!\\n  \\\"Pin exact record bytes, require exactly one EDN form, classify, then perform\\n  the locked atomic transaction.\\\"\\n  [ledger-path record-path]\\n  (try\\n    (let [bytes (Files/readAllBytes (.toPath (io/file record-path)))\\n          parsed (read-one-form (String. bytes \\\"UTF-8\\\"))]\\n      (if-not (= :read (:status parsed))\\n        parsed\\n        (let [pin {:path record-path :sha256 (load-identity/sha256 bytes)}\\n              classification (terminal/classify (:value parsed) pin)]\\n          (if-not (= :classified (:status classification))\\n            classification\\n            (transact-classification! ledger-path classification)))))\\n    (catch Throwable t\\n      (refusal :store/record-ingest-failed {:detail (ex-message t)}))))\\n\\n;; Compatibility boundary for the pre-ledger observation route. Packet 2 does\\n;; not use HEAD.edn to derive active injuries, but existing callers remain\\n;; byte-for-byte compatible until the later quarantine packet.\\n(defn- read-bytes [path] (Files/readAllBytes (.toPath (io/file path))))\\n(defn- legacy-atomic-write! [target text]\\n  (let [target (io/file target)\\n        tmp (io/file (.getParentFile target)\\n                     (str \\\".\\\" (.getName target) \\\".\\\" (UUID/randomUUID) \\\".tmp\\\"))]\\n    (io/make-parents target)\\n    (spit tmp text)\\n    (Files/move (.toPath tmp) (.toPath target)\\n                (into-array StandardCopyOption\\n                            [StandardCopyOption/ATOMIC_MOVE\\n                             StandardCopyOption/REPLACE_EXISTING]))\\n    (.getCanonicalPath target)))\\n\\n(defn deposit!\\n  \\\"Legacy observation deposit retained for compatibility. It is not an\\n  authority for :wm/meta-injury-ledger-v1 active state.\\\"\\n  ([run-record-path] (deposit! default-root run-record-path))\\n  ([root run-record-path]\\n   (let [record-bytes (read-bytes run-record-path)\\n         record (edn/read-string (String. record-bytes \\\"UTF-8\\\"))\\n         run-pin {:path (.getCanonicalPath (io/file run-record-path))\\n                  :sha256 (load-identity/sha256 record-bytes)}\\n         projection (injury/project-run-record record run-pin)\\n         projection-path (io/file root (str (:run-id projection) \\\".edn\\\"))\\n         projection-path (legacy-atomic-write! projection-path\\n                                               (str (pr-str projection) \\\"\\\\n\\\"))\\n         projection-bytes (read-bytes projection-path)\\n         source-pin {:path projection-path\\n                     :sha256 (load-identity/sha256 projection-bytes)}\\n         authority {:schema :wm/meta-injury-authority-v1\\n                    :source-pin source-pin :run-record-pin run-pin}\\n         observation (injury/produce {:source-bytes projection-bytes\\n                                      :expected-source-pin source-pin\\n                                      :run-record-bytes record-bytes\\n                                      :expected-run-record-pin run-pin})\\n         head (assoc authority :status (:status observation)\\n                     :capability (:capability observation)\\n                     :run-id (:run-id projection))\\n         head-path (legacy-atomic-write! (io/file root \\\"HEAD.edn\\\")\\n                                         (str (pr-str head) \\\"\\\\n\\\"))]\\n     (assoc head :head-path head-path :observation observation))))\\n\\n(defn load-authority\\n  \\\"Legacy pinned observation authority; never consulted by ledger active-set.\\\"\\n  ([] (load-authority default-root))\\n  ([root]\\n   (try\\n     (let [head-file (io/file root \\\"HEAD.edn\\\")]\\n       (when (.isFile head-file)\\n         (let [{:keys [source-pin run-record-pin]}\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 10,
+      "type": "text",
+      "at": "2026-10-22T04:06:00.590460614Z",
+      "text": "The store already handles a missing ledger file as empty (`load-ledger` \u2192 `empty-ledger` with `:source :new`, then `transact-classification!` writes it with the locked atomic write), so step 2 likely needs no code change \u2014 I'll verify by test. Setting up the worktree:"
+    },
+    {
+      "seq": 11,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:00.620731313Z",
+      "tools": [
+        "run_shell",
+        "run_readonly"
+      ],
+      "previews": [
+        "run_shell cd /home/joe/code/futon2 && git worktree add ~/worktrees/futon2/wm-live-store main && cd ~/worktrees/futon2/wm-live-stor",
+        "run_readonly cd /home/joe/code/futon2 && grep -n \"wm-meta-injuries\" test/futon2/aif/hermetic_repair_fixture.clj test/futon2/aif/meta_"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":128,\"out\":\"\",\"err\":\"Preparing worktree (checking out 'main')\\nfatal: 'main' is already used by worktree at '/home/joe/code/futon2'\\n\"}}",
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"test/futon2/aif/hermetic_repair_fixture.clj:51:        injury-root (str (io/file repair-root \\\"wm-meta-injuries\\\"))\\ntest/futon2/aif/meta_self_heal_production_test.clj:1896:  \\\"No live transaction.edn existed under data/wm-meta-injuries on 2026-10-20,\\ntest/futon2/aif/full_loop_runtime_test.clj:127:  ;; paths it is given, never the live data/wm-meta-injuries files.\\ntest/futon2/aif/f43_other_injury_requeue_test.clj:77:                      (slurp \\\"/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn\\\"))]\\ntest/futon2/test_support/runner_fixture.clj:39:  into data/wm-meta-injuries because this fixture left the injury root live.\\\"\\ntest/futon2/test_support/runner_fixture_test.clj:4:   canonical data/wm-meta-injuries file set unchanged. On 2026-10-19 four test\\ntest/futon2/test_support/runner_fixture_test.clj:11:(def canonical-root \\\"/home/joe/code/futon2/data/wm-meta-injuries\\\")\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 12,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:06.440988411Z",
+      "tools": [
+        "run_readonly",
+        "run_shell"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && sed -n 70,95p test/futon2/aif/f43_other_injury_requeue_test.clj && sed -n 1,60p test/futon2/",
+        "run_shell cd /home/joe/code/futon2 && git worktree add -b wm-live-store ~/worktrees/futon2/wm-live-store main && cd ~/worktrees/fu"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"                                           :injury-id injury-b\\n                                           :record-pin pin-q}})]\\n      (is (= :transition/invalid (:reason forged)))\\n      (is (some #{:requeue/evidence} (:defects forged)))))\\n\\n  (testing \\\"the production ledger remains valid\\\"\\n    (let [production (edn/read-string\\n                      (slurp \\\"/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn\\\"))]\\n      (is (= :valid (:status (ledger/validate-l \u2026[trimmed]\u2026 )\\n(ns futon2.test-support.runner-fixture\\n  \\\"Report-free fixtures shared by full-loop runner tests.\\\"\\n  (:require [clojure.java.io :as io]\\n            [clojure.test :refer [is]]\\n            [futon2.aif.full-loop-runner :as runner]\\n            [futon2.aif.hermetic-repair-fixture :as hermetic]\\n            [futon2.aif.learning-trial-ledger :as learning-ledger]\\n            [futon2.aif.meta-injury-store :as meta-injury-store]\\n            [futon2.aif.morning-brief :as morning-brief]\\n            [futon2.aif.cascade-policy :as cascade-policy]\\n            [futon2.aif.policy :as policy]\\n            [futon2.aif.trace :as trace])\\n  (:import [java.nio.file Files]\\n           [java.nio.file.attribute FileAttribute]))\\n\\n(defn declared-effective-configuration [opts]\\n  {:schema :wm/effective-run-configuration-v1\\n   :run/id (:run-id opts)\\n   :loaded-code-identity (or (:loaded-code-identity opts) {:status :unavailable})\\n   :evaluation :not-reached\\n   :policy-details? false\\n   :fpi-dark? false\\n   :fpi-posterior? false})\\n\\n(defn- production-file-set [dir]\\n  (let [d (io/file dir)]\\n    (if (.isDirectory d)\\n      ;; path -> length: an append to an existing daily trace changes a length\\n      (into (sorted-map) (map (fn [^java.io.File x] [(.getPath x) (.length x)]))\\n            (filter #(.isFile ^java.io.File %) (file-seq d)))\\n      (sorted-map))))\\n\\n(defn with-hermetic-traces\\n  \\\"Temporary trace, run-record, learning-ledger, morning-brief and meta-injury\\n  roots for a runner test namespace, and a check that the production trace,\\n  brief and injury file sets did not change. A futon3c test that drove the\\n  runner without this fixture wrote two fixture ticks into the live trace on\\n  2026-09-28; on 2026-10-19 four fixture runs wrote injury records and HEAD.edn\\n  into data/wm-meta-injuries because this fixture left the injury root live.\\\"\\n  [f]\\n  (let [root (.toFile (Files/createTempDirectory \\\"wm-runner-trace-suite-\\\"\\n                                                (make-array FileAttribute 0)))\\n        run-record-root (.toFile (Files/createTempDirectory\\n                                  \\\"wm-runner-record-suite-\\\"\\n                                  (make-array FileAttribute 0)))\\n        live-trace @#'trace/default-trace-dir\\n        live-brief morning-brief/default-root\\n        live-injuries meta-injury-store/default-root\\n        before [(production-file-set live-trace) (production-file-set live-brief)\\n                (production-file-set live-injuries)]]\\n    (try\\n      (with-redefs-fn {#'trace/default-trace-dir (.getPath root)\\n                       #'runner/default-run-record-dir (.getPath run-record-root)\\n                       #'learning-ledger/default-root\\n                       (str (io/file root \\\"learning-ledger\\\"))\\n                       #'morning-brief/default-root\\n                       (str (io/file root \\\"morning-brief\\\"))\\n                       #'meta-injury-store/default-root\\n                       (str (io/file root \\\"meta-injuries\\\"))}\\n        f)\\n      (is (= before [(production-file-set live-trace)\\n                      (production-file-set live-brief)\\n                      (production-file-set live-injuries)])\\n          \\\"the suite must not add, remove or grow production trace, morning-brief or meta-injury files\\\")\\n      (finally\\n        (doseq [file (reverse (file-seq root))] (io/delete-file file true))\\n        (doseq [file (reverse (file-seq run-record-root))]\\n          (io/delete-file file true))))))\\n\\n(def ^:private selected-action\\n  {:kind :cascade-candidate :cascade-id :test/selected :id :test/selected\\n   :target \\\"M-selected\\\"\\n   :precedence [:test/selected-pattern :test/selected-followup]\\n   :construction-receipt {:cascade/id :test/selected :moves 1\\n                          :family-searched :unit :coverage 1}\\n   :interpretation-receipts [{:pattern :test/selected-pattern\\n                              :admitted-by :test-suite}]})\\n\\n(defn loop-exercised-ranked-entry\\n  \\\"Build a selector entry with the retained evidence required at the real\\n\",\"err\":\"\"}}",
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"HEAD is now at 4dae9104e wm: isolate meta-injury ledger and deposit sinks in runner tests\\n4dae9104e wm: isolate meta-injury ledger and deposit sinks in runner tests\\n\",\"err\":\"Preparing worktree (new branch 'wm-live-store')\\n\"}}"
+      ]
+    },
+    {
+      "seq": 13,
+      "type": "text",
+      "at": "2026-10-22T04:06:20.508581637Z",
+      "text": "Notes:\n- f43_other_injury_requeue_test.clj:78 slups the production ledger at the OLD path and asserts it stays valid. That's a test, not production code \u2014 but after archive, the old ledger still exists unchanged, so the test still passes. Fine. But should I update it? The old path remains; leave it but maybe note. Actually the test is asserting the production ledger remains valid \u2014 after this change the production ledger is the new one. Minimal: leave, since old file exists and stays valid. But it's misleading. Packet says out of scope only tripwires etc. I'll update it to point at the live path... but the live path won't have a ledger until first live transition (test would slurp missing file). Better: keep it pointed at the archived ledger (which still must remain valid \u2014 its immutability check is fine) and adjust the docstring/comment to say it's the archived ledger. I'll rename the test string to \"the archived ledger remains valid\".\n\n- runner_fixture_test's canonical-root still the old path \u2014 that's the archived store; the fixture check \"production unchanged\" would now be checking the archive rather than live. Hmm. Packet: \"the hermetic fixture's production-unchanged assertions must still pass, now against the new defaults.\" The runner-fixture captures live-injuries from meta-injury-store/default-root at fixture time, so it automatically follows the new default (live root, empty). canonical-root in runner_fixture_test is the old dir \u2014 after the fixture the deposit goes to temp; the test checks canonical old file set unchanged. To be safe, update canonical-root to the new live root? The check is that the canonical store unchanged \u2014 the new live root is the canonical one. But the live root may be missing (empty) \u2192 file-set returns empty map before and after \u2192 passes. I'll update canonical-root to the new live path and keep a second assertion on the archive? Keep it simple: point canonical-root at new live root; the fixture's own before/after covers whatever defaul \u2026[trimmed]"
+    },
+    {
+      "seq": 14,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:20.512966274Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && grep -n \"default-root\\|default-ledger-path\\|default-transaction-path\\|default-diagnosis-root"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"13:(def production-repair-root repair/default-root)\\n16:(def production-meta-injury-root meta-injury-store/default-root)\\n17:(def production-meta-injury-ledger-path meta-self-heal/default-ledger-path)\\n18:(def production-meta-injury-transaction-path meta-self-heal/default-transaction-path)\\n55:    (with-redefs [repair/default-root repair-root\\n57:                  meta-injury-store/default-root injury-root\\n58:                  meta-self-heal/default-ledger-path ledger-path\\n59:                  meta-self-heal/default-transaction-path transaction-path\\n67:          \\\"the deposit sink (meta-injury-store/default-root) must stay untouched\\\")\\n69:          \\\"the durable ledger (meta-self-heal/default-ledger-path) must stay\\n    (is (every? fn? (map with-fn [:author :review :enact :retry])))\\n    (is (not (contains? without :retry-click-id)))\\n    (is (= {:author (:author supplied)} supplied)\\n        \\\"an explicit port map is used as given, nothing merged in\\\")))\\n\\n(deftest latest-retry-click-follows-the-requeue-receipts-not-index-two\\n  \\\"No live transaction.edn existed under data/wm-meta-injuries on 2026-10-20,\\n   so the receipts below are authored in the phase order the coordinator\\n   seals them: author, review, enact, retry, then retry-requeue-<n>.\\\"\\n  (let [receipt (fn [phase click] {:phase phase :payload {:retry-click click}})\\n        enacted [{:phase :author :payload {:patch-sha \\\"p\\\"}} {:phase :review}\\n                 (receipt :enact \\\"click-0\\\")]\\n        retried (conj enacted (receipt :retry \\\"click-0\\\"))\\n        requeued (into retried [(receipt :retry-requeue-1 \\\"click-1\\\")\\n                                (receipt :retry-requeue-2 \\\"click-2\\\")])]\\n    (is (= \\\"click-2\\\" (production/latest-retry-click {:receipts requeued}))\\n        \\\"the newest requeue receipt names the click\\\")\\n    (is (= \\\"click-0\\\" (production/latest-retry-click {:receipts retried})))\\n    (is (= \\\"click-0\\\" (production/latest-retry-click {:receipts enacted}))\\n        \\\"before any retry receipt the enact receipt's minted click stands\\\")\\n    (is (nil? (production/latest-retry-click {:receipts (subvec enacted 0 2)})))\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 15,
+      "type": "text",
+      "at": "2026-10-22T04:06:27.319221417Z",
+      "text": "Now making the edits in the worktree."
+    },
+    {
+      "seq": 16,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:27.320356468Z",
+      "tools": [
+        "edit_file",
+        "edit_file"
+      ],
+      "previews": [
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/src/futon2/aif/meta_injury_store.clj",
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/src/futon2/aif/meta_self_heal_production.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/src/futon2/aif/meta_injury_store.clj\",\"replacements\":1}}",
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/src/futon2/aif/meta_self_heal_production.clj\",\"replacements\":1}}"
+      ]
+    },
+    {
+      "seq": 17,
+      "type": "text",
+      "at": "2026-10-22T04:06:32.854425685Z",
+      "text": "Now: ARCHIVED.md (in shared checkout data dir \u2014 data/wm-meta-injuries lives in the shared checkout's data/, not tracked? Check if data/ is gitignored. If ignored, ARCHIVED.md won't be committed but must exist in place. Packet says add it; also commit on main. Check git status of data dir."
+    },
+    {
+      "seq": 18,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:32.860293452Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && git check-ignore data/wm-meta-injuries/ledger.edn ; cat .gitignore 2>/dev/null | head; ls ho"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"data/wm-meta-injuries/ledger.edn\\n# local tooling caches\\n.clj-kondo/\\n.cpcache/\\n.lsp/\\n\\n# local artifacts/reports\\nPAUSE\\naif_cheatsheet.aux\\naif_cheatsheet.log\\naif_cheatsheet.out\\naccepted.json\\nalignment-baseline\\nalignment-baseline-dispatch.json\\nalignment-baseline-request.txt\\nalignment-baseline-review.json\\nalignment-baseline-snapshot.json\\nalignment-baseline-terminal.json\\nalignment-confirm-dispatch.json\\nalignment-confirm-job.json\\nalignment-confirm-request.txt\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 19,
+      "type": "text",
+      "at": "2026-10-22T04:06:46.622028585Z",
+      "text": "data/ is gitignored. ARCHIVED.md goes into the shared checkout's data/wm-meta-injuries/ (not committed \u2014 that's fine, the archive itself is untracked anyway; the \"add ARCHIVED.md\" is an in-place action). I'll create it in /home/joe/code/futon2/data/wm-meta-injuries/ARCHIVED.md (worktree has its own data/ dir; the canonical archive is the shared checkout \u2014 writing there is the in-place archive action; it's not a git operation, so no \"git pull\" concern).\n\nAlso snapshot sha256 listing before tests (do now, on the shared dir)."
+    },
+    {
+      "seq": 20,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:46.631707462Z",
+      "tools": [
+        "write_file",
+        "run_readonly"
+      ],
+      "previews": [
+        "write_file /home/joe/code/futon2/data/wm-meta-injuries/ARCHIVED.md",
+        "run_readonly cd /home/joe/code/futon2 && find data/wm-meta-injuries -type f | sort | xargs sha256sum | sha256sum && find data/wm-meta"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/code/futon2/data/wm-meta-injuries/ARCHIVED.md\",\"bytes\":1040}}",
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"302fa9f14f0aa9bee33f7f6de8eab1ea4dbcb6cdee10e52f77e3026866f2785e  -\\n91\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 21,
+      "type": "text",
+      "at": "2026-10-22T04:06:52.877630265Z",
+      "text": "Combined hash of the 91 files (which now includes ARCHIVED.md \u2014 that's my own write; the before-hash was captured after writing it, but ARCHIVED.md is mine; the immutability check is that pre-existing files unchanged. Better: capture hash excluding ARCHIVED.md both before and after. I'll compute the after-hash excluding ARCHIVED.md too, and present the before/after. Actually my \"before\" already includes ARCHIVED.md \u2014 slightly sloppy. I'll compute hash of all files excluding ARCHIVED.md now and again after tests; that's a clean before/after pair."
+    },
+    {
+      "seq": 22,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:52.878412721Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && find data/wm-meta-injuries -type f ! -name ARCHIVED.md | sort | xargs sha256sum | tee /tmp/w"
+      ],
+      "output": [
+        "{\"ok\":false,\"error\":\"Command rejected by the readonly peripheral: `tee` mutates state. This peripheral runs reads only; `2>/dev/null`, `2>&1` and pipes are fine. Rewrite the command without the mutating part, or report that the work needs a writable peripheral. Do not retry variants of the same command.\"}"
+      ]
+    },
+    {
+      "seq": 23,
+      "type": "text",
+      "at": "2026-10-22T04:06:52.878516163Z",
+      "text": "[run_readonly \u2717 Command rejected by the readonly peripheral: `tee` mutates state. This peripheral runs reads only; `2>/dev/null`, `2>&1` and pipes are fine. Rewrite the command without the mutating part, or report that the work needs a writable peripheral.\u2026[+43 chars]]"
+    },
+    {
+      "seq": 24,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:55.478471352Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd /home/joe/code/futon2 && find data/wm-meta-injuries -type f ! -name ARCHIVED.md | sort | xargs sha256sum | sha256sum "
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"c5029277c07a0a5bc22b2ff036d62572e224a205a20adf48ebfd3fe80c00e2a9  -\\n90\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 25,
+      "type": "text",
+      "at": "2026-10-22T04:06:58.910971818Z",
+      "text": "Before-hash (90 pre-existing files): c5029277... Now the new test. Where to put it: test/futon2/aif/meta_injury_store_test.clj? Check existing test namespaces for the store."
+    },
+    {
+      "seq": 26,
+      "type": "tool_use",
+      "at": "2026-10-22T04:06:58.917313055Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd ~/worktrees/futon2/wm-live-store && ls test/futon2/aif/ | grep -i \"meta_injury\\|meta_self\" && grep -rn \"empty-ledger\""
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"meta_injury_ledger_test.clj\\nmeta_injury_store_test.clj\\nmeta_self_heal_harness_test.clj\\nmeta_self_heal_production_test.clj\\n62:(def empty-ledger\\n18:(def allowed-predecessors\\n135:(defn- author-failed-reopen? [state previous-state entry]\\n137:       (= previous-state :claimed)\\n140:(defn- corrected-reopen? [state previous-state entry]\\n142:       (= previous-state :abandoned)\\n154:        previous (latest ledger (:injury-id entry))\\n155:        previous-state (:state previous)\\n162:        requeue? (and (= state :enacted) (= previous-state :enacted))\\n170:        author-failed-reopen? (author-failed-reopen? state previous-state entry)\\n171:        corrected-reopen? (corrected-reopen? state previous-state entry)]\\n173:      (not (contains? (get allowed-predecessors state #{}) previous-state))\\n175:      (and previous (not= (:entry-id previous)\\n176:                          (get-in entry [:injury-predecessor :entry-id])))\\n177:      (conj :predecessor/id)\\n178:      (and previous (not= (:entry-pin previous)\\n179:                          (get-in entry [:injury-predecessor :entry-pin])))\\n180:      (conj :predecessor/pin)\\n181:      (and (nil? previous) (:injury-predecessor entry)) (conj :predecessor/unexpected)\\n182:      (and previous (not= attempt (:attempt previous))\\n184:      (and (= state :reopened) (not= attempt (inc (:attempt previous))))\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 27,
+      "type": "tool_use",
+      "at": "2026-10-22T04:07:02.021062998Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd ~/worktrees/futon2/wm-live-store && sed -n 1,40p test/futon2/aif/meta_injury_store_test.clj && grep -n \"deftest\" test"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"(ns futon2.aif.meta-injury-store-test\\n  (:require [clojure.test :refer [deftest is testing]]\\n            [futon2.aif.meta-field-observation :as field]\\n            [futon2.aif.meta-injury-observation :as injury]\\n            [futon2.aif.meta-injury-store :as store]\\n            [futon2.aif.meta-live-outer-selector :as selector]\\n            [futon2.aif.meta-terminal-injury :as terminal]))\\n\\n(def pin {:path \\\"fixtures/terminal.edn\\\"\\n          :sha256 \\\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\\\"})\\n\\n(defn- failed-record []\\n  {:run/id \\\"2026-10-19-real-shape\\\" :click/id \\\"wm-click-real-shape\\\"\\n   :failure {:kind :abstained :stage :selection\\n             :detail {:kind :wm/selection-terminal-abstention}}\\n   :terminal-receipt {:kind :failure :failure-kind :abstained}\\n   :outer-task-selection {:schema :wm/outer-task-selection-v1\\n                          :status :absent :reason :receipt-not-retained}\\n   :loop-node-exercise {:schema :wm/loop-node-exercise-v1 :status :incomplete\\n                        :counts {:present 0 :bypassed 0 :refused 4}}\\n   :run-output {:schema :wm/run-output-v1 :status :absent\\n                :reason :run-not-grounded :outcome :abstained}\\n   :traceWritten false})\\n(defn- click-authority []\\n  {:schema :wm/ordinary-click-availability-v1 :unit :ordinary-click\\n   :allocated 5 :consumed 4 :available 1\\n   :ledger-source {:path \\\"/tmp/click-ledger\\\"\\n                   :sha256 (apply str (repeat 64 \\\"a\\\"))}})\\n\\n(deftest legacy-terminal-observation-route-remains-compatible\\n  (let [tmp (.toFile (java.nio.file.Files/createTempDirectory\\n                      \\\"wm-injury\\\" (make-array java.nio.file.attribute.FileAttribute 0)))\\n        record-path (str tmp \\\"/run.edn\\\")\\n        _ (spit record-path (str (pr-str (failed-record)) \\\"\\\\n\\\"))\\n        deposit (store/deposit! (str tmp \\\"/injuries\\\") record-path)\\n        authority (store/load-authority (str tmp \\\"/injuries\\\") )\\n        observation (field/observe\\n                     {:registry-snapshot {:missions {:missions []}\\n                                          :tickets {:tickets []}\\n                                          :excursions {:excursions []}}\\n2:  (:require [clojure.test :refer [deftest is testing]]\\n30:(deftest legacy-terminal-observation-route-remains-compatible\\n53:(deftest legacy-run-record-drift-still-refuses\\n63:(deftest legacy-algorithm-failure-shapes-remain-active\\n81:(deftest durable-store-is-atomic-one-form-tamper-evident-and-replay-stable\\n108:(deftest resealed-content-is-required-on-read\\n115:(deftest record-file-ingestion-pins-exact-one-form-bytes\\n198:(defn integrate\\n311:              (integrate (:ledger acc) classification)))\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 28,
+      "type": "text",
+      "at": "2026-10-22T04:07:09.102742519Z",
+      "text": "Now write the new test namespace, e.g. `test/futon2/aif/meta_injury_live_store_default_test.clj` \u2014 or add to existing store test. New namespace is cleaner. Tests:\n\n1. defaults resolve under new root, none under old; and greps the source of store/ledger/meta-self-heal namespaces for the old literal path. Bad-case check: temporarily point one default back at old path and see test fail \u2014 I'll do this manually during dev (redefine via with-redefs? no, test reads the def values; simplest bad case: edit the def temporarily and run, then revert). I'll do that.\n\n2. first-append to nonexistent ledger at temp path: use store/ingest-record-file! with a classified record \u2014 reuse the failed-record shape from the store test to build a record, call ingest-record-file! into temp ledger path, then load and check one entry, no injury-predecessor, and load-ledger source :new semantics before.\n\nNeed terminal/classify shape. I'll reuse the same helper shape."
+    },
+    {
+      "seq": 29,
+      "type": "tool_use",
+      "at": "2026-10-22T04:07:09.105995491Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd ~/worktrees/futon2/wm-live-store && sed -n 81,150p test/futon2/aif/meta_injury_store_test.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"(deftest durable-store-is-atomic-one-form-tamper-evident-and-replay-stable\\n  (let [dir (.toFile (java.nio.file.Files/createTempDirectory\\n                      \\\"meta-injury-store\\\" (make-array java.nio.file.attribute.FileAttribute 0)))\\n        path (str (.getPath dir) \\\"/ledger.edn\\\")\\n        classification\\n        (terminal/classify {:run/id \\\"run-1\\\" :click/id \\\"click-1\\\"\\n                            :failure {:kind :phase-failure :stage :reload}}\\n                           pin)\\n        first (store/transact-classification! path classification)\\n        bytes-before (slurp path)\\n        duplicate (store/transact-classification! path classification)\\n        bytes-after (slurp path)]\\n    (is (= :appended (:status first)))\\n    (is (= :atomic-locked-one-form (:durability first)))\\n    (is (= :loaded (:status (store/load-ledger path))))\\n    (let [durable (store/load-durable-ledger path)]\\n      (is (= :wm/durable-meta-injury-ledger-v1 (:schema durable)))\\n      (is (= path (get-in durable [:source-pin :path])))\\n      (is (= (:ledger first) (:ledger durable))))\\n    (is (= :duplicate (:status duplicate)))\\n    (is (= bytes-before bytes-after))\\n    (is (= :read (:status (store/read-one-form bytes-after))))\\n    (is (= :store/multiple-forms\\n           (:reason (store/read-one-form (str bytes-after \\\"{}\\\")))))\\n    (spit path (str bytes-after \\\" \\\" \\\"{:tampered true}\\\"))\\n    (is (= :store/multiple-forms (:reason (store/load-ledger path))))))\\n\\n(deftest resealed-content-is-required-on-read\\n  (let [dir (.toFile (java.nio.file.Files/createTempDirectory\\n                      \\\"meta-injury-tamper\\\" (make-array java.nio.file.attribute.FileAttribute 0)))\\n        path (str (.getPath dir) \\\"/ledger.edn\\\")]\\n    (spit path \\\"{:schema :wm/meta-injury-ledger-v1 :attempt-limit 3 :entries [] :ledger-pin {:path \\\\\\\"meta-injury-ledger/ledger.edn\\\\\\\" :sha256 \\\\\\\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\\\\\\"}}\\\")\\n    (is (= :store/tampered-ledger (:reason (store/load-ledger path))))))\\n\\n(deftest record-file-ingestion-pins-exact-one-form-bytes\\n  (let [dir (.toFile (java.nio.file.Files/createTempDirectory\\n                      \\\"meta-injury-record\\\" (make-array java.nio.file.attribute.FileAttribute 0)))\\n        ledger-path (str (.getPath dir) \\\"/ledger.edn\\\")\\n        record-path (str (.getPath dir) \\\"/run.edn\\\")\\n        record {:run/id \\\"run-file\\\" :click/id \\\"click-file\\\"\\n                :failure {:kind :author-dispatch-failed :stage :author-dispatch}}]\\n    (spit record-path (pr-str record))\\n    (let [result (store/ingest-record-file! ledger-path record-path)]\\n      (is (= :appended (:status result)))\\n      (is (= record-path (get-in result [:classification :record-pin :path])))\\n      (is (= 64 (count (get-in result [:classification :record-pin :sha256])))))\\n    (spit record-path (str (pr-str record) \\\"\\\\n{}\\\"))\\n    (is (= :store/multiple-forms\\n           (:reason (store/ingest-record-file! ledger-path record-path))))))\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 30,
+      "type": "text",
+      "at": "2026-10-22T04:07:23.227813793Z",
+      "text": "I need to scrub the old directory name from my own comments too, so the \"no production code names the old directory\" test can be strict:"
+    },
+    {
+      "seq": 31,
+      "type": "tool_use",
+      "at": "2026-10-22T04:07:23.228902058Z",
+      "tools": [
+        "edit_file",
+        "edit_file"
+      ],
+      "previews": [
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/src/futon2/aif/meta_injury_store.clj",
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/src/futon2/aif/meta_self_heal_production.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/src/futon2/aif/meta_injury_store.clj\",\"replacements\":1}}",
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/src/futon2/aif/meta_self_heal_production.clj\",\"replacements\":1}}"
+      ]
+    },
+    {
+      "seq": 32,
+      "type": "tool_use",
+      "at": "2026-10-22T04:07:39.224878430Z",
+      "tools": [
+        "write_file"
+      ],
+      "previews": [
+        "write_file /home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/meta_injury_live_store_test.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/meta_injury_live_store_test.clj\",\"bytes\":4664}}"
+      ]
+    },
+    {
+      "seq": 33,
+      "type": "text",
+      "at": "2026-10-22T04:07:49.745647272Z",
+      "text": "Let me simplify that convoluted occurrence check:"
+    },
+    {
+      "seq": 34,
+      "type": "tool_use",
+      "at": "2026-10-22T04:07:49.746390505Z",
+      "tools": [
+        "edit_file"
+      ],
+      "previews": [
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/meta_injury_live_store_test.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/meta_injury_live_store_test.clj\",\"replacements\":1}}"
+      ]
+    },
+    {
+      "seq": 35,
+      "type": "text",
+      "at": "2026-10-22T04:08:05.004860466Z",
+      "text": "Now update the two tests that hard-name the old path:"
+    },
+    {
+      "seq": 36,
+      "type": "tool_use",
+      "at": "2026-10-22T04:08:05.010011409Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd ~/worktrees/futon2/wm-live-store && grep -n \"wm-meta-injuries\" test/futon2/aif/meta_self_heal_production_test.clj tes"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"test/futon2/aif/meta_self_heal_production_test.clj:1896:  \\\"No live transaction.edn existed under data/wm-meta-injuries on 2026-10-20,\\ntest/futon2/aif/full_loop_runtime_test.clj:127:  ;; paths it is given, never the live data/wm-meta-injuries files.\\ntest/futon2/aif/f43_other_injury_requeue_test.clj:77:                      (slurp \\\"/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn\\\"))]\\ntest/futon2/test_support/runner_fixture.clj:39:  into data/wm-meta-injuries because this fixture left the injury root live.\\\"\\ntest/futon2/aif/hermetic_repair_fixture.clj:51:        injury-root (str (io/file repair-root \\\"wm-meta-injuries\\\"))\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 37,
+      "type": "tool_use",
+      "at": "2026-10-22T04:08:10.444630111Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd ~/worktrees/futon2/wm-live-store && sed -n 5,20p test/futon2/aif/test_support 2>/dev/null; sed -n 70,80p test/futon2/"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"                                           :injury-id injury-b\\n                                           :record-pin pin-q}})]\\n      (is (= :transition/invalid (:reason forged)))\\n      (is (some #{:requeue/evidence} (:defects forged)))))\\n\\n  (testing \\\"the production ledger remains valid\\\"\\n    (let [production (edn/read-string\\n                      (slurp \\\"/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn\\\"))]\\n      (is (= :valid (:status (ledger/validate-ledger production)))))))\\n(ns futon2.test-support.runner-fixture-test\\n  \\\"Bad case for with-hermetic-traces: a real meta-injury deposit made while the\\n   fixture is active must land under the fixture's temporary root and leave the\\n   canonical data/wm-meta-injuries file set unchanged. On 2026-10-19 four test\\n   runs deposited into the canonical store (finding F1, PACKETS-2026-10-19.md).\\\"\\n  (:require [clojure.java.io :as io]\\n            [clojure.test :refer [deftest is testing]]\\n            [futon2.aif.meta-injury-store :as meta-injury-store]\\n            [futon2.test-support.runner-fixture :as runner-fixture]))\\n\\n(def canonical-root \\\"/home/joe/code/futon2/data/wm-meta-injuries\\\")\\n\\n(def live-run-record\\n  \\\"L1, 2026-10-19: a real abstained click record, read only.\\\"\\n  \\\"/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-19-d608312b-f4e8-458d-a541-481aabeff61b.edn\\\")\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 38,
+      "type": "text",
+      "at": "2026-10-22T04:08:16.630890665Z",
+      "text": "Edits:\n1. f43 test: change to assert the archived ledger remains valid (read-only, still exists).\n2. runner_fixture_test: canonical-root \u2192 live root; also add archive-unchanged check (the archive must not be touched by the fixture either). Update docstring mention."
+    },
+    {
+      "seq": 39,
+      "type": "tool_use",
+      "at": "2026-10-22T04:08:16.631902588Z",
+      "tools": [
+        "edit_file",
+        "edit_file"
+      ],
+      "previews": [
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/f43_other_injury_requeue_test.clj",
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/test/futon2/test_support/runner_fixture_test.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/f43_other_injury_requeue_test.clj\",\"replacements\":1}}",
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/test/futon2/test_support/runner_fixture_test.clj\",\"replacements\":1}}"
+      ]
+    },
+    {
+      "seq": 40,
+      "type": "tool_use",
+      "at": "2026-10-22T04:08:22.321309174Z",
+      "tools": [
+        "edit_file",
+        "edit_file"
+      ],
+      "previews": [
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/test/futon2/test_support/runner_fixture_test.clj",
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/test/futon2/test_support/runner_fixture_test.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/test/futon2/test_support/runner_fixture_test.clj\",\"replacements\":1}}",
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/test/futon2/test_support/runner_fixture_test.clj\",\"replacements\":1}}"
+      ]
+    },
+    {
+      "seq": 41,
+      "type": "text",
+      "at": "2026-10-22T04:08:28.452135631Z",
+      "text": "Also runner_fixture_test docstring still says \"leave the canonical data/wm-meta-injuries file set unchanged\" \u2014 historical statement about 2026-10-19; fine to leave (it describes history), but \"canonical data/wm-meta-injuries\" is now the archive... acceptable as history. Update slightly to note. Minor; leave.\n\nAlso runner_fixture.clj:39 docstring \u2014 historical, fine.\n\nDoes the hermetic_repair_fixture assert \"production-unchanged\" against the old literal? Line 16-18 capture defaults at load time \u2014 now the new ones. Good.\n\nDo full_loop_runner tests redef? The fixture at ~8348 uses `(or ... default)`; runner_fixture.clj redefs meta-injury-store/default-root but NOT meta-self-heal/default-ledger-path/transaction! zai-2's commit 4dae9104 \"isolate meta-injury ledger and deposit sinks in runner tests\" \u2014 check what it did; maybe it redefs those too somewhere."
+    },
+    {
+      "seq": 42,
+      "type": "tool_use",
+      "at": "2026-10-22T04:08:28.461622101Z",
+      "tools": [
+        "run_readonly"
+      ],
+      "previews": [
+        "run_readonly cd ~/worktrees/futon2/wm-live-store && grep -n \"default-ledger-path\\|default-transaction-path\\|meta-self-heal\" test/futo"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"test/futon2/aif/hermetic_repair_fixture.clj:7:            [futon2.aif.meta-self-heal-production :as meta-self-heal]\\ntest/futon2/aif/hermetic_repair_fixture.clj:17:(def production-meta-injury-ledger-path meta-self-heal/default-ledger-path)\\ntest/futon2/aif/hermetic_repair_fixture.clj:18:(def production-meta-injury-transaction-path meta-self-heal/default-transaction-path)\\ntest/futon2/aif/hermetic_repair_fixture.clj:58:                  meta-self-heal/default-ledger-path ledger-path\\ntest/futon2/aif/hermetic_repair_fixture.clj:59:                  meta-self-heal/default-transaction-path transaction-path\\ntest/futon2/aif/hermetic_repair_fixture.clj:69:          \\\"the durable ledger (meta-self-heal/default-ledger-path) must stay\\ncommit 4dae9104e57c4331f1e1fd67f79f76d9c38b7c3c\\nAuthor: zai-2 <zai-2@futon>\\nDate:   Thu Oct 22 04:02:34 2026 +0000\\n\\n    wm: isolate meta-injury ledger and deposit sinks in runner tests\\n    \\n    The hermetic repair fixture redirected meta-injury-store/default-root but\\n    not meta-self-heal-production/default-ledger-path (or -transaction-path),\\n    so full-loop runner terminal sinks could fall through to the production\\n    sealed ledger (2026-10-22 contamination, ledger ordinals 37-49).\\n    \\n    - hermetic_repair_fixture: also redef default-ledger-path and\\n      default-transaction-path to temp paths; assert production ledger and\\n      transaction files byte-for-byte unchanged after the suite.\\n    - the two leaky deftests now pass explicit :meta-injury-root and\\n      :meta-injury-ledger-path (protects direct/REPL callers too).\\n    - new focused deftest terminal-publication-ingests-into-isolated-stores-only:\\n      executes the real close/deposit/ingest path against temp stores, asserts\\n      :appended/:atomic-locked-one-form durability and the temp ledger entry,\\n      and pins production roots untouched.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 43,
+      "type": "text",
+      "at": "2026-10-22T04:08:34.089931401Z",
+      "text": "Now run the gates in the worktree:"
+    },
+    {
+      "seq": 44,
+      "type": "tool_use",
+      "at": "2026-10-22T04:08:34.285026416Z",
+      "tools": [
+        "run_shell",
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && clj-kondo --lint src/futon2/aif/meta_injury_store.clj src/futon2/aif/meta_self_he",
+        "run_shell cd ~/worktrees/futon2/wm-live-store && emacs --batch -l /home/joe/code/futon4/dev/check-parens.el src/futon2/aif/meta_in"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"linting took 101ms, errors: 0, warnings: 0\\nkondo exit 0\\n\",\"err\":\"\"}}",
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"OK\\nparens exit 0\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 45,
+      "type": "text",
+      "at": "2026-10-22T04:08:34.599347993Z",
+      "text": "[auto-continue 1/64]"
+    },
+    {
+      "seq": 46,
+      "type": "tool_use",
+      "at": "2026-10-22T04:08:40.968458487Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && export FUTON3C_INVOKE_JOBS_FILE=/tmp/wm-live-store-jobs-$(date +%s).edn && timeou"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"\\nRunning tests in #{\\\"test\\\"}\\n\\nTesting futon2.aif.meta-injury-live-store-test\\n\\nFAIL in (no-production-source-names-the-archived-store) (meta_injury_live_store_test.clj:45)\\nsrc/futon2/aif/meta_injury_store.clj\\nthe only occurrence of wm-meta-injuries in production source is the\\n           live-root literal wm-meta-injuries-live-2026-10-22\\nexpected: (every? (fn* [p1__2904#] (str/starts-with? p1__2904# live-root)) (map (fn* [p1__2905#] (subs text p1__2905#)) (take-w \u2026[trimmed]\u2026 s/readAllBytes (.toPath (io/file record-path)))\\\\n          parsed (read-one-form (String. bytes \\\\\\\"UTF-8\\\\\\\"))]\\\\n      (if-not (= :read (:status parsed))\\\\n        parsed\\\\n        (let [pin {:path record-path :sha256 (load-identity/sha256 bytes)}\\\\n              classification (terminal/classify (:value parsed) pin)]\\\\n          (if-not (= :classified (:status classification))\\\\n            classification\\\\n            (transact-classification! ledger-path classification)))))\\\\n    (catch Throwable t\\\\n      (refusal :store/record-ingest-failed {:detail (ex-message t)}))))\\\\n\\\\n;; Compatibility boundary for the pre-ledger observation route. Packet 2 does\\\\n;; not use HEAD.edn to derive active injuries, but existing callers remain\\\\n;; byte-for-byte compatible until the later quarantine packet.\\\\n(defn- read-bytes [path] (Files/readAllBytes (.toPath (io/file path))))\\\\n(defn- legacy-atomic-write! [target text]\\\\n  (let [target (io/file target)\\\\n        tmp (io/file (.getParentFile target)\\\\n                     (str \\\\\\\".\\\\\\\" (.getName target) \\\\\\\".\\\\\\\" (UUID/randomUUID) \\\\\\\".tmp\\\\\\\"))]\\\\n    (io/make-parents target)\\\\n    (spit tmp text)\\\\n    (Files/move (.toPath tmp) (.toPath target)\\\\n                (into-array StandardCopyOption\\\\n                            [StandardCopyOption/ATOMIC_MOVE\\\\n                             StandardCopyOption/REPLACE_EXISTING]))\\\\n    (.getCanonicalPath target)))\\\\n\\\\n(defn deposit!\\\\n  \\\\\\\"Legacy observation deposit retained for compatibility. It is not an\\\\n  authority for :wm/meta-injury-ledger-v1 active state.\\\\\\\"\\\\n  ([run-record-path] (deposit! default-root run-record-path))\\\\n  ([root run-record-path]\\\\n   (let [record-bytes (read-bytes run-record-path)\\\\n         record (edn/read-string (String. record-bytes \\\\\\\"UTF-8\\\\\\\"))\\\\n         run-pin {:path (.getCanonicalPath (io/file run-record-path))\\\\n                  :sha256 (load-identity/sha256 record-bytes)}\\\\n         projection (injury/project-run-record record run-pin)\\\\n         projection-path (io/file root (str (:run-id projection) \\\\\\\".edn\\\\\\\"))\\\\n         projection-path (legacy-atomic-write! projection-path\\\\n                                               (str (pr-str projection) \\\\\\\"\\\\\\\\n\\\\\\\"))\\\\n         projection-bytes (read-bytes projection-path)\\\\n         source-pin {:path projection-path\\\\n                     :sha256 (load-identity/sha256 projection-bytes)}\\\\n         authority {:schema :wm/meta-injury-authority-v1\\\\n                    :source-pin source-pin :run-record-pin run-pin}\\\\n         observation (injury/produce {:source-bytes projection-bytes\\\\n                                      :expected-source-pin source-pin\\\\n                                      :run-record-bytes record-bytes\\\\n                                      :expected-run-record-pin run-pin})\\\\n         head (assoc authority :status (:status observation)\\\\n                     :capability (:capability observation)\\\\n                     :run-id (:run-id projection))\\\\n         head-path (legacy-atomic-write! (io/file root \\\\\\\"HEAD.edn\\\\\\\")\\\\n                                         (str (pr-str head) \\\\\\\"\\\\\\\\n\\\\\\\"))]\\\\n     (assoc head :head-path head-path :observation observation))))\\\\n\\\\n(defn load-authority\\\\n  \\\\\\\"Legacy pinned observation authority; never consulted by ledger active-set.\\\\\\\"\\\\n  ([] (load-authority default-root))\\\\n  ([root]\\\\n   (try\\\\n     (let [head-file (io/file root \\\\\\\"HEAD.edn\\\\\\\")]\\\\n       (when (.isFile head-file)\\\\n         (let [{:keys [source-pin run-record-pin]}\\\\n               (edn/read-string (slurp head-file))]\\\\n           (when (and (.isFile (io/file (:path source-pin)))\\\\n                      (.isFile (io/file (:path run-record-pin))))\\\\n             {:source-bytes (read-bytes (:path source-pin))\\\\n              :expected-source-pin source-pin\\\\n              :run-record-bytes (read-bytes (:path run-record-pin))\\\\n              :expected-run-record-pin run-record-pin}))))\\\\n     (catch Throwable _ nil))))\\\\n\\\")))\\n\\nRan 3 tests containing 27 assertions.\\n1 failures, 0 errors.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 47,
+      "type": "text",
+      "at": "2026-10-22T04:08:50.399254851Z",
+      "text": "The occurrence starts at the directory-name suffix, not the full absolute path \u2014 fixing the check to match the name literal:"
+    },
+    {
+      "seq": 48,
+      "type": "tool_use",
+      "at": "2026-10-22T04:08:50.401293985Z",
+      "tools": [
+        "edit_file",
+        "edit_file"
+      ],
+      "previews": [
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/meta_injury_live_store_test.clj",
+        "edit_file /home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/meta_injury_live_store_test.clj"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/meta_injury_live_store_test.clj\",\"replacements\":1}}",
+        "{\"ok\":true,\"result\":{\"file\":\"/home/joe/worktrees/futon2/wm-live-store/test/futon2/aif/meta_injury_live_store_test.clj\",\"replacements\":1}}"
+      ]
+    },
+    {
+      "seq": 49,
+      "type": "text",
+      "at": "2026-10-22T04:08:59.338648475Z",
+      "text": "Wait \u2014 live-root is defined with live-dir-name embedded; also test file itself isn't production. But live-root literal in test contains \"wm-meta-injuries\" \u2014 fine, tests aren't checked.\n\nAlso every-live-default test asserts equals (str live-root \"/ledger.edn\") \u2014 matches. Re-run. Also do the bad-case demonstration: temporarily point default-ledger-path at old path and show test fails. I'll do that after green run."
+    },
+    {
+      "seq": 50,
+      "type": "tool_use",
+      "at": "2026-10-22T04:09:00.952039357Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && export FUTON3C_INVOKE_JOBS_FILE=/tmp/wm-jobs-badcase.edn && timeout 300 clojure -"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"\\nTesting futon2.aif.meta-injury-live-store-test\\n\\nRan 3 tests containing 27 assertions.\\n0 failures, 0 errors.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 51,
+      "type": "text",
+      "at": "2026-10-22T04:09:04.867734475Z",
+      "text": "Green. Now the bad-case demonstration \u2014 point `default-ledger-path` back at the old path and show the test catches it:"
+    },
+    {
+      "seq": 52,
+      "type": "tool_use",
+      "at": "2026-10-22T04:09:06.280505302Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && sed -i 's#(def default-ledger-path (str store/default-root \"/ledger.edn\"))#(def d"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"16:(def default-ledger-path \\\"/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn\\\")\\n424:                                                 default-ledger-path)\\nFAIL in (no-production-source-names-the-archived-store) (meta_injury_live_store_test.clj:46)\\nFAIL in (every-live-default-resolves-under-the-fresh-live-root) (meta_injury_live_store_test.clj:28)\\n2 failures, 0 errors.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 53,
+      "type": "text",
+      "at": "2026-10-22T04:09:09.866659538Z",
+      "text": "Both guards catch the regression. Revert the sabotage and run the full required test set:"
+    },
+    {
+      "seq": 54,
+      "type": "tool_use",
+      "at": "2026-10-22T04:09:09.871397803Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && sed -i 's#(def default-ledger-path \"/home/joe/code/futon2/data/wm-meta-injuries/l"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"16:(def default-ledger-path (str store/default-root \\\"/ledger.edn\\\"))\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 55,
+      "type": "tool_use",
+      "at": "2026-10-22T04:09:42.876359616Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && export FUTON3C_INVOKE_JOBS_FILE=/tmp/wm-jobs-run.edn && for ns in futon2.aif.meta"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"== futon2.aif.meta-injury-store-test\\n\\nRan 6 tests containing 25 assertions.\\n1 failures, 0 errors.\\n== futon2.aif.meta-injury-ledger-test\\n\\nRan 21 tests containing 236 assertions.\\n0 failures, 0 errors.\\n== futon2.aif.meta-injury-live-store-test\\n\\nRan 3 tests containing 27 assertions.\\n0 failures, 0 errors.\\n== futon2.aif.meta-self-heal-production-test\\n\\nRan 55 tests containing 396 assertions.\\n0 failures, 0 errors.\\n== futon2.aif.f43-other-injury-requeue-test\\n\\nRan 1 tests containing 39 assertions.\\n0 failures, 0 errors.\\n== futon2.test-support.runner-fixture-test\\n\\nRan 1 tests containing 8 assertions.\\n0 failures, 0 errors.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 56,
+      "type": "tool_use",
+      "at": "2026-10-22T04:09:50.052917848Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && export FUTON3C_INVOKE_JOBS_FILE=/tmp/wm-jobs-run.edn && timeout 600 clojure -M:te"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"\\nRunning tests in #{\\\"test\\\"}\\n\\nTesting futon2.aif.meta-injury-store-test\\n\\nFAIL in (legacy-terminal-observation-route-remains-compatible) (meta_injury_store_test.clj:51)\\nexpected: (= {:type :run-algorithm, :target \\\"A-self-heal\\\"} (:action selected))\\n  actual: (not (= {:type :run-algorithm, :target \\\"A-self-heal\\\"} nil))\\n\\nRan 6 tests containing 25 assertions.\\n1 failures, 0 errors.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 57,
+      "type": "text",
+      "at": "2026-10-22T04:09:55.777309367Z",
+      "text": "Is this failure pre-existing on main? Check by running that namespace on the pristine main worktree \u2014 or stash my changes? My worktree only changed defs; the failing test uses temp paths (`(str tmp \"/injuries\")`) \u2014 unrelated to my change. Verify on the shared checkout (main, 4dae9104e) \u2014 but don't pollute: the test uses temp dirs, safe."
+    },
+    {
+      "seq": 58,
+      "type": "tool_use",
+      "at": "2026-10-22T04:10:00.167807813Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd /home/joe/code/futon2 && git stash list | head -1; git status --porcelain src test | head; export FUTON3C_INVOKE_JOBS"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"\\nRan 6 tests containing 25 assertions.\\n1 failures, 0 errors.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 59,
+      "type": "text",
+      "at": "2026-10-22T04:10:04.468332363Z",
+      "text": "Pre-existing on clean main \u2014 not my change. Now `full_loop_runner_test` (and the hermetic fixture's production-unchanged assertions live in the namespaces already run):"
+    },
+    {
+      "seq": 60,
+      "type": "tool_use",
+      "at": "2026-10-22T04:19:06.489828003Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && ls test/futon2/aif | grep full_loop && export FUTON3C_INVOKE_JOBS_FILE=/tmp/wm-jo"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"full_loop_cli_test.clj\\nfull_loop_cohort_test.clj\\nfull_loop_discharge_test.clj\\nfull_loop_runner_1_4_wiring_test.clj\\nfull_loop_runner_test.clj\\nfull_loop_runtime_test.clj\\nzaif_full_loop_test.clj\\n\\nRan 234 tests containing 1326 assertions.\\n328 failures, 30 errors.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 61,
+      "type": "text",
+      "at": "2026-10-22T04:19:10.552709375Z",
+      "text": "328 failures \u2014 likely something environmental or caused by my change. Check whether main also fails. First check a couple of failures to see nature."
+    },
+    {
+      "seq": 62,
+      "type": "tool_use",
+      "at": "2026-10-22T04:28:07.235446933Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd ~/worktrees/futon2/wm-live-store && export FUTON3C_INVOKE_JOBS_FILE=/tmp/wm-jobs-run.edn && timeout 1800 clojure -M:t"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"FAIL in (cohort-grounding-uses-the-started-cohort-and-run) (full_loop_runner_test.clj:6949)\\nexpected: (= :grounded-progress (:outcome result))\\n  actual: (not (= :grounded-progress :no-selection))\\n\\nFAIL in (cohort-grounding-uses-the-started-cohort-and-run) (full_loop_runner_test.clj:6950)\\nexpected: (= \\\"full-loop/discharge/cohort/test-cohort-exhaustion/run/cohort-discharge-run/attempt/attempt-001\\\" (:xt/id discharge))\\n  actual: (not (= \\\"full-loop/discharge/cohort/test-cohort-exhaustion/run/cohort-discharge-run/attempt/attempt-001\\\" nil))\\n\\nFAIL in (cohort-grounding-uses-the-started-cohort-and-run) (full_loop_runner_test.clj:6952)\\nexpected: (= :test-cohort-exhaustion (:discharge/cohort-id discharge))\\n  actual: (not (= :test-cohort-exhaustion nil))\\n\\nFAIL in (cohort-grounding-uses-the-started-cohort-and-run) (full_loop_runner_test.clj:6953)\\nexpected: (= \\\"cohort-discharge-run\\\" (:discharge/run-id discharge))\\n  actual: (not (= \\\"cohort-discharge-run\\\" nil))\\n[wm-phase] {:trigger nil, :phase :runner-source, :transition :start, :at \\\"2026-10-22T04:19:23.324419610Z\\\"}\\n--\\nFAIL in (approving-code-review-without-execution-evidence-is-rejected) (full_loop_runner_test.clj:1791)\\nexpected: (= :build-failed (:outcome result))\\n  actual: (not (= :build-failed :no-selection))\\n\\nFAIL in (approving-code-review-without-execution-evidence-is-rejected) (full_loop_runner_test.clj:1792)\\nexpected: (= :review-execution-evidence-missing (get-in result [:data :failure-kind]))\\n  actual: (not (= :review-execution-evidence-missing :no-selection))\\n\\nFAIL in (approving-code-review-without-execution-evidence-is-rejected) (full_loop_runner_test.clj:1794)\\nexpected: (false? (:passed? gate))\\n  actual: (not (false? nil))\\n\\nFAIL in (approving-code-review-without-execution-evidence-is-rejected) (full_loop_runner_test.clj:1795)\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 63,
+      "type": "text",
+      "at": "2026-10-22T04:28:22.178069152Z",
+      "text": "These look unrelated to meta-injury paths (:no-selection). Likely pre-existing on main, or environment (live service on :6768?). Check baseline on the clean shared checkout \u2014 heavy (maybe minutes) but necessary."
+    },
+    {
+      "seq": 64,
+      "type": "tool_use",
+      "at": "2026-10-22T04:36:40.935609171Z",
+      "tools": [
+        "run_shell"
+      ],
+      "previews": [
+        "run_shell cd /home/joe/code/futon2 && export FUTON3C_INVOKE_JOBS_FILE=/tmp/wm-jobs-baseline.edn && timeout 1800 clojure -M:test -n"
+      ],
+      "output": [
+        "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"\\nRan 234 tests containing 1326 assertions.\\n330 failures, 30 errors.\\n\",\"err\":\"\"}}"
+      ]
+    },
+    {
+      "seq": 65,
+      "type": "text",
+      "at": "2026-10-22T04:36:53.384514997Z",
+      "text": "Baseline main fails too (330 vs my 328 \u2014 need to compare names):"
+    }
+  ]
+}

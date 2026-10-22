@@ -1,0 +1,24 @@
+{
+  "since": 1792644234,
+  "order": [
+    [
+      "futon2.aif.meta-injury-store",
+      "/home/joe/code/futon2/src/futon2/aif/meta_injury_store.clj"
+    ],
+    [
+      "futon2.aif.meta-self-heal-production",
+      "/home/joe/code/futon2/src/futon2/aif/meta_self_heal_production.clj"
+    ],
+    [
+      "futon3c.wm.meta-self-heal-adapters",
+      "/home/joe/code/futon3c/src/futon3c/wm/meta_self_heal_adapters.clj"
+    ],
+    [
+      "futon3c.wm.runner-service",
+      "/home/joe/code/futon3c/src/futon3c/wm/runner_service.clj"
+    ]
+  ],
+  "dependencies": [
+    "futon3c.wm.runner-service"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:ledger \"/home/joe/code/futon2/data/wm-meta-injuries/ledger.edn\", :acceptances \"/home/joe/code/futon2/data/wm-meta-injuries/acceptances\", :diagnoses \"/home/joe/code/futon2/data/wm-meta-injuries/diagnoses\", :transaction \"/home/joe/code/futon2/data/wm-meta-injuries/transaction.edn\", :stopped [], :deposit \"/home/joe/code/futon2/data/wm-meta-injuries\"}}",
+  "err": ""
+}
