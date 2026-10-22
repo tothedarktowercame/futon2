@@ -97,9 +97,13 @@
     (when-not (and (some? (:occurrence-id prediction-context))
                    (= horizon-steps (:tau prediction-context)))
       (om/refuse! :missing-prediction-context {}))
-    (when-not (and (map? cascade-spec)
-                   (every? #(set? (get cascade-spec %)) [:want :evidence :zeroed])
-                   (every? set? (:zeroed cascade-spec)))
+    ;; A class-only comparison takes its preference from the class model
+    ;; (Lean classKernel H), so it consumes no token want/evidence/zeroed:
+    ;; the token slots may be absent there, and are shape-checked if given.
+    (when-not (or (and (::class-only? opts) (not (contains? opts :cascade-spec)))
+                  (and (map? cascade-spec)
+                       (every? #(set? (get cascade-spec %)) [:want :evidence :zeroed])
+                       (every? set? (:zeroed cascade-spec))))
       (om/refuse! :invalid-observation-preference {}))
     (when-not (and (map? q0) (seq q0) (m/normalized-exact? q0)
                    (every? set? (keys q0)))

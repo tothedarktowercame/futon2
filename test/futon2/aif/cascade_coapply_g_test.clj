@@ -218,3 +218,12 @@
                     (assoc :observation-model-of {}))]
     (is (= :class-observation-required
            (:reason (g/compare-at-horizon {:cascade-belief {#{} 1}} [join] options))))))
+
+(deftest class-only-comparison-needs-no-token-preference
+  (let [options (dissoc (opts 2 {:join counts}) :cascade-spec)
+        r (g/compare-at-horizon {:cascade-belief {#{} 1}} [join] options)]
+    (is (vector? r) (pr-str r))
+    (is (= :class-model-preference (get-in r [0 :certificate :c-source :source]))))
+  (is (= :invalid-observation-preference
+         (:kind (g/compare-at-horizon {:cascade-belief {#{} 1}} [join]
+                                      (assoc (opts 2 {:join counts}) :cascade-spec {:want :bad}))))))

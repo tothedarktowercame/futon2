@@ -85,6 +85,10 @@
                                        :g (- (:g step) (:expected-novelty term)))) steps terms))
               (assoc-in [:certificate :g-terms :expected-information-gain] novelty)
               (assoc-in [:certificate :g-terms :raw :expected-information-gain] novelty)
+              (cond-> (not (contains? opts :cascade-spec))
+                (assoc-in [:certificate :c-source]
+                          {:source :class-model-preference :lean "classKernel"
+                           :token-preference :not-consumed}))
               (assoc-in [:certificate :parameter-novelty]
                         {:law :frontier-beta-approximation :lean "CascadeCoApplyGNovelty"
                          :counts counts :steps terms :total novelty})))))
@@ -135,7 +139,8 @@
               (and (contains? opts :parameter-information-mode)
                    (not= :frontier-beta-approximation (:parameter-information-mode opts))))
       (refuse! :conflicting-score-law {}))
-    (scorer/validate-comparison-inputs! (:cascade-belief state) opts)
+    (scorer/validate-comparison-inputs! (:cascade-belief state)
+                                        (assoc opts ::scorer/class-only? true))
     (let [results (mapv #(score-one state % opts) candidates)
           refused (filterv #(= :refused (:status %)) results)
           scored (filterv #(= :scored (:status %)) results)
