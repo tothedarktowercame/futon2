@@ -1,0 +1,16 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.runner-source-restart-test
+[wm-phase] {:trigger nil, :phase :runner-source, :transition :start, :at "2026-10-22T03:20:53.070026074Z"}
+[wm-full-loop] REFUSING: serving runner source drifts from /home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj; reload the namespace from the canonical checkout before running attempts.
+[wm-phase] {:trigger nil, :phase :runner-source, :transition :end, :outcome :ok, :duration-ms 4297, :debugger/restart :use-value, :debugger/dwell {:schema :wm/debugger-dwell-v1, :run-id "source-no-substitute", :phase :runner-source, :condition-kind :stale-runner-source, :stopped-at-monotonic-ns 142898352070047, :resumed-at-monotonic-ns 142898354514113, :restart-choice :use-value, :duration-ms 2}, :at "2026-10-22T03:20:57.367369487Z"}
+[wm-full-loop] REFUSING: serving runner source drifts from /home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj; reload the namespace from the canonical checkout before running attempts.
+[wm-phase] {:trigger nil, :phase :runner-source, :transition :start, :at "2026-10-22T03:20:57.382366535Z"}
+[wm-full-loop] REFUSING: serving runner source drifts from /home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj; reload the namespace from the canonical checkout before running attempts.
+[wm-phase] {:debugger/restart :retry, :transition :end, :phase :runner-source, :outcome :error, :error-class "clojure.lang.ExceptionInfo", :duration-ms 10, :debugger/dwell {:schema :wm/debugger-dwell-v1, :run-id "source-recovery", :phase :runner-source, :condition-kind :stale-runner-source, :stopped-at-monotonic-ns 142898376549536, :resumed-at-monotonic-ns 142898380868059, :restart-choice :retry, :duration-ms 4}, :at "2026-10-22T03:20:57.393206591Z", :error "Serving runner source drifts from the canonical checkout", :trigger nil}
+[wm-phase] {:trigger nil, :phase :runner-source, :transition :start, :at "2026-10-22T03:20:57.406638769Z"}
+[wm-phase] {:trigger nil, :phase :runner-source, :transition :end, :outcome :ok, :duration-ms 5, :at "2026-10-22T03:20:57.412169027Z"}
+
+Ran 2 tests containing 8 assertions.
+0 failures, 0 errors.

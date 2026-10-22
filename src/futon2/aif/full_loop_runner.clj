@@ -700,6 +700,15 @@
                          :runner/source check}))))
     check))
 
+(defn check-runner-source-phase!
+  "Hold source drift before attempt creation, allowing reload then :retry.
+   Recheck after the stop: a debugger-supplied value is not code identity,
+   and disk may have changed while a successful breakpoint was held."
+  [opts]
+  (run-phase! opts {:trigger (:trigger opts)} :runner-source
+              #(refuse-on-runner-source-drift!))
+  (refuse-on-runner-source-drift!))
+
 (defn judge-refusal
   "WM-CLICK-REFUSAL-I: the judge's typed refusal of the cascade decision, or
   nil. The joint decision throws \"cascade decision refused\" with the kind
@@ -8196,7 +8205,7 @@
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.
-        source-check (refuse-on-runner-source-drift!)
+        source-check (check-runner-source-phase! (assoc raw-opts :run-id run-id))
         publication (discharge-receipt/catch-up!
                      (or (:repair-root raw-opts) repair/default-root)
                      (or (:discharge-receipt-repo raw-opts) "/home/joe/code/futon2"))
