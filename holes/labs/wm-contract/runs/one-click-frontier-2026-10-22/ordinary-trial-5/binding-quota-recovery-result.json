@@ -1,0 +1,16 @@
+{
+  "failed_job": "invoke-1792654279891-2394-c6ed7d1c",
+  "recovered": "unfinished docstring only; implementation completed locally",
+  "binding_commit": "256b1b26f",
+  "producer_commit": "37a9c991d",
+  "worktree": "/home/joe/code/futon2-declared-effect-binding",
+  "tests": "8 tests 42 assertions, 0 failures",
+  "lint": "0 errors/warnings",
+  "parens": "OK",
+  "replay": "binding-real-producer-replay.clj",
+  "replay_output": "binding-real-producer-replay.edn",
+  "replay_exit": 0,
+  "replay_result": "real historical C2 build/reconstruct -> binding verified; self-hashed undeclared horizon refused",
+  "limitation": "Standalone JVM combining isolated source roots; no serving load, runner wiring, declaration authoring, integration, deployment or Trial. Trusted production adapter must reconstruct from retained pinned inputs.",
+  "next": "independent review then integration; live bridge still required"
+}
