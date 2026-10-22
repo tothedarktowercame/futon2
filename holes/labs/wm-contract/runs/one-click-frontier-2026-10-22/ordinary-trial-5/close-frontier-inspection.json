@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:class :known-typed-failure, :projection-keys (:outcome :grounded? :artifact-only? :failure-kind :occurrence :route-attestation :route-attestation-ref), :failure {:outcome :build-failed, :failure-kind :reviewer-falsifier-failed}}}",
+  "err": ""
+}
