@@ -1,0 +1,37 @@
+{
+  "reviewer": "zai-3",
+  "date": "2026-10-22",
+  "subject": "futon2 commit dd8b9352fce6441c020edbb60050b4b819a58c12 (source entry restartability)",
+  "frozen-live-evidence": "6785482b0",
+  "scope": "read-only; recorded focused log source-restart-test.log; no JVM loads, clicks, dispatches, commits or source changes",
+  "verdict": "sound, ship-as-is; no blockers in the reviewed change itself",
+  "questions": {
+    "does-retry-hold-at-source-guard-and-preserve-earlier-work": {
+      "answer": true,
+      "evidence": [
+        "check-runner-source-phase! (full_loop_runner.clj:703) wraps refuse-on-runner-source-drift! in run-phase! at :runner-source. On drift the ex-info (:failure-kind :stale-runner-source) is a stoppable failure, so an attached debugger holds at await-restart!; :retry re-invokes only the phase thunk (the check), re-emitting the phase start. The call site (line 8208) is before attempt creation and before run-opportunity-core!, so a retry cannot consume an attempt, re-run selection, or re-run ensure-dispatch-seat!.",
+        "Positive test reload-and-retry-preserves-prefix-and-enters-next-section-once: prefix counter stays 1, next-section counter reaches exactly 1 after :retry, runner-source-drift read exactly 3 times (initial stop + retry recheck + trailing recheck), and the returned identity is the post-repair current map.",
+        "source-restart-test.log matches: stop with restart :retry, phase restart, then :ok in 5ms."
+      ],
+      "caveat": "prefix/section preservation is demonstrated at component level (the test's prefix/next-section atoms stand in for section work); no live completed click exists, as the README itself states."
+    },
+    "does-the-added-check-change-selection-or-bypass-code-identity": {
+      "answer": "no bypass; no selection change",
+      "evidence": [
+        "The trailing refuse-on-runner-source-drift! outside run-phase! re-derives identity from load-time digest vs canonical disk. run-phase!'s :use-value/:continue path would return the debugger-supplied value, but that value is discarded (check-runner-source-phase! returns the trailing check, and the trailing check throws if drift persists). Test supplied-value-cannot-substitute-for-current-source confirms: [:use-value current] still yields :stale-runner-source, matching the log's :end :ok with :use-value followed by refusal.",
+        "The trailing throw happens outside run-phase!, so it cannot be stopped or substituted at a debugger phase boundary; it propagates to the run boundary exactly like the pre-patch live refusal recorded in accepted.json.",
+        "Return value shape is unchanged: refuse! returns the full check map in both drift and current cases, so :loaded-code-identity (line 8218) and :runner/source (line 8328) record the same structure as before the patch. Selection namespaces are only reported/required-current, as before; the patch adds no selection authority."
+      ]
+    }
+  },
+  "drift-vs-accepted.json": "The test's drift fixture reproduces the actual recorded digests verbatim (loaded 9174b3c2272dd7c1ba5e15b1a1ba7e4710ae97cae2c7301b0f6c76ea35f09224, canonical acf4080b443c8574aaba28601b83509acd56fbd264dacbd09b0485e36d6be063) and the failure-kind/failure-stage/runner/source shape. This is the real case, not a synthetic analogue.",
+  "real-blockers": [
+    "None inside commit dd8b9352. The genuine blockers to the one-click objective are external and already named in the README: the failed child wm-requeue-7-4-repair has no run record, is at its recorded requeue limit, and its acceptance is terminal/idempotent, so end-to-end completion depends on the child-outcome observation port (zai-8, in progress). No admission should be spent to repeat :awaiting-retry."
+  ],
+  "minor-notes": [
+    "Telemetry gap: when the trailing recheck throws (use-value bypass or drift-while-held), the :runner-source phase has already emitted :end :ok, so the failure appears with no matching phase end event. Cosmetic; the typed ex-data still carries failure-stage :runner-source.",
+    "Double work per run start: on the normal no-stop path the full runner-source-drift computation (all required-source digests plus the loaded-displacement scan) runs twice — once inside the phase, once trailing. Correctness unaffected; if the displacement scan is ever costly, a short-lived memo around the pair would do.",
+    "TOCTOU between the trailing check and attempt creation pre-exists this patch and is unchanged; the recorded identity is the last check, as the docstring for runner-source-drift already scopes."
+  ],
+  "validation-performed": "Read the commit diff, run-phase!/await-restart retry loop, refuse-on-runner-source-drift! in full, the call site at 8196-8218, accepted.json drift payload, and the recorded focused test log. No commands that mutate state; no suite run (per instruction, no concrete concern warranted a targeted re-run)."
+}
