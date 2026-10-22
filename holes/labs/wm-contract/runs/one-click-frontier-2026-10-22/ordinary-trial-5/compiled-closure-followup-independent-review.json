@@ -1,0 +1,12 @@
+{
+  "reviewed": "c79f26b38",
+  "initial_tests": "7/37 pass",
+  "additional_counterexample": "foreign target qualified product received local target closure",
+  "correction": "c0f35f79d in futon2-compiled-closure-review",
+  "after_tests": "8/40 pass",
+  "lint": "0 errors, 2 existing runner warnings",
+  "parens": "OK",
+  "before": "compiled-closure-foreign-product-probe.edn",
+  "after": "compiled-closure-foreign-product-after.edn",
+  "status": "correction committed isolated; independent review requested before integration/deploy"
+}
