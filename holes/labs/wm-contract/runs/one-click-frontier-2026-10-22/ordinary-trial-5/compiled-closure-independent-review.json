@@ -1,0 +1,11 @@
+{
+  "verdict": "confirmed defect",
+  "probe-exit": 0,
+  "actual": {
+    "effect-measurements": [],
+    "classified": "grounded-change",
+    "outer-class": "closure"
+  },
+  "scope": "Standalone invocation of real classifier and dataset; no production closure fabricated",
+  "contract-decision": "C3 no-declaration exception not accepted; requires explicit evidence contract/invariant review"
+}
