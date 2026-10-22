@@ -1,0 +1,40 @@
+{:schema :wm/r20-catchup-extraction-v1
+ :extracted-at "2026-10-22"
+ :pair
+ [{:name :a
+   :record "data/wm-runs/tick-run-record-2026-10-21-fcf06c3f-8c08-4c55-a322-632090fa7220.edn"
+   :run-id "2026-10-21-fcf06c3f-8c08-4c55-a322-632090fa7220"
+   :started-at "2026-10-21T01:27:07.240171605Z"
+   :certificate
+   {:schema :wm/r20-certificate-v1 :certified? false
+    :rows {:precision {:verdict :not-recorded :reason :precision-update-not-retained :missing [:update]}
+           :evidence {:verdict :not-recorded :reason :required-r20-record-fields-not-retained :missing [:likelihood]}
+           :habit {:verdict :not-recorded :reason :required-r20-record-fields-not-retained :missing [:counts-after :next-consumed]}
+           :class-preference {:verdict :not-recorded :reason :no-scored-class-emission-candidate :missing [:class-emission-scoring]}
+           :strategic-focus {:verdict :not-recorded :reason :focus-record-not-retained :missing [:previous-focus :focus :scored-class]}
+           :liveness {:verdict :not-recorded :reason :required-r20-record-fields-not-retained :missing [:before-state :after-state :reported-live]}
+           :independence {:verdict :agrees :author "zai-2" :reviewer "zai-3"}
+           :joint-action {:verdict :not-recorded :reason :required-r20-record-fields-not-retained :missing [:ownership]}
+           :cost {:verdict :agrees :case :mostly-acting
+                  :tokens {:through-selection 0 :after-selection 224196 :total 224196 :input 222070 :output 2126}
+                  :active-ms {:through-selection 214824 :after-selection 53305}
+                  :jobs {:through-selection 0 :after-selection 2}}}}}
+  {:name :b
+   :record "data/wm-runs/tick-run-record-2026-10-21-752b48a7-6d82-4a0e-b888-9966e8c46116.edn"
+   :run-id "2026-10-21-752b48a7-6d82-4a0e-b888-9966e8c46116"
+   :started-at "2026-10-21T02:43:48.771382846Z"
+   :previous-run-id "2026-10-21-fcf06c3f-8c08-4c55-a322-632090fa7220"
+   :certificate
+   {:schema :wm/r20-certificate-v1 :certified? false
+    :rows {:precision {:verdict :not-recorded :reason :precision-update-not-retained :missing [:update]}
+           :evidence {:verdict :not-recorded :reason :required-r20-record-fields-not-retained :missing [:likelihood]}
+           :habit {:verdict :not-recorded :reason :required-r20-record-fields-not-retained :missing [:counts-after :next-consumed]}
+           :class-preference {:verdict :not-recorded :reason :no-scored-class-emission-candidate :missing [:class-emission-scoring]}
+           :strategic-focus {:verdict :not-recorded :reason :focus-record-not-retained :missing [:previous-focus :focus :scored-class]}
+           :liveness {:verdict :not-recorded :reason :required-r20-record-fields-not-retained :missing [:before-state :after-state :reported-live]}
+           :independence {:verdict :agrees :author "zai-2" :reviewer "zai-3"}
+           :joint-action {:verdict :not-recorded :reason :required-r20-record-fields-not-retained :missing [:ownership]}
+           :cost {:verdict :agrees :case :mostly-acting
+                  :tokens {:through-selection 0 :after-selection 612130 :total 612130 :input 609636 :output 2494}
+                  :active-ms {:through-selection 213959 :after-selection 105459}
+                  :jobs {:through-selection 0 :after-selection 2}}}}}]}
