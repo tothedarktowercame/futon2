@@ -1,3 +1,15 @@
+LATEST: reviewed C2+binding+production authority+retention stack INTEGRATED
+canonical through fefa67278; exact source match7fc3b894c. Focused canonical
+43tests213assertions all pass; declared-effect-canonical-integration.json/logs.
+NOT deployed or wired. Reviews2407/2402/2410/2412 accepted. C1 closure review2403
+still pending. Next work is actual runner wiring with frozen selection base,
+retained source bytes, separate occurrence binding, explicit D-task context,
+consistent build/close/falsifier authority. Joe declaration question pending.
+Trial5 closed failure, FIVE remain; broad useful objective OPEN. No new admission
+until valid owner declaration/horizon and reviewed bridge. No broad suites or
+serving-JVM diagnostic/worktree loads/kills. Keep source integration distinct
+from live evidence. Older continuation paragraphs below superseded where stale.
+
 LATEST — supersedes old parks2381/2384/2385: Trial5 CLOSED build-failed;
 FIVE project Trials remain; work order wo-da02b427-e639-4ac2-b3ed-a7e6325d665b OPEN.
 Zai agents hit5hourquota (reset15:46:37); do not redispatch there blindly.

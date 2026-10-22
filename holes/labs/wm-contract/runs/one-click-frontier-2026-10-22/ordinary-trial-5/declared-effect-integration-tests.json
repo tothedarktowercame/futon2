@@ -1,0 +1,52 @@
+[
+  {
+    "command": [
+      "clojure",
+      "-M:test",
+      "-n",
+      "futon2.aif.declared-effect-record-test"
+    ],
+    "exit": 0,
+    "log": "integrated-declared-effect-record-test.log"
+  },
+  {
+    "command": [
+      "clojure",
+      "-M:test",
+      "-n",
+      "futon2.aif.occurrence-declared-effect-binding-test"
+    ],
+    "exit": 0,
+    "log": "integrated-occurrence-declared-effect-binding-test.log"
+  },
+  {
+    "command": [
+      "clojure",
+      "-M:test",
+      "-n",
+      "futon2.aif.declared-effect-retention-test"
+    ],
+    "exit": 0,
+    "log": "integrated-declared-effect-retention-test.log"
+  },
+  {
+    "command": [
+      "clojure",
+      "-M:test:test-slow",
+      "-n",
+      "futon2.aif.declared-effect-record-slow-test"
+    ],
+    "exit": 0,
+    "log": "integrated-declared-effect-record-slow-test.log"
+  },
+  {
+    "command": [
+      "clojure",
+      "-M:test:test-slow",
+      "-n",
+      "futon2.aif.declared-effect-authority-test"
+    ],
+    "exit": 0,
+    "log": "integrated-declared-effect-authority-test.log"
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "canonical_head": "fefa67278",
+  "reviewed_head": "7fc3b894c",
+  "source_identity": "git diff reviewed head against canonical three modules empty",
+  "sha256": {
+    "src/futon2/aif/declared_effect_record.clj": "8810d71149f8481133c6d32943c8f0e20b7421bec6a46081300b42c695c51b29",
+    "src/futon2/aif/declared_effect_authority.clj": "d022880c3e60af6273b24353a761811bc0b962665955f887a503c1585c0a7bb4",
+    "src/futon2/aif/occurrence_declared_effect_binding.clj": "fde75061b3394c4d4baed3ac9f3a07299073b1b6ed0e5c919fbf461026e370fa"
+  },
+  "gates": {
+    "tests": 43,
+    "assertions": 213,
+    "failures": 0,
+    "namespaces": 5,
+    "logs": "integrated-*.log and declared-effect-integration-tests.json"
+  },
+  "reviews": {
+    "C2": "2407 accepted a2e54d1ae",
+    "binding": "2402 accepted256b1b26f with adapter gate",
+    "authority": "2410 acceptedcbb693cf5",
+    "retention": "2412 accepted7fc3b894c"
+  },
+  "not_done": [
+    "serving reload",
+    "runner selection/dispatch/build/close/falsifier connections",
+    "owner-authored target declaration/horizon",
+    "useful ordinary production close"
+  ],
+  "known_nonblocking": "Pinned original source deletion at retention still raises NoSuchFileException; retaining before dispatch must fail closed.",
+  "trial_budget_remaining": 5
+}
