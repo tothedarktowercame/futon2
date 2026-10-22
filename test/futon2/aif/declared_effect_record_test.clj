@@ -1,12 +1,11 @@
 (ns futon2.aif.declared-effect-record-test
   "Focused unit tests for the C2 declared-effect record producer/validator.
-  All observation readers are injected; no git, no network, no JVM state.
-  Git-reading replay tests live in test-slow (declared_effect_record_slow_test.clj)
-  and are run explicitly via the :test-slow alias.
+  Observation readers AND revision resolvers are injected; no git, no
+  network, no JVM state. Git-reading replay tests live in test-slow
+  (declared_effect_record_slow_test.clj), run explicitly via :test-slow.
 
-  Reviewer round (declared-effect-record-independent-review.json): the exact
-  probe negatives -- unproven bare-boolean observation, forged self-hashed
-  schema, tampered body passing reconstruct -- are included verbatim below."
+  Reviewer rounds (declared-effect-record-*-review.json): every probe
+  negative is included verbatim or modeled with the same shape."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.declared-effect-record :as der]))
 
@@ -42,7 +41,7 @@
 
 (defn- proof
   "A full-credit C4 result whose evidence proves LOCATOR was read at the
-  base revision; OBSERVED overrides the boolean."
+  pinned base revision (reference base-sha, resolved resolved)."
   ([locator] (proof locator false))
   ([locator observed]
    {:observed observed :check :C4
@@ -51,18 +50,28 @@
 
 (defn- proving-reader
   "Reader keyed on the locator :decl; unmatched decls get a proven false
-  observation. Overrides let a test corrupt exactly one result."
+  observation."
   [overrides]
   (fn [locator]
     (if-let [o (get overrides (:decl locator))]
       o
       (proof locator))))
 
+(defn- model-resolver
+  "Injected revision resolver modeling resolution: futon2/base-ref resolves
+  to `resolved`; anything else is a typed unknown-sha."
+  []
+  (fn [{:keys [repo sha]}]
+    (if (and (= repo "futon2") (= sha base-sha))
+      {:repo repo :reference sha :resolved-sha resolved}
+      {:status :missing :kind :unknown-sha :repo repo :sha sha})))
+
 (defn- base-inputs [dir observe]
   {:target target
    :declaration {:path (str dir "/declaration.edn")}
    :base-revision {:repo "futon2" :sha base-sha}
-   :observe observe})
+   :observe observe
+   :resolve-revision (model-resolver)})
 
 (deftest positive-record-freezes-pinned-declaration-and-before-observations
   (let [dir (tmp-dir)
@@ -74,9 +83,10 @@
     (testing "declared horizon carried, not defaulted"
       (is (= {:status :declared :value 2 :authority :declaration/horizon-steps}
              (:horizon record))))
-    (testing "both wants observed false at base, active, base resolved-sha pinned"
+    (testing "base independently resolved and pinned"
+      (is (= resolved (get-in record [:base-revision :resolved-sha]))))
+    (testing "both wants observed false at base, active"
       (is (= [[target :want-a] [target :want-b]] (:active-wants record)))
-      (is (= resolved (get-in record [:base-revision :resolved-sha])))
       (is (every? #(false? (get-in % [:observation :observed-before]))
                   (get-in record [:want-observations :active]))))
     (testing "legacy declaration fields never reach the record"
@@ -119,7 +129,8 @@
 (deftest missing-trial5-declaration-is-typed-absent
   (let [record (der/build-record {:target "M-stack-geometry"
                                   :base-revision {:repo "futon5a" :sha "base-ref"}
-                                  :observe (proving-reader {})})]
+                                  :observe (proving-reader {})
+                                  :resolve-revision (model-resolver)})]
     (is (= :absent (get-in record [:declaration :status])))
     (is (= :no-target-effect-declaration (get-in record [:declaration :reason])))
     (is (= :absent (get-in record [:horizon :status])))
@@ -169,17 +180,55 @@
       (is (= [] @seen) "no observation attempted for unsupported classes")
       (is (false? (:eligible (:admission record)))))))
 
-(deftest bare-boolean-observation-without-evidence-cannot-become-false
+(deftest locator-repo-mismatch-is-typed-never-observed
+  (let [dir (tmp-dir)
+        _ (write-declaration! dir :locators
+                              {:want-a {:class :C4 :repo "other-repo" :sha "HEAD"
+                                        :path "docs/a.md" :decl "WANT-A-DONE"}
+                               :want-b {:class :C4 :repo "futon2" :sha "HEAD"
+                                        :path "docs/b.md" :decl "WANT-B-DONE"}})
+        record (der/build-record (base-inputs dir (proving-reader {})))]
+    (testing "a locator authored for another repo is typed, not observed"
+      (is (= 1 (count (get-in record [:want-observations :unknown]))))
+      (is (= :locator-repo-mismatch
+             (get-in record [:want-observations :unknown 0 :observation :kind])))
+      (is (= [[target :want-b]] (:active-wants record)))
+      (is (false? (:eligible (:admission record)))))))
+
+(deftest unresolved-base-pins-nothing-and-observes-nothing
   (let [dir (tmp-dir)
         _ (write-declaration! dir)
-        ;; exact reviewer probe: reader returns a bare boolean, base revision
-        ;; is a wrong repo / not-a-revision reference
+        seen (atom [])
+        ;; modeled round-2 probe: base wrong-repo/not-a-revision
         record (der/build-record
                 {:target target
                  :declaration {:path (str dir "/declaration.edn")}
                  :base-revision {:repo "wrong-repo" :sha "not-a-revision"}
-                 :observe (fn [_] {:observed false})})]
-    (testing "unproven observations are typed unknown, never false-before"
+                 :observe (fn [l] (swap! seen conj (:path l)) (proof l))
+                 :resolve-revision (model-resolver)})]
+    (testing "an unresolvable base pins nothing and observes nothing"
+      (is (= [] @seen) "no observation attempted at an unresolved base")
+      (is (= 2 (count (get-in record [:want-observations :unknown]))))
+      (is (every? #(= :base-unresolved %)
+                  (mapv #(get-in % [:observation :kind])
+                        (get-in record [:want-observations :unknown]))))
+      (is (= [] (:active-wants record)))
+      (is (nil? (get-in record [:base-revision :resolved-sha])))
+      (is (false? (:eligible (:admission record))))
+      (is (contains? (set (:refusals (:admission record))) :base-unresolved))
+      (is (contains? (set (:refusals (:admission record))) :unknown-observation)))))
+
+(deftest echoed-evidence-with-false-resolved-sha-cannot-become-false
+  (let [dir (tmp-dir)
+        _ (write-declaration! dir)
+        ;; modeled round-2 probe: resolver independently resolves, reader
+        ;; echoes the locator but claims a different resolved-sha
+        record (der/build-record
+                (base-inputs dir (fn [loc]
+                                   {:observed false :check :C4
+                                    :evidence (assoc (select-keys loc [:repo :path :decl :sha])
+                                                     :resolved-sha "not-a-commit")})))]
+    (testing "evidence must carry the INDEPENDENTLY resolved sha, not an echo"
       (is (= 2 (count (get-in record [:want-observations :unknown]))))
       (is (every? #(= :observation-evidence-mismatch %)
                   (mapv #(get-in % [:observation :kind])
@@ -187,9 +236,21 @@
       (is (= [] (:active-wants record)))
       (is (nil? (get-in record [:want-observations :unknown 0
                                 :observation :observed-before])))
-      (is (nil? (get-in record [:base-revision :resolved-sha])))
-      (is (false? (:eligible (:admission record))))
-      (is (contains? (set (:refusals (:admission record))) :unknown-observation)))))
+      (is (false? (:eligible (:admission record)))))))
+
+(deftest bare-boolean-observation-without-evidence-cannot-become-false
+  (let [dir (tmp-dir)
+        _ (write-declaration! dir)
+        record (der/build-record
+                (assoc (base-inputs dir (fn [_] {:observed false}))
+                       :base-revision {:repo "wrong-repo" :sha "not-a-revision"}))]
+    (testing "unproven observations are typed unknown, never false-before"
+      (is (= 2 (count (get-in record [:want-observations :unknown]))))
+      (is (every? #(= :base-unresolved %)
+                  (mapv #(get-in % [:observation :kind])
+                        (get-in record [:want-observations :unknown]))))
+      (is (= [] (:active-wants record)))
+      (is (false? (:eligible (:admission record)))))))
 
 (deftest mismatched-evidence-control-with-boolean-false-is-typed
   (let [dir (tmp-dir)
@@ -209,7 +270,7 @@
       (is (nil? (get-in record [:want-observations :unknown 0
                                 :observation :observed-before]))))))
 
-(deftest inconsistent-resolved-base-refuses-admission
+(deftest divergent-resolved-shas-refuse-admission
   (let [dir (tmp-dir)
         _ (write-declaration! dir)
         record (der/build-record
@@ -217,9 +278,12 @@
                                                    [:evidence :resolved-sha]
                                                    (if (= "WANT-A-DONE" (:decl l))
                                                      "sha-one" "sha-two")))))]
-    (testing "rows resolving different base revisions are refused together"
-      (is (= 2 (count (:active-wants record))))
-      (is (contains? (set (:refusals (:admission record))) :observation-base-inconsistent))
+    (testing "evidence naming anything but the independently resolved sha is typed"
+      (is (= 2 (count (get-in record [:want-observations :unknown]))))
+      (is (every? #(= :observation-evidence-mismatch %)
+                  (mapv #(get-in % [:observation :kind])
+                        (get-in record [:want-observations :unknown]))))
+      (is (= [] (:active-wants record)))
       (is (false? (:eligible (:admission record)))))))
 
 (deftest reader-refusal-stays-unknown-observation
@@ -245,7 +309,6 @@
         record (der/build-record
                 (base-inputs dir (fn [l]
                                    (if (= "WANT-A-DONE" (:decl l))
-                                     ;; both a refusal and an observation: contradictory
                                      {:status :missing :kind :unknown-sha
                                       :observed false :check :C4}
                                      (proof l)))))]
@@ -298,7 +361,7 @@
         _ (write-declaration! dir)
         record (der/build-record (assoc (base-inputs dir (proving-reader {}))
                                         :target "someone-else"))]
-    (is (= :declaration-target-mismatch (first (:refusals (:admission record)))))
+    (is (contains? (set (:refusals (:admission record))) :declaration-no-want))
     (is (false? (:eligible (:admission record))))))
 
 (deftest invalid-inputs-are-typed-never-thrown
@@ -312,24 +375,36 @@
     (let [record (der/build-record {:target target
                                     :declaration {:path " "}
                                     :base-revision {:repo "futon2" :sha "x"}
-                                    :observe (proving-reader {})})]
+                                    :observe (proving-reader {})
+                                    :resolve-revision (model-resolver)})]
       (is (= :declaration-source-missing (get-in record [:declaration :reason])))
       (is (= [:declaration-source-refused] (get-in record [:admission :refusals])))))
   (testing "nil target with no declaration is a typed absent record"
     (let [record (der/build-record {:target nil
                                     :base-revision {:repo "futon2" :sha "x"}
-                                    :observe (proving-reader {})})]
+                                    :observe (proving-reader {})
+                                    :resolve-revision (model-resolver)})]
       (is (= [:no-declared-effect] (get-in record [:admission :refusals]))))))
 
 (deftest forged-self-hashed-record-fails-verification
-  ;; exact reviewer probe: {:schema :bogus ...} hashed with its own digest
   (let [forged {:schema :bogus :target "forged" :admission {:eligible true}}
         forged (assoc forged :record/digest (der/record-digest forged))]
     (is (false? (:verified (der/verify-record forged))))
     (is (= :record-schema-mismatch (:reason (der/verify-record forged))))))
 
+(deftest empty-rows-with-active-summary-fails-verification
+  ;; exact round-2 probe: correct schema + self digest + active-wants token,
+  ;; but ALL observation lists empty and no declaration/horizon/base
+  (let [fake {:schema der/schema :target "forged" :wants [["forged" :effect]]
+              :active-wants [["forged" :effect]] :excluded-already-true []
+              :want-observations {:active [] :excluded-already-true [] :unknown []}
+              :admission {:eligible true :refusals []}}
+        fake (assoc fake :record/digest (der/record-digest fake))]
+    (is (false? (:verified (der/verify-record fake))))
+    (is (contains? #{:want-census-mismatch :record-shape-invalid :admission-inconsistent}
+                   (:reason (der/verify-record fake))))))
+
 (deftest tampered-body-retaining-old-digest-fails-reconstruction
-  ;; exact reviewer probe: valid record, :target swapped, digest kept
   (let [dir (tmp-dir)
         _ (write-declaration! dir)
         inputs (base-inputs dir (proving-reader {}))
@@ -337,10 +412,20 @@
     (is (false? (:verified (der/verify-record tampered))))
     (is (false? (:verified (der/reconstruct inputs tampered))))))
 
+(deftest changed-declaration-bytes-break-reconstruct-pin
+  (let [dir (tmp-dir)
+        path (write-declaration! dir)
+        inputs (base-inputs dir (proving-reader {}))
+        record (der/build-record inputs)
+        _ (spit path (pr-str (assoc (read-string (slurp path)) :horizon-steps 9)))]
+    (testing "reconstruct re-consumes the pinned bytes, not the status"
+      (is (:verified (der/verify-record record)) "record itself stays consistent")
+      (is (false? (:verified (der/reconstruct inputs record))))
+      (is (= :declaration-pin-broken (:reason (der/reconstruct inputs record)))))))
+
 (deftest admission-inconsistency-fails-verification
   (let [dir (tmp-dir)
         _ (write-declaration! dir)
-        ;; an all-true record (derived [:no-open-declared-want]) forged eligible
         record (der/build-record (base-inputs dir (fn [l] (proof l true))))
         forged-admission (assoc record :admission {:eligible true :refusals []})
         rehashed (assoc forged-admission :record/digest (der/record-digest forged-admission))]

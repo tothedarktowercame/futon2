@@ -6,7 +6,8 @@
   the default test run: execute explicitly with
     clojure -M:test:test-slow -n futon2.aif.declared-effect-record-slow-test
   Every deftest is also tagged ^:slow."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.declared-effect-record :as der]))
 
 ;; Pinned history (futon2 main, object store shared with this worktree):
@@ -91,12 +92,33 @@
 (deftest ^:slow real-reader-refusal-stays-unknown
   (let [inputs {:target t-repair-target
                 :declaration {:path t-repair-declaration}
+                ;; no :resolve-revision: the PRODUCTION git resolver runs
                 :base-revision {:repo "futon2" :sha (apply str (repeat 40 "0"))}}
         record (der/build-record inputs)]
-    (testing "an unresolvable base revision is a typed unknown, never false"
+    (testing "an unresolvable base is typed :base-unresolved, never false"
       (is (= 1 (count (get-in record [:want-observations :unknown]))))
-      (is (= :unknown-sha (get-in record [:want-observations :unknown 0 :observation :kind])))
+      (is (= :base-unresolved (get-in record [:want-observations :unknown 0
+                                              :observation :kind])))
       (is (= [] (:active-wants record)))
       (is (nil? (get-in record [:want-observations :unknown 0
                                 :observation :observed-before])))
-      (is (false? (:eligible (:admission record)))))))
+      (is (false? (:eligible (:admission record))))
+      (is (contains? (set (:refusals (:admission record))) :base-unresolved)))))
+
+(deftest ^:slow production-default-resolver-refuses-wrong-repo-echo-evidence
+  ;; exact round-2 probe shape with the PRODUCTION defaults: no injected
+  ;; resolver, reader echoes the locator and claims resolved-sha not-a-commit
+  (let [path t-repair-declaration
+        target (:target (edn/read-string (slurp path)))
+        record (der/build-record {:target target :declaration {:path path}
+                                  :base-revision {:repo "wrong-repo" :sha "not-a-revision"}
+                                  :observe (fn [loc]
+                                             {:observed false :check :C4
+                                              :evidence (assoc (select-keys loc [:repo :path :decl :sha])
+                                                               :resolved-sha "not-a-commit")})})]
+    (is (false? (:eligible (:admission record))))
+    (is (= [] (:active-wants record)))
+    (is (= 1 (count (get-in record [:want-observations :unknown]))))
+    (is (= :base-unresolved (get-in record [:want-observations :unknown 0
+                                            :observation :kind])))
+    (is (:verified (der/verify-record record)))))
