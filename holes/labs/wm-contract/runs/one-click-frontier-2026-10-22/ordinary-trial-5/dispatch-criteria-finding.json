@@ -1,0 +1,16 @@
+{
+  "selected_run": "2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45",
+  "reproduction": "dispatch-criteria-replay.json",
+  "operational_steps": 19,
+  "rendered_completion_checks": 0,
+  "acceptance_block": ":absent/:no-renderable-criteria",
+  "source_sites": [
+    "full_loop_runner.clj:3381",
+    "full_loop_runner.clj:3514",
+    "full_loop_runner.clj:3540",
+    "cascade_plan.clj:67"
+  ],
+  "repair_job": "invoke-1792649026245-2343-597ebccc",
+  "active_execution_author_state": "done",
+  "scope": "Rendering repair only; useful-action admission and runtime outcome remain independent."
+}

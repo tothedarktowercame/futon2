@@ -1,0 +1,17 @@
+(let [order (fn [xs] (let [idx (zipmap xs (range))] (fn [a b] (if (= a b) 0 (compare [(get idx a (count idx)) (pr-str a)] [(get idx b (count idx)) (pr-str b)])))))
+      readers {'wm/keyword (fn [[n k]] (keyword n k))
+               'wm/map (fn [pairs] (into (sorted-map-by (order (mapv first pairs))) pairs))
+               'wm/set (fn [xs] (into (sorted-set-by (order xs)) xs))}
+      frozen (with-open [in (java.util.zip.GZIPInputStream. (clojure.java.io/input-stream "/home/joe/code/futon2/holes/labs/wm-contract/runs/one-click-frontier-2026-10-22/ordinary-trial-5/construction.edn.gz"))] (clojure.edn/read-string {:readers readers} (slurp in)))
+      c (get-in frozen [:result :value :construction])
+      steps (get-in c [:operational-plan :steps])
+      block (#'futon2.aif.full-loop-runner/acceptance-criterion-block {:action c})
+      plan (futon2.aif.cascade-plan/cascade-plan-text c)
+      operations (mapv #(get-in % [:clause :operation]) steps)
+      checks (mapv #(get-in % [:clause :completion-check]) steps)
+      present (mapv #(clojure.string/includes? plan (pr-str %)) checks)]
+  (assert (= 19 (count steps)))
+  (assert (= :no-renderable-criteria (:reason block)))
+  {:construction-kind (:construction-kind c) :step-count (count steps)
+   :completion-checks-in-pattern-plan (count (filter true? present))
+   :acceptance-block block :operations operations :pattern-plan plan})

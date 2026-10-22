@@ -1,3 +1,17 @@
+NEW independent defect REPRODUCED while execution author runs: frozen compiled
+construction19 steps render0 completion checks via cascade-plan and acceptance
+block yields :no-renderable-criteria. Production execution prompt therefore asks
+bounded generic mission work; author is investigating new cross-reference edge
+extraction in futon5a, not the already-satisfied header clauses. Do not count
+that as certified enactment of this selected cascade, even if useful mission
+progress results. See dispatch-criteria-replay.clj/.json (read-only production
+functions against frozen construction). Isolated rendering repair dispatched to
+Zai5 job invoke-1792649026245-2343-597ebccc; packet compiled-dispatch-repair-request.txt.
+That side repair is NOT a blocker on current author/review outcome. No deployment
+while worker in flight. Existing park remains awaiting execution-author job2341;
+continue same Trial and freeze next stop. Later review pure rendering repair
+independently. No new admission. Broad objective remains open.
+
 LATEST: same Trial5 passed reviewed compile and construction. Both boundaries
 captured losslessly with ordered/printer-aware helper in commit46d66500f:
 ordinary-trial-5/cascade-resume.edn.gz and construction.edn.gz. Runtime accepted
