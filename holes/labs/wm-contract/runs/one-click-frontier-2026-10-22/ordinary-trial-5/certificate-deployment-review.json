@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-22T05:48:28.045365+00:00",
+  "verdict": "approved-and-deployed",
+  "source_commits": [
+    "30fcfcfed",
+    "c394f9ee3"
+  ],
+  "capture_commit": "7fcf1c90c",
+  "focused_tests": "5 tests /39 assertions /0 failures /0 errors",
+  "lint": "0 errors /0 warnings, one pre-existing info; parens OK",
+  "offline_replay": "Frozen positive accepted and all four independent negative cases refused; assertions pass, exit0 in isolated worktree. See certificate-ordered-replay.clj/.edn.",
+  "seal_finding": "Original live carrier verifies. Ordered capture preserves exact pr-str; offline verification also needs binding *print-namespace-maps* false, matching serving JVM. With that binding recorded carrier pin recomputes exactly and semantic verify returns nil. The earlier author claim of impossible offline verification is superseded.",
+  "runtime": "Recorded canonical reload c394f9ee3 at05:45:31. Exact held judgement recertified; certificate is sole changed field. Selection terminal condition checked before use-value.",
+  "resume": "First attempt validated and saved receipt but three-arity continue! unsupported in loaded debugger. Second attempt uses supported two-arity continue!, delivered true. No new Trial.",
+  "provenance_limit": "Receipt replay attests recorded provider source pin, not independently recovered provider body. Belief produced projection derives from original refusal branch order; recorded explicitly.",
+  "current_frontier": "Same Trial progressed through selected-reading and selection-world to cascade execution. Nineteen operational clauses require authoring. Runtime dispatched Zai2 job invoke-1792648003771-2330-22e77e15. After-cascade-resume breakpoint armed. No useful mission effect claimed."
+}

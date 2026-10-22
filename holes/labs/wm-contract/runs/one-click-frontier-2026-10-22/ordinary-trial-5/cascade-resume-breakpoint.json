@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:armed [[:after :author-wait] [:after :build-resolution] [:after :cascade-resume] [:after :close-evidence-manifest] [:after :construction] [:after :grounding] [:after :reviewer-wait] [:after :selection]]}}",
+  "err": ""
+}

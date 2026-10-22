@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok true, :value {:path \"src/futon2/aif/meta_live_outer_selector.clj\", :stable? true, :schema 1, :dirty? false, :serving-pid 27067, :readable? true, :content-sha256 \"8c512bd1353ea0bdd713b7058b1eb2ad784e7473b70a2e416339e6d3acc068fe\", :loaded-at \"2026-10-22T05:45:31.454750598Z\", :tree-sha \"253e9a014bf914c1f2b1e9b6c1fce5cf5eba6ccc\", :git-head \"c394f9ee3580177ca11ed3535708154e3d34ae44\"}}",
+  "err": ""
+}

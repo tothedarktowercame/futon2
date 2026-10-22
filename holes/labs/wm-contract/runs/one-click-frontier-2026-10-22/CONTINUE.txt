@@ -1,3 +1,21 @@
+LATEST: Trial5 selection repair DEPLOYED and same held run RESUMED successfully.
+Commits30fcfcfed+c394f9ee3; capture7fcf1c90c preserves map/set order. Offline
+replay additionally needs *print-namespace-maps* false (serving value), then
+original recorded carrier pin verifies and positive cert passes; four negatives
+refuse. See certificate-deployment-review.json, certificate-ordered-replay.edn.
+This supersedes the earlier claim frozen replay is impossible. Canonical reload
+recorded; exact in-memory judgement changed ONLY outer-learning certificate.
+continue! supported TWO arities arguments here (three-argument call failed before
+delivery; saved receipt, second call delivered true). Same Trial no new admission.
+Run2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45, clickc2a23bb2..., attempt002.
+Now running cascade-resume after compile found19 operational clauses owed.
+Runtime itself dispatched Zai2 job invoke-1792648003771-2330-22e77e15, then will
+contact distinct reviewer and retry. Breakpoint [:after :cascade-resume] armed;
+read job/worker state, freeze next held section using updated helper, inspect
+result before continuing exact run. FIVE Trials remain. No useful effect yet.
+No broad tests/no JVM kills/no diagnostic worktree loads. Work order
+wo-da02b427-e639-4ac2-b3ed-a7e6325d665b remains open; do not close on these commits.
+
 LATEST REVIEW: aee932efe is NOT approved/deployed. Independent executable review
 accepted frozen positive but also four invalid cases: no provider pin, refused
 evidence, corrupted objective seal, minimal status-only map with every pin/id nil.

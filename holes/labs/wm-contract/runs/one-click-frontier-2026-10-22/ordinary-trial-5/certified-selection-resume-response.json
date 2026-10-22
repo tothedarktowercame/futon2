@@ -1,0 +1,5 @@
+{
+  "rc": 0,
+  "out": "{:ok false, :error \"Syntax error macroexpanding at (1:1).\", :type \"clojure.lang.Compiler$CompilerException\"}",
+  "err": ""
+}
