@@ -1331,6 +1331,10 @@
                                        :patch-sha (get-in result [:transaction :receipts 0 :payload :patch-sha])
                                        :retry-click (latest-retry-click (:transaction result))
                                        :checkpoint-receipts receipts}
+                                (string? (:detail result))
+                                (assoc :detail
+                                       (subs (:detail result)
+                                             0 (min 2000 (count (:detail result)))))
                                 (= :retired (:status retirement))
                                 (assoc :transaction-retired
                                        (select-keys retirement [:path :attempt]))
