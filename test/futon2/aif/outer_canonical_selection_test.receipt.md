@@ -19,7 +19,7 @@ clojure -X:test :nses '[futon2.aif.outer-canonical-selection-test futon2.aif.out
 Result:
 
 ```
-Ran 6 tests containing 39 assertions.
+Ran 7 tests containing 42 assertions.
 0 failures, 0 errors.
 ```
 

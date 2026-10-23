@@ -2,7 +2,9 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is]]
             [futon2.aif.outer-canonical-g :as frontier]
-            [futon2.aif.outer-canonical-selection :as sut]))
+            [futon2.aif.outer-canonical-selection :as sut]
+            [futon2.aif.selected-outer-cascade-policy :as carrier]
+            [futon2.aif.selected-outer-cascade-policy-test]))
 
 (def fixture (edn/read-string (slurp "test/fixtures/outer-canonical-g/b5-input-fc464172.edn")))
 (def menu (:sealed-menu fixture))
@@ -38,3 +40,23 @@
         chosen (sut/evaluate (frontier/produce broken) broken 0.0)]
     (is (= self-improvement (get-in chosen [:action :policy-id])))
     (is (not (contains? #{wiring bindings} (get-in chosen [:action :policy-id]))))))
+
+(deftest canonical-carrier-replays-the-frontier-choice
+  (let [production (var-get (ns-resolve 'futon2.aif.selected-outer-cascade-policy-test
+                                         'production-carriers))
+        {:keys [menu evidence objective]} (production)
+        f (frontier/produce menu)
+        selection (sut/evaluate f menu 0.0)
+        sealed (carrier/seal-canonical menu evidence objective f selection)
+        wrong-entry (second (:entries menu))
+        wrong-selection (assoc selection
+                               :action {:type :advance-cascade-live-policy
+                                        :target (:target-id wrong-entry)
+                                        :policy-id (:policy-id wrong-entry)
+                                        :cascade-digest (:cascade-digest wrong-entry)}
+                               :selected {:policy-id (:policy-id wrong-entry)})
+        forged (carrier/seal-canonical menu evidence objective f wrong-selection)
+        forged (assoc forged :carrier-pin (carrier/carrier-pin forged))]
+    (is (nil? (carrier/verify sealed)))
+    (is (= :selected (get-in (carrier/decision sealed) [:decision :status])))
+    (is (= :selected-policy-canonical-replay (carrier/verify forged)))))
