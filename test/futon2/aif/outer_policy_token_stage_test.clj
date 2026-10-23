@@ -77,3 +77,23 @@
     (is (= 1 (count (:want got))))
     (is (= (:universe (source text)) (get-in got [:declared-wants :universe])))
     (is (= {(first (:want got)) false} (get-in got [:declared-wants :universe])))))
+
+(deftest retained-precedence-reaches-the-missing-model-refusal
+  ;; Verbatim value from 90ca [:decision :action :precedence]. Pin the
+  ;; committed projection bytes so this test does not depend on ~/notes.
+  (let [text (slurp "test/resources/m2w/precedence.edn")
+        a (carried-action)
+        d (attach a)
+        step (token/precedence-step (:precedence a))]
+    (is (= "56f1ef4ff88e275c9dea118a83ada112b9c435ecdc0f654682b00501929ea390"
+           (identity/sha256 (.getBytes text "UTF-8"))))
+    (is (= (edn/read-string text) (:precedence a)))
+    (is (= 27 (count (get-in step [:co-apply :units]))))
+    (is (not (contains? step :status)))
+    (is (= 1 (count (get-in d [:selection-certificate :token-belief-stage :domain-inputs]))))
+    (is (not (contains? (:selection-certificate d) :precision-family)))
+    (is (= {:schema :wm/token-outcome-prediction-v1
+            :target (:target a) :action a :model-id nil
+            :prediction-rule :positive-marginal-support
+            :status :refused :reason :prediction-input-unavailable}
+           (token/freeze-prediction d)))))
