@@ -691,8 +691,12 @@
                        :status (typed :status :no-status-on-click-state)})
                     summary (record-summary target run-id (read-record! run-id))]
                 (cond-> (assoc summary :server-click-id click-id :cast cast)
-                  pre-emption (-> (dissoc :abstention)
-                                  (assoc :pre-empted-by pre-emption))
+                  ;; only the missing-record abstention is the self-heal's
+                  ;; misreading; a target's own decline on a record stays
+                  (and pre-emption
+                       (= :run-record-missing (get-in summary [:abstention :kind])))
+                  (dissoc :abstention)
+                  pre-emption (assoc :pre-empted-by pre-emption)
                   (:absent state) (assoc :click-state state)))))))))
 
 ;; ---------------------------------------------------------------------------

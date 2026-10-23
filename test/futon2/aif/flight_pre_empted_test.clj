@@ -132,3 +132,14 @@
     (is (= :pre-empted (:status result)))
     (is (= pre-emption (:pre-emption result)))
     (is (= pre-emption (get-in result [:flight :pre-emption])))))
+
+(deftest pre-emption-keeps-a-recorded-decline
+  (testing "only :run-record-missing is dropped; a decline on a record stays"
+    (let [record {:decision {:abstention {:status :abstained
+                                          :targets [{:target target :kind :declined
+                                                     :missing :evidence}]}}}
+          click ((http-click (atom 0) self-heal-click-state record)
+                 {:flight {:target target :flight/id "decline" :click 1}})]
+      (is (= "dedicated-meta-self-heal" (get-in click [:pre-empted-by :route])))
+      (is (= {:target target :kind :declined :missing :evidence}
+             (:abstention click))))))

@@ -115,3 +115,25 @@ check-parens flight_pre_empted_test.clj: OK
 - futon3c source matches are all `:abstention-reason` in strategic-outcome
   records; none reads this flight record or click summary, so futon3c needs no
   change.
+
+## Review fix (claude-7)
+
+Review finding: on pre-emption `http-click-fn` dropped `:abstention`
+whatever its kind, so a target's own decline on an existing run record would
+be lost. Now only `:run-record-missing` is dropped. New test
+`pre-emption-keeps-a-recorded-decline`.
+
+Red on `227a9af96`'s `flight_runner.clj` (that var alone):
+`Ran 1 tests containing 2 assertions. 1 failures, 0 errors.`
+(actual `nil` for the decline). Log: `/home/joe/notes/r1c2-fix-red.log`.
+
+Green, same six namespaces as above: `Ran 41 tests containing 144 assertions.
+0 failures, 0 errors.` Log: `/home/joe/notes/r1c2-fix-green.log`.
+clj-kondo 0/0; check-parens OK on both edited files.
+
+Bad cases probed by hand (not committed): route as keyword
+`:dedicated-meta-self-heal` is pre-empted with values verbatim; a self-heal
+state with no `:injury-id` is pre-empted with
+`{:absent :no-injury-id-on-click-state}`; a non-self-heal route, a throwing
+read and a string body all keep `:run-record-missing` and carry typed
+`:click-state`.
