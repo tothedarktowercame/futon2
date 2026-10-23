@@ -7237,16 +7237,58 @@
                              ;; must survive to the run record — the judge's
                              ;; own :dropped-candidates travel on the sorry
                              ;; cell, unchanged, for persist-run-record!.
-                             (sorry :no-selection
-                                    (cond-> {:decision (:decision judgement)
-                                             :dropped-candidates
-                                             (get-in judgement
-                                                     [:cascade-problems :dropped-candidates])}
-                                      persisted-cascade-execution
-                                      (assoc :downstream-refusal persisted-cascade-execution
-                                             :held-phase
-                                             (when (:open-cascade persisted-cascade-execution)
-                                               persisted-cascade-execution)))))]
+                             ;; Injury 94091 / D3: the held open-cascade cell also retains the
+                             ;; judgment — the controller decision with its measured node
+                             ;; exercise — so the selection checkpoint on the run record stays
+                             ;; resumable instead of degrading to a bare no-selection sorry.
+                             ;; Injury 94091 / D3: the held open-cascade cell
+                             ;; also retains the judgment -- the controller
+                             ;; decision with its measured node exercise --
+                             ;; so the selection checkpoint on the run record
+                             ;; stays resumable instead of degrading to a
+                             ;; bare no-selection sorry.
+                             (let [held-cell
+                               (sorry :no-selection
+                                 (cond-> {:decision (:decision judgement)
+                                          :dropped-candidates
+                                          (get-in judgement
+                                                  [:cascade-problems :dropped-candidates])}
+                                   persisted-cascade-execution
+                                   (assoc :downstream-refusal persisted-cascade-execution
+                                          :held-phase
+                                          (cond
+                                            (:open-cascade persisted-cascade-execution)
+                                            persisted-cascade-execution
+                                            ;; Injury 94091: a typed :error
+                                            ;; carrier from the resume
+                                            ;; handler (or any typed :error
+                                            ;; cascade condition) carries no
+                                            ;; :phase and no :open-cascade
+                                            ;; key, so the naive classifier
+                                            ;; reads the hold as
+                                            ;; no-selection.  The SAME
+                                            ;; open-cascade phase is held;
+                                            ;; project it explicitly.
+                                            (= :error (:status persisted-cascade-execution))
+                                            {:open-cascade true
+                                             :repairable
+                                             (not= false
+                                                   (:repairable
+                                                    persisted-cascade-execution))
+                                             :kind (:kind persisted-cascade-execution)
+                                             :repair (:repair persisted-cascade-execution)}
+                                            :else nil))))]
+                               (if (get-in held-cell [:sorry :held-phase])
+                                 ;; A held open-cascade cell keeps the
+                                 ;; measured loop-node exercise on its
+                                 ;; decision, so the retained checkpoint is
+                                 ;; resumable evidence, not a bare sorry.
+                                 (assoc held-cell
+                                        :judgment
+                                        {:decision
+                                         (loop-node-exercise/require-complete!
+                                          (:decision judgement))})
+                                 held-cell)))]
         (let [selection-cell (cond-> (-> selection-cell
                                          (assoc-in [:judgment :effective-run-configuration]
                                                    @effective-configuration)
@@ -7286,9 +7328,28 @@
           (reset! pending-selection selection-cell)
           (swap! checkpoints assoc :selection selection-cell))
         (when-not entry
-          (throw (ex-info "War Machine abstained or selected no addressable action"
-                          (no-entry-failure-data judgement
-                                                 persisted-cascade-execution))))
+          ;; Injury 94091: a typed :error from the cascade-resume handler
+          ;; (or any typed :error cascade condition without an :open-cascade
+          ;; key) is a HELD, repairable, resumable phase of the selected
+          ;; cascade -- never abstention.  Throwing the abstention message
+          ;; here relabels a machine condition as the tick's abstention,
+          ;; records a spurious repair obligation at the close boundary and
+          ;; drops the selection checkpoint, exactly what
+          ;; open_cascade_resume.clj's contract forbids.  The marker
+          ;; exception carries the condition to the runner's catch, which
+          ;; returns the held result without closing or recording anything.
+          (throw (ex-info (if (= :error (:status persisted-cascade-execution))
+                            "Selected cascade held in open-cascade phase"
+                            "War Machine abstained or selected no addressable action")
+                          (if (= :error (:status persisted-cascade-execution))
+                            {::held-open-cascade-resume true
+                             :outcome :incomplete
+                             :failure-kind (:kind persisted-cascade-execution)
+                             :held-phase (get-in @checkpoints
+                                                 [:selection :sorry :held-phase])
+                             :downstream-refusal persisted-cascade-execution}
+                            (no-entry-failure-data judgement
+                                                   persisted-cascade-execution)))))
         (when-let [uncast (seq (for [[role seat] [[:author author] [:reviewer reviewer]]
                                      :when (nil? seat)] role))]
           (throw (ex-info "Selected an action, but no cast was given for it"
@@ -8225,7 +8286,28 @@
              :checkpoints @checkpoints
              :data sorry-data
              :closed-event closed-event})
-          (if (identical? historical-verification-completion-token
+          (if (::held-open-cascade-resume (ex-data e))
+            ;; Injury 94091: the cascade-resume handler returned a typed
+            ;; :error.  This is a held, repairable, resumable phase of the
+            ;; selected cascade, not a system failure and not the tick's
+            ;; abstention: no repair obligation is recorded, the attempt is
+            ;; not closed, and the selection checkpoint -- already carrying
+            ;; the typed condition on its sorry cell -- survives to the run
+            ;; record for the next resume.
+            (do
+              (emit-phase! opts @phase-context
+                           {:phase :opportunity :transition :end
+                            :outcome :incomplete
+                            :duration-ms (- (System/currentTimeMillis) started)
+                            :held-phase (:held-phase (ex-data e))})
+              {:attempt-id attempt-id
+               :opportunity-id opportunity-id
+               :outcome :incomplete
+               :checkpoints @checkpoints
+               :data {:outcome :incomplete
+                      :held-phase (:held-phase (ex-data e))
+                      :downstream-refusal (:downstream-refusal (ex-data e))}})
+            (if (identical? historical-verification-completion-token
                           (:historical-verification-completion-token (ex-data e)))
             (let [completion (ex-data e)]
               (close! :historical-verification-awaiting-validation
@@ -8293,7 +8375,7 @@
                                          (:build-retries failure))}
                         (seq (:reviews failure))
                         (assoc :reviews (:reviews failure)
-                               :revision (:revision failure)))))))))))
+                               :revision (:revision failure))))))))))))
 
 (defn run-opportunity!
   "Run one opportunity and ensure initialization failures also become durable

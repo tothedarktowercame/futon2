@@ -323,7 +323,14 @@
         cell (get-in result [:checkpoints :selection :sorry])]
     (testing "the resume handler's typed failure replaces the stale open carrier"
       (is (= resume-error (get-in cell [:downstream-refusal])))
-      (is (nil? (get-in cell [:held-phase]))))))
+      ;; Injury 94091 (2026-10-23): the handler's typed failure REPLACES the
+      ;; stale open carrier but the phase stays HELD, projected explicitly —
+      ;; a nil :held-phase here is what let the runner relabel the typed
+      ;; machine condition as the tick's abstention.
+      (is (get-in cell [:held-phase :open-cascade]))
+      (is (true? (get-in cell [:held-phase :repairable])))
+      (is (= :open-cascade-review-answer-invalid
+             (get-in cell [:held-phase :kind]))))))
 
 (deftest selected-canonical-record-is-not-rebuilt-after-selection
   ;; The exact record compared by G is retained. A later reading source is
