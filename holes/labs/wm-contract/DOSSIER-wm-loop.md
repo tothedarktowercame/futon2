@@ -83,4 +83,4 @@ This file is the one list. Each item names the goal it blocks. Work that blocks 
 - 2026-10-23 04:06Z — C4 discovery back (codex-1): SPEC premise stale, producer+posterior path exists; no producer packet; trace the G1 click record's `:f-prefix` reasons. Row updated.
 - 2026-10-23 04:07Z — C6 re-check reviewed (trace holds at `cf33036f1`); conformance-test packet `C6-conformance-test-2026-10-23.md` to codex-3 (`invoke-…2618-95e47ec0`), park `park-8e07d93f`.
 - 2026-10-23 04:08Z — M2g reviewed: both tests red→green, real coordinator through `route!`; truncation test added (`1fbca5b03`); `meta-self-heal-production` and `runner-service` reloaded from master. M2 side gap closed.
-- 2026-10-23 04:13Z — M2f discovery reviewed (citations hold); fix split M2f-1 runner `:compile-diagnostic` (codex-11, `invoke-…2619-5378cbfc`, park `park-f8ccab36`) then M2f-2 futon2 correction edge.
+- 2026-10-23 04:10Z — M2f discovery reviewed (citations hold); fix split M2f-1 runner `:compile-diagnostic` (codex-11, `invoke-…2619-5378cbfc`, park `park-f8ccab36`) then M2f-2 futon2 correction edge.
