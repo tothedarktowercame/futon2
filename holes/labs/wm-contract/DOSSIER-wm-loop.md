@@ -92,5 +92,4 @@ This file is the one list. Each item names the goal it blocks. Work that blocks 
 - 2026-10-23 04:31Z — H click scored (H1 held, H2 not exercised: reader error, not a compiler header; store unchanged). M2f-3 packet to codex-11: classify `reading source`/`macroexpanding` headers.
 - 2026-10-23 04:34Z — M2f-3 reviewed, `fc555879d` reloaded; live cfbcbad0 log now classified 91:39. H′ click to codex-11.
 - 2026-10-23 04:52Z — H′ click scored: compile correction held; reviewer refused the revision (unattainable `:expected`, setup-only failures). Prompt fix futon3c `7fdf71b46`; M2f-4 (review correction) to codex-11, park `park-48c8adcc`.
-
 - 2026-10-23 04:55Z — M2f-4 reviewed, merged `eabecaee8` + test-dir fix `011a58739`, reloaded. H″ click on cfbcbad0… to codex-11.
