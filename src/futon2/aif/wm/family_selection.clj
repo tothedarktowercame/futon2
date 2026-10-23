@@ -5,6 +5,8 @@
   fold under each policy's structural reading-policy key (cascade-habit-store
   policy-view); a ranked entry carries no E of its own before that."
   (:require [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.mission-hole-wants :as mission-wants]
+            [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.wm.family-canonical-g :as canonical-g]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
@@ -362,6 +364,42 @@
                             (mapcat :failures (:rows result))))
      :refusal (:refusal result)}))
 
+(defn- declared-mission-wants [target declarations]
+  (let [rows (filterv #(= target (:target-id %)) declarations)
+        row (first rows)
+        pin (:source-pin row)
+        path (:source-path row)
+        source (when (and (= 1 (count rows)) (string? path)
+                          (string? (:sha256 pin)))
+                 (mission-wants/mission-source mission-registry/default-code-root
+                                               {:id target :path path}))
+        reason (cond
+                 (not= 1 (count rows)) :target-source-pin-unavailable
+                 (not (and (string? path) (string? (:sha256 pin)))) :target-source-pin-unavailable
+                 (nil? source) :mission-wants-unavailable
+                 (not= (:sha256 pin) (get-in source [:source :sha256])) :target-source-sha-mismatch)]
+    (if reason
+      {:declared-wants {:status :unavailable :reason reason :target-source-pin pin
+                        :observed-source (:source source)}}
+      {:want (:want source)
+       :observation-locators (into {} (map (fn [[token locator]] [[target token] locator]))
+                                   (:locators source))
+       :declared-wants {:status :available :source (:source source)
+                        :target-source-pin pin :holes (:holes source)
+                        :criteria (:criteria source) :unlocated (:unlocated source)}})))
+
+(defn- attach-declared-wants
+  "Read each target once before sealing. Only a matching mission byte pin
+  authorizes wants; scorer tokens and downstream rereads are not sources."
+  [ranked field]
+  (let [by-target (into {} (map (fn [target]
+                                [target (declared-mission-wants target (:target-sources field))]))
+                        (distinct (map #(get-in % [:action :target]) ranked)))]
+    (mapv (fn [entry]
+            (update entry :action
+                    #(merge (dissoc % :want :observation-locators :declared-wants)
+                            (get by-target (:target %))))) ranked)))
+
 (defn sealed-pre-choice-menu
   "Atomically form and canonical-bind a complete pre-choice policy menu.
   FIELD is the pinned full-field carrier.  JOIN supplies only existing
@@ -374,7 +412,7 @@
         rows (score-family-field (filterv #(= :computed (:status %)) families)
                                      target-classes)
             {:keys [ranked]} (construct-ranked rows)
-            bound (cascade-identity/bind-ranked ranked
+            bound (cascade-identity/bind-ranked (attach-declared-wants ranked field)
                                                 (or (:readings join) (constantly {}))
                                                 (:authored join))
             refusals (vec (:refusals bound))
