@@ -14,6 +14,7 @@
 
 (def schema :wm/cascade-continuation-v1)
 (def close-schema :wm/cascade-continuation-close-v1)
+(def failure-schema :wm/cascade-continuation-failure-v1)
 
 (defn- hex64? [x]
   (and (string? x) (re-matches #"[0-9a-f]{64}" x)))
@@ -111,6 +112,55 @@
                        :source-run-id source-run-id
                        :source-attempt-id source-attempt-id}})))
 
+(defn production-failure-adapter
+  "Return an append-only failure port. It records a failed certified-frontier
+  dispatch without relabelling that failure as a close or a spent click."
+  [{:keys [root source-run-id source-attempt-id]}]
+  (fn [packet]
+    (let [record {:schema failure-schema
+                  :source-run-id source-run-id
+                  :source-attempt-id source-attempt-id
+                  :selected-cascade-digest (:selected-cascade-digest packet)
+                  :cascade-digest (:cascade-digest packet)
+                  :frontier (:frontier packet)
+                  :failed-occurrence-id (:failed-occurrence-id packet)
+                  :failed-pattern (:failed-pattern packet)
+                  :kind (:kind packet)
+                  :failure (:failure packet)
+                  :completed-receipts (:completed-receipts packet)
+                  :completed-receipt-digests
+                  (mapv :digest (:completed-receipts packet))}
+          digest (evidence/value-digest record)
+          sealed (assoc record :digest digest)
+          file (io/file root (str digest ".edn"))]
+      (io/make-parents file)
+      (if (.exists file)
+        (when-not (= sealed (edn/read-string (slurp file)))
+          (throw (ex-info "cascade continuation failure collision"
+                          {:kind :continuation-failure-collision
+                           :path (.getPath file)})))
+        (spit file (pr-str sealed)))
+      {:status :recorded
+       :failure-receipt {:digest digest
+                         :path (.getPath file)
+                         :source-run-id source-run-id
+                         :source-attempt-id source-attempt-id}})))
+
+(defn- verified-failure-record? [result]
+  (and (= :recorded (:status result))
+       (hex64? (get-in result [:failure-receipt :digest]))))
+
+(defn- record-failure [failure-fn packet]
+  (try
+    (let [result (failure-fn packet)]
+      (if (verified-failure-record? result)
+        result
+        {:status :error :kind :failure-record-unverified
+         :failure-record-result result}))
+    (catch Throwable t
+      {:status :error :kind :failure-record-unverified
+       :message (.getMessage t)})))
+
 (defn continue-certified-cascade!
   "Consume one certified :cascade-ready carrier.
 
@@ -120,7 +170,7 @@
   the complete evidence packet and must return a digest-bound :closed result.
   Missing ports and malformed evidence are typed errors, never abstentions."
   [{:keys [ready executable-cascade-root execution-journal-root executors
-           close-fn instant-fn]
+           close-fn failure-fn instant-fn]
     :or {instant-fn #(Instant/now)}}]
   (let [selected (:cascade-digest ready)
         compiled (:compiled-digest ready)
@@ -163,10 +213,25 @@
                 (if-let [node (first nodes)]
                   (let [effect (dispatch/dispatch-node executors compiled node)]
                     (if-not (= :enacted (:status effect))
-                      (assoc effect :status :error
-                             :kind (or (:kind effect)
-                                       :continuation-effect-failed)
-                             :completed receipts)
+                      (let [kind (or (:kind effect)
+                                     :continuation-effect-failed)
+                            result (assoc effect :status :error
+                                          :kind kind
+                                          :completed receipts)]
+                        (cond-> result
+                          failure-fn
+                          (assoc :failure-record
+                                 (record-failure
+                                  failure-fn
+                                  {:selected-cascade-digest selected
+                                   :cascade-digest compiled
+                                   :frontier expected
+                                   :failed-occurrence-id (:occurrence-id node)
+                                   :failed-pattern (or (:pattern node)
+                                                       (get-in node [:structural-node :pattern]))
+                                   :kind kind
+                                   :failure effect
+                                   :completed-receipts receipts}))))
                       (let [receipt (:receipt effect)
                             now (instant-fn)
                             entry (journal/entry
