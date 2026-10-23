@@ -385,6 +385,7 @@
        :observation-locators (into {} (map (fn [[token locator]] [[target token] locator]))
                                    (:locators source))
        :declared-wants {:status :available :source (:source source)
+                        :universe (:universe source)
                         :target-source-pin pin :holes (:holes source)
                         :criteria (:criteria source) :unlocated (:unlocated source)}})))
 

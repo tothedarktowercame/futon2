@@ -1,0 +1,15 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.d-predecessor-task-authority-test
+
+Testing futon2.aif.outer-policy-token-stage-test
+
+Testing futon2.aif.selected-outer-cascade-policy-test
+
+Testing futon2.aif.wm.family-selection-test
+
+Testing futon2.aif.wm.outer-action-declared-wants-test
+
+Ran 40 tests containing 245 assertions.
+0 failures, 0 errors.
