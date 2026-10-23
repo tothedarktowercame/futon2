@@ -296,7 +296,7 @@
   "This run's sealed terminal carrier: choice, typed outcome, the
   selection-input digest its decision computed before selecting, and its own
   Q6 refusal when it refused to repeat."
-  [{:keys [run-id started-at decision outcome downstream valence-carry focus]}]
+  [{:keys [run-id started-at decision outcome downstream valence-carry focus enactment]}]
   (let [q6 (get-in decision [:selection-certificate :q6])
         digest (when (intact? q6) (:input-digest q6))]
     (seal (cond-> {:schema terminal-schema
@@ -311,6 +311,12 @@
             ;; silently mistakes for no predecessor.
             true (assoc :focus (or focus {:status :absent
                                            :reason :focus-not-retained}))
+            ;; C5: the ordinary route has no pattern enactment producer yet.
+            ;; Preserve that fact as a typed absence, never as a nil a later
+            ;; habit reader could mistake for a no-enactment success.
+            true (assoc :enactment (or enactment
+                                       {:status :absent
+                                        :reason :ordinary-pattern-enactment-not-observed}))
             (and digest (= :refused (:status q6)))
             (assoc :q6-refusal {:input-digest digest
                                 :excluded-key (get-in q6 [:rearm :excluded-key])})))))
