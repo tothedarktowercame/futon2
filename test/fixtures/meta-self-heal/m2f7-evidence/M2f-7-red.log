@@ -1,0 +1,56 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.meta-diagnosis-correction-test
+
+FAIL in (nested-live-reply-corrects-once) (meta_diagnosis_correction_test.clj:40)
+expected: (= 2 (count requests))
+  actual: (not (= 2 1))
+
+FAIL in (nested-live-reply-corrects-once) (meta_diagnosis_correction_test.clj:41)
+expected: (= :available (:status result))
+  actual: (not (= :available :refused))
+
+FAIL in (nested-live-reply-corrects-once) (meta_diagnosis_correction_test.clj:42)
+expected: (= 1 (count pins))
+  actual: (not (= 1 0))
+
+FAIL in (nested-live-reply-corrects-once) (meta_diagnosis_correction_test.clj:43)
+expected: (= [[:primary-cause :production-functions]] (:found-at c))
+  actual: (not (= [[:primary-cause :production-functions]] nil))
+
+FAIL in (nested-live-reply-corrects-once) (meta_diagnosis_correction_test.clj:44)
+expected: (= [:selection-entrypoint :required-loop-node-evaluator :terminal-routing-entrypoint] (get-in c [:defects :missing-roles]))
+  actual: (not (= [:selection-entrypoint :required-loop-node-evaluator :terminal-routing-entrypoint] nil))
+
+FAIL in (nested-live-reply-corrects-once) (meta_diagnosis_correction_test.clj:46)
+expected: (= :absent (get-in c [:defects :production-functions-field]))
+  actual: (not (= :absent nil))
+
+FAIL in (nested-live-reply-corrects-once) (meta_diagnosis_correction_test.clj:47)
+expected: (= (pr-str (:diagnosis nested-reply)) (:first-diagnosis c))
+  actual: (not (= "{:classification :reviewer-falsifier-refusal-after-successful-author-and-review, :primary-cause {:stage :reviewer-wait, :condition \"The full-loop runner reconstructed the reviewer-falsifier receipt from canonical inputs after a successful author commit (38f70766bb10de4234ab10efc32a31fce9edf594, corroborated, in author window) and a done APPROVE review job (zai-3, invoke-1792711605133-2578). `futon2.aif.reviewer-falsifier/receipt` computed at least one applicable check in `check-order` as :fail, so its :status was :refused; `verify` then matched everything else and returned {:status :refused :reason :reviewer-falsifier-applicable-check-failed}, and the runner's reviewer-wait phase folded that into :failure-kind :reviewer-falsifier-failed / :outcome :build-failed. Note this is a falsifier veto, not an author/reviewer execution failure: author job state done, artifact binding corroborates, reviewer approved.\", :affected-nodes [{:node :reviewer-falsifier/receipt, :reason \"Rebuilt the receipt from canonical inputs; its applicable-check aggregation produced :failed-checks non-empty, so :status :refused. The injury record abbreviates :checks and :failed-checks (:reason :available-in-pinned-record), so the exact failing check name is not present in the request evidence; it is one of the applicable members of [:mission-standing :work-evidence :selected-want-accounting :evidence-authority :standing-disposition :artifact-binding :review-execution]. Contextual evidence narrows it: work-evidence was :ordinary-cascade (:not-applicable for want/authority/disposition when repair, but ordinary cascade makes :selected-want-accounting, :evidence-authority and :standing-disposition all applicable via want-check/authority-check/disposition-check), artifact-binding corroborated (:pass), reviewer note says review ran with kondo inspection (:review-execution likely :pass), and the reviewer itself reported 'checklist still open so target = still-live' — consistent with :selected-want-accounting (want-check :unverifiable) or :evidence-authority (authoritative-row? mismatch on measured outcome rows) failing. Determining which requires reading :reviewer-falsifier's :checks from the pinned record at /home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-fb1ff2b0-2012-4ba0-a57a-c5cb0afa46ce.edn.\"} {:node :reviewer-falsifier/verify, :reason \"Duty-bound to refuse when the reconstructed receipt is not :verified; the :refused result it returned is the specific value the runner tested at full_loop_runner.clj ~7915-7923 and 8043-8049.\"} {:node :full-loop-runner/reviewer-wait-phase, :reason \"run-phase! :reviewer-wait stage converted the refused falsifier into :failure-kind :reviewer-falsifier-failed, :failure-stage :reviewer-wait, outcome :build-failed, despite :cause {:absent :no-cause} in the injury record.\"} {:node :wm.terminal-receipt/terminal-receipt, :reason \"Failure receipt sourced \\\"futon2.aif.wm.terminal-receipt/terminal-receipt\\\" at 2026-10-22T23:08:42Z in the record shows this same refusal pattern recurs on this target class; the terminal router correctly emitted exactly one :failure-receipt.\"}], :production-functions [{:role :selection-entrypoint, :var \"futon2.aif.full-loop-runner/strategic-selection!\", :file \"src/futon2/aif/full_loop_runner.clj\"} {:role :required-loop-node-evaluator, :var \"futon2.aif.wm.loop-node-exercise/require-complete!\", :file \"src/futon2/aif/wm/loop_node_exercise.clj\"} {:role :terminal-routing-entrypoint, :var \"futon2.aif.wm.terminal-receipt/terminal-receipt\", :file \"src/futon2/aif/wm/terminal_receipt.clj\"} {:role :failing-check-production, :var \"futon2.aif.reviewer-falsifier/receipt\", :file \"src/futon2/aif/reviewer_falsifier.clj\"} {:role :failing-check-verification, :var \"futon2.aif.reviewer-falsifier/verify\", :file \"src/futon2/aif/reviewer_falsifier.clj\"} {:role :run-boundary, :var \"futon2.aif.full-loop-runner/run-opportunity!\", :file \"src/futon2/aif/full_loop_runner.clj\"}], :request-bindings {:injury-id \"injury/cfbcbad062bde07d539c7e2abd97a6a189f910f4\", :source-record-sha256 \"13659d51d2e8f6e40780858d5ea79a8726d3f83c3ece41a2c7571f45c41b8ff0\", :schema :wm/meta-diagnosis-request-v1}}}" nil))
+
+FAIL in (nested-live-reply-corrects-once) (meta_diagnosis_correction_test.clj:48)
+expected: (= (first requests) (dissoc (second requests) :correction))
+  actual: (not (= {:schema :wm/meta-diagnosis-request-v1, :repair-claimed? false, :abbreviated-fields [{:path [:click/id], :serialized-bytes 47, :reason :available-in-pinned-record} {:path [:run-output], :serialized-bytes 18, :reason :available-in-pinned-record} {:path [:run/id], :serialized-bytes 49, :reason :available-in-pinned-record} {:path [:traceWritten], :serialized-bytes 5, :reason :available-in-pinned-record}], :source-record-pin {:path "/home/joe/notes/M2f-7-tests/1809b685-333f-4387-b48d-e659210a670f/record.edn", :sha256 "6213d69e001a331b12789cd002d2a4a29ba3daa69278246d1ab5ce628a9b0c22"}, :evidence-access {:format :edn, :root :source-record-pin, :instruction "Read full values at the indexed paths from the pinned record; verify SHA256. Previews are not complete evidence."}, :request-budget-bytes 131072, :injury-record {:failure {:kind :fold-output-invalid, :stage :construction, :detail {:outcome :construction-failed, :target "A-self-heal"}}}, :record-index [{:path [:click/id], :serialized-bytes 47} {:path [:failure], :serialized-bytes 114} {:path [:run-output], :serialized-bytes 18} {:path [:run/id], :serialized-bytes 49} {:path [:traceWritten], :serialized-bytes 5}], :injury-id "injury-recorded-l1"} nil))
+
+FAIL in (second-invalid-diagnosis-exhausts) (meta_diagnosis_correction_test.clj:54)
+expected: (= 2 (count requests))
+  actual: (not (= 2 1))
+
+FAIL in (second-invalid-diagnosis-exhausts) (meta_diagnosis_correction_test.clj:55)
+expected: (= :meta-self-heal/diagnosis-correction-exhausted (:reason result))
+  actual: (not (= :meta-self-heal/diagnosis-correction-exhausted :meta-self-heal/diagnosis-production-functions-absent))
+
+FAIL in (second-invalid-diagnosis-exhausts) (meta_diagnosis_correction_test.clj:56)
+expected: (= :absent (get-in result [:first :production-functions-field]))
+  actual: (not (= :absent nil))
+
+Ran 4 tests containing 20 assertions.
+11 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-14137786761095916420.edn

@@ -201,13 +201,13 @@
                        :bytes size :budget diagnosis-request-budget-bytes})))
     request))
 
-(defn produce-diagnosis!
+(defn- produce-diagnosis-once!
   "Turn an active injury's exact opening-record pin into a diagnosis request.
   This is deliberately before, and separate from, repair coordination: it
   never claims a repair, and only exposes a diagnosis evidence pin after its
   receipt is durable.  An existing pin remains the compatibility path for
   already-produced diagnoses."
-  [opts durable active-entry]
+  [opts durable active-entry corrected-request]
   (if-let [pin (:diagnosis-evidence-pin opts)]
     {:status :present :diagnosis-evidence-pin pin :source :existing}
     (let [injury-id (:injury-id active-entry)
@@ -228,7 +228,7 @@
           (if-not (= :available (:status source))
             (assoc source :injury-id injury-id :source-record-pin source-pin
                    :repair-claimed? false)
-            (let [request (try (bounded-diagnosis-request injury-id source-pin (:record source))
+            (let [request (try (or corrected-request (bounded-diagnosis-request injury-id source-pin (:record source)))
                                (catch clojure.lang.ExceptionInfo e
                                  (if (= :meta-self-heal/diagnosis-request-over-budget (:kind (ex-data e)))
                                    (refusal (:kind (ex-data e))
@@ -274,6 +274,7 @@
                                      default-repository-root)
                                  (:diagnosis response))
                                 {:injury-id injury-id :request request
+                                 ::diagnosis (:diagnosis response)
                                  :repair-claimed? false}))
 
                 :else
@@ -293,6 +294,57 @@
                                     :request request :repair-claimed? false})
                     (assoc written :injury-id injury-id :request request
                            :repair-claimed? false)))))))))))
+
+(defn- nested-production-function-paths [diagnosis]
+  (letfn [(walk [path value]
+            (cond
+              (map? value)
+              (mapcat (fn [[k v]]
+                        (let [p (conj path k)]
+                          (concat (when (and (= k :production-functions) (seq path)) [p])
+                                  (walk p v)))) value)
+              (sequential? value)
+              (mapcat (fn [[i v]] (walk (conj path i) v)) (map-indexed vector value))
+              :else []))]
+    (vec (sort-by pr-str (walk [] diagnosis)))))
+
+(defn- diagnosis-defects [result]
+  (dissoc result :status :reason :injury-id :request :repair-claimed? ::diagnosis))
+
+(defn produce-diagnosis!
+  "Produce a durable diagnosis, with one bounded correction for invalid
+  production-function identities; never reinterpret a nested declaration."
+  [opts durable active-entry]
+  (let [first-result (produce-diagnosis-once! opts durable active-entry nil)]
+    (if-not (= :meta-self-heal/diagnosis-production-functions-absent (:reason first-result))
+      first-result
+      (let [diagnosis (::diagnosis first-result)
+            defects (diagnosis-defects first-result)
+            found-at (nested-production-function-paths diagnosis)
+            text (diagnosis-text diagnosis)
+            correction {:defects defects :found-at found-at
+                        :first-diagnosis (subs text 0 (min 8000 (count text)))
+                        :instruction
+                        (str ":production-functions must be a key of the :diagnosis map itself, "
+                             "sibling of :classification and :primary-cause, with an entry for each missing role "
+                             (pr-str (:missing-roles defects))
+                             (when (seq found-at) (str "; it was found at " (pr-str found-at)))
+                             "; return a corrected diagnosis.")}
+            request (assoc (:request first-result) :correction correction)
+            size (max (diagnosis-bytes request)
+                      (binding [*print-length* nil *print-level* nil *print-namespace-maps* true]
+                        (count (.getBytes (pr-str request) "UTF-8"))))]
+        (if (> size diagnosis-request-budget-bytes)
+          (refusal :meta-self-heal/diagnosis-unavailable
+                   {:injury-id (:injury-id active-entry) :repair-claimed? false
+                    :diagnosis-reason :meta-self-heal/diagnosis-request-over-budget
+                    :bytes size :budget diagnosis-request-budget-bytes})
+          (let [second-result (produce-diagnosis-once! opts durable active-entry request)]
+            (if (= :meta-self-heal/diagnosis-production-functions-absent (:reason second-result))
+              (refusal :meta-self-heal/diagnosis-correction-exhausted
+                       {:injury-id (:injury-id active-entry) :repair-claimed? false
+                        :first defects :second (diagnosis-defects second-result)})
+              second-result)))))))
 
 (defn- acceptance-path [root receipt]
   (str root "/acceptance-" (load-identity/sha256 (receipt-bytes receipt)) ".edn"))

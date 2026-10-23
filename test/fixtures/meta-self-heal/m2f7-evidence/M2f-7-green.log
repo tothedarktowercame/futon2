@@ -1,0 +1,11 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.meta-acceptance-compile-correction-test
+
+Testing futon2.aif.meta-acceptance-review-correction-test
+
+Testing futon2.aif.meta-diagnosis-correction-test
+
+Ran 12 tests containing 67 assertions.
+0 failures, 0 errors.
