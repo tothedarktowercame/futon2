@@ -543,7 +543,9 @@
                         :repair-claimed? false}
                        (dissoc enrichment :production-functions)
                        (when-let [correction (:meta-acceptance-correction opts)]
-                         {:correction correction}))
+                         {:correction correction})
+                       (when-let [correction (:meta-acceptance-review-correction opts)]
+                         {:review-correction correction}))
         response (try (accept request)
                       (catch Throwable _
                         {:status :failed
@@ -773,7 +775,10 @@
                     ;; F17 (chain 7, 2026-10-19 19:17Z): the adapter keeps the
                     ;; transport's error as :detail (F9); this record dropped it,
                     ;; so a reviewer rate-limit read only as producer-invoke-failed.
-                    :review-detail (:detail response)})
+                    :review-detail (:detail response)
+                    :review-refusal (if (contains? response :refusal)
+                                      (:refusal response)
+                                      (select-keys response [:reason :reason/type :detail]))})
           (not= request-identity response-identity)
           (refusal :meta-self-heal/acceptance-review-identity-mismatch
                    {:request request
@@ -810,7 +815,7 @@
               (assoc written :injury-id (:injury-id proposal)
                      :repair-claimed? false))))))))
 
-(defn prepare-acceptance
+(defn- prepare-acceptance-before-review-correction
   "Runtime-facing proposal preparation.  A proposed/unreviewed specification
   remains observation only; this function never returns it as coordinator
   :acceptance-test authority."
@@ -862,6 +867,55 @@
     {:status :unavailable :reason :meta-self-heal/acceptance-diagnosis-unavailable
      :diagnosis-status (:status diagnosis-observation)
      :repair-claimed? false}))
+(defn prepare-acceptance
+  "Prepare and admit independently executed acceptance proposals, with at most
+  one compile correction followed by at most one review correction."
+  [opts diagnosis-observation]
+  (let [first-result (prepare-acceptance-before-review-correction opts diagnosis-observation)]
+    (if-not (= :meta-self-heal/acceptance-review-refused (:reason first-result))
+      first-result
+      (let [request (:request first-result)
+            run (:result request)
+            review-refusal (:review-refusal first-result)
+            pins {:first-run-pin (:run-pin run)
+                  :first-proposal-pin (:proposal-evidence-pin request)}
+            correction (assoc pins
+                              :review-refusal review-refusal
+                              :instruction
+                              (str "The reviewer refused the previous test ("
+                                   (or (:type review-refusal) (:reason review-refusal)
+                                       (:reason/type review-refusal) :unspecified)
+                                   "); return a corrected test whose failures before repair "
+                                   "are the injury's own reason, with :expected {:exit 0}."))
+            ;; Do not call preparation recursively: this revision has its own
+            ;; run and review, but cannot spend either correction budget again.
+            revised (produce-acceptance!
+                     (-> opts
+                         (dissoc :meta-acceptance-correction)
+                         (assoc :meta-acceptance-review-correction correction))
+                     diagnosis-observation)
+            second-result (if (= :proposed (:status revised))
+                            (admit-acceptance! opts revised)
+                            revised)
+            result (case (:reason second-result)
+                     :meta-self-heal/acceptance-review-refused
+                     (refusal :meta-self-heal/acceptance-review-correction-exhausted
+                              {:injury-id (:injury-id diagnosis-observation)
+                               :first first-result :second second-result
+                               :first-run-pin (:run-pin run)
+                               :second-run-pin (get-in second-result [:request :result :run-pin])
+                               :repair-claimed? false})
+                     :meta-self-heal/acceptance-test-does-not-compile
+                     (refusal :meta-self-heal/acceptance-compile-correction-exhausted
+                              {:injury-id (:injury-id diagnosis-observation)
+                               :first run :second (:acceptance-result second-result)
+                               :repair-claimed? false})
+                     second-result)]
+        (cond-> (assoc result :acceptance-review-correction pins)
+          (:acceptance-compile-correction first-result)
+          (assoc :acceptance-compile-correction
+                 (:acceptance-compile-correction first-result)))))))
+
 (defn- persist-transaction! [path transaction]
   (try
     (if-not (= :valid (:status (coordinator/verify-transaction transaction)))

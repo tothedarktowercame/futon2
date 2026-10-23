@@ -1,0 +1,20 @@
+{:status :refused,
+ :injury-id "injury/cfbcbad062bde07d539c7e2abd97a6a189f910f4",
+ :source-record-pin {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-fb1ff2b0-2012-4ba0-a57a-c5cb0afa46ce.edn",
+                     :sha256 "13659d51d2e8f6e40780858d5ea79a8726d3f83c3ece41a2c7571f45c41b8ff0"},
+ :diagnosis-evidence-pin {:path "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/diagnoses/diagnosis-8df1f69c65447b3be23246da5ee76b65d0035a519d73ea577ec92e3fb3fcbeac.edn",
+                          :sha256 "8df1f69c65447b3be23246da5ee76b65d0035a519d73ea577ec92e3fb3fcbeac"},
+ :proposal-evidence-pin {:path "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/acceptances/acceptance-35031fb6fcddd272b97e66f76a94a208e9ab1a8db5f32fabe7f25315190b6204.edn",
+                         :sha256 "35031fb6fcddd272b97e66f76a94a208e9ab1a8db5f32fabe7f25315190b6204"},
+ :refusal
+ {:type :expected-report-unattainable,
+  :detail
+  "The :expected report {:test 4, :fail 0, :error 0, :pass 10} cannot be produced by a passing run of this test. The pre-repair run (:result) already executed 15 assertions (6 failures + 2 errors + 7 passes) in 4 tests; a repair of production code cannot reduce or change the test's assertion count, and a fully-passing run of the same 4 deftests would report at least 15 assertions and 4 tests — never exactly 10 passes. The declared expectation is therefore unsatisfiable, so even a correct repair would be judged as failing against this acceptance.",
+  :evidence
+  {:pre-repair-summary "Ran 4 tests containing 15 assertions. 6 failures, 2 errors.",
+   :run-pin {:path "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/acceptance-runs/meta-want-retention-injury-cfbcbad0-acceptance-001-2026-10-23T04-46-39-545727348Z.log",
+             :sha256 "c84efbab893c25da625203053039d4a515502c1edda24db075864e47da8ef76e"}},
+  :secondary-concern
+  "Not adjudicated (refusal above is decisive): with 6 failures and 2 errors across the 4 deftests, this request alone does not establish that every failure is the injury's own :selected-want-identity-missing reason rather than collateral breakage; the run log would need to show that before this acceptance could be re-submitted with a corrected :expected.",
+  :remedy
+  "Re-submit with :expected matching the true passing report of this test (4 tests, 0 fail, 0 error, pass equal to the test's full assertion count as executed on repaired code), and confirm from the run log that each pre-repair failure cites the injury's reason."}}
