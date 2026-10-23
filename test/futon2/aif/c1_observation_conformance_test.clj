@@ -24,9 +24,10 @@
 (deftest fixture-action-changes-observation
   (let [keep-observation (observation-after keep-pattern)
         flip-observation (observation-after flip-pattern)
-        ;; outcome-risk is downstream of Q(o | action); use a full-support
-        ;; preference solely to prove the real risk consumer accepts both rows.
-        preference {state-false 1/2 observed-true 1/2}]
+        ;; outcome-risk is downstream of Q(o | action). A uniform preference
+        ;; would give both actions the same risk by symmetry, so prefer the
+        ;; true observation: the action must then change the risk too.
+        preference {state-false 1/10 observed-true 9/10}]
     (testing "the real transition kernel makes the action's successor state"
       (is (= {state-false 1}
              (manifest/pattern-kernel keep-pattern state-false)))
@@ -37,5 +38,10 @@
       (is (= 9/10 (get flip-observation observed-true)))
       (is (not= keep-observation flip-observation)))
     (testing "outcome-risk consumes the resulting action-conditioned observation distributions"
-      (is (number? (manifest/outcome-risk keep-observation preference)))
-      (is (number? (manifest/outcome-risk flip-observation preference))))))
+      (let [keep-risk (manifest/outcome-risk keep-observation preference)
+            flip-risk (manifest/outcome-risk flip-observation preference)]
+        (is (number? keep-risk))
+        (is (number? flip-risk))
+        (is (< 1e-12 keep-risk))
+        (is (> 1e-12 (Math/abs (double flip-risk))))
+        (is (< flip-risk keep-risk))))))

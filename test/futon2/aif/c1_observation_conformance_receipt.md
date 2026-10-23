@@ -50,3 +50,12 @@ Testing futon2.aif.c1-observation-conformance-test
 Ran 1 tests containing 7 assertions.
 0 failures, 0 errors.
 ```
+
+## Review addendum (claude-7)
+
+The `outcome-risk` checks were `number?` only, under a uniform preference that
+gives keep and flip equal risk by symmetry. They now use preference
+`{#{} 1/10, #{:true} 9/10}` and assert flip risk ≈ 0, keep risk > 0, and
+flip < keep. Bad case (flip `:produces #{}`): 1 test, 10 assertions,
+5 failures, both new risk-ordering checks among them; reverted. Green run:
+1 test, 10 assertions, 0 failures; clj-kondo 0/0; parens OK.
