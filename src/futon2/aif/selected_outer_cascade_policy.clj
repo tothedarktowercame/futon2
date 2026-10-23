@@ -24,8 +24,14 @@
    :pattern-prediction-input])
 
 (defn- pin [path value]
+  ;; Pinned text must not depend on the caller's print bindings: a REPL binds
+  ;; *print-namespace-maps* true, the click path leaves it false.
   {:path path
-   :sha256 (load-identity/sha256 (.getBytes (pr-str value) "UTF-8"))})
+   :sha256 (load-identity/sha256
+            (.getBytes (binding [*print-namespace-maps* false *print-length* nil
+                                 *print-level* nil *print-meta* false]
+                         (pr-str value))
+                       "UTF-8"))})
 
 (defn objective-pin [receipt]
   (pin "wm://outer-policy-objective-v1" (dissoc receipt :objective-pin)))

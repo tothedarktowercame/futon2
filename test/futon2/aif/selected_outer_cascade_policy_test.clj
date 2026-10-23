@@ -138,3 +138,8 @@
     (is (identical? first-pass second-pass))
     (is (= (:carrier-pin carrier)
            (get-in second-pass [:policy :selected-outer-cascade-policy :carrier-pin])))))
+
+(deftest carrier-pin-ignores-caller-print-bindings
+  (let [c {:schema sut/schema :selected-entry {:wm/a 1 :wm/b [1 2 3]}}]
+    (is (= (sut/carrier-pin c)
+           (binding [*print-namespace-maps* true *print-length* 2] (sut/carrier-pin c))))))
