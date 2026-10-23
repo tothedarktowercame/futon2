@@ -32,7 +32,7 @@
   {:status :error :kind kind :repair data})
 
 (defn effect-request
-  [cascade-digest node author reviewer]
+  ([cascade-digest node author reviewer]
   (let [body {:cascade-digest cascade-digest
               :occurrence-id (:occurrence-id node)
               :pattern (or (:pattern node) (get-in node [:structural-node :pattern]))
@@ -40,15 +40,23 @@
               :author author :reviewer reviewer}]
     (assoc body :schema :wm/cascade-effect-request-v1
            :request-id (evidence/value-digest body))))
+  ([cascade-digest node author reviewer target]
+   (let [body (-> (effect-request cascade-digest node author reviewer)
+                  (dissoc :schema :request-id)
+                  (assoc :target (if (and (string? target) (not (str/blank? target)))
+                                   target
+                                   {:status :absent :reason :selected-target-unavailable})))]
+     (assoc body :schema :wm/cascade-effect-request-v1
+                 :request-id (evidence/value-digest body)))))
 
 (defn reviewed-build-review-close-executor
   "Create the production :wm/pattern-apply executor. AUTHOR-CONTACT performs
   the occurrence work; REVIEWER-CONTACT independently checks its grounded
   artifacts. Only an exact, distinct-reviewer acceptance becomes a sealed
   verified-effect receipt."
-  [{:keys [author reviewer author-contact reviewer-contact]}]
+  [{:keys [author reviewer author-contact reviewer-contact target]}]
   (fn [{:keys [cascade-digest node]}]
-    (let [request (effect-request cascade-digest node author reviewer)
+    (let [request (effect-request cascade-digest node author reviewer target)
           answer (author-contact request)
           reviewed (reviewer-contact {:request request :author-answer answer})
           effect (:effect reviewed)]

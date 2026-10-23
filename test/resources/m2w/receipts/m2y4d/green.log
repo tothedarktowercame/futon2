@@ -1,0 +1,15 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.continue-on-prod-run-id-test
+
+Testing futon2.aif.m2y4a-effect-retention-test
+
+Testing futon2.aif.m2y4d-effect-target-test
+
+Testing futon2.aif.wm.cascade-continuation-test
+
+Testing futon2.aif.wm.compiled-cascade-construction-test
+
+Ran 15 tests containing 82 assertions.
+0 failures, 0 errors.

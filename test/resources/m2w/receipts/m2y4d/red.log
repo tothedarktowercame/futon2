@@ -1,0 +1,37 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.m2y4d-effect-target-test
+
+FAIL in (sealed-mission-target-reaches-author-once) (m2y4d_effect_target_test.clj:40)
+Pre-change request loses the selected mission
+expected: (= target (:target request))
+  actual: (not (= "M-self-improvement-loop" nil))
+
+FAIL in (sealed-mission-target-reaches-author-once) (m2y4d_effect_target_test.clj:47)
+expected: (.contains prompt "do not contact the reviewer")
+  actual: false
+
+FAIL in (sealed-mission-target-reaches-author-once) (m2y4d_effect_target_test.clj:48)
+expected: (.contains prompt "runner sends your answer")
+  actual: false
+
+FAIL in (missing-target-is-explicit-not-invented) (m2y4d_effect_target_test.clj:52)
+expected: (= {:status :absent, :reason :selected-target-unavailable} (get-in (capture-request target) [:request :target]))
+  actual: (not (= {:status :absent, :reason :selected-target-unavailable} nil))
+
+FAIL in (missing-target-is-explicit-not-invented) (m2y4d_effect_target_test.clj:52)
+expected: (= {:status :absent, :reason :selected-target-unavailable} (get-in (capture-request target) [:request :target]))
+  actual: (not (= {:status :absent, :reason :selected-target-unavailable} nil))
+
+FAIL in (missing-target-is-explicit-not-invented) (m2y4d_effect_target_test.clj:52)
+expected: (= {:status :absent, :reason :selected-target-unavailable} (get-in (capture-request target) [:request :target]))
+  actual: (not (= {:status :absent, :reason :selected-target-unavailable} nil))
+
+Ran 3 tests containing 11 assertions.
+6 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-14323060951169905416.edn
