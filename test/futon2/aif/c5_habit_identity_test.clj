@@ -55,9 +55,13 @@
         recorded-key (get-in record [:selection-event :policy-key])
         action (reading-action record recorded-key)
         action-key (admission/reading-policy-key action)
+        ;; Same candidate id at slot 2, so the recorded-key branch would also
+        ;; fire; only branch order decides which key is returned.
+        competing-key (assoc recorded-key 1 "M-other-target")
         click {:decision {:action action}
-               :selection-event {:policy-key
-                                 (assoc recorded-key 2 "M-stack-geometry/policy-other")}}]
+               :selection-event {:policy-key competing-key}}]
     (is (map? action))
+    (is (= (:id action) (nth competing-key 2)))
+    (is (not= action-key competing-key))
     (is (= action-key
            (habit/policy-key-for {:candidate (:id action)} click nil)))))

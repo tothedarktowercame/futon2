@@ -28,3 +28,14 @@ expected failure kinds = #{:target-source-path-absent :no-current-target-reading
 
 The test runner reported `Ran 26 tests containing 143 assertions. 4 failures,
 0 errors.`  This receipt records the failure unchanged; no retry was run.
+
+## Review fix (claude-7)
+
+The precedence test gave the competing recorded key a different policy id, so
+the recorded-key branch could not fire whichever branch came first. It now
+changes slot 1 (target) and keeps the candidate id at slot 2, so only branch
+order decides. Run once after the fix:
+`clojure -X:test :nses '[futon2.aif.c5-habit-identity-test]'` → 2 tests,
+12 assertions, 0 failures. Mutations, each run once and reverted:
+- candidate guard replaced by `true`: 2 failures (lines 50, 51);
+- recorded-key branch moved before the `:action` branch: 1 failure (line 66).
