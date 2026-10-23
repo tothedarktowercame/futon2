@@ -262,13 +262,20 @@
   (let [fx (fixture)
         rows (vals (select-keys (:rows fx) [:current :unread :no-path]))
         result (decide fx (vec rows) {"M-current" 1 "M-unread" 1 "T-no-path" 1})
-        cert (get-in result [:decision :selection-certificate])]
-    (is (= 1 (::selector-calls result)))
-    (is (= "M-current" (get-in result [:decision :action :target])))
-    (is (= #{"M-unread" "T-no-path"}
-           (set (map :target-id (filter #(empty? (:policies %)) (:target-policy-families cert))))))
-    (is (= #{:no-current-target-reading :target-source-path-absent}
-           (set (map :kind (:family-failures cert)))))))
+        decision (:decision result)
+        cert (:selection-certificate decision)]
+    ;; Incomplete menu coverage abstains before selection (532e30be8f).
+    ;; The computed target remains in the field; unavailable targets remain
+    ;; explicit refusals rather than disappearing from the comparison.
+    (is (= 0 (::selector-calls result)))
+    (is (= :abstained (:status decision)))
+    (is (nil? (get-in decision [:action :target])))
+    (is (= #{{:target "M-unread" :failure-kind :no-current-target-reading}
+             {:target "T-no-path" :failure-kind :target-source-path-absent}}
+           (set (map #(select-keys % [:target :failure-kind]) (:refusals decision)))))
+    (is (= :computed
+           (:status (first (filter #(= "M-current" (:target-id %))
+                                   (get-in cert [:target-policy-field :families]))))))))
 
 (deftest all-failed-field-abstains-typed-with-no-selector-call
   (let [fx (fixture)
