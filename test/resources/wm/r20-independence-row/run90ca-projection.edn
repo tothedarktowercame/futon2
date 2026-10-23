@@ -1,0 +1,26 @@
+{:source
+ {:path "data/wm-runs/tick-run-record-2026-10-23-90ca5944-3d52-4bd6-940c-fe2f6c2c8c6b.edn"
+  :sha256 "976d1bfc7983b3cc234dbc5a25ae848e0c73b018fa2076940b31bbfc5dcdc5b9"
+  :projection "participants and the independence row, values verbatim"}
+ :participants
+ {:schema :wm/run-participants-v1
+  :roles
+  {:author {:status :present, :identity "zai-2"}
+   :configured-reviewer {:status :present, :identity "zai-3"}
+   :reviewer-of-record {:status :present, :identity "zai-3"}
+   :repair-reviewer {:status :present, :identity "zai-8"}
+   :issuing-caller {:status :present, :identity "codex-11",
+                    :source :wm-click-http-boundary}}}
+ :apparatus-independence
+ {:node :independence
+  :verdict :agrees
+  :case :author-is-not-reviewer
+  :checked
+  {:author
+   {:path [:participants :roles :author]
+    :receipt {:status :present, :identity "zai-2"}
+    :identity "zai-2"}
+   :reviewer
+   {:path [:participants :roles :reviewer-of-record]
+    :receipt {:status :present, :identity "zai-3"}
+    :identity "zai-3"}}}}
