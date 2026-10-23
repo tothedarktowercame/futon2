@@ -541,7 +541,9 @@
                                      (assoc :production-functions
                                             (:production-functions enrichment)))
                         :repair-claimed? false}
-                       (dissoc enrichment :production-functions))
+                       (dissoc enrichment :production-functions)
+                       (when-let [correction (:meta-acceptance-correction opts)]
+                         {:correction correction}))
         response (try (accept request)
                       (catch Throwable _
                         {:status :failed
@@ -734,7 +736,9 @@
             ;; PASSES before any repair does not pin the injury; it is refused
             ;; here, typed, without spending a reviewer invoke.
             passes-before-repair? (and valid-run? (= :passed (:outcome run-result)))
-            response (when (and valid-run? (not passes-before-repair?))
+            does-not-compile? (and valid-run? (contains? run-result :compile-diagnostic))
+            response (when (and valid-run? (not passes-before-repair?)
+                                (not does-not-compile?))
                        (try (review request)
                           (catch Throwable _ {:status :failed
                                                :reason :meta-self-heal/acceptance-review-threw})))
@@ -749,6 +753,10 @@
         (cond
           (not valid-run?)
           (refusal :meta-self-heal/acceptance-run-refused
+                   {:request request :acceptance-result run-result
+                    :repair-claimed? false})
+          does-not-compile?
+          (refusal :meta-self-heal/acceptance-test-does-not-compile
                    {:request request :acceptance-result run-result
                     :repair-claimed? false})
           passes-before-repair?
@@ -812,10 +820,40 @@
     {:status :present :acceptance-test (:acceptance-test opts) :source :supplied}
 
     (= :available (:status diagnosis-observation))
-    (let [proposal (produce-acceptance! opts diagnosis-observation)]
-      (if (= :proposed (:status proposal))
-        (admit-acceptance! opts proposal)
-        proposal))
+    (let [proposal (produce-acceptance! opts diagnosis-observation)
+          first-result (if (= :proposed (:status proposal))
+                         (admit-acceptance! opts proposal)
+                         proposal)]
+      (if-not (= :meta-self-heal/acceptance-test-does-not-compile
+                 (:reason first-result))
+        first-result
+        (let [run (:acceptance-result first-result)
+              diagnostic (:compile-diagnostic run)
+              pins {:first-run-pin (:run-pin run)
+                    :first-proposal-pin (:acceptance-evidence-pin proposal)}
+              correction (assoc pins
+                                :compile-diagnostic diagnostic
+                                :instruction
+                                (str "The previous test did not compile at "
+                                     (:file diagnostic) ":" (:line diagnostic) ":"
+                                     (:col diagnostic) ": " (:message diagnostic)
+                                     "; return a corrected test that uses only the vars in "
+                                     ":production-functions and vars that exist in the repository."))
+              revised (produce-acceptance!
+                       (assoc opts :meta-acceptance-correction correction)
+                       diagnosis-observation)
+              second-result (if (= :proposed (:status revised))
+                              (admit-acceptance! opts revised)
+                              revised)]
+          ;; Deliberately not recursive: a second compiler failure exhausts
+          ;; this correction, and neither failed run grants admission.
+          (if (= :meta-self-heal/acceptance-test-does-not-compile
+                 (:reason second-result))
+            (refusal :meta-self-heal/acceptance-compile-correction-exhausted
+                     {:injury-id (:injury-id diagnosis-observation)
+                      :first run :second (:acceptance-result second-result)
+                      :repair-claimed? false})
+            (assoc second-result :acceptance-compile-correction pins)))))
 
     (= :not-required (:status diagnosis-observation))
     {:status :not-required :reason :meta-self-heal/acceptance-no-diagnosis-required}
