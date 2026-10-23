@@ -58,7 +58,10 @@
                           (map vector entries actions))
         h (max 1 (min scorer/max-horizon (reduce max 0 (vals unit-counts))))
         horizon-choice {:horizon h :rule :max-field-unit-count-clamped
-                        :limit scorer/max-horizon :unit-counts unit-counts}
+                        :limit scorer/max-horizon :unit-counts unit-counts
+                        :entry-horizon-steps
+                        (into {} (map (juxt :policy-id #(get-in % [:class-emission :model :horizon])))
+                              entries)}
         prepared (mapv #(candidate-and-model % h) entries)
         candidates (mapv :candidate (filter :candidate prepared))
         models (into {} (map (juxt (comp :id :candidate) :model)) (filter :candidate prepared))
@@ -66,8 +69,14 @@
         options {:horizon-steps h :pattern-counts (:pattern-counts count-result)
                  :observation-model-of models :require-ruled-class-kernel? true
                  :prediction-context {:occurrence-id [:outer-menu (mapv :policy-id entries)] :tau h}}
+        ;; The frontier is diagnostic in O3-1: a scorer exception is recorded
+        ;; as a typed refusal rather than ending the outer selection.
+        thrown (volatile! nil)
         result (when (and (seq candidates) (not= :refused (:status count-result)))
-                 (canonical/compare-at-horizon {:cascade-belief {#{} 1}} candidates options))
+                 (try (canonical/compare-at-horizon {:cascade-belief {#{} 1}} candidates options)
+                      (catch Exception e
+                        (vreset! thrown {:class (.getName (class e)) :message (.getMessage e)})
+                        nil)))
         by-id (into {} (map (juxt :cascade-id identity))
                        (if (vector? result) result (:candidates result)))
         pre-refusals (into {} (map (juxt (comp :policy-id :refusal) :refusal))
@@ -86,6 +95,10 @@
                                      :action-pin {:cascade-digest (:cascade-digest action)})
                         (= :scored (:status r))
                         (assoc :G (:G-efe r) :rank (:rank r)))
+                    @thrown
+                    (assoc (refusal entry :canonical-score-threw)
+                           :exception @thrown
+                           :action-pin {:cascade-digest (:cascade-digest action)})
                     (= :refused (:status count-result))
                     (assoc (refusal entry (:kind count-result))
                            :action-pin {:cascade-digest (:cascade-digest action)})
