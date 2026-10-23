@@ -296,7 +296,7 @@
   "This run's sealed terminal carrier: choice, typed outcome, the
   selection-input digest its decision computed before selecting, and its own
   Q6 refusal when it refused to repeat."
-  [{:keys [run-id started-at decision outcome downstream valence-carry]}]
+  [{:keys [run-id started-at decision outcome downstream valence-carry focus]}]
   (let [q6 (get-in decision [:selection-certificate :q6])
         digest (when (intact? q6) (:input-digest q6))]
     (seal (cond-> {:schema terminal-schema
@@ -306,6 +306,11 @@
                    :outcome (typed-outcome outcome downstream decision)
                    :input-digest digest}
             valence-carry (assoc :valence-carry valence-carry)
+            ;; C5: presence and absence both cross the sealed terminal.  A
+            ;; missing focus must not become a nil that a later discovery
+            ;; silently mistakes for no predecessor.
+            true (assoc :focus (or focus {:status :absent
+                                           :reason :focus-not-retained}))
             (and digest (= :refused (:status q6)))
             (assoc :q6-refusal {:input-digest digest
                                 :excluded-key (get-in q6 [:rearm :excluded-key])})))))

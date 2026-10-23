@@ -5,7 +5,8 @@
             [futon2.aif.action-identity :as identity]
             [clojure.edn :as edn]
             [clojure.string :as str]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.previous-run :as previous-run])
   (:import [java.time Instant]))
 
 (load-identity/register! *ns* *file*)
@@ -436,6 +437,32 @@
   (try (= receipt (build decision (:inputs receipt) (:context receipt)))
        (catch Exception _ false)))
 
+(defn predecessor-focus
+  "The prior focus admissible from PREDECESSOR's sealed Q6 terminal.
+   Absence is data: callers pass it to discovery so a fresh discovery cannot
+   be labelled as a retained predecessor focus."
+  [predecessor]
+  (cond
+    (nil? predecessor)
+    (absent :predecessor-carrier-not-supplied)
+
+    (not (and (= previous-run/predecessor-schema (:schema predecessor))
+              (previous-run/intact? predecessor)))
+    (absent :predecessor-carrier-tampered)
+
+    (not= :present (:status predecessor))
+    (absent (or (:reason predecessor) :predecessor-status-unknown))
+
+    (not (and (= previous-run/terminal-schema (get-in predecessor [:previous :schema]))
+              (previous-run/intact? (:previous predecessor))))
+    (absent :previous-terminal-carrier-tampered)
+
+    :else
+    (let [focus (get-in predecessor [:previous :focus])]
+      (if (and (map? focus) (= :present (:status focus)) (some? (:focus focus)))
+        (assoc focus :previous-run/id (:previous-run/id predecessor))
+        (absent (or (:reason focus) :previous-focus-not-retained))))))
+
 (defn decision-focus
   "The focus context a decision taken at DECISION-AS-OF classifies against
   (codex-20 corrections 2 and 3): the discovery from the window covering the
@@ -446,8 +473,9 @@
   ask discovered at now with no retention and classified every target
   :unknown). Returns {:info the focus context, :established the prior
   discovery, :established-as-of the retention or covering time}."
-  [inputs decision-as-of]
-  (let [decision-instant (java.time.Instant/parse decision-as-of)
+  ([inputs decision-as-of] (decision-focus inputs decision-as-of nil))
+  ([inputs decision-as-of previous]
+   (let [decision-instant (java.time.Instant/parse decision-as-of)
         covering-as-of (some (fn [w]
                                (when (and (not (.isAfter (java.time.Instant/parse (:from w))
                                                          decision-instant))
@@ -462,17 +490,19 @@
                                         (inst-ms (java.time.Instant/parse (:valid-through w))))]
                             (when (seq ended)
                               (str (java.time.Instant/ofEpochMilli (reduce max ended))))))
-        established (discover inputs (or covering-as-of retention-as-of decision-as-of) nil)]
+        established (discover inputs (or covering-as-of retention-as-of decision-as-of) nil)
+        retained (or previous
+                     (when-not (= :unknown (:status established))
+                       {:focus (:focus established) :as-of retention-as-of}))]
     {:established established
      :established-as-of (or retention-as-of covering-as-of)
      :info (if (some? covering-as-of)
-             (discover inputs decision-as-of nil)
+             (discover inputs decision-as-of previous)
              (if (= :unknown (:status established))
-               (assoc established :as-of decision-as-of)
-               (discover inputs decision-as-of {:focus (:focus established)
-                                                :as-of retention-as-of})))}))
+               (discover inputs decision-as-of previous)
+               (discover inputs decision-as-of retained)))})))
 
 (defn decision-focus-info
   "The focus context alone (see decision-focus)."
-  [inputs decision-as-of]
-  (:info (decision-focus inputs decision-as-of)))
+  ([inputs decision-as-of] (:info (decision-focus inputs decision-as-of)))
+  ([inputs decision-as-of previous] (:info (decision-focus inputs decision-as-of previous))))
