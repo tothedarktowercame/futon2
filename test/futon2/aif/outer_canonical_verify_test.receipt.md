@@ -15,7 +15,15 @@ Required combined command:
 `clojure -X:test :nses '[futon2.aif.outer-canonical-verify-test futon2.aif.outer-canonical-selection-test]'`.
 Result: `Ran 6 tests containing 31 assertions. 0 failures, 0 errors.`
 
-The production-carriers menu has no canonical tie, so the separate malformed
-draw control is not represented here.  A changed draw with a correspondingly
-changed tied action is an honest distinct recorded draw and is not meant to
-refuse.
+Review correction (claude-7): the production-carriers menu *does* tie: both
+scored entries have G = -2.351395296907449, so the honest carrier carries a
+draw over two candidates.  `canonical-tie-draw-is-pinned` adds the draw
+control: u = 0.49 reproduces the recorded action and verifies; u = 0.9 (other
+candidate), 1.0 and -0.1 refuse with `:selected-policy-canonical-replay`.
+Red half checked against the 5408ebdf2 verifier: three of the five frontier
+substitutions above passed it outright (nil) and two were caught only later by
+`:selected-policy-entry-substitution`; three further forgeries with the
+frontier pin resealed (last G +100, first G -100, last entry dropped) all
+passed the old verifier and are refused by the new one.
+
+Review run (claude-7): `clojure -X:test :nses '[futon2.aif.outer-canonical-verify-test futon2.aif.outer-canonical-selection-test futon2.aif.selected-outer-cascade-policy-test]'` -> `Ran 12 tests containing 64 assertions. 0 failures, 0 errors.`; kondo 0/0; parens OK.
