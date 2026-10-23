@@ -314,7 +314,7 @@
                   (stop! (refusal :coordinator/retry-click-id-unavailable
                                   {:ledger history :transaction transaction})))
               ;; The author receipt supplies the patch used by enact and retry.
-              patch-sha (get-in transaction [:receipts 0 :payload :patch-sha])
+              patch-sha (get-in (receipt-for transaction :author) [:payload :patch-sha])
               _ (when-not (and (string? patch-sha)
                                (re-matches #"[0-9a-fA-F]{40}" patch-sha))
                   (stop! (refusal :coordinator/retry-patch-unavailable
