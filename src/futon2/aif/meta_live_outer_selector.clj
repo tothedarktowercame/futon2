@@ -16,6 +16,8 @@
             [futon2.aif.outer-policy-evidence :as policy-evidence]
             [futon2.aif.outer-policy-evidence-provider :as evidence-provider]
             [futon2.aif.outer-policy-objective :as policy-objective]
+            [futon2.aif.outer-canonical-g :as outer-canonical-g]
+            [futon2.aif.outer-canonical-selection :as canonical-selection]
             [futon2.aif.assessed-policy-basis :as assessed-basis]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.selected-outer-cascade-policy :as selected-policy]
@@ -817,6 +819,12 @@
                     (assoc :g-law (:g-law policy-field-config)))
         sealed-menu (when policy-field
                       (policy-menu-fn policy-field menu-join))
+        ;; O3-1 records the canonical frontier beside the existing objective;
+        ;; nothing in this packet consumes it to make a choice.
+        canonical-g-frontier (when (= :sealed (:status sealed-menu))
+                               (outer-canonical-g/produce sealed-menu))
+        canonical-policy-selection (when canonical-g-frontier
+                                     (canonical-selection/evaluate canonical-g-frontier sealed-menu))
         provided (when (= :sealed (:status sealed-menu))
                    (evidence-provider/resolve-provider
                     outer-policy-evidence-provider sealed-menu))
@@ -831,6 +839,14 @@
                          (assessed-basis/seal sealed-menu policy-evidence policy-objective))
         candidate-carrier
         (cond
+          (= :selected (:status canonical-policy-selection))
+          (selected-policy/seal-canonical sealed-menu policy-evidence policy-objective
+                                          canonical-g-frontier canonical-policy-selection)
+
+          ;; O3-2 deliberately has no objective fallback: canonical refusal is
+          ;; a typed outer no-choice, while the objective remains recorded.
+          (not= :selected (:status canonical-policy-selection)) nil
+
           (= :selected (:status policy-objective))
           (selected-policy/seal sealed-menu policy-evidence policy-objective)
 
@@ -872,6 +888,12 @@
             (not= :provided (:status provided)) provided
             (not (contains? #{:computed :partial} (:status policy-evidence))) policy-evidence
             carrier-defect {:status :refused :reason carrier-defect}
+            (not= :selected (:status canonical-policy-selection)) canonical-policy-selection
+            ;; The receipt's :meta-selection must name the canonical choice;
+            ;; the objective's own winner stays under :policy-objective.
+            (and activated-carrier (= :canonical-G-frontier (:basis-kind activated-carrier)))
+            (assoc canonical-policy-selection :selection-basis
+                   (get-in selected-projection [:decision :selection-certificate :selection-basis]))
             activated-carrier
             (assoc policy-objective :selection-basis
                    (get-in selected-projection [:decision :selection-certificate :selection-basis]))
@@ -961,6 +983,8 @@
                                       :policy-evidence policy-evidence
                                       :missing-policy-evidence (:missing policy-evidence)
                                       :policy-objective policy-objective
+                                      :canonical-g-frontier canonical-g-frontier
+                                      :canonical-policy-selection canonical-policy-selection
                                       :assessed-policy-basis assessed-basis
                                       :selected-outer-cascade-policy activated-carrier
                                       :missing-targets (mapv :target-id incomplete)

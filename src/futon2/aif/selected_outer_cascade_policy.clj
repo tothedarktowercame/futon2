@@ -4,6 +4,7 @@
             [futon2.aif.assessed-policy-basis :as assessed-basis]
             [futon2.aif.outer-policy-evidence :as evidence]
             [futon2.aif.outer-policy-objective :as objective]
+            [futon2.aif.outer-canonical-selection :as canonical-selection]
             [futon2.aif.wm.executable-cascade :as executable]
             [futon2.aif.wm.family-selection :as family]))
 
@@ -14,7 +15,7 @@
   [:schema :status :target-id :policy-id :cascade-digest :selected-entry
    :sealed-menu :menu-pin :evidence-carrier :evidence-pin
    :objective-receipt :objective-pin :recomputation
-   :basis-kind :scope :assessed-basis])
+   :basis-kind :scope :assessed-basis :canonical-frontier :canonical-selection])
 
 (defn- pin [path value]
   {:path path
@@ -88,6 +89,28 @@
                                      :reason :assessed-population-basis}}}]
       (assoc body :carrier-pin (carrier-pin body)))))
 
+(defn seal-canonical
+  "Seal a selection already made over O3-1's retained canonical frontier.
+   The objective receipt remains evidence/reporting, not this choice basis."
+  [menu evidence-carrier objective-receipt frontier selection]
+  (if-not (= :selected (:status selection))
+    {:schema schema :status :refused :reason :canonical-policy-selection-required
+     :canonical-status (:status selection)}
+    (let [action (:action selection)
+          entry (first (filter #(and (= (:policy-id %) (:policy-id action))
+                                     (= (:cascade-digest %) (:cascade-digest action))) (:entries menu)))
+          objective-receipt (assoc objective-receipt :objective-pin (objective-pin objective-receipt))
+          body {:schema schema :status :sealed :basis-kind :canonical-G-frontier
+                :target-id (:target action) :policy-id (:policy-id action)
+                :cascade-digest (:cascade-digest action) :selected-entry entry
+                :sealed-menu menu :menu-pin (:menu-pin menu)
+                :evidence-carrier evidence-carrier :evidence-pin (:evidence-pin evidence-carrier)
+                :objective-receipt objective-receipt :objective-pin (:objective-pin objective-receipt)
+                :canonical-frontier frontier :canonical-selection selection
+                :recomputation {:q2 (select-keys action [:target :policy-id :cascade-digest])
+                                :q4 (:policies objective-receipt) :q8 (:comparison objective-receipt)}}]
+      (assoc body :carrier-pin (carrier-pin body)))))
+
 (defn verify
   "Total semantic verification. Returns nil when valid, otherwise a keyword."
   [carrier]
@@ -99,9 +122,9 @@
           basis-kind (or (:basis-kind carrier) :strict-objective)
           basis (:assessed-basis carrier)
           entry (:selected-entry carrier)
-          action (if (= :assessed-population basis-kind)
-                   (get-in raw-receipt [:assessed-selection :action])
-                   (:action raw-receipt))
+          action (cond (= :assessed-population basis-kind) (get-in raw-receipt [:assessed-selection :action])
+                       (= :canonical-G-frontier basis-kind) (get-in carrier [:canonical-selection :action])
+                       :else (:action raw-receipt))
           expected-entry (first (filter #(and (= (:policy-id %) (:policy-id action))
                                              (= (:cascade-digest %) (:cascade-digest action))
                                              (= (:target-id %) (:target action)))
@@ -114,7 +137,7 @@
       (cond
         (not= schema (:schema carrier)) :selected-policy-schema
         (not= :sealed (:status carrier)) :selected-policy-status
-        (not (contains? #{:strict-objective :assessed-population} basis-kind))
+        (not (contains? #{:strict-objective :assessed-population :canonical-G-frontier} basis-kind))
         :selected-policy-basis-kind
         (not= (carrier-pin carrier) (:carrier-pin carrier)) :selected-policy-seal
         (family/verify-sealed-menu menu) :selected-policy-menu-invalid
@@ -142,6 +165,11 @@
         (and (= :strict-objective basis-kind)
              (not= receipt (assoc recomputed :objective-pin (objective-pin recomputed))))
         :selected-policy-objective-recomputation
+        (and (= :canonical-G-frontier basis-kind)
+             (not= (:canonical-selection carrier)
+                   (canonical-selection/evaluate (:canonical-frontier carrier) menu
+                                                 (get-in carrier [:canonical-selection :draw :u]))))
+        :selected-policy-canonical-replay
         (nil? entry) :selected-policy-entry-missing
         (not= entry expected-entry) :selected-policy-entry-substitution
         (not= (:cascade-digest entry) (get-in entry [:canonical-cascade :digest]))
@@ -162,6 +190,7 @@
     {:status :refused :reason defect}
     (let [entry (:selected-entry carrier)
           assessed? (= :assessed-population (:basis-kind carrier))
+          canonical? (= :canonical-G-frontier (:basis-kind carrier))
           raw-receipt (dissoc (:objective-receipt carrier) :objective-pin)
           selection (when assessed? (:assessed-selection raw-receipt))]
       {:status :selected
@@ -179,13 +208,18 @@
                                        :selected-outer-cascade-policy]
                           :sealed-menu {:status :carried-on-receipt
                                         :menu-pin (:menu-pin carrier)})
-                   :selection-basis (if assessed?
+                   :selection-basis (cond
+                                      canonical? {:kind :canonical-G-frontier
+                                                  :basis (get-in carrier [:canonical-selection :basis])
+                                                  :frontier-pin (get-in carrier [:canonical-selection :frontier-pin])
+                                                  :draw (get-in carrier [:canonical-selection :draw])}
+                                      assessed?
                                       {:kind :assessed-population
                                        :scope (:scope selection)
                                        :assessed-ids (:assessed-ids selection)
                                        :absent (:absent selection)
                                        :draw (:draw selection)}
-                                      {:kind :strict-objective})
+                                      :else {:kind :strict-objective})
                    :q2 (get-in carrier [:recomputation :q2])
                    :q4 (get-in carrier [:recomputation :q4])
                    :q8 (get-in carrier [:recomputation :q8])
