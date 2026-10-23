@@ -252,10 +252,10 @@
           selection (when assessed? (:assessed-selection raw-receipt))]
       {:status :selected
        :decision (with-token-stage
-                 {:status :selected
-                  :action (:action entry)
-                  :selection-certificate
-                  {:selection-route :wm/selected-outer-cascade-policy-v1
+                 (cond-> {:status :selected
+                           :action (:action entry)
+                           :selection-certificate
+                           {:selection-route :wm/selected-outer-cascade-policy-v1
                    :pattern-prediction-input
                    (or (:pattern-prediction-input carrier)
                        {:schema token-outcome/pattern-input-schema :status :absent
@@ -287,7 +287,9 @@
                    :q8 (get-in carrier [:recomputation :q8])
                    ;; Observed outer-route terms, not a beta update: the
                    ;; objective receipt is sealed and replay-verified above.
-                   :precision-row (:precision-row raw-receipt)}}
+                            :precision-row (:precision-row raw-receipt)}}
+                   (some? (:cascade-id entry))
+                   (assoc :selection-law {:candidate (:cascade-id entry)}))
                  (str "outer-selection/" (get-in carrier [:carrier-pin :sha256])))
        :ranked [entry]
        :preselected true})))
