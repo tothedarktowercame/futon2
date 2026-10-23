@@ -1,0 +1,21 @@
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=/home/joe/notes/M2r/tmp
+
+Running tests in #{"test"}
+
+Testing futon2.aif.retry-patch-identity-test
+
+FAIL in (requeue-mints-from-transaction-patch-and-refuses-its-absence) (retry_patch_identity_test.clj:15)
+expected: (= [(get-in initial [:transaction :work-order :repair-id]) 1 1 fixture/sha-a] (vec (first (clojure.core/deref args))))
+  actual: (not (= ["repair/6d555210724efd0882e0dd56fd0f05823908f373" 1 1 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"] ["repair/6d555210724efd0882e0dd56fd0f05823908f373" 1 1]))
+
+FAIL in (requeue-mints-from-transaction-patch-and-refuses-its-absence) (retry_patch_identity_test.clj:25)
+expected: (= :coordinator/retry-patch-unavailable (:reason refused))
+  actual: (not (= :coordinator/retry-patch-unavailable :coordinator/author-payload-refused))
+
+Ran 1 tests containing 7 assertions.
+2 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/home/joe/notes/M2r/tmp/clojure-2542316455167748813.edn

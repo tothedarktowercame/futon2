@@ -313,7 +313,13 @@
               _ (when-not (fn? retry-click-id)
                   (stop! (refusal :coordinator/retry-click-id-unavailable
                                   {:ledger history :transaction transaction})))
-              new-id (retry-click-id repair-id attempt next-n)
+              ;; The author receipt supplies the patch used by enact and retry.
+              patch-sha (get-in (receipt-for transaction :author) [:payload :patch-sha])
+              _ (when-not (and (string? patch-sha)
+                               (re-matches #"[0-9a-fA-F]{40}" patch-sha))
+                  (stop! (refusal :coordinator/retry-patch-unavailable
+                                  {:ledger history :transaction transaction})))
+              new-id (retry-click-id repair-id attempt next-n patch-sha)
               requeued (accepted! (ledger/append-requeue history injury-id new-id))
               history' (:ledger requeued)]
           (if (= :abandoned (get-in requeued [:entry :state]))
