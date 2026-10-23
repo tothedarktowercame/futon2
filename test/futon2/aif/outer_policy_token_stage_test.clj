@@ -24,7 +24,8 @@
   (assoc-in action [:declared-wants :universe] (:universe (source mission-text))))
 
 (deftest pinned-initialization-and-measurement
-  (is (= mission-sha (identity/sha256 (.getBytes mission-text "UTF-8")))))
+  (is (= mission-sha (identity/sha256 (.getBytes mission-text "UTF-8"))))
+  (is (= mission-sha (get-in action [:declared-wants :target-source-pin :sha256]))))
 
 (deftest six-wants-reach-the-readers
   (let [a (carried-action) d (attach a)
@@ -55,7 +56,11 @@
                       [(assoc (carried-action) :want nil) :declared-wants-empty]
                       [(assoc (carried-action) :want []) :declared-wants-empty]
                       [(assoc-in (carried-action) [:declared-wants :target-source-pin :path] "/repo/holes/missions/OTHER.md")
-                       :declared-wants-target-mismatch]]]
+                       :declared-wants-target-mismatch]
+                      [(assoc-in (carried-action) [:declared-wants :universe] {}) :declared-wants-universe-invalid]
+                      [(assoc-in (carried-action) [:declared-wants :universe] nil) :declared-wants-universe-invalid]
+                      [(update-in (carried-action) [:declared-wants :universe] dissoc (first (:want action)))
+                       :declared-wants-universe-invalid]]]
     (let [d (attach a)]
       (is (= reason (get-in d [:selection-certificate :token-belief-stage-status :reason])))
       (is (not (contains? (:selection-certificate d) :token-belief-stage)))
