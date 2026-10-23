@@ -582,7 +582,12 @@
                           {:status (:status response)
                            :body (cheshire.core/parse-string (:body response) true)}))))]
         (if (and (= 200 status) (map? (:ordinary-click-budget body)))
-          (:ordinary-click-budget body)
+          ;; JSON carries the keyword values as strings; read them back.
+          (let [budget (:ordinary-click-budget body)
+                kw (fn [v] (if (string? v) (keyword v) v))]
+            (-> budget
+                (cond-> (contains? budget :schema) (update :schema kw))
+                (cond-> (contains? budget :unit) (update :unit kw))))
           {:status :unavailable
            :reason :click-budget-response-unreadable
            :http-status status}))

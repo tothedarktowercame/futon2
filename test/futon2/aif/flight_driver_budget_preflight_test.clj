@@ -4,7 +4,9 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
+            [cheshire.core :as json]
             [futon2.aif.flight-driver :as driver]
+            [futon2.aif.flight-runner :as fr]
             [futon2.aif.observation-checks :as checks])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -85,3 +87,24 @@
       (is (= :click-budget-unreadable (:reason result)))
       (is (= :click-budget-read-failed
              (get-in result [:availability :reason]))))))
+
+;; GET /api/alpha/wm/click, :ordinary-click-budget, captured 2026-10-23T14:3xZ
+;; from the serving JVM (other response keys dropped; values verbatim).
+(def live-click-get-body
+  "{\"ordinary-click-budget\":{\"schema\":\"wm/ordinary-click-availability-v1\",\"authorization\":{\"path\":\"futon2/holes/labs/wm-contract/AUTH-ordinary-click-budget-renewal-7-2026-09-24.md\",\"sha\":\"326826ac\"},\"allocated\":168,\"consumed\":167,\"available\":1,\"unit\":\"ordinary-click\",\"ledger-source\":{\"path\":\"/home/joe/code/futon2/data/wm-ordinary-clicks/consumption.jsonl\",\"sha256\":\"57b2be80e74c2ff7fe29724e4d214948be41d600c04fe772590b3cc97485e69a\"}}}")
+
+(defn- live-availability-fn []
+  (fr/http-click-availability-fn
+   {:get! (fn [] {:status 200
+                  :body (json/parse-string live-click-get-body true)})}))
+
+(deftest live-route-shape-is-readable
+  (testing "the live JSON budget reads as available 1, not unreadable"
+    (let [{:keys [calls result]} (run 2 (live-availability-fn))]
+      (is (zero? calls))
+      (is (= :click-budget-insufficient (:reason result)))
+      (is (= 1 (:available result)))))
+  (testing "the live JSON budget admits a one-click flight"
+    (let [{:keys [calls result]} (run 1 (live-availability-fn))]
+      (is (pos? calls))
+      (is (not= :refused (:status result))))))

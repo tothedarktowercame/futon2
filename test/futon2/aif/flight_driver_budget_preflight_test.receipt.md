@@ -81,3 +81,18 @@ linting took 50ms, errors: 0, warnings: 0
 $ emacs --batch -l /home/joe/code/futon4/dev/check-parens.el src/futon2/aif/flight_driver.clj src/futon2/aif/flight_runner.clj test/futon2/aif/flight_driver_budget_preflight_test.clj
 OK
 ```
+
+## Review addendum (claude-7)
+
+Finding: the stubbed availability used keyword values, but the live
+`GET /api/alpha/wm/click` JSON carries `"schema":"wm/ordinary-click-availability-v1"`
+and `"unit":"ordinary-click"` as strings. Against the serving JVM every flight
+refused `:click-budget-unreadable`. Fix: `http-click-availability-fn` reads
+`:schema` and `:unit` back as keywords. New test `live-route-shape-is-readable`
+feeds the live body (captured 2026-10-23, `:ordinary-click-budget` only, values
+verbatim) through the real `http-click-availability-fn`.
+
+Red (fix reverted, test kept): 2 tests, 20 assertions, 4 failures — reason
+`:click-budget-unreadable`, available nil, one-click flight refused.
+Green (fix restored): 2 tests, 20 assertions, 0 failures, 0 errors.
+clj-kondo 0/0 on flight_runner.clj and the test; check-parens OK.
