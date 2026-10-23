@@ -169,7 +169,9 @@
   (str "Execute exactly this certified cascade occurrence through the ordinary "
        "build/review/close work discipline. Ground any claimed effect in durable "
        "artifacts (commit or content-addressed evidence). Reply with one JSON "
-       "object naming request-id, cascade-digest, occurrence-id, by, and effect.\n\n"
+       "object naming request-id, cascade-digest, occurrence-id, by, and effect. "
+       "The request's :target is the mission to work in; do not contact the reviewer, "
+       "the runner sends your answer to the named reviewer.\n\n"
        (pr-str request)))
 
 (defn- cascade-effect-review-prompt [{:keys [request author-answer]}]
@@ -195,7 +197,7 @@
                           opts reviewer cascade-effect-review-prompt "work")]
     {:wm/pattern-apply
      (cascade-continuation/reviewed-build-review-close-executor
-      {:author author :reviewer reviewer
+      {:author author :reviewer reviewer :target (:target opts)
        :author-contact #(handoff/response-map (author-contact %))
        :reviewer-contact #(handoff/response-map (reviewer-contact %))})}))
 
@@ -604,6 +606,7 @@
                 #(select-keys % [:status :kind :cascade-digest
                                  :compiled-digest]))]
     {:schema :wm/on-prod-history-result-v1
+     :target (get-in entry [:action :target])
      :run-id run-id
      :source-run-id source-run-id
      :source-attempt-id source-attempt-id
@@ -653,7 +656,7 @@
                (or (:execution-journal-root opts)
                    cascade-decision/default-execution-journal-root)
                :executors (or cascade-capability-executors
-                              (production-cascade-executors opts))
+                              (production-cascade-executors (assoc opts :target (:target resumed))))
                :close-fn
                (or cascade-close-fn
                    (cascade-continuation/production-close-adapter
