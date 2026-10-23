@@ -491,9 +491,13 @@
                             (when (seq ended)
                               (str (java.time.Instant/ofEpochMilli (reduce max ended))))))
         established (discover inputs (or covering-as-of retention-as-of decision-as-of) nil)
-        retained (or previous
-                     (when-not (= :unknown (:status established))
-                       {:focus (:focus established) :as-of retention-as-of}))]
+        ;; A carried predecessor focus is the input to the retention rule;
+        ;; an absent one (cold start, or a terminal sealed before C5) must
+        ;; not displace the retention from the last ended window.
+        retained (if (:focus previous)
+                   previous
+                   (when-not (= :unknown (:status established))
+                     {:focus (:focus established) :as-of retention-as-of}))]
     {:established established
      :established-as-of (or retention-as-of covering-as-of)
      :info (if (some? covering-as-of)

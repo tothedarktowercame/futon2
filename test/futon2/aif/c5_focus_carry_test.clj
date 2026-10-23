@@ -68,3 +68,18 @@
     (let [predecessor (previous-run/start! (temp-dir) "one" "2026-01-01T00:00:00Z")]
       (is (= {:status :absent :reason :no-earlier-started-run}
              (focus/predecessor-focus predecessor))))))
+
+(deftest absent-predecessor-keeps-the-in-click-retention
+  ;; Every terminal sealed before C5 lacks :focus, so the first carried click
+  ;; sees an absent predecessor; the earlier window's focus is still retained.
+  (let [ended-window {:windows [{:from "2026-01-01T00:00:00Z"
+                                 :until "2026-01-01T01:00:00Z"
+                                 :valid-through "2026-01-01T01:00:00Z"
+                                 :commits [{:at "2026-01-01T00:10:00Z"
+                                            :paths ["holes/labs/wm-contract/x.md"]}]}]
+                      :facet-edges []}]
+    (doseq [previous [nil
+                      {:status :absent :reason :no-earlier-started-run}
+                      {:status :absent :reason :previous-focus-not-retained}]]
+      (let [info (focus/decision-focus-info ended-window "2026-01-02T00:00:00Z" previous)]
+        (is (= [:retained "WM"] [(:status info) (:focus info)]) (pr-str previous))))))

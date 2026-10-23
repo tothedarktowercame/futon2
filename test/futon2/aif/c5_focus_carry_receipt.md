@@ -61,3 +61,29 @@ the focus carry.  `futon2.aif.focus-receipt-test` was already red at the real
 serving fixture (`receipt-is-attached-by-the-real-serving-selection` gets no
 focus receipt); it produced 6 failures before this lane's assertions could
 serve as an acceptance gate.  Neither was changed to hide these failures.
+
+## Review fix (claude-7)
+
+Finding: `decision-focus` took `(or previous ...)`, and `predecessor-focus`
+always returns a map, so an *absent* predecessor (cold start, or any terminal
+sealed before C5, i.e. every terminal on disk today) displaced the retention
+from the last ended window. Probe on `28024580`: earlier window discovered
+WM, no window now; `previous` nil gives `:retained "WM"`, `previous` absent
+gives `:unknown nil`. Fix: only a predecessor with a `:focus` replaces the
+retention. New test `absent-predecessor-keeps-the-in-click-retention`
+(three `previous` values).
+
+```sh
+clojure -X:test :nses '[futon2.aif.c5-focus-carry-test]'
+```
+
+```text
+Ran 3 tests containing 14 assertions.
+0 failures, 0 errors.
+```
+
+Baseline comparison, branch vs main `902d294cc`, identical on both:
+`focus-receipt-test` 12 tests / 106 assertions, 6 failures (lines 80-82,
+`receipt-is-attached-by-the-real-serving-selection`);
+`meta-live-outer-selector-test` 33 / 152, 1 failure (line 553). Logs in
+`~/notes/C5-focus/cmp/`. Kondo 0/0, parens OK, `git diff --check` clean.
