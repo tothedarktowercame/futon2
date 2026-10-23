@@ -23,6 +23,7 @@
 #                                       # callers do not break (firing no longer needs it)
 #   scripts/wm_click.sh --probe-seats   # also spend one turn per seat on a quota probe
 #
+# Optional: --ask-seats zai-4,zai-5,zai-6 names interpretation workers.
 # Optional: --g-law canonical-coapply selects the canonical law on the reading-family route.
 # Identify the issuer with --issuing-caller NAME or WM_ISSUING_CALLER.
 # Omission is recorded as caller-unknown and does not block a click.
@@ -42,11 +43,12 @@ BASE="http://localhost:7070"
 # at 21:11Z). Override with --author / --reviewer / --repair-reviewer.
 AUTHOR="zai-2"; REVIEWER="zai-3"; REPAIR="zai-8"
 ISSUING_CALLER="${WM_ISSUING_CALLER:-caller-unknown}"
-RUN=0; PROBE=0; G_LAW=""
+RUN=0; PROBE=0; G_LAW=""; ASK_SEATS=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --run) RUN=1;;
+    --ask-seats) ASK_SEATS="$2"; shift;;
     --g-law) G_LAW="${2:-}"; [ "$G_LAW" = "canonical-coapply" ] || { echo "unsupported --g-law" >&2; exit 2; }; shift;;
     --force) :;; # no-op since firing never refuses; kept for old callers
     --probe-seats) PROBE=1;;
@@ -130,11 +132,32 @@ case "$ISSUING_CALLER" in
 esac
 [ "$misconfigured" = "0" ] || { echo; echo "cannot launch (exit 3)"; exit 3; }
 
+# Prefer three idle Zai seats outside the cast. When fewer are idle, report
+# their actual state below rather than adding an admission guard.
+default_ask_seats() {
+  python3 -c '
+import json,sys
+roster=json.load(sys.stdin); roster=roster.get("agents",roster)
+excluded=set(sys.argv[1:])
+preferred=["zai-4","zai-5","zai-6"]
+names=[s for s in preferred + sorted(roster) if s.startswith("zai-") and s in roster and s not in excluded]
+names=list(dict.fromkeys(names))
+def idle(s):
+    r=roster.get(s,{})
+    return r.get("status") in ("idle","restored") and r.get("invoke-ready?") is True
+names.sort(key=lambda s: not idle(s))
+print(",".join(names[:3]))
+' "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER"
+}
+
 # cast_report: print the casting/single-flight state once; return 0 when all
 # three seats are idle-or-restored + invoke-ready AND no click is in flight.
 cast_report() {
   local roster notready="" a st inf
   roster=$(curl -s -m 10 "$BASE/api/alpha/agents")
+  if [ -z "$ASK_SEATS" ]; then
+    ASK_SEATS=$(printf '%s' "$roster" | default_ask_seats)
+  fi
   for a in "$AUTHOR" "$REVIEWER" "$REPAIR"; do
     st=$(printf '%s' "$roster" | AGENT="$a" python3 -c '
 import sys, json, os
@@ -151,6 +174,16 @@ else:
 ' 2>/dev/null)
     [ "$st" = "idle" ] || notready="$notready $a($st)"
   done
+  # Ask-seat observations never veto a click or change cast waiting.
+  printf '%s' "$roster" | python3 -c '
+import json,sys
+roster=json.load(sys.stdin); roster=roster.get("agents",roster)
+for seat in sys.argv[1].split(","):
+    row=roster.get(seat)
+    status="absent" if not isinstance(row,dict) else str(row.get("status")) + ("" if row.get("invoke-ready?") else "/not-invoke-ready")
+    overlap=" (also cast)" if seat in sys.argv[2:] else ""
+    print("  %-22s %s%s" % ("ask " + seat,status,overlap))
+' "$ASK_SEATS" "$AUTHOR" "$REVIEWER" "$REPAIR"
   # 3. No click already in flight (the boundary is single-flight). An
   # unreadable endpoint counts as busy: we do not fire into an unknown state.
   inf=$(curl -s -m 15 "$BASE/api/alpha/wm/click" | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d.get("running?"))' 2>/dev/null)
@@ -323,13 +356,14 @@ while [ -z "$clickid" ]; do
   # endpoint refuses as :wm-click-run-id-malformed.
   RUNID="$(date -u +%Y-%m-%d)-$(cat /proc/sys/kernel/random/uuid)"
   echo; echo "firing click, run-id $RUNID"
-  payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" "$G_LAW" <<'PYJSON'
+  payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" "$G_LAW" "$ASK_SEATS" <<'PYJSON'
 import json, sys
 payload = dict(zip(
     ["run-id", "author", "reviewer", "repair-reviewer", "issuing-caller"],
     sys.argv[1:6]), trigger="duree-click-on-demand")
 if sys.argv[6]:
     payload["g-law"] = sys.argv[6]
+payload["interpretation-seats"] = sys.argv[7].split(",")
 print(json.dumps(payload))
 PYJSON
 )
