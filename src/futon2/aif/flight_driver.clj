@@ -207,11 +207,40 @@
      :run? false}))
 
 (defn run-flight!
-  "Fly the planned flight once. Returns {:flight … :record-path …}."
+  "Fly the planned flight once. Before any click, read the serving ordinary
+  click budget and refuse the whole flight when MAX-CLICKS exceeds it or the
+  observation is unreadable. Returns {:flight … :record-path …} when flown,
+  or a typed refusal with an unopened flight and no click calls."
   [{:keys [seat store max-clicks sources checker bb library-root cascades
-           run-record-dir click-fn answer-fn dispatch-step! dispatch-seat step-deadline-ms] :as opts} planned]
+           run-record-dir click-fn answer-fn dispatch-step! dispatch-seat step-deadline-ms
+           availability-fn agency-base] :as opts} planned]
   (let [target (:target (resolve-target opts))
         store (or store wi/default-store)
+        requested-clicks (or max-clicks 4)
+        availability-fn (or availability-fn
+                            (fr/http-click-availability-fn
+                             (cond-> {} agency-base (assoc :agency-base agency-base))))
+        availability (try
+                       (availability-fn)
+                       (catch Exception e
+                         {:status :unavailable
+                          :reason :click-budget-read-failed
+                          :message (ex-message e)}))
+        available (when (and (= :wm/ordinary-click-availability-v1 (:schema availability))
+                             (= :ordinary-click (:unit availability))
+                             (integer? (:available availability))
+                             (<= 0 (:available availability)))
+                    (:available availability))
+        refusal (cond
+                  (nil? available)
+                  {:status :refused :reason :click-budget-unreadable
+                   :requested-clicks requested-clicks
+                   :availability availability}
+
+                  (> requested-clicks available)
+                  {:status :refused :reason :click-budget-insufficient
+                   :requested-clicks requested-clicks :available available
+                   :availability availability})
         run-record-dir (or run-record-dir runner/default-run-record-dir)
         record-path (fn [click-id] (str (io/file run-record-dir (str "tick-run-record-" click-id ".edn"))))
         f (flight-for (assoc opts :id (:flight-id planned)))
@@ -256,7 +285,8 @@
                           (throw (ex-info (str (ex-message e) "; flight record written to " (.getCanonicalPath path))
                                           {:record-path (.getCanonicalPath path) :flight aborted} e))))
                       (throw e))))
-        flown (fly! {:read-fn (fr/read-fn (cond-> {:store store :answer-fn answer
+        flown (when-not refusal
+                (fly! {:read-fn (fr/read-fn (cond-> {:store store :answer-fn answer
                                                             :notify! notify! :caller "joe"}
                                                      cascades (assoc :served-by-cascades {target cascades})))
                               :ask-fn (fr/ask-fn {:store store :answer-fn answer})
@@ -267,16 +297,19 @@
                               :wc-fn wc
                               :observe-fn (fr/observe-fn)
                               :sources-fn (constantly sources)
-                              :max-clicks (or max-clicks 4)})
-        path (write! flown)]
-    {:flight flown :record-path (.getCanonicalPath path)
-     :enactments (:enactments flown)
-     :readings (vec (for [a (:readings flown) q (:asked a)] (select-keys q [:kind :want :request-id :seat :job-id :outcome])))
-     :requests (vec (for [a (:asks flown) q (:asked a)] (select-keys q [:want :request-id :seat :job-id :outcome])))
-     :published-store (str store "/" target ".edn")
-     :clicks (mapv #(select-keys % [:click-id :advanced :open-after :abstention]) (:clicks flown))
-     :status (:status flown) :closure-scope (:closure-scope flown) :needs (:needs flown)
-     :open-questions (:open-questions flown)}))
+                              :max-clicks requested-clicks}))]
+    (if refusal
+      (assoc refusal :flight (assoc f :status :refused :refusal refusal)
+             :clicks [])
+      (let [path (write! flown)]
+        {:flight flown :record-path (.getCanonicalPath path)
+         :enactments (:enactments flown)
+         :readings (vec (for [a (:readings flown) q (:asked a)] (select-keys q [:kind :want :request-id :seat :job-id :outcome])))
+         :requests (vec (for [a (:asks flown) q (:asked a)] (select-keys q [:want :request-id :seat :job-id :outcome])))
+         :published-store (str store "/" target ".edn")
+         :clicks (mapv #(select-keys % [:click-id :advanced :open-after :abstention]) (:clicks flown))
+         :status (:status flown) :closure-scope (:closure-scope flown) :needs (:needs flown)
+         :open-questions (:open-questions flown)}))))
 
 (defn read-only!
   "The read step alone (D11 part 5): ask the seat for the readings the plan
