@@ -1,0 +1,5 @@
+FAIL in (selected-off-the-outer-route-does-not-ask) (m2l_outer_selection_ask_test.clj:66)
+FAIL in (selected-off-the-outer-route-does-not-ask) (m2l_outer_selection_ask_test.clj:67)
+Ran 4 tests containing 16 assertions.
+2 failures, 0 errors.
+Test failures or errors occurred.

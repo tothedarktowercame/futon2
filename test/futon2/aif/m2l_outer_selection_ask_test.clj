@@ -58,3 +58,10 @@
         {:keys [calls record]} (run-case {:status :abstained :refusals [refusal]})]
     (is (= [refusal] calls))
     (is (= :test-no-publication (get-in record [:interpretation-ask :reason])))))
+
+(deftest selected-off-the-outer-route-does-not-ask
+  (let [{:keys [calls record]} (run-case (assoc-in (selected-decision)
+                                                  [:selection-certificate :selection-route]
+                                                  :wm/some-inner-route))]
+    (is (empty? calls))
+    (is (= :selection-complete-no-ask-required (get-in record [:interpretation-ask :reason])))))
