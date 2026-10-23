@@ -7,9 +7,13 @@ passed because it replayed only the argmin.  The new check rejects that and the
 horizon, count-table/digest, class-model-id, and scored-to-refused substitutions
 before choice replay.
 
-Command: `clojure -X:test :nses '[futon2.aif.outer-canonical-verify-test]'`
+Focused verifier command: `clojure -X:test :nses '[futon2.aif.outer-canonical-verify-test]'`
 
 Result: `Ran 1 tests containing 6 assertions. 0 failures, 0 errors.`
+
+Required combined command:
+`clojure -X:test :nses '[futon2.aif.outer-canonical-verify-test futon2.aif.outer-canonical-selection-test]'`.
+Result: `Ran 6 tests containing 31 assertions. 0 failures, 0 errors.`
 
 The production-carriers menu has no canonical tie, so the separate malformed
 draw control is not represented here.  A changed draw with a correspondingly
