@@ -187,3 +187,12 @@
     (is (nil? (:order result)))
     (is (.isFile (io/file path)))
     (is (not (.exists (io/file (get-in context [:injury-selection :deferred-path])))))))
+
+(deftest fresh-selection-yields-to-an-active-blocker
+  ;; Defer moved the old transaction aside, then the blocker's prepare wrote
+  ;; nothing: the next intake must still select the blocker, not 04e14314.
+  (let [history (fixture "ledger") opts (env history)
+        _ (defer-copy! opts)
+        context (p/diagnosis-context opts)]
+    (is (= :fresh (get-in context [:injury-selection :mode])))
+    (is (= blocker (get-in context [:injury-selection :injury-id])))))

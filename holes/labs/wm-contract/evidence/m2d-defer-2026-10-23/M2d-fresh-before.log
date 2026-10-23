@@ -1,0 +1,59 @@
+
+Running tests in #{"test"}
+
+=== TEST 1: zero-construction enactment → realized 0.0 ===
+  PASS realized-G is non-nil
+  PASS realized-G is 0.0
+  PASS expected-G preserved
+  PASS holes carried (N=3)
+
+=== TEST 2: devmap-coherence fixture → realized >0 boxes ===
+  PASS fold engine produced >0 boxes for devmap-coherence
+  PASS realized-G is negative (non-zero coverage)
+  PASS realized-G differs from 0.0
+
+=== TEST 3: anti-fake-calibration guard ===
+  PASS realized-G (0.0) != expected-G (-1.0)
+  PASS realized-G is 0.0 (not faked from expected)
+  PASS signed error is +1.0 (plan over-promised)
+
+=== TEST 4: full gamma sample (expected + realized) end-to-end ===
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-faithfulness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-head-004.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-bayesian-structure-learning-003.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-canon-fingerprint-store-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-futonzero-generative-011.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-learning-loop-010.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-operational-vocabulary-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-reachable-from-boot-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-state-snapshot-witness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-war-machine-pilot-001.edn [prompt-not-reconstructable]
+
+=== BONUS: nil wiring → realized-G stays nil (genuinely unmeasurable) ===
+  PASS nil wiring → realized-G nil
+  PASS empty wiring (no boxes, no holes) → realized-G nil
+
+ ALL TESTS PASS
+WARNING: binding already refers to: #'clojure.core/binding in namespace: strict-contract-qualification-test, being replaced by: #'strict-contract-qualification-test/binding
+
+Testing futon2.aif.m2d-defer-to-blocking-injury-test
+
+FAIL in (fresh-selection-yields-to-an-active-blocker) (m2d_defer_to_blocking_injury_test.clj:198)
+expected: (= blocker (get-in context [:injury-selection :injury-id]))
+  actual: (not (= "injury/cfbcbad062bde07d539c7e2abd97a6a189f910f4" "injury/04e14314a0eec3aab88d8e7044be26f3ae5dfe6d"))
+
+Ran 1 tests containing 2 assertions.
+1 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-4638496297225729957.edn

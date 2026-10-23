@@ -901,7 +901,11 @@
                               (sort-by (juxt :injury-id :transaction-path)) first))]
         (if restorable
           (assoc restorable :mode :restore :restore-to path)
-          {:mode :fresh :injury-id (first (sort (keys injuries)))})))))
+          ;; A deferred injury whose blocker is still active yields to the
+          ;; blocker here too, e.g. when the blocker's prepare refused after
+          ;; the defer moved the old transaction aside.
+          (let [injury-id (first (sort (keys injuries)))]
+            {:mode :fresh :injury-id (or (defer? injury-id) injury-id)}))))))
 
 (defn- move-selected-transaction! [selection]
   (when (#{:defer :restore} (:mode selection))
