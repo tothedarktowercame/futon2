@@ -1,0 +1,24 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.c3-rollout-from-belief-conformance-test
+
+FAIL in (rollout-starts-at-the-supplied-current-belief) (c3_rollout_from_belief_conformance_test.clj:26)
+expected: (= mu from-mu)
+  actual: (not (= {#{:true} 1} {#{} 1}))
+
+FAIL in (rollout-starts-at-the-supplied-current-belief) (c3_rollout_from_belief_conformance_test.clj:28)
+expected: (= 1 (get out-mu #{:true} 0))
+  actual: (not (= 1 0))
+
+FAIL in (rollout-starts-at-the-supplied-current-belief) (c3_rollout_from_belief_conformance_test.clj:29)
+expected: (not= out-q0 out-mu)
+  actual: (not (not= {#{} 1} {#{} 1}))
+
+Ran 1 tests containing 8 assertions.
+3 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-7324342368690673022.edn
