@@ -29,3 +29,22 @@
     (is (= :coordinator/port-threw (:reason result)))
     (is (= :author (:phase result)))
     (is (= "boom-detail" (:detail result)))))
+
+(deftest long-port-detail-is-cut-at-2000-characters
+  (let [env (harness/prepare-environment! (temp-root))
+        message (apply str (repeat 2500 "x"))
+        ports (assoc (harness/fake-ports (:repo env) (atom {}) :success)
+                     :author (fn [_] (throw (ex-info message {}))))
+        opts (merge (harness/work-order-options env)
+                    {:meta-injury-ledger-path (:ledger-path env)
+                     :meta-repair-transaction-path (str (:root env) "/transaction.edn")
+                     :meta-acceptance-run-fn
+                     (constantly {:status :ran :outcome :passed :exit 0
+                                  :summary "fixture pass"
+                                  :run-pin {:path "fixture://acceptance-run"
+                                            :sha256 (apply str (repeat 64 "a"))}})
+                     :meta-acceptance-observation {:status :present}
+                     :meta-repair-ports ports})
+        result (production/route! opts)]
+    (is (= :coordinator/port-threw (:reason result)))
+    (is (= (subs message 0 2000) (:detail result)))))
