@@ -605,7 +605,8 @@
   (:click-not-started), never retried. The cast (click-cast of OPTS) goes on
   the POST body under the endpoint's keys, each seat given; the result
   carries :cast as sent. Ports are injectable for tests."
-  [{:keys [agency-base run-record-dir caller poll-ms post! get-status! read-record! sleep! today]
+  [{:keys [agency-base run-record-dir caller poll-ms post! get-status! get-click-state!
+           read-record! sleep! today]
     :or {agency-base "http://localhost:7070" caller "wm-flight" poll-ms 5000
          run-record-dir runner/default-run-record-dir
          sleep! #(Thread/sleep (long %))
@@ -621,6 +622,15 @@
         get-status! (or get-status! (fn [] (-> (babashka.http-client/get (str agency-base "/api/alpha/wm/click")
                                                                          {:throw false})
                                                :body (cheshire.core/parse-string true))))
+        get-click-state!
+        (or get-click-state!
+            (fn [click-id]
+              (-> (babashka.http-client/get
+                   (str agency-base "/api/alpha/wm/click?click-id="
+                        (java.net.URLEncoder/encode (str click-id) "UTF-8"))
+                   {:throw false})
+                  :body
+                  (cheshire.core/parse-string true))))
         read-record! (or read-record! (fn [run-id]
                                         (let [f (io/file run-record-dir (str "tick-run-record-" run-id ".edn"))]
                                           (when (.isFile f) (clojure.edn/read-string {:default tagged-literal} (slurp f))))))]
@@ -653,8 +663,37 @@
                   (when (and (:running? s) (= click-id (:click-id s)))
                     (sleep! poll-ms)
                     (recur))))
-              (assoc (record-summary target run-id (read-record! run-id))
-                     :server-click-id click-id :cast cast)))))))
+              (let [state (try
+                            (get-click-state! click-id)
+                            (catch Exception e
+                              {:absent :click-state-read-failed
+                               :message (ex-message e)}))
+                    state (cond
+                            (:absent state) state
+                            (contains? #{:not-found "not-found"} (:status state))
+                            {:absent :click-state-not-found}
+                            (not (map? state))
+                            {:absent :click-state-unreadable}
+                            :else state)
+                    disposition (get-in state [:result :runtime-disposition])
+                    route (:route disposition)
+                    pre-empted? (contains? #{:dedicated-meta-self-heal
+                                            "dedicated-meta-self-heal"} route)
+                    typed (fn [k reason]
+                            (if (contains? disposition k)
+                              (get disposition k)
+                              {:absent reason}))
+                    pre-emption
+                    (when pre-empted?
+                      {:route route
+                       :injury-id (typed :injury-id :no-injury-id-on-click-state)
+                       :repair-id (typed :repair-id :no-repair-id-on-click-state)
+                       :status (typed :status :no-status-on-click-state)})
+                    summary (record-summary target run-id (read-record! run-id))]
+                (cond-> (assoc summary :server-click-id click-id :cast cast)
+                  pre-emption (-> (dissoc :abstention)
+                                  (assoc :pre-empted-by pre-emption))
+                  (:absent state) (assoc :click-state state)))))))))
 
 ;; ---------------------------------------------------------------------------
 ;; D11 part 5: the flight reads what the mission does not state

@@ -603,8 +603,10 @@
   Records the wants advanced; carries unreached wants and the abstention's
   missing input forward; closes when every want holds after the click; ends
   :click-refused when the server did not start the click (after closure has
-  been checked), and otherwise :no-progress when nothing advanced."
-  [flight {:keys [click-id wants want-source before after unreached-wants abstention] :as click}]
+  been checked), :pre-empted when the server spent it on META self-heal, and
+  otherwise :no-progress when nothing advanced."
+  [flight {:keys [click-id wants want-source before after unreached-wants abstention
+                  pre-empted-by] :as click}]
   (let [moved (advanced wants before after)
         open (vec (remove #(true? (get after %)) wants))
         refusal (when (= :click-not-started (:kind abstention))
@@ -613,6 +615,7 @@
                    :detail (:detail abstention)})
         status (cond (empty? open) :closed
                      refusal :click-refused
+                     pre-empted-by :pre-empted
                      (empty? moved) :no-progress
                      :else :open)]
     (-> flight
@@ -634,6 +637,8 @@
                   ;; WM-CLICK-REASON-I: why the click closed (record-summary)
                   (contains? click :failure) (assoc :failure (:failure click))
                   (contains? click :cast) (assoc :cast (:cast click))
+                  pre-empted-by (assoc :pre-empted-by pre-empted-by)
+                  (contains? click :click-state) (assoc :click-state (:click-state click))
                   ;; RUNNER-DRIFT-I: the serving JVM's displaced namespaces
                   ;; when the click ran (record-summary)
                   (contains? click :displacement) (assoc :displacement (:displacement click))))
@@ -644,6 +649,7 @@
                                        (select-keys abstention [:status :detail])))))
         (assoc :status status)
         (cond-> refusal (assoc :refusal refusal))
+        (cond-> pre-empted-by (assoc :pre-emption pre-empted-by))
         ;; what a closure covered: the criteria in view, and what was not
         (cond-> (= :closed status)
           (assoc :closure-scope {:criteria-in-view (count wants)
