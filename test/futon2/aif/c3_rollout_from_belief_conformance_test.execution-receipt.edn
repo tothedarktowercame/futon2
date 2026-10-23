@@ -1,0 +1,54 @@
+{:schema :wm/focused-test-execution-v1
+ :date "2026-10-23"
+ :head-at-execution "f74a84037be49bac3bd0f61f6b4d67c941a8fc20"
+ :branch "c3-rollout-from-belief-conformance"
+ :worktree "/home/joe/worktrees/futon2/c3-rollout"
+ :environment {:java "OpenJDK 21.0.12.1+1-1-24.04.4-Ubuntu"
+               :clojure-cli "1.12.5.1664"
+               :futon3c-invoke-jobs-file :unset
+               :process :own-jvm
+               :shared-jvm-access false :wm-clicks 0}
+ :spec {:head "f01d392afb345e6feccb1d8cd08c7de1fe34183e"
+        :file "DarkTower/WarMachine/Proof2/RolloutAtMachine.lean"
+        :theorems ["rolloutFromQ0_ne_rolloutFromBelief"
+                   "rolloutFromBelief_changes_the_outcome"]
+        :representation "false = #{}, true = #{:true}; theta 0 keeps either state; zero false-positive/false-negative rates give identity likelihood."}
+ :command "clojure -X:test :nses '[futon2.aif.c3-rollout-from-belief-conformance-test]'"
+ :runs [{:mode :negative-control :exit 1 :tests 1 :assertions 8 :failures 3 :errors 0
+         :mutation {:file "src/futon2/aif/cascade_model_manifest.clj" :line 469
+                    :before "(loop [k 0 q q0 evaluations []]"
+                    :after "(loop [k 0 q {#{} 1} evaluations []]"}
+         :log "c3_rollout_from_belief_conformance_test.red.log"
+         :failed-assertions ["mu must remain the starting distribution"
+                             "step-1 true probability from mu must be 1, not 0"
+                             "q0 and mu must produce different predictions"]}
+        {:mode :restored-source :exit 0 :tests 1 :assertions 8 :failures 0 :errors 0
+         :log "c3_rollout_from_belief_conformance_test.green.log"}]
+ :gates {:clj-kondo "linting took 5ms, errors: 0, warnings: 0"
+         :check-parens "OK"
+         :production-source-diff :empty}
+ :live-caller-finding
+ {:scope :source-inspection-not-live-execution
+  :result :fixed-empty-state-prior-not-post-update-belief
+  :evidence
+  [{:file "src/futon2/aif/meta_live_outer_selector.clj" :lines [793 796]
+    :value "policy-menu-fn (or policy-menu-fn family-selection/sealed-pre-choice-menu)"}
+   {:file "src/futon2/aif/wm/family_selection.clj" :lines [403 413]
+    :finding "sealed-pre-choice-menu obtains scored family rows through score-family-field"}
+   {:file "src/futon2/aif/wm/family_selection.clj" :line 282
+    :value "[prepared (shape-g/score-policy prepared)]"}
+   {:file "src/futon2/aif/cascade_shape_g.clj" :lines [544 548]
+    :finding "score-policy calls score-arranged with the cascade, nil observation, and class context"}
+   {:file "src/futon2/aif/cascade_shape_g.clj" :lines [322 339]
+    :value "{:cascade-belief {#{} 1}}"
+    :finding "Both the progress and class scorer calls supply this fixed initial distribution."}
+   {:file "src/futon2/aif/cascade_observation_scoring.clj" :line 323
+    :value "(score-candidate (:cascade-belief state) % opts preference)"}
+   {:file "src/futon2/aif/cascade_observation_scoring.clj" :lines [199 205]
+    :value "steps (loop [tau 1 q q0 result []]"
+    :rollout "(m/rollout-evaluation (constantly (:precedence candidate)) q 1)"}
+   {:file "src/futon2/aif/cascade_observation_scoring.clj" :lines [220 227]
+    :finding "Further prediction steps carry next-q; observation conditioning occurs after the rollout, not as its initial belief."}
+   {:file "src/futon2/aif/cascade_model_manifest.clj" :lines [468 492]
+    :finding "Both public rollout APIs use rollout*, which initializes q from the argument q0. That argument can be any supplied current belief: its name does not reset it."}]
+  :conclusion "The real rollout primitive conforms to the two-state supplied-belief witness. This does not establish C3 end-to-end: the ordinary reading-policy scoring caller supplies an empty-state prior. No caller change is included."}}
