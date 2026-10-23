@@ -1,0 +1,21 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.m2y3-pattern-prediction-test
+
+FAIL in (retained-90ca-freezes-native-pattern-wants) (m2y3_pattern_prediction_test.clj:35)
+Native scorer tokens must not be qualified a second time
+expected: (= (vec (sort-by pr-str (get-in e [:observation-model :want]))) wanted)
+  actual: (not (= [["M-war-machine-wiring" :pattern-done ["gauntlet/world-is-hypergraph" 0]] ["M-war-machine-wiring" :pattern-done ["gauntlet/world-is-hypergraph" 19]]] [["M-war-machine-wiring" ["M-war-machine-wiring" :pattern-done ["gauntlet/world-is-hypergraph" 0]]] ["M-war-machine-wiring" ["M-war-machine-wiring" :pattern-done ["gauntlet/world-is-hypergraph" 19]]]]))
+
+FAIL in (retained-90ca-freezes-native-pattern-wants) (m2y3_pattern_prediction_test.clj:38)
+expected: (every? (fn* [p1__15413#] (and (vector? p1__15413#) (= 3 (count p1__15413#)))) wanted)
+  actual: (not (every? #object[futon2.aif.m2y3_pattern_prediction_test$fn__15415$fn__15440$fn__15441 0x545bdccb "futon2.aif.m2y3_pattern_prediction_test$fn__15415$fn__15440$fn__15441@545bdccb"] [["M-war-machine-wiring" ["M-war-machine-wiring" :pattern-done ["gauntlet/world-is-hypergraph" 0]]] ["M-war-machine-wiring" ["M-war-machine-wiring" :pattern-done ["gauntlet/world-is-hypergraph" 19]]]]))
+
+Ran 2 tests containing 18 assertions.
+2 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-14391484302240762959.edn

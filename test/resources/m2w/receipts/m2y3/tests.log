@@ -1,0 +1,17 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.m2y3-pattern-prediction-test
+
+Testing futon2.aif.outer-policy-token-stage-test
+
+Testing futon2.aif.selected-outer-cascade-policy-test
+
+Testing futon2.aif.token-outcome-coapply-test
+
+Testing futon2.aif.token-outcome-pair-test
+
+Testing futon2.aif.token-outcome-test
+
+Ran 37 tests containing 464 assertions.
+0 failures, 0 errors.

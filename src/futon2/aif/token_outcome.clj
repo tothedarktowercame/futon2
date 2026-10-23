@@ -1,11 +1,58 @@
 (ns futon2.aif.token-outcome
   "Selection-time token prediction and post-build comparison. No belief update."
   (:require [clojure.set :as set]
+            [clojure.walk :as walk]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.interpretation-evidence :as evidence]))
 
 (load-identity/register! *ns* *file*)
+
+(def pattern-input-schema :wm/pattern-done-prediction-input-v1)
+(def ^:private pattern-model-keys
+  [:q0 :horizon :want :transition-kernel :observation-model])
+
+(defn- pattern-model-id [input]
+  (let [order #(compare (pr-str %1) (pr-str %2))
+        canonical (walk/postwalk
+                   #(cond (map? %) (into (sorted-map-by order) %)
+                          (set? %) (into (sorted-set-by order) %)
+                          :else %)
+                   (select-keys input pattern-model-keys))]
+    (load-identity/sha256 (.getBytes (pr-str canonical) "UTF-8"))))
+
+(defn- pattern-token? [target token]
+  (and (vector? token) (= 3 (count token)) (= target (first token))
+       (= :pattern-done (second token))
+       (vector? (nth token 2)) (= 2 (count (nth token 2)))
+       (string? (first (nth token 2))) (nat-int? (second (nth token 2)))))
+
+(defn- pattern-input-valid? [target {:keys [q0 horizon want transition-kernel observation-model]}]
+  (and (map? q0) (seq q0) (every? set? (keys q0))
+       (every? #(and (number? %) (<= 0 %)) (vals q0))
+       (model/normalized-exact? q0)
+       (every? #(pattern-token? target %) (mapcat identity (keys q0)))
+       (nat-int? horizon) (keyword? transition-kernel)
+       (map? observation-model) (= horizon (:horizon observation-model))
+       (or (set? want) (vector? want)) (seq want)
+       (= (count want) (count (set want)))
+       (= want (:want observation-model))
+       (every? #(pattern-token? target %) want)))
+
+(defn pattern-prediction-input
+  "Copy the selected scorer's inputs before sealing. No precision-family or
+   mission-hole defaults: the native pattern-token domain is part of the hash."
+  [entry]
+  (let [input {:schema pattern-input-schema
+               :q0 (get-in entry [:prediction :initial-belief])
+               :horizon (:horizon-steps entry)
+               :want (get-in entry [:observation-model :want])
+               :transition-kernel (:transition-kernel entry)
+               :observation-model (:observation-model entry)}]
+    (if (pattern-input-valid? (get-in entry [:action :target]) input)
+      (assoc input :status :present :model-id (pattern-model-id input))
+      {:schema pattern-input-schema :status :absent
+       :reason :selected-pattern-model-input-unavailable})))
 
 (defn- co-apply-input
   "Structural validation of the {:co-apply {:units … :descent … :patterns …}}
@@ -70,16 +117,27 @@
         target (:target action)
         certificate (:selection-certificate decision)
         family (:precision-family certificate)
-        {:keys [q0 horizon]} (:model family)
+        pattern? (contains? certificate :pattern-prediction-input)
+        input (:pattern-prediction-input certificate)
+        prediction-model (if pattern? (select-keys input pattern-model-keys) (:model family))
+        {:keys [q0 horizon]} prediction-model
         domains (filter #(= target (:target %))
                         (get-in certificate [:token-belief-stage :domain-inputs]))
-        want (get-in (first domains) [:declaration :want])
+        want (if pattern? (:want input) (get-in (first domains) [:declaration :want]))
         base {:schema :wm/token-outcome-prediction-v1 :target target
-              :action action :model-id (:model-id family)
+              ;; The pattern prediction retains executable identity, not the
+              ;; separate mission-hole obligations or their locators.
+              :action (if pattern? (select-keys action [:kind :id :target :precedence]) action)
+              :model-id (:model-id (if pattern? input family))
               :prediction-rule :positive-marginal-support}
         step (precedence-step (:precedence action))]
     (if-not (and (= :cascade-candidate (:kind action))
-                 (= 1 (count domains)) (seq want)
+                 (if pattern?
+                   (and (= :wm/selected-outer-cascade-policy-v1 (:selection-route certificate))
+                        (= pattern-input-schema (:schema input)) (= :present (:status input))
+                        (pattern-input-valid? target input)
+                        (= (:model-id input) (pattern-model-id input)))
+                   (= 1 (count domains))) (seq want)
                  (map? q0) (seq q0) (model/normalized-exact? q0)
                  (every? set? (keys q0))
                  (integer? horizon) (<= 0 horizon)
@@ -92,12 +150,12 @@
         (if (contains? belief :status)
           (assoc base :status :refused :reason :model-rollout-refused :finding belief)
           (assoc base :status :frozen :initial-belief q0 :horizon horizon
-                 :model (:model family) :rollout result
+                 :model prediction-model :rollout result
                  :precedence-kind (if (vector? step) :precedence-vector :co-apply-map)
-                 :observation-locators (:observation-locators action)
+                 :observation-locators (when-not pattern? (:observation-locators action))
                  :intended-outputs (step-intended-outputs step)
                  :wanted (mapv (fn [token]
-                                 (let [qualified [target token]]
+                                 (let [qualified (if pattern? token [target token])]
                                    {:token qualified
                                     :predicted (reduce-kv
                                                 (fn [p state mass]

@@ -1,6 +1,7 @@
 (ns futon2.aif.selected-outer-cascade-policy
   "Sealed handoff from the strict outer policy selector to cascade execution."
   (:require [clojure.string :as str]
+            [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.scoring-input-receipts :as scoring-inputs]
             [futon2.aif.load-identity :as load-identity]
@@ -19,7 +20,8 @@
   [:schema :status :target-id :policy-id :cascade-digest :selected-entry
    :sealed-menu :menu-pin :evidence-carrier :evidence-pin
    :objective-receipt :objective-pin :recomputation
-   :basis-kind :scope :assessed-basis :canonical-frontier :canonical-selection])
+   :basis-kind :scope :assessed-basis :canonical-frontier :canonical-selection
+   :pattern-prediction-input])
 
 (defn- pin [path value]
   {:path path
@@ -31,6 +33,11 @@
 (defn carrier-pin [carrier]
   (pin "wm://selected-outer-cascade-policy-v1"
        (select-keys carrier body-keys)))
+
+(defn- seal-body [body]
+  (let [body (assoc body :pattern-prediction-input
+                    (token-outcome/pattern-prediction-input (:selected-entry body)))]
+    (assoc body :carrier-pin (carrier-pin body))))
 
 (defn seal
   "Seal an objective selection, including a replayable draw among equal minima."
@@ -60,7 +67,7 @@
                                      :cascade-digest (get-in objective-receipt [:action :cascade-digest])}
                                 :q4 (:policies objective-receipt)
                                 :q8 (:comparison objective-receipt)}}]
-      (assoc body :carrier-pin (carrier-pin body)))))
+      (seal-body body))))
 
 (defn seal-assessed
   "Adapt a verified P07a assessed basis into executable identity transport.
@@ -91,7 +98,7 @@
                                 :q4 (:policies receipt)
                                 :q8 {:status :absent
                                      :reason :assessed-population-basis}}}]
-      (assoc body :carrier-pin (carrier-pin body)))))
+      (seal-body body))))
 
 (defn seal-canonical
   "Seal a selection already made over O3-1's retained canonical frontier.
@@ -113,7 +120,7 @@
                 :canonical-frontier frontier :canonical-selection selection
                 :recomputation {:q2 (select-keys action [:target :policy-id :cascade-digest])
                                 :q4 (:policies objective-receipt) :q8 (:comparison objective-receipt)}}]
-      (assoc body :carrier-pin (carrier-pin body)))))
+      (seal-body body))))
 
 (defn verify
   "Total semantic verification. Returns nil when valid, otherwise a keyword."
@@ -179,6 +186,10 @@
         :selected-policy-canonical-replay
         (nil? entry) :selected-policy-entry-missing
         (not= entry expected-entry) :selected-policy-entry-substitution
+        (and (contains? carrier :pattern-prediction-input)
+             (not= (:pattern-prediction-input carrier)
+                   (token-outcome/pattern-prediction-input entry)))
+        :selected-policy-pattern-input-substitution
         (not= (:cascade-digest entry) (get-in entry [:canonical-cascade :digest]))
         :selected-policy-canonical-record
         (not= (:cascade-digest entry) (executable/digest (:canonical-cascade entry)))
@@ -239,6 +250,10 @@
                   :action (:action entry)
                   :selection-certificate
                   {:selection-route :wm/selected-outer-cascade-policy-v1
+                   :pattern-prediction-input
+                   (or (:pattern-prediction-input carrier)
+                       {:schema token-outcome/pattern-input-schema :status :absent
+                        :reason :pattern-prediction-input-not-sealed})
                    :selected-canonical-cascade (:canonical-cascade entry)
                    :selected-outer-cascade-policy
                    (assoc (select-keys carrier [:schema :status :basis-kind :scope
