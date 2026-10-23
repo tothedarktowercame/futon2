@@ -189,6 +189,22 @@
        "or any other seat; the runner receives this reply.\n\nREQUEST:\n"
        (pr-str request) "\n\nAUTHOR ANSWER:\n" (pr-str author-answer)))
 
+(defn- cascade-effect-contact-answer
+  "Decode one cascade-effect Agency response without erasing why it supplied
+  no answer. Successful decoding is exactly handoff/response-map's existing
+  value; only nil becomes a typed absence."
+  [seat response]
+  (if-some [answer (handoff/response-map response)]
+    answer
+    (let [state (:state response)
+          state (if (string? state) (keyword state) state)
+          reason (cond
+                   (= :done state) :unparseable-answer
+                   (some? state) state
+                   :else :unparseable-answer)]
+      (cond-> {:status :absent :reason reason :seat seat}
+        (:job-id response) (assoc :job-id (:job-id response))))))
+
 (defn production-cascade-executors
   "The live capability registry for certified cascade continuation."
   [opts]
@@ -201,8 +217,8 @@
     {:wm/pattern-apply
      (cascade-continuation/reviewed-build-review-close-executor
       {:author author :reviewer reviewer :target (:target opts)
-       :author-contact #(handoff/response-map (author-contact %))
-       :reviewer-contact #(handoff/response-map (reviewer-contact %))})}))
+       :author-contact #(cascade-effect-contact-answer author (author-contact %))
+       :reviewer-contact #(cascade-effect-contact-answer reviewer (reviewer-contact %))})}))
 
 (defn- patch-loader
   "Resolve a reviewed patch only after reloading its named namespace and
