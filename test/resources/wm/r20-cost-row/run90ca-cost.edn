@@ -1,0 +1,27 @@
+{:source
+ {:path "data/wm-runs/tick-run-record-2026-10-23-90ca5944-3d52-4bd6-940c-fe2f6c2c8c6b.edn"
+  :sha256 "976d1bfc7983b3cc234dbc5a25ae848e0c73b018fa2076940b31bbfc5dcdc5b9"
+  :projection "only fields consumed by apparatus-certificates/cost-row; values verbatim"}
+ :model-usage
+ {:status :complete
+  :input-tokens 2124394 :output-tokens 21088 :total-tokens 2145482
+  :cached-input-tokens 2035904 :uncached-input-tokens 88490
+  :jobs
+  [{:job-id "invoke-1792772763177-2702-2ba056f5" :phase :cascade-resume
+    :input-tokens 250597 :output-tokens 5727 :total-tokens 256324}
+   {:job-id "invoke-1792773139750-2704-089db1a9" :phase :cascade-resume
+    :input-tokens 47928 :output-tokens 653 :total-tokens 48581}
+   {:job-id "invoke-1792773208171-2706-d66e9813" :phase :author-dispatch
+    :input-tokens 1470752 :output-tokens 12554 :total-tokens 1483306}
+   {:job-id "invoke-1792773512468-2708-518264ed" :phase :reviewer-dispatch
+    :input-tokens 355117 :output-tokens 2154 :total-tokens 357271}]}
+ :timing
+ {:phase-timings-ms
+  {:delivery-qa 11372 :author-dispatch 231 :construction 68
+   :close-evidence-manifest 19 :build-resolution 8 :preference-refresh 2784
+   :cascade-execution 224 :reviewer-dispatch 327 :ration-admission 3
+   :author-wait 236173 :cascade-resume 397074 :selected-target-reading 700
+   :opportunity 1186763 :agent-readiness 5 :stop-line-memory 7268
+   :occurrence-square-authoring 3 :reviewer-wait 54086 :selected-reading 5
+   :substrate-preflight 6454 :code-state 69 :selection 231348
+   :selection-world 73}}}
