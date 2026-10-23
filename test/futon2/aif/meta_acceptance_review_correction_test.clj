@@ -10,7 +10,7 @@
 (def live-refusal (:refusal (edn/read-string (slurp fixture))))
 
 (defn exercise [runs verdicts]
-  (let [dir (str "/home/joe/notes/M2f-4-fixtures/" (java.util.UUID/randomUUID))
+  (let [dir (str (java.nio.file.Files/createTempDirectory "m2f4-" (make-array java.nio.file.attribute.FileAttribute 0)))
         _ (.mkdirs (io/file dir))
         diagnosis (#'fixtures/produced-diagnosis! dir)
         requests (atom []) reviews (atom []) executed (atom [])
