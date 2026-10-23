@@ -43,6 +43,8 @@
   "/home/joe/code/futon2/resources/wm/reading-precision-beta/wm-readiness-2026-10-17-campaign.edn")
 (def default-cascade-continuation-close-root
   "/home/joe/code/futon2/data/wm-cascade-continuation-closes")
+(def default-cascade-continuation-failure-root
+  "/home/joe/code/futon2/data/wm-cascade-continuation-failures")
 
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
 
@@ -619,7 +621,7 @@
   Production callers must supply :cascade-capability-executors and
   :cascade-close-fn. Their absence is a typed frontier, never synthetic
   success."
-  [{:keys [cascade-capability-executors cascade-close-fn] :as opts}]
+  [{:keys [cascade-capability-executors cascade-close-fn cascade-failure-fn] :as opts}]
   (let [;; Ordinary run-opportunity! installs this context before any Agency
         ;; contact. A selection-free production continuation must do the same,
         ;; otherwise the first capability dispatch fails outside the ledger.
@@ -655,5 +657,12 @@
                    (cascade-continuation/production-close-adapter
                     {:root (or (:cascade-continuation-close-root opts)
                                default-cascade-continuation-close-root)
+                     :source-run-id (:source-run-id opts)
+                     :source-attempt-id (:source-attempt-id opts)}))
+               :failure-fn
+               (or cascade-failure-fn
+                   (cascade-continuation/production-failure-adapter
+                    {:root (or (:cascade-continuation-failure-root opts)
+                               default-cascade-continuation-failure-root)
                      :source-run-id (:source-run-id opts)
                      :source-attempt-id (:source-attempt-id opts)}))})))))
