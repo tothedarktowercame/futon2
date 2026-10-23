@@ -4,6 +4,7 @@
   spends a click; every effect must be supplied by a registered capability
   executor and survive journal validation before close is callable."
   (:require [clojure.edn :as edn]
+            [clojure.string :as str]
             [clojure.java.io :as io]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.wm.cascade-capability-dispatch :as dispatch]
@@ -16,6 +17,15 @@
 
 (defn- hex64? [x]
   (and (string? x) (re-matches #"[0-9a-f]{64}" x)))
+
+(defn- revision-valid? [grounding]
+  ;; JSON keys have already been keywordised. Revision/repo are strings, not
+  ;; enum keywords; absence remains valid for content-addressed effects.
+  (or (not (contains? grounding :revision))
+      (and (string? (:revision grounding))
+           (re-matches #"[0-9a-fA-F]{40}" (:revision grounding))
+           (string? (:repo grounding))
+           (not (str/blank? (:repo grounding))))))
 
 (defn- fail [kind data]
   {:status :error :kind kind :repair data})
@@ -49,6 +59,7 @@
                (= reviewer (:accepted-by reviewed))
                (contains? #{:verified "verified"} (:status effect))
                (map? (:grounding effect))
+               (revision-valid? (:grounding effect))
                (hex64? (:digest (:grounding effect))))
         (dispatch/seal-receipt
          {:schema dispatch/receipt-schema
@@ -80,6 +91,7 @@
                   :frontier (:frontier packet)
                   :effect-receipt-digests (mapv :digest
                                                 (:effect-receipts packet))
+                  :effect-receipts (:effect-receipts packet)
                   :journal-certificate (:journal-certificate packet)}
           digest (evidence/value-digest record)
           sealed (assoc record :digest digest)

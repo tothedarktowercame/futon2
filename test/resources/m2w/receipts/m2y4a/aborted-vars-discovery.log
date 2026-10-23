@@ -1,0 +1,63 @@
+
+Running tests in #{"test"}
+
+=== TEST 1: zero-construction enactment → realized 0.0 ===
+  PASS realized-G is non-nil
+  PASS realized-G is 0.0
+  PASS expected-G preserved
+  PASS holes carried (N=3)
+
+=== TEST 2: devmap-coherence fixture → realized >0 boxes ===
+  PASS fold engine produced >0 boxes for devmap-coherence
+  PASS realized-G is negative (non-zero coverage)
+  PASS realized-G differs from 0.0
+
+=== TEST 3: anti-fake-calibration guard ===
+  PASS realized-G (0.0) != expected-G (-1.0)
+  PASS realized-G is 0.0 (not faked from expected)
+  PASS signed error is +1.0 (plan over-promised)
+
+=== TEST 4: full gamma sample (expected + realized) end-to-end ===
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-faithfulness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-head-004.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-bayesian-structure-learning-003.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-canon-fingerprint-store-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-futonzero-generative-011.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-learning-loop-010.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-operational-vocabulary-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-reachable-from-boot-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-state-snapshot-witness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-war-machine-pilot-001.edn [prompt-not-reconstructable]
+
+=== BONUS: nil wiring → realized-G stays nil (genuinely unmeasurable) ===
+  PASS nil wiring → realized-G nil
+  PASS empty wiring (no boxes, no holes) → realized-G nil
+
+ ALL TESTS PASS
+WARNING: binding already refers to: #'clojure.core/binding in namespace: strict-contract-qualification-test, being replaced by: #'strict-contract-qualification-test/binding
+
+Testing futon2.aif.m2y4a-effect-retention-test
+
+FAIL in (durable-close-retains-complete-sealed-receipts) (m2y4a_effect_retention_test.clj:49)
+expected: (= [receipt] (:effect-receipts stored))
+  actual: (not (= [{:schema :wm/cascade-effect-receipt-v1, :cascade-digest "fa1cc1f7ccbb78223a6a7c725ca7beafa543c12ce839a8b9498687cea3566a32", :occurrence-id ["pattern/example" 0], :operation :apply, :capability :wm/pattern-apply, :evidence-kind :verified-effect, :effect {:status "verified", :grounding {:kind "commit", :digest "fa1cc1f7ccbb78223a6a7c725ca7beafa543c12ce839a8b9498687cea3566a32", :revision "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", :repo "futon2"}}, :digest "39559a80103651e768fbb9de005816ef2bc2acc800f8479b322d95064a65f74f"}] nil))
+
+FAIL in (durable-close-retains-complete-sealed-receipts) (m2y4a_effect_retention_test.clj:51)
+expected: (= revision (get-in stored [:effect-receipts 0 :effect :grounding :revision]))
+  actual: (not (= "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" nil))
+
+Ran 1 tests containing 4 assertions.
+2 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-16163081838154967182.edn

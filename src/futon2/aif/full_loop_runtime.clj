@@ -176,7 +176,11 @@
   (str "Independently verify this occurrence-level build/review/close result. "
        "Inspect the durable artifacts. Reply with one JSON object containing "
        "the exact request-id, cascade-digest, occurrence-id, author's by, your "
-       "accepted-by, and effect {status:'verified', grounding:{kind,digest}}. "
+       "accepted-by, and effect {status:'verified', grounding:{kind,digest,revision,repo}}. "
+       "For a commit effect, revision is the full 40-hex git commit sha you "
+       "inspected and repo is its non-blank repository name or path. Keep digest "
+       "as the 64-hex content grounding digest, not the commit sha. For a "
+       "content-addressed effect without a commit, omit revision. "
        "Do not accept an ungrounded success label.\n\nREQUEST:\n"
        (pr-str request) "\n\nAUTHOR ANSWER:\n" (pr-str author-answer)))
 

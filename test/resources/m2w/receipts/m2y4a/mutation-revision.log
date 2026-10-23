@@ -1,0 +1,44 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.m2y4a-effect-retention-test
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:31)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision bad, :repo "futon2"})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:31)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision bad, :repo "futon2"})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:31)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision bad, :repo "futon2"})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:31)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision bad, :repo "futon2"})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:34)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision revision, :repo repo})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:34)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision revision, :repo repo})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:34)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision revision, :repo repo})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:34)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision revision, :repo repo})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+Ran 4 tests containing 24 assertions.
+8 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-7461600120271959163.edn

@@ -1,0 +1,68 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.m2y4a-effect-retention-test
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:31)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision bad, :repo "futon2"})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:31)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision bad, :repo "futon2"})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:31)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision bad, :repo "futon2"})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:31)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision bad, :repo "futon2"})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:34)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision revision, :repo repo})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:34)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision revision, :repo repo})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:34)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision revision, :repo repo})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (optional-revision-is-checked-and-retained) (m2y4a_effect_retention_test.clj:34)
+expected: (= :reviewed-effect-invalid (:kind (execute {:digest digest, :revision revision, :repo repo})))
+  actual: (not (= :reviewed-effect-invalid nil))
+
+FAIL in (durable-close-retains-complete-sealed-receipts) (m2y4a_effect_retention_test.clj:49)
+expected: (= [receipt] (:effect-receipts stored))
+  actual: (not (= [{:schema :wm/cascade-effect-receipt-v1, :cascade-digest "fa1cc1f7ccbb78223a6a7c725ca7beafa543c12ce839a8b9498687cea3566a32", :occurrence-id ["pattern/example" 0], :operation :apply, :capability :wm/pattern-apply, :evidence-kind :verified-effect, :effect {:status "verified", :grounding {:kind "commit", :digest "fa1cc1f7ccbb78223a6a7c725ca7beafa543c12ce839a8b9498687cea3566a32", :revision "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", :repo "futon2"}}, :digest "39559a80103651e768fbb9de005816ef2bc2acc800f8479b322d95064a65f74f"}] nil))
+
+FAIL in (durable-close-retains-complete-sealed-receipts) (m2y4a_effect_retention_test.clj:51)
+expected: (= revision (get-in stored [:effect-receipts 0 :effect :grounding :revision]))
+  actual: (not (= "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" nil))
+
+FAIL in (commit-review-prompt-names-revision-authority) (m2y4a_effect_retention_test.clj:67)
+expected: (.contains prompt "revision")
+  actual: false
+
+FAIL in (commit-review-prompt-names-revision-authority) (m2y4a_effect_retention_test.clj:68)
+expected: (.contains prompt "repo")
+  actual: false
+
+FAIL in (commit-review-prompt-names-revision-authority) (m2y4a_effect_retention_test.clj:69)
+expected: (.contains prompt "40-hex")
+  actual: false
+
+FAIL in (commit-review-prompt-names-revision-authority) (m2y4a_effect_retention_test.clj:70)
+expected: (.contains prompt "inspected")
+  actual: false
+
+Ran 4 tests containing 24 assertions.
+14 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-13519886826469841473.edn
