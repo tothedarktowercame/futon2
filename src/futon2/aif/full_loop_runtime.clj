@@ -623,7 +623,11 @@
   (let [;; Ordinary run-opportunity! installs this context before any Agency
         ;; contact. A selection-free production continuation must do the same,
         ;; otherwise the first capability dispatch fails outside the ledger.
+        ;; The run id is fixed here, not inside resume, so the dispatches the
+        ;; executors make register under the same run as the resume phase.
         opts (cond-> opts
+               (nil? (:run-id opts))
+               (assoc :run-id (str "on-prod-history-" (UUID/randomUUID)))
                (nil? (:click-id opts))
                (assoc :click-id
                       (str "potted-history:" (:source-run-id opts) "/"
