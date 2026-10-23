@@ -213,7 +213,8 @@
   writing <store>/flights/STOP (every flight) or <store>/flights/<flight-id>.stop
   (this one); the flight then ends :operator-stopped with :stop {:path :read-at
   :text}, and the file is left for the operator to remove. :stop-fn in opts
-  replaces that file check. Returns {:flight … :record-path …} when flown,
+  replaces that file check. A server refusal is returned as :click-refused
+  with its :refusal. Returns {:flight … :record-path …} when flown,
   or a typed refusal with an unopened flight and no click calls."
   [{:keys [seat store max-clicks sources checker bb library-root cascades
            run-record-dir click-fn answer-fn dispatch-step! dispatch-seat step-deadline-ms
@@ -313,14 +314,15 @@
       (assoc refusal :flight (assoc f :status :refused :refusal refusal)
              :clicks [])
       (let [path (write! flown)]
-        {:flight flown :stop (:stop flown) :record-path (.getCanonicalPath path)
-         :enactments (:enactments flown)
-         :readings (vec (for [a (:readings flown) q (:asked a)] (select-keys q [:kind :want :request-id :seat :job-id :outcome])))
-         :requests (vec (for [a (:asks flown) q (:asked a)] (select-keys q [:want :request-id :seat :job-id :outcome])))
-         :published-store (str store "/" target ".edn")
-         :clicks (mapv #(select-keys % [:click-id :advanced :open-after :abstention]) (:clicks flown))
-         :status (:status flown) :closure-scope (:closure-scope flown) :needs (:needs flown)
-         :open-questions (:open-questions flown)}))))
+        (cond-> {:flight flown :stop (:stop flown) :record-path (.getCanonicalPath path)
+                 :enactments (:enactments flown)
+                 :readings (vec (for [a (:readings flown) q (:asked a)] (select-keys q [:kind :want :request-id :seat :job-id :outcome])))
+                 :requests (vec (for [a (:asks flown) q (:asked a)] (select-keys q [:want :request-id :seat :job-id :outcome])))
+                 :published-store (str store "/" target ".edn")
+                 :clicks (mapv #(select-keys % [:click-id :advanced :open-after :abstention]) (:clicks flown))
+                 :status (:status flown) :closure-scope (:closure-scope flown) :needs (:needs flown)
+                 :open-questions (:open-questions flown)}
+          (:refusal flown) (assoc :refusal (:refusal flown)))))))
 
 (defn read-only!
   "The read step alone (D11 part 5): ask the seat for the readings the plan
