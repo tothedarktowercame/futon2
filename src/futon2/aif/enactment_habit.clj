@@ -49,7 +49,11 @@
                                   :candidate-derivations candidate])
         precedences (replay-precedences replay candidate)
         action (get-in click [:decision :action])
-        reading? (and (map? (:precedence action)) (= candidate (:id action)))]
+        reading? (and (map? (:precedence action)) (= candidate (:id action)))
+        recorded-key (get-in click [:selection-event :policy-key])
+        recorded-reading? (and (vector? recorded-key)
+                               (= :wm/reading-policy-v1 (first recorded-key))
+                               (= candidate (nth recorded-key 2 nil)))]
     (cond
       (nil? candidate) (refused :enactment-names-no-candidate {})
       ;; A reading policy's history identity is its own structural key, the
@@ -57,6 +61,8 @@
       reading?
       (or (prefix-admission/reading-policy-key action)
           (refused :reading-policy-key-refused {:candidate candidate}))
+      recorded-reading?
+      recorded-key
       (nil? derivation) (refused :candidate-not-in-click {:candidate candidate})
       (nil? (:target derivation)) (refused :target-absent {:candidate candidate})
       (not= 1 (count precedences))
