@@ -24,6 +24,7 @@
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.q2-construction :as q2]
             [futon2.aif.q8-frontier :as q8]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.wm.family-selection :as family-selection]
             [futon2.aif.wm.cascade-decision :as cascade-decision]))
 
@@ -749,9 +750,11 @@
         ;; retained.  It is deliberately not consulted by the injury arm.
         focus-inputs (when (and (not injury?) selection-as-of)
                        (or focus-inputs (focus-receipt/read-inputs)))
+        predecessor-focus (focus-receipt/predecessor-focus previous-run/*predecessor*)
         focus-context (when (and (not injury?) selection-as-of)
                         (or focus-context
-                            (focus-receipt/decision-focus-info focus-inputs selection-as-of)))
+                            (focus-receipt/decision-focus-info focus-inputs selection-as-of
+                                                              predecessor-focus)))
         focus-valid? (and selection-as-of
                           (= selection-as-of (:as-of focus-context)))
         focus-receipt (cond
@@ -766,7 +769,9 @@
                         {:status :present :as-of selection-as-of
                          :focus (:focus focus-context)
                          :focus-status (:status focus-context)
-                         :focus-origin (:focus-origin focus-context)})
+                         :focus-origin (:focus-origin focus-context)
+                         :previous-focus (or (:previous-focus focus-context)
+                                             predecessor-focus)})
         classify (or focus-classify-fn focus-receipt/classify-target)
         target-classes
         (if (= :present (:status focus-receipt))
@@ -961,6 +966,7 @@
                                       :reason (when-not activated-carrier
                                                 ordinary-reason)
                                       :meta-selection selection
+                                      :focus-receipt focus-receipt
                                       :field-source-pin (:source-pin policy-field)
                                       :family-census (when policy-field
                                                        (family-selection/field-census policy-field))

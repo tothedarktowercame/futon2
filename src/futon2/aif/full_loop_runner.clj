@@ -1202,6 +1202,7 @@
                           :decision (or decision (:decision selection-sorry))
                           :outcome (:outcome result)
                           :downstream (:downstream-refusal selection-sorry)
+                          :focus (get-in outer-task-selection [:policy :focus-receipt])
                           :valence-carry valence-carry})
             ;; Requirements Q8: certified from the outer receipt this run
             ;; retained, its predecessor and its decision; recomputable from

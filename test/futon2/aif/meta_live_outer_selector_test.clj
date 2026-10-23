@@ -803,7 +803,8 @@
                                             :reason :relation-not-declared}}))
                             :policy-menu-fn (fn [_ j] (reset! join j) nil)}))]
     (is (= {:status :present :as-of selection-as-of :focus "WM"
-            :focus-status :retained :focus-origin nil}
+            :focus-status :retained :focus-origin nil
+            :previous-focus {:status :absent :reason :predecessor-carrier-not-supplied}}
            (:focus-receipt @join)))
     (is (= {:class :focus :scorer-class :focused}
            (select-keys (get-in @join [:target-classes "M-a"]) [:class :scorer-class])))
