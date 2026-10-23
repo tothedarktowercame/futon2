@@ -322,7 +322,8 @@
                  :clicks (mapv #(select-keys % [:click-id :advanced :open-after :abstention]) (:clicks flown))
                  :status (:status flown) :closure-scope (:closure-scope flown) :needs (:needs flown)
                  :open-questions (:open-questions flown)}
-          (:refusal flown) (assoc :refusal (:refusal flown)))))))
+          (:refusal flown) (assoc :refusal (:refusal flown))
+          (:pre-emption flown) (assoc :pre-emption (:pre-emption flown)))))))
 
 (defn read-only!
   "The read step alone (D11 part 5): ask the seat for the readings the plan
