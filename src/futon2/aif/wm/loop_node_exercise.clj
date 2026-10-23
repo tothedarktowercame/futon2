@@ -23,39 +23,78 @@
    :because :typed-selection-refusal
    :evidence (mapv #(select-keys % [:target :kind :missing]) refusals)})
 
+(defn- q4-candidate-rows
+  "The live outer-policy route (selection-route
+  :wm/selected-outer-cascade-policy-v1) retains its candidate space as the
+  selection certificate's :q4 rows: one row per admissible policy with its
+  identity, per-policy posterior, and the canonical cascade's reading order
+  (the multi-step rollout the policy would enact). Project those rows into
+  the candidate shape the evaluator reads, keeping only the small fields —
+  never the whole canonical cascade."
+  [certificate]
+  (mapv (fn [row]
+          {:policy {:id (:policy-id row) :target (:target-id row)}
+           :posterior (:posterior row)
+           :reading-order (or (get-in row [:canonical-cascade :reading-order])
+                              (get-in row [:canonical-cascade
+                                           :structural :reading-order]))})
+        (:q4 certificate)))
+
+(defn- selected-entry-class-emission
+  "The class emission the live route scored for the selected policy and
+  consumed into its G (selection-certificate :selected-outer-cascade-policy
+  :selected-entry :class-emission), or nil."
+  [certificate]
+  (get-in certificate [:selected-outer-cascade-policy
+                       :selected-entry :class-emission]))
+
 (defn receipt [decision]
   (let [certificate (:selection-certificate decision)
-        candidates (or (:candidates certificate) (:candidates decision))
-        policies (or (:policies certificate) (:policies decision))
+        candidates (or (:candidates certificate) (:candidates decision)
+                       (q4-candidate-rows certificate))
+        policies (or (:policies certificate) (:policies decision)
+                     (when-let [prior (get-in certificate
+                                             [:precision-row :prior])]
+                       (keys prior)))
         comparison (or (get-in decision [:selection-law :policy-comparison])
                        (:policy-comparison decision))
         policy-of (fn [candidate]
                     (or (:policy candidate) (:id candidate)
                         (get-in candidate [:f-prefix :policy])))
-        class-scoring (filter #(and (= :class-emission
-                                       (get-in % [:class-emission :model :kind]))
-                                    (true? (get-in % [:class-emission :consumed-in-g?]))
-                                    (number? (get-in % [:class-emission :risk])))
-                              candidates)
         horizons (keep #(get-in % [:class-emission :model :horizon]) candidates)
+        selected-ce (selected-entry-class-emission certificate)
+        horizons (cond-> horizons
+                   (and (map? selected-ce)
+                        (number? (get-in selected-ce [:model :horizon])))
+                   (conj (get-in selected-ce [:model :horizon])))
         precedences
         (let [per-candidate
               (mapv #(mapv (fn [entry]
                              (if (map? entry) (:id entry) entry))
-                           (:precedence (policy-of %)))
+                           (or (:precedence (policy-of %))
+                               ;; the live route's per-policy rollout: the
+                               ;; canonical cascade's reading order
+                               (:reading-order %)))
                     candidates)]
           (or (when (some seq per-candidate) per-candidate)
               (when-let [p (:precedence comparison)]
                 [(mapv #(if (map? %) (:id %) %) p)])
               []))
+        q4-posteriors (into {} (map (juxt :policy-id :posterior))
+                                   (:q4 certificate))
         probabilities (or (get-in certificate [:policy-precision-state :probabilities])
                           (get-in certificate [:precision-family :probabilities])
                           (get-in decision [:policy-precision-state :probabilities])
-                          (get-in decision [:selection-law :posterior]))
+                          (get-in decision [:selection-law :posterior])
+                          ;; the live route retains the per-policy prior and
+                          ;; the per-policy posteriors of the :q4 rows
+                          (get-in certificate [:precision-row :prior])
+                          (when (seq q4-posteriors) q4-posteriors))
         temperature (or (get-in certificate [:policy-precision-state :temperature])
                         (get-in certificate [:precision-family :temperature])
                         (get-in decision [:policy-precision-state :temperature])
-                        (get-in decision [:selection-law :beta]))
+                        (get-in decision [:selection-law :beta])
+                        (get-in certificate [:precision-row :beta-prior]))
         abstention (get-in decision [:abstention :status])
         typed-abstention? (and (= :abstained (:status decision))
                                (seq (:refusals decision)))
@@ -113,18 +152,49 @@
                                                             [:kind :id :target])})
                   (refused :R14 :selection-posterior-not-retained)))
          :CTAU-CLASS
-         (if (and (seq class-scoring)
-                  (= (count class-scoring) (count candidates))
-                  (every? #(map? (get-in % [:class-emission :model :class-preference]))
-                          class-scoring))
-           (present :CTAU-CLASS
-                    {:scored-candidate-count (count class-scoring)
-                     :comparison-status (:status comparison)
-                     :horizons (mapv #(get-in % [:class-emission :model :horizon])
-                                     class-scoring)
-                     :preference-kind :class-emission
-                     :consumption :terminal-class-cost-added-to-G})
-           (refused :CTAU-CLASS :class-preference-evidence-not-retained))})
+         (let [scored? (fn [ce]
+                         (and (= :class-emission (get-in ce [:model :kind]))
+                              (true? (:consumed-in-g? ce))
+                              (number? (:risk ce))))
+               scored (filterv #(scored? (:class-emission %)) candidates)
+               selected-scored? (scored? selected-ce)
+               candidate-count (if (and (zero? (count candidates))
+                                        selected-scored?)
+                                 1
+                                 (count candidates))
+               scored-count (+ (count scored) (if selected-scored? 1 0))]
+           (cond
+             (and (pos? candidate-count) (= scored-count candidate-count)
+                  (every? #(map? (get-in % [:class-emission :model
+                                            :class-preference]))
+                          (concat scored
+                                  (when selected-scored? [{:class-emission selected-ce}]))))
+             (present :CTAU-CLASS
+                      {:scored-candidate-count scored-count
+                       :comparison-status (:status comparison)
+                       :horizons (vec (concat
+                                       (keep #(get-in % [:class-emission :model :horizon])
+                                             scored)
+                                       (when selected-scored?
+                                         [(get-in selected-ce [:model :horizon])])))
+                       :preference-kind :class-emission
+                       :consumption :terminal-class-cost-added-to-G})
+
+             ;; the live route class-scores the selected policy's emission and
+             ;; consumes it into its G; the other rows retain no class
+             ;; preference. That is exercised machinery over a partially
+             ;; scored space — typed as bypassed, never as not-retained.
+             (and (pos? scored-count) (< scored-count candidate-count))
+             (decision-bypass :CTAU-CLASS :selected-candidate-only-class-scoring
+                              {:scored-candidate-count scored-count
+                               :candidate-count candidate-count
+                               :horizon (when selected-scored?
+                                          (get-in selected-ce [:model :horizon]))
+                               :preference-kind :class-emission
+                               :consumption :terminal-class-cost-added-to-G})
+
+             :else (refused :CTAU-CLASS
+                            :class-preference-evidence-not-retained)))})
         counts (frequencies (map :status (vals by-node)))]
     {:schema schema
      :status (if (zero? (get counts :refused 0)) :complete :incomplete)
