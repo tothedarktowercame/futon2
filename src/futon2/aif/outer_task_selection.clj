@@ -24,7 +24,7 @@
   cannot cross this boundary."
   [task]
   (select-keys task [:id :kind :status-class :open-hole-count :priority
-                     :requisition :source :repair-observations
+                     :want :requisition :source :repair-observations
                      :ownership :last-touch]))
 
 (defn- supported? [{:keys [id kind]}]
@@ -79,7 +79,7 @@
      {:schema schema
       :policy {:kind :seeded-uniform-task-support
                :uses [:id :kind :status-class :open-hole-count :priority
-                      :requisition :source]
+                      :want :requisition :source]
                :observes [:repair-observations :ownership :last-touch]
                :forbids [:cascade :candidates :constructed-candidates
                          :interpretations :precedence :g :g-terms]}
@@ -95,4 +95,8 @@
                            {:absent :no-seed}))}
       chosen
       (assoc :action {:type (get action-type (:kind chosen))
-                      :target (:id chosen)}))))
+                      :target (:id chosen)
+                      ;; The want identity selected here must survive to
+                      ;; want accounting; dropping it starved
+                      ;; selected-want-outcome (injury 04e14314).
+                      :want (vec (:want chosen))}))))

@@ -26,7 +26,9 @@
         wants (mapv (fn [want] (if (vector? want) want [target want]))
                     (:want selected-action))
         duplicates (->> wants frequencies (keep (fn [[w n]] (when (> n 1) w))) vec)
-        rows (:tokens token-comparison)
+        ;; Comparison rows arrive from token-outcome/compare-outcomes under
+        ;; :tokens; callers may also present the row vector under :rows.
+        rows (or (:tokens token-comparison) (:rows token-comparison))
         row-tokens (mapv :token rows)
         progress (group-by :token (vec progress-evidence))
         blocked (group-by :token (vec blockers))

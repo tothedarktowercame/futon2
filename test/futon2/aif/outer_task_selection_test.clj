@@ -22,7 +22,7 @@
                          [:constructed-candidates :interpretations :g :g-terms])
                   (:support changed)))
     (is (= #{:id :kind :status-class :open-hole-count :priority
-             :requisition :source}
+             :want :requisition :source}
            (set (get-in changed [:policy :uses]))))))
 
 (deftest selection-is-recomputable-and-yields-a-task-action
