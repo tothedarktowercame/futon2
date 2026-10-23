@@ -185,7 +185,8 @@
        "inspected and repo is its non-blank repository name or path. Keep digest "
        "as the 64-hex content grounding digest, not the commit sha. For a "
        "content-addressed effect without a commit, omit revision. "
-       "Do not accept an ungrounded success label.\n\nREQUEST:\n"
+       "Do not accept an ungrounded success label. Do not contact the author "
+       "or any other seat; the runner receives this reply.\n\nREQUEST:\n"
        (pr-str request) "\n\nAUTHOR ANSWER:\n" (pr-str author-answer)))
 
 (defn production-cascade-executors
