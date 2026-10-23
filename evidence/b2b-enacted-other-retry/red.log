@@ -1,0 +1,21 @@
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=/home/joe/notes/b2b/tmp
+
+Running tests in #{"test"}
+
+Testing futon2.aif.b2b-enacted-other-injury-retry-test
+
+FAIL in (other-enacted-injury-retains-both-attributions) (b2b_enacted_other_injury_retry_test.clj:42)
+expected: (= :appended (:status result))
+  actual: (not (= :appended :refused))
+
+FAIL in (other-enacted-injury-retains-both-attributions) (b2b_enacted_other_injury_retry_test.clj:43)
+expected: (some? (ledger/pending-requeue after injury-b))
+  actual: (not (some? nil))
+
+Ran 3 tests containing 40 assertions.
+2 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/home/joe/notes/b2b/tmp/clojure-15919295237652003678.edn

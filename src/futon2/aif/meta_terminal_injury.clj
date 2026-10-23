@@ -265,7 +265,8 @@
                appended classification enacted :open)
               (assoc appended :classification classification :transition :open)))
 
-          (= :enacted (:state previous))
+          (and (= :enacted (:state previous))
+               (not other-injury-retry?))
           (if (= (:retry-click previous) (:click-id classification))
             (let [appended
                   (ledger/append-retry-result

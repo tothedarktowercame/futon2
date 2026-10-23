@@ -1,0 +1,14 @@
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=/home/joe/notes/b2b/tmp
+
+Running tests in #{"test"}
+
+Testing futon2.aif.b2b-enacted-other-injury-retry-test
+
+Testing futon2.aif.f43-other-injury-requeue-test
+
+Testing futon2.aif.f46-repeated-injury-requeue-test
+
+Testing futon2.aif.meta-terminal-injury-test
+
+Ran 17 tests containing 290 assertions.
+0 failures, 0 errors.
