@@ -681,7 +681,7 @@
   open wants on the last click), or before any click when owner questions
   leave it no wants (:status :not-a-target-yet, :open-questions). Returns the
   flight record."
-  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn enact-fn wc-fn fetch-run-record]}]
+  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn enact-fn wc-fn fetch-run-record stop-fn]}]
   ;; WM-SPIKE-FIX-III: a Throwable out of any step still leaves a record.
   ;; P holds the flight as recorded so far and the step running; the catch
   ;; throws an ex-info carrying that flight with :status :aborted, which the
@@ -692,7 +692,9 @@
         keep! (fn [f] (vswap! p assoc :f f) f)]
    (try
   (loop [f flight]
-    (if (or (not= :open (:status f)) (>= (count (:clicks f)) max-clicks))
+    (if-let [stop (when stop-fn (stop-fn))]
+      (assoc f :status :operator-stopped :stop stop)
+      (if (or (not= :open (:status f)) (>= (count (:clicks f)) max-clicks))
       (cond-> f (= :open (:status f)) (assoc :status :click-limit))
       (let [_ (keep! f)
             sources (at :sources sources-fn)
@@ -785,7 +787,7 @@
                      (and (= :closed (:status f)) (seq questions))
                      (assoc-in [:closure-scope :open-questions] questions)
                      (and (= :no-progress (:status f)) (seq pending))
-                     (assoc :status :awaiting-answer :pending pending))))))))
+                     (assoc :status :awaiting-answer :pending pending)))))))))
    (catch Throwable e
      (let [{:keys [f step]} @p]
        (throw (ex-info (str "flight aborted in step " (some-> step name) ": " (ex-message e))
