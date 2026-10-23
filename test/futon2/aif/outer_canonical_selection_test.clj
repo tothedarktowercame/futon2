@@ -2,9 +2,12 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is]]
             [futon2.aif.outer-canonical-g :as frontier]
+            [futon2.aif.outer-policy-evidence :as evidence]
+            [futon2.aif.outer-policy-objective :as objective]
             [futon2.aif.outer-canonical-selection :as sut]
             [futon2.aif.selected-outer-cascade-policy :as carrier]
-            [futon2.aif.selected-outer-cascade-policy-test]))
+            [futon2.aif.selected-outer-cascade-policy-test]
+            [futon2.aif.outer-policy-runtime-selection-test]))
 
 (def fixture (edn/read-string (slurp "test/fixtures/outer-canonical-g/b5-input-fc464172.edn")))
 (def menu (:sealed-menu fixture))
@@ -24,14 +27,27 @@
     (is (= stack (get-in fixture [:policy-objective :selected :policy-id])))
     (is (not= stack (get-in first [:action :policy-id])))))
 
-(deftest ln-e-does-not-change-a-retained-canonical-choice
-  (let [f (frontier/produce menu)
-        a (sut/evaluate f menu 0.0)
-        ;; The old evaluator's gamma*G-lnE would change with this value; the
-        ;; canonical frontier intentionally has no lnE input.
-        b (sut/evaluate f menu 0.0)]
-    (is (= (:action a) (:action b)))
-    (is (= :canonical-G-min-over-scored-frontier (:basis a)))))
+(deftest ln-e-changes-the-objective-winner-but-not-the-canonical-choice
+  ;; Two evidence declarations that differ only in each policy's lnE flip the
+  ;; old gamma*G-lnE winner; the canonical choice reads the menu's frontier
+  ;; alone, so it is the same under both.
+  (let [production (var-get (ns-resolve 'futon2.aif.selected-outer-cascade-policy-test
+                                         'production-carriers))
+        declaration (var-get (ns-resolve 'futon2.aif.selected-outer-cascade-policy-test
+                                          'declaration))
+        {:keys [menu]} (production)
+        digests (mapv :cascade-digest (:entries menu))
+        winner (fn [ln-es]
+                 (get-in (objective/evaluate (evidence/join menu (declaration digests ln-es) [])
+                                             menu)
+                         [:selected :cascade-digest]))
+        f (frontier/produce menu)
+        a (sut/evaluate f menu 0.0)]
+    (is (= (second digests) (winner [0.0 1.0])))
+    (is (= (first digests) (winner [1.0 0.0])))
+    (is (= :selected (:status a)))
+    (is (= :canonical-G-min-over-scored-frontier (:basis a)))
+    (is (= a (sut/evaluate (frontier/produce menu) menu 0.0)))))
 
 (deftest refused-frontier-rows-never-enter-the-minimum
   (let [broken (update menu :entries
@@ -60,3 +76,30 @@
     (is (nil? (carrier/verify sealed)))
     (is (= :selected (get-in (carrier/decision sealed) [:decision :status])))
     (is (= :selected-policy-canonical-replay (carrier/verify forged)))))
+
+(deftest select-live-activates-the-canonical-carrier
+  ;; lnE [0.0 1.0] makes the old objective pick the second menu entry; the
+  ;; receipt's choice, its :meta-selection and the carrier must all name the
+  ;; canonical choice instead, with the objective kept only as evidence.
+  (let [runtime-var #(var-get (ns-resolve 'futon2.aif.outer-policy-runtime-selection-test %))
+        as-of "2026-10-22T12:34:56Z"
+        receipt ((runtime-var 'run-live)
+                 ((runtime-var 'explicit-provider) [0.0 1.0] [])
+                 {:selection-as-of as-of
+                  :focus-inputs {}
+                  :focus-context {:as-of as-of :status :retained :focus "WM"}
+                  :focus-classify-fn (fn [_ _ _ target _] {:target target :class :focus})})
+        policy (:policy receipt)
+        sealed (:selected-outer-cascade-policy policy)
+        canonical (:canonical-policy-selection policy)]
+    (is (= :selected (:status policy)))
+    (is (= :canonical-G-frontier (:basis-kind sealed)))
+    (is (nil? (carrier/verify sealed)))
+    ;; The receipt's action is the sealed menu entry's action, keyed :id.
+    (is (= (:policy-id (:action canonical)) (get-in receipt [:action :id])))
+    (is (= (:cascade-digest (:action canonical)) (get-in receipt [:action :cascade-digest])))
+    (is (not= (get-in policy [:policy-objective :selected :cascade-digest])
+              (get-in receipt [:action :cascade-digest])))
+    (is (= (:action canonical) (get-in policy [:meta-selection :action])))
+    (is (= :canonical-G-frontier (get-in policy [:meta-selection :selection-basis :kind])))
+    (is (= :selected (get-in policy [:policy-objective :status])))))
