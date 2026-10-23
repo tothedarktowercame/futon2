@@ -1,0 +1,10 @@
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=/home/joe/notes/M2r/tmp
+
+Running tests in #{"test"}
+
+Testing futon2.aif.meta-repair-coordinator-test
+
+Testing futon2.aif.retry-patch-identity-test
+
+Ran 20 tests containing 125 assertions.
+0 failures, 0 errors.

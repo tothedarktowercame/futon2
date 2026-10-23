@@ -72,7 +72,7 @@
      :enact (fn [r] (receipt r :succeeded
                              {:patch-sha sha-a :integration-commit sha-a
                               :retry-click "click-retry-repair-1"}))
-     :retry-click-id (fn [_repair-id _attempt ordinal]
+     :retry-click-id (fn [_repair-id _attempt ordinal _patch-sha]
                        (str "click-retry-requeue-" ordinal))
      :retry (fn [r] (receipt r :succeeded
                              {:repair-id (get-in r [:work-order :repair-id])
