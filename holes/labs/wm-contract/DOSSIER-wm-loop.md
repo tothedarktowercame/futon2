@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-23 22:53:57Z (clock read) — NEXT coordination transferred to codex-11 by Joe via claude-7 (handoff `invoke-1792795957485-2814-b72f3111`). Scope remains the named Lean terms; no new click or runtime change. J2 replay dispatched to codex-1 (`invoke-1792796012809-2816-1dc06db0`, park `park-92ec1638-97fb-4d15-896c-2e507ebb9855`), packet `~/notes/wm-next/J2-replay-packet.md`: retained inputs only; missing reach/class is typed absence, not a fabricated replay. Independent formal packet C5 present rows dispatched to codex-9 (`invoke-1792796037474-2817-aad8a924`, park `park-324ab25f-91f8-465a-acbd-bbe8a5aa45e6`), packet `~/notes/wm-next/C5-present-rows-packet.md`: strengthen Carries against absent rows while retaining every equation; theta and witnessed are separate subsequent units. Codex-11 reviews both. T1 remains behind the J2 replay/review; C4/C6 depend on T1; C6 off-facet choice remains open to Joe.
+
 - 2026-10-22 — dossier started. A1–A4 merged. O1 dispatched. Finding that production clicks bypass the reading-family route (codex-11, `~/notes/step4-route-probe.edn`) produced O1–O3; Joe ruled the direction the same evening.
 - 2026-10-22 22:30Z — O1 code merged (`3c7dd10ce`). First shadow click pre-empted by the Trial5 META injury: new row M1, now first on G1's path. Runner reloaded.
 - 2026-10-22 22:36Z — M1 cause found (oversized diagnosis request); fix 1 dispatched. M2 added: the Trial5 injury (outer-selected action without declared wants) still reproduces.
