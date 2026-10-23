@@ -209,11 +209,15 @@
 (defn run-flight!
   "Fly the planned flight once. Before any click, read the serving ordinary
   click budget and refuse the whole flight when MAX-CLICKS exceeds it or the
-  observation is unreadable. Returns {:flight … :record-path …} when flown,
+  observation is unreadable. An operator stops the flight between clicks by
+  writing <store>/flights/STOP (every flight) or <store>/flights/<flight-id>.stop
+  (this one); the flight then ends :operator-stopped with :stop {:path :read-at
+  :text}, and the file is left for the operator to remove. :stop-fn in opts
+  replaces that file check. Returns {:flight … :record-path …} when flown,
   or a typed refusal with an unopened flight and no click calls."
   [{:keys [seat store max-clicks sources checker bb library-root cascades
            run-record-dir click-fn answer-fn dispatch-step! dispatch-seat step-deadline-ms
-           availability-fn agency-base] :as opts} planned]
+           availability-fn agency-base stop-fn] :as opts} planned]
   (let [target (:target (resolve-target opts))
         store (or store wi/default-store)
         requested-clicks (or max-clicks 4)
@@ -244,6 +248,13 @@
         run-record-dir (or run-record-dir runner/default-run-record-dir)
         record-path (fn [click-id] (str (io/file run-record-dir (str "tick-run-record-" click-id ".edn"))))
         f (flight-for (assoc opts :id (:flight-id planned)))
+        stop-fn (or stop-fn
+                    (fn []
+                      (let [d (io/file store "flights")
+                            ps [(io/file d "STOP") (io/file d (str (:flight/id f) ".stop"))]]
+                        (when-let [p (first (filter #(.isFile %) ps))]
+                          {:path (.getCanonicalPath p) :read-at (str (java.time.Instant/now))
+                           :text (str/trim (slurp p))}))))
         ;; the click's run record by click id: the enactment reads it, and the
         ;; flight's conditioning step needs it too (FPI-LIVE-D: without it every
         ;; step was :no-run-record and F_pi admission could never admit one)
@@ -297,12 +308,12 @@
                               :wc-fn wc
                               :observe-fn (fr/observe-fn)
                               :sources-fn (constantly sources)
-                              :max-clicks requested-clicks}))]
+                              :max-clicks requested-clicks :stop-fn stop-fn}))]
     (if refusal
       (assoc refusal :flight (assoc f :status :refused :refusal refusal)
              :clicks [])
       (let [path (write! flown)]
-        {:flight flown :record-path (.getCanonicalPath path)
+        {:flight flown :stop (:stop flown) :record-path (.getCanonicalPath path)
          :enactments (:enactments flown)
          :readings (vec (for [a (:readings flown) q (:asked a)] (select-keys q [:kind :want :request-id :seat :job-id :outcome])))
          :requests (vec (for [a (:asks flown) q (:asked a)] (select-keys q [:want :request-id :seat :job-id :outcome])))
