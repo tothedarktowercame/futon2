@@ -16,6 +16,7 @@
             [futon2.aif.outer-policy-evidence :as policy-evidence]
             [futon2.aif.outer-policy-evidence-provider :as evidence-provider]
             [futon2.aif.outer-policy-objective :as policy-objective]
+            [futon2.aif.outer-canonical-g :as outer-canonical-g]
             [futon2.aif.assessed-policy-basis :as assessed-basis]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.selected-outer-cascade-policy :as selected-policy]
@@ -817,6 +818,10 @@
                     (assoc :g-law (:g-law policy-field-config)))
         sealed-menu (when policy-field
                       (policy-menu-fn policy-field menu-join))
+        ;; O3-1 records the canonical frontier beside the existing objective;
+        ;; nothing in this packet consumes it to make a choice.
+        canonical-g-frontier (when (= :sealed (:status sealed-menu))
+                               (outer-canonical-g/produce sealed-menu))
         provided (when (= :sealed (:status sealed-menu))
                    (evidence-provider/resolve-provider
                     outer-policy-evidence-provider sealed-menu))
@@ -961,6 +966,7 @@
                                       :policy-evidence policy-evidence
                                       :missing-policy-evidence (:missing policy-evidence)
                                       :policy-objective policy-objective
+                                      :canonical-g-frontier canonical-g-frontier
                                       :assessed-policy-basis assessed-basis
                                       :selected-outer-cascade-policy activated-carrier
                                       :missing-targets (mapv :target-id incomplete)
