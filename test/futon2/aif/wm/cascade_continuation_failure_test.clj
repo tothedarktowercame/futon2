@@ -111,7 +111,8 @@
 (deftest absent-or-invalid-failure-port-preserves-the-dispatch-failure
   (let [record (three-node-record (fixture))
         baseline (run-failure record {})
-        garbage (run-failure record {:failure-fn (constantly :garbage)})]
+        garbage (run-failure record {:failure-fn (constantly :garbage)})
+        thrower (run-failure record {:failure-fn (fn [_] (throw (ex-info "boom" {})))})]
     (testing "the optional port preserves the pre-packet result when absent"
       (is (= :capability-effect-receipt-invalid (:kind baseline)))
       (is (not (contains? baseline :failure-record)))
@@ -119,7 +120,13 @@
     (testing "a bad recorder cannot overwrite the original failure reason"
       (is (= :capability-effect-receipt-invalid (:kind garbage)))
       (is (= :failure-record-unverified
-             (get-in garbage [:failure-record :kind]))))))
+             (get-in garbage [:failure-record :kind])))
+      (is (= baseline (dissoc garbage :failure-record))))
+    (testing "a throwing recorder is typed and leaves the dispatch result unchanged"
+      (is (= :failure-record-unverified
+             (get-in thrower [:failure-record :kind])))
+      (is (= "boom" (get-in thrower [:failure-record :message])))
+      (is (= baseline (dissoc thrower :failure-record))))))
 
 (deftest successful-continuation-does-not-call-the-failure-port
   (let [record (fixture)

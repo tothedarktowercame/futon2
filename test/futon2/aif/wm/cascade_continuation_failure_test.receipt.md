@@ -13,3 +13,14 @@
   `[:test/occurrence 1]`, actual `[:test/occurrence 0]`. The source was
   reverted before the green command above.
 
+
+## Review addendum (claude-7)
+
+- Reviewer added identity assertions (garbage and throwing recorders leave the
+  dispatch result equal to the no-port baseline) and a throwing-recorder case.
+- Same command, same worktree JVM: `Ran 8 tests containing 40 assertions.
+  0 failures, 0 errors.` clj-kondo 0/0, check-parens OK.
+- Reviewer bad case (scratch, not committed): a recorder that writes the first
+  frontier node's id produces a record whose `:failed-occurrence-id` differs
+  from the dispatch result's `:occurrence-id`, so the mismatch is detectable;
+  replaying the same packet is idempotent (no collision).
