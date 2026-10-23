@@ -157,8 +157,10 @@
 (defn- open-cascade-review-prompt [{:keys [requisition author-answer]}]
   (str "Independently review this held-cascade repair. Verify the committed "
        "source and every hole decision. Reply with one JSON object containing "
-       "the author's requisition-id, cascade-digest, by, decisions and patch, "
-       "plus accepted-by set to your own seat id.\n\nREQUISITION:\n"
+       "the author's requisition-id, cascade-digest, patch {source-digest} "
+       "naming the committed source you verified, and accepted-by set to your "
+       "own seat id. Do not restate decisions; acceptance binds the author's "
+       "decisions to that verified source digest.\n\nREQUISITION:\n"
        (json/generate-string requisition)
        "\n\nAUTHOR ANSWER:\n"
        (json/generate-string author-answer)))
@@ -255,6 +257,16 @@
                                                        :author-answer author-answer}))
                 reviewed (when reviewer-response
                            (handoff/response-map reviewer-response))
+                ;; Review accepts the author's decisions; it does not author
+                ;; a second copy. Mismatched pins retain the original validator
+                ;; path, and reviewer identity is still checked there.
+                accepted-answer
+                (if (and (= (:requisition-id author-answer) (:requisition-id reviewed))
+                         (= (:cascade-digest author-answer) (:cascade-digest reviewed))
+                         (= (get-in author-answer [:patch :source-digest])
+                            (get-in reviewed [:patch :source-digest])))
+                  (assoc author-answer :accepted-by (:accepted-by reviewed))
+                  reviewed)
                 ledger (open-resume/new-ledger (or (:run-id opts) "held-click"))]
             (cond
               (nil? author-answer)
@@ -271,7 +283,7 @@
 
               :else
               (open-resume/handle-error!
-               ledger error author reviewer reviewed
+               ledger error author reviewer accepted-answer
                {:click-budget (:click-budget opts)
                 :selection-counter (:selection-counter opts)
                 :patch-loader (or (:open-cascade-patch-loader opts)

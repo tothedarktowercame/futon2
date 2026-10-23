@@ -1,0 +1,23 @@
+Review complete. Verified against the live workspace:
+
+- **Committed source exists**: `futon2/src/futon2/aif/wm/authored/req_f7374bcce.clj`, commit `fc7356769`, working tree clean, clj-kondo clean (0 errors/warnings).
+- **Digest matches**: sha256 of the committed file is `daf082eb…a76cd85a0`, identical to the author's `patch.source-digest`. The `decisions` var guards on the correct cascade-digest and `:compile` phase, returning a typed mismatch otherwise.
+- **All 27 holes covered**: every `hole-id` in the requisition (0–26, incl. repeated patterns) has exactly one decision; capability is uniformly `wm/pattern-apply`, matching owner `wm/enactment-compiler`.
+- **Completion-checks are textual conditions on the mission**, and I verified each against `futon5a/holes/missions/M-war-machine-wiring.md`: title bridge line (l.1), `OPEN — VERIFY (2026-05-01)` with Checkpoint 1 / V-1 / D-7.5 (l.4), `Owner: Joe + Claude` (l.5), Repos line with five parenthesized roles (l.6), and every citation (M-war-machine, M-war-machine-tuning, M-live-geometric-stack with T/∇/Δ/drift, M-pattern-application-diagnostic, aif-engine.md, clj_ants_aif.clj + tests, M-aif-head/M-aif4iad "framings", chapter0 "canonical", futon2-aif-ants.edn, stereolithography § Checkpoint 6, piano_roll.py + /tmp artifacts, "tuning surface", "prototype trace renderer", "(substrate × time)", "WM should emit per mission", "autonomous-foraging reference"). All present verbatim.
+- Cited artifacts also exist on disk — one observation: `futon2/src/ants/clj_ants_aif.clj` and `futon2/test/ants/` were moved to `futon2a` (commit `611d74429`); the mission text (and hence the faithful clauses) still cite the old `futon2/` paths. That is a mission-text staleness, not an authoring error — the clauses correctly mirror the text they constrain.
+
+```json
+{
+  "requisition-id": "f7374bcceac03b0bde21d32fa2c10df8edeffb0e8482acf6bfcf9d11e0a50414",
+  "cascade-digest": "8d37d377a381625761650d22c4f3a83f7f27cf9320a0b4cb43937147b9f7d907",
+  "by": "zai-2",
+  "decisions": "accepted: all 27 operational-clause decisions verified against the committed source (futon2 commit fc7356769, sha256 daf082ebc82d1306a86a0c6fad221d4fdef7e30090b7bf64ff9e017a76cd85a0, clj-kondo clean) and against the mission text futon5a/holes/missions/M-war-machine-wiring.md; every completion-check string is present in that text; each requisition hole-id maps to exactly one wm/pattern-apply decision; the decisions var guards the cascade-digest and :compile phase with a typed mismatch. Observation, not a blocker: the mission cites futon2/src/ants/clj_ants_aif.clj and futon2/test/ants/, which now live in futon2a (moved in futon2 commit 611d74429) — mission-text staleness, faithfully mirrored by the clauses.",
+  "patch": {
+    "namespace": "futon2.aif.wm.authored.req-f7374bcce",
+    "var": "decisions",
+    "source-digest": "daf082ebc82d1306a86a0c6fad221d4fdef7e30090b7bf64ff9e017a76cd85a0",
+    "commit": "fc7356769"
+  },
+  "accepted-by": "zai-3"
+}
+```
