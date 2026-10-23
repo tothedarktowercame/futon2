@@ -1,0 +1,32 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.m2y4e-contact-absence-test
+
+FAIL in (effect-contact-absence-is-retained) (m2y4e_contact_absence_test.clj:31)
+a designated seat that is not idle is a typed non-contact
+expected: (= {:status :absent, :reason :not-contacted, :seat "zai-6"} (:author-answer r))
+  actual: (not (= {:status :absent, :reason :not-contacted, :seat "zai-6"} nil))
+
+FAIL in (effect-contact-absence-is-retained) (m2y4e_contact_absence_test.clj:33)
+a designated seat that is not idle is a typed non-contact
+expected: (= {:status :absent, :reason :not-contacted, :seat "zai-2"} (:review-answer r))
+  actual: (not (= {:status :absent, :reason :not-contacted, :seat "zai-2"} nil))
+
+FAIL in (effect-contact-absence-is-retained) (m2y4e_contact_absence_test.clj:43)
+a done Agency answer with no JSON has an explicit parse reason
+expected: (= {:status :absent, :reason :unparseable-answer, :seat "zai-6", :job-id "zai-6-job"} (:author-answer r))
+  actual: (not (= {:status :absent, :reason :unparseable-answer, :seat "zai-6", :job-id "zai-6-job"} nil))
+
+FAIL in (effect-contact-absence-is-retained) (m2y4e_contact_absence_test.clj:46)
+a done Agency answer with no JSON has an explicit parse reason
+expected: (= {:status :absent, :reason :unparseable-answer, :seat "zai-2", :job-id "zai-2-job"} (:review-answer r))
+  actual: (not (= {:status :absent, :reason :unparseable-answer, :seat "zai-2", :job-id "zai-2-job"} nil))
+
+Ran 1 tests containing 8 assertions.
+4 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-4754417261039962928.edn
