@@ -1,0 +1,12 @@
+{:schema :wm/full-loop-observed-outcomes-v1
+ :observed "attempt outcomes of every recorded outer-loop cohort, per data/wm-full-loop (see --check for fixed-point semantics)"
+ :cohorts {
+  "wm-outer-loop-40-v1" {:attempts 40 :no-closed-record 40}
+  "wm-outer-loop-41-v1" {:attempts 10 :no-closed-record 10}
+  "wm-outer-loop-42-v1" {:attempts 2 :no-closed-record 2}
+  "wm-outer-loop-43-v1" {:attempts 2 :no-closed-record 2}
+  "wm-outer-loop-44-v1" {:attempts 2 :build-failed 1, :substrate-unavailable 1}
+  "wm-outer-loop-45-v1" {:attempts 3 :grounded-change 1, :incomplete 2}
+  "wm-outer-loop-46-v1" {:attempts 3 :grounded-change 3}
+}
+ :total {:cohorts 7 :attempts 62 :build-failed 1, :grounded-change 4, :incomplete 2, :no-closed-record 54, :substrate-unavailable 1}
