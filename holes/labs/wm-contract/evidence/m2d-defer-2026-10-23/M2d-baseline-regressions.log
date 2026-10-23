@@ -1,0 +1,15 @@
+WARNING: Use of :paths external to the project has been deprecated, please remove: /home/joe/notes/M2d-baseline-src
+
+FAIL in (pinned-injury-evidence-produces-a-durable-diagnosis-input) (meta_self_heal_production_test.clj:251)
+expected: (= "2026-10-19-bd1f106d-5bdc-4b9d-8350-5d9c9bd6832f" (get-in (clojure.core/deref seen) [:injury-record :run/id]))
+  actual: (not (= "2026-10-19-bd1f106d-5bdc-4b9d-8350-5d9c9bd6832f" nil))
+
+FAIL in (injected-transaction-failures-never-fall-through-to-ordinary-work) (meta_self_heal_harness_test.clj:64)
+author-failure
+expected: (= state (-> result :ledger :entries last :state))
+  actual: (not (= :claimed :reopened))
+
+FAIL in (isolated-success-uses-git-evidence-and-restarts-each-boundary) (meta_self_heal_harness_test.clj:44)
+expected: (every? (fn* [p1__43176#] (and (zero? (get-in p1__43176# [:verify :exit])) (= :valid (get-in p1__43176# [:verify :value :status])))) (:checkpoints result))
+  actual: (not (every? #object[futon2.aif.meta_self_heal_harness_test$fn__43177$fn__43224$fn__43225 0x1dcf9bd8 "futon2.aif.meta_self_heal_harness_test$fn__43177$fn__43224$fn__43225@1dcf9bd8"] [{:phase :claim, :status :checkpoint, :verify {:exit 1, :value nil}} {:phase :author, :status :checkpoint, :verify {:exit 1, :value nil}} {:phase :review, :status :checkpoint, :verify {:exit 1, :value nil}} {:phase :enact, :status :checkpoint, :verify {:exit 1, :value nil}}]))
+{:test 3, :pass 41, :fail 3, :error 0}

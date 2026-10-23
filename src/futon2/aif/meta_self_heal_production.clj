@@ -848,6 +848,80 @@
                  (= :valid (:status (coordinator/verify-transaction (:value read)))))
         (:value read)))))
 
+(defn- transaction-snapshot [path]
+  (when (and path (.isFile (io/file path)))
+    (let [bytes (Files/readAllBytes (.toPath (io/file path)))
+          read (store/read-one-form (String. bytes "UTF-8"))
+          transaction (:value read)]
+      (when (and (= :read (:status read))
+                 (= :valid (:status (coordinator/verify-transaction transaction))))
+        {:transaction transaction :transaction-path (str path)
+         :transaction-sha256 (load-identity/sha256 bytes)}))))
+
+(defn- recorded-blocker [durable injury-id]
+  (let [latest (last (filter #(and (= injury-id (:injury-id %)) (:state %))
+                             (get-in durable [:ledger :entries])))
+        cause (:requeue-cause latest)]
+    (when (and (= :enacted (:state latest))
+               (= :other-open-injury (:kind cause))
+               (not= injury-id (:injury-id cause)))
+      (:injury-id cause))))
+
+(defn injury-selection
+  "Read-only selection shared by intake and route. The transaction byte pin
+  binds a later move to the file read here. No file is moved during intake."
+  [path durable active]
+  (let [injuries (:injuries active)
+        select-snapshot (fn [snapshot]
+                          (assoc (dissoc snapshot :transaction)
+                                 :injury-id (get-in snapshot [:transaction :work-order :injury-id])))
+        defer? (fn [injury-id]
+                 (let [blocker (recorded-blocker durable injury-id)]
+                   (when (contains? injuries blocker) blocker)))]
+    (if-let [snapshot (transaction-snapshot path)]
+      (let [selection (select-snapshot snapshot) injury-id (:injury-id selection)]
+        (if-let [blocker (defer? injury-id)]
+          (assoc selection :mode :defer :injury-id blocker
+                 :deferred-injury injury-id :blocking-injury blocker
+                 :deferred-path (str path ".deferred-"
+                                     (str/replace injury-id #"[^A-Za-z0-9._-]" "_") ".edn"))
+          (assoc selection :mode :resume)))
+      (let [file (when path (io/file path))
+            prefix (when file (str (.getName file) ".deferred-"))
+            restorable (when (and file (not (.exists file)))
+                         (->> (.listFiles (.getAbsoluteFile (or (.getParentFile file) (io/file "."))))
+                              (filter #(and (str/starts-with? (.getName %) prefix)
+                                            (str/ends-with? (.getName %) ".edn")))
+                              (keep #(transaction-snapshot (.getPath %)))
+                              (map select-snapshot)
+                              (filter #(let [id (:injury-id %)
+                                             blocker (recorded-blocker durable id)]
+                                         (and (contains? injuries id) blocker
+                                              (not (contains? injuries blocker)))))
+                              (sort-by (juxt :injury-id :transaction-path)) first))]
+        (if restorable
+          (assoc restorable :mode :restore :restore-to path)
+          {:mode :fresh :injury-id (first (sort (keys injuries)))})))))
+
+(defn- move-selected-transaction! [selection]
+  (when (#{:defer :restore} (:mode selection))
+    (let [source (:transaction-path selection)
+          target (or (:deferred-path selection) (:restore-to selection))]
+      (try
+        (cond
+          (not= (:transaction-sha256 selection)
+                (load-identity/sha256 (Files/readAllBytes (.toPath (io/file source)))))
+          (refusal :meta-self-heal/selected-transaction-changed {:path source})
+          (.exists (io/file target))
+          (refusal :meta-self-heal/transaction-move-conflict {:path target})
+          :else
+          (do (Files/move (.toPath (io/file source)) (.toPath (io/file target))
+                          (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
+              {:status :moved :path target}))
+        (catch Throwable t
+          (refusal :meta-self-heal/transaction-move-failed
+                   {:path source :target target :detail (ex-message t)}))))))
+
 (defn carried-bindings-observation
   "Read a valid persisted repair transaction once and describe whether its
   diagnosis and acceptance bindings belong to an active injury."
@@ -856,16 +930,29 @@
     (if (or (not= :computed (:status active))
             (empty? (:injuries active)))
       {:status :absent :reason :no-active-injury}
-      (if-let [transaction (load-transaction (:meta-repair-transaction-path opts))]
-        (let [work-order (:work-order transaction)]
-          (if (contains? (:injuries active) (:injury-id work-order))
-            {:diagnosis-evidence-pin (:diagnosis-evidence-pin work-order)
-             :acceptance-test (:acceptance-test work-order)
-             :source :carried-transaction
-             :transaction-pin (:transaction-pin transaction)
-             :attempt (:attempt work-order)}
-            {:status :absent :reason :transaction-injury-not-active}))
-        {:status :absent :reason :no-transaction}))))
+      (let [selection (or (:injury-selection context)
+                          (injury-selection (:meta-repair-transaction-path opts)
+                                            (:durable-ledger context) active))]
+        (cond
+          (and (:transaction-path selection)
+               (not= (:meta-repair-transaction-path opts)
+                     (or (:restore-to selection) (:transaction-path selection))))
+          {:status :absent :reason :transaction-selection-path-mismatch}
+          (= :defer (:mode selection))
+          {:status :absent :reason :transaction-deferred
+           :blocking-injury (:blocking-injury selection)}
+          :else
+          (if-let [transaction (when-let [path (:transaction-path selection)]
+                                 (load-transaction path))]
+            (let [work-order (:work-order transaction)]
+              (if (contains? (:injuries active) (:injury-id work-order))
+                {:diagnosis-evidence-pin (:diagnosis-evidence-pin work-order)
+                 :acceptance-test (:acceptance-test work-order)
+                 :source :carried-transaction
+                 :transaction-pin (:transaction-pin transaction)
+                 :attempt (:attempt work-order)}
+                {:status :absent :reason :transaction-injury-not-active}))
+            {:status :absent :reason :no-transaction}))))))
 
 (defn carried-bindings
   "Return persisted diagnosis and acceptance bindings for an active injury."
@@ -982,7 +1069,9 @@
                  (ledger/active-injuries (:ledger durable)))]
     {:meta-injury-ledger-path ledger-path
      :durable-ledger durable
-     :active-injuries active}))
+     :active-injuries active
+     :injury-selection (injury-selection (:meta-repair-transaction-path opts)
+                                        durable active)}))
 
 (defn prepare-diagnosis
   "Prepare exactly the injury route that coordinator/prepare will select.  A
@@ -991,7 +1080,7 @@
   rev 6, ledgerRead): a loaded ledger whose active set did not compute is
   unavailable before a supplied pin can short-circuit (M8R finding 15,
   2026-10-20), so run-opportunity! ends the click there under a pin too."
-  [opts {:keys [durable-ledger active-injuries]}]
+  [opts {:keys [durable-ledger active-injuries injury-selection]}]
   (cond
     (and (= :loaded (:status durable-ledger))
          (not= :computed (:status active-injuries)))
@@ -1011,7 +1100,8 @@
     {:status :not-required :reason :meta-self-heal/no-active-injury}
 
     :else
-    (let [injury-id (first (sort (keys (:injuries active-injuries))))
+    (let [injury-id (or (:injury-id injury-selection)
+                        (first (sort (keys (:injuries active-injuries)))))
           entry (assoc (get-in active-injuries [:injuries injury-id])
                        :injury-id injury-id)]
       (produce-diagnosis! opts durable-ledger entry))))
@@ -1166,7 +1256,14 @@
               (refusal :meta-self-heal/production-config-required
                        {:route :dedicated-meta-self-heal :absent-terms missing
                         :ordinary-selection-called? false})
-              (let [resumed0 (load-transaction transaction-path)
+              (let [selection (if context (:injury-selection context)
+                                    (injury-selection transaction-path durable active))
+                    movement (if (nil? selection)
+                               (refusal :meta-self-heal/injury-selection-missing)
+                               (move-selected-transaction! selection))
+                    resumed0 (when-not (or (= :refused (:status movement))
+                                           (= :defer (:mode selection)))
+                               (load-transaction transaction-path))
                     resumed-injury (get-in resumed0 [:work-order :injury-id])
                     ledger-attempt (get-in active [:injuries resumed-injury :attempt])
                     retirement (when (and resumed0 (integer? ledger-attempt)
@@ -1174,8 +1271,9 @@
                                              ledger-attempt))
                                  (retire-stale-transaction! transaction-path resumed0))
                     resumed (when-not (= :retired (:status retirement)) resumed0)
-                    prepared (when-not resumed
-                               (coordinator/prepare durable (work-order-options opts)))
+                    prepared (when-not (or resumed (= :refused (:status movement)))
+                               (coordinator/prepare durable
+                                 (assoc (work-order-options opts) :injury-id (:injury-id selection))))
                     transaction (or resumed (:transaction prepared))
                     ;; Click wm-click-c78d0f27 (2026-10-19): a refused prepare
                     ;; returns no transaction, and comparing the diagnosis
@@ -1193,7 +1291,9 @@
                                          (acceptance-transaction-binding opts transaction))
                     binding (or (when-not (= :valid (:status diagnosis-binding)) diagnosis-binding)
                                 acceptance-binding)]
-                (if (= :refused (:status retirement))
+                (if (= :refused (:status movement))
+                  (assoc movement :route :dedicated-meta-self-heal :ordinary-selection-called? false)
+                  (if (= :refused (:status retirement))
                   (assoc retirement :route :dedicated-meta-self-heal
                          :ordinary-selection-called? false)
                   (if-not (= :valid (:status binding))
@@ -1230,6 +1330,12 @@
                                 (= :retired (:status retirement))
                                 (assoc :transaction-retired
                                        (select-keys retirement [:path :attempt]))
+                                (= :defer (:mode selection))
+                                (assoc :transaction-deferred
+                                       {:path (:path movement) :injury-id (:deferred-injury selection)
+                                        :blocking-injury (:blocking-injury selection)})
+                                (= :restore (:mode selection))
+                                (assoc :transaction-restored {:path (:path movement)})
                                 lw (assoc :ledger-write lw)
                                 tw (assoc :transaction-write tw
                                           :transaction (:transaction result)))))
@@ -1336,4 +1442,4 @@
                                       :entry (->> (get-in next-durable [:ledger :entries])
                                                   (filter #(= injury-id (:injury-id %)))
                                                   last
-                                                  (#(select-keys % [:state :attempt :reason])))})))))))))))))))))
+                                                  (#(select-keys % [:state :attempt :reason])))}))))))))))))))))))

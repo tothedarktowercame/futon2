@@ -1,0 +1,45 @@
+{
+  "base": "641a8c759",
+  "branch": "m2d-defer-blocker",
+  "worktree": "/home/joe/worktrees/futon2/m2d-defer-blocker",
+  "focused_command": "clojure -X:test :nses '[futon2.aif.m2d-defer-to-blocking-injury-test]'",
+  "focused": {
+    "tests": 7,
+    "assertions": 36,
+    "failures": 0,
+    "errors": 0
+  },
+  "before": {
+    "tests": 1,
+    "assertions": 8,
+    "failures": 6,
+    "errors": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "parens": "OK",
+  "regressions_initial": {
+    "tests": 99,
+    "assertions": 756,
+    "failures": 4,
+    "errors": 0
+  },
+  "regression_resolution": {
+    "context_path_mismatch": "fixed; isolated original regression 1 test / 8 assertions passed",
+    "other_three": "reproduced on unchanged base source; 3 tests / 44 assertions / 3 failures / 0 errors"
+  },
+  "live_store_written": false,
+  "reload": false,
+  "clicks": 0,
+  "logs": {
+    "M2d-before.log": "3447c71926c5a3b00ed1c487ba7500233f4554dbb388be3500b8733d7f10bd40",
+    "M2d-final-focused.log": "dd6e20dd6ecb33a39ba4215300ccb26191b10714cea52d237dac424f0a8f6f0f",
+    "M2d-kondo.log": "522393dd3b4422b0b9391255e6a296e175e7da462d1d8325b7d86c6c872b9d2a",
+    "M2d-parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "M2d-regressions.log": "f50ae1d1b2070977705d1c3d188de5e353c4ec8cfa18cb7bb26ac0b299f2d080",
+    "M2d-baseline-regressions.log": "ea127359ed1d69e76264760105a402d9e06cfc36d1f696734c8fd162cd9e8ab7",
+    "M2d-carried-regression.log": "22c76d07592a823c164f65e22deb266d38ca754cbbd911d738c77449aec2519a"
+  }
+}
