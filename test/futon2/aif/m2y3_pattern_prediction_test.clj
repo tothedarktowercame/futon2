@@ -52,7 +52,14 @@
       (is (= :refused
              (:status (outcome/freeze-prediction
                        (assoc-in (decision e)
-                                 [:selection-certificate :pattern-prediction-input :horizon] 9))))))
+                                 [:selection-certificate :pattern-prediction-input :horizon] 9)))))
+      ;; Consistent tamper: passes shape validation, so only :model-id can catch it.
+      (is (= :refused
+             (:status (outcome/freeze-prediction
+                       (-> (decision e)
+                           (assoc-in [:selection-certificate :pattern-prediction-input :horizon] 9)
+                           (assoc-in [:selection-certificate :pattern-prediction-input
+                                      :observation-model :horizon] 9)))))))
     (doseq [changed [(dissoc e :prediction)
                      (assoc e :horizon-steps nil)
                      (assoc-in e [:observation-model :want]
