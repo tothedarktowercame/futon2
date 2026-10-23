@@ -2113,16 +2113,25 @@
        (:class (focus-receipt/classify-target inputs discovery (:as-of discovery) target ctx))))))
 
 (defn- interpretation-needed-refusals
-  "Refusals an interpretation ask can discharge, in the decision's own
-  refusal order.  `:no-query-time-slice` means no retrieval/interpretation
-  entered construction at all; asking for and publishing an interpretation
-  is the in-tick way to create that missing construction input."
+  "Ask inputs in refusal order, or the selected outer target's declared wants.
+  The ask producer determines which wants lack interpretations; the runner
+  only identifies the target. The ordinary-click ask boundary owns the budget."
   [decision]
-  (when (and (map? decision) (= :abstained (:status decision)))
+  (cond
+    (= :abstained (:status decision))
     (vec (filter #(contains? #{:no-query-time-slice
                                :no-admitted-interpretation}
                              (:kind %))
-                 (:refusals decision)))))
+                 (:refusals decision)))
+
+    (and (= :selected (:status decision))
+         (= :wm/selected-outer-cascade-policy-v1
+            (get-in decision [:selection-certificate :selection-route]))
+         (= :cascade-candidate (get-in decision [:action :kind]))
+         (= :available (get-in decision [:action :declared-wants :status]))
+         (seq (get-in decision [:action :want])))
+    [{:target (get-in decision [:action :target])
+      :stage :outer-policy-effects :kind :no-admitted-interpretation}]))
 
 (defn- interpretable-refusal
   "The first :no-admitted-interpretation refusal whose target classifies to
