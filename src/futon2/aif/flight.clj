@@ -679,8 +679,11 @@
   advances nothing (:no-progress, or :awaiting-answer with :pending when an
   ask's answer was still in flight at the click), after MAX-CLICKS (then :status :click-limit, with the
   open wants on the last click), or before any click when owner questions
-  leave it no wants (:status :not-a-target-yet, :open-questions). Returns the
-  flight record."
+  leave it no wants (:status :not-a-target-yet, :open-questions). STOP-FN,
+  when given, is called with no arguments at each loop head and again just
+  before each click; a non-nil return ends the flight with :status
+  :operator-stopped and :stop that value, and no further click is made.
+  Returns the flight record."
   [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn enact-fn wc-fn fetch-run-record stop-fn]}]
   ;; WM-SPIKE-FIX-III: a Throwable out of any step still leaves a record.
   ;; P holds the flight as recorded so far and the step running; the catch
@@ -720,7 +723,12 @@
                 f (keep! (cond-> f
                            asked (-> (update :asks (fnil conj []) (assoc asked :before-click (inc (count (:clicks f)))))
                                      (update :needs into (:needs asked)))))
-                result (at :click #(click-fn (judge-opts f wants)))
+                ;; R1(b): read and ask can run for minutes, so the stop is
+                ;; read again just before the click as well as at the loop head
+                stop (when stop-fn (stop-fn))]
+            (if stop
+              (assoc f :status :operator-stopped :stop stop)
+              (let [result (at :click #(click-fn (judge-opts f wants)))
                 ;; M-wm-wiring row 0: the enactment step, after the click and
                 ;; before the after-observation, which should see its effect
                 enacted (when enact-fn (at :enact #(enact-fn f result)))
@@ -787,7 +795,7 @@
                      (and (= :closed (:status f)) (seq questions))
                      (assoc-in [:closure-scope :open-questions] questions)
                      (and (= :no-progress (:status f)) (seq pending))
-                     (assoc :status :awaiting-answer :pending pending)))))))))
+                     (assoc :status :awaiting-answer :pending pending)))))))))))
    (catch Throwable e
      (let [{:keys [f step]} @p]
        (throw (ex-info (str "flight aborted in step " (some-> step name) ": " (ex-message e))

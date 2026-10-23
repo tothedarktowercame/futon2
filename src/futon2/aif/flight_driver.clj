@@ -209,7 +209,11 @@
 (defn run-flight!
   "Fly the planned flight once. Before any click, read the serving ordinary
   click budget and refuse the whole flight when MAX-CLICKS exceeds it or the
-  observation is unreadable. Returns {:flight … :record-path …} when flown,
+  observation is unreadable. An operator stops the flight between clicks by
+  writing <store>/flights/STOP (every flight) or <store>/flights/<flight-id>.stop
+  (this one); the flight then ends :operator-stopped with :stop {:path :read-at
+  :text}, and the file is left for the operator to remove. :stop-fn in opts
+  replaces that file check. Returns {:flight … :record-path …} when flown,
   or a typed refusal with an unopened flight and no click calls."
   [{:keys [seat store max-clicks sources checker bb library-root cascades
            run-record-dir click-fn answer-fn dispatch-step! dispatch-seat step-deadline-ms
