@@ -550,7 +550,11 @@
                    :policy-menu-fn nil
                    :fetch-snapshot (constantly snapshot)}))]
     (is (= :refused (get-in receipt [:policy :status])))
+    ;; :no-canonically-bound-policy is the production default menu's own
+    ;; refusal (family_selection sealed-pre-choice-menu, empty entries), so
+    ;; it shows the nil constructor fell back to the default.
     (is (contains? #{:incomplete-policy-menu-coverage
+                     :no-canonically-bound-policy
                      :outer-policy-evidence-provider-required}
                    (get-in receipt [:policy :meta-selection :reason])))
     (is (nil? (:action receipt)))))
