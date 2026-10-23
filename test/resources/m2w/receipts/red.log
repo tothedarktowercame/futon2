@@ -1,0 +1,68 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.outer-policy-token-stage-test
+
+FAIL in (old-and-invalid-actions-have-no-stage) (outer_policy_token_stage_test.clj:64)
+expected: (= reason (get-in d [:selection-certificate :token-belief-stage-status :reason]))
+  actual: (not (= :declared-wants-universe-absent nil))
+
+FAIL in (old-and-invalid-actions-have-no-stage) (outer_policy_token_stage_test.clj:64)
+expected: (= reason (get-in d [:selection-certificate :token-belief-stage-status :reason]))
+  actual: (not (= :declared-wants-empty nil))
+
+FAIL in (old-and-invalid-actions-have-no-stage) (outer_policy_token_stage_test.clj:64)
+expected: (= reason (get-in d [:selection-certificate :token-belief-stage-status :reason]))
+  actual: (not (= :declared-wants-empty nil))
+
+FAIL in (old-and-invalid-actions-have-no-stage) (outer_policy_token_stage_test.clj:64)
+expected: (= reason (get-in d [:selection-certificate :token-belief-stage-status :reason]))
+  actual: (not (= :declared-wants-target-mismatch nil))
+
+FAIL in (pre-seal-producer-carries-source-facts) (outer_policy_token_stage_test.clj:77)
+expected: (= (:universe (source text)) (get-in got [:declared-wants :universe]))
+  actual: (not (= #:hole{:h9d2f3d29a87d false} nil))
+
+FAIL in (pre-seal-producer-carries-source-facts) (outer_policy_token_stage_test.clj:78)
+expected: (= {(first (:want got)) false} (get-in got [:declared-wants :universe]))
+  actual: (not (= #:hole{:h9d2f3d29a87d false} nil))
+
+FAIL in (six-wants-reach-the-readers) (outer_policy_token_stage_test.clj:44)
+expected: (= [{:target (:target a), :declaration {:facts (get-in a [:declared-wants :universe]), :want (:want a), :interpretations {}}}] (:domain-inputs stage))
+  actual: (not (= [{:target "M-war-machine-wiring", :declaration {:facts #:hole{:h3b6587f68a09 false, :h367d19f57c3e false, :h2ec21424642e false, :h459471323b5c false, :hbc31d1f47ff8 false, :h66d04c790126 false}, :want [:hole/h3b6587f68a09 :hole/h367d19f57c3e :hole/h2ec21424642e :hole/h459471323b5c :hole/hbc31d1f47ff8 :hole/h66d04c790126], :interpretations {}}}] nil))
+
+FAIL in (six-wants-reach-the-readers) (outer_policy_token_stage_test.clj:47)
+expected: (= {#{} 1} (into {} (get-in stage [:initialization :value])))
+  actual: (not (= {#{} 1} {}))
+
+FAIL in (six-wants-reach-the-readers) (outer_policy_token_stage_test.clj:48)
+expected: (= :assembled-target-facts (get-in stage [:initialization :origin]))
+  actual: (not (= :assembled-target-facts nil))
+
+FAIL in (six-wants-reach-the-readers) (outer_policy_token_stage_test.clj:49)
+expected: (carry/valid-stage? stage (:initial-belief-receipt d))
+  actual: (not (carry/valid-stage? nil nil))
+
+FAIL in (six-wants-reach-the-readers) (outer_policy_token_stage_test.clj:50)
+expected: (= universe (get-in stage [:prospective-carry :universe]))
+  actual: (not (= #{["M-war-machine-wiring" :hole/h2ec21424642e] ["M-war-machine-wiring" :hole/hbc31d1f47ff8] ["M-war-machine-wiring" :hole/h459471323b5c] ["M-war-machine-wiring" :hole/h3b6587f68a09] ["M-war-machine-wiring" :hole/h66d04c790126] ["M-war-machine-wiring" :hole/h367d19f57c3e]} nil))
+
+FAIL in (six-wants-reach-the-readers) (outer_policy_token_stage_test.clj:51)
+expected: (= universe (:universe dispatch))
+  actual: (not (= #{["M-war-machine-wiring" :hole/h2ec21424642e] ["M-war-machine-wiring" :hole/hbc31d1f47ff8] ["M-war-machine-wiring" :hole/h459471323b5c] ["M-war-machine-wiring" :hole/h3b6587f68a09] ["M-war-machine-wiring" :hole/h66d04c790126] ["M-war-machine-wiring" :hole/h367d19f57c3e]} nil))
+
+FAIL in (six-wants-reach-the-readers) (outer_policy_token_stage_test.clj:52)
+expected: (= universe (set (map :token rows)))
+  actual: (not (= #{["M-war-machine-wiring" :hole/h2ec21424642e] ["M-war-machine-wiring" :hole/hbc31d1f47ff8] ["M-war-machine-wiring" :hole/h459471323b5c] ["M-war-machine-wiring" :hole/h3b6587f68a09] ["M-war-machine-wiring" :hole/h66d04c790126] ["M-war-machine-wiring" :hole/h367d19f57c3e]} #{}))
+
+FAIL in (six-wants-reach-the-readers) (outer_policy_token_stage_test.clj:53)
+expected: (= 6 (count (clojure.core/deref reads)))
+  actual: (not (= 6 0))
+
+Ran 4 tests containing 25 assertions.
+14 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-14864802812166908492.edn

@@ -1,6 +1,9 @@
 (ns futon2.aif.selected-outer-cascade-policy
   "Sealed handoff from the strict outer policy selector to cascade execution."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [clojure.string :as str]
+            [futon2.aif.token-belief-carry :as token-carry]
+            [futon2.aif.scoring-input-receipts :as scoring-inputs]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.assessed-policy-basis :as assessed-basis]
             [futon2.aif.outer-policy-evidence :as evidence]
             [futon2.aif.outer-policy-objective :as objective]
@@ -187,6 +190,39 @@
         :else nil))
     (catch Throwable _ :selected-policy-malformed)))
 
+(defn- with-token-stage
+  "Record mission-source facts for observation dispatch, never for scoring.
+   Occurrence identifies the sealed selection; it is not a minted enactment."
+  [decision occurrence-id]
+  (let [{:keys [target want declared-wants]} (:action decision)
+        facts (:universe declared-wants)
+        source-path (get-in declared-wants [:source :path])
+        pinned-path (get-in declared-wants [:target-source-pin :path])
+        reason (cond
+                 (not= :available (:status declared-wants)) :declared-wants-unavailable
+                 (not (seq want)) :declared-wants-empty
+                 (not (contains? declared-wants :universe)) :declared-wants-universe-absent
+                 (not (and (string? target) (string? source-path)
+                           (str/ends-with? source-path (str "/" target ".md"))
+                           (or (nil? pinned-path)
+                               (and (string? pinned-path)
+                                    (str/ends-with? pinned-path (str "/" target ".md"))))))
+                 :declared-wants-target-mismatch
+                 (not (and (map? facts) (seq facts)
+                           (every? boolean? (vals facts))
+                           (every? #(contains? facts %) want))) :declared-wants-universe-invalid)]
+    (if reason
+      (assoc-in decision [:selection-certificate :token-belief-stage-status]
+                {:status :unavailable :reason reason})
+      (let [problems [{:target target :cascade-problem
+                       {:facts facts :want want :interpretations {}}}]
+            initialization (scoring-inputs/initial-belief problems)
+            stage (token-carry/stage initialization (token-carry/domain-inputs problems)
+                                     nil {:occurrence-id occurrence-id})]
+        (-> decision
+            (assoc :initial-belief-receipt initialization)
+            (assoc-in [:selection-certificate :token-belief-stage] stage))))))
+
 (defn decision
   "Project a verified handoff into the downstream decision shape without selection."
   [carrier]
@@ -198,7 +234,8 @@
           raw-receipt (dissoc (:objective-receipt carrier) :objective-pin)
           selection (when assessed? (:assessed-selection raw-receipt))]
       {:status :selected
-       :decision {:status :selected
+       :decision (with-token-stage
+                 {:status :selected
                   :action (:action entry)
                   :selection-certificate
                   {:selection-route :wm/selected-outer-cascade-policy-v1
@@ -230,5 +267,6 @@
                    ;; Observed outer-route terms, not a beta update: the
                    ;; objective receipt is sealed and replay-verified above.
                    :precision-row (:precision-row raw-receipt)}}
+                 (str "outer-selection/" (get-in carrier [:carrier-pin :sha256])))
        :ranked [entry]
        :preselected true})))
