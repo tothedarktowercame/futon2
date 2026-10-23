@@ -602,11 +602,17 @@
      :abstention {:kind :missing …} | nil}          the judge's decline, if any
   Records the wants advanced; carries unreached wants and the abstention's
   missing input forward; closes when every want holds after the click; ends
-  :no-progress when nothing advanced."
+  :click-refused when the server did not start the click (after closure has
+  been checked), and otherwise :no-progress when nothing advanced."
   [flight {:keys [click-id wants want-source before after unreached-wants abstention] :as click}]
   (let [moved (advanced wants before after)
         open (vec (remove #(true? (get after %)) wants))
+        refusal (when (= :click-not-started (:kind abstention))
+                  {:click-id click-id
+                   :status (:status abstention)
+                   :detail (:detail abstention)})
         status (cond (empty? open) :closed
+                     refusal :click-refused
                      (empty? moved) :no-progress
                      :else :open)]
     (-> flight
@@ -637,6 +643,7 @@
                                         :missing (:missing abstention)}
                                        (select-keys abstention [:status :detail])))))
         (assoc :status status)
+        (cond-> refusal (assoc :refusal refusal))
         ;; what a closure covered: the criteria in view, and what was not
         (cond-> (= :closed status)
           (assoc :closure-scope {:criteria-in-view (count wants)
@@ -683,7 +690,9 @@
   when given, is called with no arguments at each loop head and again just
   before each click; a non-nil return ends the flight with :status
   :operator-stopped and :stop that value, and no further click is made.
-  Returns the flight record."
+  A server refusal (:click-not-started) ends :click-refused with its unchanged
+  :refusal; closure takes precedence if the after-observation already closes
+  every want. Returns the flight record."
   [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn enact-fn wc-fn fetch-run-record stop-fn]}]
   ;; WM-SPIKE-FIX-III: a Throwable out of any step still leaves a record.
   ;; P holds the flight as recorded so far and the step running; the catch
