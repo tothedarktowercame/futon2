@@ -565,6 +565,37 @@
      :reviewer (seat :reviewer :no-reviewer-given)
      :repair-reviewer (seat :repair-reviewer :no-repair-reviewer-given)}))
 
+(defn http-click-availability-fn
+  "Read the serving click endpoint's non-consuming ordinary-click budget.
+  Returns a typed unavailable value on transport, HTTP, or response-shape
+  failure. The caller decides how many clicks it requires."
+  [{:keys [agency-base get!]
+    :or {agency-base "http://localhost:7070"}}]
+  (fn []
+    (try
+      (let [{:keys [status body]}
+            ((or get! (fn []
+                        (let [response
+                              (babashka.http-client/get
+                               (str agency-base "/api/alpha/wm/click")
+                               {:throw false})]
+                          {:status (:status response)
+                           :body (cheshire.core/parse-string (:body response) true)}))))]
+        (if (and (= 200 status) (map? (:ordinary-click-budget body)))
+          ;; JSON carries the keyword values as strings; read them back.
+          (let [budget (:ordinary-click-budget body)
+                kw (fn [v] (if (string? v) (keyword v) v))]
+            (-> budget
+                (cond-> (contains? budget :schema) (update :schema kw))
+                (cond-> (contains? budget :unit) (update :unit kw))))
+          {:status :unavailable
+           :reason :click-budget-response-unreadable
+           :http-status status}))
+      (catch Exception e
+        {:status :unavailable
+         :reason :click-budget-read-failed
+         :message (ex-message e)}))))
+
 (defn http-click-fn
   "A flight click function over the serving JVM: POST /api/alpha/wm/click
   with the flight as flight-edn and a dated run id, wait until that click is
