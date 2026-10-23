@@ -27,7 +27,7 @@
         receipt (execute ground)]
     (is (dispatch/valid-receipt? receipt digest node))
     (is (= ground (get-in receipt [:effect :grounding]))))
-  (doseq [bad [digest "abcdef0" 42 nil]]
+  (doseq [bad [digest "abcdef0" 42 nil (apply str (repeat 40 "B"))]]
     (is (= :reviewed-effect-invalid
            (:kind (execute {:digest digest :revision bad :repo "futon2"})))) )
   (doseq [repo [nil "" "  " :futon2]]

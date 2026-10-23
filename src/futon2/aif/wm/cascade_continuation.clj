@@ -23,7 +23,7 @@
   ;; enum keywords; absence remains valid for content-addressed effects.
   (or (not (contains? grounding :revision))
       (and (string? (:revision grounding))
-           (re-matches #"[0-9a-fA-F]{40}" (:revision grounding))
+           (re-matches #"[0-9a-f]{40}" (:revision grounding))
            (string? (:repo grounding))
            (not (str/blank? (:repo grounding))))))
 
