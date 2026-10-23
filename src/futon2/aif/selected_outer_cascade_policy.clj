@@ -4,6 +4,7 @@
             [futon2.aif.assessed-policy-basis :as assessed-basis]
             [futon2.aif.outer-policy-evidence :as evidence]
             [futon2.aif.outer-policy-objective :as objective]
+            [futon2.aif.outer-canonical-g :as canonical-g]
             [futon2.aif.outer-canonical-selection :as canonical-selection]
             [futon2.aif.wm.executable-cascade :as executable]
             [futon2.aif.wm.family-selection :as family]))
@@ -165,6 +166,9 @@
         (and (= :strict-objective basis-kind)
              (not= receipt (assoc recomputed :objective-pin (objective-pin recomputed))))
         :selected-policy-objective-recomputation
+        (and (= :canonical-G-frontier basis-kind)
+             (not= (:canonical-frontier carrier) (canonical-g/produce menu)))
+        :selected-policy-canonical-frontier-replay
         (and (= :canonical-G-frontier basis-kind)
              (not= (:canonical-selection carrier)
                    (canonical-selection/evaluate (:canonical-frontier carrier) menu
