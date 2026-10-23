@@ -1,0 +1,9 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.outer-policy-token-stage-test
+
+Testing futon2.aif.wm.outer-action-declared-wants-test
+
+Ran 8 tests containing 58 assertions.
+0 failures, 0 errors.

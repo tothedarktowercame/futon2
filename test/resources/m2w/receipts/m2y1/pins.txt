@@ -1,0 +1,2 @@
+56f1ef4ff88e275c9dea118a83ada112b9c435ecdc0f654682b00501929ea390  test/resources/m2w/precedence.edn
+539a79578d704f7ed8a5a273a8cf15febd77af1512295b4fef38ea0b7ddfaeee  /home/joe/notes/M2v/decision-3-0.edn

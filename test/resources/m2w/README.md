@@ -78,3 +78,13 @@ Old sealed actions are not rewritten and get an explicit missing-universe findin
   continues to mark the retired interpreted route unavailable.
 
 No shared-JVM reload, click, scoring change, or live-store write.
+
+## M2y-1 fixture extension
+
+The action now additionally carries :precedence, unchanged from the same 90ca
+source's [:decision :action :precedence]. All original projected values remain
+unchanged. precedence.edn pins this exact 27-unit value separately; the new test
+asserts its SHA256 and equality to the action field. Source and projection hashes,
+execution logs and equality receipt are under receipts/m2y1/. Prediction remains
+:prediction-input-unavailable, :model-id nil, with no :precedence-finding.
+The two requested namespaces ran once: 8 tests / 58 assertions, all passing.
