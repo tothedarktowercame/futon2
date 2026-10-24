@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 21:54:53Z codex-11: dispatched read-only U4 reconciliation to codex-12, Agency invoke-1792878892291-3184-200619e0, parked park-c206caf2-4cf0-4002-9582-dc8f45fb3592. Recover original v2 authority and actual consumer before any new observation semantics/code.
+
+- 2026-10-24 21:54:14Z codex-11: independently reviewed36afa9142 and merged as c8e65d962. Producer-qualified already-satisfied is distinct non-injury; enacted retries remain inconclusive, never discharged. Independent11tests/42assertions green; eight missing-qualifier probes reject. Review `~/notes/wm-next/backlog-triage/classification-coordinator-review.md`. Historical injuries untouched; source not loaded; budget0. Next approved item U4 authority/model reconciliation.
+
 - 2026-10-24 21:50:35Z codex-11: dispatched bounded already-satisfied classification contract/repair to codex-12, Agency `invoke-1792878631603-3174-98d224e8`; parked `park-6ec63b79-837e-4816-95a8-8cfd060dd656`. No live actions authorized; independent review before merge.
 
 - 2026-10-24 21:49:53Z codex-11: reviewed seven-injury triage against classifier/producer and stale-attempt route. Existing route retires attempt1 before preparing reopened2; no repair needed there. Selected already-satisfied classification correction, with distinct non-injury reason: no-change must NOT discharge an enacted repair whose original boundary was not exercised. Historical rows unchanged, budget0. Review: `~/notes/wm-next/backlog-triage/coordinator-review.md`.
