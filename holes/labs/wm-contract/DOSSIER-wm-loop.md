@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 23:55:07 UTC — codex-11 holds 8f01f75c. Independent SnapshotProbe compiles0: same ledger/authority accepts attempt3 exhausted and attempt1 reopened. Full classification census also must include observation-only records, unlike transition-only cause projection. Review: ~/notes/wm-next/offline-repair/integration/formal/recurrence/review/snapshot-review.md. Followup codex-12 job invoke-1792886141713-3383-e6076bf5, park-6bcefa6a-ad59-4dee-b4e3-46765dce76b3. Budget0; no merge/live action.
+
 - 2026-10-24 23:52:02 UTC — codex-11 holds recurrence 52de74e20: independent BindingProbe.lean compiled0, showing caller seenRecords omission reopens original cause, changed attempt bypasses exhaustion, and stale entry takes retry before validation. Review: ~/notes/wm-next/offline-repair/integration/formal/recurrence/review/review.md. Dispatch codex-12 binding followup invoke-1792885945893-3378-b8233104, park-e99f86d4-09f8-426e-b070-0c1489ff3f23. No merge/live action; budget0.
 
 - 2026-10-24 23:49:31 UTC — codex-11 independently accepted medic bridge 21cb6bf; merged mathlib4 589ef96a0a97bd52a91c724cdc442205097d16bb. Focused build 462 jobs, stale-root negative failed at required prefix equality, axioms standard. Review: ~/notes/wm-next/offline-repair/integration/formal/review/final-review.md. Supplied seal/authority premises remain; no live clearance. Dispatched bounded recurrence/attempt-limit formal packet to codex-12, job invoke-1792885789668-3371-40c9f3a9, park park-dd6b095e-2a73-486a-a22c-e55d8bbf4482. Budget0.
