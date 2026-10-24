@@ -14,6 +14,7 @@
    :diagnostic-only :diagnostic-only})
 (def successful-outcomes #{:success :closed :grounded-change :cohort-complete})
 (def pin-re #"[0-9a-f]{64}")
+(def git-re #"[0-9a-f]{40,64}")
 
 (defn- nonblank? [x] (and (string? x) (not (str/blank? x))))
 (defn- pin? [x]
@@ -35,6 +36,23 @@
   (or (get-in record [:terminal-receipt :outcome])
       (get-in record [:failure :detail :outcome])
       (:outcome record)))
+(defn- producer-qualified-already-satisfied? [record]
+  ;; PROOF-2b's author-refusal producer establishes commit existence before
+  ;; throwing this typed close. Classification trusts only the mutually
+  ;; agreeing retained producer fields; it does not infer from author prose or
+  ;; arbitrary metadata, and it does not re-run Git as a second authority.
+  (let [failure (:failure record)
+        detail (:detail failure)
+        grounded (:grounded-commit detail)]
+    (and (= :already-satisfied (:kind failure))
+         (= :author-wait (:stage failure))
+         (= :already-satisfied (:failure-kind detail))
+         (= :author-wait (:failure-stage detail))
+         (= :already-satisfied (:outcome detail))
+         (= :already-satisfied (get-in record [:run-output :outcome]))
+         (nonblank? (:repo grounded))
+         (string? (:sha grounded))
+         (boolean (re-matches git-re (:sha grounded))))))
 (defn- target [record]
   (let [candidate (or (get-in record [:failure :target])
                       (get-in record [:failure :detail :target]))]
@@ -130,7 +148,9 @@
           non-injury-reason (if (= :abstained kind)
                               (when-not (unconfigured-route? record)
                                 (abstention-reason record))
-                              (or (get explicit-non-injury-kinds kind)
+                              (or (when (producer-qualified-already-satisfied? record)
+                                    :producer-qualified-already-satisfied)
+                                  (get explicit-non-injury-kinds kind)
                                   (when (and (nil? kind)
                                              (contains? successful-outcomes terminal-outcome))
                                     :successful-task-outcome)
@@ -158,6 +178,8 @@
                                       :partial-frontier-continuation :partial-frontier-continuation
                                       :ordinary-selection-abstention :ordinary-abstention
                                       :successful-task-outcome :successful-task-outcome
+                                      :producer-qualified-already-satisfied
+                                      :producer-qualified-already-satisfied
                                       :operator-cancelled :operator-cancelled
                                       :declared-no-work :declared-no-work
                                       :diagnostic-only :diagnostic-only
