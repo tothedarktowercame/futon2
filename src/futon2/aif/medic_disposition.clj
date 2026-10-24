@@ -7,12 +7,15 @@
   medicEffectiveActiveOccurrences at mathlib4 revision 18bb69d802d5766a7.
   `certified-sweep` corresponds to MedicSweepProvenance.AdmittedSweep with an
   empty initial correction log. Caller-supplied authority remains external;
-  this namespace neither authenticates pins nor mutates the META ledger.")
+  this namespace neither authenticates pins nor mutates the META ledger."
+  (:require [clojure.string :as str]))
 
 (def schema :wm/medic-disposition-v1)
 (def correction-kinds #{:historical-misclassification :genuine-repair})
 (def replay-results #{:producer-qualified-non-injury
                       :unsupported-author-refusal :done-at-base-revision :injury})
+
+(declare payload-valid?)
 
 (def ^:private common-fields
   #{:kind :injury-id :entry-id :predecessor-entry-id :patch-id
@@ -38,13 +41,16 @@
   (first (filter #(= injury-id (:injury-id %)) (latest-entries history))))
 
 (defn- exact-keys? [m expected] (= expected (set (keys m))))
-(defn- present-scalars? [m ks] (every? #(some? (get m %)) ks))
+(defn- identity-scalar? [x] (and (string? x) (not (str/blank? x))))
+(defn- present-scalars? [m ks] (every? #(identity-scalar? (get m %)) ks))
 
 (defn- entry-valid? [entry]
   (and (map? entry)
        (exact-keys? entry #{:injury-id :entry-id :predecessor-entry-id
                             :cause-record-id :cause-pin :active?})
        (present-scalars? entry [:injury-id :entry-id :cause-record-id :cause-pin])
+       (or (nil? (:predecessor-entry-id entry))
+           (identity-scalar? (:predecessor-entry-id entry)))
        (boolean? (:active? entry))))
 
 (defn validate-state
@@ -62,11 +68,13 @@
       {:status :refused :reason :malformed-history-entry}
       (not= (count history) (count (set (map :entry-id history))))
       {:status :refused :reason :duplicate-entry-id}
+      (not-every? payload-valid? corrections)
+      {:status :refused :reason :malformed-correction}
       :else
       (loop [prior {} remaining history]
         (if-let [entry (first remaining)]
           (let [pred (:predecessor-entry-id entry)]
-            (if (and pred (not= pred (get prior (:injury-id entry))))
+            (if (and (some? pred) (not= pred (get prior (:injury-id entry))))
               {:status :refused :reason :invalid-predecessor :entry entry}
               (recur (assoc prior (:injury-id entry) (:entry-id entry))
                      (next remaining))))
@@ -78,12 +86,14 @@
     :genuine-repair genuine-fields
     nil))
 
-(defn- payload-valid? [payload]
+(defn payload-valid?
+  "Structural model-domain validation; this does not authenticate any field."
+  [payload]
   (let [kind (:kind payload)
         fields (payload-fields kind)]
     (and (map? payload) fields (exact-keys? payload fields)
-         (present-scalars? payload (disj fields :predecessor-entry-id
-                                          :original-acceptance-repaired?))
+         (present-scalars? payload (disj fields :kind :predecessor-entry-id
+                                          :original-acceptance-repaired? :replay))
          (not= (:reviewer payload) (:evaluator payload))
          (case kind
            :historical-misclassification (contains? replay-results (:replay payload))
@@ -164,8 +174,12 @@
   withheld unless state is valid, corrections start empty, and every request
   was actually appended by `process`."
   [authority? state requests]
-  (let [valid (validate-state state)]
+  (let [request-sequence? (or (vector? requests) (list? requests))
+        valid (validate-state state)]
     (cond
+      (not request-sequence?)
+      {:schema schema :status :uncertified :reason :request-sequence-required
+       :certified? false :state state :results []}
       (not= :valid (:status valid)) (assoc valid :schema schema :certified? false)
       (seq (:corrections state))
       {:schema schema :status :uncertified :reason :preloaded-corrections
@@ -187,7 +201,10 @@
          (mapv occurrence))))
 
 (defn certified-clear-all?
-  "True only for a certified fold whose exact effective-active projection is empty."
-  [certified-result]
-  (and (:certified? certified-result)
-       (empty? (effective-active (:state certified-result)))))
+  "Recompute from explicit authority, origin, and requests. The one-argument
+  form rejects untrusted result maps retained by callers of the earlier API."
+  ([_untrusted-result] false)
+  ([authority? origin requests]
+   (let [result (certified-sweep authority? origin requests)]
+     (and (:certified? result)
+          (empty? (effective-active (:state result)))))))

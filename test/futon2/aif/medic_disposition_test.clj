@@ -27,10 +27,11 @@
         all (medic/certified-sweep allow base [(req hist hist) (req genuine genuine)])]
     (is (:certified? partial))
     (is (= [["41" "e2"]] (medic/effective-active (:state partial))))
-    (is (false? (medic/certified-clear-all? partial)))
+    (is (false? (medic/certified-clear-all? allow base [(req hist hist)])))
     (is (:certified? all))
     (is (empty? (medic/effective-active (:state all))))
-    (is (medic/certified-clear-all? all))
+    (is (medic/certified-clear-all? allow base
+                                    [(req hist hist) (req genuine genuine)]))
     (is (= (:history base) (get-in all [:state :history])))))
 
 (deftest latest-occurrence-binding-preserves-reopen-and-inactive
@@ -86,7 +87,30 @@
     (is (empty? ordinary) "ordinary projection computes but proves no provenance")
     (is (= :preloaded-corrections (:reason certified)))
     (is (false? (:certified? certified)))
-    (is (false? (medic/certified-clear-all? certified)))))
+    (is (false? (medic/certified-clear-all? certified)))
+    (is (false? (medic/certified-clear-all? allow forged [])))))
+
+(deftest public-clear-all-recomputes-and-rejects-forged-results
+  (is (false? (medic/certified-clear-all? {:certified? true})))
+  (is (false? (medic/certified-clear-all?
+               {:certified? true :state {:history [] :corrections []}})))
+  (is (true? (medic/certified-clear-all? allow
+                                         {:history [] :corrections []} [])))
+  (is (= :request-sequence-required
+         (:reason (medic/certified-sweep allow
+                                         {:history [] :corrections []} nil)))))
+
+(deftest correction-and-predecessor-domain-is-explicit
+  (is (= :malformed-correction
+         (:reason (medic/validate-state {:history [] :corrections [nil]}))))
+  (is (= :malformed-history-entry
+         (:reason (medic/validate-state
+                   {:history [(assoc e1 :predecessor-entry-id false)]
+                    :corrections []}))))
+  (is (= :invalid-predecessor
+         (:reason (medic/validate-state
+                   {:history [(assoc e1 :predecessor-entry-id "unknown")]
+                    :corrections []})))))
 
 (deftest rejected-step-withholds-sweep-certification
   (let [result (medic/certified-sweep allow base [(req hist hist) (req hist hist)])]
