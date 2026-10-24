@@ -11,7 +11,7 @@
 ;; Usage: bb code_sites.clj [REV ...]  -> JSON array of sites on stdout.
 ;; Each REV is repo=sha (e.g. /home/joe/code/futon2=ef89bd061) and reads that repo at that
 ;; commit instead of HEAD.
-(require '[cheshire.core :as json] '[edamame.core :as e] '[clojure.java.io :as io] '[clojure.string :as str])
+(require '[cheshire.core :as json] '[edamame.core :as e] '[clojure.java.shell :as shell] '[clojure.string :as str])
 
 (def sources
   ;; [tag repo file only-fns]  only-fns nil = whole file
@@ -24,17 +24,20 @@
    ;; cited by the Lean text but owing no outcome sites: :defn rows only
    ["L" "/home/joe/code/futon2" "src/futon2/aif/meta_injury_ledger.clj" #{}]
    ["I" "/home/joe/code/futon2" "src/futon2/aif/meta_injury_store.clj" #{}]
-   ["U" "/home/joe/code/futon2" "src/futon2/aif/full_loop_runner.clj" #{}]])
+   ["U" "/home/joe/code/futon2" "src/futon2/aif/full_loop_runner.clj" #{}]
+   ;; Definition-only source for named CheckedProblemMap alignment.  Its rows
+   ;; resolve explicit Lean anchors, but contribute no outcome-site denominator.
+   ["K" "/home/joe/code/futon2" "src/futon2/aif/checked_problem_map.clj" #{}]])
 
 (def revs (into {} (map #(str/split % #"=" 2)) *command-line-args*))
 
 (defn head [repo]
-  (str/trim (:out (clojure.java.shell/sh "git" "-C" repo "rev-parse" "--short=9" (get revs repo "HEAD")))))
+  (str/trim (:out (shell/sh "git" "-C" repo "rev-parse" "--short=9" (get revs repo "HEAD")))))
 
 (defn committed [repo sha file]
   ;; Read the file as committed at a sha, never the working tree: the sha the report
   ;; names must be the content it read, and another lane may be mid-edit.
-  (:out (clojure.java.shell/sh "git" "-C" repo "show" (str sha ":" file))))
+  (:out (shell/sh "git" "-C" repo "show" (str sha ":" file))))
 
 (defn forms [text]
   (e/parse-string-all text {:all true :row-key :line :col-key :col :end-row-key :end-line

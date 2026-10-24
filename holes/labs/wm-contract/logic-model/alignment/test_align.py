@@ -1,4 +1,7 @@
 import importlib.util
+import json
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,7 +14,8 @@ align = _ALIGN.align
 
 def site(fn, reason, line, tag="P", kind="refusal"):
   return {"id": f"{tag}:{line}:{reason.split('/')[-1]}", "tag": tag, "fn": fn,
-          "line": line, "kind": kind, "reason": reason}
+          "line": line, "kind": kind, "reason": reason,
+          "file": "src/example.clj", "sha": "a" * 40}
 
 
 def entity(name, text):
@@ -132,7 +136,8 @@ class StatusMapTest(unittest.TestCase):
 
 
 def defn(fn, source, tag="P"):
-  return {"tag": tag, "fn": fn, "line": 1, "end-line": 1, "kind": "defn", "source": source}
+  return {"tag": tag, "fn": fn, "line": 1, "end-line": 1, "kind": "defn", "source": source,
+          "file": "src/example.clj", "sha": "a" * 40}
 
 
 class AnchorResolutionTest(unittest.TestCase):
@@ -226,6 +231,183 @@ class NegatedAnchorTest(unittest.TestCase):
     self.assertEqual([], edge_ids(edges, "name"))
     without_negation = align(sites, [entity("retry", "The retry port's phase, `(C coordinate :retry)`.")])
     self.assertEqual(["R:476"], edge_ids(without_negation, "name"))
+
+
+class NamedDeclarationTest(unittest.TestCase):
+  """The named fragment is opt-in and deliberately narrower than Lean syntax."""
+  def source(self, text):
+    return {"repo": "/repo", "revision": "a" * 40, "path": "DarkTower/Test.lean",
+            "module": "DarkTower/Test", "text": text, "sha256": "b" * 64}
+
+  def test_namespace_section_dotted_and_noncomputable_definitions(self):
+    entities, issues = _ALIGN.named_lean_entities(self.source('''
+namespace Outer.Real
+section ignored
+/-- `(K closed-set)` -/
+noncomputable def closedSet : Nat := 0
+end ignored
+theorem CheckedReturn.empty : True := True.intro
+end Outer.Real
+-- def fake : Nat := 0
+def outside : Nat := 0
+'''))
+    self.assertEqual([], issues[:-1])
+    self.assertEqual(["Outer.Real.closedSet", "Outer.Real.CheckedReturn.empty"],
+                     [entity["symbol"] for entity in entities])
+    self.assertEqual(["def", "theorem"], [entity["kind"] for entity in entities])
+    self.assertEqual("DarkTower/Test", entities[0]["module"])
+    self.assertEqual("declaration outside namespace", issues[-1]["reason"])
+
+  def test_private_required_symbol_is_typed_unsupported(self):
+    entities, issues = _ALIGN.named_lean_entities(self.source('''
+namespace Outer
+private def hidden : Nat := 0
+end Outer
+'''))
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "unsupported: private declaration"):
+      _ALIGN.require_named_entities(entities, issues, [("def", "Outer.hidden")])
+
+  def test_noncomputable_section_keeps_namespace_after_end(self):
+    source = self.source("namespace Demo\nnoncomputable section\ndef inside : Nat := 0\nend\ndef outsideSection : Nat := 0\nend Demo\n")
+    entities, issues = _ALIGN.named_lean_entities(source)
+    self.assertEqual([], issues)
+    self.assertEqual(["Demo.inside", "Demo.outsideSection"], [e["symbol"] for e in entities])
+
+  def test_structural_issue_refuses_even_when_required_name_was_parsed(self):
+    source = self.source("namespace Demo\nend Wrong\ndef present : Nat := 0\nend Demo\n")
+    entities, issues = _ALIGN.named_lean_entities(source)
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "unsupported source structure"):
+      _ALIGN.require_named_entities(entities, issues, [("def", "Demo.present")])
+
+  def test_multiline_string_ghost_declaration_is_not_extracted(self):
+    source = self.source('''
+namespace Demo
+def text : String := "hello
+def fake : Nat := 0
+world"
+end Demo
+''')
+    entities, issues = _ALIGN.named_lean_entities(source)
+    self.assertEqual(["Demo.text"], [entity["symbol"] for entity in entities])
+    self.assertEqual([], issues)
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "Demo.fake.*missing"):
+      _ALIGN.require_named_entities(entities, issues, [("def", "Demo.fake")])
+
+  def test_doc_looking_line_inside_multiline_string_is_not_a_doc_comment(self):
+    source = self.source('''
+namespace Demo
+def text : String := "hello
+/-- def fake : Nat := 0 -/
+world"
+def real : Nat := 0
+end Demo
+''')
+    entities, issues = _ALIGN.named_lean_entities(source)
+    self.assertEqual(["Demo.text", "Demo.real"], [entity["symbol"] for entity in entities])
+    self.assertEqual([], issues)
+
+  def test_nested_doc_comment_ghost_declaration_is_not_extracted(self):
+    source = self.source('''
+namespace Demo
+/-- doc /- nested -/
+def fake : Nat := 0
+-/
+def real : Nat := 0
+end Demo
+''')
+    entities, issues = _ALIGN.named_lean_entities(source)
+    self.assertEqual(["Demo.real"], [entity["symbol"] for entity in entities])
+    self.assertEqual([], issues)
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "Demo.fake.*missing"):
+      _ALIGN.require_named_entities(entities, issues, [("def", "Demo.fake")])
+
+  def test_required_ghost_rejects_before_output(self):
+    source = self.source('''
+namespace Demo
+def text : String := "hello
+def fake : Nat := 0
+world"
+end Demo
+''')
+    with tempfile.TemporaryDirectory() as directory:
+      sites = Path(directory) / "sites.json"
+      sites.write_text(json.dumps([]))
+      out = Path(directory) / "out"
+      with self.assertRaisesRegex(_ALIGN.AlignmentError, "Demo.fake.*missing"):
+        _ALIGN.main(sites, out, named_sources=[source], requirements=[("def", "Demo.fake")])
+      self.assertFalse(out.exists())
+
+  def test_requirement_rejects_missing_and_ambiguity(self):
+    source = self.source("namespace Outer\ndef present : Nat := 0\nend Outer\n")
+    entities, issues = _ALIGN.named_lean_entities(source)
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "missing"):
+      _ALIGN.require_named_entities(entities, issues, [("def", "Outer.renamed")])
+    duplicate = entities + [dict(entities[0])]
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "ambiguous"):
+      _ALIGN.require_named_entities(duplicate, issues, [("def", "Outer.present")])
+
+  def test_line_insertions_preserve_named_identity(self):
+    before, _ = _ALIGN.named_lean_entities(self.source("namespace Outer\ndef stable : Nat := 0\nend Outer\n"))
+    after, _ = _ALIGN.named_lean_entities(self.source("\n\nnamespace Outer\n\n\ndef stable : Nat := 0\nend Outer\n"))
+    self.assertEqual(before[0]["id"], after[0]["id"])
+    self.assertEqual(before[0]["symbol"], after[0]["symbol"])
+    self.assertNotEqual(before[0]["line"], after[0]["line"])
+
+  def test_explicit_anchor_emits_definition_edge_and_no_anchor_does_not(self):
+    source = self.source("namespace Outer\n/-- `(K closed-set)` -/\ndef closedSet : Nat := 0\nend Outer\n")
+    entities, _ = _ALIGN.named_lean_entities(source)
+    rows = [defn("closed-set", "(defn closed-set [] #{})", "K")]
+    edges, nodes = _ALIGN.declaration_edges(entities, rows)
+    self.assertEqual(["code:K:closed-set"], [node["id"] for node in nodes])
+    self.assertEqual([entities[0]["id"], "code:K:closed-set"], edges[0]["hx/endpoints"])
+    no_anchor, _ = _ALIGN.named_lean_entities(self.source("namespace Outer\ndef other : Nat := 0\nend Outer\n"))
+    self.assertEqual(([], []), _ALIGN.declaration_edges(no_anchor, rows))
+
+  def test_required_mode_fails_before_writing_for_unresolved_anchor(self):
+    source = self.source("namespace Outer\n/-- `(K typo)` -/\ndef stable : Nat := 0\nend Outer\n")
+    with tempfile.TemporaryDirectory() as directory:
+      sites = Path(directory) / "sites.json"
+      sites.write_text(json.dumps([defn("closed-set", "(defn closed-set [] #{})", "K")]))
+      out = Path(directory) / "out"
+      with self.assertRaisesRegex(_ALIGN.AlignmentError, "anchors do not resolve"):
+        _ALIGN.main(sites, out, named_sources=[source], requirements=[("def", "Outer.stable")])
+      self.assertFalse(out.exists())
+
+  def test_legacy_raw_path_artifact_keeps_constructor_shape(self):
+    with tempfile.TemporaryDirectory() as directory:
+      root = Path(directory)
+      lean = root / "Legacy.lean"
+      lean.write_text("inductive Legacy\n  | kept\n")
+      sites = root / "sites.json"
+      sites.write_text(json.dumps([site("route!", "kept", 1)]))
+      out = root / "out"
+      _ALIGN.main(sites, out, lean)
+      graph = json.loads((out / "hypergraph.json").read_text())
+      self.assertEqual({"sites", "entities", "hyperedges"}, set(graph))
+      self.assertEqual("lean:Legacy.Legacy.kept", graph["entities"][0]["id"])
+      self.assertEqual("Legacy", graph["entities"][0]["inductive"])
+
+  def test_pinned_source_reads_committed_content_only(self):
+    if not shutil.which("git"):
+      self.skipTest("git unavailable")
+    with tempfile.TemporaryDirectory() as directory:
+      repo = Path(directory) / "repo"; repo.mkdir()
+      subprocess.run(["git", "-C", str(repo), "init", "-q"], check=True)
+      subprocess.run(["git", "-C", str(repo), "config", "user.email", "test@example.invalid"], check=True)
+      subprocess.run(["git", "-C", str(repo), "config", "user.name", "test"], check=True)
+      (repo / "Demo.lean").write_text("namespace Demo\ndef committed : Nat := 0\nend Demo\n")
+      subprocess.run(["git", "-C", str(repo), "add", "Demo.lean"], check=True)
+      subprocess.run(["git", "-C", str(repo), "commit", "-qm", "fixture"], check=True)
+      revision = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
+      (repo / "Demo.lean").write_text("namespace Demo\ndef dirty : Nat := 0\nend Demo\n")
+      source = _ALIGN.pinned_lean_source(f"{repo}@{revision}:Demo.lean")
+      entities, _ = _ALIGN.named_lean_entities(source)
+      self.assertEqual(["Demo.committed"], [entity["symbol"] for entity in entities])
+      from_head = _ALIGN.pinned_lean_source(f"{repo}@HEAD:Demo.lean")
+      self.assertEqual(revision, from_head["revision"])
+      self.assertRegex(from_head["revision"], r"^[0-9a-f]{40}$")
+      with self.assertRaisesRegex(_ALIGN.AlignmentError, "REPO@REV:PATH"):
+        _ALIGN.pinned_lean_source("not-pinned")
 
 
 if __name__ == "__main__":
