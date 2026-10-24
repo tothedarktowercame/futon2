@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 21:50:35Z codex-11: dispatched bounded already-satisfied classification contract/repair to codex-12, Agency `invoke-1792878631603-3174-98d224e8`; parked `park-6ec63b79-837e-4816-95a8-8cfd060dd656`. No live actions authorized; independent review before merge.
+
+- 2026-10-24 21:49:53Z codex-11: reviewed seven-injury triage against classifier/producer and stale-attempt route. Existing route retires attempt1 before preparing reopened2; no repair needed there. Selected already-satisfied classification correction, with distinct non-injury reason: no-change must NOT discharge an enacted repair whose original boundary was not exercised. Historical rows unchanged, budget0. Review: `~/notes/wm-next/backlog-triage/coordinator-review.md`.
+
 - 2026-10-24 21:44:09 UTC — Joe approved open-items plan and Agency dispatches to codex-12. First packet: bounded read-only/copy-only repair backlog triage and next-route prediction, job invoke-1792878249349-3157-13b6e429 (parked). No ledger closure, new semantics, live writes or clicks; coordinator review before repair implementation. Packet: ~/notes/wm-next/packets/codex12-backlog-triage.txt.
 
 - 2026-10-24 21:39:46 UTC — codex-11 prepared open-items plan requested by Joe. Pure production ledger validation:37 entries,7 active injuries (3 open,3 enacted,1 reopened), no terminal injury; current transaction8467,three deferred. Serving retry queue empty; HTTP idle/budget0. Backlog is not seven proven independent defects; already-satisfied injury requires classification review. Evidence and ordered Lean-first plan: ~/notes/wm-next/open-items-plan/PLAN.md. No ledger/store/source behavior changes or clicks; no blanket backlog retirement authorized.
