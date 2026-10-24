@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 23:09:22Z codex-11: Joe requests offline repair readiness for clean next run. Pure current ledger validates37entries/7active, same SHA7c15670e; route still preempts. Source correction not historical discharge. Dispatched codex-12 offline disposition/API/contract assessment invoke-1792883359900-3305-0c2c5b89, parked park-e3525978-79e2-4cce-9b7c-d09a876b5223; no fake retry/reset/retraction. Notes `~/notes/wm-next/offline-repair/`;budget0/no live changes.
+
 - 2026-10-24 22:58:33Z codex-11: Joe requests comprehensive efficient handoff/data-boundary census. Completed pinned lexical seed across401 source files,19 registered sites; not resolved calls/completeness. Existing registry audit only checks anchors. Dispatched resolved source-only coverage/recovery/Lean-progress matrix codex-12 invoke-1792882711465-3286-de8343ad, parked park-3d21d6e2-5611-421f-be2e-f363e331b586; separate reviewer-code packet retained. Artifacts `~/notes/wm-next/handoff-census/`;budget0/no runtime changes.
 
 - 2026-10-24 22:51:01Z codex-11: dispatched opt-in reviewer evidence correction implementation codex-12 invoke-1792882259198-3268-02aadf2f, parked park-1bea6a48-da9e-425d-b842-742efb4e4f64. Exact existing gate, no observation invention, no serving activation;budget0.
