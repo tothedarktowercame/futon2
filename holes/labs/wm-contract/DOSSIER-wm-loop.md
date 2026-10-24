@@ -44,6 +44,7 @@ Rewritten 2026-10-23 (22:47Z, Joe: "I am ok with the NEXT steps mentioned"). The
 - **U1** — is a click one epoch or several? Not needed for G1 (`ClosedLoopAtMachine.loop 1` is the one-epoch click). SPEC §5.
 - **U2** — T and H on the cascade route. Canonical G takes one H per comparison (U2(a)); see C7.
 - **U3** — how the next focus is chosen. Not needed for G1. SPEC §5.
+- **U4 — observation authority / model reconciliation (open, not chosen).** `PatternTheta` assumes caller-attested guard-held fires; `resources/wm/attempt-learning-contract-v2.edn` instead authorizes selected-cascade-effect-attempt evidence and explicitly does not establish individual-pattern-firing. `learning_trial_ledger/producer-of` attributes by unique declaration. Recover and respect that existing authority before treating this as a fresh operator choice: does it instantiate a distinct attempt-delivery parameter/model, or is a further witnessed-fire producer required for the Lean parameter? `PatternObservationAdmission` (Lean merge85fc561de3) supplies a payload-bound conditional gate only; it does not settle this reconciliation. Existing `declared_effect_authority`/occurrence binding is a producer candidate for declaration identity, not demonstrated fire evidence. Cross-reference the parked mission-hole prediction domain and the recovered selected-want-census/evidence-authority failures in `~/notes/wm-next/pattern-measurement-repair/intake.md`; these are related interfaces, not proven equivalent decisions. Resolving authority alone does not fix token-domain accounting. No relabelling, new prior, or automatic widening of learning scope is authorized here.
 
 ## Machinery the statement assumes (not Lean terms)
 
@@ -95,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 
 ## Log
+
+- 2026-10-24 21:34:21 UTC — codex-11 read first-reader authority suggestion, actual attempt-learning v2 resource, producer-of and PatternTheta. Added U4 as unresolved model/authority reconciliation, respecting the existing v2 authorization rather than silently selecting a different grain. Cross-referenced parked measurement domain and falsifier accounting without equating them. No code or live changes.
 
 - 2026-10-24 21:26:24 UTC — codex-11 accepted payload-bound supplied observation admission241a9447, Lean merge 85fc561de3. Independent build exit0 and flipped-payload negative exit1 for intended semantic reason. Existing PatternTheta/R20 unchanged; actual projected events feed arithmetic/pooling controls. Review: ~/notes/wm-next/pattern-measurement-repair/formal-final-review.md. Runtime authority producer and falsifier accounting still open; budget0/no click.
 
