@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 21:26:24 UTC — codex-11 accepted payload-bound supplied observation admission241a9447, Lean merge 85fc561de3. Independent build exit0 and flipped-payload negative exit1 for intended semantic reason. Existing PatternTheta/R20 unchanged; actual projected events feed arithmetic/pooling controls. Review: ~/notes/wm-next/pattern-measurement-repair/formal-final-review.md. Runtime authority producer and falsifier accounting still open; budget0/no click.
+
 - 2026-10-24 21:23:04 UTC — codex-11 held formal observation admission44466e7855: authority checker cannot inspect observed Bool; independent Lean opposite-outcome probe exit0. Requested payload-bound authority and project-connected arithmetic/pooling controls from codex-9 (invoke-1792877014195-3124-69d73ca2, parked). Review: ~/notes/wm-next/pattern-measurement-repair/formal-coordinator-review.md. No merge/runtime/click; budget0.
 
 - 2026-10-24 21:20:32 UTC — codex-11 independently recovered checkpoint failures: selected-want-census-mismatch and revision-authority-missing (measurements[]). No retention loss in sealed checkpoint. Reviewed missing fire-authority bridge against PatternTheta; dispatched Lean-only conditional admission to codex-9 invoke-1792876832058-3117-9437a51a, preserving occurrence identity separately from shared pattern-key pooling. No runtime repair/learning closure claimed; budget0. Review: ~/notes/wm-next/pattern-measurement-repair/coordinator-review.md.
