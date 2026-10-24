@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 11:35:14 UTC — Joe requests claude-7 review toward AIF-compliant warranted-generalisation specification. Explicit correction: carry preserves availability, not mandatory use/change in immediate next iteration; transfer tested on a relevant later case, scope expansion needs warrant. Plan/state annotated. Advisory job `invoke-1792841714179-2927-b3cabdbc`, park `park-61fc5937-62a4-46ba-845b-c854ae92cf3b`; proposal only before agreement, no code/reload/click.
+
 - 2026-10-24 11:08:27 UTC — codex-11 reviewed claude-7 carry advisory against primary t4r-linked REPL note and local AIF texts. Review `/home/joe/notes/wm-next/loop-plan/carry-model-review.md`: counts can encode learned conditional strengths, but pair-keyed graph weights/automatic increments are not adopted. Theta already parameterizes transitions; storage key alone does not make it merely a node bias. t4r supplies a simplified observation-cycle sketch, not a completed WM learning algorithm. Proposed before/observation/slow-update/publication/next-use sketch returned to Joe; further implementation paused pending conceptual agreement.
 
 - 2026-10-24 11:05:05 UTC — Joe requests conceptual carry sketch before detailed development: AIF-led slow connection/model updates, t4r as simplified learning loop; counts are not presumed the intended semantics. Dispatched read-only advisory to claude-7, job `invoke-1792839904944-2919-1bcad4ce`, park `park-2c4ee354-033e-424e-9677-78691c9bb183`. Require primary t4r identification, before/update/next-use sketch and sourced/proposed distinction. Further formal/runtime implementation paused for review with Joe; existing proofs remain scoped results, not the ruling.
