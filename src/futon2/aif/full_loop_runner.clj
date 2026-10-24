@@ -3833,13 +3833,14 @@
   again after the reply; the same unchanged gate validates the corrected job."
   [opts phase-context reviewer author dispatched-turns target repo commit files
    artifact-binding review-job review-gate]
-  (let [allowance (long (or (:review-evidence-corrections opts) 0))
-        _ (when-not (contains? #{0 1} allowance)
+  (let [raw-allowance (get opts :review-evidence-corrections 0)
+        _ (when-not (contains? #{0 1} raw-allowance)
             (throw (ex-info "Review evidence correction allowance must be 0 or 1"
                             {:outcome :build-failed
                              :failure-kind :review-evidence-correction-config-invalid
                              :failure-stage :reviewer-wait
-                             :review-evidence-corrections allowance})))
+                             :review-evidence-corrections raw-allowance})))
+        allowance raw-allowance
         trigger? (and (pos? allowance)
                       (= "done" (:state review-job))
                       (= :review-execution-evidence-missing
@@ -3898,15 +3899,14 @@
               (run-phase! opts phase-context :review-evidence-correction-wait
                           #((or (:poll-fn opts) poll-job!) opts expected-job-id))
               after (observe-repo-head opts repo)
-              corrected-gate (review-execution-gate files corrected-job)
-              correction (assoc base-record
-                                :request {:job-id expected-job-id
-                                          :prompt prompt
-                                          :prompt-sha256 (sha256 prompt)}
-                                :corrected {:job (retained-review-job corrected-job)
-                                            :gate corrected-gate}
-                                :after-head after
-                                :remaining-allowance 0)]
+              correction-before-check
+              (assoc base-record
+                     :request {:job-id expected-job-id
+                               :prompt prompt
+                               :prompt-sha256 (sha256 prompt)}
+                     :corrected {:job (retained-review-job corrected-job)}
+                     :after-head after
+                     :remaining-allowance 0)]
           (when (= "cancelled" (:state corrected-job))
             (throw (ex-info "Agency job was cancelled"
                             {:outcome :cancelled
@@ -3916,28 +3916,41 @@
                              :terminal-code (:terminal-code corrected-job)
                              :terminal-message (:terminal-message corrected-job)
                              :review-evidence-correction
-                             (assoc correction :status :cancelled)})))
+                             (assoc correction-before-check :status :cancelled)})))
           (when-not (and (string? expected-job-id)
                          (= expected-job-id (:job-id corrected-job))
                          (= reviewer (:agent-id corrected-job)))
             (review-correction-failure!
              "Reviewer evidence correction reply provenance did not match dispatch"
-             :reply-provenance-mismatch correction))
+             :reply-provenance-mismatch correction-before-check))
           (when-not (= "done" (:state corrected-job))
             (review-correction-failure!
              "Reviewer evidence correction did not complete"
-             :correction-job-not-done correction))
+             :correction-job-not-done correction-before-check))
           (when-not (= commit (:head after))
             (review-correction-failure!
              "Reviewer evidence correction changed the pinned artifact revision"
-             :artifact-revision-changed correction))
-          {:review-job corrected-job
-           :review-gate corrected-gate
-           :review-evidence-corrections
-           [(assoc correction
-                   :status (if (:passed? corrected-gate) :corrected :exhausted)
-                   :reason (when-not (:passed? corrected-gate)
-                             :review-execution-evidence-still-missing))]})))))
+             :artifact-revision-changed correction-before-check))
+          (let [corrected-gate
+                (try
+                  (review-execution-gate files corrected-job)
+                  (catch Throwable t
+                    (review-correction-failure!
+                     "Reviewer evidence correction result was malformed"
+                     :corrected-review-evidence-malformed
+                     (assoc correction-before-check
+                            :checker-error {:class (.getName (class t))
+                                            :message (ex-message t)
+                                            :data (ex-data t)}))))
+                correction (assoc-in correction-before-check
+                                     [:corrected :gate] corrected-gate)]
+            {:review-job corrected-job
+             :review-gate corrected-gate
+             :review-evidence-corrections
+             [(assoc correction
+                     :status (if (:passed? corrected-gate) :corrected :exhausted)
+                     :reason (when-not (:passed? corrected-gate)
+                               :review-execution-evidence-still-missing))]}))))))
 
 (defn- review-findings-text
   "Return the complete reviewer reply only when a typed negative verdict

@@ -908,7 +908,8 @@
            reviewer-correction-agent reviewer-correction-artifact-head
            reviewer-correction-summary reviewer-correction-state
            initial-author-job operator-actions delivery-qa-fn
-           judgement-transform-fn dispatch-observer runner-options]
+           judgement-transform-fn dispatch-observer runner-options
+           isolate-modified-runner?]
     :or {grounded? true artifacts? false
          cure-observed-commit ::from-artifact-ref}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
@@ -1041,21 +1042,24 @@
               (when judgement-transform-fn
                 {:judgement-transform-fn judgement-transform-fn})
               runner-options)
-        ;; This harness supplies every external boundary and deliberately runs
-        ;; against the worktree bytes under test.  The production source guard
-        ;; remains covered separately by the runner-source tests.
-        result (with-redefs-fn
-                 {#'runner/refuse-on-runner-source-drift!
-                  (constantly {:runner/source-check :fixture-current})
-                  #'runner/selected-entry
-                  (fn [j]
-                    (when-let [action (get-in j [:decision :action])]
-                      {:action action
-                       :rank (or (get-in j [:decision :rank]) 1)
-                       :G-efe (get-in j [:decision :controller-score])
-                       :controller-score
-                       (get-in j [:decision :controller-score])}))}
-                 #(runner/run-opportunity! opts))]
+        run #(runner/run-opportunity! opts)
+        ;; Only the correction fixtures opt into worktree/source isolation.
+        ;; Existing users of this long-lived helper keep their original gates.
+        result (if (or isolate-modified-runner?
+                       (some? review-evidence-corrections))
+                 (with-redefs-fn
+                   {#'runner/refuse-on-runner-source-drift!
+                    (constantly {:runner/source-check :fixture-current})
+                    #'runner/selected-entry
+                    (fn [j]
+                      (when-let [action (get-in j [:decision :action])]
+                        {:action action
+                         :rank (or (get-in j [:decision :rank]) 1)
+                         :G-efe (get-in j [:decision :controller-score])
+                         :controller-score
+                         (get-in j [:decision :controller-score])}))}
+                   run)
+                 (run))]
     {:result result :item (first @queued)
      :queued-operator-actions @queued-operator-actions
      :dispatches @dispatches
@@ -1927,7 +1931,8 @@
 
 (deftest review-evidence-correction-is-opt-in-and-pre-falsifier-only
   (testing "default zero and an already passing gate dispatch nothing extra"
-    (doseq [options [{:reviewer-execution
+    (doseq [options [{:isolate-modified-runner? true
+                      :reviewer-execution
                       {:executed false :tool-events 0 :command-events 0}}
                      {:review-evidence-corrections 1
                       :reviewer-execution successful-execution}]]
@@ -1983,7 +1988,80 @@
              (catch Throwable t t)))]
     (is (= "synthetic transport ambiguity" (ex-message thrown)))
     (is (= 1 @dispatches)
-        "a run-phase retry rethrows the retained transport result without resending")))
+        "a same-thunk run-phase replay rethrows the retained result without resending")))
+
+(defn- correction-boundary-result
+  [allowance corrected-job]
+  (let [dispatches (atom 0)
+        opts {:review-evidence-corrections allowance
+              :repo-head-observation-fn (fn [_] {:head "feature123"})
+              :dispatch-fn (fn [& _]
+                             (swap! dispatches inc)
+                             {:job-id "correction-1"})
+              :poll-fn (fn [& _] corrected-job)}]
+    {:dispatches dispatches
+     :result
+     (with-redefs-fn
+       {#'runner/run-phase! (fn [_ _ _ thunk & _] (thunk))}
+       #(try
+          (#'runner/review-evidence-correction-loop
+           opts {} "codex-7" "zai-5" (atom 0) "M-selected" "/repo"
+           "feature123" ["src/feature.clj"]
+           {:repo "/repo" :commit "feature123" :observed-head "feature123"
+            :pre-dispatch-head "base" :corroborates? true}
+           {:job-id "review-1" :agent-id "codex-7" :state "done"
+            :execution {:executed false :tool-events 0 :command-events 0}}
+           {:passed? false :failure-kind :review-execution-evidence-missing})
+          (catch Throwable t t)))}))
+
+(deftest review-evidence-correction-validates-raw-allowance
+  (doseq [allowance [0.5 "1"]]
+    (let [{:keys [result dispatches]}
+          (correction-boundary-result allowance {})]
+      (is (= :review-evidence-correction-config-invalid
+             (:failure-kind (ex-data result))))
+      (is (= allowance (:review-evidence-corrections (ex-data result))))
+      (is (zero? @dispatches)))))
+
+(deftest review-evidence-correction-retains-malformed-reply-before-checking
+  (testing "correct seat malformed execution is a typed retained refusal"
+    (let [{:keys [result dispatches]}
+          (correction-boundary-result
+           1 {:job-id "correction-1" :agent-id "codex-7" :state "done"
+              :execution {:executed true :tool-events "malformed"}})
+          correction (:review-evidence-correction (ex-data result))]
+      (is (= :review-evidence-correction-refused (:failure-kind (ex-data result))))
+      (is (= :corrected-review-evidence-malformed (:reason correction)))
+      (is (= "correction-1" (get-in correction [:corrected :job :job-id])))
+      (is (= "java.lang.ClassCastException"
+             (get-in correction [:checker-error :class])))
+      (is (= 1 @dispatches))))
+  (testing "wrong seat is rejected before malformed evidence is evaluated"
+    (let [{:keys [result]}
+          (correction-boundary-result
+           1 {:job-id "correction-1" :agent-id "wrong-seat" :state "done"
+              :execution {:executed true :tool-events "malformed"}})]
+      (is (= :reply-provenance-mismatch
+             (get-in (ex-data result) [:review-evidence-correction :reason])))))
+  (testing "cancelled malformed payload preserves cancellation"
+    (let [{:keys [result]}
+          (correction-boundary-result
+           1 {:job-id "correction-1" :agent-id "codex-7" :state "cancelled"
+              :execution {:executed true :tool-events "malformed"}})]
+      (is (= :operator-cancelled (:failure-kind (ex-data result))))
+      (is (= :cancelled
+             (get-in (ex-data result) [:review-evidence-correction :status]))))))
+
+(deftest retained-25e24-mechanical-failure-is-outside-review-correction
+  (let [projection (edn/read-string
+                    (slurp "/home/joe/notes/wm-next/handoff-quality/code/retained-25e24-scope.edn"))
+        failures (:observed-failures projection)]
+    (is (= "25e24e8b" (:run-prefix projection)))
+    (is (= [{:selected-want-hole-count 6 :pattern-done-count 2}
+            {:measurements []}]
+           (mapv :observed failures)))
+    (is (every? false? (map :correction-capable? failures)))
+    (is (false? (:review-evidence-correction-applicable? projection)))))
 
 (deftest corrected-review-request-changes-enters-existing-revision-path
   (let [{:keys [result dispatches]}
