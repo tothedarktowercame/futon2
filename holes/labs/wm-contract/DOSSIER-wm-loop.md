@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 21:58:17Z codex-11: dispatched bounded Lean-only attempt-delivery admission/count packet to codex-12, Agency invoke-1792879095966-3196-3942d7dd; parked park-144e0141-fbbb-4022-a5bd-f3fe4737db1e. Prior/population/key interpretation supplied; no Clojure consumer changes or live actions.
+
+- 2026-10-24 21:57:22Z codex-11: reviewed U4 report against primary sources. Delivery evidence is not a witnessed-fire history. Correction: B-D Revision2 R2.1 explicitly supersedes accepted-close population, while v2 resource retains older wording; no population choice made. Selected separate supplied-admission Lean attempt-delivery update, no fire/scorer adapter. Review `~/notes/wm-next/authority-reconciliation/coordinator-review.md`; budget0.
+
 - 2026-10-24 21:54:53Z codex-11: dispatched read-only U4 reconciliation to codex-12, Agency invoke-1792878892291-3184-200619e0, parked park-c206caf2-4cf0-4002-9582-dc8f45fb3592. Recover original v2 authority and actual consumer before any new observation semantics/code.
 
 - 2026-10-24 21:54:14Z codex-11: independently reviewed36afa9142 and merged as c8e65d962. Producer-qualified already-satisfied is distinct non-injury; enacted retries remain inconclusive, never discharged. Independent11tests/42assertions green; eight missing-qualifier probes reject. Review `~/notes/wm-next/backlog-triage/classification-coordinator-review.md`. Historical injuries untouched; source not loaded; budget0. Next approved item U4 authority/model reconciliation.
