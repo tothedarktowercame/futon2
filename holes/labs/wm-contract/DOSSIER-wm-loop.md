@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 23:52:02 UTC — codex-11 holds recurrence 52de74e20: independent BindingProbe.lean compiled0, showing caller seenRecords omission reopens original cause, changed attempt bypasses exhaustion, and stale entry takes retry before validation. Review: ~/notes/wm-next/offline-repair/integration/formal/recurrence/review/review.md. Dispatch codex-12 binding followup invoke-1792885945893-3378-b8233104, park-e99f86d4-09f8-426e-b070-0c1489ff3f23. No merge/live action; budget0.
+
 - 2026-10-24 23:49:31 UTC — codex-11 independently accepted medic bridge 21cb6bf; merged mathlib4 589ef96a0a97bd52a91c724cdc442205097d16bb. Focused build 462 jobs, stale-root negative failed at required prefix equality, axioms standard. Review: ~/notes/wm-next/offline-repair/integration/formal/review/final-review.md. Supplied seal/authority premises remain; no live clearance. Dispatched bounded recurrence/attempt-limit formal packet to codex-12, job invoke-1792885789668-3371-40c9f3a9, park park-dd6b095e-2a73-486a-a22c-e55d8bbf4482. Budget0.
 
 - 2026-10-24 23:45:37 UTC — codex-11 HOLDS medic ledger bridge6a794a679: independent Lean StaleRoot.lean exit0 proves stale-root historical medic entry valid while append rejects same op. Require prefix-root validation/append preservation and actual admitted projection, explicit predecessor/order domain. Review offline-repair/integration/formal/review/coordinator-review.md. Follow-up codex-12 `invoke-1792885534115-3369-fc4a02d9`, park `park-f872e1b0-d74b-4936-9acb-1d6712c51cf2`. No merge/live action,budget0.
