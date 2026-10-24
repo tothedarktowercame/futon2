@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 23:57:18 UTC — codex-11 accepted conditional recurrence model689292e; merged mathlib4 3966e7a7e651f1ba40d132a057f6d9654d42bcb2. Independent attempt3-to1 control refuses under same functional authority; observation-only duplicate green; build463, semantic negative red, standard axioms. Review: ~/notes/wm-next/offline-repair/integration/formal/recurrence/review/final-review.md. Dispatch codex-12 exact schema/exhaustion integration mapping job invoke-1792886256225-3384-37984c4e, park-e5aa0f1f-85a2-4ca6-a096-d8df3a27e1c8. Runtime authentication/exhaustion correspondence open, budget0; no live clearance.
+
 - 2026-10-24 23:55:07 UTC — codex-11 holds 8f01f75c. Independent SnapshotProbe compiles0: same ledger/authority accepts attempt3 exhausted and attempt1 reopened. Full classification census also must include observation-only records, unlike transition-only cause projection. Review: ~/notes/wm-next/offline-repair/integration/formal/recurrence/review/snapshot-review.md. Followup codex-12 job invoke-1792886141713-3383-e6076bf5, park-6bcefa6a-ad59-4dee-b4e3-46765dce76b3. Budget0; no merge/live action.
 
 - 2026-10-24 23:52:02 UTC — codex-11 holds recurrence 52de74e20: independent BindingProbe.lean compiled0, showing caller seenRecords omission reopens original cause, changed attempt bypasses exhaustion, and stale entry takes retry before validation. Review: ~/notes/wm-next/offline-repair/integration/formal/recurrence/review/review.md. Dispatch codex-12 binding followup invoke-1792885945893-3378-b8233104, park-e99f86d4-09f8-426e-b070-0c1489ff3f23. No merge/live action; budget0.
