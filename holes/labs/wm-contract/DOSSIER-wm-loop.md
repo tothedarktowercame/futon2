@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 22:51:01Z codex-11: dispatched opt-in reviewer evidence correction implementation codex-12 invoke-1792882259198-3268-02aadf2f, parked park-1bea6a48-da9e-425d-b842-742efb4e4f64. Exact existing gate, no observation invention, no serving activation;budget0.
+
+- 2026-10-24 22:50:18Z codex-11: accepted state-indexed correction0247e87dc1; merged Lean590a4dc3d1. OrdinaryClickRoute unchanged net; actual review binding retained through wait, arrival-time same-checker return. Independent460-job build passes; unrelated receipt negative rejects intended state mismatch. Conditional local refinement, not runtime/liveness proof. Review `~/notes/wm-next/handoff-quality/formal/final-review.md`; code opt-in next,budget0.
+
 - 2026-10-24 22:47:20Z codex-11: dispatched guarded-state correction follow-up codex-12 invoke-1792882038400-3262-401b632a; parked park-1050fe0b-a426-4458-b1fb-3063f32da1e0. No promotion until exact request/response binding is proved.
 
 - 2026-10-24 22:46:40Z codex-11: held reviewer correction Lean d6c16e8c8a. Independent probe proves every p27+budget enters via unrelated validCorrection; actual review/binding absent from state. Also dispatch requires future corrected evidence, while wait returns unconditionally. Requested state-indexed trigger/binding and arrival-time validation. Review `~/notes/wm-next/handoff-quality/formal/coordinator-review.md`; no merge/code/live actions;budget0.
