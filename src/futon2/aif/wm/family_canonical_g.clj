@@ -1,10 +1,13 @@
 (ns futon2.aif.wm.family-canonical-g
   "Opt-in field comparison using the Lean canonical co-application G."
-  (:require [futon2.aif.cascade-coapply-g :as canonical]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.cascade-coapply-g :as canonical]
             [futon2.aif.cascade-pattern-counts :as counts]
             [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.cascade-shape-g :as shape]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- comparison-id [[p _]] [(:target p) (:policy-id p)])
 
