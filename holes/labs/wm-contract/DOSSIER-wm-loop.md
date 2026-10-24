@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 22:47:20Z codex-11: dispatched guarded-state correction follow-up codex-12 invoke-1792882038400-3262-401b632a; parked park-1050fe0b-a426-4458-b1fb-3063f32da1e0. No promotion until exact request/response binding is proved.
+
+- 2026-10-24 22:46:40Z codex-11: held reviewer correction Lean d6c16e8c8a. Independent probe proves every p27+budget enters via unrelated validCorrection; actual review/binding absent from state. Also dispatch requires future corrected evidence, while wait returns unconditionally. Requested state-indexed trigger/binding and arrival-time validation. Review `~/notes/wm-next/handoff-quality/formal/coordinator-review.md`; no merge/code/live actions;budget0.
+
 - 2026-10-24 22:44:28Z codex-11: dispatched reviewer-evidence formal prerequisite to codex-12 invoke-1792881865051-3257-1a5de094, parked park-29e5c9ff-1ca1-4a45-905c-43633faedf45. Independent review before code; no live actions.
 
 - 2026-10-24 22:43:43Z codex-11: reviewed handoff intake and actual row27/29 gates. Missing reviewer execution evidence lacks same-round correction; select bounded Lean detour prerequisite with unchanged binding/checker and no skipped gate. Diagnostic25e24 passed reviewer gate and failed machine token/authority accounting; no LLM correction warranted there,8467 remains open. Review `~/notes/wm-next/handoff-quality/coordinator-review.md`. Budget0.
