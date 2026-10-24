@@ -53,16 +53,18 @@
         action (:action prediction)
         q0 (:initial-belief prediction)
         horizon (:horizon prediction)
+        precedence (trial/precedence-analysis (:precedence action))
         model-valid? (and (= :frozen (:status prediction)) (seq q0)
                           (model/normalized-exact? q0) (every? set? (keys q0))
-                          (integer? horizon) (pos? horizon) (vector? (:precedence action)))
-        q (when model-valid? (model/rollout (constantly (:precedence action)) q0 horizon))
+                          (integer? horizon) (pos? horizon)
+                          (= :present (:status precedence)))
+        q (when model-valid? (model/rollout (constantly (:step precedence)) q0 horizon))
         prediction-valid? (and model-valid? (model/normalized-exact? q))
         signed (if (and source-record expected read-job)
                  (task/verify-observations-v2 source-record expected read-job)
                  {:status :refused :kind :observation-authority-unavailable})
         declarations (get-in source-record [:dispatch :declarations])
-        rows (mapv
+        admitted-rows (mapv
               (fn [row]
                 (let [token (:effect row)
                       observed (get-in signed [:observations token :artifact-observation :observed])
@@ -98,7 +100,7 @@
                       key {:occurrence (select-keys occurrence [:action/id :action/value-sha256 :transition/id])
                            :effect token :grain (:trial-grain contract)}
                       family {:target (:target action) :cascade (:id action)
-                              :patterns (mapv :id (:precedence action)) :effect token :route route}]
+                              :patterns (mapv :id (:patterns precedence)) :effect token :route route}]
                   (assoc row
                          :status (if reason :held :admitted-at-attempt-grain) :reason reason :counted? false
                          :trial-grain (:trial-grain contract) :selected-cascade action
@@ -120,9 +122,24 @@
                          :learning-family (identity/digest family)
                          :shadow (assoc (:shadow row) :scope :illustrative-per-firing-sensitivity-only
                                         :attempt-parameter-consumption :none))))
-              ;; One cascade/effect trial even when several patterns mention it.
-              (vals (into (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
-                          (map (juxt :effect identity)) (:trials base))))]
-    (assoc base :schema :wm/learning-trial-receipt-v2 :contract contract
-           :contract-sha256 (identity/digest contract)
-           :status :record-only :reason nil :trials rows)))
+              (:trials base))
+        ;; One cascade/effect trial even when several patterns mention it.
+        ;; Legacy vectors retain their historical global effect sort. Co-apply
+        ;; candidates retain declared unit order, choosing the first declaring
+        ;; unit when an effect is repeated.
+        rows (if (vector? (:step precedence))
+               (vec (vals (into (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
+                                (map (juxt :effect identity)) admitted-rows)))
+               (second
+                (reduce (fn [[seen out] row]
+                          (if (contains? seen (:effect row))
+                            [seen out]
+                            [(conj seen (:effect row)) (conj out row)]))
+                        [#{} []] admitted-rows)))]
+    (cond->
+     (assoc base :schema :wm/learning-trial-receipt-v2 :contract contract
+            :contract-sha256 (identity/digest contract)
+            :status :record-only :reason nil :trials rows)
+      (= :held (:status precedence))
+      (assoc :status :held :reason (:reason precedence)
+             :precedence-finding (:finding precedence)))))
