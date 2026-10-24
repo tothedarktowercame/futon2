@@ -293,6 +293,13 @@ def click_running() -> bool:
         return True
 
 
+def reload_namespace(ns: str) -> dict:
+    """Load a planned canonical namespace; callers own idle/dirty checks."""
+    return jvm_eval(f"(try (require (quote {ns}) :reload) :reloaded "
+                    f"(catch Throwable t (loop [t t acc []] (if t (recur (.getCause t) "
+                    f"(conj acc (str (.getName (class t)) \": \" (.getMessage t)))) (str \"RELOAD-FAILED \" acc)))))")
+
+
 def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bool | None, str, int]:
     """Reload every click-path namespace committed since since_epoch. Returns
     (ok, failure-text, new-since). Reload only between clicks, or while the
@@ -310,9 +317,7 @@ def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bo
     for f in skipped:
         log(f"reload: SKIP {f} -- uncommitted edits in the working tree")
     for ns, f in order:
-        r = jvm_eval(f"(try (require (quote {ns}) :reload) :reloaded "
-                     f"(catch Throwable t (loop [t t acc []] (if t (recur (.getCause t) "
-                     f"(conj acc (str (.getName (class t)) \": \" (.getMessage t)))) (str \"RELOAD-FAILED \" acc)))))")
+        r = reload_namespace(ns)
         if r["rc"] != 0 or ":reloaded" not in r["out"]:
             text = f"reload of {ns} ({f}) failed: {r['out'][:1500]} {r['err'][:500]}"
             log(text)

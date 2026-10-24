@@ -7,21 +7,25 @@
 # checks are easy to skip if they live in a checklist instead of a file.
 #
 # FIRING POLICY (PROOF-wm-works ⟨1⟩1 ⟨2⟩1/⟨2⟩2, Joe 2026-09-22): the machine
-# runs when Joe says run. Nothing here refuses a click except Agency being
-# unreachable (exit 1). Preflight checks PRINT their findings and never stop
-# firing. Casting and the single-flight boundary are waited out, not refused:
-# --run polls until the cast seats are free and no click is in flight, then
-# fires. A wait longer than 30 minutes, or a casting misconfiguration that
+# runs when Joe says run. Agency must be reachable (exit 1 otherwise).
+# Clean-start authority, 2026-10-24: --run
+# prepares canonical source composition only while idle, and refuses dirty,
+# unavailable or still-stale identity before POST (exit 3). No held-run recovery.
+# Informational tripwire checks PRINT their findings and never stop
+# firing. Busy cast seats are waited out, not refused:
+# --run polls until the cast seats are free; an active click refuses source
+# preparation rather than authorizing a reload. A wait longer than 30 minutes,
+# or a casting misconfiguration that
 # cannot be waited out, is a terminal account and exit 3 -- reported, never a
 # silent refusal and never a success. The tripwires keep acting DURING a run
-# exactly as before; this script only no longer vetoes firing in advance.
+# exactly as before; source readiness is distinct from their findings.
 #
 #   scripts/wm_click.sh                 # PREFLIGHT ONLY. Default. Fires nothing.
 #                                       Prints findings, exits 0 when Agency is up.
 #   scripts/wm_click.sh --run           # print findings, wait for seats/single-flight, then fire
 #   scripts/wm_click.sh --run --force   # --force is a NO-OP, accepted so existing
 #                                       # callers do not break (firing no longer needs it)
-#   scripts/wm_click.sh --probe-seats   # also spend one turn per seat on a quota probe
+#   scripts/wm_click.sh --run --probe-seats # also spend one turn per seat on a quota probe
 #
 # Optional: --ask-seats zai-4,zai-5,zai-6 names interpretation workers.
 # Optional: --g-law canonical-coapply selects the canonical law on the reading-family route.
@@ -33,6 +37,7 @@
 set -uo pipefail
 
 F2="$HOME/code/futon2"; F3C="$HOME/code/futon3c"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 BASE="http://localhost:7070"
 # codex-22 was the charter's reviewer and is no longer on the roster, so the
 # default casting failed preflight on every invocation (claude-4, 2026-09-19).
@@ -89,6 +94,18 @@ elif [ "$budget" -le 0 ] 2>/dev/null; then
   echo; echo "cannot launch (exit 3)"; exit 3
 else
   say "click budget" "$budget available"
+fi
+
+# Source preparation is not an informational tripwire. No campaign/abort loop.
+# Check before preflight JVM reads and again immediately before each POST.
+prepare_sources() {
+  if ! python3 "$SCRIPT_DIR/wm_click_prepare.py"; then
+    cannot "source composition" "idle canonical preparation did not verify; no click posted"
+    return 3
+  fi
+}
+if [ "$RUN" = "1" ]; then
+  prepare_sources || exit 3
 fi
 
 # 2. Casting: three distinct seats, all on the roster AND idle.
@@ -195,7 +212,11 @@ for seat in sys.argv[1].split(","):
   if [ "$inf" = "False" ]; then
     say "in flight" "none"
   else
-    say "in flight" "click running ($inf) -- single-flight boundary, waiting"
+    say "in flight" "click running or unavailable ($inf)"
+    if [ "$RUN" = "1" ]; then
+      cannot "source composition" "not idle; no preparation or launch"
+      exit 3
+    fi
   fi
   [ -z "$notready" ] && [ "$inf" = "False" ]
 }
@@ -220,9 +241,10 @@ for seat in sys.argv[1].split(","):
 # JVM, whose env is not this shell's, so a var like WM_CLICK_SKIP_WIRES on the
 # proof-eval command line never reaches the code (measured, ab5ca8fa). Inline
 # any such literal into the generated form.
-cat > /tmp/wm_click_wires.clj <<'CLJ'
-(do (require 'futon2.aif.tripwire 'futon2.aif.repair-obligation)
-    (let [cro (resolve 'futon2.aif.tripwire/cross-run-observation)
+if [ "$RUN" = "1" ]; then
+wires_file=$(mktemp "${TMPDIR:-/tmp}/wm-click-wires.XXXXXX.clj")
+cat > "$wires_file" <<'CLJ'
+(let [cro (resolve 'futon2.aif.tripwire/cross-run-observation)
           evals @(resolve 'futon2.aif.tripwire/wire-evaluators)
           rcw (resolve 'futon2.aif.tripwire/repair-covered-witness?)
           root @(resolve 'futon2.aif.repair-obligation/default-root)
@@ -240,7 +262,7 @@ cat > /tmp/wm_click_wires.clj <<'CLJ'
           ;; Everything not repair-covered still halts.
           classified (for [[k f] evals
                            :let [w (try (f (assoc obs :tripwire/force? true))
-                                        (catch Throwable e [{:kind :wire-threw}]))]
+                                        (catch Throwable _ [{:kind :wire-threw}]))]
                            :when (seq w)]
                        [k (mapv :kind w)
                         (boolean (some #(rcw % obs) w))])]
@@ -257,11 +279,15 @@ cat > /tmp/wm_click_wires.clj <<'CLJ'
        :stop-lines-queued
        (count (filter #(and (= :open (:repair/status %))
                             (not= :environmental-hold (:repair/class %)))
-                      ((resolve 'futon2.aif.repair-obligation/open-obligations))))}))
+                      ((resolve 'futon2.aif.repair-obligation/open-obligations))))})
 CLJ
 # proof-eval.sh reads its admin token from its own directory, so it must be
 # invoked from there.
-wires=$( (cd "$F3C" && ./scripts/proof-eval.sh -f /tmp/wm_click_wires.clj 2>&1) | tail -1)
+wires=$( (cd "$F3C" && ./scripts/proof-eval.sh -f "$wires_file" 2>&1) | tail -1)
+rm -f -- "$wires_file"
+else
+  wires="not evaluated in dry-run (no JVM evaluation or namespace load)"
+fi
 case "$wires" in
   *":tripping []"*)
     say "tripwires" "13/13 clear";;
@@ -307,7 +333,10 @@ case "$queued" in
 esac
 
 # 5. Seat quota (opt-in: costs one agent turn each).
-if [ "$PROBE" = "1" ]; then
+if [ "$PROBE" = "1" ] && [ "$RUN" != "1" ]; then
+  say "quota probe" "not sent in dry-run; use --run --probe-seats"
+fi
+if [ "$PROBE" = "1" ] && [ "$RUN" = "1" ]; then
   for a in "$AUTHOR" "$REVIEWER" "$REPAIR"; do
     r=$(cd "$F3C" && timeout 200 python3 scripts/agency_send.py --from "$ISSUING_CALLER" --to "$a" \
           --kind whistle --timeout-ms 170000 <<'EOF' 2>&1 | tail -1
@@ -331,7 +360,7 @@ if [ "$RUN" != "1" ]; then
 fi
 
 # Casting wait (⟨1⟩1 ⟨2⟩2): never launch into an occupied seat and never start
-# a second active click. Instead of refusing, WAIT: poll every 20 s, printing
+# a second active click. WAIT for seats only: poll every 20 s, printing
 # each poll, until cast_report clears. After 30 minutes, print a terminal
 # account and exit 3 (cannot launch -- reported, not a refusal, not a success).
 waited_since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -351,6 +380,7 @@ while [ -z "$clickid" ]; do
   done
 
   # ---------------------------------------------------------------- fire
+  prepare_sources || exit 3
   # The kernel's UUID source, not uuidgen: zone 1.1 (2026-10-09) shipped
   # without uuid-runtime, and the old `|| date +%s` fallback minted an id the
   # endpoint refuses as :wm-click-run-id-malformed.
@@ -372,12 +402,11 @@ PYJSON
   echo "$resp"
   # The server answers {:rejected :already-running :click-id <THE OTHER CLICK>}
   # when another caller started a click between our wait and this POST
-  # (runner_service.clj click!). That id is not ours: go back to waiting.
+  # (runner_service.clj click!). That id is not ours: stop this launch.
   rejected=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("rejected") or "")' 2>/dev/null)
   if [ -n "$rejected" ]; then
-    echo "launch not accepted ($rejected); another click holds the boundary -- waiting again"
-    sleep 20
-    continue
+    cannot "launch" "$rejected; no automatic launch after another active click"
+    exit 3
   fi
   clickid=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id",""))' 2>/dev/null)
   [ -n "$clickid" ] || { echo "no click-id returned; not accepted"; exit 1; }
