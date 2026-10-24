@@ -60,6 +60,14 @@
           (and (map? entry)
                (some #{cause} (vals (select-keys entry cause-fields)))))
         (supported-cause-entries record)))
+(defn- failed-checks [record]
+  ;; Retain the falsifier receipt's failed-check identity when the terminal
+  ;; record's failure detail carries the receipt. The record itself must name
+  ;; the checks; classification never invents them.
+  (let [checks (get-in record [:failure :detail :reviewer-falsifier
+                               :failed-checks])]
+    (when (and (vector? checks) (seq checks) (every? keyword? checks))
+      checks)))
 (defn- unconfigured-route? [record]
   (and (= :abstained (failure-kind record))
        (contains-cause? record :outer-policy-evidence-provider-required)))
@@ -161,7 +169,8 @@
                   :observation-class (if (unconfigured-route? record)
                                        :missing-production-machinery
                                        :terminal-failure)
-                  :target (or (target record) {:absent :target-not-recorded}))))))
+                  :target (or (target record) {:absent :target-not-recorded}))
+           (failed-checks record) (assoc :failed-checks (failed-checks record))))))
     (catch Throwable t
       (refusal :terminal-record/malformed {:detail (ex-message t)}))))
 
