@@ -1,8 +1,13 @@
 (ns futon2.aif.checked-problem-map-test
-  "Lean-synthetic fixture: direct proof-erased transcription of the reviewed
-  CheckedProblemMap m0.  It is not a decoder for a live WM record and supplies
-  no proof authentication.  Source pin: mathlib4 CheckedProblemMap reviewed in
-  /home/joe/notes/wm-next/hypergraph-implementation/intake.md §3."
+  "Lean-synthetic, adapted fixture from mathlib4 CheckedProblemMap.lean at
+  f2ed1412229687109b44a0a046e4d41d597ea364.  It is not a live decoder and
+  supplies no proof authentication.
+
+  Adaptations: m0's six statement IDs are keywords; nil and false are added
+  only to exercise Clojure membership; report labels/claims are deliberately
+  varied to prove they are inert; and metadata is added to prove preservation.
+  The source fixture is otherwise the reviewed foundation/adapter/consumer,
+  hard alternative, and unseeded two-node-cycle shape."
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.checked-problem-map :as checked]))
@@ -47,7 +52,8 @@
 (defn- rule-closed? [problem-map candidate]
   (and (every? #(contains? candidate (:stmt %)) (:artifacts problem-map))
        (every? (fn [{:keys [head tails]}]
-                 (or (not (every? candidate tails)) (contains? candidate head)))
+                 (or (not (every? #(contains? candidate %) tails))
+                     (contains? candidate head)))
                (:reductions problem-map))))
 
 (defn- subsets [items]
@@ -55,6 +61,12 @@
 
 (defn- wrong-claimed-closed-seeding [problem-map report]
   (into (checked/closed-set problem-map) (:claimed-closed report)))
+
+(defn- assert-exhaustive-least! [problem-map]
+  (let [result (checked/closed-set problem-map)
+        candidates (filter #(rule-closed? problem-map %) (subsets (:universe problem-map)))]
+    (is (rule-closed? problem-map result))
+    (is (every? #(set/subset? result %) candidates))))
 
 (deftest admits-only-supplied-artifacts-and-and-rules
   (testing "Lean foundation_adapter_discharge and one_alternative_suffices"
@@ -85,13 +97,26 @@
       (is (not (checked/closed? after :cyc-a)))
       (is (not (checked/closed? after :cyc-b)))
       (is (checked/closed? after :consumer))))
-  (testing "the closure is rule-closed and least among all 64 subsets of six IDs"
+  (testing "false and nil work as reduction tails and heads, not just seeds"
+    (let [typed (assoc m0 :artifacts [{:stmt :foundation}]
+                          :reductions [{:head false :tails #{:foundation}}
+                                       {:head nil :tails #{false}}])]
+      (is (= #{:foundation false nil} (checked/closed-set typed)))
+      (is (checked/has-reduction? typed false))
+      (is (checked/has-reduction? typed nil))))
+  (testing "the closure is rule-closed and least among all 64 subsets on nonempty cases"
     (let [six #{:foundation :adapter :consumer :hard :cyc-a :cyc-b}
-          map-six (assoc m0 :universe six)
-          result (checked/closed-set map-six)
-          candidates (filter #(rule-closed? map-six %) (subsets six))]
-      (is (rule-closed? map-six result))
-      (is (every? #(set/subset? result %) candidates)))))
+          chain {:universe six :artifacts [{:stmt :foundation}]
+                 :reductions [{:head :adapter :tails #{:foundation}}
+                              {:head :consumer :tails #{:adapter}}
+                              {:head :hard :tails #{}}]
+                 :obligations #{:consumer :cyc-a}}
+          seeded-alternative {:universe six :artifacts [{:stmt :hard}]
+                              :reductions (:reductions m0) :obligations #{:consumer :cyc-a}}
+          seeded-cycle {:universe six :artifacts [{:stmt :cyc-a}]
+                        :reductions (:reductions m0) :obligations #{:consumer :cyc-a}}]
+      (doseq [problem-map [chain seeded-alternative seeded-cycle]]
+        (assert-exhaustive-least! problem-map)))))
 
 (deftest update-and-return-observation-boundaries
   (let [m1 (checked/update m0 foundation-and-adapter)]
@@ -109,6 +134,40 @@
       (let [with-false (assoc m0 :artifacts [{:stmt false} {:stmt nil}])]
         (is (checked/closed? with-false false))
         (is (checked/closed? with-false nil))))))
+
+(deftest admission-preserves-supplied-vectors-and-is-monotone
+  (let [base (assoc m0
+                    :artifacts [{:stmt :foundation :metadata {:origin :base}}]
+                    :reductions [{:head :adapter :tails #{:foundation} :metadata {:rank 1}}])
+        checked-part {:artifacts [{:stmt :hard :metadata {:origin :report}}]
+                      :reductions [{:head :consumer :tails #{:adapter} :metadata {:rank 2}}]}
+        admitted (checked/admit base checked-part)
+        reordered (assoc admitted
+                         :artifacts (vec (reverse (concat (:artifacts admitted)
+                                                          (:artifacts admitted))))
+                         :reductions (vec (reverse (concat (:reductions admitted)
+                                                           (:reductions admitted)))))]
+    (testing "admit changes neither fixed set and preserves vector order and entry metadata"
+      (is (= (:universe base) (:universe admitted)))
+      (is (= (:obligations base) (:obligations admitted)))
+      (is (= [{:stmt :foundation :metadata {:origin :base}}
+              {:stmt :hard :metadata {:origin :report}}]
+             (:artifacts admitted)))
+      (is (= {:head :adapter :tails #{:foundation} :metadata {:rank 1}}
+             (first (:reductions admitted)))))
+    (testing "order and duplicates do not change closure; admission is monotone"
+      (is (= (checked/closed-set admitted) (checked/closed-set reordered)))
+      (is (set/subset? (checked/closed-set base) (checked/closed-set admitted))))
+    (testing "sequential helper then foundation closes consumer"
+      (is (checked/closed? (checked/update (checked/update m0 censored-helper)
+                                             foundation-only)
+                          :consumer)))
+    (testing "same label and same claims, different checked content differs"
+      (let [same-header (assoc foundation-and-adapter
+                               :label (:label foundation-only)
+                               :claimed-closed (:claimed-closed foundation-only))]
+        (is (not= (checked/return-obs m0 #{:consumer} foundation-only)
+                  (checked/return-obs m0 #{:consumer} same-header)))))))
 
 (deftest typed-input-refusals
   (is (= :undeclared-statement
