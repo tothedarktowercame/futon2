@@ -8,6 +8,29 @@
 
 (defn- comparison-id [[p _]] [(:target p) (:policy-id p)])
 
+(defn- exact-rational? [x] (or (integer? x) (ratio? x)))
+
+(defn coherence-finding
+  "CoherentThetaCandidate.Coherent at the family boundary. Only exact integer
+   or ratio inputs certify this equality; IEEE/decimal coercions and tolerances
+   are not proofs of a common posterior. No ledger reads or parameter repairs."
+  [candidate pattern-counts]
+  (let [{:keys [units patterns]} (get-in candidate [:precedence :co-apply])]
+    (if-not (and (vector? units) (seq units) (map? patterns)
+                 (map? pattern-counts) (= (set units) (set (keys pattern-counts))))
+      {:kind :pattern-coherence-input-missing}
+      (some (fn [unit]
+              (let [theta (get-in patterns [unit :theta])
+                    pair (get pattern-counts unit)
+                    reason (cond
+                             (not (exact-rational? theta)) :unsupported-pattern-theta
+                             (not (and (vector? pair) (= 2 (count pair))
+                                       (every? #(and (exact-rational? %) (pos? %)) pair)))
+                             :unsupported-pattern-counts
+                             (not= theta (/ (first pair) (reduce +' pair)))
+                             :incoherent-pattern-theta)]
+                (when reason {:kind reason :unit unit :theta theta :counts pair}))) units))))
+
 (defn- replace-score [score entry model inputs horizon-choice]
   (let [terms (get-in entry [:certificate :g-terms])
         carrier (assoc (:selection-candidate score) :g (:G-efe entry))]
@@ -41,6 +64,10 @@
   (let [pairs (vec (mapcat :scored rows))
         candidates (mapv #(assoc (:candidate (second %)) :id (comparison-id %)) pairs)
         counts-result (counts/family-pattern-counts candidates)
+        incoherent (into {} (keep (fn [c]
+                                   (when-let [finding (coherence-finding c (get-in counts-result [:pattern-counts (:id c)]))]
+                                     [(:id c) finding])) candidates))
+        eligible (filterv #(not (contains? incoherent (:id %))) candidates)
         h (max 1 (min scorer/max-horizon
                       (reduce max 0 (map #(count (get-in % [:precedence :co-apply :units])) candidates))))
         horizon-choice {:horizon h :rule :max-field-unit-count-clamped
@@ -54,14 +81,19 @@
         options {:horizon-steps h :pattern-counts (:pattern-counts counts-result)
                  :observation-model-of models :require-ruled-class-kernel? true
                  :prediction-context {:occurrence-id [:field-comparison (mapv :id candidates)] :tau h}}
-        results (when (and (seq candidates) (not= :refused (:status counts-result)))
-                  (canonical/compare-at-horizon {:cascade-belief {#{} 1}} candidates options))
+        results (when (not= :refused (:status counts-result))
+                  (if (seq eligible)
+                    (canonical/compare-at-horizon {:cascade-belief {#{} 1}} eligible options)
+                    []))
         refusal (cond
                   (= :refused (:status counts-result)) counts-result
-                  (empty? candidates) {:status :refused :reason :no-admissible-candidate}
+                  (empty? eligible) {:status :refused :reason :no-admissible-candidate}
                   (not (vector? results)) results)
-        entries (into {} (map (juxt :cascade-id identity))
-                      (if (vector? results) results (:candidates results)))
+        entries (merge (into {} (map (juxt :cascade-id identity))
+                             (if (vector? results) results (:candidates results)))
+                       (when-not (= :refused (:status counts-result))
+                         (into {} (map (fn [[id finding]]
+                                         [id {:status :refused :refusal finding}]) incoherent))))
         updated (mapv
                  (fn [row]
                    (let [scored (filterv some? (mapv (fn [[p score :as pair]]
@@ -100,7 +132,8 @@
         ruled (:class-preference (shape/class-emission-model ::ruled #{} #{} h))
         counts-result (counts/family-pattern-counts [candidate])
         expected-counts (:pattern-counts counts-result)
-        result (canonical/compare-at-horizon state [candidate] options)
+        coherence (coherence-finding candidate (get-in options [:pattern-counts (:id candidate)]))
+        result (when-not coherence (canonical/compare-at-horizon state [candidate] options))
         entry (when (vector? result) (first result))
         actual (first (:scorer-result record))
         terms (get-in entry [:certificate :g-terms])
@@ -139,6 +172,7 @@
                        :consumed-fit-ambiguity? false}
        :authority {:kind :class-emission :source :classKernel :model-horizon h
                    :lean :compareAtHorizonN :version :canonical-coapply-g-v1}}
-      {:status :refused :kind :canonical-g-not-bound-to-record
+      {:status :refused :kind (or (:kind coherence) :canonical-g-not-bound-to-record)
+       :coherence-finding coherence
        :policy-id (:policy-id record) :target (:target record)
        :recomputation (when-not (vector? result) result)})))
