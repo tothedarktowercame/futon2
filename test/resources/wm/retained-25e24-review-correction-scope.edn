@@ -1,0 +1,19 @@
+{:schema :wm/review-evidence-correction-scope-v1
+ :source-checkpoint
+ {:path "/home/joe/code/futon2/data/wm-full-loop-machinery-150/wm-contract-machinery-150-v1/attempt-002/005-build.edn"
+  :sha256 "6af4686c58723798b3f62656592ec16ae3831e13d33b83eaa1cda965cac6fa7f"}
+ :source-terminal
+ {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-25e24e8b-efeb-40e1-a108-232b50b79f88.edn"
+  :sha256 "e54b75c71a69105338373dc784732ece7a0b9114807bde3e354cf171aa2afdbc"}
+ :run-prefix "25e24e8b"
+ :observed-failures
+ [{:check :selected-want-outcome/receipt
+   :observed {:selected-want-hole-count 6 :pattern-done-count 2}
+   :correction-capable? false
+   :reason :machine-producer-consumer-mismatch}
+  {:check :evidence-authority
+   :observed {:measurements []}
+   :correction-capable? false
+   :reason :observation-producer-absent}]
+ :review-evidence-correction-applicable? false
+ :note "Retained-source projection only; it does not assert a live outcome or close any injury."}

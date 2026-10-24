@@ -2053,9 +2053,17 @@
              (get-in (ex-data result) [:review-evidence-correction :status]))))))
 
 (deftest retained-25e24-mechanical-failure-is-outside-review-correction
-  (let [projection (edn/read-string
-                    (slurp "/home/joe/notes/wm-next/handoff-quality/code/retained-25e24-scope.edn"))
+  (let [resource (io/resource "resources/wm/retained-25e24-review-correction-scope.edn")
+        bytes (with-open [in (io/input-stream resource)] (.readAllBytes in))
+        projection (edn/read-string (String. bytes "UTF-8"))
+        fixture-sha (let [digest (.digest
+                                  (java.security.MessageDigest/getInstance "SHA-256")
+                                  bytes)]
+                      (apply str (map #(format "%02x" %) digest)))
         failures (:observed-failures projection)]
+    (is (= "5556f2d9c2043f926c40c04e154ed7b505dc080bfd8b9b7bd1242a23ddf33e82"
+           fixture-sha)
+        "the repository fixture is byte-identical to the retained projection")
     (is (= "25e24e8b" (:run-prefix projection)))
     (is (= [{:selected-want-hole-count 6 :pattern-done-count 2}
             {:measurements []}]
