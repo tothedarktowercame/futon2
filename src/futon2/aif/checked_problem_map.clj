@@ -8,8 +8,10 @@
   UNDISCHARGED here.  This namespace reads no status, label, claim, receipt or
   checker Boolean as evidence; it has no production caller, store, or I/O.
 
-  The executable closure is intended to compute CheckedProblemMap.closedSet.
-  Its equivalence to Lean Closed is pending the separate reviewed Lean gate."
+  The structural step follows ExecutableCheckedClosure.step. Lean proves its
+  bounded iteration and early fixed point equal CheckedProblemMap.closedSet
+  (mathlib4 3836beefbc). Clojure correspondence is reviewed and tested, not a
+  machine-checked proof of this source. H-real remains a separate obligation."
   (:refer-clojure :exclude [update])
   (:require [clojure.set :as set]))
 

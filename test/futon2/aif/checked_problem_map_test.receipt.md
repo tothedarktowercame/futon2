@@ -51,3 +51,13 @@ baseline semantic failure.
 This receipt covers a Lean-synthetic, adapted fixture only.  The separate Lean
 executable-closure equivalence gate remains pending; no test here authenticates
 proofs, admits runtime records, or warrants a production caller.
+
+## Coordinator review follow-up
+
+Iterative Lean gate reviewed at mathlib4 `3836beefbc`: step iteration and early
+fixed point equal Closed. Source restored byte-identically to implementation
+commit before this docstring-only clarification. Reviewer reran focused namespace:
+6 tests, 46 assertions, 0 failures/errors. Mutation and final logs copied to
+`/home/joe/notes/wm-next/hypergraph-implementation/review/` for persistence.
+Clojure correspondence remains reviewed/tested rather than formally verified;
+H-real, runtime admission and production integration remain open.
