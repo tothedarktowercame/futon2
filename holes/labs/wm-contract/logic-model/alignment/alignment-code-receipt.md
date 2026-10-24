@@ -57,3 +57,25 @@ namespace plus section/end scopes, dotted declaration names, and
 outside-namespace declarations, and documentation comments with trailing
 source are typed unsupported findings; required entries reject rather than
 invent public symbols.  It is not a Lean elaborator.
+
+## Coordinator follow-up review (2026-10-24 14:48:49 UTC)
+
+Independent ghost probes now reject both multiline-string and nested-doc required
+symbols before output. HEAD resolves to full immutable 3836beefbc68cc2060ff54f88447322f64f8ad77.
+The real modules parse 42/33/48 public declarations, each checked as a requirement;
+private declarations remain excluded with explicit findings.
+
+A small reviewer correction tracks `noncomputable section` (present in the real
+CheckedReturnObservation module) and refuses structural unsupported findings in
+required mode even when the requested name was parsed. Two new tests failed before
+this correction (exit 1); all 42 pass afterward (exit 0). Legacy tests remain green.
+Commands: `TMPDIR=/home/joe/notes/wm-next/hypergraph-implementation/alignment-review-run python3 -I holes/labs/wm-contract/logic-model/alignment/test_align.py`;
+`python3 -I /home/joe/notes/wm-next/hypergraph-implementation/alignment-review-run/followup-probe.py` (exit 0);
+`git diff --check` (exit 0).
+Logs: alignment-review-run/{scope-red.log,scope-green.log,followup-probe.log} under
+~/notes/wm-next/hypergraph-implementation/. Probe script retained alongside them.
+
+Accepted for the reviewed bounded declaration syntax and existing three modules.
+This is not a Lean elaborator or proof of symbol existence for arbitrary syntax.
+No canonical artifacts or declaration annotations were generated. Explicit source
+correspondence edges remain separate from semantic equivalence/runtime authority.

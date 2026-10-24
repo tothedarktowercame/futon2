@@ -267,6 +267,18 @@ end Outer
     with self.assertRaisesRegex(_ALIGN.AlignmentError, "unsupported: private declaration"):
       _ALIGN.require_named_entities(entities, issues, [("def", "Outer.hidden")])
 
+  def test_noncomputable_section_keeps_namespace_after_end(self):
+    source = self.source("namespace Demo\nnoncomputable section\ndef inside : Nat := 0\nend\ndef outsideSection : Nat := 0\nend Demo\n")
+    entities, issues = _ALIGN.named_lean_entities(source)
+    self.assertEqual([], issues)
+    self.assertEqual(["Demo.inside", "Demo.outsideSection"], [e["symbol"] for e in entities])
+
+  def test_structural_issue_refuses_even_when_required_name_was_parsed(self):
+    source = self.source("namespace Demo\nend Wrong\ndef present : Nat := 0\nend Demo\n")
+    entities, issues = _ALIGN.named_lean_entities(source)
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "unsupported source structure"):
+      _ALIGN.require_named_entities(entities, issues, [("def", "Demo.present")])
+
   def test_multiline_string_ghost_declaration_is_not_extracted(self):
     source = self.source('''
 namespace Demo

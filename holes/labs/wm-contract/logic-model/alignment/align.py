@@ -157,7 +157,7 @@ def _doc_comment(lines, start):
 DECLARATION = re.compile(r"^(?P<prefix>(?:(?:private|protected|noncomputable|unsafe|partial)\s+)*)"
                          r"(?P<kind>def|theorem)\s+(?P<name>[A-Za-z_][A-Za-z0-9_'.]*)\b")
 NAMESPACE = re.compile(r"^namespace\s+([A-Za-z_][A-Za-z0-9_'.]*)\b")
-SECTION = re.compile(r"^section(?:\s+[A-Za-z_][A-Za-z0-9_'.]*)?\s*$")
+SECTION = re.compile(r"^(?:noncomputable\s+)?section(?:\s+[A-Za-z_][A-Za-z0-9_'.]*)?\s*$")
 END = re.compile(r"^end(?:\s+[A-Za-z_][A-Za-z0-9_'.]*)?\s*(?:--.*)?$")
 
 def named_lean_entities(source):
@@ -223,6 +223,10 @@ def named_lean_entities(source):
 
 def require_named_entities(entities, issues, requirements):
   """Reject unpinned missing, ambiguous, or unsupported required symbols."""
+  structural = [issue for issue in issues if issue["kind"] == "unsupported"]
+  if structural:
+    raise AlignmentError("unsupported source structure: " +
+                         "; ".join(issue["reason"] for issue in structural))
   indexed = {}
   for entity in entities:
     indexed.setdefault((entity["kind"], entity["symbol"]), []).append(entity)
