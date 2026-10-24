@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 13:04:35 UTC — reviewed/promoted AIFJointObjectiveIdentity `3f783c9e65` through `8e5594602e`: existing risk/ambiguity adapter to joint-KL identity, build and zero-mass reviewer probe exit 0, false omitted-information theorem exit 1; standard axioms only. Review `/home/joe/notes/wm-next/loop-plan/joint-identity/review.md`. Next bounded fixed neutral-detail constant proof dispatched `invoke-1792847075309-2957-1f6ccf6b`, park `park-3951b708-ade1-4132-8805-d7b91d8e006d`. Source approximation preserved; no runtime/model/preference adoption.
+
 - 2026-10-24 13:01:14 UTC — reviewed joint-objective derivation; synthetic replay exits 0. Conditional outcome-risk identity accepted, with source eq15 approximation explicit and information-preservation requiring more than one-way recovery. Review `/home/joe/notes/wm-next/loop-plan/AIF-JOINT-OBJECTIVE-REVIEW.md`. Dispatched codex-9 finite Lean identity using existing risk/ambiguity and independent KL information: `invoke-1792846862951-2956-15078d89`, park `park-927b6e4f-1c16-41ea-923e-cb2adb0c4731`. No outer preferences/model semantics adopted or runtime changes.
 
 - 2026-10-24 12:53:14 UTC — outer-return arithmetic independently replayed/asserted (exit 0): normalisation, shared-parameter prediction, batch novelty, KL chain. Full objective not accepted: ambiguity/conditional-information assumptions and observation modalities require consistent derivation. Review `/home/joe/notes/wm-next/loop-plan/AIF-OUTER-RETURN-REVIEW.md`; bounded follow-up claude-7 `invoke-1792846384991-2955-a57b5fb8`, park `park-26ab5c7e-2784-4926-bf12-bb9c68ca6f8c`. No preference choice, scoring change or compliance claim.
