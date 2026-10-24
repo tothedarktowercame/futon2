@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 23:30:21 UTC — delayed medic addendum4d659ea reviewed:9-line structural-authority refusal theorem only, no algorithm change. Exact committed module independently elaborated exit0; merged mathlib6fb62bf9ef0bffd939d54a666dfc467ce32df395. Review appended under offline-repair/formal/review/final-review.md. Sweep provenance3360 remains pending; no duplicate dispatch or runtime action,budget0.
+
 - 2026-10-24 23:29:44 UTC — codex-11 accepted medic occurrence-bound admission0f22add; mathlib mergea1b3ca8a349acf8cf80daff98b3d184c76dea107. Independent stale/cause checks with permissive authority and focused build passed; axioms standard only. Review `~/notes/wm-next/offline-repair/formal/review/final-review.md`. Supplied-evidence scope, no runtime adoption: general sweep provenance/clear-all proof next, Agency codex-12 `invoke-1792884581841-3360-63ad2b89`, park `park-5b321306-e8d9-4292-9e7c-066968831acc`. Arbitrary prepopulated corrections not certified; fresh occurrence IDs assumed. No live injury cleared,Clojure action or click;budget0.
 
 - 2026-10-24 23:27:38 UTC — codex-11 accepted/merged reviewer evidence correction56bd131a (preceded c9fb3214/1b6d9db4) as66d243bc1f4d2f39ff2fc0daeb022b38b36c580e. Independent final3 tests26 assertions green; fixture exact hash/classpath checked; author8/58 and mutation/static receipts reviewed. Final review `~/notes/wm-next/handoff-quality/code/review/final-review.md`. Default0 unchanged, no serving load/activation; preflight identity must be checked before future execution. Same gate/one correction, mechanical falsifier excluded. No injury clearance/learning claim;budget0.
