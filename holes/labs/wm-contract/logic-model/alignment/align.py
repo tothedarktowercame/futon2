@@ -86,6 +86,14 @@ def pinned_lean_source(spec):
     raise AlignmentError("pinned Lean source must be REPO@REV:PATH") from exc
   if not repo or not revision or not rel.endswith(".lean"):
     raise AlignmentError("pinned Lean source needs nonempty repo, revision, and .lean path")
+  resolved = subprocess.run(["git", "-C", repo, "rev-parse", "--verify", f"{revision}^{{commit}}"],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+  if resolved.returncode:
+    raise AlignmentError(f"cannot resolve immutable Lean commit {repo}@{revision}: " +
+                         resolved.stderr.decode("utf-8", "replace").strip())
+  revision = resolved.stdout.decode("ascii", "strict").strip()
+  if not re.fullmatch(r"[0-9a-f]{40}", revision):
+    raise AlignmentError(f"resolved Lean revision is not a full commit: {revision!r}")
   result = subprocess.run(["git", "-C", repo, "show", f"{revision}:{rel}"],
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
   if result.returncode:
@@ -99,28 +107,52 @@ def pinned_lean_source(spec):
           "module": rel[:-5], "text": text,
           "sha256": hashlib.sha256(result.stdout).hexdigest()}
 
-def _masked_lean_line(line, block_depth):
+def _masked_lean_line(line, block_depth, in_string):
   """Mask strings and nested comments for the deliberately small declaration parser."""
-  out, i, quote = [], 0, False
+  out, i = [], 0
   while i < len(line):
     pair = line[i:i + 2]
     if block_depth:
       if pair == "/-": block_depth += 1; i += 2; out.extend("  "); continue
       if pair == "-/": block_depth -= 1; i += 2; out.extend("  "); continue
       out.append(" "); i += 1; continue
-    if not quote and pair == "/-":
+    if not in_string and pair == "/-":
       block_depth += 1; i += 2; out.extend("  "); continue
-    if not quote and pair == "--":
+    if not in_string and pair == "--":
       out.extend(" " * (len(line) - i)); break
     ch = line[i]
-    if ch == '"' and (i == 0 or line[i - 1] != "\\"):
-      quote = not quote; out.append(" ")
-    elif quote:
+    if in_string:
       out.append(" ")
+      if ch == "\\" and i + 1 < len(line):
+        i += 1; out.append(" ")
+      elif ch == '"':
+        in_string = False
+    elif ch == '"':
+      in_string = True; out.append(" ")
     else:
       out.append(ch)
     i += 1
-  return "".join(out), block_depth
+  return "".join(out), block_depth, in_string
+
+def _doc_comment(lines, start):
+  """Return (doc-text, final-line-index, trailing-source) for nested `/--` comments."""
+  depth, i, column, chunks = 1, start, lines[start].find("/--") + 3, [lines[start]]
+  while i < len(lines):
+    line = lines[i]
+    while column < len(line):
+      pair = line[column:column + 2]
+      if pair == "/-":
+        depth += 1; column += 2; continue
+      if pair == "-/":
+        depth -= 1; column += 2
+        if depth == 0:
+          return "\n".join(chunks), i, line[column:]
+        continue
+      column += 1
+    i += 1
+    if i < len(lines): chunks.append(lines[i])
+    column = 0
+  raise AlignmentError(f"unterminated documentation comment at line {start + 1}")
 
 DECLARATION = re.compile(r"^(?P<prefix>(?:(?:private|protected|noncomputable|unsafe|partial)\s+)*)"
                          r"(?P<kind>def|theorem)\s+(?P<name>[A-Za-z_][A-Za-z0-9_'.]*)\b")
@@ -137,26 +169,35 @@ def named_lean_entities(source):
   public identities.  Unsupported private declarations are returned as issues
   so a required identity fails rather than becoming an invented public symbol.
   """
-  out, issues, scopes, pending_doc, block_depth = [], [], [], None, 0
+  out, issues, scopes, pending_doc, block_depth, in_string = [], [], [], None, 0, False
   lines = source["text"].splitlines()
   i = 0
   while i < len(lines):
     raw, stripped = lines[i], lines[i].strip()
-    if stripped.startswith("/--"):
-      doc = [stripped]
-      while "-/" not in lines[i] and i + 1 < len(lines):
-        i += 1; doc.append(lines[i].strip())
-      pending_doc = " ".join(doc)
-      i += 1; continue
-    line, block_depth = _masked_lean_line(raw, block_depth)
+    if not in_string and not block_depth and stripped.startswith("/--"):
+      doc, end_line, trailing = _doc_comment(lines, i)
+      if trailing.strip():
+        issues.append({"line": end_line + 1, "kind": "unsupported",
+                       "reason": "documentation comment with trailing source"})
+      pending_doc = doc
+      i = end_line + 1; continue
+    line, block_depth, in_string = _masked_lean_line(raw, block_depth, in_string)
     code = line.strip()
     ns = NAMESPACE.match(code)
     if ns:
       scopes.append(("namespace", ns.group(1))); pending_doc = None; i += 1; continue
     if SECTION.match(code):
       scopes.append(("section", None)); pending_doc = None; i += 1; continue
-    if END.match(code):
-      if scopes: scopes.pop()
+    end = END.match(code)
+    if end:
+      requested = code[3:].strip().split()[0] if code[3:].strip() else None
+      if not scopes:
+        issues.append({"line": i + 1, "kind": "unsupported", "reason": "unmatched end"})
+      elif requested and scopes[-1][0] == "namespace" and scopes[-1][1] != requested:
+        issues.append({"line": i + 1, "kind": "unsupported", "reason": "named end does not match scope",
+                       "name": requested})
+      else:
+        scopes.pop()
       pending_doc = None; i += 1; continue
     decl = DECLARATION.match(code)
     if decl:

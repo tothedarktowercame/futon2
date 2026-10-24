@@ -267,6 +267,64 @@ end Outer
     with self.assertRaisesRegex(_ALIGN.AlignmentError, "unsupported: private declaration"):
       _ALIGN.require_named_entities(entities, issues, [("def", "Outer.hidden")])
 
+  def test_multiline_string_ghost_declaration_is_not_extracted(self):
+    source = self.source('''
+namespace Demo
+def text : String := "hello
+def fake : Nat := 0
+world"
+end Demo
+''')
+    entities, issues = _ALIGN.named_lean_entities(source)
+    self.assertEqual(["Demo.text"], [entity["symbol"] for entity in entities])
+    self.assertEqual([], issues)
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "Demo.fake.*missing"):
+      _ALIGN.require_named_entities(entities, issues, [("def", "Demo.fake")])
+
+  def test_doc_looking_line_inside_multiline_string_is_not_a_doc_comment(self):
+    source = self.source('''
+namespace Demo
+def text : String := "hello
+/-- def fake : Nat := 0 -/
+world"
+def real : Nat := 0
+end Demo
+''')
+    entities, issues = _ALIGN.named_lean_entities(source)
+    self.assertEqual(["Demo.text", "Demo.real"], [entity["symbol"] for entity in entities])
+    self.assertEqual([], issues)
+
+  def test_nested_doc_comment_ghost_declaration_is_not_extracted(self):
+    source = self.source('''
+namespace Demo
+/-- doc /- nested -/
+def fake : Nat := 0
+-/
+def real : Nat := 0
+end Demo
+''')
+    entities, issues = _ALIGN.named_lean_entities(source)
+    self.assertEqual(["Demo.real"], [entity["symbol"] for entity in entities])
+    self.assertEqual([], issues)
+    with self.assertRaisesRegex(_ALIGN.AlignmentError, "Demo.fake.*missing"):
+      _ALIGN.require_named_entities(entities, issues, [("def", "Demo.fake")])
+
+  def test_required_ghost_rejects_before_output(self):
+    source = self.source('''
+namespace Demo
+def text : String := "hello
+def fake : Nat := 0
+world"
+end Demo
+''')
+    with tempfile.TemporaryDirectory() as directory:
+      sites = Path(directory) / "sites.json"
+      sites.write_text(json.dumps([]))
+      out = Path(directory) / "out"
+      with self.assertRaisesRegex(_ALIGN.AlignmentError, "Demo.fake.*missing"):
+        _ALIGN.main(sites, out, named_sources=[source], requirements=[("def", "Demo.fake")])
+      self.assertFalse(out.exists())
+
   def test_requirement_rejects_missing_and_ambiguity(self):
     source = self.source("namespace Outer\ndef present : Nat := 0\nend Outer\n")
     entities, issues = _ALIGN.named_lean_entities(source)
@@ -333,6 +391,9 @@ end Outer
       source = _ALIGN.pinned_lean_source(f"{repo}@{revision}:Demo.lean")
       entities, _ = _ALIGN.named_lean_entities(source)
       self.assertEqual(["Demo.committed"], [entity["symbol"] for entity in entities])
+      from_head = _ALIGN.pinned_lean_source(f"{repo}@HEAD:Demo.lean")
+      self.assertEqual(revision, from_head["revision"])
+      self.assertRegex(from_head["revision"], r"^[0-9a-f]{40}$")
       with self.assertRaisesRegex(_ALIGN.AlignmentError, "REPO@REV:PATH"):
         _ALIGN.pinned_lean_source("not-pinned")
 

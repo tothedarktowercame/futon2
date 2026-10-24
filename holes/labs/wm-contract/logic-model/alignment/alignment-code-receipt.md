@@ -35,3 +35,25 @@ committed content and did not load any application namespace.
 This receipt establishes generator mechanics only.  No Lean annotation was
 added, no generated canonical artifact was regenerated, and no edge asserts
 runtime proof authority or proof admission.
+
+## Follow-up lexical/pin repair (`8d5ae0b31` review hold)
+
+Reviewer red evidence before this repair is retained at
+`/home/joe/notes/wm-next/hypergraph-implementation/alignment-review-run/probe.json`:
+both a multiline string and a nested documentation comment incorrectly made
+`Demo.fake` a required definition, and `HEAD` was recorded literally.
+
+After the repair:
+
+| command | exit | result / log |
+|---|---:|---|
+| `python3 -I holes/labs/wm-contract/logic-model/alignment/test_align.py` | 0 | 40 tests, including multiline-string/doc-looking ghost, nested-doc ghost, fail-before-output, and `HEAD` → full-commit controls; `/home/joe/notes/wm-next/hypergraph-implementation/alignment-followup-logs/test-align-final.log` |
+| pinned extractor using short `3836beefbc` | 0 | recorded `3836beefbc68cc2060ff54f88447322f64f8ad77`, not `HEAD`/short SHA; `.../alignment-followup-logs/pinned-short-revision.log` |
+| `git diff --check` | 0 | clean |
+
+The supported parser remains intentionally narrow: named `def`/`theorem`,
+namespace plus section/end scopes, dotted declaration names, and
+`noncomputable def`.  Private declarations, unmatched/mismatched ends,
+outside-namespace declarations, and documentation comments with trailing
+source are typed unsupported findings; required entries reject rather than
+invent public symbols.  It is not a Lean elaborator.
