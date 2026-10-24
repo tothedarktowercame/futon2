@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 12:26:23 UTC — Joe requests progress toward a justified AIF-compliance claim. Dispatched claude-7 forward specification `invoke-1792844780098-2947-4bcd4d28`, park `park-2c8c5ef3-1716-4f0d-9ce1-c7e142e65787`: explicit hierarchical generative factorisation, inference/learning/G equations, dependency/censoring treatment, carry consumers and source-to-Lean obligation table. Output `loop-plan/AIF-CONTRACT-DRAFT.md`; first bounded formal gap or precise operator choice required. No arbitrary scoring substitute, semantic adoption or implementation dispatched.
+
 - 2026-10-24 12:04:55 UTC — reviewed outer/inner advisory against recorded Sard ranking/stale consumer blueprint and R15 source. Review `/home/joe/notes/wm-next/loop-plan/outer-inner-review.md`: target selection distinction supported; ReturnConforms must require foundation proof plus checked reduction, preserve residuals and distinguish alternative routes from joint prerequisites. No preference/double-counting ruling or independent trial count adopted. One-consumer return boundary proposed for discussion; no code or click.
 
 - 2026-10-24 12:01:24 UTC — Joe requests claude-14 assessment of outer construction-target selection versus inner blueprint/proof. Dispatched read-only advisory `invoke-1792843281112-2945-effc5dc1`, park `park-d8cd7bf9-89c9-4778-a48c-212d1ef8358b`; packet `/home/joe/notes/wm-next/packets/outer-inner-claude14.txt`. Require concrete dependency versus predicted-unlock example, carried boundary objects and first warranted formal obligation. No implementation or link-count objective adopted.
