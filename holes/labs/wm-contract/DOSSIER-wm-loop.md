@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 21:39:46 UTC — codex-11 prepared open-items plan requested by Joe. Pure production ledger validation:37 entries,7 active injuries (3 open,3 enacted,1 reopened), no terminal injury; current transaction8467,three deferred. Serving retry queue empty; HTTP idle/budget0. Backlog is not seven proven independent defects; already-satisfied injury requires classification review. Evidence and ordered Lean-first plan: ~/notes/wm-next/open-items-plan/PLAN.md. No ledger/store/source behavior changes or clicks; no blanket backlog retirement authorized.
+
 - 2026-10-24 21:34:21 UTC — codex-11 read first-reader authority suggestion, actual attempt-learning v2 resource, producer-of and PatternTheta. Added U4 as unresolved model/authority reconciliation, respecting the existing v2 authorization rather than silently selecting a different grain. Cross-referenced parked measurement domain and falsifier accounting without equating them. No code or live changes.
 
 - 2026-10-24 21:26:24 UTC — codex-11 accepted payload-bound supplied observation admission241a9447, Lean merge 85fc561de3. Independent build exit0 and flipped-payload negative exit1 for intended semantic reason. Existing PatternTheta/R20 unchanged; actual projected events feed arithmetic/pooling controls. Review: ~/notes/wm-next/pattern-measurement-repair/formal-final-review.md. Runtime authority producer and falsifier accounting still open; budget0/no click.
