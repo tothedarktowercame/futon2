@@ -89,3 +89,50 @@ Pre-commit file hashes:
 - Contract gate/default, priors, horizon, declaration membership, theta eligibility, observation authority, and fire semantics are unchanged.
 
 One diagnostic command was invoked incorrectly as `clojure -M:test -e ...`; because the alias supplies the test runner, it began the full suite. It was terminated (`kill 2469238`) once detected and is not counted as evidence or a gate.
+
+## Occurrence-identity follow-up
+
+Reviewer control: `/home/joe/notes/wm-next/minimum-construction-learning/shape-review-probe.clj` exposed that equal pattern maps lost their co-apply unit identity. Base commit: `91d2026a0484e57bf163d91b84b7ce819a64629f`.
+
+The added control uses equal-valued patterns at units `:first` and `false`. Only `:first` precedes `:dependent`, so changing the wrong equal occurrence also changes the two-step rollout. Before the follow-up production change:
+
+```text
+clojure -X:test :nses '[futon2.aif.learning-coapply-shape-test]'
+Ran 5 tests containing 23 assertions.
+3 failures, 0 errors.
+exit 1
+```
+
+The failures showed that no explicit second entry existed and the `false`-keyed pattern did not receive theta.
+
+After carrying `{unit, pattern}` from enumeration through shadow selection:
+
+```text
+clojure -X:test :nses '[futon2.aif.learning-trial-test futon2.aif.attempt-learning-test futon2.aif.learning-coapply-shape-test]'
+Ran 11 tests containing 96 assertions.
+0 failures, 0 errors.
+exit 0
+```
+
+The test pins the unit and descent unchanged, the first and dependent patterns unchanged, only the `false`-keyed second occurrence updated, and a rollout difference from the old first-occurrence selection.
+
+Follow-up gates:
+
+```text
+clj-kondo --lint src/futon2/aif/learning_trial.clj src/futon2/aif/attempt_learning.clj test/futon2/aif/learning_coapply_shape_test.clj
+linting took 17ms, errors: 0, warnings: 1
+
+emacs --batch -l /home/joe/code/futon4/dev/check-parens.el src/futon2/aif/learning_trial.clj src/futon2/aif/attempt_learning.clj test/futon2/aif/learning_coapply_shape_test.clj
+OK
+
+git diff --check
+exit 0, no output
+```
+
+The warning remains the pre-existing `attempt_learning.clj:16:3` misplaced docstring. Follow-up pre-commit hashes:
+
+```text
+2f899812367ad6d541a1ac85a92077f7444b2cdade56600081b35aa5a89c5b18  src/futon2/aif/learning_trial.clj
+29d9a1c723f0e265af4f0b23f1c36e2b6e4bcd16e170a864652852a56e7ee18c  src/futon2/aif/attempt_learning.clj
+20ba3a0fcc40f6ecd78aca4cf85d2df854db796fbeefd35f909ebb2fab70e252  test/futon2/aif/learning_coapply_shape_test.clj
+```

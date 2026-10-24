@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.attempt-learning :as attempt]
+            [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.learning-trial :as trial]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.selected-outer-cascade-policy :as selected]
@@ -108,3 +109,33 @@
       (is (= (marginal prior-belief [:t :b]) (marginal counted-belief [:t :b]))))
     (testing "only the selected pattern's theta changes"
       (is (not= (marginal prior-belief [:t :a]) (marginal counted-belief [:t :a]))))))
+
+(deftest coapply-shadow-selects-the-enumerated-occurrence
+  (let [duplicate {:id :same
+                   :guard {:status :interpreted :clauses [{:present #{} :absent #{}}]}
+                   :produces #{[:t :same]}}
+        other {:id :other
+               :guard {:status :interpreted :clauses [{:present #{[:t :same]} :absent #{}}]}
+               :produces #{[:t :other]}}
+        step {:co-apply {:units [:first false :dependent]
+                         :descent [[:first :dependent]]
+                         :patterns {:first duplicate false duplicate :dependent other}}}
+        analysis (trial/precedence-analysis step)
+        second-entry (second (:pattern-entries analysis))
+        changed (#'trial/with-pattern-theta (:step analysis) second-entry 1/4)
+        wrong-occurrence (assoc-in step [:co-apply :patterns :first :theta] 1/4)
+        rollout (fn [precedence]
+                  (:belief (model/rollout-evaluation
+                            (constantly precedence) {#{} 1} 2)))]
+    (is (= false (:unit second-entry)) "a false unit key is an occurrence identity")
+    (is (= duplicate (:pattern second-entry)))
+    (is (= (:units (:co-apply step)) (get-in changed [:co-apply :units])))
+    (is (= (:descent (:co-apply step)) (get-in changed [:co-apply :descent])))
+    (is (= duplicate (get-in changed [:co-apply :patterns :first])))
+    (is (= (assoc duplicate :theta 1/4)
+           (get-in changed [:co-apply :patterns false])))
+    (is (= other (get-in changed [:co-apply :patterns :dependent])))
+    (is (= (rollout step) (rollout changed))
+        "the second occurrence is outside the first unit's dependency descent")
+    (is (not= (rollout changed) (rollout wrong-occurrence))
+        "updating the equal first occurrence changes the dependent rollout")))
