@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 20:00:14 UTC — codex-11 reviewed serving activation: six composition identities and runner own source current, actual installed verifier current, nochange prompt present. HTTP and 215-file inventories unchanged. Service registration remains absent; canonical load/installed verifier evidence only. Review: ~/notes/wm-next/clean-click-boundary/activation/coordinator-review.md. Remaining two diagnostic parents authorized for sequential dispatch with fresh preflight; no AIF/learning closure claim.
+
 - 2026-10-24 19:47:42 UTC — codex-11 reviewed and merged CLI preparation 3f0a0c79a via c2001a45a3. Independent 9 preparation tests green; worker 15 reload tests and semantic mutations reviewed. Scope: declared composition, observed idle boundary, no atomic reload lock or whole-system identity claim. Review: ~/notes/wm-next/clean-click-boundary/cli-final-review.md. No serving reload/click; activation must also verify runner/service identities. Two diagnostic parents unused.
 
 - 2026-10-24 19:40:51 UTC — codex-11 accepted exact baseline attribution (comparison exit 0); merged scoped clean admission futon2 a65056b3ba, futon3c 8b45ac821e. Existing service failures predate whole patch; new focused admission tests green. Review: ~/notes/wm-next/clean-click-boundary/admission-final-review.md. Source only, no reload/click; CLI preparation and serving verification still pending. Broad-discovery incident unknown effects retained.
