@@ -309,7 +309,7 @@
 
 (def sealed-menu-body-keys
   [:schema :field-source-pin :family-census :frontier :focus-receipt :class-census
-   :entries :refusals :failures :canonical-g-shadow])
+   :target-relations :entries :refusals :failures :canonical-g-shadow])
 
 (defn- class-census [target-classes]
   {:by-class (frequencies (keep :class (vals target-classes)))
@@ -424,6 +424,7 @@
                   :frontier (measured-frontier field)
                   :focus-receipt (:focus-receipt join)
                   :class-census (class-census target-classes)
+                  :target-relations target-classes
                   :entries entries :refusals refusals
                   :failures (vec (concat failures (mapcat :failures rows) refusals))}
             body (cond-> body

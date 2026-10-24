@@ -783,6 +783,8 @@
                                               registry/default-code-root)))
                              relation (:class c)]
                          [(:id task) {:class relation
+                                      :relation (:relation c)
+                                      :derived-via (:derived-via c)
                                       :scorer-class (get focus-receipt/scorer-class relation)
                                       :reason (when (= :unknown relation)
                                                 (or (get-in c [:relation :reason])

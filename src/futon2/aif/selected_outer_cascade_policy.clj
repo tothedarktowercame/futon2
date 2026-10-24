@@ -266,6 +266,12 @@
                                                 :target-id :policy-id :cascade-digest
                                                 :selected-entry :menu-pin :evidence-pin
                                                 :objective-pin :carrier-pin])
+                          :target-relations (get-in carrier [:sealed-menu :target-relations])
+                          :target-relations-source
+                          {:at [:outer-task-selection :policy
+                                :selected-outer-cascade-policy :sealed-menu
+                                :target-relations]
+                           :menu-pin (:menu-pin carrier)}
                           :carried-at [:outer-task-selection :policy
                                        :selected-outer-cascade-policy]
                           :sealed-menu {:status :carried-on-receipt
