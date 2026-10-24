@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 13:14:20 UTC — independently reviewed/promoted AIFReportEncoding `e7a7c03080`: build and Option/point-prior reviewer probes pass, false constant-lossless claim fails, standard axioms. Review `/home/joe/notes/wm-next/loop-plan/report-encoding/review.md`. Deterministic injection preserves MI, augmented observation is distinct. Next composition of three reviewed lemmas dispatched `invoke-1792847660094-2959-0a96ea13`, park `park-07ffacc5-acae-476e-bae5-c39c9702547f`; raw-report information must not be collapsed to scored-only information. No runtime or preference adoption.
+
 - 2026-10-24 13:09:22 UTC — reviewed/promoted AIFNeutralDetail `e2b9b12239` through `549d1a13e7`. Build and asymmetric-joint/order probe exit 0; false no-constant claim exit 1; standard axioms only. Review `/home/joe/notes/wm-next/loop-plan/neutral-detail/review.md`. No independence or MI encoding assumption. Next deterministic injective report-encoding information proof dispatched `invoke-1792847362633-2958-072506b1`, park `park-bd6c4526-c228-4ed4-b18d-d02b8a602a6d`; lossy/augmented controls required. No runtime or preference adoption.
 
 - 2026-10-24 13:04:35 UTC — reviewed/promoted AIFJointObjectiveIdentity `3f783c9e65` through `8e5594602e`: existing risk/ambiguity adapter to joint-KL identity, build and zero-mass reviewer probe exit 0, false omitted-information theorem exit 1; standard axioms only. Review `/home/joe/notes/wm-next/loop-plan/joint-identity/review.md`. Next bounded fixed neutral-detail constant proof dispatched `invoke-1792847075309-2957-1f6ccf6b`, park `park-3951b708-ade1-4132-8805-d7b91d8e006d`. Source approximation preserved; no runtime/model/preference adoption.
