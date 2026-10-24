@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 23:36:01 UTC — codex-11 HOLDS medic pure code4dbf79b: independent bb probe confirms forged certified flag clears without state/trace, nil requests default empty, false predecessor and malformed correction validate. Evidence offline-repair/code/review/{coordinator-review.md,probe.clj,probe.log}. Follow-up codex-12 `invoke-1792884959601-3362-e5160322`, park `park-f600da89-5567-4032-b6bd-4afa725505db` requires actual-input certification and strict domain checks. No merge/route/store/live action;budget0.
+
 - 2026-10-24 23:33:37 UTC — codex-11 accepted MedicSweepProvenance71f6fc, merged mathlib18bb69d802d5766a7fc6b9f03a9e6477a88ba495. Independent inhabited one-step trace/elaboration and focused build pass; standard axioms. Scope: admitted-appends trace from empty corrections, not arbitrary preloaded/mixed-outcome certification. Review offline-repair/formal/review/sweep-final-review.md. Pure Clojure correspondence dispatched codex-12 `invoke-1792884814960-3361-d60e0c0b`, park `park-3944374e-303f-4040-b218-24194512476b`; no store/caller/routing changes. Runtime authority/adoption still open,no injuries cleared,budget0.
 
 - 2026-10-24 23:30:21 UTC — delayed medic addendum4d659ea reviewed:9-line structural-authority refusal theorem only, no algorithm change. Exact committed module independently elaborated exit0; merged mathlib6fb62bf9ef0bffd939d54a666dfc467ce32df395. Review appended under offline-repair/formal/review/final-review.md. Sweep provenance3360 remains pending; no duplicate dispatch or runtime action,budget0.
