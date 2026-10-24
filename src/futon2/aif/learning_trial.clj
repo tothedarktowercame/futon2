@@ -12,12 +12,47 @@
 (def prior-resource "wm/learning-trial-prior.edn")
 (defn declared-prior [] (edn/read-string (slurp (io/resource prior-resource))))
 
-(defn- shadow [prediction pattern theta]
-  (let [precedence (mapv #(if (= (:id pattern) (:id %)) (assoc % :theta theta) %)
-                         (get-in prediction [:action :precedence]))]
+(defn precedence-analysis
+  "Validate PRECEDENCE with the prediction seam and return its patterns in
+  declared execution order. The rollout step remains in its original vector
+  or co-apply representation."
+  [precedence]
+  ;; Resolve lazily: token-outcome is the validation authority, while this
+  ;; namespace remains loadable by its historical dynamic API tests.
+  (let [validate (requiring-resolve 'futon2.aif.token-outcome/precedence-step)
+        step (validate precedence)]
+    (if (contains? step :status)
+      {:status :held :reason (:kind step) :finding step
+       :patterns [] :pattern-entries []}
+      (let [entries (if (vector? step)
+                      (mapv (fn [pattern] {:pattern pattern}) step)
+                      (let [{:keys [units patterns]} (:co-apply step)]
+                        (mapv (fn [unit] {:unit unit :pattern (patterns unit)}) units)))]
+        {:status :present
+         :step step
+         :patterns (mapv :pattern entries)
+         :pattern-entries entries}))))
+
+(defn- produces-of [pattern]
+  (or (:produces pattern) (get-in pattern [:transition :produces]) #{}))
+
+(defn- with-pattern-theta [step {:keys [unit pattern]} theta]
+  (if (vector? step)
+    (mapv #(if (= (:id pattern) (:id %)) (assoc % :theta theta) %) step)
+    (let [patterns (get-in step [:co-apply :patterns])]
+      (if (contains? patterns unit)
+        (assoc-in step [:co-apply :patterns unit :theta] theta)
+        step))))
+
+(defn- shadow [prediction pattern-entry theta]
+  (let [{:keys [status step] :as analysis}
+        (precedence-analysis (get-in prediction [:action :precedence]))
+        precedence (when (= :present status) (with-pattern-theta step pattern-entry theta))]
     (if (and (= :frozen (:status prediction)) (seq (:initial-belief prediction)))
-      {:theta theta :rollout (model/rollout-evaluation (constantly precedence)
-                                                      (:initial-belief prediction) (:horizon prediction))}
+      (if precedence
+        {:theta theta :rollout (model/rollout-evaluation (constantly precedence)
+                                                         (:initial-belief prediction) (:horizon prediction))}
+        {:status :held :reason (:reason analysis) :precedence-finding (:finding analysis)})
       {:status :held :reason :prediction-input-unavailable})))
 
 (defn receipt
@@ -31,12 +66,14 @@
         prediction (:prediction comparison)
         action (:action prediction)
         rows (into {} (map (juxt :token identity)) (:tokens comparison))
+        precedence (precedence-analysis (get-in prediction [:action :precedence]))
         valid-prior? (and (= :illustrative (:authority prior)) (= :record-only (:mode prior))
                           (every? #(and (integer? %) (pos? %)) [(:alpha prior) (:beta prior)]))
         trials
         (mapv
-         (fn [[pattern token]]
-           (let [row (get rows token)
+         (fn [[pattern-entry token]]
+           (let [pattern (:pattern pattern-entry)
+                 row (get rows token)
                  observed (:observed row)
                  measurement (:measurement row)
                  meaning {:token token :locator (:declared-locator measurement)
@@ -84,11 +121,19 @@
               :deduplication {:identity identity :inputs identity-data}
               :shadow (if (and next-theta (#{:observation-placement-not-declared :execution-clock-contract-missing} reason))
                         {:status :hypothetical :counted? false :prior (select-keys prior [:alpha :beta])
-                         :if-counted after :prior-rollout (shadow prediction pattern theta)
-                         :if-counted-rollout (shadow prediction pattern next-theta)}
+                         :if-counted after :prior-rollout (shadow prediction pattern-entry theta)
+                         :if-counted-rollout (shadow prediction pattern-entry next-theta)}
                         {:status :held :reason reason})}))
-         (for [pattern (:precedence action) token (sort-by pr-str (:produces pattern))] [pattern token]))]
-    {:schema :wm/learning-trial-receipt-v1 :mode :record-only
-     :prior prior :prior-sha256 (evidence/value-digest prior)
-     :status :held :reason (if (seq trials) :execution-clock-contract-missing :prediction-input-unavailable)
-     :production-parameters :unchanged :trials trials}))
+         (for [pattern-entry (:pattern-entries precedence)
+               token (sort-by pr-str (produces-of (:pattern pattern-entry)))]
+           [pattern-entry token]))]
+    (cond->
+     {:schema :wm/learning-trial-receipt-v1 :mode :record-only
+      :prior prior :prior-sha256 (evidence/value-digest prior)
+      :status :held
+      :reason (cond (= :held (:status precedence)) (:reason precedence)
+                    (seq trials) :execution-clock-contract-missing
+                    :else :prediction-input-unavailable)
+      :production-parameters :unchanged :trials trials}
+      (= :held (:status precedence))
+      (assoc :precedence-finding (:finding precedence)))))
