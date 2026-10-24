@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 22:02:25Z codex-11: dispatched composed admission/update follow-up to codex-12 invoke-1792879343061-3205-d96f86d2, parked park-e24b0d77-c6d6-483e-a463-a5d34213327a. Same branch, no amended commits or live actions.
+
+- 2026-10-24 22:01:47Z codex-11: reviewed AttemptDeliveryTheta180fb67ebc. Independent focused build8501jobs passes, unqualified-admission negative rejects. Hold for composed admission/update theorem: current no-update-named control only proves admit=none. Raw count equations accepted; no consumer semantics changed. Review `~/notes/wm-next/authority-reconciliation/formal-coordinator-review.md`; budget0/main Lean unchanged.
+
 - 2026-10-24 21:58:17Z codex-11: dispatched bounded Lean-only attempt-delivery admission/count packet to codex-12, Agency invoke-1792879095966-3196-3942d7dd; parked park-144e0141-fbbb-4022-a5bd-f3fe4737db1e. Prior/population/key interpretation supplied; no Clojure consumer changes or live actions.
 
 - 2026-10-24 21:57:22Z codex-11: reviewed U4 report against primary sources. Delivery evidence is not a witnessed-fire history. Correction: B-D Revision2 R2.1 explicitly supersedes accepted-close population, while v2 resource retains older wording; no population choice made. Selected separate supplied-admission Lean attempt-delivery update, no fire/scorer adapter. Review `~/notes/wm-next/authority-reconciliation/coordinator-review.md`; budget0.
