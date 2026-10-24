@@ -3717,6 +3717,15 @@
        "   Never reconstruct it from a short id or from memory: a fabricated\n"
        "   tail fails artifact binding and closes the attempt (cohort-55\n"
        "   attempt-001 died exactly this way).\n"
+       "7. If inspection shows that the selected construction already satisfies its\n"
+       "   stated acceptance criteria at an EXISTING commit, do not make a cosmetic\n"
+       "   commit and do NOT present the base HEAD as a new DONE artifact. Begin the\n"
+       "   required feature card with :built or :want-coverage saying it is already\n"
+       "   satisfied, and put the full existing commit sha in :proof-ref (the Agency\n"
+       "   records that sha as the artifact reference). End exactly with:\n"
+       "   FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head. This reports only\n"
+       "   the selected construction's existing evidence; it does not claim that the\n"
+       "   whole mission is complete.\n"
        "If no safe substantive parcel is possible, make no commit and finish with "
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>.")))
 
