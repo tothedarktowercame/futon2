@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 12:53:14 UTC — outer-return arithmetic independently replayed/asserted (exit 0): normalisation, shared-parameter prediction, batch novelty, KL chain. Full objective not accepted: ambiguity/conditional-information assumptions and observation modalities require consistent derivation. Review `/home/joe/notes/wm-next/loop-plan/AIF-OUTER-RETURN-REVIEW.md`; bounded follow-up claude-7 `invoke-1792846384991-2955-a57b5fb8`, park `park-26ab5c7e-2784-4926-bf12-bb9c68ca6f8c`. No preference choice, scoring change or compliance claim.
+
 - 2026-10-24 12:47:15 UTC — independently reviewed and promoted CoherentThetaCandidate code `0e77696543` through receipt `ce7a2169ad` to mathlib4 darktower. Build/probe exit 0, false stale-coherence claim exit 1; standard axioms only. Constructor shares posterior inputs; prediction increase and novelty decrease are horizon-one supplied-model results. Review `/home/joe/notes/wm-next/loop-plan/coherent-theta/review.md`. Scorer enforcement, provenance and R20 binding remain open; no runtime claim. Outer specification repair still pending.
 
 - 2026-10-24 12:44:22 UTC — Joe authorizes next formal step and specific AIF repairs with literature references. Dispatched codex-9 Lean-only single-posterior coherence job `invoke-1792845856720-2951-cfa1e9e9` (park `park-9699300c-2fd3-4eb4-b238-62ba7dd5f39e`); claude-7 one-epoch outer return specification repair `invoke-1792845862260-2952-85bd0b35` (park `park-69792e0f-ced7-4e79-8fa2-6403422c1232`). Packets under `/home/joe/notes/wm-next/packets/aif-*.txt`. Independent review required; no scorer/R20 weakening, live changes or preference choices.
