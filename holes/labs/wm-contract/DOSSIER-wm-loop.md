@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 01:34:34 UTC — codex-11 dispatched easy-first strategic-focus producer check to codex-9, Agency job `invoke-1792805667947-2885-38672b37`, park `park-ca5cdbd2-940e-47c7-9cca-864ea88daed2`. One read-only question against StrategicTickConforms: does its finite relation exist before scoring, permitting retention-only repair? No inferred relation, off-facet ruling, source change or click. Packet: `/home/joe/notes/wm-next/packets/strategic-focus-producer-check.txt`; review required before code.
+
 - 2026-10-24 01:25:24 UTC — codex-11 independently reviewed and landed coapply learning shape repair 91d2026a0 + occurrence follow-up 1bc47a2bd, merge 2993fc0f1. Explicit unit identity preserves the selected occurrence even with equal pattern values and false/nil keys (independent probe exit 0). Worker gates: 11 tests, 96 assertions, zero failures/errors; static gates passed with one pre-existing warning. Review: `/home/joe/notes/wm-next/minimum-construction-learning/coapply-followup-review.md`. This is shape integration for the PatternTheta alignment work, not witnessed-learning closure: 27 held candidates; admission/prior/witness obligations unchanged. No reload, click or live-store write.
 
 - 2026-10-24 01:20:30Z (clock read) — coapply shape 91d2026a0 reviewed, NOT landed. Independent JVM probe exit0 exposes equal-valued unit shadow bug: requesting second modifies first. Review `~/notes/wm-next/minimum-construction-learning/coapply-review.md`; explicit occurrence-key correction dispatched (`invoke-1792804829904-2878-c0c327f3`, park `park-d1f12d54-ce69-46a0-96d2-68c1b3720c1b`). Prior/contract/observation semantics unchanged; no click/reload/live write.
