@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 21:20:32 UTC — codex-11 independently recovered checkpoint failures: selected-want-census-mismatch and revision-authority-missing (measurements[]). No retention loss in sealed checkpoint. Reviewed missing fire-authority bridge against PatternTheta; dispatched Lean-only conditional admission to codex-9 invoke-1792876832058-3117-9437a51a, preserving occurrence identity separately from shared pattern-key pooling. No runtime repair/learning closure claimed; budget0. Review: ~/notes/wm-next/pattern-measurement-repair/coordinator-review.md.
+
 - 2026-10-24 21:17:02 UTC — Joe authorized next investigation and repair. Dispatched exact falsifier recovery and prediction/measurement contract intake to codex-3, invoke-1792876622925-3113-dd33a582 (parked). Read-only first packet; code repair follows coordinator review of existing Lean/observation warrant. No invented occurrence attribution or hole-to-pattern relabel; budget0/no clicks. Packet: ~/notes/wm-next/packets/pattern-measurement-repair-intake.txt.
 
 - 2026-10-24 21:00:51 UTC — codex-11 reviewed remaining two diagnostic parent/child chains: first already-satisfied; second fresh futon5a citation repair547b191 then reviewer-falsifier-failed. Independently read retained receipts:12 and27 held observation-missing trials; learning ledger hash unchanged. Pattern-done predictions vs mission-hole measurements confirmed; exact failed falsifier checks remain omitted, no causal certainty claimed. Final retained idle/queue[]/stops[], budget0. Review: ~/notes/wm-next/diagnostic-clicks/remaining-two/coordinator-review.md. No productive learning/R20 closure; no additional clicks.
