@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 19:39:44 UTC — codex-11 independently reviewed and merged author no-change contract 08b913c450 via 8b5264af99. Focused tests 8/16 green; existing REFUSE/card/existing-artifact semantics preserved, DONE unchanged-head remains invalid. Prompt only; no fresh learning or global mission-completion claim. Review: ~/notes/wm-next/diagnostic-clicks/nochange-final-review.md. No reload/click; clean admission baseline review separate; two diagnostic parents unused.
+
 - 2026-10-24 19:36:47 UTC — codex-11 reviewed clean admission be509dc8a/088507662; independent isolated API tests pass 4 tests/27 assertions. Promotion held: service guard-removal control leaves configuration lookup change present, so exact pre-change baseline attribution requested via invoke-1792870633093-3032-a521b4ed (parked). Broad discovery incident remains disclosed with effects not fully established. Review: ~/notes/wm-next/clean-click-boundary/admission-coordinator-review.md. No merge/reload/click; CLI preparation separate, two diagnostic parents unused.
 
 - 2026-10-24 19:35:28 UTC — codex-11 reviewed nochange-intake against existing REFUSE/already-satisfied boundary and futon5a ancestry/digest. Existing verifier predates dispatch; global mission completion not established. Dispatched author prompt clarification plus focused fresh-vs-existing regression to codex-3 (invoke-1792870555672-3031-1aafca3e), parked. No new admission kind, fresh-artifact relaxation, reload or click. Review: ~/notes/wm-next/diagnostic-clicks/nochange-coordinator-review.md. Clean admission separate.
