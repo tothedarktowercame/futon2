@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 22:07:29Z codex-11: reviewed population/consumer chronology. Signed accepted-close wording vs later comparison-row transcription has no retained adoption/re-review resolving it. Asked Joe whether authority-qualified delivery observations count despite later overall refusal; recommendation yes for independently valid measurements, absent/invalid remain held. Not adopted. Endpoint meaning does not authorize full illustrative EFE promotion; pooling/producer/consumer remain open. Review `~/notes/wm-next/authority-reconciliation/population-consumer-review.md`. Dependent implementation paused; budget0.
+
 - 2026-10-24 22:05:41Z codex-11: dispatched read-only delivery population/consumer authority decision to codex-12 invoke-1792879538715-3211-ee298b59, parked park-f50184fd-2412-492b-8252-35636f111f2a. Recover historical ruling before further model or runtime implementation; budget0.
 
 - 2026-10-24 22:05:06Z codex-11: accepted composed attempt-delivery180fb67ebc+1e09d4dec7; merged Lean5c275aaa2a. Independent focused8501-job build green; false duplicate increment reduces to False. Actual admit->update binding now proved, supplied population/prior/identity retained; no fire/scorer/R20/runtime equivalence. Review `~/notes/wm-next/authority-reconciliation/formal-final-review.md`. Budget0.
