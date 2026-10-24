@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 13:01:14 UTC — reviewed joint-objective derivation; synthetic replay exits 0. Conditional outcome-risk identity accepted, with source eq15 approximation explicit and information-preservation requiring more than one-way recovery. Review `/home/joe/notes/wm-next/loop-plan/AIF-JOINT-OBJECTIVE-REVIEW.md`. Dispatched codex-9 finite Lean identity using existing risk/ambiguity and independent KL information: `invoke-1792846862951-2956-15078d89`, park `park-927b6e4f-1c16-41ea-923e-cb2adb0c4731`. No outer preferences/model semantics adopted or runtime changes.
+
 - 2026-10-24 12:53:14 UTC — outer-return arithmetic independently replayed/asserted (exit 0): normalisation, shared-parameter prediction, batch novelty, KL chain. Full objective not accepted: ambiguity/conditional-information assumptions and observation modalities require consistent derivation. Review `/home/joe/notes/wm-next/loop-plan/AIF-OUTER-RETURN-REVIEW.md`; bounded follow-up claude-7 `invoke-1792846384991-2955-a57b5fb8`, park `park-26ab5c7e-2784-4926-bf12-bb9c68ca6f8c`. No preference choice, scoring change or compliance claim.
 
 - 2026-10-24 12:47:15 UTC — independently reviewed and promoted CoherentThetaCandidate code `0e77696543` through receipt `ce7a2169ad` to mathlib4 darktower. Build/probe exit 0, false stale-coherence claim exit 1; standard axioms only. Constructor shares posterior inputs; prediction increase and novelty decrease are horizon-one supplied-model results. Review `/home/joe/notes/wm-next/loop-plan/coherent-theta/review.md`. Scorer enforcement, provenance and R20 binding remain open; no runtime claim. Outer specification repair still pending.
