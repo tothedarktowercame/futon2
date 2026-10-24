@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 13:47:20 UTC — independently reviewed/promoted OuterReturnModel `77c21f3bf9`. Build and dependent Unit/Bool fibre probe pass; false closed-gate normalization fails. Normalized joint conditional return and finite latent push preserve nonqualifying verdict mass. Review `/home/joe/notes/wm-next/loop-plan/outer-return-model/review.md`; singleton discipline remains explicit input, Option distinction is not missingness policy. Checked-map part still in flight; no runtime/proof-return binding or model probabilities adopted.
+
 - 2026-10-24 13:43:50 UTC — Joe explicitly requests outer return model and checked problem-map update. Dispatched Lean-only dependent/joint return kernel to codex-9 (`invoke-1792849423521-2961-50c86b4c`, park `park-8414dd9d-96dd-4ba3-b03d-5f59420311bf`) and fixed-universe proof-bearing map update to claude-14 (`invoke-1792849429702-2962-88bb329c`, park `park-f8e9059d-c522-42e3-b465-3528939ec835`). Independent review before promotion; no invented probabilities, admission evidence, runtime authority or preference choices. Packets under `/home/joe/notes/wm-next/packets/`.
 
 - 2026-10-24 13:17:05 UTC — independently reviewed/promoted AIFObjectiveComposition `196285e3d5`: existing finite risk/ambiguity equals scored-marginal cost minus actual raw-report MI plus fixed detail constant. Build and Option-detail reviewer probe exit 0; false scored-only collapse exits 1; standard axioms. Review `/home/joe/notes/wm-next/loop-plan/objective-composition/review.md`. Conditional objective milestone only; next producer boundary is normalized outer return plus checked map update. No domain/preference choice, R20 runtime or full compliance claim.
