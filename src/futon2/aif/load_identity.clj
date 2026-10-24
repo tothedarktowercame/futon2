@@ -7,6 +7,13 @@
 
 (defonce registry (atom {}))
 
+(def source-composition
+  "Declared outer-selection composition, shared by launch and runtime checks.
+   Verification never loads these namespaces or manufactures registration."
+  ['futon2.aif.full-loop-runtime 'futon2.report.war-machine
+   'futon2.aif.meta-live-outer-selector 'futon2.aif.meta-pipeline-selector
+   'futon2.aif.wm.family-selection 'futon2.aif.wm.family-canonical-g])
+
 (def required-sources
   "Explicit decision/close scope; absent registrations are never current.
   Click-path coverage (codex-20 review, 2026-09-22): the declared set includes
@@ -50,6 +57,7 @@
    ;; explicit so the runner's source-identity report and idle reload planning
    ;; can name a landed family-selection change even when the runner is unchanged.
    'futon2.aif.wm.family-selection "/home/joe/code/futon2/src/futon2/aif/wm/family_selection.clj"
+   'futon2.aif.wm.family-canonical-g "/home/joe/code/futon2/src/futon2/aif/wm/family_canonical_g.clj"
    'futon2.aif.meta-pipeline-selector "/home/joe/code/futon2/src/futon2/aif/meta_pipeline_selector.clj"
    'futon2.aif.interpretation-construction "/home/joe/code/futon2/src/futon2/aif/interpretation_construction.clj"
    'futon2.aif.run-narrative "/home/joe/code/futon2/src/futon2/aif/run_narrative.clj"
@@ -154,3 +162,14 @@
          sources (merge (zipmap (keys entries) (repeat nil)) required)]
      (into (sorted-map)
            (map (fn [[n path]] [n (check (get entries n) path canonical-read)])) sources))))
+
+(defn composition-status
+  "Read-only admission evidence. Missing/unreadable identity is not current.
+   The one-argument form consumes an existing report (runtime race guard)."
+  ([] (composition-status (report)))
+  ([reports]
+   (let [namespaces (into {} (map (fn [n] [n (get reports n {:status :unregistered})]))
+                          source-composition)
+         defects (into {} (remove (fn [[_ r]] (= :current (:status r)))) namespaces)]
+     {:status (if (empty? defects) :current :unavailable)
+      :namespaces namespaces :defects defects})))
