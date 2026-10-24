@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 22:41:10Z codex-11: Joe approves qualified-observation population despite later refusal without weakening acceptance; directs existing handoff-quality correction cycle before failing a whole round. Read same-author build-cure loop (default1) and single-contact handoff/exchange; coverage unresolved. Dispatched codex-12 actual-boundary intake invoke-1792881667772-3250-e651e3b7, parked park-f30e4bfa-a66a-4dee-b202-eebbeb9299fd. Diagnostic failure is measurement/accounting, not the hypothetical citation failure. Notes `~/notes/wm-next/handoff-quality/coordinator-intake.md`; budget0/no live action.
+
 - 2026-10-24 22:07:29Z codex-11: reviewed population/consumer chronology. Signed accepted-close wording vs later comparison-row transcription has no retained adoption/re-review resolving it. Asked Joe whether authority-qualified delivery observations count despite later overall refusal; recommendation yes for independently valid measurements, absent/invalid remain held. Not adopted. Endpoint meaning does not authorize full illustrative EFE promotion; pooling/producer/consumer remain open. Review `~/notes/wm-next/authority-reconciliation/population-consumer-review.md`. Dependent implementation paused; budget0.
 
 - 2026-10-24 22:05:41Z codex-11: dispatched read-only delivery population/consumer authority decision to codex-12 invoke-1792879538715-3211-ee298b59, parked park-f50184fd-2412-492b-8252-35636f111f2a. Recover historical ruling before further model or runtime implementation; budget0.
