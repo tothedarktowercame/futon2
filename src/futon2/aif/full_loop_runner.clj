@@ -155,6 +155,7 @@
 (def discrimination-epsilon 1.0e-6)
 (def artifact-window-tolerance-ms (* 2 60 1000))
 (def default-build-cure-retries 1)
+(def default-review-evidence-corrections 0)
 (def default-author-infrastructure-retries 1)
 (def default-revision-rounds 1)
 (def ^:private historical-verification-completion-token (Object.))
@@ -345,6 +346,7 @@
                  parsed (when env-val (try (Integer/parseInt env-val)
                                            (catch Exception _ nil)))]
              (or parsed default-build-cure-retries))
+           :review-evidence-corrections default-review-evidence-corrections
            :revision-rounds default-revision-rounds
            :author-infrastructure-retries default-author-infrastructure-retries
            :trigger :duree-click-on-demand
@@ -3783,6 +3785,172 @@
        "or FULL_LOOP_REVIEW: REJECT <reason>\n"
        "You may add a second line FULL_LOOP_REVIEWER_NOTE: <short note>; it is context, "
        "not the operator's feature verdict."))
+
+(def ^:private review-execution-gate-contract
+  {:id :wm/review-execution-gate :version 1
+   :validator 'futon2.aif.task-execution-evidence/review-execution-gate})
+
+(defn- retained-review-job [job]
+  (select-keys job [:job-id :agent-id :state :request :result :result-summary
+                    :terminal-message :events :execution :artifact-ref
+                    :repo-observed-artifact-ref]))
+
+(defn- review-evidence-correction-prompt
+  [reviewer target author repo commit binding review-job review-gate]
+  (str reviewer ": FULL-LOOP REVIEW EVIDENCE CORRECTION. Your completed review "
+       "was refused only because the existing review-execution gate found required "
+       "execution evidence missing. This is one bounded correction of your review "
+       "response, not a new author build or permission to assert tool use.\n\n"
+       "SELECTED TARGET: " (pr-str target) "\n"
+       "IMPLEMENTATION AUTHOR: " author "\n"
+       "REVIEWER OF RECORD: " reviewer "\n"
+       "Repository: " repo "\n"
+       "PINNED ARTIFACT REVISION: " commit "\n"
+       "IMMUTABLE CORRECTION BINDING: " (pr-str binding) "\n"
+       "EXACT GATE FINDING: " (pr-str review-gate) "\n"
+       "ORIGINAL REVIEW JOB (RETAINED): "
+       (pr-str (retained-review-job review-job)) "\n\n"
+       "Perform the required repository checks against the pinned revision and "
+       "report the actual commands/results. Do not edit, commit, redispatch author "
+       "work, fill evidence counters, or claim tools you did not execute. Begin "
+       "with exactly FULL_LOOP_REVIEW: APPROVE, FULL_LOOP_REVIEW: REQUEST_CHANGES "
+       "<reason>, or FULL_LOOP_REVIEW: REJECT <reason>. The unchanged "
+       "review-execution gate will evaluate the returned Agency job."))
+
+(defn- review-correction-failure!
+  [message reason correction]
+  (throw (ex-info message
+                  {:outcome :build-failed
+                   :failure-kind :review-evidence-correction-refused
+                   :failure-stage :reviewer-wait
+                   :review-evidence-correction
+                   (assoc correction :status :refused :reason reason)})))
+
+(defn- review-evidence-correction-loop
+  "Opt-in one-bounce correction for a completed review whose existing execution
+  gate reports exactly :review-execution-evidence-missing. The actual job and
+  gate trigger entry. The immutable binding is observed before dispatch and
+  again after the reply; the same unchanged gate validates the corrected job."
+  [opts phase-context reviewer author dispatched-turns target repo commit files
+   artifact-binding review-job review-gate]
+  (let [raw-allowance (get opts :review-evidence-corrections 0)
+        _ (when-not (contains? #{0 1} raw-allowance)
+            (throw (ex-info "Review evidence correction allowance must be 0 or 1"
+                            {:outcome :build-failed
+                             :failure-kind :review-evidence-correction-config-invalid
+                             :failure-stage :reviewer-wait
+                             :review-evidence-corrections raw-allowance})))
+        allowance raw-allowance
+        trigger? (and (pos? allowance)
+                      (= "done" (:state review-job))
+                      (= :review-execution-evidence-missing
+                         (:failure-kind review-gate))
+                      (not (:passed? review-gate))
+                      (not= author reviewer))]
+    (if-not trigger?
+      {:review-job review-job :review-gate review-gate
+       :review-evidence-corrections []}
+      (let [before (observe-repo-head opts repo)
+            binding {:target target :author author :reviewer reviewer
+                     :repository repo :artifact-revision commit
+                     :artifact-binding-sha256
+                     (sha256 (select-keys artifact-binding
+                                          [:repo :commit :observed-head
+                                           :pre-dispatch-head :corroborates?]))
+                     :checker-contract review-execution-gate-contract
+                     :checker-contract-sha256
+                     (sha256 review-execution-gate-contract)}
+            base-record {:schema :wm/review-evidence-correction-v1
+                         :allowance 1 :binding binding
+                         :original {:job (retained-review-job review-job)
+                                    :gate review-gate}
+                         :before-head before}]
+        (when-not (= commit (:head before))
+          (review-correction-failure!
+           "Reviewer evidence correction artifact changed before dispatch"
+           :artifact-revision-changed-before-dispatch base-record))
+        (let [prompt (review-evidence-correction-prompt
+                      reviewer target author repo commit binding
+                      review-job review-gate)
+              dispatch-result (atom nil)
+              dispatch-once
+              (fn []
+                (locking dispatch-result
+                  (case (:status @dispatch-result)
+                    :returned (:value @dispatch-result)
+                    :threw (throw (:throwable @dispatch-result))
+                    (try
+                      (swap! dispatched-turns inc)
+                      (let [response ((or (:dispatch-fn opts) dispatch!)
+                                      opts reviewer "wm-full-loop" target prompt)]
+                        (reset! dispatch-result
+                                {:status :returned :value response})
+                        response)
+                      (catch Throwable t
+                        ;; A debugger replay rethrows the retained transport
+                        ;; result; it never performs a second external send.
+                        (reset! dispatch-result {:status :threw :throwable t})
+                        (throw t))))))
+              response (run-phase! opts phase-context
+                                   :review-evidence-correction-dispatch
+                                   dispatch-once)
+              expected-job-id (:job-id response)
+              corrected-job
+              (run-phase! opts phase-context :review-evidence-correction-wait
+                          #((or (:poll-fn opts) poll-job!) opts expected-job-id))
+              after (observe-repo-head opts repo)
+              correction-before-check
+              (assoc base-record
+                     :request {:job-id expected-job-id
+                               :prompt prompt
+                               :prompt-sha256 (sha256 prompt)}
+                     :corrected {:job (retained-review-job corrected-job)}
+                     :after-head after
+                     :remaining-allowance 0)]
+          (when (= "cancelled" (:state corrected-job))
+            (throw (ex-info "Agency job was cancelled"
+                            {:outcome :cancelled
+                             :failure-kind :operator-cancelled
+                             :failure-stage :review-evidence-correction-wait
+                             :job-id (:job-id corrected-job)
+                             :terminal-code (:terminal-code corrected-job)
+                             :terminal-message (:terminal-message corrected-job)
+                             :review-evidence-correction
+                             (assoc correction-before-check :status :cancelled)})))
+          (when-not (and (string? expected-job-id)
+                         (= expected-job-id (:job-id corrected-job))
+                         (= reviewer (:agent-id corrected-job)))
+            (review-correction-failure!
+             "Reviewer evidence correction reply provenance did not match dispatch"
+             :reply-provenance-mismatch correction-before-check))
+          (when-not (= "done" (:state corrected-job))
+            (review-correction-failure!
+             "Reviewer evidence correction did not complete"
+             :correction-job-not-done correction-before-check))
+          (when-not (= commit (:head after))
+            (review-correction-failure!
+             "Reviewer evidence correction changed the pinned artifact revision"
+             :artifact-revision-changed correction-before-check))
+          (let [corrected-gate
+                (try
+                  (review-execution-gate files corrected-job)
+                  (catch Throwable t
+                    (review-correction-failure!
+                     "Reviewer evidence correction result was malformed"
+                     :corrected-review-evidence-malformed
+                     (assoc correction-before-check
+                            :checker-error {:class (.getName (class t))
+                                            :message (ex-message t)
+                                            :data (ex-data t)}))))
+                correction (assoc-in correction-before-check
+                                     [:corrected :gate] corrected-gate)]
+            {:review-job corrected-job
+             :review-gate corrected-gate
+             :review-evidence-corrections
+             [(assoc correction
+                     :status (if (:passed? corrected-gate) :corrected :exhausted)
+                     :reason (when-not (:passed? corrected-gate)
+                               :review-execution-evidence-still-missing))]}))))))
 
 (defn- review-findings-text
   "Return the complete reviewer reply only when a typed negative verdict
@@ -7928,14 +8096,25 @@
                          #(do (swap! dispatched-turns inc)
                               ((or (:dispatch-fn opts) dispatch!) opts reviewer
                                "wm-full-loop" target reviewer-prompt-text))))
-                      review-job
+                      initial-effective-review-job
                       (if retry-review?
                         (run-phase! opts @phase-context :reviewer-retry-wait
                                     #((or (:poll-fn opts) poll-job!) opts
                                       (:job-id retry-review-response)))
                         initial-review-job)
-                      _ (throw-if-cancelled! review-job :reviewer-wait)
-                      review-gate (review-execution-gate files review-job)
+                      _ (throw-if-cancelled! initial-effective-review-job
+                                             :reviewer-wait)
+                      initial-review-gate
+                      (review-execution-gate files initial-effective-review-job)
+                      review-correction-state
+                      (review-evidence-correction-loop
+                       opts @phase-context reviewer author dispatched-turns
+                       target repo commit files artifact-binding
+                       initial-effective-review-job initial-review-gate)
+                      review-job (:review-job review-correction-state)
+                      review-gate (:review-gate review-correction-state)
+                      review-evidence-corrections
+                      (:review-evidence-corrections review-correction-state)
                       initial-commit commit
                       revision-state
                       (run-revision-round
@@ -8049,6 +8228,8 @@
                                           :review-text (job-text review-job)
                                           :approved? approved?
                                           :review-gate review-gate
+                                          :review-evidence-corrections
+                                          (vec review-evidence-corrections)
                                           :reviewer-falsifier
                                           reviewer-falsifier-receipt
                                           :reviewer-falsifier-verification
@@ -8099,6 +8280,8 @@
                            {:outcome :build-failed :author-job author-job
                            :artifact-binding artifact-binding
                            :review-job review-job :commit commit
+                           :review-evidence-corrections
+                           (vec review-evidence-corrections)
                            :target target
                            :reviewer-falsifier reviewer-falsifier-receipt
                            :reviewer-falsifier-verification

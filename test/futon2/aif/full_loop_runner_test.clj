@@ -903,8 +903,13 @@
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
            reviewer-events reviewer-result cure-card cure-summary cure-commit build-cure-retries
            cure-observed-commit
+           review-evidence-corrections reviewer-correction-execution
+           reviewer-correction-events reviewer-correction-result
+           reviewer-correction-agent reviewer-correction-artifact-head
+           reviewer-correction-summary reviewer-correction-state
            initial-author-job operator-actions delivery-qa-fn
-           judgement-transform-fn dispatch-observer runner-options]
+           judgement-transform-fn dispatch-observer runner-options
+           isolate-modified-runner?]
     :or {grounded? true artifacts? false
          cure-observed-commit ::from-artifact-ref}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
@@ -960,11 +965,14 @@
                  (when dispatch-observer
                    (dispatch-observer agent prompt))
                  (swap! dispatches conj agent)
-                 (let [job-id (if (= agent "zai-5")
+                 (let [review-count (count (filter #(= "codex-7" %) @dispatches))
+                       job-id (if (= agent "zai-5")
                                 (if (> (count (filter #(= "zai-5" %) @dispatches)) 1)
                                   cure-id
                                   "feature-author")
-                                "feature-review")]
+                                (if (> review-count 1)
+                                  "feature-review-correction"
+                                  "feature-review"))]
                    (swap! dispatch-requests assoc job-id {:prompt prompt})
                    {:job-id job-id}))
                :poll-fn
@@ -985,14 +993,29 @@
                                                      (or cure-commit commit)))
                             :execution successful-execution}
                      cure-card (assoc :feature-card cure-card))
-                   ;; reviewer
-                   (cond-> {:job-id job-id :state "done"
+                   "feature-review"
+                   (cond-> {:job-id job-id :agent-id "codex-7" :state "done"
                             :execution (or reviewer-execution successful-execution)
                             :result-summary (str "FULL_LOOP_REVIEW: APPROVE\n"
                                                  "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")
                             :request (get @dispatch-requests job-id)}
                      reviewer-result (assoc :result reviewer-result)
-                     reviewer-events (assoc :events reviewer-events))))
+                     reviewer-events (assoc :events reviewer-events))
+                   "feature-review-correction"
+                   (cond-> {:job-id job-id
+                            :agent-id (or reviewer-correction-agent "codex-7")
+                            :state (or reviewer-correction-state "done")
+                            :execution (or reviewer-correction-execution
+                                           successful-execution)
+                            :result-summary
+                            (or reviewer-correction-summary
+                                (str "FULL_LOOP_REVIEW: APPROVE\n"
+                                     "FULL_LOOP_REVIEWER_NOTE: Corrected evidence."))
+                            :request (get @dispatch-requests job-id)}
+                     reviewer-correction-result
+                     (assoc :result reviewer-correction-result)
+                     reviewer-correction-events
+                     (assoc :events reviewer-correction-events))))
                :resolve-build-fn
                (fn [_]
                  {:repo (.getPath root)
@@ -1005,15 +1028,38 @@
                   :dial-moved? grounded?
                   :implementation-id "feature-impl"
                   :discharge-id "feature-discharge"})
+               :repo-head-observation-fn
+               (fn [_]
+                 {:head (or reviewer-correction-artifact-head commit)
+                  :observed-at-ms 0})
               :queue-fn #(swap! queued conj %)}
               (when (some? build-cure-retries)
                 {:build-cure-retries build-cure-retries})
+              (when (some? review-evidence-corrections)
+                {:review-evidence-corrections review-evidence-corrections})
               (when delivery-qa-fn
                 {:delivery-qa-fn delivery-qa-fn})
               (when judgement-transform-fn
                 {:judgement-transform-fn judgement-transform-fn})
               runner-options)
-        result (runner/run-opportunity! opts)]
+        run #(runner/run-opportunity! opts)
+        ;; Only the correction fixtures opt into worktree/source isolation.
+        ;; Existing users of this long-lived helper keep their original gates.
+        result (if (or isolate-modified-runner?
+                       (some? review-evidence-corrections))
+                 (with-redefs-fn
+                   {#'runner/refuse-on-runner-source-drift!
+                    (constantly {:runner/source-check :fixture-current})
+                    #'runner/selected-entry
+                    (fn [j]
+                      (when-let [action (get-in j [:decision :action])]
+                        {:action action
+                         :rank (or (get-in j [:decision :rank]) 1)
+                         :G-efe (get-in j [:decision :controller-score])
+                         :controller-score
+                         (get-in j [:decision :controller-score])}))}
+                   run)
+                 (run))]
     {:result result :item (first @queued)
      :queued-operator-actions @queued-operator-actions
      :dispatches @dispatches
@@ -1796,6 +1842,249 @@
                                 :approved?])))
     (is (= :review-execution-evidence-missing
            (get-in item [:failure :kind])))))
+
+(deftest opt-in-review-evidence-correction-rechecks-the-same-gate
+  (let [{:keys [result dispatches dispatch-requests]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :review-evidence-corrections 1
+          :reviewer-execution {:executed false :tool-events 0 :command-events 0}
+          :reviewer-correction-execution successful-execution})
+        validation (get-in result [:checkpoints :build :judgment :validation])
+        correction (first (:review-evidence-corrections validation))]
+    (is (not= :review-execution-evidence-missing
+              (get-in result [:data :failure-kind]))
+        "the corrected job passes this gate and the same round continues")
+    (is (= ["zai-5" "codex-7" "codex-7"] dispatches))
+    (is (= 1 (count (filter #(= "zai-5" %) dispatches)))
+        "author work is not repeated")
+    (is (= :corrected (:status correction)))
+    (is (= :review-execution-evidence-missing
+           (get-in correction [:original :gate :failure-kind])))
+    (is (true? (get-in correction [:corrected :gate :passed?])))
+    (is (= "feature-review" (get-in correction [:original :job :job-id])))
+    (is (= "feature-review-correction"
+           (get-in correction [:corrected :job :job-id])))
+    (is (str/includes?
+         (get-in dispatch-requests ["feature-review-correction" :prompt])
+         "EXACT GATE FINDING"))))
+
+(deftest review-evidence-correction-is-bounded-and-fails-closed
+  (testing "still missing evidence exhausts without another dispatch"
+    (let [{:keys [result dispatches]}
+          (run-feature-card-attempt
+           {:author-card feature-card-claim
+            :review-evidence-corrections 1
+            :reviewer-execution {:executed false :tool-events 0 :command-events 0}
+            :reviewer-correction-execution
+            {:executed false :tool-events 0 :command-events 0}})
+          correction (get-in result [:data :error-data
+                                     :review-evidence-corrections 0])]
+      (is (= :build-failed (:outcome result)))
+      (is (= :review-execution-evidence-missing
+             (get-in result [:data :failure-kind])))
+      (is (= :exhausted (:status correction)))
+      (is (= 3 (count dispatches)))))
+  (testing "wrong reviewer provenance refuses explicitly"
+    (let [{:keys [result dispatches]}
+          (run-feature-card-attempt
+           {:author-card feature-card-claim
+            :review-evidence-corrections 1
+            :reviewer-execution {:executed false :tool-events 0 :command-events 0}
+            :reviewer-correction-agent "wrong-seat"})]
+      (is (= :build-failed (:outcome result)))
+      (is (= :review-evidence-correction-refused
+             (get-in result [:data :failure-kind])))
+      (is (= :reply-provenance-mismatch
+             (get-in result [:data :error-data
+                             :review-evidence-correction :reason])))
+      (is (= 3 (count dispatches)))))
+  (testing "artifact movement after dispatch refuses explicitly"
+    (let [observations (atom ["feature123" "feature123" "changed456"])
+          {:keys [result]}
+          (run-feature-card-attempt
+           {:author-card feature-card-claim
+            :review-evidence-corrections 1
+            :reviewer-execution {:executed false :tool-events 0 :command-events 0}
+            :runner-options
+            {:repo-head-observation-fn
+             (fn [_]
+               (let [head (first @observations)]
+                 (swap! observations subvec 1)
+                 {:head head :observed-at-ms 0}))}})]
+      (is (= :build-failed (:outcome result)))
+      (is (= :artifact-revision-changed
+             (get-in result [:data :error-data
+                             :review-evidence-correction :reason])))))
+  (testing "cancelled correction preserves cancellation semantics and record"
+    (let [{:keys [result]}
+          (run-feature-card-attempt
+           {:author-card feature-card-claim
+            :review-evidence-corrections 1
+            :reviewer-execution {:executed false :tool-events 0 :command-events 0}
+            :reviewer-correction-state "cancelled"})]
+      (is (= :cancelled (:outcome result)))
+      (is (= :operator-cancelled (get-in result [:data :failure-kind])))
+      (is (= :cancelled
+             (get-in result [:data :error-data
+                             :review-evidence-correction :status]))))))
+
+(deftest review-evidence-correction-is-opt-in-and-pre-falsifier-only
+  (testing "default zero and an already passing gate dispatch nothing extra"
+    (doseq [options [{:isolate-modified-runner? true
+                      :reviewer-execution
+                      {:executed false :tool-events 0 :command-events 0}}
+                     {:review-evidence-corrections 1
+                      :reviewer-execution successful-execution}]]
+      (let [{:keys [dispatches]}
+            (run-feature-card-attempt (merge {:author-card feature-card-claim}
+                                             options))]
+        (is (= ["zai-5" "codex-7"] dispatches)))))
+  (testing "post-review mechanical falsifier failure cannot dispatch correction"
+    (let [{:keys [result dispatches]}
+          (run-feature-card-attempt
+           {:author-card feature-card-claim
+            :review-evidence-corrections 1
+            :judgement-transform-fn
+            (fn [j]
+              (assoc-in j [:token-outcome-prediction :tokens]
+                        [{:identity ["wrong-target" :wrong-token]
+                          :predicted true}]))})]
+      (is (= :build-failed (:outcome result)))
+      (is (= :reviewer-falsifier-failed
+             (get-in result [:data :failure-kind])))
+      (is (= ["zai-5" "codex-7"] dispatches)))))
+
+(deftest review-evidence-correction-debugger-replay-does-not-redispatch
+  (let [dispatches (atom 0)
+        opts {:review-evidence-corrections 1
+              :repo-head-observation-fn
+              (fn [_] {:head "feature123" :observed-at-ms 0})
+              :dispatch-fn
+              (fn [& _]
+                (swap! dispatches inc)
+                (throw (ex-info "synthetic transport ambiguity"
+                                {:kind :transport-failure})))}
+        replaying-run-phase
+        (fn [_ _ phase f & _]
+          (if (= :review-evidence-correction-dispatch phase)
+            (do (try (f) (catch Throwable _ nil))
+                (f))
+            (f)))
+        thrown
+        (with-redefs-fn
+          {#'runner/run-phase! replaying-run-phase}
+          #(try
+             (#'runner/review-evidence-correction-loop
+              opts {} "codex-7" "zai-5" (atom 0)
+              "M-selected" "/repo" "feature123" ["src/feature.clj"]
+              {:repo "/repo" :commit "feature123"
+               :observed-head "feature123" :pre-dispatch-head "base"
+               :corroborates? true}
+              {:job-id "review-1" :agent-id "codex-7" :state "done"}
+              {:passed? false
+               :failure-kind :review-execution-evidence-missing})
+             nil
+             (catch Throwable t t)))]
+    (is (= "synthetic transport ambiguity" (ex-message thrown)))
+    (is (= 1 @dispatches)
+        "a same-thunk run-phase replay rethrows the retained result without resending")))
+
+(defn- correction-boundary-result
+  [allowance corrected-job]
+  (let [dispatches (atom 0)
+        opts {:review-evidence-corrections allowance
+              :repo-head-observation-fn (fn [_] {:head "feature123"})
+              :dispatch-fn (fn [& _]
+                             (swap! dispatches inc)
+                             {:job-id "correction-1"})
+              :poll-fn (fn [& _] corrected-job)}]
+    {:dispatches dispatches
+     :result
+     (with-redefs-fn
+       {#'runner/run-phase! (fn [_ _ _ thunk & _] (thunk))}
+       #(try
+          (#'runner/review-evidence-correction-loop
+           opts {} "codex-7" "zai-5" (atom 0) "M-selected" "/repo"
+           "feature123" ["src/feature.clj"]
+           {:repo "/repo" :commit "feature123" :observed-head "feature123"
+            :pre-dispatch-head "base" :corroborates? true}
+           {:job-id "review-1" :agent-id "codex-7" :state "done"
+            :execution {:executed false :tool-events 0 :command-events 0}}
+           {:passed? false :failure-kind :review-execution-evidence-missing})
+          (catch Throwable t t)))}))
+
+(deftest review-evidence-correction-validates-raw-allowance
+  (doseq [allowance [0.5 "1"]]
+    (let [{:keys [result dispatches]}
+          (correction-boundary-result allowance {})]
+      (is (= :review-evidence-correction-config-invalid
+             (:failure-kind (ex-data result))))
+      (is (= allowance (:review-evidence-corrections (ex-data result))))
+      (is (zero? @dispatches)))))
+
+(deftest review-evidence-correction-retains-malformed-reply-before-checking
+  (testing "correct seat malformed execution is a typed retained refusal"
+    (let [{:keys [result dispatches]}
+          (correction-boundary-result
+           1 {:job-id "correction-1" :agent-id "codex-7" :state "done"
+              :execution {:executed true :tool-events "malformed"}})
+          correction (:review-evidence-correction (ex-data result))]
+      (is (= :review-evidence-correction-refused (:failure-kind (ex-data result))))
+      (is (= :corrected-review-evidence-malformed (:reason correction)))
+      (is (= "correction-1" (get-in correction [:corrected :job :job-id])))
+      (is (= "java.lang.ClassCastException"
+             (get-in correction [:checker-error :class])))
+      (is (= 1 @dispatches))))
+  (testing "wrong seat is rejected before malformed evidence is evaluated"
+    (let [{:keys [result]}
+          (correction-boundary-result
+           1 {:job-id "correction-1" :agent-id "wrong-seat" :state "done"
+              :execution {:executed true :tool-events "malformed"}})]
+      (is (= :reply-provenance-mismatch
+             (get-in (ex-data result) [:review-evidence-correction :reason])))))
+  (testing "cancelled malformed payload preserves cancellation"
+    (let [{:keys [result]}
+          (correction-boundary-result
+           1 {:job-id "correction-1" :agent-id "codex-7" :state "cancelled"
+              :execution {:executed true :tool-events "malformed"}})]
+      (is (= :operator-cancelled (:failure-kind (ex-data result))))
+      (is (= :cancelled
+             (get-in (ex-data result) [:review-evidence-correction :status]))))))
+
+(deftest retained-25e24-mechanical-failure-is-outside-review-correction
+  (let [resource (io/resource "resources/wm/retained-25e24-review-correction-scope.edn")
+        bytes (with-open [in (io/input-stream resource)] (.readAllBytes in))
+        projection (edn/read-string (String. bytes "UTF-8"))
+        fixture-sha (let [digest (.digest
+                                  (java.security.MessageDigest/getInstance "SHA-256")
+                                  bytes)]
+                      (apply str (map #(format "%02x" %) digest)))
+        failures (:observed-failures projection)]
+    (is (= "5556f2d9c2043f926c40c04e154ed7b505dc080bfd8b9b7bd1242a23ddf33e82"
+           fixture-sha)
+        "the repository fixture is byte-identical to the retained projection")
+    (is (= "25e24e8b" (:run-prefix projection)))
+    (is (= [{:selected-want-hole-count 6 :pattern-done-count 2}
+            {:measurements []}]
+           (mapv :observed failures)))
+    (is (every? false? (map :correction-capable? failures)))
+    (is (false? (:review-evidence-correction-applicable? projection)))))
+
+(deftest corrected-review-request-changes-enters-existing-revision-path
+  (let [{:keys [result dispatches]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :review-evidence-corrections 1
+          :reviewer-execution {:executed false :tool-events 0 :command-events 0}
+          :reviewer-correction-summary
+          "FULL_LOOP_REVIEW: REQUEST_CHANGES retain the missing negative control"
+          :runner-options {:revision-rounds 1}})]
+    (is (= "zai-5" (last dispatches))
+        "the corrected negative verdict enters the existing author revision path")
+    (is (contains? #{:build-failed :incomplete} (:outcome result)))
+    (is (not= :reviewer-falsifier-failed
+              (get-in result [:data :failure-kind])))))
 
 (deftest reviewer-tool-ledger-corroborates-a-stale-execution-summary
   (let [cohort (retention-cohort "reviewer-tool-ledger")
