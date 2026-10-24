@@ -24,6 +24,21 @@
 (defn- author-job [& {:as extra}]
   (merge {:result click-14-reply} extra))
 
+(defn- prompt []
+  (@#'runner/author-prompt
+   {:author "author" :reviewer "reviewer"
+    :target-repository "/repo" :target-repository-head "base-head"}
+   "M-selected" {:id "M-selected"} {} []))
+
+(deftest author-prompt-states-the-existing-artifact-refusal-contract
+  (let [text (prompt)]
+    (is (re-find #"selected construction already satisfies" text))
+    (is (re-find #"do not make a cosmetic" text))
+    (is (re-find #":proof-ref" text)
+        "the feature-card key whose durable SHA Agency extracts")
+    (is (re-find #"do NOT present the base HEAD as a new DONE artifact" text))
+    (is (re-find #"FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head" text))))
+
 (deftest already-true-with-an-existing-commit-is-already-satisfied
   (let [r (runner/author-refusal-classification
            (author-job :artifact-ref futon7-sha)
@@ -42,6 +57,40 @@
                  nil
                  (catch clojure.lang.ExceptionInfo e (ex-data e)))))
         "the close carries the named commit as the grounded commit")))
+
+(deftest already-satisfied-refusal-closes-before-the-fresh-artifact-gate
+  ;; This is the shared author-wait boundary.  run-opportunity! invokes this
+  ;; guard immediately before fresh-artifact-binding; a REFUSE with existing
+  ;; evidence must leave that fresh-only gate untouched.
+  (let [fresh-called? (atom false)
+        result (try
+                 (runner/throw-if-author-refused!
+                  (author-job :artifact-ref futon7-sha
+                              :artifact-binding {:repo futon7-root})
+                  "M-x" :author-wait)
+                 (reset! fresh-called? true)
+                 :continued
+                 (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= :already-satisfied (:outcome result)))
+    (is (= {:repo "futon7" :sha futon7-sha} (:grounded-commit result)))
+    (is (false? @fresh-called?)
+        "the fresh binding is not reached for a valid existing artifact")))
+
+(deftest done-at-the-base-head-remains-unbound-and-fails-the-build-gate
+  (let [base "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        binding (runner/fresh-artifact-binding
+                 {:repo-head-observation-fn
+                  (fn [repo] {:repo repo :head base :observed-at-ms 2000})
+                  :resolve-commit-sha-fn (fn [_ sha] (when (= sha base) base))
+                  :ancestor-fn (constantly true)
+                  :commit-time-ms-fn (constantly 1500)}
+                 "/repo" {:repo "/repo" :head base :observed-at-ms 1000}
+                 {:result (str "FULL_LOOP_AUTHOR: DONE " base)})]
+    (is (nil? (:commit binding))
+        "an unchanged base is never a fresh author artifact")
+    (is (= :artifact-binding-mismatch
+           (:failure-kind
+            (runner/unvalidated-artifact-failure true base (:commit binding)))))))
 
 (deftest already-true-with-a-nonexistent-commit-stays-invalid
   (is (= {:outcome :invalid-author-refusal}
