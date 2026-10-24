@@ -96,6 +96,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-24 11:41:44 UTC — codex-11 reviewed generalisation advisory; notes `/home/joe/notes/wm-next/loop-plan/generalisation-spec-review.md`. Persistent availability and later relevant use retained; applicability alone does not imply prediction change, novelty theorem requires equal risk/ambiguity, partition coarsening remains a proposal. Scope/admission and consumer dependencies must be explicit. Conceptual agreement with Joe precedes further Lean/Clojure implementation; no runtime closure, dispatch or click.
+
 - 2026-10-24 11:35:14 UTC — Joe requests claude-7 review toward AIF-compliant warranted-generalisation specification. Explicit correction: carry preserves availability, not mandatory use/change in immediate next iteration; transfer tested on a relevant later case, scope expansion needs warrant. Plan/state annotated. Advisory job `invoke-1792841714179-2927-b3cabdbc`, park `park-61fc5937-62a4-46ba-845b-c854ae92cf3b`; proposal only before agreement, no code/reload/click.
 
 - 2026-10-24 11:08:27 UTC — codex-11 reviewed claude-7 carry advisory against primary t4r-linked REPL note and local AIF texts. Review `/home/joe/notes/wm-next/loop-plan/carry-model-review.md`: counts can encode learned conditional strengths, but pair-keyed graph weights/automatic increments are not adopted. Theta already parameterizes transitions; storage key alone does not make it merely a node bias. t4r supplies a simplified observation-cycle sketch, not a completed WM learning algorithm. Proposed before/observation/slow-update/publication/next-use sketch returned to Joe; further implementation paused pending conceptual agreement.
