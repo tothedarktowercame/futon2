@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:21:55 UTC — Cfb exact authorization issued
+
+Review ae38925f… accepted and hash checked with evaluation ca0d52ce…; all3seat sessions independently roster checked. Coordinator exact authorization1b27528d… for c1fc78cd… intent, ord17/pred14, narrow corrected retention scope under Joe instruction. No new operator approval needed. Final combined-a9 isolated operation/provider/recovery validation dispatched invoke-1792938157341-3620-c1e6c02f, park-8ee36167-8a45-4638-9228-279d19ebd083; no live append yet. Artifacts ~/notes/wm-next/offline-repair/authority/cfb-adoption/coordinator-authorization.md. Six remain, budget0.
+
 ### 2026-10-25 14:20:48 UTC — 9cc held; bounded author correction target identified
 
 Five retained pins verified. DONE-base remains correctly refused, different-target REFUSE cannot substitute. Actual author-wait fresh-binding failure throws before build-cure-loop; completed malformed reply misses correction opportunity. Review ~/notes/wm-next/offline-repair/injury9cc/evaluation/coordinator-review.md. Lean-first same-author bounded correction packet invoke-1792938087696-3619-738c850d, park-89ea8754-33d9-41ec-aa70-14a1eaddd323; unchanged gates, no presumed reply success. No source/live change or clearance; six remain/budget0.
