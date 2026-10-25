@@ -99,6 +99,56 @@
 (defn- short-commit [c]
   (if (and (string? c) (> (count c) 7)) (subs c 0 7) (str c)))
 
+;; --- "you said / we did" ------------------------------------------------------
+;;
+;; Text lookup: the declared-wants map carries both :universe (token ->
+;; observed boolean at selection) and :holes, a vector of
+;; {:id "M-war-machine-wiring#3b6587f68a09" :kind ... :line N :text "- [ ] ..."}.
+;; A token :hole/h3b6587f68a09 maps to the hole whose :id has the same
+;; 12-hex suffix after "#". In the live data the map lives at the key path
+;; [:qa-targets :selection :policy :declared-wants] (4 of 310 items carry
+;; it; the others record nothing, which renders as :not-recorded).
+;; No item in the current data carries a post-run re-observation of the
+;; want tokens, so the third column renders the typed note
+;; "not re-observed after the run" -- never an invented value.
+
+(defn- declared-wants-of [item]
+  (or (:declared-wants item)
+      (get-in item [:qa-targets :selection :policy :declared-wants])))
+
+(defn- hole-text [dw token]
+  ;; token :hole/h3b6587f68a09 (name "h3b6587f68a09") matches the hole whose
+  ;; :id "M-war-machine-wiring#3b6587f68a09" ends with the same trailing
+  ;; 12-hex run -- the token name carries an extra leading "h".
+  (let [hex (re-find #"[0-9a-f]{12}$" (name token))]
+    (some #(when (and hex (str/ends-with? (:id %) hex)) (:text %))
+          (:holes dw))))
+
+(defn render-you-said-we-did [item]
+  (let [dw (declared-wants-of item)]
+    (if (and (map? dw) (= :available (:status dw)))
+      (str "<div class=\"wants\"><table><tr>"
+           "<th class=\"lbl\">You said</th><th>at selection</th><th>after the run</th></tr>"
+           (apply str
+                  (for [[token value] (:universe dw)]
+                    (let [text (hole-text dw token)]
+                      (str "<tr><td>" (esc (or text "no stated text for this token"))
+                           " <code>" (esc (str (namespace token) "/" (name token))) "</code></td>"
+                           "<td>" (esc value) "</td>"
+                           "<td class=\"note\">not re-observed</td></tr>"))))
+           "</table>"
+           "<div class=\"row\"><span class=\"lbl\">We did</span><span class=\"val\">"
+           (esc (:outcome item)) " &middot; commit "
+           (esc (short-commit (:commit item))) "</span></div>"
+           "<div class=\"note\">not re-observed after the run (no post-run "
+           "observation of these tokens exists in the item)</div></div>")
+      ;; typed absence: no :declared-wants key, or a status other than
+      ;; :available -- show exactly the recorded status.
+      (str "<div class=\"wants\"><div class=\"row\"><span class=\"lbl\">declared wants</span>"
+           "<span class=\"val\">"
+           (esc (if (nil? dw) :not-recorded (:status dw)))
+           "</span></div></div>"))))
+
 (defn- row [label value]
   (when-not (str/blank? (str value))
     (str "<div class=\"row\"><span class=\"lbl\">" (esc label) "</span>"
@@ -122,6 +172,7 @@
      (when ocr (str (row "open-cascade-refinement status" (:status ocr))
                     (row "open-cascade-refinement pattern" (:pattern ocr))))
      (row "addenda" (when (pos? addenda-count) addenda-count))
+     (render-you-said-we-did item)
      "<div class=\"questions\"><span class=\"lbl\">pending review questions:</span><ul>"
      (apply str (for [o (:pending-objectives item)]
                   (str "<li><code>" (name o) "</code> &mdash; "
@@ -153,6 +204,7 @@
      ".item{border:1px solid #333;padding:.6rem;margin:.6rem 0;border-radius:4px;background:#181818}"
      ".row{margin:.1rem 0}.lbl{display:inline-block;min-width:16rem;color:#89a}"
      ".val{color:#ddd}.questions ul{margin:.2rem 0 0 0;padding-left:1.2rem}"
+     "table{border-collapse:collapse;margin:.4rem 0}th,td{border:1px solid #333;padding:.2rem .5rem;text-align:left}"
      ".note{color:#789;font-size:.85rem}</style></head><body>"
      "<h1>War Machine &mdash; Morning Brief (pending items)</h1>"
      "<div class=\"hdr\">pending: " (count pending)
@@ -198,12 +250,20 @@
                :queued-at "2026-10-22T10:00:00Z"
                :outcome :build-failed :selected-target :t/two
                :failure {:kind :k :stage :s}})
-    ;; item 3: pending, newer (must be listed first)
+    ;; item 3: pending, newer (must be listed first), with two declared wants
+    ;; (one observed true, one false) each carrying stated text
     (spit-edn (fs/path root "items" "c.edn")
               {:attempt-id "attempt-003"
                :queued-at "2026-10-24T10:00:00Z"
                :outcome :grounded-change :commit "1234567890abcdef"
-               :selected-target :t/three})
+               :selected-target :t/three
+               :declared-wants
+               {:status :available
+                :universe {:hole/aaaa00000001 true :hole/bbbb00000002 false}
+                :holes [{:id "M-fixture#aaaa00000001" :kind :unchecked-task
+                         :line 1 :text "- [ ] want one stated text"}
+                        {:id "M-fixture#bbbb00000002" :kind :unchecked-task
+                         :line 2 :text "- [ ] want two stated text"}]}})
     (doseq [o (item-objectives {:commit "x" :outcome :grounded-change})]
       (spit-edn (fs/path root "reviews" (str "r-" (name o) ".edn"))
                 {:attempt-id "attempt-001" :objective o :answer :yes
@@ -221,8 +281,22 @@
         (throw (ex-info "self-check failed"
                         {:i3 i3 :i2 i2 :listed-001 listed-001
                          :pending-count pending-count})))
+      ;; you-said/we-did: item 3 renders both want texts with their values
+      ;; (one true, one false); item 2, which has no :declared-wants, shows
+      ;; the typed absence instead.
+      (let [w1 (.contains body "- [ ] want one stated text <code>hole/aaaa00000001</code></td><td>true</td>")
+            w2 (.contains body "- [ ] want two stated text <code>hole/bbbb00000002</code></td><td>false</td>")
+            absent-2 (and (.contains body ":not-recorded")
+                          (pos? (.indexOf body ":not-recorded")))
+            i-absent (.indexOf body ":not-recorded")]
+        (when (or (not w1) (not w2) (not absent-2) (<= i-absent i3))
+          (throw (ex-info "self-check failed (wants)"
+                          {:want-1-rendered w1 :want-2-rendered w2
+                           :typed-absence-rendered absent-2 :i-absent i-absent}))))
       (println "self-check OK: fixture 3 items (1 fully reviewed, 2 pending);"
-               "page lists exactly attempt-003 then attempt-002; pending count" pending-count)
+               "page lists exactly attempt-003 then attempt-002; pending count" pending-count
+               "; both declared-want texts render with their values (true/false);"
+               "the no-declared-wants item shows the typed absence")
       (fs/delete-tree dir))))
 
 ;; --- entry -------------------------------------------------------------------
