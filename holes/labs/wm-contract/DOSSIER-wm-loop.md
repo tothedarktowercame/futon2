@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 00:49:43 UTC — Medic caller wiring reviewed and source landed
+
+Merged `0d0079e33d3455efbb1d2a4100e2edffd81ee84c` (16b53709 + d4cc5ed3). Independent focused gate:9 tests/60 assertions green. Both original bypass probes now exit1 at their former permissive assertions: covered retry refused, malformed context makes zero readiness calls. Exact-scope synthetic bundle traverses runtime/coordinator/checkpoint path; no live injury attestation. Review/log pins: `~/notes/wm-next/offline-repair/integration/caller-code/review/final-review.md`.
+
+Source only, not serving activation. No live trust set, final medic operation or fresh ledger validation installed. Next boundary is concrete context configuration/adoption caller including indeterminate-write recovery. Historical seven-injury census remains historical. Budget0.
+
 ### 2026-10-25 00:45:55 UTC — Caller adoption held on effective-retry bypass
 
 Independent isolated probes against16b53709 confirmed empty effective-active set after medic correction still returns retry :ready; malformed authority also reaches retry readiness before refusal. Review/probes: `~/notes/wm-next/offline-repair/integration/caller-code/review/`. Requested complete context validation and inhabited runtime propagation tests. No merge/activation/live ledger access. Budget0.
