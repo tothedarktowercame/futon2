@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:36Z — 9cc acceptance held for caller coverage
+
+Reviewed proposed3b0ea8c test/fixture. Direct correction-helper invocation plus separate refusal classifier does not prove actual author-wait wiring; helper-absent sentinel cannot establish semantic historical red. Requested test-only composed caller coverage, construction/prompt binding and synthetic retained evidence before evaluation. Review: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/coordinator-review.md`. No production or live change, no clearance; budget0.
+
 ### 2026-10-25 15:32Z — 9cc repair acceptance commissioned
 
 Independent review confirms medic requires repair acceptance, not historical mission completion or a real corrected c52 reply. No existing9cc repair contract was found. Coordinator explicitly commissioned new narrow prompt/correction acceptance bound to retained c52 identities, with synthetic replies labelled and unchanged artifact gates. Contract must be reviewed/pinned before semantic pre/post evaluation; missing-symbol/fixture errors cannot count as red.9cc remains active; no clearance or authority issued. Decision: `/home/joe/notes/wm-next/offline-repair/injury9cc/correction-evaluation/coordinator-contract-decision.md`. Review's ledger39 and approximate future heading are not freshness warrants; current ledger40/effective4 unchanged.
