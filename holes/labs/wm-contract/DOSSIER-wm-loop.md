@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T21:45:20.234566+00:00 — Historical medic clearance complete
+
+Verified actual8467 append and fresh-process replay: ledger44/raw7/effective0, gen8seven scopes, ledgerSHA5862fd76bfd59259cb94da92af4248b9d55103a9e0410ac685b653443ea2b1fc. Independent full-operation equality count1 at ordinal44 corrects vacuous serving string-vs-map count0. Six receipt pins match; replay bytes unchanged; idle queue/stops0 budget0. Review /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/live/coordinator-review.md. All seven historical injuries effectively cleared with raw history preserved; no task success/learning credit or queued task run. Journal defect and incident unknown effects remain separate.
+
 ### 2026-10-25T21:32:12.189273+00:00 — Exact8467 live disposition released
 
 Canonical projection activation evidence and refreshed provider controls reviewed; exact envelope/driver/form pins unchanged. Release only gen7to8seven scopes and signed8467 operation under Joe existing authorization, guarded by fresh idle/root/occurrence checks. No clearance claimed until store+serving readback and duplicate replay. Release: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/coordinator-live-release.md. Budget0; no source commits during worker.
