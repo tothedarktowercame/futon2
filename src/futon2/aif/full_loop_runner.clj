@@ -8437,11 +8437,15 @@
                              measurements commit)
                             mission-comparison
                             (when mission-applicable?
-                              (mission-observation/project
-                               {:baseline mission-baseline
-                                :dispatch (get-in @d-task-dispatch [:dispatch])
-                                :repository repo :after-revision commit
-                                :after-rows measurements}))
+                              (let [dispatch (get-in @d-task-dispatch [:dispatch])]
+                                (mission-observation/project
+                                 {:baseline mission-baseline
+                                  :dispatch dispatch
+                                  :repository repo :after-revision commit
+                                  :after-rows
+                                  (mission-observation/capture-after
+                                   {:dispatch dispatch :repository repo
+                                    :revision commit})})))
                             outcomes
                             (selected-want-outcome/receipt
                              (cond->
@@ -8455,8 +8459,9 @@
                                (assoc :mission-observation mission-comparison)))]
                         {:target target :commit commit
                          :work-evidence
-                         (if (= :repair-machine-failure
-                                (get-in construction [:selected-action :type]))
+                         (if (and (= :repair-machine-failure
+                                     (get-in construction [:selected-action :type]))
+                                  (not mission-applicable?))
                            {:kind :repair-machine-failure
                             :selected-action (get-in construction [:selected-action])
                             :durable-finding stop-line

@@ -91,6 +91,15 @@
                   :request request :wants wants :rows normalized}]
             (assoc base :baseline-sha256 (evidence/value-digest base))))))))
 
+(defn capture-after
+  "Run the selected-mission C3/C4 readers at the reviewed artifact revision.
+   This census is deliberately independent of the pattern/attempt universe."
+  [{:keys [dispatch repository revision]}]
+  (let [action (get-in dispatch [:occurrence :action/value])
+        wants (qualified-wants action)]
+    (when (and (string? repository) (string? revision))
+      (read-selected dispatch wants repository revision))))
+
 (defn project
   "Admit the exact retained before baseline and post-build reader rows.
    Before=true is a typed refusal under the current selected-want policy."
@@ -100,8 +109,8 @@
         wants (qualified-wants action)
         trusted-before (capture-before {:dispatch dispatch :repository repository
                                         :revision (get-in dispatch [:before :head])})
-        trusted-after (when (and (string? repository) (string? after-revision))
-                        (read-selected dispatch wants repository after-revision))
+        trusted-after (capture-after {:dispatch dispatch :repository repository
+                                      :revision after-revision})
         supplied-after after-rows
         after-rows (mapv (fn [row]
                            (if (contains? row :observed)
@@ -117,7 +126,14 @@
       (not= schema (:schema baseline)) (refusal :baseline-missing {})
       (not= (:baseline-sha256 baseline) (evidence/value-digest unsigned))
       (refusal :baseline-payload-mismatch {})
-      (not= trusted-before baseline) (refusal :before-authority-mismatch {})
+      (not= trusted-before baseline)
+      (refusal :before-authority-mismatch
+               {:differing-keys
+                (vec (for [k (set (concat (keys trusted-before) (keys baseline)))
+                           :when (not= (get trusted-before k) (get baseline k))]
+                       k))
+                :trusted-repository (:repository trusted-before)
+                :retained-repository (:repository baseline)})
       (not= trusted-after supplied-after) (refusal :after-authority-mismatch {})
       (not= occurrence-id (:occurrence-id baseline)) (refusal :occurrence-mismatch {})
       (not= (identity/digest action) (:action-sha256 baseline)) (refusal :action-mismatch {})
@@ -133,7 +149,9 @@
                       (not= (:token before) (:token after)) :token-mismatch
                       (not= (:locator before) (:declared-locator after)) :locator-mismatch
                       (not= (:revision baseline) (get-in before [:result :evidence :resolved-sha]))
-                      :before-revision-mismatch
+                      {:reason :before-revision-mismatch :token (:token before)
+                       :expected (:revision baseline)
+                       :actual (get-in before [:result :evidence :resolved-sha])}
                       (not= after-revision (get-in after [:result :evidence :resolved-sha]))
                       :after-revision-mismatch
                       (not= (:observed before) (get-in before [:result :observed]))
@@ -145,7 +163,8 @@
                       (not (boolean? (:observed after))) :after-observation-missing))
                   pairs)]
         (if problem
-          (refusal problem {})
+          (refusal (if (map? problem) (:reason problem) problem)
+                   (if (map? problem) (dissoc problem :reason) {}))
           {:schema projection-schema :status :admitted
            :occurrence-id occurrence-id :before-revision (:revision baseline)
            :after-revision after-revision

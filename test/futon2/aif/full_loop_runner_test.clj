@@ -1145,6 +1145,11 @@
                           (merge
                            (cond->
                             {:cohort? true :execution-cohort (:binding cohort)
+                           :target-repo-fn (fn [& _] (.getPath token-repo))
+                           :repo-head-observation-fn
+                           (fn [repo]
+                             {:head (token-fixture/command repo "rev-parse" "HEAD")
+                              :observed-at-ms 0})
                            :d-task-evidence-root (str (io/file (:root cohort) "d-task"))
                            :learning-trial-ledger-root
                            (str (io/file (:root cohort) "learning-ledger"))

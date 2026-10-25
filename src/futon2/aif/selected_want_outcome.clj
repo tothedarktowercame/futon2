@@ -52,7 +52,7 @@
       (seq duplicates) (refuse :selected-want-duplicate {:duplicates duplicates})
       (not-every? #(and (vector? %) (= 2 (count %)) (= target (first %))) wants)
       (refuse :selected-want-target-mismatch {:target target :wants wants})
-      (not= :compared (:status token-comparison))
+      (and (not mission?) (not= :compared (:status token-comparison)))
       (refuse :selected-want-after-observation-missing
               {:comparison-status (:status token-comparison)})
       (or (not= (set wants) (set row-tokens)) (not= (count wants) (count rows)))
@@ -108,7 +108,10 @@
                                                         :blocked :invalid-blocker)
                                           :else :untouched)]
                  (cond-> {:target target :want want
-                          :before {:observed false :authority :selected-initial-belief}
+                          :before {:observed false
+                                   :authority (if mission?
+                                                :mission-observation
+                                                :selected-initial-belief)}
                           :after {:observed observed :measurement measurement}
                           :classification classification}
                    progress-row (assoc :progress-evidence progress-row)
