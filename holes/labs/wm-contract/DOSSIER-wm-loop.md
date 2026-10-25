@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:03:48 UTC — Injury04 repair artifact resolved; evaluation dispatched
+
+Compared original hash64b3eff6…/missing-want refusal with source diffs: 7ca70e10 repairs want propagation; dafa05d repairs reporting only. Accept artifact choice for independent evaluation, preserve ord20 lineage. Replay log pins ab0e78c7 (prose11321a13d corrected in coordinator review). Review ~/notes/wm-next/offline-repair/injury04/coordinator-review.md. Codex12 evaluation invoke-1792937083851-3590-cb4fae6e, park-444ade3e-9803-43af-8af8-766ec8deeb62, follows cfb940 work with separate outputs and isolated semantic mutation. Genuine verifier non-root bug still held. No live clearance, ledger change, reload, click or learning credit; six effective injuries remain.
+
 ### 2026-10-25 14:02:49 UTC — Genuine authority held on reproduced non-root binding defect
 
 Independent named tests12/47 pass, but actual valid open->claimed probe refuses admission: verifier reads absent raw predecessor-entry-id instead of binding projected ordinal to actual sealed same-injury predecessor. Review and retained failing positive probe: ~/notes/wm-next/offline-repair/genuine-authority/review/coordinator-review.md. Source commits89cd28916/a79dcb4b7 held; no merge/load/live clearance. Codex3 followup invoke-1792936969649-3587-27c50cb5, park-c60d29b1-d4c7-4b54-aa91-598443729022, requires real non-root and mixed historical/genuine admission controls. Six injuries remain; budget0. Injury41 retention already source-landed, not loaded.
