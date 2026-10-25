@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T19:02:10.688322+00:00 — 8467 shared deferred review remains held
+
+Reviewed562406f. Independent scanner suite10tests44assertions green; sorted-map schema traversal fix warranted. Shared movedHEAD probe reaches grounded-change without author resend, but its green log itself names canonical META paths and script lacks owner fixture chain. No absence-of-effects inference. Fourth coordinator review retained under mission-observation/persistence/review. Agency codex12 job invoke-1792954922094-3894-4bed0077 commissioned repository-owned isolated deferred/missing/tampered-sidecar and reviewer/learning controls. No activation, live disposition, click or budget change.
+
 ### 2026-10-25T18:59:28.123399+00:00 — injury41 exact medic review
 
 Coordinator independently verified evaluator packet dbbf5a99: current42/root335fd6a2, occurrence18/open1/nil same-injury predecessor, pins and 18 verifier controls. Reviewer-adapted check exited0; initial evaluator-script identity-only refusal retained. Actual scoped review and authorization written at `/home/joe/notes/wm-next/offline-repair/authority/41-adoption/coordinator-authorization.md`. Qualification remains function-valued patch boundary only; journal restart limitation retained. Agency claude-9 final offline assembly queued `invoke-1792954753589-3893-6652abc1`; six-scope isolated controls required before live review. No live disposition, click or budget change. Effective injuries remain41/8467 per verified snapshot;8467 deferred fixture work separate.
