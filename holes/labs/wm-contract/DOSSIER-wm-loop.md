@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:20:48 UTC — 9cc held; bounded author correction target identified
+
+Five retained pins verified. DONE-base remains correctly refused, different-target REFUSE cannot substitute. Actual author-wait fresh-binding failure throws before build-cure-loop; completed malformed reply misses correction opportunity. Review ~/notes/wm-next/offline-repair/injury9cc/evaluation/coordinator-review.md. Lean-first same-author bounded correction packet invoke-1792938087696-3619-738c850d, park-89ea8754-33d9-41ec-aa70-14a1eaddd323; unchanged gates, no presumed reply success. No source/live change or clearance; six remain/budget0.
+
 ### 2026-10-25 14:18:23 UTC — Cfb exact assembly validated; operation review dispatched
 
 Independently validated c1fc78cd… intent,5artifact pins/genuine payload/equal request and4delivered artifact hashes. Retention-only correction adopted; ord17/pred14/root363c3b4f… binding. Review ~/notes/wm-next/offline-repair/authority/cfb-adoption/coordinator-assembly-review.md. Claude9 exact reviewer receipt requested via invoke-1792937934710-3616-d0272364, park-d1571eb7-83b7-45ab-9ea6-65dd0ad21ce7; no attributed approval before reply. Genuine verifier active, provider a9 only. No live clearance; six remain, budget0.
