@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T19:32:59.322322+00:00 — 8467 repair acceptance released
+
+Reviewed newly declared reopened-defect acceptance1bb7d489. Isolated coordinator fixes f2f879381(resource) and8c3146900(declaration repo adapter); current exact suite4tests36assertions green. Initial4failures were fixture mismatch, retained as setup evidence. Frozen test4c5ea680/fixture9916f11d. Scope six-want producer/accounting plus separate one-want actual owner deferred composition; no six-want end-to-end claim. Release actual historical gate/caller mutation evaluation with pinned adapter; no retrospective baseline/task success or clearance. Review under injury8467/repair-acceptance/coordinator-contract-review.md.
+
 ### 2026-10-25T19:25:15.823130+00:00 — 8467 forward activation verified
 
 Canonical49a8c59d / Lean ddf999ac landed and activated. Coordinator independently checked evidence hashes, five reload results, runner current identity and structurally unchanged provider/ledger/serving snapshots. Ledger42/effective2 exactly41/8467, gen6five scopes, idle/budget0. Acceptance review retained in mission-observation/activation/coordinator-review.md. Next is precise repair-acceptance qualification; no historical baseline reconstruction, task success inference, learning credit or medic disposition. Initial offline reader format error retained; corrected checker exits0.
