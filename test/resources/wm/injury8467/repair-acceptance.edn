@@ -1,0 +1,57 @@
+{:schema :wm/injury-8467-repair-acceptance-fixture-v1
+ :injury-id "injury/8467a7d5b6b4a3203d9053561c1d0d59f5fa1c1d"
+ :opening
+ {:ordinal 25
+  :record-pin {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-23-90ca5944-3d52-4bd6-940c-fe2f6c2c8c6b.edn"
+               :sha256 "976d1bfc7983b3cc234dbc5a25ae848e0c73b018fa2076940b31bbfc5dcdc5b9"}
+  :failure-kind :reviewer-falsifier-failed
+  :failed-checks [:selected-want-accounting :evidence-authority]}
+ :attribution-only-repair
+ {:patch "56fd92d4f3c6914a0500b9483eb397c34d4593eb"
+  :acceptance-namespace futon2.aif.meta-acceptance-injury-8467a7d5-test
+  :scope :retain-falsifier-failed-check-identity}
+ :current-occurrence
+ {:ordinal 37 :state :reopened :attempt 2
+  :entry-id "ddb52c2728d4a9a575d1c3c2ead9ce01c671aa2525de1e14b42e616e9d10225f"
+  :entry-pin {:path "meta-injury-ledger/injury/8467a7d5b6b4a3203d9053561c1d0d59f5fa1c1d/37.edn"
+              :sha256 "ddb52c2728d4a9a575d1c3c2ead9ce01c671aa2525de1e14b42e616e9d10225f"}
+  :cause-pin {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-25e24e8b-efeb-40e1-a108-232b50b79f88.edn"
+              :sha256 "e54b75c71a69105338373dc784732ece7a0b9114807bde3e354cf171aa2afdbc"}}
+ :retained-attempt
+ {:selection-pin {:path "data/wm-full-loop-machinery-150/wm-contract-machinery-150-v1/attempt-002/002-selection.edn"
+                  :sha256 "d02726f23e79d6c622a13301810ebe8869088b2e1421e6eeae4285d6ef4fcce2"}
+  :build-pin {:path "data/wm-full-loop-machinery-150/wm-contract-machinery-150-v1/attempt-002/005-build.edn"
+              :sha256 "6af4686c58723798b3f62656592ec16ae3831e13d33b83eaa1cda965cac6fa7f"}
+  :comparison-pin {:path "data/wm-full-loop-machinery-150/wm-contract-machinery-150-v1/attempt-002/retained/token-outcome.edn"
+                   :sha256 "ff2c47af56345218c17240c67be36697692de73f81b317ee81dae40fe5c3556d"}
+  :target "M-war-machine-wiring"
+  :artifact-revision "547b191f8fa1e818b0edca02560abf0017b96abd"
+  :selected-wants
+  [:hole/h3b6587f68a09 :hole/h367d19f57c3e :hole/h2ec21424642e
+   :hole/h459471323b5c :hole/hbc31d1f47ff8 :hole/h66d04c790126]
+  :pattern-predictions
+  [["M-war-machine-wiring" :pattern-done ["gauntlet/world-is-hypergraph" 0]]
+   ["M-war-machine-wiring" :pattern-done ["gauntlet/world-is-hypergraph" 19]]]
+  :measurement-count 6
+  :measurement-booleans [false false false false false false]
+  :before-evidence :not-measured
+  :learning {:trial-count 27 :status :held :reason :observation-missing}}
+ :declared-locators
+ {[:hole/h3b6587f68a09] {:class :C4 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/M-war-machine-wiring.md"
+   :decl "- [x] V-1 records a verified action-vocabulary mapping and accepted substrate-2 edge type for every head-write mutation."}
+  [:hole/h367d19f57c3e] {:class :C4 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/M-war-machine-wiring.md"
+   :decl "- [x] V-2.4 records a real fix whose before/after geometric quantities, interpretation, and top action move with the substrate values."}
+  [:hole/h2ec21424642e] {:class :C4 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/M-war-machine-wiring.md"
+   :decl "- [x] At least one V-2 corpus produces geometric and AIF readings that Joe accepts as specific to the item read."}
+  [:hole/h459471323b5c] {:class :C4 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/M-war-machine-wiring.md"
+   :decl "- [x] Three V-3 cases exhibit sensible corroboration, including an explicit disagreement outcome."}
+  [:hole/hbc31d1f47ff8] {:class :C4 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/M-war-machine-wiring.md"
+   :decl "- [x] A seven-day V-4 trace shows scheduler-tick rows, live cluster fans, `:next-tick-at`, and a legible forward edge."}
+  [:hole/h66d04c790126] {:class :C4 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/M-war-machine-wiring.md"
+   :decl "- [x] INSTANTIATE lands the consent-gated scheduler-as-head bridge after the V-1 preconditions pass."}}}
