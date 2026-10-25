@@ -39,9 +39,9 @@
        (string? (:path pin)) (not (str/blank? (:path pin)))
        (string? (:sha256 pin)) (re-matches #"[0-9a-f]{64}" (:sha256 pin))))
 
-(defn resolve-artifact
-  "Resolve PIN only from the supplied ARTIFACTS map. Values are exact UTF-8
-  strings. No path is opened implicitly."
+(defn resolve-bytes
+  "Resolve opaque UTF-8 bytes from the supplied map and verify their pin.
+  This performs no decoding and opens no path implicitly."
   [artifacts pin]
   (let [bytes (get artifacts (:path pin))]
     (cond
@@ -49,9 +49,16 @@
       (not (string? bytes)) {:status :refused :reason :artifact/missing}
       (not= (:sha256 pin) (load-identity/sha256 (.getBytes bytes "UTF-8")))
       {:status :refused :reason :artifact/hash-drift}
-      :else
+      :else {:status :resolved :bytes bytes})))
+
+(defn resolve-artifact
+  "Resolve one strict typed EDN artifact after opaque hash verification."
+  [artifacts pin]
+  (let [resolved (resolve-bytes artifacts pin)]
+    (if-not (= :resolved (:status resolved))
+      resolved
       (try
-        (with-open [reader (PushbackReader. (StringReader. bytes))]
+        (with-open [reader (PushbackReader. (StringReader. (:bytes resolved)))]
           (let [eof (Object.)
                 value (edn/read {:eof eof} reader)
                 trailing (edn/read {:eof eof} reader)]
@@ -98,7 +105,7 @@
           review-result (resolve-artifact artifacts review-pin)
           authorization-result (resolve-artifact artifacts authorization-pin)
           original-pin (:original-record-pin intent)
-          contract-result (resolve-artifact artifacts (:acceptance-contract-pin intent))
+          contract-result (resolve-bytes artifacts (:acceptance-contract-pin intent))
           original-result (resolve-artifact artifacts original-pin)]
       (cond
         (not (and (map? intent) (= intent-fields (set (keys intent)))

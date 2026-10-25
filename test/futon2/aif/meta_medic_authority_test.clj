@@ -16,8 +16,11 @@
   (let [original {:failure {:kind :already-satisfied :stage :author-wait}
                   :run-output {:outcome :already-satisfied}}
         [original-pin original-bytes] (pinned "artifacts/original.edn" original)
-        contract-value {:contract :producer-qualified-already-satisfied}
-        [contract-pin contract-bytes] (pinned "artifacts/contract.edn" contract-value)
+        contract-path "holes/labs/wm-contract/already-satisfied-terminal-classification-invariant.md"
+        contract-bytes (slurp contract-path)
+        contract-pin {:path contract-path
+                      :sha256 (load-identity/sha256
+                               (.getBytes contract-bytes "UTF-8"))}
         opened (ledger/append-transition
                 ledger/empty-ledger
                 {:injury-id "injury/a9" :state :open :attempt 1
@@ -111,9 +114,21 @@
                      (assoc-in f [:artifacts path] "{:tampered true}\n")))))
     (is (= :artifact/missing
            (:reason (authority/verify (update f :artifacts dissoc contract-path)))))
+    (is (= :artifact/hash-drift
+           (:reason (authority/verify
+                     (assoc-in f [:artifacts contract-path]
+                               (str (get-in f [:artifacts contract-path]) "tamper"))))))
     (is (= :artifact/multiple-forms
            (:reason (authority/resolve-artifact {"artifacts/two.edn" two-forms}
                                                 two-pin))))))
+
+(deftest pinned-markdown-contract-is-opaque-and-hash-verified
+  (let [f (fixture)
+        pin (get-in f [:intent :acceptance-contract-pin])]
+    (is (= "7b8788e96ff60cfd1138a5c641ec148d0defd17cf1f3b9a96e3c021552f7b63d"
+           (:sha256 pin)))
+    (is (= :resolved (:status (authority/resolve-bytes (:artifacts f) pin))))
+    (is (= :verified (:status (authority/verify f))))))
 
 (deftest intent-and-final-envelope-bindings-refuse-drift
   (let [f (fixture)]
