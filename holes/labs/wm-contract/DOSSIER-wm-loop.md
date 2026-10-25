@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T20:57:21.694173+00:00 — 8467 exhaustion projection review
+
+313382920 closes special reopen bypass. Independent public append-transition probe still accepts ordinary exhausted row with extra new-cause-pin and changes projected cause; inactive row, no clearance bypass claimed. Evidence: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/projection-repair/coordinator-followup-review.md and exhaustion-extra-pin-probe.log, exit0. Hold source landing/matrix/activation pending positive route guard. Broad-test incident retained separately; effects unknown. No live changes; budget0.
+
 ### 2026-10-25T20:51:30.294468+00:00 — 8467 projection review held
 
 Isolated c618f2b fixes actual ordinary reopen admission but special-route public probe accepts author-failed reopen with extra new-cause-pin and changes projected cause. Gate is too broad; source remains unmerged/unactivated. Evidence: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/projection-repair/coordinator-review.md and special-route-probe.log (exit0). Commission narrow route binding followup; envelope and live ledger unchanged; budget0.
