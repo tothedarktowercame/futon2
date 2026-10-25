@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:08 UTC — exact940 authorization
+
+Independent review0f57cc57 and evaluation2022c2d9 verified; actual roster identities match. Coordinator authorized exact940 ordinal27/root98ce6a80 under Joe instruction, scope held-state/error retention only. Final combined a9+cfb+940 isolated envelope/provider validation next; no live disposition, five active remain. Evidence `/home/joe/notes/wm-next/offline-repair/authority/940-adoption/coordinator-authorization.md`.
+
 ### 2026-10-25 15:08 UTC — author correction composed retention hold
 
 Repo fix accepted; independent18tests65assertionsgreen. Full-fixture actual author-wait→sealed record probe reproduces dropped correction evidence after downstream invalid-refusal gate. Narrow final retention/fixture ownership fix requested; no merge/activation/9cc clearance. Coordinator direct-helper probe without fixtures was stopped143; unknown effects not denied. Exact evidence and execution limitations: `/home/joe/notes/wm-next/offline-repair/injury9cc/author-correction/code/review/followup-coordinator-review.md`.
