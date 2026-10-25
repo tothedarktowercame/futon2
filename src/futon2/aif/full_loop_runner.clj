@@ -8092,12 +8092,15 @@
                                         (:head head-observation))
                                  target mission construction stop-lines))
                 mission-applicable?
-                (and (str/starts-with? (str target) "M-")
-                     (seq (get-in construction [:selected-action :want]))
-                     (not= :repair-machine-failure
-                           (get-in construction [:selected-action :type])))
+                (or (and (str/starts-with? (str target) "M-")
+                         (seq (get-in construction [:selected-action :want]))
+                         (not= :repair-machine-failure
+                               (get-in construction [:selected-action :type])))
+                    (and deferred-author-job
+                         (contains? deferred-author-context
+                                    :mission-observation-baseline)))
                 _ (reset! d-task-dispatch
-                          (if deferred-author-job
+                          (if (and deferred-author-job mission-applicable?)
                             (:d-task-dispatch deferred-author-context)
                             (d-task/capture-result
                              (assoc @d-task-context
@@ -8199,17 +8202,22 @@
                                          {:failure-stage :author-wait
                                           :author-job-id author-job-id
                                           :deferred-author-dispatch-context
-                                          {:schema :wm/deferred-author-dispatch-context-v1
-                                           :target target
-                                           :repository author-repo
-                                           :pre-author-head pre-author-head
-                                           :mission-observation-baseline mission-baseline
-                                           :mission-observation-origin
-                                           {:cohort-id (:cohort/id start-event)
-                                            :attempt-id attempt-id}
-                                           :d-task-dispatch @d-task-dispatch
-                                           :job-id author-job-id
-                                           :prompt-sha256 (sha256 author-prompt-text)}})
+                                          (cond->
+                                           {:schema :wm/deferred-author-dispatch-context-v1
+                                            :target target
+                                            :repository author-repo
+                                            :pre-author-head pre-author-head
+                                            :job-id author-job-id
+                                            :prompt-sha256 (sha256 author-prompt-text)}
+                                            mission-applicable?
+                                            (assoc
+                                             :mission-observation-baseline mission-baseline
+                                             :mission-observation-origin
+                                             (or (:mission-observation-origin
+                                                  deferred-author-context)
+                                                 {:cohort-id (:cohort/id start-event)
+                                                  :attempt-id attempt-id})
+                                             :d-task-dispatch @d-task-dispatch))})
                                   e)))))
                   retry-author?
                   (and fresh-author?
@@ -8437,7 +8445,11 @@
                             outcomes
                             (selected-want-outcome/receipt
                              (cond->
-                              {:selected-action (get-in construction [:selected-action])
+                              {:selected-action
+                               (if mission-applicable?
+                                 (get-in @d-task-dispatch
+                                         [:dispatch :occurrence :action/value])
+                                 (get-in construction [:selected-action]))
                                :token-comparison comparison}
                                mission-applicable?
                                (assoc :mission-observation mission-comparison)))]
