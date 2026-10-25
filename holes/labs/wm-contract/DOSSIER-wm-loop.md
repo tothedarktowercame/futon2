@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T20:26:09.839304+00:00 — 8467 final matrix resumed; live held
+
+Final envelope/provider controls complete, copied matrix SIGTERM143 after six minutes lacked summary. Preserved original artifacts. Coordinator verified envelope pins and launched unchanged driver through separate controls-resume harness8ba113b0 with durable per-case progress and strengthened no-write/raw-history checks, wrapper3234419. Dynamic lint findings same as original6/3, parenspass; no pass claim pending execution. No live change; helper to monitor existing process to completion, no restart/cleanup or arbitrary six-minute kill.
+
 ### 2026-10-25T20:16:47.848996+00:00 — exact8467 authorization issued
 
 Independent exact reviewe205ce4c accepted;12 evaluator and9 review pins verified and fresh three-seat identities match. Authorized intent3eede72b at43root72c1f7be/latest37reopened2/pred36/newcause25e24, scope measurement-accounting only. Next isolated seven-scope43to44/effective0 and gen7to8 checks; no live clearance. Historical/mutation lineage and narrow baseline/learning limits retained. Authorization receiptc46d4e2e17d1 under authority/8467-adoption.
