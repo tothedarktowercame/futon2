@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25 00:30:53 UTC — codex-11 accepted verifier86a5cb, merge d336438486d9821eeafdf38f42f47495d13531ab; independent9tests30assertions and3prior negative probes green. Opaque pinned Markdown/strict typed EDN verified. Retained full original a9 record read-only, hash6ca9604... confirmed, capture authority/a9-evaluation/capture.json; no fresh ledger claim. Offline evaluation dispatched invoke-1792888253336-3421-4a0aabe8, park-f1b6df01-deee-476e-ae6c-7de8bf24a7f6. Reviewer/authentication/live qualification remain open,budget0.
+
 - 2026-10-25 00:29:22 UTC — codex-11 reviewed8b043ef: independent prior3probes refuse,8tests26assertions green. Actual pinned Markdown contract hash7b8788e verifies integrity but resolve-artifact rejects as malformed EDN; promotion held for byte/typed-parser separation. Review ~/notes/wm-next/offline-repair/authority/review/format-review.md. Dispatch invoke-1792888162092-3420-a2ac77da, park-d0ea55bd-1d8f-4447-847c-ecfde1cd0aaf. No merge/live qualification,budget0.
 
 - 2026-10-25 00:27:00 UTC — codex-11 holds authority2eadd14e: independent probe exit0 shows missing contract verifies, substituted payload roles/evidence with recomputed envelope verifies under unchanged trust, trailing EDN accepted. Review ~/notes/wm-next/offline-repair/authority/review/review.md. Followup codex-12 invoke-1792888020485-3418-dfbc599e, park-7c23a21a-5879-4d8b-ab7b-f482363adc14; require semantic intent/receipt binding and strict artifact parsing. No merge/live qualification, budget0.
