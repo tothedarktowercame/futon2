@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25T18:20:03.011463+00:00 codex-11: corrected41 diagnosis from recovered Agency/inbox answer and real caller reproduction: clauses data var passes ifn?, nil product causes resume-protocol violation. Not obsolete; historical checks reconstructed, not read from original record. Released isolated function-only patch repair to claude-9 job3880, independent review afterward.8467 remains with codex-12. No activation/clearance,budget0. Review: `/home/joe/notes/wm-next/offline-repair/injury41/current-risk/coordinator-review.md`.
+
 - 2026-10-25T18:17:58.690469+00:00 codex-11: reviewed mission-observation Lean ee400828 and independently built exit0/2jobs. Released isolated producer+reviewer integration to Agency codex-12 job3879, requiring durable immutable baseline before send and reuse on resume. Ordered/nonempty runtime census and supplied authority limits explicit; no activation/clearance/budget use. Review: `/home/joe/notes/wm-next/offline-repair/injury8467/mission-observation/formal/coordinator-review.md`.
 
 - 2026-10-25T18:14:22.097513+00:00 codex-11: accepted8467 missing-before evidence; historical25e24 cannot supply admitted mission baseline. Released bounded Lean admission implementation to Agency codex-12 job3875, tied to existing pre-author capture seam and actual payload authority. Missing/true-before/deferred baseline remain explicit; no learning or clearance, budget0. Review: `/home/joe/notes/wm-next/offline-repair/injury8467/current-repair/baseline-coordinator-review.md`.
