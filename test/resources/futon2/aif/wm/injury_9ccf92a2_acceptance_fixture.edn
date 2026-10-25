@@ -1,0 +1,32 @@
+{:schema :wm/injury-9ccf92a2-repair-acceptance-fixture-v1
+ :retained-identities
+ {:run-id "2026-10-24-c52d61b9-d268-438c-a204-b944e507a724"
+  :cause-record-pin
+  {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-c52d61b9-d268-438c-a204-b944e507a724.edn"
+   :sha256 "38ee0703e9bb7ee8b3bcb69f2dc0ded8a7b43c0af239e53f144b1d42061b3a5f"}
+  :repair-finding-pin
+  {:path "/home/joe/code/futon2/data/wm-repair-obligations/findings/repair-occ-eb4c2e8d0cd9951c9b028b8faca4865f666badbbbc996869445090261cd0ed84.edn"
+   :sha256 "7aab03fd54c4380c49f68419e69691240d46773a571bddfb10ef3d935c943813"}
+  :dispatch-sha256 "90ba01cdc4ffa3cf8cc061901def0756f1304e391071f4da119763d999f206ad"
+  :target "M-war-machine-wiring"
+  :repository "/home/joe/code/futon5a"
+  :base-head "68120423443eab3243c400563cc9c66f45fea6e7"
+  :author "zai-2"
+  :original-job-id "invoke-1792869943375-3025-243e90fa"
+  :compiled-cascade-digest "cc5cbb7fe7ecd93ed9af5efb608fd1b87b5bb84a2f2aa4bf89dbe21dc437321f"
+  :existing-artifact "249ce8a6685edbbb23b019d2661d5dc2c2198e90"}
+ :synthetic-responses
+ {:notice "These are test-only synthetic replies, not retained or reconstructed zai-2 responses."
+  :original-done-at-base
+  {:state "done"
+   :result "FULL_LOOP_AUTHOR: DONE 68120423443eab3243c400563cc9c66f45fea6e7"}
+  :corrected-existing-refusal
+  {:state "done"
+   :artifact-ref "249ce8a6685edbbb23b019d2661d5dc2c2198e90"
+   :feature-card
+   {:built "synthetic: selected construction already exists"
+    :want-coverage "synthetic: existing artifact covers the selected contract"
+    :matches-intent? true
+    :proof-ref "249ce8a6685edbbb23b019d2661d5dc2c2198e90"
+    :things-to-try ["git show 249ce8a -> retained existing implementation"]}
+   :result "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head"}}}
