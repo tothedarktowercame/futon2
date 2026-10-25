@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:02:49 UTC — Genuine authority held on reproduced non-root binding defect
+
+Independent named tests12/47 pass, but actual valid open->claimed probe refuses admission: verifier reads absent raw predecessor-entry-id instead of binding projected ordinal to actual sealed same-injury predecessor. Review and retained failing positive probe: ~/notes/wm-next/offline-repair/genuine-authority/review/coordinator-review.md. Source commits89cd28916/a79dcb4b7 held; no merge/load/live clearance. Codex3 followup invoke-1792936969649-3587-27c50cb5, park-c60d29b1-d4c7-4b54-aa91-598443729022, requires real non-root and mixed historical/genuine admission controls. Six injuries remain; budget0. Injury41 retention already source-landed, not loaded.
+
 ### 2026-10-25 14:00:30 UTC — A9 live disposition verified; six effective injuries remain
 
 Reviewed live receipt and serving postflight; independently recomputed canonical ledger SHA `0b7a08ee3dc47f97e91c4ea91f813064e8863083e46dc8c7470539925b8c1245`. Exact authorized operation appended ordinal38; replay duplicate. Ledger38/raw7/effective6; a9 excluded and other six retained. Idle, no queued work/stops, budget0 unchanged; no task success or learning credit. Review: ~/notes/wm-next/offline-repair/authority/a9-adoption/live/coordinator-review.md.
