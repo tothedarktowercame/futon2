@@ -71,7 +71,8 @@
     :action action
     :universe (set (map #(vector target %) wants))
     :before-files {"holes/missions/M-war-machine-wiring.md" (unchecked-mission)}
-    :locators (into {} (map (fn [[[token] locator]] [token locator]))
+    :locators (into {} (map (fn [[[token] locator]]
+                            [token (assoc locator :repo "repo")]))
                     (:declared-locators contract))}
    (fn [{:keys [inputs repo commit]}]
      (let [dispatch (:dispatch inputs)
