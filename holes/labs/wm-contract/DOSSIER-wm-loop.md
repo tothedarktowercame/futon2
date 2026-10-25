@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:45Z — 9cc pinned semantic evaluation released
+
+Final070fc720 contract/static adapter accepted and test/fixture hashes independently verified. Named isolated historical5a0509f9a/repaired2c5e2ddb7/current matrix released with caller-removal mutation if green. Errors cannot count as semantic pre-red; frozen contract changes require review. Synthetic replies remain synthetic; no qualification/clearance. Release: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation-release.md`. Budget0 unchanged.
+
 ### 2026-10-25 15:44Z — 04 reassembled, independent review resumed
 
 Rebuilt exact schemas/digest/receipts verified by coordinator hashes and actual validator source/output. Production verify passes only under explicitly synthetic isolated approval inputs; predecessor/cause controls refuse. These are compatibility tests, not authority. New digest c311e9f0; real exact review dispatched to claude-9. Old bytes and unchanged repair evidence preserved. No live/clearance; ledger40/effective4 budget0. Review: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-reassembly-review.md`.
