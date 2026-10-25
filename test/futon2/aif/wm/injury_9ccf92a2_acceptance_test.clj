@@ -8,7 +8,8 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :as test :refer [deftest is testing use-fixtures]]
-            [futon2.aif.full-loop-runner :as runner]))
+            [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.load-identity :as load-identity]))
 
 (def fixture
   (-> "futon2/aif/wm/injury_9ccf92a2_acceptance_fixture.edn"
@@ -45,39 +46,95 @@
   {:construction-kind :selected-cascade
    :selected-action {:target (:target retained)
                      :compiled-cascade-digest (:compiled-cascade-digest retained)}
-   :repair-contract {:dispatch-sha256 (:dispatch-sha256 retained)}})
+   ;; The historical prompt bytes are unavailable. This repository-owned
+   ;; reconstruction keeps the two retained contract identities together in
+   ;; the prompt-construction subset that production hashes and redisplays.
+   :repair-contract {:compiled-cascade-digest
+                     (:compiled-cascade-digest retained)
+                     :dispatch-sha256 (:dispatch-sha256 retained)}})
 
-(defn- correction-call
-  [{:keys [allowance corrected original repo]}]
-  (let [dispatches (atom [])
-        correction-var (ns-resolve 'futon2.aif.full-loop-runner
-                                   'author-response-correction-loop)]
-    ;; Cross-revision adapter: c52's source has no correction operation. Return
-    ;; a semantic absence value so the historical red is about missing promised
-    ;; behavior, never an unresolved symbol or fixture API crash.
-    (if-not correction-var
-      {:status :correction-behavior-absent :dispatches dispatches}
-      (let [opts {:author-response-corrections (if (nil? allowance) 1 allowance)
-                  :dispatch-fn
-                  (fn [_ agent caller target prompt]
-                    (swap! dispatches conj {:agent agent :caller caller
-                                            :target target :prompt prompt})
-                    {:job-id "synthetic-9cc-correction-1"})
-                  :poll-fn (fn [_ _] (or corrected (corrected-job)))}
-            result
-            (with-redefs-fn
-              {#'runner/run-phase! (fn [_ _ _ thunk & _] (thunk))}
-              #(try
-                 (correction-var
-                  opts {} (:author retained) (atom 0) (:target retained)
-                  (or repo (:repository retained))
-                  {:repo (or repo (:repository retained))
-                   :head (:base-head retained) :observed-at-ms 1}
-                  (construction) {:job-id (:original-job-id retained)}
-                  "PINNED ORIGINAL PROMPT" (or original (original-job)))
-                 (catch clojure.lang.ExceptionInfo e e)))]
-        {:status :correction-behavior-present
-         :dispatches dispatches :result result}))))
+(defn- sha256 [s]
+  (load-identity/sha256 (.getBytes s "UTF-8")))
+
+(defn- composed-author-wait
+  "Cross the owner's real run-opportunity!/author-wait caller boundary.
+
+  The owner fixture is intentionally generic. This transparent adapter replaces
+  only its external ports and selected fixture identities: author zai-2, target,
+  bound repository/base, original job id and compiled/dispatch contract fields.
+  It does not call or redefine the correction operation, refusal classifier, or
+  fresh-artifact gate. The same adapter runs on c52 and repaired sources."
+  [{:keys [allowance corrected repository artifact-valid?]
+    :or {allowance 1 artifact-valid? true}}]
+  (let [run-attempt (ns-resolve 'futon2.aif.full-loop-runner-test
+                                'run-feature-card-attempt)
+        dispatches (atom [])
+        requests (atom {})
+        correction-id "synthetic-9cc-correction-1"
+        reviewer-id "synthetic-9cc-review"
+        repo (or repository (:repository retained))
+        corrected (or corrected (corrected-job))
+        dispatch-fn
+        (fn [_ agent caller target prompt]
+          (let [n (inc (count @dispatches))
+                job-id (case n
+                         1 (:original-job-id retained)
+                         2 correction-id
+                         reviewer-id)]
+            (swap! dispatches conj {:ordinal n :agent agent :caller caller
+                                    :target target :prompt prompt :job-id job-id})
+            (swap! requests assoc job-id {:prompt prompt})
+            {:job-id job-id}))
+        poll-fn
+        (fn [_ job-id]
+          (condp = job-id
+            (:original-job-id retained) (original-job)
+            correction-id corrected
+            reviewer-id {:job-id reviewer-id :agent-id "codex-7" :state "done"
+                         :execution {:executed true :tool-events 1 :command-events 1}
+                         :result-summary "FULL_LOOP_REVIEW: APPROVE"
+                         :request (get @requests reviewer-id)}))
+        transform
+        (fn [j]
+          (-> j
+              (assoc-in [:decision :action :target] (:target retained))
+              (assoc-in [:decision :action :compiled-cascade-digest]
+                        (:compiled-cascade-digest retained))
+              (assoc-in [:decision :action :repair-contract :dispatch-sha256]
+                        (:dispatch-sha256 retained))))
+        result
+        (with-redefs-fn
+          {#'runner/primary-repos (constantly [])
+           #'runner/commit-exists-in?
+           (fn [candidate-repo sha]
+             (and artifact-valid?
+                  (= candidate-repo (:repository retained))
+                  (= sha (:existing-artifact retained))))}
+          #(run-attempt
+            {:author-response-corrections allowance
+             :isolate-modified-runner? true
+             :initial-author-job (original-job)
+             :cure-agent (:author retained)
+             :cure-summary (:result corrected)
+             :cure-commit (:artifact-ref corrected)
+             :cure-card (:feature-card corrected)
+             :judgement-transform-fn transform
+             :runner-options
+             {:author (:author retained)
+              :reviewer "codex-7"
+              :repair-reviewer "codex-1"
+              :construct-fn (fn [_] (construction))
+              :target-repo-fn (fn [& _] repo)
+              :repo-head-observation-fn
+              (fn [_] {:repo repo :head (:base-head retained) :observed-at-ms 1})
+              :dispatch-fn dispatch-fn
+              :poll-fn poll-fn}}))]
+    {:result result :dispatches @dispatches :requests @requests
+     :fixture-adapter {:substitutions
+                       {:author (:author retained) :target (:target retained)
+                        :repository repo :base-head (:base-head retained)
+                        :original-job-id (:original-job-id retained)
+                        :construction (construction)}}}))
 
 (deftest retained-fixture-pins-the-full-c52-identity
   (is (= "38ee0703e9bb7ee8b3bcb69f2dc0ded8a7b43c0af239e53f144b1d42061b3a5f"
@@ -93,83 +150,78 @@
                 :compiled-cascade-digest :existing-artifact) retained)))
   (is (str/includes? (:notice synthetic) "synthetic replies")))
 
-(deftest prompt-explicitly-states-already-satisfied-refusal
-  (let [prompt-var (ns-resolve 'futon2.aif.full-loop-runner 'author-prompt)
-        text (when prompt-var
-               (prompt-var {:author (:author retained) :reviewer "reviewer"
-                            :target-repository (:repository retained)
-                            :target-repository-head (:base-head retained)}
-                           (:target retained) {:id (:target retained)} {} []))]
-    (is (string? text) "historical red: explicit prompt behavior is absent")
-    (is (str/includes? text "do NOT present the base HEAD as a new DONE artifact"))
-    (is (str/includes? text
-                       "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head"))))
-
-(deftest done-at-base-gets-one-immutable-same-author-correction
-  (let [{:keys [status dispatches result]} (correction-call {})
-        correction (first (:author-response-corrections result))]
-    (is (= :correction-behavior-present status)
-        "historical red: the promised correction behavior is absent")
-    (is (= 1 (count @dispatches)))
-    (is (= [(:author retained) (:target retained)]
-           ((juxt :agent :target) (first @dispatches))))
+(deftest composed-author-wait-corrects-before-the-bound-refusal-gate
+  (let [{:keys [result dispatches fixture-adapter]} (composed-author-wait {})
+        correction (get-in result [:result :data :author-job
+                                   :author-response-corrections 0])
+        original-dispatch (first dispatches)
+        correction-dispatch (second dispatches)
+        reconstructed-prompt (:prompt original-dispatch)]
+    (is (= {:author (:author retained) :target (:target retained)
+            :repository (:repository retained) :base-head (:base-head retained)
+            :original-job-id (:original-job-id retained)
+            :construction (construction)}
+           (:substitutions fixture-adapter))
+        "transparent owner-fixture substitutions are retained as test evidence")
+    (is (= [(:author retained) (:author retained)]
+           (mapv :agent (take 2 dispatches)))
+        "the actual author-wait path dispatches exactly one same-author correction")
+    (is (= [(:target retained) (:target retained)]
+           (mapv :target (take 2 dispatches))))
     (is (= [(:target retained) (:repository retained) (:base-head retained)
             (:author retained) (:original-job-id retained)]
            ((juxt :target :repository :base-head :author :original-request-id)
             (:binding correction))))
-    (is (= :corrected (:status correction)))))
-
-(deftest synthetic-corrected-refusal-passes-the-unchanged-bound-repository-gate
-  (let [{:keys [result]} (correction-call {})
-        job (:author-job result)
-        classification
-        (runner/author-refusal-classification
-         job (:repository retained)
-         (fn [repo sha] (and (= repo (:repository retained))
-                             (= sha (:existing-artifact retained)))))]
-    (is (= {:outcome :already-satisfied
-            :grounded-commit {:repo "futon5a"
-                              :sha (:existing-artifact retained)}}
-           classification))
-    (is (= (:existing-artifact retained) (:artifact-ref job)))
-    (is (nil? (:commit
-               (runner/fresh-artifact-binding
-                {:repo-head-observation-fn
-                 (fn [repo] {:repo repo :head (:base-head retained)
-                             :observed-at-ms 2})
-                 :resolve-commit-sha-fn (fn [_ sha] sha)
-                 :ancestor-fn (constantly true)
-                 :commit-time-ms-fn (constantly 1)}
-                (:repository retained)
-                {:repo (:repository retained) :head (:base-head retained)
-                 :observed-at-ms 1}
-                (original-job))))
-        "DONE at the dispatched base never becomes a fresh artifact")))
+    (is (= (:compiled-cascade-digest retained)
+           (get-in correction [:binding :construction-contract
+                               :repair-contract :compiled-cascade-digest])))
+    (is (= (:dispatch-sha256 retained)
+           (get-in correction [:binding :construction-contract
+                               :repair-contract :dispatch-sha256])))
+    (is (= (sha256 (pr-str (get-in correction [:binding :construction-contract])))
+           (get-in correction [:binding :construction-contract-sha256])))
+    (is (= (sha256 reconstructed-prompt)
+           (get-in correction [:binding :original-prompt-sha256]))
+        "the reconstructed prompt—not unavailable historical full bytes—is bound")
+    (is (str/includes? reconstructed-prompt
+                       "do NOT present the base HEAD as a new DONE artifact"))
+    (is (str/includes? reconstructed-prompt
+                       "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head"))
+    (is (str/includes? (:prompt correction-dispatch) "IMMUTABLE CORRECTION BINDING"))
+    (is (str/includes? (get-in correction [:corrected :job :result-summary])
+                       "REFUSE :already-satisfied-at-base-head")
+        "synthetic correction provenance survives the composed author-wait evidence")
+    (is (= :corrected (:status correction)))
+    (is (= :already-satisfied (get-in result [:result :outcome])))
+    (is (= (:existing-artifact retained)
+           (get-in result [:result :data :grounded-commit :sha])))))
 
 (deftest repeated-base-wrong-job-foreign-repo-and-zero-allowance-refuse
   (testing "repeated base"
     (let [{:keys [result]}
-          (correction-call
+          (composed-author-wait
            {:corrected (merge (corrected-job)
                               {:artifact-ref nil
                                :result (str "FULL_LOOP_AUTHOR: DONE "
                                             (:base-head retained))})})]
       (is (= :corrected-response-repeats-base-done
-             (get-in (ex-data result) [:author-response-correction :reason])))))
+             (get-in result [:result :data :error-data
+                             :author-response-correction :reason])))))
   (testing "wrong returned job identity"
     (let [{:keys [result]}
-          (correction-call {:corrected (corrected-job {:job-id "foreign-job"})})]
+          (composed-author-wait
+           {:corrected (corrected-job {:job-id "foreign-job"})})]
       (is (= :reply-provenance-mismatch
-             (get-in (ex-data result) [:author-response-correction :reason])))))
-  (testing "foreign repository cannot ground the synthetic refusal"
-    (let [{:keys [result]} (correction-call {})]
-      (is (= {:outcome :invalid-author-refusal}
-             (runner/author-refusal-classification
-              (:author-job result) "/foreign/repository"
-              (fn [repo sha] (and (= repo (:repository retained))
-                                  (= sha (:existing-artifact retained)))))))))
+             (get-in result [:result :data :error-data
+                             :author-response-correction :reason])))))
+  (testing "foreign repository is rejected by the real corrected refusal gate"
+    (let [{:keys [result]}
+          (composed-author-wait {:repository "/foreign/repository"})]
+      (is (= :invalid-author-refusal
+             (get-in result [:result :data :failure-kind])))))
   (testing "zero allowance"
-    (let [{:keys [dispatches result]} (correction-call {:allowance 0})]
-      (is (zero? (count @dispatches)))
+    (let [{:keys [dispatches result]} (composed-author-wait {:allowance 0})]
+      (is (= 1 (count dispatches)) "only the original author dispatch occurs")
       (is (= :author-response-correction-exhausted
-             (get-in (ex-data result) [:author-response-correction :reason]))))))
+             (get-in result [:result :data :error-data
+                             :author-response-correction :reason]))))))
