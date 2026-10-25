@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 16:34Z — exact9cc authorization issued
+
+Actual independent reviewbd826116 accepted, three artifact hashes and fresh roster checked. Coordinator authorizationbbef7960 binds f1ac6524 intent/ordinal28open1/nil predecessor at41entry root79880da4. Narrow synthetic conditional handoff repair only; fixture/ingest limits preserved. Exact five-scope envelope/store/provider controls dispatched before live release; no clearance yet. Authorization: `/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/coordinator-authorization.md`.41/8467 separate;budget0.
+
 ### 2026-10-25 16:28Z — 9cc evaluator assembly to exact review
 
 Five packet/output and five intent artifact hashes verified. Digestf1ac6524 binds latest28/open1 with nil same-injury predecessor at ledger41/root79880da4; global history distinguished. Synthetic verifier positive/three binding negatives establish compatibility only. Exact independent review dispatched, preserving newly commissioned handoff scope and synthetic/port/ingest limits. No auth/live clearance. Review: `/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/coordinator-assembly-review.md`.
