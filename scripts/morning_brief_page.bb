@@ -125,7 +125,10 @@
           (:holes dw))))
 
 (defn render-you-said-we-did [item]
-  (let [dw (declared-wants-of item)]
+  (let [dw (declared-wants-of item)
+        ;; :universe-after (futon2 368079c98): the selected wants read again
+        ;; at the reviewed commit; a token absent from it was not observed.
+        after (or (:universe-after item) {})]
     (if (and (map? dw) (= :available (:status dw)))
       (str "<div class=\"wants\"><table><tr>"
            "<th class=\"lbl\">You said</th><th>at selection</th><th>after the run</th></tr>"
@@ -135,13 +138,17 @@
                       (str "<tr><td>" (esc (or text "no stated text for this token"))
                            " <code>" (esc (str (namespace token) "/" (name token))) "</code></td>"
                            "<td>" (esc value) "</td>"
-                           "<td class=\"note\">not re-observed</td></tr>"))))
+                           (if (contains? after token)
+                             (str "<td>" (esc (get after token)) "</td></tr>")
+                             "<td class=\"note\">not observed</td></tr>")))))
            "</table>"
            "<div class=\"row\"><span class=\"lbl\">We did</span><span class=\"val\">"
            (esc (:outcome item)) " &middot; commit "
            (esc (short-commit (:commit item))) "</span></div>"
-           "<div class=\"note\">not re-observed after the run (no post-run "
-           "observation of these tokens exists in the item)</div></div>")
+           (if (seq after)
+             "<div class=\"note\">after the run: read at the reviewed commit (reviewed artifact, not deployed state)</div></div>"
+             (str "<div class=\"note\">not re-observed after the run (no post-run "
+                  "observation of these tokens exists in the item)</div></div>")))
       ;; typed absence: no :declared-wants key, or a status other than
       ;; :available -- show exactly the recorded status.
       (str "<div class=\"wants\"><div class=\"row\"><span class=\"lbl\">declared wants</span>"
@@ -257,6 +264,7 @@
                :queued-at "2026-10-24T10:00:00Z"
                :outcome :grounded-change :commit "1234567890abcdef"
                :selected-target :t/three
+               :universe-after {:hole/bbbb00000002 true}
                :declared-wants
                {:status :available
                 :universe {:hole/aaaa00000001 true :hole/bbbb00000002 false}
@@ -286,12 +294,15 @@
       ;; the typed absence instead.
       (let [w1 (.contains body "- [ ] want one stated text <code>hole/aaaa00000001</code></td><td>true</td>")
             w2 (.contains body "- [ ] want two stated text <code>hole/bbbb00000002</code></td><td>false</td>")
+            after-2 (.contains body "<code>hole/bbbb00000002</code></td><td>false</td><td>true</td>")
+            unobs-1 (.contains body "<code>hole/aaaa00000001</code></td><td>true</td><td class=\"note\">not observed</td>")
             absent-2 (and (.contains body ":not-recorded")
                           (pos? (.indexOf body ":not-recorded")))
             i-absent (.indexOf body ":not-recorded")]
-        (when (or (not w1) (not w2) (not absent-2) (<= i-absent i3))
+        (when (or (not w1) (not w2) (not after-2) (not unobs-1) (not absent-2) (<= i-absent i3))
           (throw (ex-info "self-check failed (wants)"
                           {:want-1-rendered w1 :want-2-rendered w2
+                           :after-run-rendered after-2 :unobserved-typed unobs-1
                            :typed-absence-rendered absent-2 :i-absent i-absent}))))
       (println "self-check OK: fixture 3 items (1 fully reviewed, 2 pending);"
                "page lists exactly attempt-003 then attempt-002; pending count" pending-count
