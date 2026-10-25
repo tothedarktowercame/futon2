@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 13:34:59 UTC — Fresh seven-injury census reviewed; a9 adoption authorized
+
+Independent current ledger read confirms37 entries/7 effective injuries/0medic, same root and a9 occurrence34. Existing verifier only supports historical misclassification; genuine repair authority remains implementation gap. Accepted independent a9 correspondence/replay and recorded exact coordinator authorization under Joe instruction: `~/notes/wm-next/offline-repair/current-clearance/coordinator-authorization.md`.
+
+Claude9 final envelope/isolated append preparation job `invoke-1792935365143-3571-9dddf9c1`, park `park-36edb14a-eb65-43fa-8800-822d1949293b`. Live append waits for provider/readers, not new operator permission. Codex3 exact injury41 diagnosis job `invoke-1792935365549-3572-d3de33c0`, park `park-d651e015-4bad-4d85-9326-6744898ec366`. Genuine verifier queued after provider; cfb/940 evidence,04 patch dispute,9cc replay,8467 actual producer defect remain distinct. No injury cleared this turn.
+
 ### 2026-10-25 13:31:57 UTC — Medic source activation accepted; provider composition dispatched
 
 Verified retained nine successful canonical loads, plan/log/receipt hashes and equal before/final HTTP bytes. Runner/runtime identities current; no click or injury clearance. Review `~/notes/wm-next/offline-repair/activation/coordinator-review.md`.
