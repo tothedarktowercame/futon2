@@ -127,6 +127,14 @@
                    {:meta-medic-authority-context
                     {:trust {} :intent {} :artifacts {}}})))))
 
+(deftest caller-altered-resolution-map-is-refused-not-downgraded
+  (let [forged {:status :ready :identity {:forged true}
+                :verifier (constantly true)}
+        resolved (#'runtime/resolve-medic-authority
+                  {:meta-medic-authority-resolution forged})]
+    (is (= :refused (:status resolved)))
+    (is (= :meta-self-heal/medic-authority-unavailable (:reason resolved)))))
+
 (deftest retry-readiness-requires-current-effective-enacted-occurrence
   (let [history (recurrence-fixture/enacted-ledger)
         enacted (last (:entries history))

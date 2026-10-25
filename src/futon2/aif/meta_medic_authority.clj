@@ -15,6 +15,16 @@
 (def evaluation-schema :wm/meta-medic-evaluation-v1)
 (def review-schema :wm/meta-medic-qualification-review-v1)
 (def authorization-schema :wm/meta-medic-authority-v1)
+(deftype ^:private AuthorityResolution [identity verifier])
+
+(defn resolved-context? [value]
+  (instance? AuthorityResolution value))
+
+(defn resolution-identity [value]
+  (when (resolved-context? value) (.-identity ^AuthorityResolution value)))
+
+(defn resolution-verifier [value]
+  (when (resolved-context? value) (.-verifier ^AuthorityResolution value)))
 
 (def required-findings
   {:classification :producer-qualified-already-satisfied
@@ -208,6 +218,46 @@
       (= :verified (:status (verify (assoc bundle :operation checked-operation
                                            :current current
                                            :ledger-entry ledger-entry)))))))
+
+(defn resolve-context
+  "Validate and resolve one or more exact-scope authority bundles.
+
+  This is the shared process-local composition boundary.  The returned
+  verifier accepts an operation only when exactly one bundle verifies it;
+  overlapping approvals are refused as ambiguous.  IDENTITY contains only
+  stable digests and receipt pins, never artifact bytes or executable trust."
+  [context]
+  (let [bundles (cond
+                  (and (map? context) (vector? (:bundles context))) (:bundles context)
+                  (map? context) [context]
+                  :else nil)]
+    (if-not (seq bundles)
+      {:status :refused :reason :meta-self-heal/medic-authority-unavailable}
+      (let [valid? (fn [bundle]
+                     (and (map? bundle) (ifn? (:trust bundle))
+                          (= intent-schema (get-in bundle [:intent :schema]))
+                          (map? (:artifacts bundle)) (seq (:artifacts bundle))
+                          (every? pin-valid? ((juxt :evaluation-pin :review-pin
+                                                   :authorization-pin) bundle))))]
+        (if-not (every? valid? bundles)
+          {:status :refused :reason :meta-self-heal/medic-authority-unavailable}
+          (let [scopes (mapv (fn [bundle]
+                               {:intent-digest (intent-digest (:intent bundle))
+                                :evaluation-pin (:evaluation-pin bundle)
+                                :review-pin (:review-pin bundle)
+                                :authorization-pin (:authorization-pin bundle)})
+                             bundles)]
+            (if-not (= (count scopes) (count (distinct scopes)))
+              {:status :refused :reason :meta-self-heal/medic-authority-ambiguous}
+              (let [verifiers (mapv authority-verifier bundles)
+                    identity {:schema :wm/meta-medic-authority-context-identity-v1
+                              :scopes scopes}
+                    verifier (fn [observation]
+                               (= 1 (count (filter true?
+                                                   (map #(% observation) verifiers)))))]
+                {:status :ready
+                 :identity identity
+                 :resolution (AuthorityResolution. identity verifier)}))))))))
 
 (defn a9-unapproved-candidate
   "Retained-snapshot manifest only. It intentionally cannot verify."
