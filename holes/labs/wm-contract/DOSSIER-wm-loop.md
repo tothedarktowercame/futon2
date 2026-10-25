@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:43 UTC — cfb transport correction
+
+Live attempt stopped before evaluation: classpath guard rejected notes-source loading. Provider generation2/a9, ledger38/effective6, budget0 unchanged. Reviewed replacement reads pinned evidence as data and calls canonical provider API, following existing a9 activation; isolated one-form parse passed. Conditional Agency release requires hermetic identity/stale/busy controls before exact serving form and separate driver transaction. Review: `/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/transport-correction-review.md`. No clearance yet.
+
 ### 2026-10-25 14:39 UTC — cfb live release
 
 Independent isolated controls pass all eight cases (append39/effective5, duplicate, uncertain-write recovery and no-write refusals). Fixed installer identity comparison to require actual generation2/authority wrapper; no scope change. Review: `/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/coordinator-final-review.md`. Release exact idle a9+cfb provider and cfb disposition under Joe’s existing authorization. Live clearance still pending; budget0, six effective injuries last confirmed.
