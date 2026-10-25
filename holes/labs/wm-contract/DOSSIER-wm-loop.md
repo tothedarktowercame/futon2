@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T21:32:12.189273+00:00 — Exact8467 live disposition released
+
+Canonical projection activation evidence and refreshed provider controls reviewed; exact envelope/driver/form pins unchanged. Release only gen7to8seven scopes and signed8467 operation under Joe existing authorization, guarded by fresh idle/root/occurrence checks. No clearance claimed until store+serving readback and duplicate replay. Release: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/coordinator-live-release.md. Budget0; no source commits during worker.
+
 ### 2026-10-25T21:25:37.315714+00:00 — 8467 repaired transaction matrix accepted
 
 Recomputed all eight case evidence hashes and inspected summary: isolated normal44/raw7/effective0, restart unchanged, correct recovery/refusal/no-write controls on307400204. Release canonical projection landing and idle activation only; preserve gen7six scopes/ledger43, revalidate future provider form hermetically. No live8467 append yet. Review: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/projection-repair/coordinator-matrix-review.md. Existing Joe authorization, budget0; incident lineage retained.
