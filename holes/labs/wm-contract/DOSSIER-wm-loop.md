@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T19:57:45.753283+00:00 — 8467 qualification scope and nonvacuous baseline test
+
+Independent claude9 review qualifies measurement-domain repair within scope. Historical6/2 reproducer is gate-agnostic without caller; actual caller mutation remains discriminator. Direct test-only cc657f22b replaces vacuous empty dispatch with valid captured baseline positive and missing/label-only negatives;4tests43assertions green. New test4638d90743b9. Request independent delta review/test-only promotion, retaining six-row versus one-row distinction, limited learning probe, historical source identity and actual409d runner pin. No intent or live clearance.
+
 ### 2026-10-25T19:50:22.230627+00:00 — injury41 medic disposition verified; only8467 remains
 
 Independent review of31 live pins and actual full operation confirms exact41 observation once at ordinal43. Ledger43/raw7/effective1 exactly8467, sha1e6b318d/root72c1f7be; providergen7/six scopes. Fresh-process restart already-committed/duplicate unchangedbytes; serving idle queue/stops0 budget0. Helper display field compares map to string and is vacuous; coordinator full-operation equality check replaces it, evidence retained. Function-valued-patch scope only, no task/learning success. Live coordinator review under authority/41-adoption/live.8467 independent repair qualification pending; previous coordinator evidence review documents report hash typo versus actual409d runner.
