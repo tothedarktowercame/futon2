@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:08:26 UTC — Genuine verifier adapter/interleaving held
+
+37fffe0d6 fixes original predecessor probe. Independent envelope-only probe still refuses because authority-verifier omits actual runtime ledger from verify; fixture's embedded ledger hides it. Independent valid same-injury observation interleaving refuses because predecessor lookup lacks transition filtering. Both retained positive-admission probes exit1; review ~/notes/wm-next/offline-repair/genuine-authority/review/followup-review.md. Codex3 correction invoke-1792937306080-3594-6091f291, park-5938bf60-2bad-45c3-8d41-c1b9ccb83ef9, includes actual mixed-scope admission/revalidation. No merge/reload/live clearance; six remain, budget0.
+
 ### 2026-10-25 14:06:46 UTC — cfb/940 evidence checked; cfb contract distinction retained
 
 Twelve path/hash pins independently match. Cfb retained red contains inverted terminal-routing assertion corrected in809a7f7; evaluator same-byte-contract claim is overstated. Separate real missing-retention red from test correction. 940 pending independent semantic qualification. Review ~/notes/wm-next/offline-repair/genuine-evaluation/review/coordinator-review.md; claude9 dispatched invoke-1792937206492-3593-53a0b77f, park-68c49537-c831-4bcd-97a4-2bddf0e51ef5. No live qualification/append, six remain, budget0. Genuine verifier followup separate.
