@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 16:28Z — 9cc evaluator assembly to exact review
+
+Five packet/output and five intent artifact hashes verified. Digestf1ac6524 binds latest28/open1 with nil same-injury predecessor at ledger41/root79880da4; global history distinguished. Synthetic verifier positive/three binding negatives establish compatibility only. Exact independent review dispatched, preserving newly commissioned handoff scope and synthetic/port/ingest limits. No auth/live clearance. Review: `/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/coordinator-assembly-review.md`.
+
 ### 2026-10-25 16:23Z — 9cc qualified repair contract promoted
 
 Independent bounded qualification ff9b73b9 accepted. Test-only merge65342e077 adds exact two evaluated files; postmerge hashes match, runner unchanged13fb1853. Scope explicitly excludes real author/task, git authenticity and terminal/ledger ingestion; nil-click fixture warnings retained. Fresh evaluator-stage medic assembly dispatched against41entry four-scope ledger, actual9cc occurrence/predecessor via production. No exact operation approval or clearance yet. Qualification: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation/coordinator-qualification.md`.
