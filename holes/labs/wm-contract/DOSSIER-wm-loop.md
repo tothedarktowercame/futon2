@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 13:43:15 UTC — Injury41 diagnostic retention repair dispatched
+
+Reviewed current projection/emission/D4 contract: terminal failure lost nested checks/controls/repair. Historical failed invariant absent from that record; current protocol tests do not qualify historical repair. Requested exact nested wrapper/sealed-record retention test and bounded redundant retry-ledger/checkpoint recovery, since resume! also records full diagnostics separately.
+
+Codex3 job `invoke-1792935837339-3576-2b0029da`, park `park-ec641c6b-c03d-4b5e-b589-91e56f3da657`; review `~/notes/wm-next/offline-repair/injury41/coordinator-review.md`. No protocol semantics change or clearance; no live action.
+
 ### 2026-10-25 13:41:13 UTC — A9 envelope accepted; recovery driver correction
 
 Verified authorization/manifest/final-operation and unchanged evaluator/reviewer pins. Independent isolated post-rename injection exits2, readback38/effective6/covered and exact replay duplicate, but driver wrongly says not-appended. Requested truthful recovered/indeterminate outcomes and restart duplicate-before-root handling. Review/probe `~/notes/wm-next/offline-repair/authority/a9-adoption/review/`. No canonical write.
