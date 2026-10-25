@@ -236,7 +236,7 @@
         author-failed-reopen? (author-failed-reopen? state previous-state entry)
         corrected-reopen? (corrected-reopen? state previous-state entry)
         covered-operation (covered-medic-operation ledger previous)
-        ordinary-attributable-retry? (and (= :reopened state)
+        ordinary-attributable-retry? (and (#{:reopened :abandoned} state)
                                           (= :enacted previous-state)
                                           (nonblank? (:retry-click entry))
                                           (= (:retry-click entry)
@@ -254,7 +254,8 @@
                              (not (contains? (classification-pins ledger)
                                              (:new-cause-pin entry)))
                              (if (= :reopened state)
-                               (= :medic-recurrence (:reason entry))
+                               (and (= :medic-recurrence (:reason entry))
+                                    (<= attempt limit))
                                (= :attempt-limit-exhausted (:reason entry))))]
     (cond-> []
       (and (not (contains? (get allowed-predecessors state #{}) previous-state))
@@ -428,13 +429,17 @@
 
 (defn- transition->medic-entry [prior-by-injury opening-by-injury entry]
   (let [opening (or (get opening-by-injury (:injury-id entry)) entry)
+        previous (get prior-by-injury (:injury-id entry))
         recurrence? (and (#{:reopened :abandoned} (:state entry))
                          (:recurs-after-medic-operation-id entry))
-        cause (if recurrence? (:new-cause-pin entry) (:cause-record-pin opening))]
+        cause (cond
+                recurrence? (:new-cause-pin entry)
+                previous {:path (:cause-record-id previous)
+                          :sha256 (:cause-pin previous)}
+                :else (:cause-record-pin opening))]
   {:injury-id (:injury-id entry)
    :entry-id (str (:ordinal entry))
-   :predecessor-entry-id (some-> (get prior-by-injury (:injury-id entry))
-                                 :ordinal str)
+   :predecessor-entry-id (:entry-id previous)
    :cause-record-id (:path cause)
    :cause-pin (:sha256 cause)
    :active? (contains? active-states (:state entry))}))
@@ -447,7 +452,7 @@
                                openings (assoc openings (:injury-id entry) entry))
                     model-entry (transition->medic-entry prior openings entry)]
                 {:state (update state :history conj model-entry)
-                 :prior (assoc prior (:injury-id entry) entry)
+                 :prior (assoc prior (:injury-id entry) model-entry)
                  :openings openings})
 
               (and (observation? entry)
@@ -523,8 +528,11 @@
   ([ledger record-pin observation-kind]
    (append-observation ledger record-pin observation-kind {}))
   ([ledger record-pin observation-kind attribution]
+   (append-observation ledger record-pin observation-kind attribution
+                       deny-medic-authority))
+  ([ledger record-pin observation-kind attribution authority-verifier]
    (try
-     (let [checked (validate-ledger ledger)]
+     (let [checked (validate-ledger ledger authority-verifier)]
        (if-not (= :valid (:status checked))
          (refusal :ledger/tampered {:ledger-defects (:defects checked)})
          (let [previous (last (:entries ledger))
@@ -536,7 +544,7 @@
                                       {:entry-id (:entry-id previous)
                                        :entry-pin (:entry-pin previous)})}
                       (select-keys attribution [:injury-id :retry-click]))
-               defects (observation-defects entry)]
+               defects (observation-defects ledger entry authority-verifier)]
            (if (seq defects)
              (refusal (first defects) {:defects defects})
              (let [sealed (seal-entry entry)]
@@ -738,7 +746,9 @@
                                    (assoc :state :abandoned
                                           :attempt limit
                                           :reason :attempt-limit-exhausted)
-                                   (dissoc :retry-click :new-cause-pin :patch-sha))
+                                   ;; Retain the exact retry click as the auditable
+                                   ;; discriminant from medic exhaustion.
+                                   (dissoc :new-cause-pin :patch-sha))
                                authority-verifier)
             (append-transition ledger (assoc proposed :state :reopened
                                              :attempt next-attempt)

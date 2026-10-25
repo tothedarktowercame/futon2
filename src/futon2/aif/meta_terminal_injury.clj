@@ -210,12 +210,13 @@
                 (ledger-entries history))))
 
 (defn- append-other-injury-retry-observation
-  [appended classification enacted transition]
+  [appended classification enacted transition authority-verifier]
   (let [observed (ledger/append-observation
                   (:ledger appended) (:record-pin classification)
                   :retry-inconclusive
                   {:injury-id (:injury-id enacted)
-                   :retry-click (:click-id classification)})]
+                   :retry-click (:click-id classification)}
+                  authority-verifier)]
     (if (= :appended (:status observed))
       (assoc observed :classification classification :transition transition
              :retry-of (select-keys enacted
@@ -257,18 +258,21 @@
                         :patch-sha (:patch-sha authored)
                         :retry-click (:click-id classification)
                         :outcome :success
-                        :result-record-pin (:record-pin classification)})]
+                        :result-record-pin (:record-pin classification)}
+               authority-verifier)]
           (assoc appended :classification classification
                  :transition :discharged))
         (let [appended (ledger/append-observation
                         history (:record-pin classification) :retry-inconclusive
                         {:injury-id (:injury-id enacted)
-                         :retry-click (:click-id classification)})]
+                         :retry-click (:click-id classification)}
+                        authority-verifier)]
           (assoc appended :classification classification :transition :retry-inconclusive
                  :retry-of (select-keys enacted [:injury-id :repair-id :retry-click]))))
         (let [appended (ledger/append-observation
                         history (:record-pin classification)
-                        (:non-injury-reason classification))]
+                        (:non-injury-reason classification) {}
+                        authority-verifier)]
           (assoc appended :classification classification :transition :observation)))
 
       (= :injury (:classification classification))
@@ -292,10 +296,11 @@
                           :cause-record-pin (:record-pin classification)
                           :failure-stage (:failure-stage classification)
                           :failure-kind (:failure-kind classification)
-                          :detected-click (:click-id classification)})]
+                          :detected-click (:click-id classification)}
+                 authority-verifier)]
             (if other-injury-retry?
               (append-other-injury-retry-observation
-               appended classification enacted :open)
+               appended classification enacted :open authority-verifier)
               (assoc appended :classification classification :transition :open)))
 
           (and (= :enacted (:state previous))
@@ -337,10 +342,12 @@
           (let [appended (ledger/append-observation
                           history (:record-pin classification)
                           :repeated-active-injury
-                          {:injury-id (:injury-id classification)})]
+                          {:injury-id (:injury-id classification)}
+                          authority-verifier)]
             (if other-injury-retry?
               (append-other-injury-retry-observation
-               appended classification enacted :active-injury-retained)
+               appended classification enacted :active-injury-retained
+               authority-verifier)
               (assoc appended :classification classification
                      :transition :active-injury-retained)))
 

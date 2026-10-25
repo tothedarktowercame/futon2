@@ -136,6 +136,22 @@
     (is (= "retry/exact" (get-in result [:entry :retry-click])))
     (is (nil? (get-in result [:entry :recurs-after-medic-operation-id])))))
 
+(deftest exact-enacted-retry-at-limit-remains-ordinary-exhaustion
+  (let [history (:ledger (cover-latest
+                          (ledger/seal-ledger
+                           (assoc (enacted-ledger) :attempt-limit 1))
+                          "medic/enacted-limit"))
+        result (terminal/integrate history
+                                   (classified "retry-limit" "retry/exact" fresh-pin)
+                                   synthetic-authority)]
+    (is (= :appended (:status result)) (pr-str result))
+    (is (= :abandoned (get-in result [:entry :state])))
+    (is (= :attempt-limit-exhausted (get-in result [:entry :reason])))
+    (is (= "retry/exact" (get-in result [:entry :retry-click])))
+    (is (nil? (get-in result [:entry :recurs-after-medic-operation-id])))
+    (is (= :valid (:status (ledger/validate-ledger
+                            (:ledger result) synthetic-authority))))))
+
 (deftest observation-only-and-old-cause-records-remain-duplicates
   (let [open (open-ledger)
         observed (:ledger (ledger/append-observation
@@ -191,17 +207,47 @@
     (is (= :refused (:status wrong-checked)))
     (is (some #{:entry/transition-invalid} (:defects wrong-checked)))))
 
+(deftest sealed-above-limit-medic-reopen-is-refused
+  (let [history (:ledger
+                 (cover-latest
+                  (open-ledger (ledger/seal-ledger
+                                (assoc ledger/empty-ledger :attempt-limit 1)))
+                  "medic/limit-bypass"))
+        exhausted (terminal/integrate
+                   history (classified "fresh-limit" "fresh-limit" fresh-pin)
+                   synthetic-authority)
+        forged (-> (:entry exhausted)
+                   (dissoc :entry-id :entry-pin)
+                   (assoc :state :reopened :reason :medic-recurrence :attempt 2))
+        direct (ledger/append-transition history forged synthetic-authority)
+        sealed-entry (ledger/seal-entry forged)
+        sealed-ledger (ledger/seal-ledger
+                       (update history :entries conj sealed-entry))
+        checked (ledger/validate-ledger sealed-ledger synthetic-authority)]
+    (is (= :refused (:status direct)))
+    (is (some #{:medic-recurrence/evidence} (:defects direct)))
+    (is (= :refused (:status checked)))
+    (is (some #{:entry/transition-invalid} (:defects checked)))))
+
 (deftest recurrence-cause-becomes-current-medic-binding
   (let [history (:ledger (cover-latest (open-ledger) "medic/first"))
         recurred (terminal/integrate history
                                      (classified "fresh-cause" "fresh" fresh-pin)
                                      synthetic-authority)
-        current (:entry recurred)
+        claimed (ledger/append-transition
+                 (:ledger recurred)
+                 {:injury-id (:injury-id (:entry recurred))
+                  :state :claimed :attempt 2
+                  :repair-id "repair/fresh"
+                  :algorithm "algorithm/fresh"
+                  :author-session "author/fresh"
+                  :reviewer-session "reviewer/fresh"}
+                 synthetic-authority)
+        current (:entry claimed)
         genuine {:kind :genuine-repair
                  :injury-id (:injury-id current) :entry-id (str (:ordinal current))
                  :predecessor-entry-id
-                 (str (:ordinal (first (filter #(= ledger/transition-schema (:schema %))
-                                              (:entries (:ledger recurred))))))
+                 (str (:ordinal (:entry recurred)))
                  :patch-id "patch/genuine" :reviewer "reviewer/genuine"
                  :evaluator "evaluator/genuine" :evidence-pin "evidence/genuine"
                  :cause-record-id (:path fresh-pin) :cause-pin (:sha256 fresh-pin)
@@ -211,11 +257,34 @@
                  :source-revision "source/genuine"
                  :original-acceptance-repaired? true}
         operation {:operation-id "medic/fresh-genuine"
-                   :expected-ledger-pin (get-in recurred [:ledger :ledger-pin])
+                   :expected-ledger-pin (get-in claimed [:ledger :ledger-pin])
                    :request {:candidate genuine :evidence genuine}
                    :authority-receipt-pin authority-pin}
         corrected (ledger/append-medic-repaired
-                   (:ledger recurred) medic-record-pin operation synthetic-authority)]
+                   (:ledger claimed) medic-record-pin operation synthetic-authority)]
+    (is (= :appended (:status claimed)) (pr-str claimed))
     (is (= :appended (:status corrected)) (pr-str corrected))
     (is (empty? (:injuries (ledger/effective-active-injuries
                             (:ledger corrected) synthetic-authority))))))
+
+(deftest supplied-authority-threads-through-ordinary-integrate-branches
+  (let [covered (:ledger (cover-latest (open-ledger) "medic/threading"))
+        observed (terminal/integrate
+                  covered
+                  (terminal/classify
+                   {:run/id "noninjury" :click/id "other"
+                    :failure {:kind :diagnostic-only :stage :selection}}
+                   observation-pin)
+                  synthetic-authority)
+        unrelated (terminal/integrate
+                   (:ledger observed)
+                   (terminal/classify
+                    {:run/id "unrelated" :click/id "other-2"
+                     :failure {:kind :other-failure :stage :other-stage
+                               :detail {:target "unrelated"}}}
+                    {:path "records/unrelated.edn"
+                     :sha256 (apply str (repeat 64 "7"))})
+                   synthetic-authority)]
+    (is (= :appended (:status observed)) (pr-str observed))
+    (is (= :appended (:status unrelated)) (pr-str unrelated))
+    (is (= :open (get-in unrelated [:entry :state])))))
