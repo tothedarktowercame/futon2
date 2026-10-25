@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:39 UTC — cfb live release
+
+Independent isolated controls pass all eight cases (append39/effective5, duplicate, uncertain-write recovery and no-write refusals). Fixed installer identity comparison to require actual generation2/authority wrapper; no scope change. Review: `/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/coordinator-final-review.md`. Release exact idle a9+cfb provider and cfb disposition under Joe’s existing authorization. Live clearance still pending; budget0, six effective injuries last confirmed.
+
 ### 2026-10-25 14:32:54 UTC — Author correction formal accepted; adapter dispatched
 
 Independent460job buildgreen; unrelated-correction false qualification semantically red. Merged Lean8b304790b3; immutable request/reply qualification before unchanged abstract author gate. Review ~/notes/wm-next/offline-repair/injury9cc/author-correction/review/final-review.md. Bounded Clojure actual author-wait adapter invoke-1792938817874-3638-455350a1, park-913791e4-6957-4c6b-a1f5-d06022b8591f; no fabricated reply, no live qualification/activation. Six remain, budget0.
