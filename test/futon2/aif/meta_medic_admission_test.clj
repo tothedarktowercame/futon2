@@ -12,6 +12,8 @@
                        :sha256 (apply str (repeat 64 "d"))})
 (def authority-pin {:path "fixtures/synthetic-authority.edn"
                     :sha256 (apply str (repeat 64 "e"))})
+(def patch-sha "95145f09395145f09395145f09395145f0939514")
+(def integration-sha "5a5b421bc5a5b421bc5a5b421bc5a5b421bc5a5b")
 
 (defn append! [history proposed]
   (let [result (ledger/append-transition history proposed)]
@@ -159,6 +161,92 @@
     (is (= :appended (:status claimed)) (pr-str claimed))
     (is (= #{"injury/a" "injury/b"} (set (keys (:injuries effective)))))
     (is (= :claimed (get-in effective [:injuries "injury/a" :state])))))
+
+(defn ordinary-reopened-ledger []
+  (let [injury "injury/ordinary-reopened"
+        step (fn [history proposed]
+               (:ledger (ledger/append-transition history proposed)))
+        open (step ledger/empty-ledger
+                   {:injury-id injury :state :open :attempt 1
+                    :cause-record-pin cause-a :failure-stage :review
+                    :failure-kind :synthetic-failure :detected-click "click/original"})
+        claimed (step open {:injury-id injury :state :claimed :attempt 1
+                            :repair-id "repair/ordinary" :algorithm "synthetic"
+                            :author-session "author/one" :reviewer-session "reviewer/one"})
+        authored (step claimed {:injury-id injury :state :authored :attempt 1
+                                :repair-id "repair/ordinary" :patch-sha patch-sha
+                                :worktree "fixtures/worktree"})
+        reviewed (step authored {:injury-id injury :state :reviewed :attempt 1
+                                 :repair-id "repair/ordinary" :verdict :approved
+                                 :reviewer-sha patch-sha :reviewer-session "reviewer/one"})
+        enacted (step reviewed {:injury-id injury :state :enacted :attempt 1
+                                :repair-id "repair/ordinary" :patch-sha patch-sha
+                                :retry-click "retry/ordinary/1"
+                                :integration-commit integration-sha})]
+    (:ledger (ledger/append-retry-result
+              enacted {:injury-id injury :repair-id "repair/ordinary"
+                       :patch-sha patch-sha :retry-click "retry/ordinary/1"
+                       :new-cause-pin cause-b}))))
+
+(defn genuine-operation [history candidate cause]
+  (let [payload {:kind :genuine-repair
+                 :injury-id (:injury-id candidate)
+                 :entry-id (str (:ordinal candidate))
+                 :predecessor-entry-id (str (dec (:ordinal candidate)))
+                 :cause-record-id (:path cause) :cause-pin (:sha256 cause)
+                 :acceptance-contract "contract/ordinary"
+                 :patch-id "patch/ordinary" :source-revision patch-sha
+                 :pre-replay-receipt "receipt/pre"
+                 :post-replay-receipt "receipt/post"
+                 :negative-control-receipt "receipt/negative"
+                 :original-acceptance-repaired? true
+                 :reviewer "reviewer/independent" :evaluator "evaluator/independent"
+                 :evidence-pin "evidence/ordinary"}]
+    {:operation-id "medic-operation/ordinary-reopened"
+     :expected-ledger-pin (:ledger-pin history)
+     :request {:candidate payload :evidence payload}
+     :authority-receipt-pin authority-pin}))
+
+(defn reopened-authority [{:keys [operation current candidate evidence]}]
+  (and (= authority-pin (:authority-receipt-pin operation))
+       (= candidate evidence)
+       (= [(:injury-id candidate) (:entry-id candidate)
+           (:predecessor-entry-id candidate) (:cause-record-id candidate)
+           (:cause-pin candidate)]
+          [(:injury-id current) (:entry-id current)
+           (:predecessor-entry-id current) (:cause-record-id current)
+           (:cause-pin current)])))
+
+(deftest ordinary-reopened-cause-projects-and-carries-through-public-admission
+  (let [history (ordinary-reopened-ledger)
+        reopened (last (:entries history))
+        operation (genuine-operation history reopened cause-b)
+        admitted (ledger/append-medic-repaired
+                  history medic-record-pin operation reopened-authority)
+        old-cause-operation (-> operation
+                                (assoc-in [:request :candidate :cause-record-id]
+                                          (:path cause-a))
+                                (assoc-in [:request :candidate :cause-pin]
+                                          (:sha256 cause-a))
+                                (assoc-in [:request :evidence :cause-record-id]
+                                          (:path cause-a))
+                                (assoc-in [:request :evidence :cause-pin]
+                                          (:sha256 cause-a)))
+        old-cause (ledger/append-medic-repaired
+                   history medic-record-pin old-cause-operation reopened-authority)
+        carried (ledger/append-transition
+                 history {:injury-id (:injury-id reopened) :state :claimed :attempt 2
+                          :repair-id "repair/ordinary" :algorithm "synthetic"
+                          :author-session "author/two" :reviewer-session "reviewer/two"})
+        carried-entry (last (:entries (:ledger carried)))
+        carried-operation (genuine-operation (:ledger carried) carried-entry cause-b)]
+    (is (= :appended (:status admitted)) (pr-str admitted))
+    (is (= :medic/binding-mismatch (:reason old-cause)))
+    (is (= :appended (:status carried)))
+    (is (= :appended
+           (:status (ledger/append-medic-repaired
+                     (:ledger carried) medic-record-pin carried-operation
+                     reopened-authority))))))
 
 (deftest unsupported-snapshot-origin-refuses-explicitly
   (let [history (base-ledger)

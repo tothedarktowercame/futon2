@@ -430,10 +430,15 @@
 (defn- transition->medic-entry [prior-by-injury opening-by-injury entry]
   (let [opening (or (get opening-by-injury (:injury-id entry)) entry)
         previous (get prior-by-injury (:injury-id entry))
-        recurrence? (and (#{:reopened :abandoned} (:state entry))
-                         (:recurs-after-medic-operation-id entry))
+        ;; Reopen validation makes :new-cause-pin the evidence for an ordinary
+        ;; attributable retry's fresh failed classification.  Medic recurrence
+        ;; uses the same field with additional bindings.  Author-failed and
+        ;; corrected-port routes carry no new cause and therefore retain the
+        ;; prior occurrence's cause.
+        fresh-cause? (and (#{:reopened :abandoned} (:state entry))
+                          (:new-cause-pin entry))
         cause (cond
-                recurrence? (:new-cause-pin entry)
+                fresh-cause? (:new-cause-pin entry)
                 previous {:path (:cause-record-id previous)
                           :sha256 (:cause-pin previous)}
                 :else (:cause-record-pin opening))]
