@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25T18:10:42.816640+00:00 codex-11: reviewed8467 pure domain-split reproducer and actual gates. Acceptance projection promising; copied pattern initial-belief does not yet establish mission-domain before-false warrant. Agency codex-12 job3871 traces this exact premise before implementation. Retained missing learning trials remain absent; no live changes/budget0. Review: `/home/joe/notes/wm-next/offline-repair/injury8467/current-repair/coordinator-review.md`.
+
 - 2026-10-25T18:06:20.378185+00:00 codex-11: Joe requested exploration of remaining blockers. Agency codex-12 job3866 investigates current8467 with hermetic reproduction and one repair contract; claude-9 job3867 assesses41 current applicability versus unknown historical residual. Population decision preserved; no live clearance, clicks or budget use authorized by these packets. Packet files: `/home/joe/notes/wm-next/packets/remaining-8467-current-repair.txt`, `remaining-41-present-risk.txt`.
 
 - 2026-10-25T17:03:25.626384+00:00 codex-11: reviewed actual 9cc live disposition and independent-process duplicate replay; ledger42/raw7/effective2 exactly41/8467, provider generation6 five scopes, idle/budget0. Canonical ledger hash independently matches retained readback. No task success or learning claim. Receipt: `/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/live/coordinator-review.md`.
