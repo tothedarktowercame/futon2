@@ -54,7 +54,11 @@
     {:status :absent :verifier (constantly false)}
     (let [context (:meta-medic-authority-context opts)]
       (if (and (map? context) (ifn? (:trust context))
-               (map? (:intent context)) (map? (:artifacts context)))
+               (= medic-authority/intent-schema (get-in context [:intent :schema]))
+               (map? (:artifacts context)) (seq (:artifacts context))
+               (medic-authority/pin-valid? (:evaluation-pin context))
+               (medic-authority/pin-valid? (:review-pin context))
+               (medic-authority/pin-valid? (:authorization-pin context)))
         {:status :ready :verifier (medic-authority/authority-verifier context)}
         {:status :refused :reason :meta-self-heal/medic-authority-unavailable}))))
 
@@ -538,11 +542,11 @@
     (binding [runner/*runtime-defaults* defaults]
       (runner/run-opportunity! runner-opts))))
 
-(defn run-opportunity!
+(defn- run-opportunity-with-authority!
   "Arbitrate durable META injuries before constructing any ordinary policy
   field. An active injury consumes the opportunity without fallback."
-  [opts]
-  (let [authority (resolve-medic-authority opts)
+  [opts authority]
+  (let [
         ;; Never honor a caller-supplied derived verifier. Only a validated
         ;; explicit context may create this process-local function.
         opts (cond-> (dissoc opts :meta-medic-authority-verifier)
@@ -601,10 +605,6 @@
                     (meta-self-heal/attributable-retry-readiness effective-opts retry)
                     (meta-self-heal/production-readiness effective-opts diagnosis-context)))]
     (cond
-      (= :refused (:status authority))
-      {:status :refused :reason (:reason authority)
-       :route :dedicated-meta-self-heal :ordinary-selection-called? false}
-
       (= :meta-self-heal/diagnosis-active-set-unavailable (:reason diagnosis-observation))
       {:status :refused :reason :meta-self-heal/active-set-unavailable
        :route :dedicated-meta-self-heal :ordinary-selection-called? false
@@ -624,6 +624,16 @@
                      :diagnosis-observation diagnosis-observation
                      :acceptance-observation acceptance-observation
                      :carried-bindings carried-bindings)))))
+
+(defn run-opportunity!
+  "Resolve medic authority before any diagnosis, readiness, ledger, or
+  selection work, then arbitrate the opportunity."
+  [opts]
+  (let [authority (resolve-medic-authority opts)]
+    (if (= :refused (:status authority))
+      {:status :refused :reason (:reason authority)
+       :route :dedicated-meta-self-heal :ordinary-selection-called? false}
+      (run-opportunity-with-authority! opts authority))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.

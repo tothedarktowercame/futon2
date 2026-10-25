@@ -1392,14 +1392,21 @@
         authority-verifier (medic-authority-verifier opts)
         durable (when (.isFile (io/file ledger-path))
                   (load-durable ledger-path authority-verifier))
-        entries (get-in durable [:ledger :entries])
-        enacted (last (filter #(= :enacted (:state %)) entries))
+        history (:ledger durable)
+        effective (when (= :loaded (:status durable))
+                    (effective-active history authority-verifier))
+        injury-id (:injury-id retry)
+        enacted (get-in effective [:injuries injury-id])
+        entries (:entries history)
         authored (last (filter #(and (= :authored (:state %))
-                                     (= (:injury-id enacted) (:injury-id %))
-                                     (= (:repair-id enacted) (:repair-id %))) entries))
+                                     (= injury-id (:injury-id %))
+                                     (= (:repair-id enacted) (:repair-id %))
+                                     (= (:attempt enacted) (:attempt %))) entries))
         expected (select-keys enacted [:injury-id :repair-id :retry-click])
         supplied (select-keys retry [:injury-id :repair-id :retry-click])]
-    (if (and (= :loaded (:status durable)) enacted authored
+    (if (and (= :loaded (:status durable))
+             (= :computed (:status effective))
+             (= :enacted (:state enacted)) authored
              (= expected supplied) (= (:patch-sha authored) (:patch-sha retry)))
       {:status :ready :attribution expected :patch-sha (:patch-sha retry)}
       (refusal :meta-self-heal/retry-attribution-refused

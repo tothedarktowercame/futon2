@@ -6,6 +6,9 @@
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.meta-medic-admission-test :as fixture]
+            [futon2.aif.meta-medic-authority :as authority]
+            [futon2.aif.meta-medic-authority-test :as authority-fixture]
+            [futon2.aif.meta-medic-recurrence-test :as recurrence-fixture]
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-self-heal-production :as self-heal]))
 
@@ -108,6 +111,126 @@
     (is (false? (:ordinary-selection-called? result)))
     (is (zero? @diagnosis))
     (is (zero? @ordinary))))
+
+(deftest malformed-authority-with-retry-refuses-before-readiness
+  (let [calls (atom [])
+        result (with-redefs [self-heal/attributable-retry-readiness
+                             (fn [& _] (swap! calls conj :readiness) {:status :ready})]
+                 (runtime/run-opportunity!
+                  {:meta-medic-authority-context nil
+                   :meta-repair-retry {:injury-id "synthetic"}}))]
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/medic-authority-unavailable (:reason result)))
+    (is (empty? @calls)))
+  (is (= :refused
+         (:status (#'runtime/resolve-medic-authority
+                   {:meta-medic-authority-context
+                    {:trust {} :intent {} :artifacts {}}})))))
+
+(deftest retry-readiness-requires-current-effective-enacted-occurrence
+  (let [history (recurrence-fixture/enacted-ledger)
+        enacted (last (:entries history))
+        p (path "retry-current")
+        retry (assoc (select-keys enacted [:injury-id :repair-id :retry-click])
+                     :patch-sha recurrence-fixture/patch-sha)
+        _ (write-form! p history)
+        current (self-heal/attributable-retry-readiness
+                 {:meta-injury-ledger-path p
+                  :meta-medic-authority-verifier recurrence-fixture/synthetic-authority}
+                 retry)
+        covered (:ledger (recurrence-fixture/cover-latest history "covered/retry"))
+        _ (write-form! p covered)
+        hidden (self-heal/attributable-retry-readiness
+                {:meta-injury-ledger-path p
+                 :meta-medic-authority-verifier recurrence-fixture/synthetic-authority}
+                retry)
+        reopened (ledger/append-retry-result
+                  history {:injury-id (:injury-id enacted)
+                           :repair-id (:repair-id enacted)
+                           :patch-sha recurrence-fixture/patch-sha
+                           :retry-click (:retry-click enacted)
+                           :new-cause-pin {:path "fixtures/new-cause.edn"
+                                           :sha256 (apply str (repeat 64 "6"))}}
+                  recurrence-fixture/synthetic-authority)
+        _ (write-form! p (:ledger reopened))
+        superseded (self-heal/attributable-retry-readiness
+                    {:meta-injury-ledger-path p
+                     :meta-medic-authority-verifier recurrence-fixture/synthetic-authority}
+                    retry)]
+    (is (= :ready (:status current)))
+    (is (= :meta-self-heal/retry-attribution-refused (:reason hidden)))
+    (is (= :meta-self-heal/retry-attribution-refused (:reason superseded)))))
+
+(defn sealed-port [counters phase payload-fn]
+  (fn [request]
+    (swap! counters update phase (fnil inc 0))
+    (let [order (:work-order request)]
+      (coordinator/seal-port-receipt
+       {:phase phase :injury-id (:injury-id order) :repair-id (:repair-id order)
+        :attempt (:attempt order) :predecessor-pin (:predecessor-pin request)
+        :status :succeeded :payload (payload-fn request)}))))
+
+(deftest exact-scope-context-reaches-real-runtime-and-coordinator
+  (let [bundle (authority-fixture/fixture)
+        verifier (authority/authority-verifier bundle)
+        medic-result (ledger/append-medic-repaired
+                      (:ledger bundle)
+                      {:path "receipts/full-path-medic.edn"
+                       :sha256 (apply str (repeat 64 "8"))}
+                      (:operation bundle) verifier)
+        unrelated-pin {:path "fixtures/unrelated.edn"
+                       :sha256 (apply str (repeat 64 "9"))}
+        unrelated (ledger/append-transition
+                   (:ledger medic-result)
+                   {:injury-id "injury/unrelated" :state :open :attempt 1
+                    :cause-record-pin unrelated-pin :failure-stage :construction
+                    :failure-kind :synthetic :detected-click "click/unrelated"}
+                   verifier)
+        p (path "full-context")
+        tx-path (str p ".transaction.edn")
+        _ (write-form! p (:ledger unrelated))
+        counters (atom {})
+        patch (apply str (repeat 40 "a"))
+        ports {:author (sealed-port counters :author
+                                   (fn [_] {:patch-sha patch :worktree "target/hermetic"}))
+               :review (sealed-port counters :review
+                                   (fn [_] {:patch-sha patch :reviewer-sha patch}))
+               :enact (sealed-port counters :enact
+                                  (fn [_] {:patch-sha patch :integration-commit patch
+                                           :retry-click "retry/hermetic"}))
+               :retry (sealed-port counters :retry
+                                  (fn [_] {:repair-id "repair/placeholder"}))}
+        ;; Retry payload needs the deterministic repair id prepared at runtime;
+        ;; replace just that port while retaining sealed provenance.
+        ports (assoc ports :retry
+                     (fn [request]
+                       (swap! counters update :retry (fnil inc 0))
+                       (let [order (:work-order request)]
+                         (coordinator/seal-port-receipt
+                          {:phase :retry :injury-id (:injury-id order)
+                           :repair-id (:repair-id order) :attempt (:attempt order)
+                           :predecessor-pin (:predecessor-pin request)
+                           :status :succeeded
+                           :payload {:repair-id (:repair-id order) :patch-sha patch
+                                     :retry-click "retry/hermetic"
+                                     :outcome :grounded-change}}))))
+        result (runtime/run-opportunity!
+                (merge work-options
+                       {:meta-medic-authority-context
+                        (select-keys bundle [:intent :artifacts :evaluation-pin
+                                             :review-pin :authorization-pin :trust])
+                        :meta-injury-ledger-path p
+                        :meta-repair-transaction-path tx-path
+                        :meta-repair-ports ports
+                        :meta-acceptance-run-fn (constantly {:status :ran :exit 0})}))]
+    (is (= :appended (:status medic-result)))
+    (is (= :appended (:status unrelated)))
+    (is (= :discharged (:status result)) (pr-str result))
+    (is (= "injury/unrelated" (:injury-id result)))
+    (is (= {:author 1 :review 1 :enact 1 :retry 1} @counters))
+    (is (= :valid (:status (ledger/validate-ledger
+                            (:ledger (store/load-durable-ledger p verifier))
+                            verifier))))))
 
 (deftest caller-supplied-derived-verifier-cannot-bypass-default-deny
   (let [medic (:ledger (fixture/appended-medic))
