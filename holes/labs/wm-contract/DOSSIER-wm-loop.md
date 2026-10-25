@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:02 UTC — 940 assembly structurally verified
+
+Read-only coordinator validation exit0 against actual combined authority ledger39/root98ce6a80: latest27/enacted1 predecessor24, pins/digest/payload match. Scope typed cascade-resume retention only. Exact independent intent review requested; no authorization inferred, no disposition, five remain. Evidence `/home/joe/notes/wm-next/offline-repair/authority/940-adoption/coordinator-assembly-review.md`.
+
 ### 2026-10-25 14:57 UTC — cfb live clearance verified; five remain
 
 Exact cfb medic append accepted: ledger39/raw7/effective5, generation3 exact a9+cfb provider, canonical SHA b05e1b38a84acf9724ff04f460843bbb07a7a34f58bbe49cc003be25e0acac74. Immediate duplicate and restarted already-committed preserve bytes; serving readback confirms only04/41/8467/940/9cc remain. Idle/queue/stops/budget0 unchanged. Scope is four-node evidence retention, not task success or learning. Review `/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/live/final-coordinator-review.md`. Fresh940 binding next.
