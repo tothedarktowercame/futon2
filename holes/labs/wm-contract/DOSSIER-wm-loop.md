@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 00:37:44 UTC — Medic caller intake reviewed; wiring dispatched
+
+Confirmed default-deny durable loads and raw-active arbitration in runtime, diagnosis/coordinator and terminal sink. Accepted bounded authority-context propagation/effective arbitration packet; review: `/home/joe/notes/wm-next/offline-repair/integration/caller-review.md`. Added exact pinned-byte snapshot consistency and restored-context revalidation requirements. Post-rename errors remain indeterminate pending authority-aware readback/exact replay.
+
+Agency codex-12 job `invoke-1792888663070-3426-01b6e8db`, park `park-a3c7fe90-a536-4bac-b790-d39be803d915`; packet `~/notes/wm-next/packets/codex12-medic-caller-wiring.txt`. Implementation pending, hermetic tests required. No production trust set or live medic append. a9 historical review is not a current-state clearance; seven injuries remains the historical census, not a refreshed claim. Budget0; no live operations.
+
 - 2026-10-25 00:33:40 UTC — codex-11 independently reran retained a9 evaluation at7e19d0b19: exit0, byte-identical output, referenced controls hash-verified. Historical qualification receipt authority/a9-evaluation/qualification-review.edn SHA a491540e9033270b57def4133929d9d66ce0f5f5428c6aa34481d418e2259145 binds intent4c486019 and evaluation32edf04. No live clearance/fresh root claim. Caller-path intake codex-12 invoke-1792888420487-3424-d8b43885, park-807f659d-b2dc-4db2-98ea-e4252947c872; authority propagation/effective selection/recovery prerequisites, budget0.
 
 - 2026-10-25 00:30:53 UTC — codex-11 accepted verifier86a5cb, merge d336438486d9821eeafdf38f42f47495d13531ab; independent9tests30assertions and3prior negative probes green. Opaque pinned Markdown/strict typed EDN verified. Retained full original a9 record read-only, hash6ca9604... confirmed, capture authority/a9-evaluation/capture.json; no fresh ledger claim. Offline evaluation dispatched invoke-1792888253336-3421-4a0aabe8, park-f1b6df01-deee-476e-ae6c-7de8bf24a7f6. Reviewer/authentication/live qualification remain open,budget0.
