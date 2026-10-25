@@ -37,22 +37,24 @@
     (catch Throwable t
       (refusal :store/malformed-edn {:detail (ex-message t)}))))
 
-(defn load-ledger [path]
-  (try
-    (let [file (io/file path)]
-      (if-not (.exists file)
-        {:status :loaded :ledger ledger/empty-ledger :source :new}
-        (let [read-result (read-one-form (slurp file))
-              value (:value read-result)
-              checked (when (= :read (:status read-result))
-                        (ledger/validate-ledger value))]
-          (cond
-            (not= :read (:status read-result)) read-result
-            (not= :valid (:status checked))
-            (refusal :store/tampered-ledger {:defects (:defects checked)})
-            :else {:status :loaded :ledger value :source :disk}))))
-    (catch Throwable t
-      (refusal :store/read-failed {:detail (ex-message t)}))))
+(defn load-ledger
+  ([path] (load-ledger path (constantly false)))
+  ([path authority-verifier]
+   (try
+     (let [file (io/file path)]
+       (if-not (.exists file)
+         {:status :loaded :ledger ledger/empty-ledger :source :new}
+         (let [read-result (read-one-form (slurp file))
+               value (:value read-result)
+               checked (when (= :read (:status read-result))
+                         (ledger/validate-ledger value authority-verifier))]
+           (cond
+             (not= :read (:status read-result)) read-result
+             (not= :valid (:status checked))
+             (refusal :store/tampered-ledger {:defects (:defects checked)})
+             :else {:status :loaded :ledger value :source :disk}))))
+     (catch Throwable t
+       (refusal :store/read-failed {:detail (ex-message t)})))))
 
 (defn load-durable-ledger
   "Load a disk-backed ledger with an exact source pin for coordinator input."
@@ -136,6 +138,52 @@
                 result))))))
     (catch Throwable t
       (refusal :store/transaction-failed {:detail (ex-message t)}))))
+
+(defn transact-medic-disposition!
+  "Lock an existing durable ledger, apply one fully supplied medic operation,
+  revalidate with the same external authority verifier, and atomically replace
+  the one-form file only after an admitted append. Missing files never denote
+  an empty ledger. Exact persisted replay is delegated to
+  append-medic-repaired and remains byte-preserving before stale-root checks."
+  [path record-pin operation authority-verifier]
+  (try
+    (let [lock-path (str path ".lock")
+          lock-file (io/file lock-path)]
+      (when-let [parent (.getParentFile lock-file)] (.mkdirs parent))
+      (with-open [channel (FileChannel/open
+                           (.toPath lock-file)
+                           (into-array StandardOpenOption
+                                       [StandardOpenOption/CREATE
+                                        StandardOpenOption/WRITE]))
+                  _lock (.lock channel)]
+        (let [file (io/file path)]
+          (if-not (.isFile file)
+            (refusal :store/durable-ledger-required)
+            (let [read-result (read-one-form (slurp file))
+                  value (:value read-result)
+                  checked (when (= :read (:status read-result))
+                            (ledger/validate-ledger value authority-verifier))]
+              (cond
+                (not= :read (:status read-result)) read-result
+                (not= :valid (:status checked))
+                (refusal :store/tampered-ledger {:defects (:defects checked)})
+                :else
+                (let [result (ledger/append-medic-repaired
+                              value record-pin operation authority-verifier)]
+                  (if-not (= :appended (:status result))
+                    result
+                    (let [result-check (ledger/validate-ledger
+                                        (:ledger result) authority-verifier)]
+                      (if-not (= :valid (:status result-check))
+                        (refusal :store/invalid-medic-result
+                                 {:defects (:defects result-check)})
+                        (do (atomic-write! path (:ledger result))
+                            (assoc result
+                                   :durability :atomic-locked-one-form))))))))))))
+    (catch java.nio.channels.OverlappingFileLockException _
+      (refusal :store/lock-contended))
+    (catch Throwable t
+      (refusal :store/medic-transaction-failed {:detail (ex-message t)}))))
 
 (defn ingest-record-file!
   "Pin exact record bytes, require exactly one EDN form, classify, then perform
