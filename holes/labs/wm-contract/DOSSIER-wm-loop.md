@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25 00:21:17 UTC — codex-11 accepted store045415441, merge 41c502551e754512f0c09046928355a6112e82bc; independent4tests21assertions and actual overlap probe green (contended, first appended, second stale). Review ~/notes/wm-next/offline-repair/integration/store/review/review.md records post-rename error uncertainty; pre-replace guarantee only, recover by readback/exact replay. Dispatch retained authority/a9 evidence intake invoke-1792887677224-3412-719e3d22, park-97711b22-da27-4d98-8180-727c9bdd2a2c. No canonical reads/writes/activation, budget0.
+
 - 2026-10-25 00:18:03 UTC — codex-11 accepted recurrence a0cc5aed, merge 580ae57552186f343aa63781698a2c35e704886a. Independent fixed probe passes both prior failures; named49tests527assertions green. Ordinary exhaustion now retains exact retry-click discriminant, status/limit unchanged. Review ~/notes/wm-next/offline-repair/integration/code/recurrence-review/final-review.md. Dispatch isolated store/CAS job invoke-1792887483141-3409-b570af38, park-fa88bd58-7746-4f6d-ab04-7ff6320b9384. No activation/live disposition, budget0.
 
 - 2026-10-25 00:14:41 UTC — codex-11 holds bd6f907d: independent pure probe exit0 demonstrates medic reopening attempt2 at limit1 accepted, and exact enacted retry at limit wrongly refused for medic evidence. Review ~/notes/wm-next/offline-repair/integration/code/recurrence-review/review.md. Followup codex-12 invoke-1792887281121-3407-213a329f, park-e7c12ec8-305d-4397-8688-b8335e34363d; also review explicit verifier propagation and current cause persistence. No merge/store/live action; budget0.
