@@ -102,6 +102,10 @@
                         (:compiled-cascade-digest retained))
               (assoc-in [:decision :action :repair-contract :dispatch-sha256]
                         (:dispatch-sha256 retained))))
+        selected-entry-var (ns-resolve 'futon2.aif.full-loop-runner
+                                       'selected-entry)
+        source-drift-var (ns-resolve 'futon2.aif.full-loop-runner
+                                     'refuse-on-runner-source-drift!)
         result
         (with-redefs-fn
           {#'runner/primary-repos (constantly [])
@@ -109,10 +113,22 @@
            (fn [candidate-repo sha]
              (and artifact-valid?
                   (= candidate-repo (:repository retained))
-                  (= sha (:existing-artifact retained))))}
+                  (= sha (:existing-artifact retained))))
+           ;; Current owner fixtures perform these two test-only isolations
+           ;; behind :isolate-modified-runner?. c52 has runner-options but not
+           ;; that flag, so apply the identical boundary outside the owner
+           ;; helper on both revisions. Neither var decides correction,
+           ;; refusal classification, nor artifact validity.
+           source-drift-var (constantly {:runner/source-check :fixture-current})
+           selected-entry-var
+           (fn [j]
+             (when-let [action (get-in j [:decision :action])]
+               {:action action
+                :rank (or (get-in j [:decision :rank]) 1)
+                :G-efe (get-in j [:decision :controller-score])
+                :controller-score (get-in j [:decision :controller-score])}))}
           #(run-attempt
             {:author-response-corrections allowance
-             :isolate-modified-runner? true
              :initial-author-job (original-job)
              :cure-agent (:author retained)
              :cure-summary (:result corrected)
@@ -130,6 +146,7 @@
               :dispatch-fn dispatch-fn
               :poll-fn poll-fn}}))]
     {:result result :dispatches @dispatches :requests @requests
+     :synthetic-provenance (:notice synthetic)
      :fixture-adapter {:substitutions
                        {:author (:author retained) :target (:target retained)
                         :repository repo :base-head (:base-head retained)
@@ -151,7 +168,8 @@
   (is (str/includes? (:notice synthetic) "synthetic replies")))
 
 (deftest composed-author-wait-corrects-before-the-bound-refusal-gate
-  (let [{:keys [result dispatches fixture-adapter]} (composed-author-wait {})
+  (let [{:keys [result dispatches fixture-adapter synthetic-provenance]}
+        (composed-author-wait {})
         correction (get-in result [:result :data :author-job
                                    :author-response-corrections 0])
         original-dispatch (first dispatches)
@@ -163,11 +181,15 @@
             :construction (construction)}
            (:substitutions fixture-adapter))
         "transparent owner-fixture substitutions are retained as test evidence")
+    (is (= (:notice synthetic) synthetic-provenance))
+    (is (str/includes? synthetic-provenance "test-only synthetic replies"))
+    (is (= 2 (count dispatches))
+        "exactly the original author request and one correction are sent")
     (is (= [(:author retained) (:author retained)]
-           (mapv :agent (take 2 dispatches)))
+           (mapv :agent dispatches))
         "the actual author-wait path dispatches exactly one same-author correction")
     (is (= [(:target retained) (:target retained)]
-           (mapv :target (take 2 dispatches))))
+           (mapv :target dispatches)))
     (is (= [(:target retained) (:repository retained) (:base-head retained)
             (:author retained) (:original-job-id retained)]
            ((juxt :target :repository :base-head :author :original-request-id)
@@ -180,7 +202,7 @@
                                :repair-contract :dispatch-sha256])))
     (is (= (sha256 (pr-str (get-in correction [:binding :construction-contract])))
            (get-in correction [:binding :construction-contract-sha256])))
-    (is (= (sha256 reconstructed-prompt)
+    (is (= (sha256 (pr-str reconstructed-prompt))
            (get-in correction [:binding :original-prompt-sha256]))
         "the reconstructed prompt—not unavailable historical full bytes—is bound")
     (is (str/includes? reconstructed-prompt
@@ -191,10 +213,14 @@
     (is (str/includes? (get-in correction [:corrected :job :result-summary])
                        "REFUSE :already-satisfied-at-base-head")
         "synthetic correction provenance survives the composed author-wait evidence")
+    (is (nil? (get-in correction [:original :job :artifact-ref]))
+        "the synthetic original DONE-at-base remains unbound")
     (is (= :corrected (:status correction)))
     (is (= :already-satisfied (get-in result [:result :outcome])))
     (is (= (:existing-artifact retained)
-           (get-in result [:result :data :grounded-commit :sha])))))
+           (get-in result [:result :data :grounded-commit :sha])))
+    (is (not= (:base-head retained)
+              (get-in result [:result :data :grounded-commit :sha])))))
 
 (deftest repeated-base-wrong-job-foreign-repo-and-zero-allowance-refuse
   (testing "repeated base"
