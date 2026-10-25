@@ -850,6 +850,17 @@
                             (> (count items) 32) (conj {:omitted :entry-limit})))
     :else {:omitted :unsupported-value}))
 
+(defn- resume-protocol-violation-detail?
+  "The close wrapper for a typed same-click resume failure.
+
+  The outer failure names its kind in :failure-kind; the protocol's checks,
+  controls, and repair counts live only in the nested :failure-detail.  Keep
+  this predicate exact so unrelated nested failure maps retain the generic
+  scalar-only projection below."
+  [error-data value]
+  (and (= :resume-protocol-violation (:failure-kind error-data))
+       (= :resume-protocol-violation (:kind value))))
+
 (defn- failure-detail [error-data]
   (let [scalar? (fn [v]
                   (or (keyword? v) (number? v) (boolean? v) (nil? v)
@@ -861,6 +872,10 @@
              (fn [{:keys [kept omitted]} k v]
                (cond
                  (contains? #{:refusals :outer-task-selection :fold-findings} k)
+                 {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
+                 (and (= :failure-detail k)
+                      (map? v)
+                      (resume-protocol-violation-detail? error-data v))
                  {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
                  (scalar? v) {:kept (assoc kept k v) :omitted omitted}
                  (and (vector? v) (<= (count v) 32) (every? scalar? v))
