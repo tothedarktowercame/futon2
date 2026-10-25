@@ -443,6 +443,14 @@
         proposal {:injury-id injury :repair-id (:repair-id claimed)
                   :reason :author-failed :port-receipt-pin pin}
         reopened (ledger/append-retry-result history proposal)
+        prior-projected (last (get-in (#'ledger/medic-state history)
+                                      [:state :history]))
+        extra-valid (ledger/append-transition
+                     history (assoc proposal :state :reopened :attempt 2
+                                    :new-cause-pin (second campaign-records)))
+        extra-malformed (ledger/append-transition
+                         history (assoc proposal :state :reopened :attempt 2
+                                        :new-cause-pin {:path "" :sha256 "bad"}))
         invalid (ledger/append-transition
                  history (assoc proposal :state :reopened :attempt 2
                                 :port-receipt-pin nil))
@@ -458,6 +466,12 @@
     (is (= 2 (get-in reopened [:entry :attempt])))
     (is (= pin (get-in reopened [:entry :port-receipt-pin])))
     (is (= :valid (:status (ledger/validate-ledger (:ledger reopened)))))
+    (doseq [result [extra-valid extra-malformed]]
+      (is (= :appended (:status result)) (pr-str result))
+      (is (= (select-keys prior-projected [:cause-record-id :cause-pin])
+             (select-keys (last (get-in (#'ledger/medic-state (:ledger result))
+                                        [:state :history]))
+                          [:cause-record-id :cause-pin]))))
     (is (some #{:reopen/author-failure-evidence} (:defects invalid)))
     (is (some #{:reopen/reason-unexpected} (:defects enacted-unexpected)))))
 
@@ -494,7 +508,14 @@
                     :reason :port-refusal-corrected
                     :correction-commit "f63a3da99bb19f4c2217e20ed6f47572e996ccbc"
                     :corrected-port-receipt-pins [pin9 pin11]}
-        result (ledger/append-transition history correction)]
+        result (ledger/append-transition history correction)
+        prior-projected (last (get-in (#'ledger/medic-state history)
+                                      [:state :history]))
+        extra-valid (ledger/append-transition
+                     history (assoc correction :new-cause-pin (second campaign-records)))
+        extra-malformed (ledger/append-transition
+                         history (assoc correction
+                                        :new-cause-pin {:path "" :sha256 "bad"}))]
     (is (= :valid (:status (ledger/validate-ledger history))))
     (is (= :appended (:status result)) (pr-str result))
     (is (= 4 (get-in result [:entry :attempt])))
@@ -502,6 +523,12 @@
            (get-in (ledger/active-injuries (:ledger result))
                    [:injuries injury :state])))
     (is (= :valid (:status (ledger/validate-ledger (:ledger result)))))
+    (doseq [extra [extra-valid extra-malformed]]
+      (is (= :appended (:status extra)) (pr-str extra))
+      (is (= (select-keys prior-projected [:cause-record-id :cause-pin])
+             (select-keys (last (get-in (#'ledger/medic-state (:ledger extra))
+                                        [:state :history]))
+                          [:cause-record-id :cause-pin]))))
 
     (doseq [[label proposed expected-defect]
             [[:wrong-reason (assoc correction :reason :author-failed)

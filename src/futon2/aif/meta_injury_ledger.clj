@@ -435,7 +435,10 @@
         ;; uses the same field with additional bindings.  Author-failed and
         ;; corrected-port routes carry no new cause and therefore retain the
         ;; prior occurrence's cause.
+        special-reopen? (#{:author-failed :port-refusal-corrected}
+                          (:reason entry))
         fresh-cause? (and (#{:reopened :abandoned} (:state entry))
+                          (not special-reopen?)
                           (:new-cause-pin entry))
         cause (cond
                 fresh-cause? (:new-cause-pin entry)

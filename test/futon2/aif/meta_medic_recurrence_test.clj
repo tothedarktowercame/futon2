@@ -119,6 +119,10 @@
       (is (= :reopened (:state entry)))
       (is (= :medic-recurrence (:reason entry)))
       (is (= fresh-pin (:new-cause-pin entry)))
+      (is (= fresh-pin
+             (let [projected (last (get-in (#'ledger/medic-state (:ledger result))
+                                           [:state :history]))]
+               {:path (:cause-record-id projected) :sha256 (:cause-pin projected)})))
       (is (= (inc (count (:entries history))) (:ordinal entry)))
       (is (= (:entry-id (last (filter #(= ledger/transition-schema (:schema %))
                                       (:entries history))))
@@ -149,6 +153,10 @@
     (is (= :attempt-limit-exhausted (get-in result [:entry :reason])))
     (is (= "retry/exact" (get-in result [:entry :retry-click])))
     (is (nil? (get-in result [:entry :recurs-after-medic-operation-id])))
+    (is (= (:cause-record-pin (first (:entries history)))
+           (let [projected (last (get-in (#'ledger/medic-state (:ledger result))
+                                         [:state :history]))]
+             {:path (:cause-record-id projected) :sha256 (:cause-pin projected)})))
     (is (= :valid (:status (ledger/validate-ledger
                             (:ledger result) synthetic-authority))))))
 
@@ -175,6 +183,10 @@
     (is (= :attempt-limit-exhausted (:reason entry)))
     (is (= fresh-pin (:new-cause-pin entry)))
     (is (= "medic/exhaust" (:recurs-after-medic-operation-id entry)))
+    (is (= fresh-pin
+           (let [projected (last (get-in (#'ledger/medic-state (:ledger result))
+                                         [:state :history]))]
+             {:path (:cause-record-id projected) :sha256 (:cause-pin projected)})))
     (is (= :duplicate (:status replay)))
     (is (empty? (:injuries (ledger/effective-active-injuries
                             (:ledger result) synthetic-authority))))))
