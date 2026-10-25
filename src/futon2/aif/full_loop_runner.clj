@@ -68,6 +68,7 @@
             [futon2.aif.accepted-increment :as accepted-increment]
             [futon2.aif.observation-label-wire :as observation-label-wire]
             [futon2.aif.d-predecessor-task-authority :as d-task]
+            [futon2.aif.mission-observation :as mission-observation]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
@@ -5805,7 +5806,9 @@
       :deferred-author-context-job-mismatch
       (or (not (string? (:repository context)))
           (nil? (:pre-author-head context))
-          (not (string? (:prompt-sha256 context))))
+          (not (string? (:prompt-sha256 context)))
+          (not= :wm/mission-observation-baseline-v1
+                (get-in context [:mission-observation-baseline :schema])))
       :deferred-author-context-incomplete
       (and (:target obligation)
            (not= (:target obligation) (:target context)))
@@ -8095,6 +8098,29 @@
                                      :failure-kind (:kind @d-task-dispatch)
                                      :failure-stage :author-dispatch
                                      :d-task-dispatch @d-task-dispatch})))
+                fresh-mission-baseline
+                (mission-observation/capture-before
+                 {:dispatch (:dispatch @d-task-dispatch)
+                  :repository author-repo :revision (:head pre-author-head)})
+                mission-baseline
+                (if deferred-author-job
+                  (:mission-observation-baseline deferred-author-context)
+                  fresh-mission-baseline)
+                _ (when-not (= :captured (:status mission-baseline))
+                    (throw (ex-info "Pre-author mission baseline unavailable"
+                                    {:failure-kind :pre-author-baseline-unavailable
+                                     :baseline mission-baseline})))
+                _ (when (and deferred-author-job
+                             (not= fresh-mission-baseline mission-baseline))
+                    (throw (ex-info "Deferred mission baseline rebound"
+                                    {:failure-kind :pre-author-baseline-rebound})))
+                _ (when-not cohort?
+                    (throw (ex-info "Durable pre-author baseline required"
+                                    {:failure-kind :pre-author-baseline-durability-disabled})))
+                _ (if cohort-source
+                    (cohort/append-pre-author-baseline!
+                     cohort-source (:data-root execution-cohort) attempt-id mission-baseline)
+                    (cohort/append-pre-author-baseline! attempt-id mission-baseline))
                 author-prompt-text
                 (prompt-for-head pre-author-head)
                 author-response
@@ -8141,6 +8167,7 @@
                                            :target target
                                            :repository author-repo
                                            :pre-author-head pre-author-head
+                                           :mission-observation-baseline mission-baseline
                                            :job-id author-job-id
                                            :prompt-sha256 (sha256 author-prompt-text)}})
                                   e)))))
@@ -8360,10 +8387,17 @@
                              (get-in @checkpoints
                                      [:selection :judgment :token-outcome-prediction])
                              measurements commit)
+                            mission-comparison
+                            (mission-observation/project
+                             {:baseline mission-baseline
+                              :dispatch (get-in @d-task-dispatch [:dispatch])
+                              :repository repo :after-revision commit
+                              :after-rows measurements})
                             outcomes
                             (selected-want-outcome/receipt
                              {:selected-action (get-in construction [:selected-action])
-                              :token-comparison comparison})]
+                              :token-comparison comparison
+                              :mission-observation mission-comparison})]
                         {:target target :commit commit
                          :work-evidence
                          (if (= :repair-machine-failure

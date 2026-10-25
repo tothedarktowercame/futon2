@@ -4,7 +4,8 @@
             [futon2.aif.d-predecessor-task-authority-test :as fixture]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.mission-observation :as mission]
-            [futon2.aif.observation-checks :as observation]))
+            [futon2.aif.observation-checks :as observation]
+            [futon2.aif.selected-want-outcome :as selected]))
 
 (defn reseal [baseline]
   (assoc baseline :baseline-sha256
@@ -36,12 +37,22 @@
            after-rows (d-task/artifact-tokens dispatch repo-path after)
            projected (mission/project {:baseline baseline :dispatch dispatch
                                        :repository repo-path :after-revision after
-                                       :after-rows after-rows})]
+                                       :after-rows after-rows})
+           accounting (selected/receipt
+                       {:selected-action
+                        (assoc (get-in dispatch [:occurrence :action/value])
+                               :observation-locators
+                               {(get-in baseline [:rows 0 :token])
+                                (get-in baseline [:rows 0 :locator])})
+                        :token-comparison {:status :compared :tokens []
+                                           :prediction {:initial-belief {#{} 1}}}
+                        :mission-observation projected})]
        (is (= :captured (:status baseline)))
        (is (false? (get-in baseline [:rows 0 :observed])))
        (is (= :admitted (:status unchanged)))
        (is (false? (get-in unchanged [:rows 0 :after :observed])))
        (is (= :admitted (:status projected)))
+       (is (= :verified (:status accounting)))
        (is (true? (get-in projected [:rows 0 :after :observed])))
        (is (= before (:before-revision projected)))
        (is (= after (:after-revision projected)))))))

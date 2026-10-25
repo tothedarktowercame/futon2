@@ -646,6 +646,57 @@
 (defn- checkpoint-index [k]
   (.indexOf checkpoint-order k))
 
+(def pre-author-baseline-schema :wm/pre-author-mission-baseline-event-v1)
+
+(defn append-pre-author-baseline!
+  "Durably retain the exact mission baseline after construction and before
+   dispatch. This sidecar does not reinterpret or renumber checkpoint events."
+  ([attempt-id cell]
+   (append-pre-author-baseline! default-preregistration default-data-root attempt-id cell))
+  ([prereg-path data-root attempt-id cell]
+   (let [p (read-preregistration prereg-path)
+         dir (cohort-dir p data-root)
+         attempt-dir (io/file dir attempt-id)
+         target (io/file attempt-dir "pre-author-mission-baseline.edn")]
+     (when-not (and (= :wm/mission-observation-baseline-v1 (:schema cell))
+                    (= :captured (:status cell))
+                    (string? (:baseline-sha256 cell)))
+       (throw (ex-info "invalid pre-author mission baseline"
+                       {:failure-kind :invalid-pre-author-baseline :cell cell})))
+     (with-cohort-lock dir
+       (fn []
+         (let [events (attempt-events attempt-dir)
+               types (set (map :checkpoint/type events))]
+           (when-not (contains? types :construction)
+             (throw (ex-info "construction must precede mission baseline"
+                             {:failure-kind :pre-author-baseline-too-early})))
+           (when (contains? types :dispatch)
+             (throw (ex-info "mission baseline must precede dispatch"
+                             {:failure-kind :pre-author-baseline-too-late})))
+           (let [record {:schema pre-author-baseline-schema
+                         :cohort/id (:cohort/id p) :attempt/id attempt-id
+                         :baseline cell}]
+             (if (.isFile target)
+               (let [old (read-edn target)]
+                 (if (= old record) old
+                   (throw (ex-info "conflicting pre-author mission baseline"
+                                   {:failure-kind :pre-author-baseline-conflict}))))
+               (do (write-new! target record) record)))))))))
+
+(defn read-pre-author-baseline
+  ([attempt-id]
+   (read-pre-author-baseline default-preregistration default-data-root attempt-id))
+  ([prereg-path data-root attempt-id]
+   (let [p (read-preregistration prereg-path)
+         file (io/file (cohort-dir p data-root) attempt-id
+                       "pre-author-mission-baseline.edn")]
+     (when (.isFile file)
+       (let [record (read-edn file)]
+         (when-not (= pre-author-baseline-schema (:schema record))
+           (throw (ex-info "invalid retained pre-author baseline"
+                           {:failure-kind :pre-author-baseline-malformed})))
+         record)))))
+
 (defn append-checkpoint!
   ([attempt-id checkpoint cell]
    (append-checkpoint! default-preregistration default-data-root attempt-id checkpoint cell))

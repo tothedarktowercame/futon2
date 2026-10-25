@@ -18,7 +18,7 @@
          (= sha256 (field/sha256 (.getBytes (slurp path) "UTF-8"))))
     (catch Throwable _ false)))
 
-(defn receipt [{:keys [selected-action token-comparison progress-evidence blockers]}]
+(defn receipt [{:keys [selected-action token-comparison mission-observation progress-evidence blockers]}]
   (let [target (:target selected-action)
         ;; The selection writes a want as a bare token of the action's own
         ;; target; predictions, locators and evidence use [target token]. A
@@ -28,7 +28,13 @@
         duplicates (->> wants frequencies (keep (fn [[w n]] (when (> n 1) w))) vec)
         ;; Comparison rows arrive from token-outcome/compare-outcomes under
         ;; :tokens; callers may also present the row vector under :rows.
-        rows (or (:tokens token-comparison) (:rows token-comparison))
+        mission? (= :admitted (:status mission-observation))
+        rows (if mission?
+               (mapv (fn [{:keys [token after]}]
+                       {:token token :observed (:observed after)
+                        :measurement (:measurement after)})
+                     (:rows mission-observation))
+               (or (:tokens token-comparison) (:rows token-comparison)))
         row-tokens (mapv :token rows)
         progress (group-by :token (vec progress-evidence))
         blocked (group-by :token (vec blockers))
@@ -57,11 +63,15 @@
                      expected-locator (get locators want)
                      declared-locator (:declared-locator measurement)
                      after-locator (:after-locator measurement)
-                     before-false? (and (map? initial) (seq initial)
-                                        (every? (fn [[state mass]]
-                                                  (or (not (pos? mass))
-                                                      (not (contains? state want))))
-                                                initial))
+                     mission-before (some #(when (= want (:token %)) (:before %))
+                                          (:rows mission-observation))
+                     before-false? (if mission?
+                                     (false? (:observed mission-before))
+                                     (and (map? initial) (seq initial)
+                                          (every? (fn [[state mass]]
+                                                    (or (not (pos? mass))
+                                                        (not (contains? state want))))
+                                                  initial)))
                      progress-rows (get progress want [])
                      blocker-rows (get blocked want [])
                      problem (cond
