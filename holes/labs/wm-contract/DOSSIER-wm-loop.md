@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 00:45:55 UTC — Caller adoption held on effective-retry bypass
+
+Independent isolated probes against16b53709 confirmed empty effective-active set after medic correction still returns retry :ready; malformed authority also reaches retry readiness before refusal. Review/probes: `~/notes/wm-next/offline-repair/integration/caller-code/review/`. Requested complete context validation and inhabited runtime propagation tests. No merge/activation/live ledger access. Budget0.
+
+Codex12 follow-up Agency job `invoke-1792889179317-3429-318190ea`, park `park-39ccc3fd-6134-4035-baa4-21f7ef1956dd`. Historical a9 qualification unchanged; no live clearance.
+
 ### 2026-10-25 00:37:44 UTC — Medic caller intake reviewed; wiring dispatched
 
 Confirmed default-deny durable loads and raw-active arbitration in runtime, diagnosis/coordinator and terminal sink. Accepted bounded authority-context propagation/effective arbitration packet; review: `/home/joe/notes/wm-next/offline-repair/integration/caller-review.md`. Added exact pinned-byte snapshot consistency and restored-context revalidation requirements. Post-rename errors remain indeterminate pending authority-aware readback/exact replay.
