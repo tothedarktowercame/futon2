@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:20 UTC — exact940 live release
+
+Six artifact/control hashes verified, driver+data-form reviewed; isolated8transaction/4provider controls pass. Release exact generation3→4 scope and940 append39→40/effective5→4, under existing authorization, subject fresh binding and actual readback. No clearance yet. Review `/home/joe/notes/wm-next/offline-repair/authority/940-adoption/coordinator-final-review.md`.
+
 ### 2026-10-25 15:16 UTC — author correction activation verified
 
 Parsed serving identity current/default1; canonical loaded/disk runner13fb1853. Authority provider3/a9+cfb and ledger39/effective5 unchanged; idle/queue/stops/budget0 retained. Review `/home/joe/notes/wm-next/offline-repair/injury9cc/author-correction/activation/coordinator-review.md`.9cc stays active; original-acceptance/composed correction qualification dispatched, no historical response invented.
