@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:37Z — 04 packet schema stop
+
+Independent exact review found extra intent/replay fields rejected by production verifier. Coordinator confirmed source grammar; earlier hash/payload checks did not establish full compatibility. Bounded evaluator reassembly dispatched: exact schemas and dependent digest/pins, old bytes retained, dafa/source provenance preserved in companion evidence. Actual verifier compatibility controls required; no new acceptance replay or schema relaxation. No review receipt/authorization/clearance; ledger40/effective4 budget0 unchanged. Review: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-grammar-review.md`.
+
 ### 2026-10-25 15:36Z — 9cc acceptance held for caller coverage
 
 Reviewed proposed3b0ea8c test/fixture. Direct correction-helper invocation plus separate refusal classifier does not prove actual author-wait wiring; helper-absent sentinel cannot establish semantic historical red. Requested test-only composed caller coverage, construction/prompt binding and synthetic retained evidence before evaluation. Review: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/coordinator-review.md`. No production or live change, no clearance; budget0.
