@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 13:40:00 UTC — Provider packet held on independent boundary probes
+
+Isolated probe exit0 confirms absent-to-present worker drift accepted, refused provider passed onward, and verifier replacement in resolved map still accepted. Source also places provider acquisition before admission lock; requested generation validation before ration. Review/probe: `~/notes/wm-next/offline-repair/provider/review/`. No serving action or live ledger access.
+
+Codex12 follow-up job `invoke-1792935641703-3574-106c7293`, park `park-9cd58d60-2e14-4ac4-8942-7cf4d07799f6`. No merge/activation. A9 authorization remains granted, final envelope and injury41 diagnosis independently in progress; live append waits for safe readers.
+
 ### 2026-10-25 13:34:59 UTC — Fresh seven-injury census reviewed; a9 adoption authorized
 
 Independent current ledger read confirms37 entries/7 effective injuries/0medic, same root and a9 occurrence34. Existing verifier only supports historical misclassification; genuine repair authority remains implementation gap. Accepted independent a9 correspondence/replay and recorded exact coordinator authorization under Joe instruction: `~/notes/wm-next/offline-repair/current-clearance/coordinator-authorization.md`.
