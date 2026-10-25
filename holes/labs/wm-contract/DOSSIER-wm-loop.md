@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:51Z — 9cc roster fixture repaired
+
+Prior matrix stopped before dispatch because retained authorzai-2 was absent from owner roster;16fail/4errors not semantic evidence. Coordinator test-only74001cd54 adds hermetic roster and string-guarded assertions, kondo clean. Repinned5794179b, released current-first bounded diagnostic matrix; historical setup errors remain distinct, no silent contract changes. No live/clearance. Release: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation/roster-fix-release.md`.
+
 ### 2026-10-25 15:49Z — 04 independent approval and exact authorization
 
 Actual independent review efddc475 accepted; intent/evaluation/review hashes and fresh roster checked. Coordinator authorized exact c311e9f0 intent/occurrence20/predecessor8 under Joe's instruction; authorization a3ebdfb6. Scope7ca selected-want identity repair only, dafa history unchanged. Final isolated four-scope40to41/effective3 and gen4to5 provider controls dispatched; no live append yet. Authorization: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-authorization.md`. Budget0; no task/learning credit.
