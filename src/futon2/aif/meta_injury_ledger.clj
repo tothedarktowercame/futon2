@@ -181,6 +181,33 @@
        (= previous-state :abandoned)
        (= :port-refusal-corrected (:reason entry))))
 
+(defn- covered-medic-operation [ledger transition]
+  (when transition
+    (let [occurrence [(:injury-id transition) (str (:ordinal transition))]]
+      (last
+       (keep (fn [entry]
+               (when (and (observation? entry)
+                          (= :medic-repaired (:observation-kind entry))
+                          (= occurrence
+                             (medic/occurrence
+                              (get-in entry [:medic-operation :request :candidate]))))
+                 (:medic-operation entry)))
+             (:entries ledger))))))
+
+(defn medic-covered-latest
+  "Return the retained operation covering the exact latest occurrence, only
+  after authority-checked prefix validation."
+  [ledger injury-id authority-verifier]
+  (let [checked (validate-ledger ledger authority-verifier)
+        current (when (= :valid (:status checked)) (latest ledger injury-id))
+        operation (covered-medic-operation ledger current)]
+    (cond
+      (not= :valid (:status checked))
+      (refusal :ledger/tampered {:ledger-defects (:defects checked)})
+      (nil? current) (refusal :medic/latest-missing)
+      (nil? operation) (refusal :medic/latest-not-covered)
+      :else {:status :covered :entry current :operation operation})))
+
 (defn- common-defects [entry]
   (cond-> []
     (not= transition-schema (:schema entry)) (conj :transition/schema)
@@ -207,10 +234,34 @@
                            (other-open-injury ledger (:injury-id entry)
                                               (:record-pin requeue-cause)))
         author-failed-reopen? (author-failed-reopen? state previous-state entry)
-        corrected-reopen? (corrected-reopen? state previous-state entry)]
+        corrected-reopen? (corrected-reopen? state previous-state entry)
+        covered-operation (covered-medic-operation ledger previous)
+        ordinary-attributable-retry? (and (= :reopened state)
+                                          (= :enacted previous-state)
+                                          (nonblank? (:retry-click entry))
+                                          (= (:retry-click entry)
+                                             (:retry-click previous)))
+        medic-origin? (and covered-operation
+                           (#{:open :enacted} previous-state)
+                           (#{:reopened :abandoned} state)
+                           (not ordinary-attributable-retry?))
+        medic-bindings? (and medic-origin?
+                             (= (:operation-id covered-operation)
+                                (:recurs-after-medic-operation-id entry))
+                             (= [(:injury-id previous) (:ordinal previous)]
+                                (:recurs-after-medic-occurrence entry))
+                             (pin? (:new-cause-pin entry))
+                             (not (contains? (classification-pins ledger)
+                                             (:new-cause-pin entry)))
+                             (if (= :reopened state)
+                               (= :medic-recurrence (:reason entry))
+                               (= :attempt-limit-exhausted (:reason entry))))]
     (cond-> []
-      (not (contains? (get allowed-predecessors state #{}) previous-state))
+      (and (not (contains? (get allowed-predecessors state #{}) previous-state))
+           (not medic-origin?))
       (conj :transition/illegal-order)
+      (and medic-origin? (not medic-bindings?))
+      (conj :medic-recurrence/evidence)
       (and previous (not= (:entry-id previous)
                           (get-in entry [:injury-predecessor :entry-id])))
       (conj :predecessor/id)
@@ -222,7 +273,7 @@
            (not= state :reopened)) (conj :attempt/changed-outside-reopen)
       (and (= state :reopened) (not= attempt (inc (:attempt previous))))
       (conj :attempt/not-incremented)
-      (and (not= state :open) claimed
+      (and (not= state :open) claimed (not medic-origin?)
            (not= (:repair-id entry) (:repair-id claimed)))
       (conj :repair/id-substitution)
       (and (= state :open)
@@ -281,6 +332,7 @@
       (and (#{:discharged :reopened} state)
            (not author-failed-reopen?)
            (not corrected-reopen?)
+           (not medic-origin?)
            (or (not (nonblank? (:retry-click entry)))
                (not= (:patch-sha entry) (:patch-sha patch))
                (not= (:retry-click entry) (:retry-click previous))
@@ -317,6 +369,7 @@
       (and (= state :reopened)
            (not author-failed-reopen?)
            (not corrected-reopen?)
+           (not medic-origin?)
            (or (not (pin? (:new-cause-pin entry))) (> attempt limit)))
       (conj :reopen/evidence-or-limit)
       (and (= state :abandoned)
@@ -374,13 +427,16 @@
          :entry (:entry checked)})))))
 
 (defn- transition->medic-entry [prior-by-injury opening-by-injury entry]
-  (let [opening (or (get opening-by-injury (:injury-id entry)) entry)]
+  (let [opening (or (get opening-by-injury (:injury-id entry)) entry)
+        recurrence? (and (#{:reopened :abandoned} (:state entry))
+                         (:recurs-after-medic-operation-id entry))
+        cause (if recurrence? (:new-cause-pin entry) (:cause-record-pin opening))]
   {:injury-id (:injury-id entry)
    :entry-id (str (:ordinal entry))
    :predecessor-entry-id (some-> (get prior-by-injury (:injury-id entry))
                                  :ordinal str)
-   :cause-record-id (get-in opening [:cause-record-pin :path])
-   :cause-pin (get-in opening [:cause-record-pin :sha256])
+   :cause-record-id (:path cause)
+   :cause-pin (:sha256 cause)
    :active? (contains? active-states (:state entry))}))
 
 (defn- medic-state [ledger]
@@ -632,12 +688,44 @@
   (when (= :valid (:status (validate-ledger ledger)))
     (pending-requeue-entry ledger injury-id)))
 
+(defn append-medic-recurrence
+  "Append one fresh same-injury occurrence after exact latest medic coverage.
+  Snapshot attempt/origin/limit/census are computed from LEDGER, never supplied."
+  [ledger injury-id fresh-record-pin authority-verifier]
+  (try
+    (let [snapshot-result (authoritative-snapshot ledger injury-id authority-verifier)
+          coverage (medic-covered-latest ledger injury-id authority-verifier)]
+      (cond
+        (not= :computed (:status snapshot-result)) snapshot-result
+        (not= :covered (:status coverage)) coverage
+        (contains? (get-in snapshot-result [:snapshot :seen-record-pins]) fresh-record-pin)
+        {:status :duplicate :reason :record-already-ingested :ledger ledger}
+        (not (pin? fresh-record-pin)) (refusal :medic-recurrence/fresh-pin)
+        :else
+        (let [snapshot (:snapshot snapshot-result)
+              operation (:operation coverage)
+              next-attempt (inc (:attempt snapshot))
+              exhausted? (> next-attempt (:attempt-limit snapshot))
+              common {:injury-id injury-id
+                      :attempt (if exhausted? (:attempt-limit snapshot) next-attempt)
+                      :new-cause-pin fresh-record-pin
+                      :recurs-after-medic-operation-id (:operation-id operation)
+                      :recurs-after-medic-occurrence (:occurrence snapshot)}
+              proposed (if exhausted?
+                         (assoc common :state :abandoned
+                                :reason :attempt-limit-exhausted)
+                         (assoc common :state :reopened :reason :medic-recurrence))]
+          (append-transition ledger proposed authority-verifier))))
+    (catch Throwable t
+      (refusal :medic-recurrence/malformed {:detail (ex-message t)}))))
+
 (defn append-retry-result
   "Append reopened, or the typed abandoned state when the next attempt would
   exceed the configured limit."
-  [ledger proposed]
+  ([ledger proposed] (append-retry-result ledger proposed deny-medic-authority))
+  ([ledger proposed authority-verifier]
   (try
-    (let [checked (validate-ledger ledger)]
+    (let [checked (validate-ledger ledger authority-verifier)]
       (if-not (= :valid (:status checked))
         (refusal :ledger/tampered {:ledger-defects (:defects checked)})
         (let [injury-id (:injury-id proposed)
@@ -650,11 +738,13 @@
                                    (assoc :state :abandoned
                                           :attempt limit
                                           :reason :attempt-limit-exhausted)
-                                   (dissoc :retry-click :new-cause-pin :patch-sha)))
+                                   (dissoc :retry-click :new-cause-pin :patch-sha))
+                               authority-verifier)
             (append-transition ledger (assoc proposed :state :reopened
-                                             :attempt next-attempt))))))
+                                             :attempt next-attempt)
+                               authority-verifier)))))
     (catch Throwable t
-      (refusal :retry-result/malformed {:detail (ex-message t)}))))
+      (refusal :retry-result/malformed {:detail (ex-message t)})))))
 
 (defn append-requeue
   "Append a fresh retry identity after an inconclusive retry without consuming
