@@ -97,6 +97,24 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:00:30 UTC — A9 live disposition verified; six effective injuries remain
+
+Reviewed live receipt and serving postflight; independently recomputed canonical ledger SHA `0b7a08ee3dc47f97e91c4ea91f813064e8863083e46dc8c7470539925b8c1245`. Exact authorized operation appended ordinal38; replay duplicate. Ledger38/raw7/effective6; a9 excluded and other six retained. Idle, no queued work/stops, budget0 unchanged; no task success or learning credit. Review: ~/notes/wm-next/offline-repair/authority/a9-adoption/live/coordinator-review.md.
+
+Landed reviewed injury41 diagnostic retention as merge `ab0e78c7ebc28589c497b9220b05aff3371f4f1e`; source only, not loaded. Historical protocol invariant remains unknown. Runner must be canonically reloaded before future clicks.
+
+Agency work confirmed: codex12 cfb/940 evaluator `invoke-1792936647954-3582-72d63937`; claude9 injury04 patch attribution `invoke-1792936648841-3583-f93776ae`. Dispatch evidence ~/notes/wm-next/offline-repair/dispatch-jobs.json; no duplicate dispatch after output truncation. Genuine verifier job3579 remains awaiting coordinator review. No additional live clearances authorized by these evidence packets.
+
+### 2026-10-25 13:53:31 UTC — Provider installation reviewed; actual a9 append dispatched
+
+Verified retained generation1 exact scope, rc0 installation/verification, unchanged status/budget, authority-aware37/effective7 read. Review ~/notes/wm-next/offline-repair/provider/activation/coordinator-review.md. All a9 authorization/provider/driver prerequisites reviewed. Released exact one-operation live append to codex12 job invoke-1792936456564-3580-7b3cdb5b, park park-5e665c8e-03f6-438c-8763-592ab38bf9b4. Fresh checks and actual serving readback required. No outcome claimed until receipt. Canonical source left untouched during operation; dossier entry staged here.
+
+### 2026-10-25 13:51:59 UTC — Injury41 retention accepted; genuine repair verifier dispatched
+
+Independent2tests14assertions green for38a2eccea. Review ~/notes/wm-next/offline-repair/injury41/final-review.md. Retention landing held only to avoid changing canonical source/HEAD during active provider load; historical injury remains unresolved. Dossier entry staged outside repo for same reason.
+
+Codex3 genuine authority counterpart job invoke-1792936363387-3579-1509c0fb, park park-45aefcad-9983-4d84-aeab-355bdead744f. Exact existing Lean genuine repair fields and actual ledger admission, no live qualification. No live changes this review.
+
 ### 2026-10-25 13:50:47 UTC — A9 recovery driver independently accepted
 
 Independent controls.clj exit0: all6 isolated controls green, including restart without reset, recovered post-rename commitment, stale different operation, unreadable readback and pre-write failure. Envelope pins unchanged. Review/log `~/notes/wm-next/offline-repair/authority/a9-adoption/review/final-review.md`. No canonical write.
