@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 13:41:13 UTC — A9 envelope accepted; recovery driver correction
+
+Verified authorization/manifest/final-operation and unchanged evaluator/reviewer pins. Independent isolated post-rename injection exits2, readback38/effective6/covered and exact replay duplicate, but driver wrongly says not-appended. Requested truthful recovered/indeterminate outcomes and restart duplicate-before-root handling. Review/probe `~/notes/wm-next/offline-repair/authority/a9-adoption/review/`. No canonical write.
+
+Claude9 follow-up `invoke-1792935758664-3575-6f1a165a`, park `park-f9b7298f-a4e9-4587-8fe8-d27eeb40a9b5`. Authorization and envelope accepted; provider readiness and driver fix remain before live append. No repeated Joe approval needed.
+
 ### 2026-10-25 13:40:00 UTC — Provider packet held on independent boundary probes
 
 Isolated probe exit0 confirms absent-to-present worker drift accepted, refused provider passed onward, and verifier replacement in resolved map still accepted. Source also places provider acquisition before admission lock; requested generation validation before ration. Review/probe: `~/notes/wm-next/offline-repair/provider/review/`. No serving action or live ledger access.
