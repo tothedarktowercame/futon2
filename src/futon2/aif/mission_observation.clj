@@ -39,15 +39,19 @@
   [{:keys [dispatch repository revision]}]
   (let [action (get-in dispatch [:occurrence :action/value])
         wants (qualified-wants action)
-        rows (d-task/artifact-tokens dispatch repository revision)
-        census (validate-census wants rows)
-        occurrence-id (get-in dispatch [:occurrence :action/id])]
+        occurrence-id (get-in dispatch [:occurrence :action/id])
+        bound-revision (get-in dispatch [:before :head])]
     (cond
-      (:reason census) (refusal (:reason census) (dissoc census :reason))
       (not (and (string? occurrence-id) (string? repository) (string? revision)))
       (refusal :request-binding-missing {})
+      (not= bound-revision revision)
+      (refusal :before-revision-mismatch {:expected bound-revision :actual revision})
       :else
-      (let [normalized
+      (let [rows (d-task/artifact-tokens dispatch repository bound-revision)
+            census (validate-census wants rows)]
+        (if (:reason census)
+          (refusal (:reason census) (dissoc census :reason))
+          (let [normalized
             (mapv (fn [row]
                     (let [result (:result row)
                           observed (:observed result)]
@@ -66,7 +70,7 @@
                   :action-sha256 (identity/digest action) :target (:target action)
                   :repository (canonical repository) :revision revision
                   :wants wants :rows normalized}]
-        (assoc base :baseline-sha256 (evidence/value-digest base))))))
+            (assoc base :baseline-sha256 (evidence/value-digest base))))))))
 
 (defn project
   "Admit the exact retained before baseline and post-build reader rows.
@@ -75,6 +79,11 @@
   (let [action (get-in dispatch [:occurrence :action/value])
         occurrence-id (get-in dispatch [:occurrence :action/id])
         wants (qualified-wants action)
+        trusted-before (capture-before {:dispatch dispatch :repository repository
+                                        :revision (get-in dispatch [:before :head])})
+        trusted-after (when (and (string? repository) (string? after-revision))
+                        (d-task/artifact-tokens dispatch repository after-revision))
+        supplied-after after-rows
         after-rows (mapv (fn [row]
                            (if (contains? row :observed)
                              row
@@ -84,9 +93,13 @@
         after-census (validate-census wants after-rows)
         unsigned (dissoc baseline :baseline-sha256)]
     (cond
+      (not= :captured (:status trusted-before))
+      (refusal :before-authority-unavailable {:trusted-result trusted-before})
       (not= schema (:schema baseline)) (refusal :baseline-missing {})
       (not= (:baseline-sha256 baseline) (evidence/value-digest unsigned))
       (refusal :baseline-payload-mismatch {})
+      (not= trusted-before baseline) (refusal :before-authority-mismatch {})
+      (not= trusted-after supplied-after) (refusal :after-authority-mismatch {})
       (not= occurrence-id (:occurrence-id baseline)) (refusal :occurrence-mismatch {})
       (not= (identity/digest action) (:action-sha256 baseline)) (refusal :action-mismatch {})
       (not= (:target action) (:target baseline)) (refusal :target-mismatch {})
