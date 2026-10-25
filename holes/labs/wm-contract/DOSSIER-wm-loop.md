@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T18:59:28.123399+00:00 — injury41 exact medic review
+
+Coordinator independently verified evaluator packet dbbf5a99: current42/root335fd6a2, occurrence18/open1/nil same-injury predecessor, pins and 18 verifier controls. Reviewer-adapted check exited0; initial evaluator-script identity-only refusal retained. Actual scoped review and authorization written at `/home/joe/notes/wm-next/offline-repair/authority/41-adoption/coordinator-authorization.md`. Qualification remains function-valued patch boundary only; journal restart limitation retained. Agency claude-9 final offline assembly queued `invoke-1792954753589-3893-6652abc1`; six-scope isolated controls required before live review. No live disposition, click or budget change. Effective injuries remain41/8467 per verified snapshot;8467 deferred fixture work separate.
+
 - 2026-10-25T18:48:57.249153+00:00 codex-11: reviewed d370d416 and deferred close-exception probe. Test helper creates new artifact repo per call; second job uses synthetic unrelated SHA. Released shared-repository real caller fixture correction and exact exception capture to Agency codex12 job3892; no production conclusion from generic close-exception, no activation/clearance,budget0.
 
 - 2026-10-25T18:43:43.826418+00:00 codex-11: held65408d47 deferred integration. Independent probe confirms nonmission nil mission-key context rejected; repeated holds also overwrite original baseline origin in source. Fresh send ordering test accepted; actual deferred/reviewer composition requested via Agency job3891. No live/clearance,budget0.
