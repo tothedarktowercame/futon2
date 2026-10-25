@@ -7213,6 +7213,46 @@
                      {:trip/observation item :trip/wire-id :test :trip/id "mission-test"}
                      "test-report"))))))
 
+(deftest mission-baseline-is-durable-before-real-author-dispatch
+  (let [recorded-action (edn/read-string
+                         (slurp "test/fixtures/narrative-trace/selected-action-1789964661.edn"))
+        action (assoc recorded-action :want (:want token-fixture/declaration))
+        decision (-> (policy/select-action-cascades
+                      [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)]
+                      {:beta 2.0})
+                     with-token-fixture-carry)
+        cohort (retention-cohort "mission-baseline-real-runner")
+        observed (atom nil)
+        result (run-token-feature-card-attempt
+                cohort decision
+                {:isolate-modified-runner? true
+                 :dispatch-observer
+                 (fn [agent _]
+                   (when (= agent "zai-5")
+                     (reset! observed
+                             (cohort/read-pre-author-baseline
+                              (:path cohort) (:root cohort) "attempt-001"))))})]
+    (is (= :wm/pre-author-mission-baseline-event-v1 (:schema @observed)))
+    (is (= :captured (get-in @observed [:baseline :status])))
+    (is (string? (get-in @observed [:baseline :request :dispatch-sha256])))
+    (is (= (get-in @observed [:baseline :occurrence-id])
+           (get-in @observed [:baseline :request :dispatch
+                              :occurrence :action/id])))
+    (is (= "zai-5" (first (:dispatches result))))
+    (let [calls (atom 0)
+          failed (with-redefs [cohort/append-pre-author-baseline!
+                               (fn [& _]
+                                 (throw (ex-info "fixture write failure"
+                                                 {:failure-kind :fixture-write-failure})))]
+                   (run-token-feature-card-attempt
+                    (retention-cohort "mission-baseline-write-failure") decision
+                    {:isolate-modified-runner? true
+                     :dispatch-fn (fn [& _] (swap! calls inc) {:job-id "must-not-send"})}))]
+      (is (zero? @calls))
+      (is (= :incomplete (get-in failed [:result :outcome])))
+      (is (= :fixture-write-failure
+             (get-in failed [:result :data :error-data :failure-kind]))))))
+
 (deftest non-cascade-target-precedence-is-unchanged
   (doseq [[action target] [[{:type :repair-machine-failure :target "repair-1"} "repair-1"]
                            [{:cascade-id :old-cascade :id :old-id :target "mission"} :old-cascade]

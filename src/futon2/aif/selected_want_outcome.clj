@@ -18,8 +18,13 @@
          (= sha256 (field/sha256 (.getBytes (slurp path) "UTF-8"))))
     (catch Throwable _ false)))
 
-(defn receipt [{:keys [selected-action token-comparison mission-observation progress-evidence blockers]}]
-  (let [target (:target selected-action)
+(defn receipt [{:keys [selected-action token-comparison mission-observation progress-evidence blockers]
+                :as input}]
+  (if (and (contains? input :mission-observation)
+           (not= :admitted (:status mission-observation)))
+    (refuse :selected-want-mission-observation-refused
+            {:mission-observation mission-observation})
+    (let [target (:target selected-action)
         ;; The selection writes a want as a bare token of the action's own
         ;; target; predictions, locators and evidence use [target token]. A
         ;; want already written as a vector is checked below as it stands.
@@ -124,4 +129,4 @@
                                                 [class (mapv :want
                                                              (filter #(= class (:classification %))
                                                                      outcomes))])) classes)}]
-            (assoc base :receipt/id (identity/digest base))))))))
+            (assoc base :receipt/id (identity/digest base)))))))))

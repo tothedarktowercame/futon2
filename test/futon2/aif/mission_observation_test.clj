@@ -99,6 +99,24 @@
                                     :dispatch {} :repository "."
                                     :after-revision "after" :after-rows []})))))
 
+(deftest explicit-mission-input-never-falls-back-to-pattern-belief
+  (let [action {:target "M-target" :want [:hole]
+                :observation-locators {["M-target" :hole] {:class :C3}}}
+        comparison {:status :compared :prediction {:initial-belief {#{} 1}}
+                    :tokens [{:token ["M-target" :hole] :observed false
+                              :measurement {:declared-locator {:class :C3}
+                                            :after-locator {:sha "after"}
+                                            :result {:evidence {:resolved-sha "after"}}}}]}]
+    (doseq [mission [nil {} {:status :refused :reason :before-authority-mismatch}]]
+      (is (= :selected-want-mission-observation-refused
+             (:reason (selected/receipt {:selected-action action
+                                         :token-comparison comparison
+                                         :mission-observation mission})))))
+    (is (= :verified
+           (:status (selected/receipt {:selected-action action
+                                       :token-comparison comparison})))
+        "absence of the new key retains the documented legacy contract")))
+
 (deftest actual-reader-true-before-and-c4
   (testing "an actual C3 true baseline is a policy refusal, not a new achievement"
     (scenario-with

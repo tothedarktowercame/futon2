@@ -5806,10 +5806,14 @@
       :deferred-author-context-job-mismatch
       (or (not (string? (:repository context)))
           (nil? (:pre-author-head context))
-          (not (string? (:prompt-sha256 context)))
-          (not= :wm/mission-observation-baseline-v1
-                (get-in context [:mission-observation-baseline :schema])))
+          (not (string? (:prompt-sha256 context))))
       :deferred-author-context-incomplete
+      (and (contains? context :mission-observation-baseline)
+           (or (not= :wm/mission-observation-baseline-v1
+                     (get-in context [:mission-observation-baseline :schema]))
+               (not= :captured (get-in context [:d-task-dispatch :status]))
+               (not (string? (get-in context [:mission-observation-origin :attempt-id])))))
+      :deferred-author-mission-baseline-invalid
       (and (:target obligation)
            (not= (:target obligation) (:target context)))
       :deferred-author-context-target-mismatch)))
@@ -8087,40 +8091,72 @@
                                         :target-repository-head
                                         (:head head-observation))
                                  target mission construction stop-lines))
+                mission-applicable?
+                (and (str/starts-with? (str target) "M-")
+                     (seq (get-in construction [:selected-action :want]))
+                     (not= :repair-machine-failure
+                           (get-in construction [:selected-action :type])))
                 _ (reset! d-task-dispatch
-                          (d-task/capture-result
-                           (assoc @d-task-context
-                                  :declaration-reads (some-> (:declaration-reads/state opts) deref)
-                                  :before pre-author-head)))
+                          (if deferred-author-job
+                            (:d-task-dispatch deferred-author-context)
+                            (d-task/capture-result
+                             (assoc @d-task-context
+                                    :declaration-reads (some-> (:declaration-reads/state opts) deref)
+                                    :before pre-author-head))))
                 _ (when-not (= :captured (:status @d-task-dispatch))
                     (throw (ex-info "Selected action could not be bound to the D task dispatch"
                                     {:outcome :incomplete
                                      :failure-kind (:kind @d-task-dispatch)
                                      :failure-stage :author-dispatch
                                      :d-task-dispatch @d-task-dispatch})))
+                retained-mission-event
+                (when (and mission-applicable? deferred-author-job)
+                  (let [origin (:mission-observation-origin deferred-author-context)]
+                    (when-not (and (= (:cohort-id origin) (:cohort/id start-event))
+                                   (string? (:attempt-id origin)))
+                      (throw (ex-info "Deferred mission baseline origin invalid"
+                                      {:failure-kind :pre-author-baseline-origin-invalid})))
+                    (if cohort-source
+                      (cohort/read-pre-author-baseline
+                       cohort-source (:data-root execution-cohort) (:attempt-id origin))
+                      (cohort/read-pre-author-baseline (:attempt-id origin)))))
                 fresh-mission-baseline
-                (mission-observation/capture-before
-                 {:dispatch (:dispatch @d-task-dispatch)
-                  :repository author-repo :revision (:head pre-author-head)})
+                (when mission-applicable?
+                  (mission-observation/capture-before
+                   {:dispatch (:dispatch @d-task-dispatch)
+                    :repository author-repo :revision (:head pre-author-head)}))
                 mission-baseline
-                (if deferred-author-job
-                  (:mission-observation-baseline deferred-author-context)
+                (if (and mission-applicable? deferred-author-job)
+                  (:baseline retained-mission-event)
                   fresh-mission-baseline)
-                _ (when-not (= :captured (:status mission-baseline))
+                _ (when (and mission-applicable? deferred-author-job
+                             (or (not= (:cohort/id retained-mission-event)
+                                       (get-in deferred-author-context
+                                               [:mission-observation-origin :cohort-id]))
+                                 (not= (:attempt/id retained-mission-event)
+                                       (get-in deferred-author-context
+                                               [:mission-observation-origin :attempt-id]))
+                                 (not= mission-baseline
+                                       (:mission-observation-baseline deferred-author-context))))
+                    (throw (ex-info "Deferred mission baseline event binding invalid"
+                                    {:failure-kind :pre-author-baseline-origin-invalid})))
+                _ (when (and mission-applicable?
+                             (not= :captured (:status mission-baseline)))
                     (throw (ex-info "Pre-author mission baseline unavailable"
                                     {:failure-kind :pre-author-baseline-unavailable
                                      :baseline mission-baseline})))
-                _ (when (and deferred-author-job
+                _ (when (and mission-applicable? deferred-author-job
                              (not= fresh-mission-baseline mission-baseline))
                     (throw (ex-info "Deferred mission baseline rebound"
                                     {:failure-kind :pre-author-baseline-rebound})))
-                _ (when-not cohort?
+                _ (when (and mission-applicable? (not cohort?))
                     (throw (ex-info "Durable pre-author baseline required"
                                     {:failure-kind :pre-author-baseline-durability-disabled})))
-                _ (if cohort-source
-                    (cohort/append-pre-author-baseline!
-                     cohort-source (:data-root execution-cohort) attempt-id mission-baseline)
-                    (cohort/append-pre-author-baseline! attempt-id mission-baseline))
+                _ (when (and mission-applicable? (not deferred-author-job))
+                    (if cohort-source
+                      (cohort/append-pre-author-baseline!
+                       cohort-source (:data-root execution-cohort) attempt-id mission-baseline)
+                      (cohort/append-pre-author-baseline! attempt-id mission-baseline)))
                 author-prompt-text
                 (prompt-for-head pre-author-head)
                 author-response
@@ -8168,6 +8204,10 @@
                                            :repository author-repo
                                            :pre-author-head pre-author-head
                                            :mission-observation-baseline mission-baseline
+                                           :mission-observation-origin
+                                           {:cohort-id (:cohort/id start-event)
+                                            :attempt-id attempt-id}
+                                           :d-task-dispatch @d-task-dispatch
                                            :job-id author-job-id
                                            :prompt-sha256 (sha256 author-prompt-text)}})
                                   e)))))
@@ -8388,16 +8428,19 @@
                                      [:selection :judgment :token-outcome-prediction])
                              measurements commit)
                             mission-comparison
-                            (mission-observation/project
-                             {:baseline mission-baseline
-                              :dispatch (get-in @d-task-dispatch [:dispatch])
-                              :repository repo :after-revision commit
-                              :after-rows measurements})
+                            (when mission-applicable?
+                              (mission-observation/project
+                               {:baseline mission-baseline
+                                :dispatch (get-in @d-task-dispatch [:dispatch])
+                                :repository repo :after-revision commit
+                                :after-rows measurements}))
                             outcomes
                             (selected-want-outcome/receipt
-                             {:selected-action (get-in construction [:selected-action])
-                              :token-comparison comparison
-                              :mission-observation mission-comparison})]
+                             (cond->
+                              {:selected-action (get-in construction [:selected-action])
+                               :token-comparison comparison}
+                               mission-applicable?
+                               (assoc :mission-observation mission-comparison)))]
                         {:target target :commit commit
                          :work-evidence
                          (if (= :repair-machine-failure

@@ -20,6 +20,21 @@
 
 (defn- canonical [path] (.getCanonicalPath (io/file path)))
 
+(defn- selected-dispatch [dispatch wants]
+  ;; The mission observation universe is the selected wants, not every token
+  ;; carried by the pattern action. The untouched dispatch is retained below
+  ;; as the immutable request binding.
+  (-> dispatch
+      (assoc-in [:occurrence :action/value :want] wants)
+      (update-in [:occurrence :action/value :observation-locators]
+                 #(select-keys % wants))))
+
+(defn- read-selected [dispatch wants repository revision]
+  (->> (d-task/artifact-tokens (selected-dispatch dispatch wants)
+                               repository revision)
+       (filter #(contains? (set wants) (:token %)))
+       vec))
+
 (defn- validate-census [wants rows]
   (let [groups (group-by :token rows)
         extras (vec (remove (set wants) (keys groups)))
@@ -47,7 +62,7 @@
       (not= bound-revision revision)
       (refusal :before-revision-mismatch {:expected bound-revision :actual revision})
       :else
-      (let [rows (d-task/artifact-tokens dispatch repository bound-revision)
+      (let [rows (read-selected dispatch wants repository bound-revision)
             census (validate-census wants rows)]
         (if (:reason census)
           (refusal (:reason census) (dissoc census :reason))
@@ -66,10 +81,14 @@
                        :result result
                        :evidence-sha256 (evidence/value-digest result)}))
                   (:rows census))
+            request {:dispatch dispatch
+                     :dispatch-sha256 (evidence/value-digest dispatch)
+                     :repository (canonical repository)
+                     :before-revision revision}
             base {:schema schema :status :captured :occurrence-id occurrence-id
                   :action-sha256 (identity/digest action) :target (:target action)
                   :repository (canonical repository) :revision revision
-                  :wants wants :rows normalized}]
+                  :request request :wants wants :rows normalized}]
             (assoc base :baseline-sha256 (evidence/value-digest base))))))))
 
 (defn project
@@ -82,7 +101,7 @@
         trusted-before (capture-before {:dispatch dispatch :repository repository
                                         :revision (get-in dispatch [:before :head])})
         trusted-after (when (and (string? repository) (string? after-revision))
-                        (d-task/artifact-tokens dispatch repository after-revision))
+                        (read-selected dispatch wants repository after-revision))
         supplied-after after-rows
         after-rows (mapv (fn [row]
                            (if (contains? row :observed)
