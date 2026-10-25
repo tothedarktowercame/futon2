@@ -4,8 +4,12 @@
   These replies are synthetic.  They exercise the runner's actual correction
   loop and then its existing author refusal/fresh-artifact validators; they do
   not rewrite c52d61b9 or claim an author completed live work."
-  (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.full-loop-runner :as runner]))
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.test :refer [deftest is testing]]
+            [futon2.aif.full-loop-runner :as runner])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
 
 (def base "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 (def existing "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
@@ -159,3 +163,90 @@
              (catch Throwable t t)))]
     (is (= "synthetic ambiguous transport" (ex-message thrown)))
     (is (= 1 @dispatches))))
+
+(deftest corrected-refusal-is-grounded-only-in-its-dispatched-repository
+  (let [{:keys [result]} (run-correction
+                           {:corrected-job (already-satisfied "correction-1" "author")})
+        refused
+        (with-redefs-fn
+          {#'runner/primary-repos (fn [] ["/other-repository"])
+           #'runner/commit-exists-in? (fn [repo _] (= repo "/other-repository"))}
+          #(try
+             (runner/throw-if-author-refused! (:author-job result) "M-target" :author-wait)
+             nil
+             (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (is (= :invalid-author-refusal (:failure-kind refused)))
+    (is (not= :already-satisfied (:outcome refused)))))
+
+(deftest corrected-refusal-still-admits-an-existing-artifact-in-its-own-repository
+  (let [{:keys [result]} (run-correction
+                           {:corrected-job (already-satisfied "correction-1" "author")})
+        refused
+        (with-redefs-fn
+          {#'runner/primary-repos (constantly [])
+           #'runner/commit-exists-in? (fn [repo sha] (and (= repo "/repo")
+                                                          (= sha existing)))}
+          #(try
+             (runner/throw-if-author-refused! (:author-job result) "M-target" :author-wait)
+             nil
+             (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (is (= :already-satisfied (:outcome refused)))
+    (is (= {:repo "repo" :sha existing} (:grounded-commit refused)))))
+
+(defn- temp-dir []
+  (.toFile (Files/createTempDirectory "author-correction-record-"
+                                     (make-array FileAttribute 0))))
+
+(deftest correction-refusal-evidence-survives-the-real-sealed-terminal-writer
+  (let [dir (temp-dir)]
+    (try
+      (let [{:keys [result]} (run-correction
+                               {:corrected-job (already-satisfied "wrong-id" "author")})
+            written (runner/persist-run-record!
+                     {:run-record-dir (.getPath dir)
+                      :observation-labels-path (str (io/file dir "labels.edn"))
+                      :scan-render-fn (fn [& _] nil)
+                      :nano-time-fn (constantly 0)}
+                     "author-correction-synthetic" "2026-10-25T00:00:00Z"
+                     {:outcome :build-failed
+                      :data {:failure-kind (:failure-kind (ex-data result))
+                             :failure-stage :author-wait
+                             :error-data (ex-data result)}})
+            record (edn/read-string (slurp (:run-record written)))
+            retained (get-in record [:failure :detail :author-response-correction])]
+        (is (= "/repo" (get-in retained [:binding :repository])))
+        (is (= "original-1" (get-in retained [:original :request :job-id])))
+        (is (= "correction-1" (get-in retained [:request :job-id])))
+        (is (= "wrong-id" (get-in retained [:corrected :job :job-id])))
+        (is (= :reply-provenance-mismatch (:reason retained))))
+      (finally
+        (doseq [f (reverse (file-seq dir))]
+          (io/delete-file f true))))))
+
+(deftest actual-author-wait-path-corrects-before-the-unchanged-refusal-gate
+  "The correction crosses the real author-wait boundary.  This fixture does
+  not fabricate a git commit in its temporary repository, so the unchanged
+  already-satisfied artifact check subsequently refuses it as invalid."
+  (require 'futon2.aif.full-loop-runner-test)
+  (let [run-attempt (ns-resolve 'futon2.aif.full-loop-runner-test
+                                'run-feature-card-attempt)
+        feature-card (var-get (ns-resolve 'futon2.aif.full-loop-runner-test
+                                          'feature-card-claim))
+        {:keys [result dispatches]} (run-attempt
+                                     {:author-response-corrections 1
+                                      :isolate-modified-runner? true
+                                      :initial-author-job
+                                      {:job-id "feature-author" :agent-id "zai-5"
+                                       :state "done" :artifact-ref "feature123"
+                                       :result-summary "FULL_LOOP_AUTHOR: DONE feature123"
+                                      :execution {:executed true :tool-events 1
+                                                   :command-events 1}}
+                                      :cure-agent "zai-5"
+                                      :cure-summary "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head"
+                                      :cure-card feature-card})]
+    (is (= ["zai-5" "zai-5"] dispatches)
+        "the actual author-wait path dispatches exactly one correction")
+    (is (= :invalid-author-refusal (get-in result [:data :failure-kind])))
+    (is (= "feature-cure"
+           (get-in result [:data :error-data :author-job
+                           :author-response-corrections 0 :request :job-id])))))

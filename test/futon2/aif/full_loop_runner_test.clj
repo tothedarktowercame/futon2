@@ -907,6 +907,7 @@
            reviewer-correction-events reviewer-correction-result
            reviewer-correction-agent reviewer-correction-artifact-head
            reviewer-correction-summary reviewer-correction-state
+           author-response-corrections cure-agent
            initial-author-job operator-actions delivery-qa-fn
            judgement-transform-fn dispatch-observer runner-options
            isolate-modified-runner?]
@@ -992,6 +993,7 @@
                                                 (str "FULL_LOOP_AUTHOR: DONE "
                                                      (or cure-commit commit)))
                             :execution successful-execution}
+                     cure-agent (assoc :agent-id cure-agent)
                      cure-card (assoc :feature-card cure-card))
                    "feature-review"
                    (cond-> {:job-id job-id :agent-id "codex-7" :state "done"
@@ -1037,6 +1039,8 @@
                 {:build-cure-retries build-cure-retries})
               (when (some? review-evidence-corrections)
                 {:review-evidence-corrections review-evidence-corrections})
+              (when (some? author-response-corrections)
+                {:author-response-corrections author-response-corrections})
               (when delivery-qa-fn
                 {:delivery-qa-fn delivery-qa-fn})
               (when judgement-transform-fn

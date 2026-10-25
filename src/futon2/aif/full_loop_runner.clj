@@ -883,6 +883,13 @@
                       (map? v)
                       (resume-protocol-violation-detail? error-data v))
                  {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
+                 ;; A correction refusal is its own bounded terminal evidence:
+                 ;; the immutable binding and the retained original/request/
+                 ;; corrected job identities are required to audit why the
+                 ;; later author gate accepted or refused it.  Generic nested
+                 ;; errors remain scalar-only below.
+                 (and (= :author-response-correction k) (map? v))
+                 {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
                  (scalar? v) {:kept (assoc kept k v) :omitted omitted}
                  (and (vector? v) (<= (count v) 32) (every? scalar? v))
                  {:kept (assoc kept k v) :omitted omitted}
@@ -3189,9 +3196,10 @@
       that does not exist — -> :invalid-author-refusal (as before).
   EXISTS-FN is the injectable commit check ([repo sha] -> boolean) so tests
   stub the git call; REPO names where to look when the job does not."
-  ([job] (author-refusal-classification job nil nil))
-  ([job repo] (author-refusal-classification job repo nil))
-  ([job repo exists-fn]
+  ([job] (author-refusal-classification job nil nil false))
+  ([job repo] (author-refusal-classification job repo nil false))
+  ([job repo exists-fn] (author-refusal-classification job repo exists-fn false))
+  ([job repo exists-fn repository-required?]
    (let [{:keys [verdict reason]} (author-verdict job)
          artifact-ref (:artifact-ref job)
          exists-fn (or exists-fn commit-exists-in?)]
@@ -3199,10 +3207,12 @@
        (let [already? (already-satisfied-card? job)]
          (cond
            (and already? artifact-ref)
-           (let [found (or (when repo
-                             (when (exists-fn repo artifact-ref) repo))
-                           (some (fn [r] (when (exists-fn r artifact-ref) r))
-                                 (primary-repos)))]
+           (let [found (if repository-required?
+                         (when (and repo (exists-fn repo artifact-ref)) repo)
+                         (or (when repo
+                               (when (exists-fn repo artifact-ref) repo))
+                             (some (fn [r] (when (exists-fn r artifact-ref) r))
+                                   (primary-repos))))]
              (if found
                {:outcome :already-satisfied
                 :grounded-commit {:repo (.getName (io/file (str found)))
@@ -3228,9 +3238,20 @@
   a reasoned refusal with no artifact claim is the guardrail refusal; a
   contradictory or unsupported claim stays :invalid-author-refusal."
   [author-job target stage]
-  (when-let [classification (author-refusal-classification
-                             author-job
-                             (get-in author-job [:artifact-binding :repo]))]
+  (let [correction-repository
+        (get-in author-job [:author-response-corrections 0 :binding :repository])
+        ;; A correction carries the repository it was dispatched to in its
+        ;; immutable binding.  Do not let its refusal search another primary
+        ;; repository: that would turn an existing but unrelated artifact into
+        ;; evidence for this correction.  Legacy author refusals retain their
+        ;; existing fallback search when no correction record is present.
+        classification (author-refusal-classification
+                        author-job
+                        (or correction-repository
+                            (get-in author-job [:artifact-binding :repo]))
+                        nil
+                        (some? correction-repository))]
+    (when classification
     (case (:outcome classification)
       :guardrail-refusal
       (throw (ex-info "Author refused with a typed reason"
@@ -3250,7 +3271,7 @@
                       {:outcome :build-failed
                        :failure-kind :invalid-author-refusal
                        :failure-stage stage
-                       :target target :author-job author-job})))))
+                       :target target :author-job author-job}))))))
 
 (defn- review-execution-gate [files job]
   (task-execution/review-execution-gate files job))
