@@ -25,7 +25,7 @@
 
 (def contract
   (edn/read-string
-   (slurp (io/resource "wm/injury8467/repair-acceptance.edn"))))
+   (slurp (io/resource "resources/wm/injury8467/repair-acceptance.edn"))))
 
 (def target (get-in contract [:retained-attempt :target]))
 (def wants (get-in contract [:retained-attempt :selected-wants]))
