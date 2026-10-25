@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25T18:42:26.239137+00:00 codex-11: verified41 canonical activation pins and identical pre/post provider/readback; ledgerSHA d3c78a4 unchanged42/effective2, gen6five scopes, idle/budget0.41/8467 denote remaining injury IDs; activation readback count-only, prior exact census at identical bytes. Agency claude9 job3890 assembles evaluator-only41 genuine intent for independent coordinator review. No clearance.
+
 - 2026-10-25T18:36:56.839491+00:00 codex-11: independently reviewed41 ae9e7158 and reran actual-handler acceptance10/108green; one known journal-ordering restart disclosed. Source merged; idle canonical activation released with exact gen6 five scopes preserved, no medic disposition. Review: `/home/joe/notes/wm-next/offline-repair/injury41/function-repair/coordinator-review.md`. Budget0.
 
 - 2026-10-25T18:31:16.914441+00:00 codex-11: held4868ed31 integration: independent probe explicit refused mission input returns verified via legacy fallback; durable baseline reader has no runner caller. Agency codex12 job3888 fixes fallback/reuse/scope and supplies actual composed tests before release. No activation/clearance,budget0. Review: `/home/joe/notes/wm-next/offline-repair/injury8467/mission-observation/persistence/review/coordinator-review.md`.
