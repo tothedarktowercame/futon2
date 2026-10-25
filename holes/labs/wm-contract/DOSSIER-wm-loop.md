@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T20:51:30.294468+00:00 — 8467 projection review held
+
+Isolated c618f2b fixes actual ordinary reopen admission but special-route public probe accepts author-failed reopen with extra new-cause-pin and changes projected cause. Gate is too broad; source remains unmerged/unactivated. Evidence: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/projection-repair/coordinator-review.md and special-route-probe.log (exit0). Commission narrow route binding followup; envelope and live ledger unchanged; budget0.
+
 ### 2026-10-25T20:46:11.243227+00:00 — 8467 admission projection defect isolated
 
 Completed copied-ledger matrix refused medic/binding-mismatch, not clearance. Coordinator binding-diagnosis probe isolates cause fields: ordinary reopened37 projects opening90ca rather than retained new-cause25e24; occurrence37/predecessor36 match, authority callback never reached. Evidence: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/coordinator-binding-diagnosis.md and binding-diagnosis.log. Approved envelope unchanged. Agency codex-12 job invoke-1792961159948-3905-f90c797d commissioned isolated adapter repair, actual admission regression and semantic mutation; no live release. Ledger remains last verified43/effective1, budget0. Prior interrupted/red matrix retained.
