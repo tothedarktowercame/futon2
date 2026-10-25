@@ -427,19 +427,27 @@
          :ledger (seal-ledger (update ledger :entries conj (:entry checked)))
          :entry (:entry checked)})))))
 
-(defn- transition->medic-entry [prior-by-injury opening-by-injury entry]
+(defn- transition->medic-entry
+  [prior-by-injury transition-by-injury opening-by-injury corrections entry]
   (let [opening (or (get opening-by-injury (:injury-id entry)) entry)
         previous (get prior-by-injury (:injury-id entry))
-        ;; Reopen validation makes :new-cause-pin the evidence for an ordinary
-        ;; attributable retry's fresh failed classification.  Medic recurrence
-        ;; uses the same field with additional bindings.  Author-failed and
-        ;; corrected-port routes carry no new cause and therefore retain the
-        ;; prior occurrence's cause.
-        special-reopen? (#{:author-failed :port-refusal-corrected}
-                          (:reason entry))
-        fresh-cause? (and (#{:reopened :abandoned} (:state entry))
-                          (not special-reopen?)
-                          (:new-cause-pin entry))
+        previous-transition (get transition-by-injury (:injury-id entry))
+        previous-occurrence [(:injury-id entry) (:entry-id previous)]
+        covered? (some #(= previous-occurrence (medic/occurrence %)) corrections)
+        exact-retry? (and (= :enacted (:state previous-transition))
+                          (nonblank? (:retry-click entry))
+                          (= (:retry-click entry) (:retry-click previous-transition)))
+        ordinary-reopen? (and (= :reopened (:state entry)) exact-retry?)
+        medic-recurrence? (and covered?
+                               (#{:open :enacted} (:state previous-transition))
+                               (#{:reopened :abandoned} (:state entry))
+                               (not exact-retry?)
+                               (:recurs-after-medic-operation-id entry)
+                               (= [(:injury-id previous-transition)
+                                   (:ordinal previous-transition)]
+                                  (:recurs-after-medic-occurrence entry)))
+        fresh-cause? (and (:new-cause-pin entry)
+                          (or ordinary-reopen? medic-recurrence?))
         cause (cond
                 fresh-cause? (:new-cause-pin entry)
                 previous {:path (:cause-record-id previous)
@@ -453,14 +461,16 @@
    :active? (contains? active-states (:state entry))}))
 
 (defn- medic-state [ledger]
-  (reduce (fn [{:keys [state prior openings] :as acc} entry]
+  (reduce (fn [{:keys [state prior transitions openings] :as acc} entry]
             (cond
               (transition? entry)
               (let [openings (if (contains? openings (:injury-id entry))
                                openings (assoc openings (:injury-id entry) entry))
-                    model-entry (transition->medic-entry prior openings entry)]
+                    model-entry (transition->medic-entry
+                                 prior transitions openings (:corrections state) entry)]
                 {:state (update state :history conj model-entry)
                  :prior (assoc prior (:injury-id entry) model-entry)
+                 :transitions (assoc transitions (:injury-id entry) entry)
                  :openings openings})
 
               (and (observation? entry)
@@ -469,7 +479,8 @@
                                         (get-in entry [:medic-operation :request :candidate])))
 
               :else acc))
-          {:state {:history [] :corrections []} :prior {} :openings {}}
+          {:state {:history [] :corrections []}
+           :prior {} :transitions {} :openings {}}
           (:entries ledger)))
 
 (defn- medic-operation-defects [operation]

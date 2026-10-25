@@ -147,7 +147,21 @@
                           "medic/enacted-limit"))
         result (terminal/integrate history
                                    (classified "retry-limit" "retry/exact" fresh-pin)
-                                   synthetic-authority)]
+                                   synthetic-authority)
+        extra-base {:injury-id (:injury-id (classified "x" "x" fresh-pin))
+                    :state :abandoned :attempt 1
+                    :repair-id "repair/synthetic"
+                    :reason :attempt-limit-exhausted
+                    :retry-click "retry/exact"}
+        extra-valid (ledger/append-transition
+                     history (assoc extra-base :new-cause-pin fresh-pin)
+                     synthetic-authority)
+        extra-malformed (ledger/append-transition
+                         history (assoc extra-base
+                                        :new-cause-pin {:path "" :sha256 "bad"})
+                         synthetic-authority)
+        prior-projected (last (get-in (#'ledger/medic-state history)
+                                      [:state :history]))]
     (is (= :appended (:status result)) (pr-str result))
     (is (= :abandoned (get-in result [:entry :state])))
     (is (= :attempt-limit-exhausted (get-in result [:entry :reason])))
@@ -157,6 +171,12 @@
            (let [projected (last (get-in (#'ledger/medic-state (:ledger result))
                                          [:state :history]))]
              {:path (:cause-record-id projected) :sha256 (:cause-pin projected)})))
+    (doseq [extra [extra-valid extra-malformed]]
+      (is (= :appended (:status extra)) (pr-str extra))
+      (is (= (select-keys prior-projected [:cause-record-id :cause-pin])
+             (select-keys (last (get-in (#'ledger/medic-state (:ledger extra))
+                                        [:state :history]))
+                          [:cause-record-id :cause-pin]))))
     (is (= :valid (:status (ledger/validate-ledger
                             (:ledger result) synthetic-authority))))))
 
