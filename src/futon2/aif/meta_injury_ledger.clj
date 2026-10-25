@@ -4,7 +4,8 @@
   This module deliberately has no filesystem, serving, runner, or mutable
   production-data dependency."
   (:require [clojure.string :as str]
-            [futon2.aif.action-identity :as identity]))
+            [futon2.aif.action-identity :as identity]
+            [futon2.aif.medic-disposition :as medic]))
 
 (def ledger-schema :wm/meta-injury-ledger-v1)
 (def transition-schema :wm/meta-injury-transition-v1)
@@ -80,6 +81,44 @@
                       (map #(count (:corrected-port-receipt-pins %))))
                 + 0 (injury-history ledger injury-id))))
 (defn- latest [ledger injury-id] (last (injury-history ledger injury-id)))
+(declare validate-ledger deny-medic-authority)
+
+(defn classification-pins
+  "Every classification pin already retained anywhere in a validated ledger.
+  This is a computation only; callers that need authority must validate first."
+  [ledger]
+  (into #{}
+        (comp (mapcat (juxt :record-pin :cause-record-pin :new-cause-pin))
+              (remove nil?))
+        (:entries ledger)))
+
+(defn authoritative-snapshot
+  "Construct the one recurrence snapshot for INJURY-ID from a valid ledger.
+  Only the formally modelled :open and :enacted origins are supported."
+  ([ledger injury-id]
+   (authoritative-snapshot ledger injury-id deny-medic-authority))
+  ([ledger injury-id authority-verifier]
+  (let [checked (validate-ledger ledger authority-verifier)
+        entry (when (= :valid (:status checked)) (latest ledger injury-id))]
+    (cond
+      (not= :valid (:status checked))
+      (refusal :ledger/tampered {:ledger-defects (:defects checked)})
+      (nil? entry) (refusal :snapshot/latest-missing)
+      (not (#{:open :enacted} (:state entry)))
+      (refusal :snapshot/unsupported-origin {:origin (:state entry)})
+      :else
+      {:status :computed
+       :snapshot {:ledger-pin (:ledger-pin ledger)
+                  :injury-id injury-id
+                  :occurrence [injury-id (:ordinal entry)]
+                  :entry-id (:entry-id entry)
+                  :entry-pin (:entry-pin entry)
+                  :attempt (:attempt entry)
+                  :origin (cond-> {:state (:state entry)}
+                            (= :enacted (:state entry))
+                            (assoc :retry-click (:retry-click entry)))
+                  :attempt-limit (effective-attempt-limit ledger injury-id)
+                  :seen-record-pins (classification-pins ledger)}}))))
 (defn requeue-ordinal
   "Count every re-queue identity minted for the latest enacted attempt.
   Unlike :requeues, this advances even when another open injury explains an
@@ -289,12 +328,12 @@
              true))
       (conj :abandonment/not-exhausted))))
 
-(declare validate-ledger)
 (defn validate-transition
   "Total validation against an already sealed ledger."
-  [ledger proposed]
+  ([ledger proposed] (validate-transition ledger proposed deny-medic-authority))
+  ([ledger proposed authority-verifier]
   (try
-    (let [history-check (validate-ledger ledger)]
+    (let [history-check (validate-ledger ledger authority-verifier)]
       (if-not (= :valid (:status history-check))
         (refusal :ledger/tampered {:ledger-defects (:defects history-check)})
         (let [entry (-> proposed
@@ -315,31 +354,111 @@
             (refusal :transition/invalid {:defects (vec (distinct defects))})
             {:status :valid :entry (seal-entry entry)}))))
     (catch Throwable t
-      (refusal :transition/malformed {:detail (ex-message t)}))))
+      (refusal :transition/malformed {:detail (ex-message t)})))))
 
-(defn append-transition [ledger proposed]
+(defn append-transition
+  ([ledger proposed] (append-transition ledger proposed deny-medic-authority))
+  ([ledger proposed authority-verifier]
   (let [replayed? (and (:entry-id proposed)
                        (some #(= (:entry-id proposed) (:entry-id %))
                              (:entries ledger)))
         checked (if replayed?
                   (refusal :transition/duplicate-replay)
-                  (validate-transition ledger proposed))]
+                  (validate-transition ledger proposed authority-verifier))]
     (if-not (= :valid (:status checked))
       checked
       (if (some #(= (:entry-id (:entry checked)) (:entry-id %)) (:entries ledger))
         (refusal :transition/duplicate-replay)
         {:status :appended
          :ledger (seal-ledger (update ledger :entries conj (:entry checked)))
-         :entry (:entry checked)}))))
+         :entry (:entry checked)})))))
 
-(defn- observation-defects [entry]
+(defn- transition->medic-entry [prior-by-injury opening-by-injury entry]
+  (let [opening (or (get opening-by-injury (:injury-id entry)) entry)]
+  {:injury-id (:injury-id entry)
+   :entry-id (str (:ordinal entry))
+   :predecessor-entry-id (some-> (get prior-by-injury (:injury-id entry))
+                                 :ordinal str)
+   :cause-record-id (get-in opening [:cause-record-pin :path])
+   :cause-pin (get-in opening [:cause-record-pin :sha256])
+   :active? (contains? active-states (:state entry))}))
+
+(defn- medic-state [ledger]
+  (reduce (fn [{:keys [state prior openings] :as acc} entry]
+            (cond
+              (transition? entry)
+              (let [openings (if (contains? openings (:injury-id entry))
+                               openings (assoc openings (:injury-id entry) entry))
+                    model-entry (transition->medic-entry prior openings entry)]
+                {:state (update state :history conj model-entry)
+                 :prior (assoc prior (:injury-id entry) entry)
+                 :openings openings})
+
+              (and (observation? entry)
+                   (= :medic-repaired (:observation-kind entry)))
+              (assoc acc :state (update state :corrections conj
+                                        (get-in entry [:medic-operation :request :candidate])))
+
+              :else acc))
+          {:state {:history [] :corrections []} :prior {} :openings {}}
+          (:entries ledger)))
+
+(defn- medic-operation-defects [operation]
+  (cond-> []
+    (not (and (map? operation)
+              (= #{:operation-id :expected-ledger-pin :request :authority-receipt-pin}
+                 (set (keys operation)))))
+    (conj :medic/operation-shape)
+    (not (nonblank? (:operation-id operation))) (conj :medic/operation-id)
+    (not (pin? (:expected-ledger-pin operation))) (conj :medic/expected-ledger-pin)
+    (not (pin? (:authority-receipt-pin operation))) (conj :medic/authority-receipt-pin)
+    (not (and (map? (:request operation))
+              (= #{:candidate :evidence} (set (keys (:request operation))))))
+    (conj :medic/request-shape)))
+
+(defn- check-medic-operation [ledger operation authority-verifier]
+  (let [shape-defects (medic-operation-defects operation)]
+    (cond
+      (seq shape-defects) {:status :refused :reason :medic/malformed
+                           :defects shape-defects}
+      (not= (:expected-ledger-pin operation) (:ledger-pin ledger))
+      (refusal :medic/stale-root)
+      :else
+      (let [state (:state (medic-state ledger))
+            request (:request operation)
+            result (medic/process
+                    (fn [current candidate evidence]
+                      (try
+                        (true? (authority-verifier
+                                {:ledger ledger :operation operation
+                                 :current current :candidate candidate
+                                 :evidence evidence}))
+                        (catch Throwable _ false)))
+                    state request)]
+        (cond
+          (= :appended (:status result)) {:status :admitted :result result}
+          (#{:duplicate :conflict} (:status result))
+          {:status :conflict :result result}
+          :else (refusal (keyword "medic" (name (:reason result)))
+                         {:medic-result result}))))))
+
+(defn- deny-medic-authority [_] false)
+
+(defn- observation-defects
+  ([entry] (observation-defects nil entry deny-medic-authority))
+  ([ledger entry authority-verifier]
   (cond-> []
     (not (pin? (:record-pin entry))) (conj :observation/record-pin)
     (not (keyword? (:observation-kind entry))) (conj :observation/kind)
     (and (= :retry-inconclusive (:observation-kind entry))
          (or (not (nonblank? (:injury-id entry)))
              (not (nonblank? (:retry-click entry)))))
-    (conj :observation/retry-attribution)))
+    (conj :observation/retry-attribution)
+    (and (= :medic-repaired (:observation-kind entry))
+         (not= :admitted (:status (check-medic-operation
+                                  ledger (:medic-operation entry)
+                                  authority-verifier))))
+    (conj :observation/medic-admission))))
 
 (defn append-observation
   "Append a pinned non-transition record. It cannot alter injury state.
@@ -371,9 +490,54 @@
      (catch Throwable t
        (refusal :observation/malformed {:detail (ex-message t)})))))
 
+(defn append-medic-repaired
+  "Pure typed medic append. AUTHORITY-VERIFIER verifies an external retained
+  authority receipt against the exact ledger/operation/payload context."
+  [ledger record-pin operation authority-verifier]
+  (try
+    (let [checked (validate-ledger ledger authority-verifier)
+          prior (filter #(and (observation? %)
+                              (= :medic-repaired (:observation-kind %)))
+                        (:entries ledger))
+          exact (some #(when (and (= record-pin (:record-pin %))
+                                  (= operation (:medic-operation %))) %)
+                      prior)]
+      (cond
+        (not= :valid (:status checked))
+        (refusal :ledger/tampered {:ledger-defects (:defects checked)})
+        exact {:status :duplicate :ledger ledger :entry exact}
+        (not= (:expected-ledger-pin operation) (:ledger-pin ledger))
+        (refusal :medic/stale-root)
+        :else
+        (let [admission (check-medic-operation ledger operation authority-verifier)]
+          (if-not (= :admitted (:status admission))
+            (if (= :conflict (:status admission))
+              {:status :conflict :reason :medic/occurrence-conflict :ledger ledger}
+              admission)
+            (let [previous (last (:entries ledger))
+                  entry (seal-entry
+                         {:schema observation-schema
+                          :ordinal (inc (count (:entries ledger)))
+                          :record-pin record-pin
+                          :observation-kind :medic-repaired
+                          :medic-operation operation
+                          :predecessor (when previous
+                                         {:entry-id (:entry-id previous)
+                                          :entry-pin (:entry-pin previous)})})
+                  result-ledger (seal-ledger (update ledger :entries conj entry))
+                  result-check (validate-ledger result-ledger authority-verifier)]
+              (if (= :valid (:status result-check))
+                {:status :appended :ledger result-ledger :entry entry
+                 :admission admission}
+                (refusal :medic/result-invalid
+                         {:ledger-defects (:defects result-check)})))))))
+    (catch Throwable t
+      (refusal :medic/malformed {:detail (ex-message t)}))))
+
 (defn validate-ledger
   "Total validation of seals, global append chain and every injury transition."
-  [ledger]
+  ([ledger] (validate-ledger ledger deny-medic-authority))
+  ([ledger authority-verifier]
   (try
     (let [top-defects (cond-> []
                         (not= ledger-schema (:schema ledger)) (conj :ledger/schema)
@@ -408,7 +572,7 @@
                 semantic-defects (if (transition? entry)
                                    (into (common-defects entry)
                                          (state-defects prefix entry))
-                                   (observation-defects entry))
+                                   (observation-defects prefix entry authority-verifier))
                 next-defects (cond-> base-defects
                                (seq semantic-defects)
                                (conj :entry/transition-invalid)
@@ -423,12 +587,13 @@
              :defects (vec (distinct defects))}
             {:status :valid :entry-count (count entries)}))))
     (catch Throwable t
-      (refusal :ledger/malformed {:detail (ex-message t)}))))
+      (refusal :ledger/malformed {:detail (ex-message t)})))))
 
 (defn active-injuries
   "Map injury id to its latest valid nonterminal transition. Tampering refuses."
-  [ledger]
-  (let [checked (validate-ledger ledger)]
+  ([ledger] (active-injuries ledger deny-medic-authority))
+  ([ledger authority-verifier]
+  (let [checked (validate-ledger ledger authority-verifier)]
     (if-not (= :valid (:status checked))
       checked
       {:status :computed
@@ -438,7 +603,27 @@
                               (let [entry (last history)]
                                 (when (contains? active-states (:state entry))
                                   [injury-id entry]))))
-                      (into {}))})))
+                      (into {}))}))))
+
+(defn effective-active-injuries
+  "Authority-checked active projection. A medic correction masks only the
+  exact latest [injury-id ordinal] occurrence it names. Raw history is kept."
+  [ledger authority-verifier]
+  (let [checked (validate-ledger ledger authority-verifier)]
+    (if-not (= :valid (:status checked))
+      checked
+      (let [corrections (->> (:corrections (:state (medic-state ledger)))
+                             (map medic/occurrence) set)]
+        {:status :computed
+         :injuries (->> (transitions ledger)
+                        (group-by :injury-id)
+                        (keep (fn [[injury-id history]]
+                                (let [entry (last history)
+                                      occurrence [injury-id (str (:ordinal entry))]]
+                                  (when (and (contains? active-states (:state entry))
+                                             (not (contains? corrections occurrence)))
+                                    [injury-id entry]))))
+                        (into {}))}))))
 
 (defn pending-requeue
   "Return the attributed inconclusive observation for an injury's latest
