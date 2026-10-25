@@ -12,7 +12,7 @@
             [futon2.aif.load-identity :as load-identity]))
 
 (def fixture
-  (-> "futon2/aif/wm/injury_9ccf92a2_acceptance_fixture.edn"
+  (-> "resources/futon2/aif/wm/injury_9ccf92a2_acceptance_fixture.edn"
       io/resource slurp edn/read-string))
 (def retained (:retained-identities fixture))
 (def synthetic (:synthetic-responses fixture))
