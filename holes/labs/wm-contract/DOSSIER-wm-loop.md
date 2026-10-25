@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:44Z — 04 reassembled, independent review resumed
+
+Rebuilt exact schemas/digest/receipts verified by coordinator hashes and actual validator source/output. Production verify passes only under explicitly synthetic isolated approval inputs; predecessor/cause controls refuse. These are compatibility tests, not authority. New digest c311e9f0; real exact review dispatched to claude-9. Old bytes and unchanged repair evidence preserved. No live/clearance; ledger40/effective4 budget0. Review: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-reassembly-review.md`.
+
 ### 2026-10-25 15:41Z — 9cc composed contract static review
 
 Revised78f65313 enters real author-wait composition. Static review found prompt-hash oracle differs from production pr-str encoding; historical owner fixture ignores newer isolation flag. Requested exact oracle/fixture fixes plus total-dispatch assertion before counted evaluation. No semantic verdict or live action. Review: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/composed-review.md`.
