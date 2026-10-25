@@ -6,7 +6,7 @@
   not rewrite c52d61b9 or claim an author completed live work."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :as test :refer [deftest is testing]]
             [futon2.aif.full-loop-runner :as runner])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -197,6 +197,35 @@
   (.toFile (Files/createTempDirectory "author-correction-record-"
                                      (make-array FileAttribute 0))))
 
+(defn- with-full-loop-runner-fixtures
+  "The integration helper belongs to full-loop-runner-test.  Requiring that
+  namespace does not install its test fixtures, so compose its owned once/each
+  chain explicitly around this one test's real author-wait call."
+  [thunk]
+  (require 'futon2.aif.full-loop-runner-test)
+  (let [metadata (meta (the-ns 'futon2.aif.full-loop-runner-test))
+        fixtures (test/join-fixtures
+                  (concat (:clojure.test/once-fixtures metadata)
+                          (:clojure.test/each-fixtures metadata)))]
+    (fixtures thunk)))
+
+(defn- correction-feature-attempt []
+  (let [run-attempt (ns-resolve 'futon2.aif.full-loop-runner-test
+                                'run-feature-card-attempt)
+        feature-card (var-get (ns-resolve 'futon2.aif.full-loop-runner-test
+                                          'feature-card-claim))]
+    (run-attempt
+     {:author-response-corrections 1
+      :isolate-modified-runner? true
+      :initial-author-job
+      {:job-id "feature-author" :agent-id "zai-5"
+       :state "done" :artifact-ref "feature123"
+       :result-summary "FULL_LOOP_AUTHOR: DONE feature123"
+       :execution {:executed true :tool-events 1 :command-events 1}}
+      :cure-agent "zai-5"
+      :cure-summary "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head"
+      :cure-card feature-card})))
+
 (deftest correction-refusal-evidence-survives-the-real-sealed-terminal-writer
   (let [dir (temp-dir)]
     (try
@@ -227,26 +256,38 @@
   "The correction crosses the real author-wait boundary.  This fixture does
   not fabricate a git commit in its temporary repository, so the unchanged
   already-satisfied artifact check subsequently refuses it as invalid."
-  (require 'futon2.aif.full-loop-runner-test)
-  (let [run-attempt (ns-resolve 'futon2.aif.full-loop-runner-test
-                                'run-feature-card-attempt)
-        feature-card (var-get (ns-resolve 'futon2.aif.full-loop-runner-test
-                                          'feature-card-claim))
-        {:keys [result dispatches]} (run-attempt
-                                     {:author-response-corrections 1
-                                      :isolate-modified-runner? true
-                                      :initial-author-job
-                                      {:job-id "feature-author" :agent-id "zai-5"
-                                       :state "done" :artifact-ref "feature123"
-                                       :result-summary "FULL_LOOP_AUTHOR: DONE feature123"
-                                      :execution {:executed true :tool-events 1
-                                                   :command-events 1}}
-                                      :cure-agent "zai-5"
-                                      :cure-summary "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head"
-                                      :cure-card feature-card})]
-    (is (= ["zai-5" "zai-5"] dispatches)
-        "the actual author-wait path dispatches exactly one correction")
-    (is (= :invalid-author-refusal (get-in result [:data :failure-kind])))
-    (is (= "feature-cure"
-           (get-in result [:data :error-data :author-job
-                           :author-response-corrections 0 :request :job-id])))))
+  (with-full-loop-runner-fixtures
+    #(let [{:keys [result dispatches]} (correction-feature-attempt)]
+       (is (= ["zai-5" "zai-5"] dispatches)
+           "the actual author-wait path dispatches exactly one correction")
+       (is (= :invalid-author-refusal (get-in result [:data :failure-kind])))
+       (is (= "feature-cure"
+              (get-in result [:data :error-data :author-job
+                              :author-response-corrections 0 :request :job-id]))))))
+
+(deftest composed-author-wait-failure-persists-bounded-correction-evidence
+  "A later existing refusal receives the corrected author job.  The real
+  persistence boundary must retain its bounded correction chain there too."
+  (with-full-loop-runner-fixtures
+    #(let [dir (temp-dir)]
+       (try
+         (let [{:keys [result]} (correction-feature-attempt)
+               written (runner/persist-run-record!
+                        {:run-record-dir (.getPath dir)
+                         :observation-labels-path (str (io/file dir "labels.edn"))
+                         :scan-render-fn (fn [& _] nil)
+                         :nano-time-fn (constantly 0)}
+                        "downstream-correction-synthetic" "2026-10-25T00:00:00Z" result)
+               record (edn/read-string (slurp (:run-record written)))
+               author-job (get-in record [:failure :detail :author-job])]
+           (is (= :invalid-author-refusal (get-in record [:failure :kind])))
+           (is (= "feature-cure"
+                  (get-in author-job [:author-response-corrections 0 :request :job-id])))
+           (is (= "feature-author"
+                  (get-in author-job [:author-response-corrections 0 :original
+                                      :request :job-id])))
+           (is (= :corrected
+                  (get-in author-job [:author-response-corrections 0 :status]))))
+         (finally
+           (doseq [f (reverse (file-seq dir))]
+             (io/delete-file f true)))))))

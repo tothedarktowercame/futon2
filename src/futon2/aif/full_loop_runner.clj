@@ -867,6 +867,22 @@
   (and (= :resume-protocol-violation (:failure-kind error-data))
        (= :resume-protocol-violation (:kind value))))
 
+(defn- corrected-author-job-detail?
+  "True only for an author job that has passed through the narrow correction
+  loop.  The terminal needs that bounded identity chain when a later, unchanged
+  author gate refuses the corrected reply."
+  [value]
+  (and (map? value)
+       (vector? (:author-response-corrections value))))
+
+(defn- bounded-corrected-author-job [job]
+  "Keep the ordinary job identity plus the bounded correction evidence, rather
+  than serialising an arbitrary Agency response tree."
+  (assoc (select-keys job [:job-id :agent-id :state :artifact-ref
+                           :repo-observed-artifact-ref :result-summary])
+         :author-response-corrections
+         (bounded-failure-value (:author-response-corrections job) 6)))
+
 (defn- failure-detail [error-data]
   (let [scalar? (fn [v]
                   (or (keyword? v) (number? v) (boolean? v) (nil? v)
@@ -890,6 +906,12 @@
                  ;; errors remain scalar-only below.
                  (and (= :author-response-correction k) (map? v))
                  {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
+                 ;; Once a corrected reply reaches the unchanged author gates,
+                 ;; those gates carry it under :author-job rather than as the
+                 ;; loop's direct :author-response-correction failure.  Retain
+                 ;; only its stable job identity and bounded correction chain.
+                 (and (= :author-job k) (corrected-author-job-detail? v))
+                 {:kept (assoc kept k (bounded-corrected-author-job v)) :omitted omitted}
                  (scalar? v) {:kept (assoc kept k v) :omitted omitted}
                  (and (vector? v) (<= (count v) 32) (every? scalar? v))
                  {:kept (assoc kept k v) :omitted omitted}
