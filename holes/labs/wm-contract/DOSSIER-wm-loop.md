@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25T17:03:25.626384+00:00 codex-11: reviewed actual 9cc live disposition and independent-process duplicate replay; ledger42/raw7/effective2 exactly41/8467, provider generation6 five scopes, idle/budget0. Canonical ledger hash independently matches retained readback. No task success or learning claim. Receipt: `/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/live/coordinator-review.md`.
+
 - 2026-10-25T16:54:24.936247+00:00 codex-11: reviewed 9cc final envelope, pinned data-only provider and isolated controls; released exact idle live adoption to Agency codex-12. Live outcome pending. Budget0; 41/8467 remain outside scope. Receipt: `/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/coordinator-final-review.md`.
 
 ### 2026-10-25 16:34Z — exact9cc authorization issued
