@@ -227,12 +227,28 @@
        (= phase (:phase receipt))
        (= verdict (:verdict receipt))))
 
+(defn- genuine-predecessor-bound?
+  "Bind the model's ordinal predecessor to both representations in the ledger:
+  the earlier same-injury transition and this entry's sealed raw predecessor.
+  Raw entries deliberately store only the prior sealed entry ID/pin; the
+  ordinal exists in the projected medic state, not on the raw entry."
+  [ledger ledger-entry intent]
+  (let [prior (last (filter #(and (= (:injury-id ledger-entry) (:injury-id %))
+                                  (< (:ordinal %) (:ordinal ledger-entry)))
+                            (:entries ledger)))
+        raw (:injury-predecessor ledger-entry)]
+    (if prior
+      (and (= (str (:ordinal prior)) (:predecessor-entry-id intent))
+           (= (:entry-id prior) (:entry-id raw))
+           (= (:entry-pin prior) (:entry-pin raw)))
+      (and (nil? (:predecessor-entry-id intent)) (nil? raw)))))
+
 (defn- verify-genuine
   "Verify the separate authority grammar for Lean's GenuineRepairPayload.
   Receipt hashes establish bytes; TRUST independently authenticates the three
   exact principal/pin bindings.  This is not a claim that a live row was
   evaluated or approved."
-  [{:keys [operation current ledger-entry intent artifacts evaluation-pin review-pin
+  [{:keys [operation current ledger ledger-entry intent artifacts evaluation-pin review-pin
            authorization-pin trust]}]
   (try
     (let [request (:request operation)
@@ -268,11 +284,12 @@
               [(:injury-id intent) (str (:ordinal intent))])
         {:status :refused :reason :intent/occurrence-mismatch}
         (not= [(:injury-id ledger-entry) (:ordinal ledger-entry)
-               (:entry-id ledger-entry) (:predecessor-entry-id ledger-entry)
-               (:state ledger-entry) (:attempt ledger-entry)]
+               (:entry-id ledger-entry) (:state ledger-entry) (:attempt ledger-entry)]
               [(:injury-id intent) (:ordinal intent) (:ledger-entry-id intent)
-               (:predecessor-entry-id intent) (:state intent) (:attempt intent)])
+               (:state intent) (:attempt intent)])
         {:status :refused :reason :intent/ledger-entry-mismatch}
+        (not (genuine-predecessor-bound? ledger ledger-entry intent))
+        {:status :refused :reason :intent/predecessor-mismatch}
         (not= [(:cause-record-id current) (:cause-pin current)]
               [(:path cause-pin) (:sha256 cause-pin)])
         {:status :refused :reason :intent/cause-mismatch}

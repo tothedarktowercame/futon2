@@ -24,8 +24,13 @@
                                          :failure-stage :reviewer-wait
                                          :failure-kind :reviewer-falsifier-failed
                                          :detected-click "click/cfb"})
-        history (:ledger opened)
-        entry (:entry opened)
+        claimed (ledger/append-transition
+                 (:ledger opened)
+                 {:injury-id "injury/cfb-synthetic" :state :claimed :attempt 1
+                  :repair-id "repair/cfb" :algorithm "synthetic"
+                  :author-session "author" :reviewer-session "reviewer"})
+        history (:ledger claimed)
+        entry (:entry claimed)
         replay (fn [phase verdict]
                  {:schema authority/genuine-replay-schema
                   :acceptance-contract-pin contract-pin :phase phase :verdict verdict})
@@ -36,7 +41,7 @@
         intent {:schema authority/genuine-intent-schema :scope :cfb-genuine-repair
                 :disposition-kind :genuine-repair :injury-id "injury/cfb-synthetic"
                 :ordinal (:ordinal entry) :ledger-entry-id (:entry-id entry)
-                :predecessor-entry-id nil :state :open :attempt 1
+                :predecessor-entry-id "1" :state :claimed :attempt 1
                 :ledger-root (:ledger-pin history) :cause-record-pin cause-pin
                 :acceptance-contract-pin contract-pin
                 :patch-revision "809a7f7ac74b5a4f951c2270cfa856ba06650f17"
@@ -59,7 +64,7 @@
                        :scope :cfb-genuine-repair :authorizer authorizer :verdict :qualified}
         [authorization-pin authorization-bytes] (pinned "cfb/authorization.edn" authorization)
         candidate {:kind :genuine-repair :injury-id "injury/cfb-synthetic"
-                   :entry-id (str (:ordinal entry)) :predecessor-entry-id nil
+                   :entry-id (str (:ordinal entry)) :predecessor-entry-id "1"
                    :patch-id (:patch-revision intent) :reviewer (:seat reviewer)
                    :evaluator (:seat evaluator) :evidence-pin (:sha256 evaluation-pin)
                    :cause-record-id (:path cause-pin) :cause-pin (:sha256 cause-pin)
@@ -82,7 +87,7 @@
                   {:kind :authorization :identity authorizer :intent-digest intent-id :receipt-pin authorization-pin}}]
     {:intent intent :ledger history :ledger-entry entry
      :current {:injury-id "injury/cfb-synthetic" :entry-id (str (:ordinal entry))
-               :predecessor-entry-id nil :cause-record-id (:path cause-pin)
+               :predecessor-entry-id "1" :cause-record-id (:path cause-pin)
                :cause-pin (:sha256 cause-pin) :active? true}
      :operation operation :artifacts artifacts :evaluation-pin evaluation-pin
      :review-pin review-pin :authorization-pin authorization-pin
@@ -112,7 +117,7 @@
     (is (= :intent/payload-mismatch (:reason (authority/verify wrong-contract))))
     (is (= :roles/not-independent (:reason (authority/verify self-review))))
     (is (= :intent/root-mismatch (:reason (authority/verify wrong-root))))
-    (is (= :intent/ledger-entry-mismatch (:reason (authority/verify wrong-predecessor))))
+    (is (= :intent/predecessor-mismatch (:reason (authority/verify wrong-predecessor))))
     (is (= :payload/swap (:reason (authority/verify false-verdict))))
     (is (= :artifact/hash-drift (:reason (authority/verify replay-drift))))
     (let [bundle (select-keys f [:intent :artifacts :evaluation-pin :review-pin :authorization-pin :trust])
