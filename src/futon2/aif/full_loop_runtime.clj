@@ -174,12 +174,19 @@
   (str "Repair the held executable cascade phase without selecting again. "
        "Implement resolutions for exactly the listed holes, commit the source, "
        "and reply with one JSON object containing requisition-id, cascade-digest, "
-       "by, decisions, and patch {namespace,var,source-digest}.\n\n"
+       "by, decisions, and patch {namespace,var,source-digest}. The patch var "
+       "must name a function (defn) of one context map {:cascade-digest :phase} "
+       "that returns the decision map keyed by hole id; a bare data var (a def'd "
+       "map, set or keyword) is refused at hot-load as "
+       ":patch-var-not-a-function.\n\n"
        (pr-str req)))
 
 (defn- open-cascade-review-prompt [{:keys [requisition author-answer]}]
   (str "Independently review this held-cascade repair. Verify the committed "
-       "source and every hole decision. Reply with one JSON object containing "
+       "source and every hole decision. Confirm that patch.var names a function "
+       "of the context map {:cascade-digest :phase}, not a data var; a data var "
+       "is refused at hot-load as :patch-var-not-a-function. Reply with one "
+       "JSON object containing "
        "the author's requisition-id, cascade-digest, patch {source-digest} "
        "naming the committed source you verified, and accepted-by set to your "
        "own seat id. Do not restate decisions; acceptance binds the author's "
@@ -243,7 +250,12 @@
 
 (defn- patch-loader
   "Resolve a reviewed patch only after reloading its named namespace and
-  checking the loaded source digest against the reviewed descriptor."
+  checking the loaded source digest against the reviewed descriptor.  The
+  var must hold a FUNCTION of the resume context: a data value that is
+  merely `ifn?` (a map, a set or a keyword answers a one-argument lookup) is
+  refused as :patch-var-not-a-function, distinct from a var that does not
+  resolve (:patch-var-unavailable).  Injury 41a00c62: the author named the
+  bare decision map `clauses` instead of the function `decisions`."
   [{:keys [namespace var source-digest]}]
   (let [n (symbol namespace)
         v (symbol var)]
@@ -254,10 +266,16 @@
         (throw (ex-info "reviewed patch source digest does not match loaded source"
                         {:kind :patch-source-digest-mismatch
                          :expected source-digest :loaded (:sha256 loaded)})))
-      (when-not (and resolved (ifn? @resolved))
-        (throw (ex-info "reviewed patch var is not callable"
-                        {:kind :patch-var-unavailable :namespace n :var v})))
-      @resolved)))
+      (when-not (var? resolved)
+        (throw (ex-info "reviewed patch var does not resolve"
+                        {:kind :patch-var-unavailable :namespace namespace :var var})))
+      (let [value @resolved]
+        (when-not (fn? value)
+          (throw (ex-info "reviewed patch var is not a function of the context"
+                          {:kind :patch-var-not-a-function
+                           :namespace namespace :var var
+                           :value-type (if (nil? value) "nil" (.getName (class value)))})))
+        value))))
 
 (defn- contact-job
   "The Agency job id a contact's response carries (`agency-answer-fn` returns

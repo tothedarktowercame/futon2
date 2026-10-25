@@ -1,0 +1,46 @@
+This requisition is already fulfilled and merged — I verified live rather than re-authoring:
+
+- **Source committed**: futon2 commit `a5f8c4d7d` ("wm: authored clauses for held cascade 27ee1f80 compile phase (requisition fbad4b8b…)"), on `main`, by zai-2 (my prior session), dispatched by this same wm-full-loop thread.
+- **Hole coverage exact**: `src/futon2/aif/wm/authored/req_fbad4b8b.clj` contains exactly the 19 requisition hole-ids as clause keys — set-equal, no extras, no missing.
+- **Independently reviewed**: zai-3's reviewer status (`cascade-reviewer-status.json`, artifact-ref `a5f8c4d7d`) says every check passed — blob sha256 matches the patch source-digest, decisions verified against `futon5a/holes/missions/M-stack-geometry.md`, and the runtime returns `:patch-cascade-context-mismatch` for any other digest/phase.
+- **Digest re-verified now**: `git show a5f8c4d7d:src/.../req_fbad4b8b.clj | sha256sum` → `a5e34ef1cfa0f69c17ccac1fb6dbb7f04bac7cf891c0faa4546aa7eb4ab5813b`.
+
+No new commit was made — committing the resolutions again would duplicate the already-merged patch, so the existing commit is the answer:
+
+```json
+{
+  "requisition-id": "fbad4b8be6eb583b0ad5be984aec251139b288492d200c6d7a15c9618dd11f3f",
+  "cascade-digest": "27ee1f800ba25111680c7c7c93355afc069f89d3a666c8a238a7574477e0b937",
+  "by": "zai-2",
+  "already-accepted-by": "zai-3",
+  "commit": "a5f8c4d7dc8f54536b9a132f1c4e7bb23455cacf",
+  "decisions": {
+    "[\"futon-theory/mission-lifecycle\" 1]": "record-open-identify-status",
+    "[\"agent/evidence-over-assertion\" 2]": "cite-formal-predecessor-artifacts",
+    "[\"futon-theory/mission-lifecycle\" 3]": "record-predecessor-disposition",
+    "[\"futon-theory/mission-lifecycle\" 4]": "adopt-living-synthesis-document",
+    "[\"war-machine/state-capture\" 5]": "capture-mission-control-dependency",
+    "[\"war-machine/state-capture\" 6]": "record-mission-control-observation-scope",
+    "[\"agent/evidence-over-assertion\" 7]": "cite-portfolio-inference-dependency",
+    "[\"agent/evidence-over-assertion\" 8]": "name-portfolio-policy-layer",
+    "[\"features/operator-turns-enter-the-observation-vector\" 9]": "cite-trip-journal-hinge-log-apparatus",
+    "[\"hdm/deep-storage-to-active-graph\" 10]": "bind-shared-futon1a-ingestion-substrate",
+    "[\"problems/operator-turns-become-inference-observations\" 12]": "connect-sorry-proximity-to-ba-turns",
+    "[\"problems/operator-turns-become-inference-observations\" 13]": "assign-sorry-discovery-observation-stream",
+    "[\"problems/llm-over-corpus-mining-lessons\" 14]": "cite-learning-loop-sibling-mission",
+    "[\"problems/llm-over-corpus-mining-lessons\" 15]": "bind-shared-learning-substrate",
+    "[\"gauntlet/world-is-hypergraph\" 17]": "cite-future-hypergraph-operator",
+    "[\"gauntlet/world-is-hypergraph\" 18]": "position-operator-analytic-layer",
+    "[\"hdm/deep-storage-to-active-graph\" 19]": "cite-webarxana-bridge-precedent",
+    "[\"hdm/deep-storage-to-active-graph\" 20]": "record-shape-a-entity-landing-precedent",
+    "[\"hdm/deep-storage-to-active-graph\" 21]": "bind-landing-and-rendering-path"
+  },
+  "patch": {
+    "namespace": "futon2.aif.wm.authored.req-fbad4b8b",
+    "var": "clauses",
+    "source-digest": "a5e34ef1cfa0f69c17ccac1fb6dbb7f04bac7cf891c0faa4546aa7eb4ab5813b"
+  }
+}
+```
+
+Each decision value above is the `:operation` of the full clause (capability `:wm/pattern-apply` plus `:consumes`/`:produces`/`completion-check` against the M-stack-geometry text); the complete clause map is in the committed file and in zai-3's review record.

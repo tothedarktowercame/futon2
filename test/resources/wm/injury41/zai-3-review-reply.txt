@@ -1,0 +1,5 @@
+Verified independently: the committed file at `a5f8c4d7dc8f54536b9a132f1c4e7bb23455cacf` (`futon2/src/futon2/aif/wm/authored/req_fbad4b8b.clj`, blob `89e8262b…`) sha256s exactly to the declared source-digest, all 19 requisition holes (ids 1–10, 12–15, 17–21) have clauses whose `:operation` keywords match the author's decision names one-for-one, the namespace guards decisions behind the cascade-digest/phase match, the commit is on repo branches, and clj-kondo is clean (0 errors/warnings).
+
+```json
+{"requisition-id":"fbad4b8be6eb583b0ad5be984aec251139b288492d200c6d7a15c9618dd11f3f","cascade-digest":"27ee1f800ba25111680c7c7c93355afc069f89d3a666c8a238a7574477e0b937","patch":{"source-digest":"a5e34ef1cfa0f69c17ccac1fb6dbb7f04bac7cf891c0faa4546aa7eb4ab5813b"},"accepted-by":"zai-3"}
+```
