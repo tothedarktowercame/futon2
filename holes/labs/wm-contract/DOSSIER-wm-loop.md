@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25T18:36:56.839491+00:00 codex-11: independently reviewed41 ae9e7158 and reran actual-handler acceptance10/108green; one known journal-ordering restart disclosed. Source merged; idle canonical activation released with exact gen6 five scopes preserved, no medic disposition. Review: `/home/joe/notes/wm-next/offline-repair/injury41/function-repair/coordinator-review.md`. Budget0.
+
 - 2026-10-25T18:31:16.914441+00:00 codex-11: held4868ed31 integration: independent probe explicit refused mission input returns verified via legacy fallback; durable baseline reader has no runner caller. Agency codex12 job3888 fixes fallback/reuse/scope and supplies actual composed tests before release. No activation/clearance,budget0. Review: `/home/joe/notes/wm-next/offline-repair/injury8467/mission-observation/persistence/review/coordinator-review.md`.
 
 - 2026-10-25T18:26:59.636492+00:00 codex-11: independently replayed8467 binding probes on888e5e34: all three refused, exit0. Released durable pre-send baseline/reviewer integration to Agency codex12 job3887, preserving explicit send ambiguity and unchanged learning. Prior broad-discovery incident remains reported with unknown effects. No live/clearance,budget0.
