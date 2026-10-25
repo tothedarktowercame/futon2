@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T20:16:47.848996+00:00 — exact8467 authorization issued
+
+Independent exact reviewe205ce4c accepted;12 evaluator and9 review pins verified and fresh three-seat identities match. Authorized intent3eede72b at43root72c1f7be/latest37reopened2/pred36/newcause25e24, scope measurement-accounting only. Next isolated seven-scope43to44/effective0 and gen7to8 checks; no live clearance. Historical/mutation lineage and narrow baseline/learning limits retained. Authorization receiptc46d4e2e17d1 under authority/8467-adoption.
+
 ### 2026-10-25T20:07:56.302561+00:00 — 8467 evaluator packet bound to current occurrence
 
 Verified12 artifact pins and independent actual ledger binding:43/root72c1f7be, latest37/reopened2, transition predecessor36, newcause25e24. Evaluator digest3eede72b/evaluation00fdce5f ready for independent exact review. Production compatibility controls remain synthetic, not approvals. No final operation/authorization/live clearance; historical attribution56fd92 distinguished from forward49a8c59d repair. Assembly review retained under authority/8467-adoption.
