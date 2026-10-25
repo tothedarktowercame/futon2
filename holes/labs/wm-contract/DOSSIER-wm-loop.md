@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T21:02:12.190722+00:00 — 8467 positive projection route reviewed
+
+Reviewed307400204 source and retained gate hashes:38/372 green, mutation6 semantic failures, restoredgreen; unchanged signed envelope public admission43to44/effectiveempty. Actual predecessor/retry/coverage route guard closes special reopen and ordinary exhaustion extra-pin substitutions. Release copied-ledger transaction matrix on isolated source only; canonical landing/activation/live remain held. Review: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/projection-repair/coordinator-positive-route-review.md. Prior incidents and failed matrices retained; budget0.
+
 ### 2026-10-25T20:57:21.694173+00:00 — 8467 exhaustion projection review
 
 313382920 closes special reopen bypass. Independent public append-transition probe still accepts ordinary exhausted row with extra new-cause-pin and changes projected cause; inactive row, no clearance bypass claimed. Evidence: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/projection-repair/coordinator-followup-review.md and exhaustion-extra-pin-probe.log, exit0. Hold source landing/matrix/activation pending positive route guard. Broad-test incident retained separately; effects unknown. No live changes; budget0.
