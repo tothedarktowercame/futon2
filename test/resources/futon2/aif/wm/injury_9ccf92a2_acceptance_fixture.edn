@@ -24,7 +24,7 @@
   {:state "done"
    :artifact-ref "249ce8a6685edbbb23b019d2661d5dc2c2198e90"
    :feature-card
-   {:built "synthetic: selected construction already exists"
+   {:built "synthetic: selected construction already landed"
     :want-coverage "synthetic: existing artifact covers the selected contract"
     :matches-intent? true
     :proof-ref "249ce8a6685edbbb23b019d2661d5dc2c2198e90"

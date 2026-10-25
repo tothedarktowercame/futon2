@@ -218,7 +218,7 @@
     (is (contains-text? reconstructed-prompt
                        "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head"))
     (is (contains-text? (:prompt correction-dispatch) "IMMUTABLE CORRECTION BINDING"))
-    (is (contains-text? (get-in correction [:corrected :job :result-summary])
+    (is (contains-text? (get-in correction [:corrected :job :result])
                        "REFUSE :already-satisfied-at-base-head")
         "synthetic correction provenance survives the composed author-wait evidence")
     (is (nil? (get-in correction [:original :job :artifact-ref]))
