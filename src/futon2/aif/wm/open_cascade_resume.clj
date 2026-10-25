@@ -281,31 +281,70 @@
 ;; Hot-load and same-click resume
 ;; ---------------------------------------------------------------------------
 
+(def ^:private hot-load-cause-keys
+  "The bounded projection of a hot-load failure's typed cause: the kind the
+  thrower named and the scalar fields that locate it.  Never the exception."
+  [:kind :namespace :var :value-type :expected :loaded])
+
+(defn- bounded-cause
+  "The typed cause of a thrown hot-load failure, when the throwable carries
+  one (ex-data with a keyword :kind): scalar fields only.  Absent otherwise;
+  nothing is invented and no exception object is retained."
+  [t]
+  (let [data (ex-data t)]
+    (when (keyword? (:kind data))
+      (into {}
+            (filter (fn [[_ v]]
+                      (or (keyword? v) (string? v) (symbol? v)
+                          (number? v) (boolean? v))))
+            (select-keys data hot-load-cause-keys)))))
+
 (defn hot-load!
   "Hot-load an accepted answer's patch: the patch is applied under the
-  requisition's binding (same cascade digest, same phase).  A patch that
-  throws is a typed error with the attempt preserved; it never surfaces as
-  abstention or refusal."
+  requisition's binding (same cascade digest, same phase).  The loader must
+  yield a FUNCTION of the context map {:cascade-digest :phase}.  A data
+  value that merely satisfies `ifn?` (a map, a set or a keyword answers a
+  one-argument lookup) is refused as :patch-var-not-a-function before any
+  retry: on 2026-10-23 (injury 41a00c62) the author named the bare decision
+  map, the lookup returned nil, and the retry's typed refusal was read by
+  `resume!` as a protocol violation.  A loader that yields nothing is the
+  distinct :patch-descriptor-unresolved.  A patch that throws, or a loader
+  that refuses, is a typed :hot-load-failed with the attempt preserved and
+  the thrower's bounded cause retained; it never surfaces as abstention or
+  refusal."
   [ledger requisition accepted patch-loader]
-  (let [attempt {:requisition-id (:requisition-id accepted)
+  (let [descriptor (:patch accepted)
+        attempt {:requisition-id (:requisition-id accepted)
                  :cascade-digest (:cascade-digest accepted)
                  :phase (:phase requisition)
+                 :patch descriptor
                  :at (str (java.time.Instant/now))}]
     (try
       (when-not (ifn? patch-loader)
         (throw (ex-info "trusted patch loader absent" {})))
-      (let [patch (patch-loader (:patch accepted))
-            _ (when-not (ifn? patch)
-                (throw (ex-info "patch descriptor did not resolve" {})))
+      (let [patch (patch-loader descriptor)
+            _ (when (nil? patch)
+                (throw (ex-info "patch descriptor did not resolve"
+                                {:kind :patch-descriptor-unresolved
+                                 :namespace (:namespace descriptor)
+                                 :var (:var descriptor)})))
+            _ (when-not (fn? patch)
+                (throw (ex-info "reviewed patch var is not a function of the context"
+                                {:kind :patch-var-not-a-function
+                                 :namespace (:namespace descriptor)
+                                 :var (:var descriptor)
+                                 :value-type (.getName (class patch))})))
             product (patch {:cascade-digest (:cascade-digest accepted)
                             :phase (:phase requisition)})]
         (record! ledger :attempts (assoc attempt :outcome :loaded :product product)))
       (catch Throwable t
-        (record! ledger :attempts
-                 (assoc attempt :outcome :failed
-                        :error (ex-message t)))
-        {:status :error :kind :hot-load-failed
-         :error (ex-message t)}))))
+        (let [cause (bounded-cause t)]
+          (record! ledger :attempts
+                   (cond-> (assoc attempt :outcome :failed :error (ex-message t))
+                     cause (assoc :cause cause)))
+          (cond-> {:status :error :kind :hot-load-failed
+                   :error (ex-message t)}
+            cause (assoc :cause cause)))))))
 
 (defn resume!
   "Retry the held phase WITHOUT a new click, WITHOUT reselection, under
