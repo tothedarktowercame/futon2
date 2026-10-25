@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 13:27:47 UTC — Joe authorizes serving activation and historical clearance
+
+Joe requested activation of reviewed medic code, historical blocking injury clearance by Agency helpers, then queued work. This supersedes earlier no-activation scope for qualified adoption; no blanket deletion, invented task success or learning credit. No fresh click budget assigned.
+
+Dispatched codex12 activation/installed verification, job `invoke-1792934860491-3565-fefc6ad0`, park `park-2e910ee7-8a45-4a3f-8f50-42055703baaa`. Independent claude9 fresh ledger/occurrence and per-row qualification review, job `invoke-1792934860847-3566-db60bfc5`, park `park-f81f5c5f-396d-430a-937a-c52cb33c2d2e`. Packets under `~/notes/wm-next/packets/medic-{activation-authorized,current-census}.txt`. Activation helper is sole serving owner; census helper read-only. Per-row append follows current-state/evidence review, not historical census assumptions. Dispatch accepted; activation and clearance not yet established.
+
 ### 2026-10-25 00:49:43 UTC — Medic caller wiring reviewed and source landed
 
 Merged `0d0079e33d3455efbb1d2a4100e2edffd81ee84c` (16b53709 + d4cc5ed3). Independent focused gate:9 tests/60 assertions green. Both original bypass probes now exit1 at their former permissive assertions: covered retry refused, malformed context makes zero readiness calls. Exact-scope synthetic bundle traverses runtime/coordinator/checkpoint path; no live injury attestation. Review/log pins: `~/notes/wm-next/offline-repair/integration/caller-code/review/final-review.md`.
