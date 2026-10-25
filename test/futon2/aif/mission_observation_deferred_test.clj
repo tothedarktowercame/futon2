@@ -26,12 +26,14 @@
                     {:action a :rank 1 :G-efe -1 :controller-score -1}))]
     (f)))
 
-(defn- scenario [sidecar-change]
+(defn- scenario
+  ([sidecar-change] (scenario sidecar-change [:hole/h6378c65a4012]))
+  ([sidecar-change wants]
   (token-fixture/with-artifact
    (fn [sha]
      (let [action (assoc (edn/read-string
                           (slurp "test/fixtures/narrative-trace/selected-action-1789964661.edn"))
-                         :want [:hole/h6378c65a4012])
+                         :want wants)
            decision ((var owner/with-token-fixture-carry)
                      (policy/select-action-cascades
                       [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)]
@@ -95,7 +97,7 @@
                                 "attempt-002" "007-closed.edn")]
                  (when (.isFile f) (edn/read-string (slurp f))))
         :origin (get-in stop-line [:failure-data :deferred-author-dispatch-context
-                                   :mission-observation-origin])}))))
+                                   :mission-observation-origin])})))))
 
 (deftest shared-artifact-deferred-resume-and-sidecar-refusals
   (let [{:keys [sha moved-head first second origin close after]} (scenario :valid)
@@ -117,3 +119,37 @@
       (is (= :incomplete (get-in second [:result :outcome])))
       (is (empty? (:dispatch-requests second))
           (str change " sidecar refuses before a new external send")))))
+
+(deftest reviewed-mission-observations-reach-brief-and-close
+  (let [{:keys [first second close]}
+        (scenario :valid [:hole/h6378c65a4012 :hole/h0e270aa090bc])
+        brief (:item second)
+        observation (:mission-observation brief)
+        rows (:rows observation)
+        accounting (get-in close [:payload :judgment :selected-want-outcomes])]
+    (is (= :reviewed-artifact (:scope observation)))
+    (is (= :observed (:status observation)))
+    (is (= [false false] (mapv #(get-in % [:before :observed]) rows)))
+    (is (= [true false] (mapv #(get-in % [:after :observed]) rows)))
+    (is (= (into {} (map (juxt :token #(get-in % [:after :observed])) rows))
+           (:universe-after brief)))
+    (is (every? :locator rows))
+    (is (string? (get-in observation [:provenance :receipt-sha256])))
+    (is (= (:commit brief) (:artifact-revision observation)))
+    (is (= :verified (:status accounting)) (pr-str accounting))
+    (is (= [:reached :untouched] (mapv :classification (:outcomes accounting))))
+    (is (= [true false] (mapv #(get-in % [:after :observed]) (:outcomes accounting))))
+    (is (= :unobserved (get-in first [:item :mission-observation :status])))
+    (is (= {} (get-in first [:item :universe-after])))
+    (is (= [:unobserved :unobserved]
+           (mapv #(get-in % [:after :status])
+                 (get-in first [:item :mission-observation :rows]))))))
+
+(deftest absent-reviewed-evidence-is-unobserved-not-false
+  (let [view (#'runner/reviewed-mission-observation
+              {:target "M-test" :want [:hole/one :hole/two]} nil)]
+    (is (= :unobserved (:status view)))
+    (is (= :mission-observation-not-retained (:reason view)))
+    (is (= {} (:universe-after view)))
+    (is (= [["M-test" :hole/one] ["M-test" :hole/two]] (:unobserved view)))
+    (is (every? #(not (contains? (:after %) :observed)) (:rows view)))))

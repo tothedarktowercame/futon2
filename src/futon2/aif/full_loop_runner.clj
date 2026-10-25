@@ -506,6 +506,37 @@
                        (.getBytes (pr-str x) "UTF-8"))]
     (apply str (map #(format "%02x" (bit-and 0xff %)) bytes))))
 
+(defn- reviewed-mission-observation
+  "Brief projection of retained evidence only; never observes or rediscovers wants."
+  [action receipt]
+  (let [wants (mapv #(if (vector? %) % [(:target action) %]) (:want action))
+        admitted? (= :admitted (:status receipt))
+        by-token (when admitted? (into {} (map (juxt :token identity)) (:rows receipt)))
+        rows (mapv (fn [token]
+                     (let [row (get by-token token)
+                           before (get-in row [:before :observed])
+                           after (get-in row [:after :observed])]
+                       {:token token
+                        :before (if (boolean? before) {:status :observed :observed before}
+                                    {:status :unobserved})
+                        :after (if (boolean? after) {:status :observed :observed after}
+                                   {:status :unobserved})
+                        :locator (get-in row [:before :locator])
+                        :artifact-revision (:after-revision receipt)})) wants)]
+    {:scope :reviewed-artifact
+     :status (if admitted? :observed :unobserved)
+     :reason (when-not admitted? (or (:reason receipt) :mission-observation-not-retained))
+     :before-revision (:before-revision receipt)
+     :artifact-revision (:after-revision receipt)
+     :provenance (when receipt {:receipt-sha256 (sha256 receipt)
+                               :occurrence-id (:occurrence-id receipt)})
+     :receipt receipt
+     :rows rows
+     :universe-after (into {} (keep (fn [{:keys [token after]}]
+                                     (when (= :observed (:status after))
+                                       [token (:observed after)]))) rows)
+     :unobserved (mapv :token (filter #(= :unobserved (get-in % [:after :status])) rows))}))
+
 (defn- decision-ground
   "Content-address the controller decision without retaining a second copy.
 
@@ -6224,6 +6255,16 @@
                        (= :historical-verification-awaiting-validation outcome)
                        selection-judgment (get-in @checkpoints [:selection :judgment])
                        selected-action (:selected-action selection-judgment)
+                       mission-action (or (get-in @d-task-dispatch
+                                                  [:dispatch :occurrence :action/value])
+                                          selected-action)
+                       mission-close? (and (str/starts-with? (str (:target mission-action)) "M-")
+                                           (seq (:want mission-action))
+                                           (not= :repair-machine-failure (:type mission-action)))
+                       mission-receipt (get-in @checkpoints
+                                               [:build :judgment :validation :mission-observation])
+                       mission-view (when mission-close?
+                                      (reviewed-mission-observation mission-action mission-receipt))
                        ;; The caller knows that a reviewed commit was grounded;
                        ;; the located declarations decide whether that commit
                        ;; closed the enacted step or only progressed it.
@@ -6369,6 +6410,10 @@
                          (:selected-cascade selection-judgment)
                          (assoc :selected-cascade (:selected-cascade selection-judgment))
 
+                         mission-view
+                         (assoc :mission-observation mission-view
+                                :universe-after (:universe-after mission-view))
+
                          (seq (:reviews data))
                          (assoc :reviews (:reviews data))
 
@@ -6438,10 +6483,12 @@
                        want-outcome-accounting
                        (when selected-action
                          (selected-want-outcome/receipt
-                          {:selected-action selected-action
-                           :token-comparison (:receipt token-comparison)
-                           :progress-evidence (:want-progress-evidence data)
-                           :blockers (:want-blockers data)}))
+                          (cond->
+                           {:selected-action (if mission-close? mission-action selected-action)
+                            :token-comparison (:receipt token-comparison)
+                            :progress-evidence (:want-progress-evidence data)
+                            :blockers (:want-blockers data)}
+                            mission-close? (assoc :mission-observation mission-receipt))))
                        route-account
                        (route-attestation/retain!
                         (if attempt-evidence-dir
@@ -8458,6 +8505,7 @@
                                mission-applicable?
                                (assoc :mission-observation mission-comparison)))]
                         {:target target :commit commit
+                         :mission-observation mission-comparison
                          :work-evidence
                          (if (and (= :repair-machine-failure
                                      (get-in construction [:selected-action :type]))
@@ -8544,6 +8592,8 @@
                                           :review-gate review-gate
                                           :review-evidence-corrections
                                           (vec review-evidence-corrections)
+                                          :mission-observation
+                                          (:mission-observation reviewer-falsifier-input)
                                           :reviewer-falsifier
                                           reviewer-falsifier-receipt
                                           :reviewer-falsifier-verification
