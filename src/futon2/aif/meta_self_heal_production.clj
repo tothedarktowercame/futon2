@@ -18,6 +18,28 @@
 (def default-diagnosis-root (str store/default-root "/diagnoses"))
 (def default-acceptance-root (str store/default-root "/acceptances"))
 (defn- refusal [reason & [details]] (merge {:status :refused :reason reason} details))
+(defn- medic-authority-verifier [opts]
+  (:meta-medic-authority-verifier opts))
+(defn- load-durable [path authority-verifier]
+  (if authority-verifier
+    (store/load-durable-ledger path authority-verifier)
+    (store/load-durable-ledger path)))
+(defn- effective-active [history authority-verifier]
+  (if authority-verifier
+    (ledger/effective-active-injuries history authority-verifier)
+    (ledger/active-injuries history)))
+(defn- prepare-repair [durable options authority-verifier]
+  (if authority-verifier
+    (coordinator/prepare durable options authority-verifier)
+    (coordinator/prepare durable options)))
+(defn- coordinate-repair [durable transaction ports authority-verifier]
+  (if authority-verifier
+    (coordinator/coordinate durable transaction ports authority-verifier)
+    (coordinator/coordinate durable transaction ports)))
+(defn- persist-ledger [path history authority-verifier]
+  (if authority-verifier
+    (store/persist-ledger! path history authority-verifier)
+    (store/persist-ledger! path history)))
 
 (defn- receipt-bytes [receipt]
   (.getBytes (str (pr-str receipt) "\n") "UTF-8"))
@@ -1024,12 +1046,19 @@
                    (when (contains? injuries blocker) blocker)))]
     (if-let [snapshot (transaction-snapshot path)]
       (let [selection (select-snapshot snapshot) injury-id (:injury-id selection)]
-        (if-let [blocker (defer? injury-id)]
-          (assoc selection :mode :defer :injury-id blocker
-                 :deferred-injury injury-id :blocking-injury blocker
-                 :deferred-path (str path ".deferred-"
-                                     (str/replace injury-id #"[^A-Za-z0-9._-]" "_") ".edn"))
-          (assoc selection :mode :resume)))
+        (cond
+          (not (contains? injuries injury-id))
+          {:mode :fresh :injury-id (first (sort (keys injuries)))
+           :stale-transaction selection}
+
+          (defer? injury-id)
+          (let [blocker (defer? injury-id)]
+            (assoc selection :mode :defer :injury-id blocker
+                   :deferred-injury injury-id :blocking-injury blocker
+                   :deferred-path (str path ".deferred-"
+                                       (str/replace injury-id #"[^A-Za-z0-9._-]" "_") ".edn")))
+
+          :else (assoc selection :mode :resume)))
       (let [file (when path (io/file path))
             prefix (when file (str (.getName file) ".deferred-"))
             restorable (when (and file (not (.exists file)))
@@ -1211,10 +1240,11 @@
   to readiness as its original typed defect."
   [opts]
   (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)
+        authority-verifier (medic-authority-verifier opts)
         durable (when (.isFile (io/file ledger-path))
-                  (store/load-durable-ledger ledger-path))
+                  (load-durable ledger-path authority-verifier))
         active (when (= :loaded (:status durable))
-                 (ledger/active-injuries (:ledger durable)))]
+                 (effective-active (:ledger durable) authority-verifier))]
     {:meta-injury-ledger-path ledger-path
      :durable-ledger durable
      :active-injuries active
@@ -1359,8 +1389,9 @@
    active; arbitrary maps cannot bypass repair arbitration."
   [opts retry]
   (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)
+        authority-verifier (medic-authority-verifier opts)
         durable (when (.isFile (io/file ledger-path))
-                  (store/load-durable-ledger ledger-path))
+                  (load-durable ledger-path authority-verifier))
         entries (get-in durable [:ledger :entries])
         enacted (last (filter #(= :enacted (:state %)) entries))
         authored (last (filter #(and (= :authored (:state %))
@@ -1379,12 +1410,14 @@
   "Nil means no active durable injury. A map consumes the opportunity."
   [opts]
   (let [ledger-path (or (:meta-injury-ledger-path opts) default-ledger-path)
+        authority-verifier (medic-authority-verifier opts)
         context (:meta-diagnosis-context opts)
         durable (if context (:durable-ledger context)
                     (when (and ledger-path (.isFile (io/file ledger-path)))
-                      (store/load-durable-ledger ledger-path)))
+                      (load-durable ledger-path authority-verifier)))
         active (if context (:active-injuries context)
-                   (when (= :loaded (:status durable)) (ledger/active-injuries (:ledger durable))))]
+                   (when (= :loaded (:status durable))
+                     (effective-active (:ledger durable) authority-verifier)))]
     (when durable
       (if (and (= :loaded (:status durable)) (not= :computed (:status active)))
         (refusal :meta-self-heal/active-set-unavailable
@@ -1404,12 +1437,29 @@
               (refusal :meta-self-heal/production-config-required
                        {:route :dedicated-meta-self-heal :absent-terms missing
                         :ordinary-selection-called? false})
-              (let [selection (if context (:injury-selection context)
-                                    (injury-selection transaction-path durable active))
-                    movement (if (nil? selection)
+              (let [initial-selection (if context (:injury-selection context)
+                                          (injury-selection transaction-path durable active))
+                    ;; Deferred-transaction restoration is a new filesystem
+                    ;; decision: reacquire authority and current active state.
+                    refreshed (when (= :restore (:mode initial-selection))
+                                (load-durable ledger-path authority-verifier))
+                    refreshed-active (when (= :loaded (:status refreshed))
+                                       (effective-active (:ledger refreshed) authority-verifier))
+                    selection (if refreshed
+                                (injury-selection transaction-path refreshed refreshed-active)
+                                initial-selection)
+                    durable (or refreshed durable)
+                    active (or refreshed-active active)
+                    movement (cond
+                               (nil? selection)
                                (refusal :meta-self-heal/injury-selection-missing)
-                               (move-selected-transaction! selection))
+                               (:stale-transaction selection)
+                               (if-let [stale (load-transaction transaction-path)]
+                                 (retire-stale-transaction! transaction-path stale)
+                                 (refusal :meta-self-heal/stale-transaction-unreadable))
+                               :else (move-selected-transaction! selection))
                     resumed0 (when-not (or (= :refused (:status movement))
+                                           (= :retired (:status movement))
                                            (= :defer (:mode selection)))
                                (load-transaction transaction-path))
                     resumed-injury (get-in resumed0 [:work-order :injury-id])
@@ -1420,8 +1470,9 @@
                                  (retire-stale-transaction! transaction-path resumed0))
                     resumed (when-not (= :retired (:status retirement)) resumed0)
                     prepared (when-not (or resumed (= :refused (:status movement)))
-                               (coordinator/prepare durable
-                                 (assoc (work-order-options opts) :injury-id (:injury-id selection))))
+                               (prepare-repair durable
+                                 (assoc (work-order-options opts) :injury-id (:injury-id selection))
+                                 authority-verifier))
                     transaction (or resumed (:transaction prepared))
                     ;; Click wm-click-c78d0f27 (2026-10-19): a refused prepare
                     ;; returns no transaction, and comparing the diagnosis
@@ -1460,7 +1511,8 @@
                   ;; :checkpoint-persist-failed was the mask of row #66.
                   (letfn [(settle [result phase receipts]
                             (let [lw (when (contains? result :ledger)
-                                       (store/persist-ledger! ledger-path (:ledger result)))
+                                       (persist-ledger ledger-path (:ledger result)
+                                                       authority-verifier))
                                   tw (when (contains? result :transaction)
                                        (persist-transaction! transaction-path
                                                              (:transaction result)))]
@@ -1495,17 +1547,19 @@
                             (loop [durable attempt-durable transaction attempt-transaction
                                    phases checkpoints receipts []]
                               (if-let [phase (first phases)]
-                                (let [result (coordinator/coordinate
-                                              durable transaction (assoc ports :stop-after phase))]
+                                (let [result (coordinate-repair
+                                              durable transaction (assoc ports :stop-after phase)
+                                              authority-verifier)]
                                   (if-not (= :checkpoint (:status result))
                                     (settle result phase receipts)
-                                    (let [lw (store/persist-ledger! ledger-path (:ledger result))
+                                    (let [lw (persist-ledger ledger-path (:ledger result)
+                                                             authority-verifier)
                                           tw (persist-transaction! transaction-path (:transaction result))]
                                       (if-not (and (= :persisted (:status lw))
                                                    (= :persisted (:status tw)))
                                         (refusal :meta-self-heal/checkpoint-persist-failed
                                                  {:phase phase :ledger-write lw :transaction-write tw})
-                                        (recur (store/load-durable-ledger ledger-path)
+                                        (recur (load-durable ledger-path authority-verifier)
                                                (:transaction result) (next phases)
                                                (conj receipts {:phase phase
                                                                :ledger-pin (:ledger-pin (:ledger result))
@@ -1515,7 +1569,8 @@
                                 ;; the coordinate call after the loop (mathlib4
                                 ;; darktower d6f4b88ca3); the coordinator's own
                                 ;; :phase, when it gives one, is kept over it.
-                                (settle (coordinator/coordinate durable transaction ports)
+                                (settle (coordinate-repair durable transaction ports
+                                                           authority-verifier)
                                         :final receipts))))]
                     (loop [attempt-durable durable attempt-transaction transaction
                            continued []]
@@ -1524,9 +1579,10 @@
                                                     (= :author-failed (:reason result))
                                                     (= :persisted (get-in result [:ledger-write :status]))
                                                     (= :persisted (get-in result [:transaction-write :status])))
-                                           (store/load-durable-ledger ledger-path))
+                                           (load-durable ledger-path authority-verifier))
                             injury-id (:injury-id result)
-                            reopened (get-in (ledger/active-injuries (:ledger next-durable))
+                            reopened (get-in (effective-active
+                                              (:ledger next-durable) authority-verifier)
                                              [:injuries injury-id])]
                         (if (and (= :loaded (:status next-durable))
                                  (= :reopened (:state reopened)))
@@ -1551,10 +1607,11 @@
                               (assoc retired :route :dedicated-meta-self-heal
                                      :ordinary-selection-called? false
                                      :continued-from continued)
-                              (let [prepared (coordinator/prepare
+                              (let [prepared (prepare-repair
                                               next-durable
                                               (continued-work-order-options
-                                               opts (:attempt reopened)))
+                                               opts (:attempt reopened))
+                                              authority-verifier)
                                     next-transaction (:transaction prepared)
                                     next-diagnosis (if next-transaction
                                                      (diagnosis-transaction-binding opts next-transaction)

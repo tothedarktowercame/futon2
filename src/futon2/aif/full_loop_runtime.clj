@@ -11,6 +11,7 @@
             [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.meta-injury-store :as injury-store]
+            [futon2.aif.meta-medic-authority :as medic-authority]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-policy-evidence-provider :as policy-evidence-provider]
@@ -47,6 +48,15 @@
   "/home/joe/code/futon2/data/wm-cascade-continuation-failures")
 
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
+
+(defn- resolve-medic-authority [opts]
+  (if-not (contains? opts :meta-medic-authority-context)
+    {:status :absent :verifier (constantly false)}
+    (let [context (:meta-medic-authority-context opts)]
+      (if (and (map? context) (ifn? (:trust context))
+               (map? (:intent context)) (map? (:artifacts context)))
+        {:status :ready :verifier (medic-authority/authority-verifier context)}
+        {:status :refused :reason :meta-self-heal/medic-authority-unavailable}))))
 
 (defn- valid-click-availability? [availability]
   (and (= :wm/ordinary-click-availability-v1 (:schema availability))
@@ -532,7 +542,13 @@
   "Arbitrate durable META injuries before constructing any ordinary policy
   field. An active injury consumes the opportunity without fallback."
   [opts]
-  (let [opts (assoc opts
+  (let [authority (resolve-medic-authority opts)
+        ;; Never honor a caller-supplied derived verifier. Only a validated
+        ;; explicit context may create this process-local function.
+        opts (cond-> (dissoc opts :meta-medic-authority-verifier)
+               (= :ready (:status authority))
+               (assoc :meta-medic-authority-verifier (:verifier authority)))
+        opts (assoc opts
                     :meta-injury-ledger-path
                     (or (:meta-injury-ledger-path opts)
                         meta-self-heal/default-ledger-path)
@@ -540,8 +556,9 @@
                     (or (:meta-repair-transaction-path opts)
                         meta-self-heal/default-transaction-path))
         retry (:meta-repair-retry opts)
-        diagnosis-context (when-not retry (meta-self-heal/diagnosis-context opts))
-        carried-bindings (if retry
+        diagnosis-context (when (and (not retry) (not= :refused (:status authority)))
+                            (meta-self-heal/diagnosis-context opts))
+        carried-bindings (if (or retry (= :refused (:status authority)))
                            {:status :absent :reason :retry}
                            (meta-self-heal/carried-bindings-observation
                             opts diagnosis-context))
@@ -553,16 +570,19 @@
                        opts
                        [:diagnosis-evidence-pin :acceptance-test])
                opts)
-        diagnosis-observation (when-not retry
+        diagnosis-observation (when (and (not retry) (not= :refused (:status authority)))
                                 (meta-self-heal/prepare-diagnosis opts diagnosis-context))
-        acceptance-observation (if (= :meta-self-heal/diagnosis-active-set-unavailable
+        acceptance-observation (if (= :refused (:status authority))
+                                 {:status :not-required
+                                  :reason :meta-self-heal/medic-authority-unavailable}
+                                 (if (= :meta-self-heal/diagnosis-active-set-unavailable
                                      (:reason diagnosis-observation))
                                 {:status :not-required :reason :meta-self-heal/acceptance-not-prepared
                                  :diagnosis-reason :meta-self-heal/diagnosis-active-set-unavailable}
                                 (if retry
                                 {:status :not-required
                                  :reason :meta-self-heal/acceptance-retry-not-prepared}
-                                (meta-self-heal/prepare-acceptance opts diagnosis-observation)))
+                                (meta-self-heal/prepare-acceptance opts diagnosis-observation))))
         effective-opts (cond-> opts
                          diagnosis-context (assoc :meta-diagnosis-context diagnosis-context)
                          diagnosis-observation
@@ -581,6 +601,10 @@
                     (meta-self-heal/attributable-retry-readiness effective-opts retry)
                     (meta-self-heal/production-readiness effective-opts diagnosis-context)))]
     (cond
+      (= :refused (:status authority))
+      {:status :refused :reason (:reason authority)
+       :route :dedicated-meta-self-heal :ordinary-selection-called? false}
+
       (= :meta-self-heal/diagnosis-active-set-unavailable (:reason diagnosis-observation))
       {:status :refused :reason :meta-self-heal/active-set-unavailable
        :route :dedicated-meta-self-heal :ordinary-selection-called? false
