@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T19:19:49.218334+00:00 — 8467 forward repair accepted for activation
+
+Reviewed0025bb42 production and full-fixture deferred regression. Independent10tests79assertions green; actual learning write observer confirms record-only/held, no counted trials, attempts.edn absent before/after. Separate mission false-to-true accounting passes while pattern comparison stays refused. Fifth coordinator review retained under mission-observation/persistence/review. Authorize reviewed source landing and idle activation preserving current medic scopes and41 repair; no historical baseline reconstruction, injury disposition, click or budget action. Earlier raw fixture incident effects remain unknown.
+
 ### 2026-10-25T19:02:10.688322+00:00 — 8467 shared deferred review remains held
 
 Reviewed562406f. Independent scanner suite10tests44assertions green; sorted-map schema traversal fix warranted. Shared movedHEAD probe reaches grounded-change without author resend, but its green log itself names canonical META paths and script lacks owner fixture chain. No absence-of-effects inference. Fourth coordinator review retained under mission-observation/persistence/review. Agency codex12 job invoke-1792954922094-3894-4bed0077 commissioned repository-owned isolated deferred/missing/tampered-sidecar and reviewer/learning controls. No activation, live disposition, click or budget change.
