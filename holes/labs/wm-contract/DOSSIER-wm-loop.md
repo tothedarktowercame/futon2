@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:41Z — 9cc composed contract static review
+
+Revised78f65313 enters real author-wait composition. Static review found prompt-hash oracle differs from production pr-str encoding; historical owner fixture ignores newer isolation flag. Requested exact oracle/fixture fixes plus total-dispatch assertion before counted evaluation. No semantic verdict or live action. Review: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/composed-review.md`.
+
 ### 2026-10-25 15:37Z — 04 packet schema stop
 
 Independent exact review found extra intent/replay fields rejected by production verifier. Coordinator confirmed source grammar; earlier hash/payload checks did not establish full compatibility. Bounded evaluator reassembly dispatched: exact schemas and dependent digest/pins, old bytes retained, dafa/source provenance preserved in companion evidence. Actual verifier compatibility controls required; no new acceptance replay or schema relaxation. No review receipt/authorization/clearance; ledger40/effective4 budget0 unchanged. Review: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-grammar-review.md`.
