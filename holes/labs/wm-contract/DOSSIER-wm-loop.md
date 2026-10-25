@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:57 UTC — cfb live clearance verified; five remain
+
+Exact cfb medic append accepted: ledger39/raw7/effective5, generation3 exact a9+cfb provider, canonical SHA b05e1b38a84acf9724ff04f460843bbb07a7a34f58bbe49cc003be25e0acac74. Immediate duplicate and restarted already-committed preserve bytes; serving readback confirms only04/41/8467/940/9cc remain. Idle/queue/stops/budget0 unchanged. Scope is four-node evidence retention, not task success or learning. Review `/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/live/final-coordinator-review.md`. Fresh940 binding next.
+
+Author correction remains held: independent probe reproduced wrong-repository REFUSE acceptance and dropped correction evidence. Codex3 followup job3659. Coordinator broad-test command and helper dev-serve command incidents retained; targeted boundaries unchanged, other effects not ruled out. Data-only serving form passed intended hermetic controls and replaced rejected notes-source loading. No suppression of incident history.
+
 ### 2026-10-25 14:43 UTC — cfb transport correction
 
 Live attempt stopped before evaluation: classpath guard rejected notes-source loading. Provider generation2/a9, ledger38/effective6, budget0 unchanged. Reviewed replacement reads pinned evidence as data and calls canonical provider API, following existing a9 activation; isolated one-form parse passed. Conditional Agency release requires hermetic identity/stale/busy controls before exact serving form and separate driver transaction. Review: `/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/transport-correction-review.md`. No clearance yet.
