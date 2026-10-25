@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 16:01Z — exact04 live adoption released
+
+Final operation/trust/provider/driver/control hashes independently verified; actual isolated transaction/provider summaries accepted. Authorized b28c9663 operation released for fresh idlegen4/ledger40 check, data-onlygen5 expansion and exact append/readback/restartedduplicate. Expected41entries/effective3 is not yet a live result. No click/reload/reset; budget0. Review: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-final-review.md`.
+
 ### 2026-10-25 15:51Z — 9cc roster fixture repaired
 
 Prior matrix stopped before dispatch because retained authorzai-2 was absent from owner roster;16fail/4errors not semantic evidence. Coordinator test-only74001cd54 adds hermetic roster and string-guarded assertions, kondo clean. Repinned5794179b, released current-first bounded diagnostic matrix; historical setup errors remain distinct, no silent contract changes. No live/clearance. Release: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation/roster-fix-release.md`.
