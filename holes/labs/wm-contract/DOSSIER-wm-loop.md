@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T20:46:11.243227+00:00 — 8467 admission projection defect isolated
+
+Completed copied-ledger matrix refused medic/binding-mismatch, not clearance. Coordinator binding-diagnosis probe isolates cause fields: ordinary reopened37 projects opening90ca rather than retained new-cause25e24; occurrence37/predecessor36 match, authority callback never reached. Evidence: /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/coordinator-binding-diagnosis.md and binding-diagnosis.log. Approved envelope unchanged. Agency codex-12 job invoke-1792961159948-3905-f90c797d commissioned isolated adapter repair, actual admission regression and semantic mutation; no live release. Ledger remains last verified43/effective1, budget0. Prior interrupted/red matrix retained.
+
 ### 2026-10-25T20:26:09.839304+00:00 — 8467 final matrix resumed; live held
 
 Final envelope/provider controls complete, copied matrix SIGTERM143 after six minutes lacked summary. Preserved original artifacts. Coordinator verified envelope pins and launched unchanged driver through separate controls-resume harness8ba113b0 with durable per-case progress and strengthened no-write/raw-history checks, wrapper3234419. Dynamic lint findings same as original6/3, parenspass; no pass claim pending execution. No live change; helper to monitor existing process to completion, no restart/cleanup or arbitrary six-minute kill.
