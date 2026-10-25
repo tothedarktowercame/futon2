@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T20:02:23.155015+00:00 — 8467 canonical contract qualified; fresh evaluator binding
+
+Independent addendum59cc61db accepted within narrow measurement-domain scope. Canonicalefbd586b1 test4638d907/fixture9916f11d and runner409d verified;4/43canonicalgreen, no production drift. f58b metadata-hash origin confirmed; broader six-want end-to-end/learning preservation/reconstruction prohibition excluded. Release evaluator-stage binding against post41 six-scope43-entry ledger, exact latest37/reopened2/current cause and predecessor. No real review/auth/operation or live clearance. Coordinator promotion review retained in repair-acceptance/evaluation.
+
 ### 2026-10-25T19:57:45.753283+00:00 — 8467 qualification scope and nonvacuous baseline test
 
 Independent claude9 review qualifies measurement-domain repair within scope. Historical6/2 reproducer is gate-agnostic without caller; actual caller mutation remains discriminator. Direct test-only cc657f22b replaces vacuous empty dispatch with valid captured baseline positive and missing/label-only negatives;4tests43assertions green. New test4638d90743b9. Request independent delta review/test-only promotion, retaining six-row versus one-row distinction, limited learning probe, historical source identity and actual409d runner pin. No intent or live clearance.
