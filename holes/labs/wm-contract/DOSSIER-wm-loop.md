@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 13:48:31 UTC — Provider fixes independently green; activation dispatched
+
+Independent futon2 20/98 and futon3c7/28 green; final three-case probe exit0 closes original drift/refusal/map-substitution findings. Reviewed lock generation check before new admission. Source merges futon2 `583e3c44aa5360a7842b5a25a158da14df79e12d`, futon3c `800e96b3459aaf8735b788755ae9dcdd91f34177`. Review `~/notes/wm-next/offline-repair/provider/review/final-review.md`.
+
+Codex12 actual canonical provider activation and exact approved a9 scope installation job `invoke-1792936162068-3578-548543f5`, park `park-d8b5e6ae-69c2-49dc-a724-4a3c268362d0`. Reader verification only; no append/click. A9 driver recovery follow-up separate before coordinated adoption. Joe authorization persists.
+
 ### 2026-10-25 13:43:15 UTC — Injury41 diagnostic retention repair dispatched
 
 Reviewed current projection/emission/D4 contract: terminal failure lost nested checks/controls/repair. Historical failed invariant absent from that record; current protocol tests do not qualify historical repair. Requested exact nested wrapper/sealed-record retention test and bounded redundant retry-ledger/checkpoint recovery, since resume! also records full diagnostics separately.
