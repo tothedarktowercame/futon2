@@ -112,7 +112,7 @@
     (is (= :intent/payload-mismatch (:reason (authority/verify wrong-contract))))
     (is (= :roles/not-independent (:reason (authority/verify self-review))))
     (is (= :intent/root-mismatch (:reason (authority/verify wrong-root))))
-    (is (= :intent/payload-mismatch (:reason (authority/verify wrong-predecessor))))
+    (is (= :intent/ledger-entry-mismatch (:reason (authority/verify wrong-predecessor))))
     (is (= :payload/swap (:reason (authority/verify false-verdict))))
     (is (= :artifact/hash-drift (:reason (authority/verify replay-drift))))
     (let [bundle (select-keys f [:intent :artifacts :evaluation-pin :review-pin :authorization-pin :trust])

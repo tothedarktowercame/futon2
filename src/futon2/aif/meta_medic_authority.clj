@@ -143,10 +143,9 @@
               [(:injury-id intent) (str (:ordinal intent))])
         {:status :refused :reason :intent/occurrence-mismatch}
         (not= [(:injury-id ledger-entry) (:ordinal ledger-entry)
-               (:entry-id ledger-entry) (:predecessor-entry-id ledger-entry)
-               (:state ledger-entry) (:attempt ledger-entry)]
+               (:entry-id ledger-entry) (:state ledger-entry) (:attempt ledger-entry)]
               [(:injury-id intent) (:ordinal intent) (:ledger-entry-id intent)
-               (:predecessor-entry-id intent) (:state intent) (:attempt intent)])
+               (:state intent) (:attempt intent)])
         {:status :refused :reason :intent/ledger-entry-mismatch}
         (not= [(:cause-record-id current) (:cause-pin current)]
               [(:path original-pin) (:sha256 original-pin)])
@@ -269,9 +268,10 @@
               [(:injury-id intent) (str (:ordinal intent))])
         {:status :refused :reason :intent/occurrence-mismatch}
         (not= [(:injury-id ledger-entry) (:ordinal ledger-entry)
-               (:entry-id ledger-entry) (:state ledger-entry) (:attempt ledger-entry)]
+               (:entry-id ledger-entry) (:predecessor-entry-id ledger-entry)
+               (:state ledger-entry) (:attempt ledger-entry)]
               [(:injury-id intent) (:ordinal intent) (:ledger-entry-id intent)
-               (:state intent) (:attempt intent)])
+               (:predecessor-entry-id intent) (:state intent) (:attempt intent)])
         {:status :refused :reason :intent/ledger-entry-mismatch}
         (not= [(:cause-record-id current) (:cause-pin current)]
               [(:path cause-pin) (:sha256 cause-pin)])
