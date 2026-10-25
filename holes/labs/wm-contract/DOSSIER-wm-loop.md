@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 16:23Z — 9cc qualified repair contract promoted
+
+Independent bounded qualification ff9b73b9 accepted. Test-only merge65342e077 adds exact two evaluated files; postmerge hashes match, runner unchanged13fb1853. Scope explicitly excludes real author/task, git authenticity and terminal/ledger ingestion; nil-click fixture warnings retained. Fresh evaluator-stage medic assembly dispatched against41entry four-scope ledger, actual9cc occurrence/predecessor via production. No exact operation approval or clearance yet. Qualification: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation/coordinator-qualification.md`.
+
 ### 2026-10-25 16:14Z — 9cc semantic evidence ready for qualification
 
 Seven evidence hashes verified. Historical19red/0errors at real caller; repaired/current3tests50assertionsgreen; actual caller-edge removal17red/0errors/restoredgreen. Synthetic conditional repair only, not original task success. Independent qualification dispatched to claude-9, explicitly reviewing fixture terminal-record/malformed warnings and no ledger-certification claim.9cc stillactive,41/8467 separate. Review: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation/coordinator-evidence-review.md`.
