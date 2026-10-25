@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25 00:09:25 UTC — codex-11 reviewed admission command incident and independently matched three source hashes. Original output/exit incomplete; no durable mutation evidenced, absence of effects unknown. Review ~/notes/wm-next/offline-repair/integration/code/review/incident-review.md. Dispatched pure recurrence code codex-12 invoke-1792886965122-3403-61e52995, park-08251ad3-5425-4087-8207-e9962f718ebb, exact named tests with redirected logs, no broad discovery. No store/live action; budget0.
+
 - 2026-10-25 00:07:05 UTC — codex-11 reviewed pure medic admission18c8bef, merged 1738a6b90143b42864042aa70f6a58524a160dde. Independent28tests282assertions green; genuine repair, false verdict, wrong predecessor, default denial probe green. Review ~/notes/wm-next/offline-repair/integration/code/review/review.md. Worker disclosed broad -M:test -e discovery; effects not established. Read-only account dispatched invoke-1792886844615-3402-5bd494b4, park-66fa22ea-0dfe-4f9d-9d53-76a7ed5417c1; no replay/cleanup. Source merge is not activation; recurrence/store next, budget0.
 
 - 2026-10-25 00:00:31 UTC — codex-11 reviewed exhausted validity0873fba, merged mathlib4 0f8f85db27d8b87df3f99711192d32496cc31900. Build463 passed; independent valid-snapshot reused-ordinal control refused, stale negative semantically red, main axioms standard. Review ~/notes/wm-next/offline-repair/integration/formal/recurrence/exhausted/coordinator-review.md. Dispatched pure medic admission/projection to codex-12 invoke-1792886455551-3397-c93fa096, park-38530652-0867-484e-92cd-d00b29e52c43. No terminal recurrence/store/live wiring, budget0.
