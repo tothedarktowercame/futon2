@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:12:05 UTC — Genuine authority reviewed and merged
+
+Merge 2edb1ab89123b173aeea85465a6aeb139aed934c; independent13tests49assertions green. Envelope/interleaved/predecessor probes pass. Coordinator mixed historical+genuine actual admission/revalidation and cross-scope refusal pass; runtime-ledger-removal mutation red, restored green. Durable final review ~/notes/wm-next/offline-repair/genuine-authority/review/final-review.md. Source only, no serving load/live clearance; six remain. Activation must preserve a9 exact scope and current ledger; genuine per-row envelopes separate.
+
 ### 2026-10-25 14:09:32 UTC — Injury04 repair evidence independently qualified
 
 Verified11artifact pins, exact want-projection mutation9semantic failures/restored1test16assertions, and clean pinned evaluator worktree. Historical red9/11 differs from current16assertion test; fresh mutation supplies same-contract comparison. Qualification ~/notes/wm-next/offline-repair/injury04/evaluation/review/qualification.md, evaluator manifest fe98b228…1b19. Qualified bounded function acceptance under supplied inputs only, not a live successful click or8467 producer repair. Preserve dafa history; actual repair7ca70e1. Operation-bound authority/provider and corrected verifier still pending. No live disposition, six remain, budget0.
