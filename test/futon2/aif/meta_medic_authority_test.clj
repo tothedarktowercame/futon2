@@ -251,9 +251,11 @@
         one (authority/resolve-context bundle)
         duplicate (authority/resolve-context {:bundles [bundle bundle]})]
     (is (= :ready (:status one)))
-    (is (true? ((:verifier one) observation)))
+    (is (true? ((authority/resolution-verifier (:resolution one)) observation)))
     (is (= :wm/meta-medic-authority-context-identity-v1
            (get-in one [:identity :schema])))
     (is (= :meta-self-heal/medic-authority-ambiguous (:reason duplicate)))
     (is (= :meta-self-heal/medic-authority-unavailable
-           (:reason (authority/resolve-context {:bundles []}))))))
+           (:reason (authority/resolve-context {:bundles []}))))
+    (is (false? (authority/resolved-context?
+                 (assoc one :verifier (constantly true)))))))

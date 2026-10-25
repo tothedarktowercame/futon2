@@ -51,12 +51,21 @@
 
 (defn- resolve-medic-authority [opts]
   (cond
-    (medic-authority/resolved-context?
-     (:meta-medic-authority-resolution opts))
-    (:meta-medic-authority-resolution opts)
+    (contains? opts :meta-medic-authority-resolution)
+    (let [resolution (:meta-medic-authority-resolution opts)]
+      (if (medic-authority/resolved-context? resolution)
+        {:status :ready
+         :identity (medic-authority/resolution-identity resolution)
+         :verifier (medic-authority/resolution-verifier resolution)}
+        {:status :refused :reason :meta-self-heal/medic-authority-unavailable}))
 
     (contains? opts :meta-medic-authority-context)
-    (medic-authority/resolve-context (:meta-medic-authority-context opts))
+    (let [resolved (medic-authority/resolve-context
+                    (:meta-medic-authority-context opts))]
+      (if (= :ready (:status resolved))
+        {:status :ready :identity (:identity resolved)
+         :verifier (medic-authority/resolution-verifier (:resolution resolved))}
+        resolved))
 
     :else {:status :absent :verifier (constantly false)}))
 

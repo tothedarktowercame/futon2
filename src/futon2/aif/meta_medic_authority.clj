@@ -15,11 +15,16 @@
 (def evaluation-schema :wm/meta-medic-evaluation-v1)
 (def review-schema :wm/meta-medic-qualification-review-v1)
 (def authorization-schema :wm/meta-medic-authority-v1)
-(def ^:private process-resolution-token (Object.))
+(deftype ^:private AuthorityResolution [identity verifier])
 
 (defn resolved-context? [value]
-  (and (= :ready (:status value))
-       (identical? process-resolution-token (:process-token value))))
+  (instance? AuthorityResolution value))
+
+(defn resolution-identity [value]
+  (when (resolved-context? value) (.-identity ^AuthorityResolution value)))
+
+(defn resolution-verifier [value]
+  (when (resolved-context? value) (.-verifier ^AuthorityResolution value)))
 
 (def required-findings
   {:classification :producer-qualified-already-satisfied
@@ -244,14 +249,15 @@
                              bundles)]
             (if-not (= (count scopes) (count (distinct scopes)))
               {:status :refused :reason :meta-self-heal/medic-authority-ambiguous}
-              (let [verifiers (mapv authority-verifier bundles)]
+              (let [verifiers (mapv authority-verifier bundles)
+                    identity {:schema :wm/meta-medic-authority-context-identity-v1
+                              :scopes scopes}
+                    verifier (fn [observation]
+                               (= 1 (count (filter true?
+                                                   (map #(% observation) verifiers)))))]
                 {:status :ready
-                 :process-token process-resolution-token
-                 :identity {:schema :wm/meta-medic-authority-context-identity-v1
-                            :scopes scopes}
-                 :verifier (fn [observation]
-                             (= 1 (count (filter true?
-                                                 (map #(% observation) verifiers)))))}))))))))
+                 :identity identity
+                 :resolution (AuthorityResolution. identity verifier)}))))))))
 
 (defn a9-unapproved-candidate
   "Retained-snapshot manifest only. It intentionally cannot verify."
