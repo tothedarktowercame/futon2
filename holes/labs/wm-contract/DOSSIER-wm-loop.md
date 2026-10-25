@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:32Z — 9cc repair acceptance commissioned
+
+Independent review confirms medic requires repair acceptance, not historical mission completion or a real corrected c52 reply. No existing9cc repair contract was found. Coordinator explicitly commissioned new narrow prompt/correction acceptance bound to retained c52 identities, with synthetic replies labelled and unchanged artifact gates. Contract must be reviewed/pinned before semantic pre/post evaluation; missing-symbol/fixture errors cannot count as red.9cc remains active; no clearance or authority issued. Decision: `/home/joe/notes/wm-next/offline-repair/injury9cc/correction-evaluation/coordinator-contract-decision.md`. Review's ledger39 and approximate future heading are not freshness warrants; current ledger40/effective4 unchanged.
+
 ### 2026-10-25 15:29Z — 04 exact review dispatched
 
 Coordinator checked evaluator assembly against post940 ledger40, independently verified four packet/five artifact hashes and canonical ledger SHA. Occurrence20/predecessor8 binds7ca70e1 selected-want repair separately from historical dafa05d attribution. Exact independent review to claude-9; roster freshness and full payload derivation explicitly included. No04 approval or disposition yet; four effective injuries remain, budget0. Receipt: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-assembly-review.md`.
