@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T20:07:56.302561+00:00 — 8467 evaluator packet bound to current occurrence
+
+Verified12 artifact pins and independent actual ledger binding:43/root72c1f7be, latest37/reopened2, transition predecessor36, newcause25e24. Evaluator digest3eede72b/evaluation00fdce5f ready for independent exact review. Production compatibility controls remain synthetic, not approvals. No final operation/authorization/live clearance; historical attribution56fd92 distinguished from forward49a8c59d repair. Assembly review retained under authority/8467-adoption.
+
 ### 2026-10-25T20:02:23.155015+00:00 — 8467 canonical contract qualified; fresh evaluator binding
 
 Independent addendum59cc61db accepted within narrow measurement-domain scope. Canonicalefbd586b1 test4638d907/fixture9916f11d and runner409d verified;4/43canonicalgreen, no production drift. f58b metadata-hash origin confirmed; broader six-want end-to-end/learning preservation/reconstruction prohibition excluded. Release evaluator-stage binding against post41 six-scope43-entry ledger, exact latest37/reopened2/current cause and predecessor. No real review/auth/operation or live clearance. Coordinator promotion review retained in repair-acceptance/evaluation.
