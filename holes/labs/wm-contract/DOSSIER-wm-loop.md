@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:18:23 UTC — Cfb exact assembly validated; operation review dispatched
+
+Independently validated c1fc78cd… intent,5artifact pins/genuine payload/equal request and4delivered artifact hashes. Retention-only correction adopted; ord17/pred14/root363c3b4f… binding. Review ~/notes/wm-next/offline-repair/authority/cfb-adoption/coordinator-assembly-review.md. Claude9 exact reviewer receipt requested via invoke-1792937934710-3616-d0272364, park-d1571eb7-83b7-45ab-9ea6-65dd0ad21ce7; no attributed approval before reply. Genuine verifier active, provider a9 only. No live clearance; six remain, budget0.
+
 ### 2026-10-25 14:17:14 UTC — Genuine authority and retention activation accepted
 
 Four canonical hashes independently match rc0 reload plan/results; seven form/log hashes verify. Actual provider generation2 one exact a9 scope,38entries/effective6/a9excluded; idle/queue0/stops0/budget0 and current ledger SHA unchanged. Review ~/notes/wm-next/offline-repair/genuine-authority/activation/coordinator-review.md. Injury41 retention now loaded, no historical clearance. Cfb envelope job3608 remains separate. No genuine disposition or click.
