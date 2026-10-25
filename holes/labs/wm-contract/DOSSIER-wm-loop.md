@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:09:32 UTC — Injury04 repair evidence independently qualified
+
+Verified11artifact pins, exact want-projection mutation9semantic failures/restored1test16assertions, and clean pinned evaluator worktree. Historical red9/11 differs from current16assertion test; fresh mutation supplies same-contract comparison. Qualification ~/notes/wm-next/offline-repair/injury04/evaluation/review/qualification.md, evaluator manifest fe98b228…1b19. Qualified bounded function acceptance under supplied inputs only, not a live successful click or8467 producer repair. Preserve dafa history; actual repair7ca70e1. Operation-bound authority/provider and corrected verifier still pending. No live disposition, six remain, budget0.
+
 ### 2026-10-25 14:08:26 UTC — Genuine verifier adapter/interleaving held
 
 37fffe0d6 fixes original predecessor probe. Independent envelope-only probe still refuses because authority-verifier omits actual runtime ledger from verify; fixture's embedded ledger hides it. Independent valid same-injury observation interleaving refuses because predecessor lookup lacks transition filtering. Both retained positive-admission probes exit1; review ~/notes/wm-next/offline-repair/genuine-authority/review/followup-review.md. Codex3 correction invoke-1792937306080-3594-6091f291, park-5938bf60-2bad-45c3-8d41-c1b9ccb83ef9, includes actual mixed-scope admission/revalidation. No merge/reload/live clearance; six remain, budget0.
