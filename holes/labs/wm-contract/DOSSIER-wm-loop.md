@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:06:46 UTC — cfb/940 evidence checked; cfb contract distinction retained
+
+Twelve path/hash pins independently match. Cfb retained red contains inverted terminal-routing assertion corrected in809a7f7; evaluator same-byte-contract claim is overstated. Separate real missing-retention red from test correction. 940 pending independent semantic qualification. Review ~/notes/wm-next/offline-repair/genuine-evaluation/review/coordinator-review.md; claude9 dispatched invoke-1792937206492-3593-53a0b77f, park-68c49537-c831-4bcd-97a4-2bddf0e51ef5. No live qualification/append, six remain, budget0. Genuine verifier followup separate.
+
 ### 2026-10-25 14:03:48 UTC — Injury04 repair artifact resolved; evaluation dispatched
 
 Compared original hash64b3eff6…/missing-want refusal with source diffs: 7ca70e10 repairs want propagation; dafa05d repairs reporting only. Accept artifact choice for independent evaluation, preserve ord20 lineage. Replay log pins ab0e78c7 (prose11321a13d corrected in coordinator review). Review ~/notes/wm-next/offline-repair/injury04/coordinator-review.md. Codex12 evaluation invoke-1792937083851-3590-cb4fae6e, park-444ade3e-9803-43af-8af8-766ec8deeb62, follows cfb940 work with separate outputs and isolated semantic mutation. Genuine verifier non-root bug still held. No live clearance, ledger change, reload, click or learning credit; six effective injuries remain.
