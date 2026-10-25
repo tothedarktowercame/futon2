@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:27:53 UTC — Author correction formal held on reply identity
+
+Independent Lean CorrectionIdentityProbe compiles proving unrelated correctionId can enter response and be accepted: field unused, wait lacks correction request. Review ~/notes/wm-next/offline-repair/injury9cc/author-correction/review/coordinator-review.md. Codex3 followup invoke-1792938493819-3626-8010c978, park-daf12724-0f8c-434f-b807-b30b81ae5e73 requires retained actual correction identity and explicit completed/provenance-verified reply before unchanged gate. No Clojure/merge/live action, six remain/budget0.
+
 ### 2026-10-25 14:21:55 UTC — Cfb exact authorization issued
 
 Review ae38925f… accepted and hash checked with evaluation ca0d52ce…; all3seat sessions independently roster checked. Coordinator exact authorization1b27528d… for c1fc78cd… intent, ord17/pred14, narrow corrected retention scope under Joe instruction. No new operator approval needed. Final combined-a9 isolated operation/provider/recovery validation dispatched invoke-1792938157341-3620-c1e6c02f, park-8ee36167-8a45-4638-9228-279d19ebd083; no live append yet. Artifacts ~/notes/wm-next/offline-repair/authority/cfb-adoption/coordinator-authorization.md. Six remain, budget0.
