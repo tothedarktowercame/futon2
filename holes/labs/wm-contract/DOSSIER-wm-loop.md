@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 13:50:47 UTC — A9 recovery driver independently accepted
+
+Independent controls.clj exit0: all6 isolated controls green, including restart without reset, recovered post-rename commitment, stale different operation, unreadable readback and pre-write failure. Envelope pins unchanged. Review/log `~/notes/wm-next/offline-repair/authority/a9-adoption/review/final-review.md`. No canonical write.
+
+Exact authorized live adoption ready after provider activation job3578 is reviewed. No further Joe permission needed; current root/occurrence gate remains. No click or budget change.
+
 ### 2026-10-25 13:48:31 UTC — Provider fixes independently green; activation dispatched
 
 Independent futon2 20/98 and futon3c7/28 green; final three-case probe exit0 closes original drift/refusal/map-substitution findings. Reviewed lock generation check before new admission. Source merges futon2 `583e3c44aa5360a7842b5a25a158da14df79e12d`, futon3c `800e96b3459aaf8735b788755ae9dcdd91f34177`. Review `~/notes/wm-next/offline-repair/provider/review/final-review.md`.
