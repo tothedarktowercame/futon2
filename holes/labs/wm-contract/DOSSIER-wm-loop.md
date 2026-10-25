@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 16:14Z — 9cc semantic evidence ready for qualification
+
+Seven evidence hashes verified. Historical19red/0errors at real caller; repaired/current3tests50assertionsgreen; actual caller-edge removal17red/0errors/restoredgreen. Synthetic conditional repair only, not original task success. Independent qualification dispatched to claude-9, explicitly reviewing fixture terminal-record/malformed warnings and no ledger-certification claim.9cc stillactive,41/8467 separate. Review: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation/coordinator-evidence-review.md`.
+
 ### 2026-10-25 16:11Z — 04 live medic disposition verified
 
 Actual store+serving evidence accepted:41entries/raw7/effective3, exactgen5a9/cfb/940/04 scopes. Operationb28c9663 appended ordinal41; separate restartduplicate unchanged. Canonical SHA960d3315 verified; only41/8467/9cc remain. Idle queue/stops0, budget0 unchanged; no task/learning success. Review: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/live/coordinator-review.md`.
