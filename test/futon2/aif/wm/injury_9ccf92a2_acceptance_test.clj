@@ -17,6 +17,10 @@
 (def retained (:retained-identities fixture))
 (def synthetic (:synthetic-responses fixture))
 
+(defn- contains-text? [value fragment]
+  ;; Missing historical observations are assertion failures, not null errors.
+  (and (string? value) (str/includes? value fragment)))
+
 (defn- with-owner-fixtures [thunk]
   ;; The deciding correction path is runner-owned. Compose the owner namespace's
   ;; registered once/each chain rather than calling its helpers unfixture'd.
@@ -137,6 +141,10 @@
              :judgement-transform-fn transform
              :runner-options
              {:author (:author retained)
+              ;; Hermetic roster follows the retained author substitution.
+              :roster-fn (fn [_] {:zai-2 {:status "idle" :invoke-ready? true}
+                                  :codex-7 {:status "idle" :invoke-ready? true}
+                                  :codex-1 {:status "idle" :invoke-ready? true}})
               :reviewer "codex-7"
               :repair-reviewer "codex-1"
               :construct-fn (fn [_] (construction))
@@ -165,7 +173,7 @@
           "249ce8a6685edbbb23b019d2661d5dc2c2198e90"]
          ((juxt :target :repository :base-head :author :original-job-id
                 :compiled-cascade-digest :existing-artifact) retained)))
-  (is (str/includes? (:notice synthetic) "synthetic replies")))
+  (is (contains-text? (:notice synthetic) "synthetic replies")))
 
 (deftest composed-author-wait-corrects-before-the-bound-refusal-gate
   (let [{:keys [result dispatches fixture-adapter synthetic-provenance]}
@@ -182,7 +190,7 @@
            (:substitutions fixture-adapter))
         "transparent owner-fixture substitutions are retained as test evidence")
     (is (= (:notice synthetic) synthetic-provenance))
-    (is (str/includes? synthetic-provenance "test-only synthetic replies"))
+    (is (contains-text? synthetic-provenance "test-only synthetic replies"))
     (is (= 2 (count dispatches))
         "exactly the original author request and one correction are sent")
     (is (= [(:author retained) (:author retained)]
@@ -205,12 +213,12 @@
     (is (= (sha256 (pr-str reconstructed-prompt))
            (get-in correction [:binding :original-prompt-sha256]))
         "the reconstructed prompt—not unavailable historical full bytes—is bound")
-    (is (str/includes? reconstructed-prompt
+    (is (contains-text? reconstructed-prompt
                        "do NOT present the base HEAD as a new DONE artifact"))
-    (is (str/includes? reconstructed-prompt
+    (is (contains-text? reconstructed-prompt
                        "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head"))
-    (is (str/includes? (:prompt correction-dispatch) "IMMUTABLE CORRECTION BINDING"))
-    (is (str/includes? (get-in correction [:corrected :job :result-summary])
+    (is (contains-text? (:prompt correction-dispatch) "IMMUTABLE CORRECTION BINDING"))
+    (is (contains-text? (get-in correction [:corrected :job :result-summary])
                        "REFUSE :already-satisfied-at-base-head")
         "synthetic correction provenance survives the composed author-wait evidence")
     (is (nil? (get-in correction [:original :job :artifact-ref]))
