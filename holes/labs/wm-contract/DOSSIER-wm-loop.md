@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25 00:14:41 UTC — codex-11 holds bd6f907d: independent pure probe exit0 demonstrates medic reopening attempt2 at limit1 accepted, and exact enacted retry at limit wrongly refused for medic evidence. Review ~/notes/wm-next/offline-repair/integration/code/recurrence-review/review.md. Followup codex-12 invoke-1792887281121-3407-213a329f, park-e7c12ec8-305d-4397-8688-b8335e34363d; also review explicit verifier propagation and current cause persistence. No merge/store/live action; budget0.
+
 - 2026-10-25 00:09:25 UTC — codex-11 reviewed admission command incident and independently matched three source hashes. Original output/exit incomplete; no durable mutation evidenced, absence of effects unknown. Review ~/notes/wm-next/offline-repair/integration/code/review/incident-review.md. Dispatched pure recurrence code codex-12 invoke-1792886965122-3403-61e52995, park-08251ad3-5425-4087-8207-e9962f718ebb, exact named tests with redirected logs, no broad discovery. No store/live action; budget0.
 
 - 2026-10-25 00:07:05 UTC — codex-11 reviewed pure medic admission18c8bef, merged 1738a6b90143b42864042aa70f6a58524a160dde. Independent28tests282assertions green; genuine repair, false verdict, wrong predecessor, default denial probe green. Review ~/notes/wm-next/offline-repair/integration/code/review/review.md. Worker disclosed broad -M:test -e discovery; effects not established. Read-only account dispatched invoke-1792886844615-3402-5bd494b4, park-66fa22ea-0dfe-4f9d-9d53-76a7ed5417c1; no replay/cleanup. Source merge is not activation; recurrence/store next, budget0.
