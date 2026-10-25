@@ -2,7 +2,7 @@
   "Synthetic authority grammar only.  The fields mirror the retained cfb/940
   acceptance evidence categories (cause, original contract, pre/post and a
   negative replay), but no live approval is represented here."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-medic-authority :as authority]))
@@ -15,7 +15,9 @@
   (let [text (str (pr-str value) "\n")]
     [{:path path :sha256 (load-identity/sha256 (.getBytes text "UTF-8"))} text]))
 
-(defn- fixture []
+(defn- fixture
+  ([] (fixture false))
+  ([interleaved?]
   (let [[cause-pin cause-bytes] (pinned "cfb/cause.edn" {:schema :wm/run :failure :held})
         [contract-pin contract-bytes] (pinned "cfb/acceptance.edn" {:schema :wm/acceptance :id :cfb})
         opened (ledger/append-transition ledger/empty-ledger
@@ -24,8 +26,14 @@
                                          :failure-stage :reviewer-wait
                                          :failure-kind :reviewer-falsifier-failed
                                          :detected-click "click/cfb"})
+        prior (if interleaved?
+                (:ledger (ledger/append-observation (:ledger opened)
+                                                    {:path "cfb/diagnostic.edn"
+                                                     :sha256 (apply str (repeat 64 "d"))}
+                                                    :diagnostic-only))
+                (:ledger opened))
         claimed (ledger/append-transition
-                 (:ledger opened)
+                 prior
                  {:injury-id "injury/cfb-synthetic" :state :claimed :attempt 1
                   :repair-id "repair/cfb" :algorithm "synthetic"
                   :author-session "author" :reviewer-session "reviewer"})
@@ -91,7 +99,7 @@
                :cause-pin (:sha256 cause-pin) :active? true}
      :operation operation :artifacts artifacts :evaluation-pin evaluation-pin
      :review-pin review-pin :authorization-pin authorization-pin
-     :trust #(contains? trusted %)}))
+     :trust #(contains? trusted %)})))
 
 (deftest genuine-repair-authority-binds-every-replay-and-admits-one-occurrence
   (let [f (fixture)
@@ -102,6 +110,18 @@
     (is (= :verified (:status (authority/verify f))))
     (is (= :appended (:status appended)) (pr-str appended))
     (is (empty? (:injuries (ledger/effective-active-injuries (:ledger appended) verifier))))))
+
+(deftest genuine-authority-uses-runtime-ledger-and-transition-predecessor
+  (doseq [[label f] [[:envelope (fixture)] [:interleaved (fixture true)]]]
+    (testing (name label)
+      (let [bundle (select-keys f [:intent :artifacts :evaluation-pin :review-pin
+                                   :authorization-pin :trust])
+            verifier (authority/authority-verifier bundle)
+            result (ledger/append-medic-repaired
+                    (:ledger f) {:path (str "cfb/" (name label) ".edn")
+                                 :sha256 (apply str (repeat 64 "e"))}
+                    (:operation f) verifier)]
+        (is (= :appended (:status result)) (pr-str result))))))
 
 (deftest genuine-repair-drift-and-cross-scope-are-refused
   (let [f (fixture)

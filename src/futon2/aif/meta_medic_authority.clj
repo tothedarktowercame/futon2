@@ -8,6 +8,7 @@
             [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.medic-disposition :as medic])
   (:import [java.io PushbackReader StringReader]))
 
@@ -233,7 +234,8 @@
   Raw entries deliberately store only the prior sealed entry ID/pin; the
   ordinal exists in the projected medic state, not on the raw entry."
   [ledger ledger-entry intent]
-  (let [prior (last (filter #(and (= (:injury-id ledger-entry) (:injury-id %))
+  (let [prior (last (filter #(and (= ledger/transition-schema (:schema %))
+                                  (= (:injury-id ledger-entry) (:injury-id %))
                                   (< (:ordinal %) (:ordinal ledger-entry)))
                             (:entries ledger)))
         raw (:injury-predecessor ledger-entry)]
@@ -390,6 +392,7 @@
           checked-operation (assoc operation :request {:candidate candidate
                                                        :evidence evidence})]
       (= :verified (:status (verify (assoc bundle :operation checked-operation
+                                           :ledger ledger
                                            :current current
                                            :ledger-entry ledger-entry)))))))
 
