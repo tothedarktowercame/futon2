@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 13:31:57 UTC — Medic source activation accepted; provider composition dispatched
+
+Verified retained nine successful canonical loads, plan/log/receipt hashes and equal before/final HTTP bytes. Runner/runtime identities current; no click or injury clearance. Review `~/notes/wm-next/offline-repair/activation/coordinator-review.md`.
+
+Actual service preflight precedes runtime verifier derivation; acceptance payload can retain options. Dispatched explicit process-local provider/shared authority composition and serialization controls to codex12, job `invoke-1792935180728-3570-4636b066`, park `park-f9f9c4bb-69da-43d4-9b1f-e3068021b2a5`. Source/tests only until review. Fresh per-row qualification remains claude9's independent job. Joe's live adoption authorization persists; no new permission request.
+
 ### 2026-10-25 13:27:47 UTC — Joe authorizes serving activation and historical clearance
 
 Joe requested activation of reviewed medic code, historical blocking injury clearance by Agency helpers, then queued work. This supersedes earlier no-activation scope for qualified adoption; no blanket deletion, invented task success or learning credit. No fresh click budget assigned.
