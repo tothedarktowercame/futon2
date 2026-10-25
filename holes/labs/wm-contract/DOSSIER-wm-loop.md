@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T19:50:22.230627+00:00 — injury41 medic disposition verified; only8467 remains
+
+Independent review of31 live pins and actual full operation confirms exact41 observation once at ordinal43. Ledger43/raw7/effective1 exactly8467, sha1e6b318d/root72c1f7be; providergen7/six scopes. Fresh-process restart already-committed/duplicate unchangedbytes; serving idle queue/stops0 budget0. Helper display field compares map to string and is vacuous; coordinator full-operation equality check replaces it, evidence retained. Function-valued-patch scope only, no task/learning success. Live coordinator review under authority/41-adoption/live.8467 independent repair qualification pending; previous coordinator evidence review documents report hash typo versus actual409d runner.
+
 ### 2026-10-25T19:37:01.977493+00:00 — exact41 live disposition released
 
 Reviewed actual final envelope/driver/data installer and isolated controls;38 artifact pins match. Authorized operation244f64d6, provider gen6to7 preserving five prior scopes, expected ledger42to43/effective2to1 exactly8467. Current41 source pins and8467 runner409d0877 correspondence checked on disk; worker requires fresh serving/idle/root checks. No live completion claimed. Coordinator-final-review.md retains source drift, journal and timed-out harness limitations. No click/budget/task success or learning inference.
