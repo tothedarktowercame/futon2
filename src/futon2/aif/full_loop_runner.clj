@@ -156,6 +156,7 @@
 (def artifact-window-tolerance-ms (* 2 60 1000))
 (def default-build-cure-retries 1)
 (def default-review-evidence-corrections 0)
+(def default-author-response-corrections 1)
 (def default-author-infrastructure-retries 1)
 (def default-revision-rounds 1)
 (def ^:private historical-verification-completion-token (Object.))
@@ -347,6 +348,11 @@
                                            (catch Exception _ nil)))]
              (or parsed default-build-cure-retries))
            :review-evidence-corrections default-review-evidence-corrections
+           ;; A narrow, opt-in-by-shape correction: only a completed author
+           ;; reply which explicitly presents its dispatched base as a DONE
+           ;; artifact may receive this one further ask.  The correction still
+           ;; goes through the unchanged refusal and fresh-artifact gates.
+           :author-response-corrections default-author-response-corrections
            :revision-rounds default-revision-rounds
            :author-infrastructure-retries default-author-infrastructure-retries
            :trigger :duree-click-on-demand
@@ -3809,6 +3815,154 @@
   (select-keys job [:job-id :agent-id :state :request :result :result-summary
                     :terminal-message :events :execution :artifact-ref
                     :repo-observed-artifact-ref]))
+
+(defn- retained-author-job [job]
+  "The author response retained by a correction is evidence about one Agency
+  job, not an assertion that its prose or artifact claim was accepted."
+  (select-keys job [:job-id :agent-id :state :request :result :result-summary
+                    :terminal-message :events :execution :artifact-ref
+                    :repo-observed-artifact-ref]))
+
+(defn- author-response-correction-failure!
+  [message reason correction]
+  (throw (ex-info message
+                  {:outcome :build-failed
+                   :failure-kind :author-response-correction-refused
+                   :failure-stage :author-wait
+                   :author-response-correction
+                   (assoc correction :status :refused :reason reason)})))
+
+(defn- author-response-correction-prompt
+  [author target repo base-head binding original-job]
+  (str author ": FULL-LOOP AUTHOR RESPONSE CORRECTION. Your completed reply "
+       "claimed the TARGET REPOSITORY BASE HEAD as a new DONE artifact. That "
+       "is not an artifact binding. This is one correction of that same "
+       "request, not permission to make a cosmetic commit or to change the "
+       "selected target, repository, base, or construction contract.\n\n"
+       "SELECTED TARGET: " (pr-str target) "\n"
+       "TARGET REPOSITORY: " (pr-str repo) "\n"
+       "TARGET REPOSITORY BASE HEAD: " (pr-str base-head) "\n"
+       "IMMUTABLE CORRECTION BINDING: " (pr-str binding) "\n"
+       "ORIGINAL AUTHOR JOB (RETAINED): "
+       (pr-str (retained-author-job original-job)) "\n\n"
+       "If the selected construction was already satisfied at an existing "
+       "commit, provide the current valid feature card, name that existing "
+       "commit as its artifact reference, and end exactly "
+       "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head. Otherwise "
+       "make a real fresh artifact in the target repository and end "
+       "FULL_LOOP_AUTHOR: DONE <fresh-commit-sha>. The unchanged author, "
+       "feature-card, and artifact-binding gates evaluate this response."))
+
+(defn- author-response-correction-loop
+  "One correction of a precisely identified author response.
+
+  This is intentionally before, rather than inside, fresh-artifact-binding:
+  the trigger is the narrow observable mistake of a completed author job
+  presenting its own dispatched base as DONE.  All other artifact failures
+  continue to reach their existing refusal unchanged.  The returned job is
+  subsequently processed by the unchanged author refusal/card/artifact gates."
+  [opts phase-context author dispatched-turns target repo pre-author-head
+   construction author-response author-prompt-text author-job]
+  (let [raw-allowance (get opts :author-response-corrections
+                           default-author-response-corrections)
+        _ (when-not (contains? #{0 1} raw-allowance)
+            (throw (ex-info "Author response correction allowance must be 0 or 1"
+                            {:outcome :build-failed
+                             :failure-kind :author-response-correction-config-invalid
+                             :failure-stage :author-wait
+                             :author-response-corrections raw-allowance})))
+        base-head (:head pre-author-head)
+        original-request-id (:job-id author-response)
+        original-verdict (author-verdict author-job)
+        trigger? (and (= "done" (:state author-job))
+                      (not= "cancelled" (:state author-job))
+                      (string? original-request-id)
+                      (= original-request-id (:job-id author-job))
+                      (= author (:agent-id author-job))
+                      (= :done (:verdict original-verdict))
+                      (= base-head (:detail original-verdict)))]
+    (if-not trigger?
+      {:author-job author-job :author-response-corrections []}
+      (let [binding {:target target
+                     :author author
+                     :repository repo
+                     :base-head base-head
+                     :construction-contract (prompt-construction construction)
+                     :construction-contract-sha256
+                     (sha256 (prompt-construction construction))
+                     :original-request-id original-request-id
+                     :original-prompt-sha256 (sha256 author-prompt-text)}
+            base-record {:schema :wm/author-response-correction-v1
+                         :allowance raw-allowance
+                         :binding binding
+                         :original {:request (select-keys author-response [:job-id])
+                                    :job (retained-author-job author-job)}}]
+        (when (zero? raw-allowance)
+          (author-response-correction-failure!
+           "Author response correction allowance is exhausted"
+           :author-response-correction-exhausted base-record))
+        (let [prompt (author-response-correction-prompt author target repo base-head
+                                                        binding author-job)
+              dispatch-result (atom nil)
+              dispatch-once
+              (fn []
+                (locking dispatch-result
+                  (case (:status @dispatch-result)
+                    :returned (:value @dispatch-result)
+                    :threw (throw (:throwable @dispatch-result))
+                    (try
+                      (swap! dispatched-turns inc)
+                      (let [response ((or (:dispatch-fn opts) dispatch!)
+                                      opts author "wm-full-loop" target prompt)]
+                        (reset! dispatch-result {:status :returned :value response})
+                        response)
+                      (catch Throwable t
+                        ;; A debugger retry reuses the retained transport result;
+                        ;; it never sends a second correction request.
+                        (reset! dispatch-result {:status :threw :throwable t})
+                        (throw t))))))
+              response (run-phase! opts phase-context :author-response-correction-dispatch
+                                   dispatch-once)
+              correction-id (:job-id response)
+              corrected-job
+              (run-phase! opts phase-context :author-response-correction-wait
+                          #((or (:poll-fn opts) poll-job!) opts correction-id))
+              correction-before-gate
+              (assoc base-record
+                     :request {:job-id correction-id
+                               :prompt prompt
+                               :prompt-sha256 (sha256 prompt)}
+                     :corrected {:job (retained-author-job corrected-job)}
+                     :remaining-allowance 0)]
+          (when (= "cancelled" (:state corrected-job))
+            (author-response-correction-failure!
+             "Author response correction job was cancelled"
+             :correction-job-cancelled correction-before-gate))
+          (when-not (and (string? correction-id)
+                         (= correction-id (:job-id corrected-job))
+                         (= author (:agent-id corrected-job)))
+            (author-response-correction-failure!
+             "Author response correction reply provenance did not match dispatch"
+             :reply-provenance-mismatch correction-before-gate))
+          (when-not (= "done" (:state corrected-job))
+            (author-response-correction-failure!
+             "Author response correction did not complete"
+             :correction-job-not-done correction-before-gate))
+          (let [corrected-verdict (author-verdict corrected-job)]
+            (when (= :unverifiable (:verdict corrected-verdict))
+              (author-response-correction-failure!
+               "Author response correction did not contain a typed terminal reply"
+               :corrected-author-response-malformed correction-before-gate))
+            (when (and (= :done (:verdict corrected-verdict))
+                       (= base-head (:detail corrected-verdict)))
+              (author-response-correction-failure!
+               "Author response correction repeated the original base as DONE"
+               :corrected-response-repeats-base-done correction-before-gate)))
+          {:author-job
+           (assoc corrected-job :author-response-corrections
+                  [(assoc correction-before-gate :status :corrected)])
+           :author-response-corrections
+           [(assoc correction-before-gate :status :corrected)]})))))
 
 (defn- review-evidence-correction-prompt
   [reviewer target author repo commit binding review-job review-gate]
@@ -7979,7 +8133,15 @@
                   (cond-> (or retry-job initial-author-job)
                     retry-author? (assoc :author-retries author-retries))
                   effective-pre-author-head
-                  (if retry-author? retry-pre-author-head pre-author-head)]
+                  (if retry-author? retry-pre-author-head pre-author-head)
+                  author-correction-state
+                  (author-response-correction-loop
+                   opts @phase-context author dispatched-turns target author-repo
+                   effective-pre-author-head construction
+                   (if retry-author? retry-response author-response)
+                   (if retry-author? retry-author-prompt-text author-prompt-text)
+                   author-job)
+                  author-job (:author-job author-correction-state)]
               (throw-if-cancelled! author-job :author-wait)
               (when-not (= "done" (:state author-job))
                 (throw (ex-info "Author job did not complete"
