@@ -626,11 +626,54 @@
                  {:tasks (into tasks [(:task missing) (:task ambiguous)])
                   :fetch-snapshot (constantly snapshot)})
         reasons (set (map :ineligible-reason (:excluded receipt)))]
-    (is (= #{:repair-finding/root-missing :repair-finding/root-ambiguous}
+    ;; a nil target is the machine-owned class since the 2026-10-25 split
+    (is (= #{:repair-finding/machine-owned :repair-finding/root-ambiguous}
            reasons))
     (is (every? #(get-in % [:ineligibility-evidence :ticket-source :sha256])
                 (:excluded receipt)))
     (is (= ["M-a" "M-b"] (mapv :id (:support receipt))))))
+
+(deftest root-missing-splits-into-three-typed-reasons
+  "The old single :repair-finding/root-missing covered three situations
+  (Joe, 2026-10-25).  Each class keeps its ticket excluded — the excluded
+  set is identical, only the reason is typed.  A machine-owned row records
+  the finding's failure/hold kind alongside."
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "meta-repair-split"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        nil-target (repair-ticket dir (apply str (repeat 64 "5")) nil nil)
+        agent-target (repair-ticket dir (apply str (repeat 64 "6"))
+                                     "A-self-heal" nil)
+        absent-target (repair-ticket dir (apply str (repeat 64 "7"))
+                                     {:absent :outer-task-not-selected} nil)
+        unresolved-target (repair-ticket dir (apply str (repeat 64 "8"))
+                                         "repair-attempt-001" nil)
+        receipt (live/select-live
+                 {:tasks (into tasks [(:task nil-target) (:task agent-target)
+                                      (:task absent-target)
+                                      (:task unresolved-target)])
+                  :fetch-snapshot (constantly snapshot)})
+        by-id (into {} (map (juxt :id identity)) (:excluded receipt))]
+    (is (= 4 (count (:excluded receipt)))
+        "exactly the four repair tickets are excluded, same set as before")
+    (is (= ["M-a" "M-b"] (mapv :id (:support receipt)))
+        "no repair ticket enters support")
+    (is (= :repair-finding/machine-owned
+           (:ineligible-reason (get by-id (:id (:task nil-target))))))
+    (is (= :repair-finding/machine-owned
+           (:ineligible-reason (get by-id (:id (:task agent-target))))))
+    (is (= :repair-finding/no-task-selected
+           (:ineligible-reason (get by-id (:id (:task absent-target))))))
+    (is (= :repair-finding/root-unresolved
+           (:ineligible-reason (get by-id (:id (:task unresolved-target))))))
+    (is (= :agent-unavailable
+           (get-in (get by-id (:id (:task nil-target)))
+                   [:ineligibility-evidence :failure-kind]))
+        "machine-owned rows carry the finding's failure kind")
+    (is (= :environmental-hold
+           (get-in (get by-id (:id (:task nil-target)))
+                   [:ineligibility-evidence :repair-class]))
+        "machine-owned rows carry the hold/failure class")))
 
 (defn- git! [dir & args]
   (let [{:keys [exit out err]} (apply shell/sh "git" "-C" (.getAbsolutePath dir) args)]

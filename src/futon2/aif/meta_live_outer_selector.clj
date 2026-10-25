@@ -406,21 +406,36 @@
           finding-id (:repair/id finding)
           target (:target finding)
           parent (:parent ticket)
+          ;; root-missing is split (Joe, 2026-10-25): one reason used to
+          ;; cover three different situations — a target that names
+          ;; something that does not resolve, a typed no-choice target, and
+          ;; machine-owned failures (nil or A- targets).  The same items
+          ;; stay excluded; only the reason is typed now, and a root is
+          ;; recovered only where retained evidence names it.
           reason (cond
                    (not (and finding-path declared-sha)) :repair-finding/evidence-missing
                    (not= declared-sha actual-sha) :repair-finding/source-sha-mismatch
                    (not= expected-finding-id finding-id) :repair-finding/identity-mismatch
+                   (and (map? target) (contains? target :absent))
+                   :repair-finding/no-task-selected
+                   (or (nil? target)
+                       (and (string? target)
+                            (str/starts-with? target "A-")))
+                   :repair-finding/machine-owned
                    (not (and (string? target) (re-matches root-task-id target)))
-                   :repair-finding/root-missing
+                   :repair-finding/root-unresolved
                    (and parent (not= parent target)) :repair-finding/root-ambiguous
                    (not (contains? root-ids target)) :repair-finding/root-not-current)
-          evidence {:ticket-id (:id ticket)
-                    :ticket-source (:source ticket)
-                    :finding-id finding-id
-                    :finding-source {:path finding-path :sha256 actual-sha}
-                    :declared-finding-sha256 declared-sha
-                    :ticket-parent parent
-                    :finding-target target}]
+          evidence (cond-> {:ticket-id (:id ticket)
+                            :ticket-source (:source ticket)
+                            :finding-id finding-id
+                            :finding-source {:path finding-path :sha256 actual-sha}
+                            :declared-finding-sha256 declared-sha
+                            :ticket-parent parent
+                            :finding-target target}
+                    (= :repair-finding/machine-owned reason)
+                    (assoc :repair-class (:repair/class finding)
+                           :failure-kind (:failure-kind finding)))]
       (if reason
         {:status :unresolved :reason reason :evidence evidence}
         {:status :attached :root-id target
