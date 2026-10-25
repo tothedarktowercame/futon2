@@ -97,6 +97,12 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 16:11Z — 04 live medic disposition verified
+
+Actual store+serving evidence accepted:41entries/raw7/effective3, exactgen5a9/cfb/940/04 scopes. Operationb28c9663 appended ordinal41; separate restartduplicate unchanged. Canonical SHA960d3315 verified; only41/8467/9cc remain. Idle queue/stops0, budget0 unchanged; no task/learning success. Review: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/live/coordinator-review.md`.
+
+Retained deferred update: 2026-10-25 16:04Z:9cc current/repaired3 failures due result/result-summary and already exists grammar. Two-literal test-only160a452e2 fixed; matrix redispatched. No production/live/clearance. Defer canonical dossier commit while04 live check active.
+
 ### 2026-10-25 16:01Z — exact04 live adoption released
 
 Final operation/trust/provider/driver/control hashes independently verified; actual isolated transaction/provider summaries accepted. Authorized b28c9663 operation released for fresh idlegen4/ledger40 check, data-onlygen5 expansion and exact append/readback/restartedduplicate. Expected41entries/effective3 is not yet a live result. No click/reload/reset; budget0. Review: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-final-review.md`.
