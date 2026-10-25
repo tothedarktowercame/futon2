@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:49Z — 04 independent approval and exact authorization
+
+Actual independent review efddc475 accepted; intent/evaluation/review hashes and fresh roster checked. Coordinator authorized exact c311e9f0 intent/occurrence20/predecessor8 under Joe's instruction; authorization a3ebdfb6. Scope7ca selected-want identity repair only, dafa history unchanged. Final isolated four-scope40to41/effective3 and gen4to5 provider controls dispatched; no live append yet. Authorization: `/home/joe/notes/wm-next/offline-repair/authority/04-adoption/coordinator-authorization.md`. Budget0; no task/learning credit.
+
 ### 2026-10-25 15:47Z — 9cc fixture path corrected
 
 Historical evaluation stopped before assertions: fixture io/resource path lacked resources/ under test classpath. Coordinator made one-literal isolated test fix314992b2a, verified resource resolution/schema in plain JVM without loading production/tests, repinned a6d64629 and released same bounded matrix. Old run remains load error, not semantic evidence. No live state/clearance. Release: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation/resource-fix-release.md`.
