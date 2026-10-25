@@ -97,6 +97,14 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:17:14 UTC — Genuine authority and retention activation accepted
+
+Four canonical hashes independently match rc0 reload plan/results; seven form/log hashes verify. Actual provider generation2 one exact a9 scope,38entries/effective6/a9excluded; idle/queue0/stops0/budget0 and current ledger SHA unchanged. Review ~/notes/wm-next/offline-repair/genuine-authority/activation/coordinator-review.md. Injury41 retention now loaded, no historical clearance. Cfb envelope job3608 remains separate. No genuine disposition or click.
+
+### 2026-10-25 14:13:36 UTC — cfb940 independent qualification accepted
+
+Four independent log hashes match. Cfb corrected contract isolates retention red1/11, patch green;940 isolated parent red6semantic/20, patch green. Accept narrowly; no original run success. Qualification-acceptance.md retains correction/addendum and pending exact operation receipts. Genuine source accepted, activation in flight; dossier staged to avoid canonical HEAD drift. Fresh cfb authority assembly next, then sequential roots940/04. Six remain, budget0.
+
 ### 2026-10-25 14:12:05 UTC — Genuine authority reviewed and merged
 
 Merge 2edb1ab89123b173aeea85465a6aeb139aed934c; independent13tests49assertions green. Envelope/interleaved/predecessor probes pass. Coordinator mixed historical+genuine actual admission/revalidation and cross-scope refusal pass; runtime-ledger-removal mutation red, restored green. Durable final review ~/notes/wm-next/offline-repair/genuine-authority/review/final-review.md. Source only, no serving load/live clearance; six remain. Activation must preserve a9 exact scope and current ledger; genuine per-row envelopes separate.
