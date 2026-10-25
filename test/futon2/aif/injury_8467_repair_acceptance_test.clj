@@ -127,9 +127,31 @@
       (is (empty? (get-in run [:second :dispatch-requests]))
           (str sidecar " original baseline refuses before send")))))
 
-(deftest historical-not-measured-cannot-be-retrofitted
-  (is (= :before-authority-unavailable
-         (:reason (mission/project
-                   {:baseline {:before-evidence :not-measured}
-                    :dispatch {} :repository "."
-                    :after-revision "historical-after" :after-rows []})))))
+(deftest bound-dispatch-requires-retained-before-baseline
+  ;; The dispatch and real reader inputs are valid in every case. Only the
+  ;; supplied baseline changes; refusal cannot come from an empty dispatch.
+  (d-fixture/with-artifact
+   {:target target :action action
+    :universe (set (map #(vector target %) wants))
+    :before-files {"holes/missions/M-war-machine-wiring.md" (unchecked-mission)}
+    :locators (into {} (map (fn [[[token] locator]]
+                             [token (assoc locator :repo "repo")]))
+                    (:declared-locators contract))}
+   (fn [{:keys [inputs repo commit]}]
+     (let [dispatch (:dispatch inputs)
+           baseline (mission/capture-before
+                     {:dispatch dispatch :repository (str repo)
+                      :revision (get-in dispatch [:before :head])})
+           request {:dispatch dispatch :repository (str repo)
+                    :after-revision commit
+                    :after-rows (mission/capture-after
+                                 {:dispatch dispatch :repository (str repo)
+                                  :revision commit})}]
+       (is (= :captured (:status baseline)))
+       (is (= :admitted (:status (mission/project (assoc request :baseline baseline)))))
+       (doseq [absent [nil {:before-evidence :not-measured}
+                          {:before-evidence :measured}]]
+         (let [result (mission/project (assoc request :baseline absent))]
+           (is (= :refused (:status result)))
+           (is (= :baseline-missing (:reason result))
+               "valid dispatch cannot substitute for a retained baseline")))))))
