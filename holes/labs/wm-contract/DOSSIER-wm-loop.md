@@ -97,6 +97,8 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+- 2026-10-25T16:54:24.936247+00:00 codex-11: reviewed 9cc final envelope, pinned data-only provider and isolated controls; released exact idle live adoption to Agency codex-12. Live outcome pending. Budget0; 41/8467 remain outside scope. Receipt: `/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/coordinator-final-review.md`.
+
 ### 2026-10-25 16:34Z — exact9cc authorization issued
 
 Actual independent reviewbd826116 accepted, three artifact hashes and fresh roster checked. Coordinator authorizationbbef7960 binds f1ac6524 intent/ordinal28open1/nil predecessor at41entry root79880da4. Narrow synthetic conditional handoff repair only; fixture/ingest limits preserved. Exact five-scope envelope/store/provider controls dispatched before live release; no clearance yet. Authorization: `/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/coordinator-authorization.md`.41/8467 separate;budget0.
