@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T19:25:15.823130+00:00 — 8467 forward activation verified
+
+Canonical49a8c59d / Lean ddf999ac landed and activated. Coordinator independently checked evidence hashes, five reload results, runner current identity and structurally unchanged provider/ledger/serving snapshots. Ledger42/effective2 exactly41/8467, gen6five scopes, idle/budget0. Acceptance review retained in mission-observation/activation/coordinator-review.md. Next is precise repair-acceptance qualification; no historical baseline reconstruction, task success inference, learning credit or medic disposition. Initial offline reader format error retained; corrected checker exits0.
+
 ### 2026-10-25T19:19:49.218334+00:00 — 8467 forward repair accepted for activation
 
 Reviewed0025bb42 production and full-fixture deferred regression. Independent10tests79assertions green; actual learning write observer confirms record-only/held, no counted trials, attempts.edn absent before/after. Separate mission false-to-true accounting passes while pattern comparison stays refused. Fifth coordinator review retained under mission-observation/persistence/review. Authorize reviewed source landing and idle activation preserving current medic scopes and41 repair; no historical baseline reconstruction, injury disposition, click or budget action. Earlier raw fixture incident effects remain unknown.
