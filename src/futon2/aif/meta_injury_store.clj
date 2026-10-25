@@ -56,23 +56,33 @@
      (catch Throwable t
        (refusal :store/read-failed {:detail (ex-message t)})))))
 
+(defn- load-durable-ledger* [path authority-verifier]
+   (try
+     (let [file (io/file path)]
+       (if-not (.isFile file)
+         (refusal :store/durable-ledger-required)
+         ;; Parse, validate, and pin one byte snapshot. A second path read here
+         ;; could return a ledger different from the bytes named by source-pin.
+         (let [bytes (Files/readAllBytes (.toPath file))
+               read-result (read-one-form (String. bytes "UTF-8"))
+               value (:value read-result)
+               checked (when (= :read (:status read-result))
+                         (ledger/validate-ledger value authority-verifier))]
+           (cond
+             (not= :read (:status read-result)) read-result
+             (not= :valid (:status checked))
+             (refusal :store/tampered-ledger {:defects (:defects checked)})
+             :else {:schema :wm/durable-meta-injury-ledger-v1
+                    :status :loaded
+                    :source-pin {:path path :sha256 (load-identity/sha256 bytes)}
+                    :ledger value}))))
+     (catch Throwable t
+       (refusal :store/durable-load-failed {:detail (ex-message t)}))))
+
 (defn load-durable-ledger
   "Load a disk-backed ledger with an exact source pin for coordinator input."
-  [path]
-  (try
-    (let [file (io/file path)]
-      (if-not (.isFile file)
-        (refusal :store/durable-ledger-required)
-        (let [bytes (Files/readAllBytes (.toPath file))
-              loaded (load-ledger path)]
-          (if-not (= :loaded (:status loaded))
-            loaded
-            {:schema :wm/durable-meta-injury-ledger-v1
-             :status :loaded
-             :source-pin {:path path :sha256 (load-identity/sha256 bytes)}
-             :ledger (:ledger loaded)}))))
-    (catch Throwable t
-      (refusal :store/durable-load-failed {:detail (ex-message t)}))))
+  ([path] (load-durable-ledger* path (constantly false)))
+  ([path authority-verifier] (load-durable-ledger* path authority-verifier)))
 
 (defn- force-write! [^Path path text]
   (with-open [channel (FileChannel/open
@@ -103,21 +113,24 @@
         (.force directory-channel true))
       (finally (Files/deleteIfExists temp)))))
 
-(defn persist-ledger! [path value]
+(defn persist-ledger!
+  ([path value] (persist-ledger! path value (constantly false)))
+  ([path value authority-verifier]
   (try
-    (let [checked (ledger/validate-ledger value)]
+    (let [checked (ledger/validate-ledger value authority-verifier)]
       (if-not (= :valid (:status checked))
         (refusal :store/invalid-ledger {:defects (:defects checked)})
         (do (atomic-write! path value)
             {:status :persisted :path path :ledger-pin (:ledger-pin value)
              :durability :atomic-one-form})))
     (catch Throwable t
-      (refusal :store/persist-failed {:detail (ex-message t)}))))
+      (refusal :store/persist-failed {:detail (ex-message t)})))))
 
 (defn transact-classification!
   "Lock, validate, integrate, and atomically replace the one-form ledger.
   Duplicate replay is byte-preserving: no rewrite occurs."
-  [path classification]
+  ([path classification] (transact-classification! path classification (constantly false)))
+  ([path classification authority-verifier]
   (try
     (let [lock-path (str path ".lock")
           lock-file (io/file lock-path)]
@@ -128,16 +141,20 @@
                                        [StandardOpenOption/CREATE
                                         StandardOpenOption/WRITE]))
                   _lock (.lock channel)]
-        (let [loaded (load-ledger path)]
+        (let [loaded (load-ledger path authority-verifier)]
           (if-not (= :loaded (:status loaded))
             loaded
-            (let [result (terminal/integrate (:ledger loaded) classification)]
+            (let [result (terminal/integrate (:ledger loaded) classification
+                                             authority-verifier)]
               (if (= :appended (:status result))
-                (do (atomic-write! path (:ledger result))
-                    (assoc result :durability :atomic-locked-one-form))
+                (let [checked (ledger/validate-ledger (:ledger result) authority-verifier)]
+                  (if-not (= :valid (:status checked))
+                    (refusal :store/invalid-ledger {:defects (:defects checked)})
+                    (do (atomic-write! path (:ledger result))
+                        (assoc result :durability :atomic-locked-one-form))))
                 result))))))
     (catch Throwable t
-      (refusal :store/transaction-failed {:detail (ex-message t)}))))
+      (refusal :store/transaction-failed {:detail (ex-message t)})))))
 
 (defn transact-medic-disposition!
   "Lock an existing durable ledger, apply one fully supplied medic operation,
@@ -188,7 +205,9 @@
 (defn ingest-record-file!
   "Pin exact record bytes, require exactly one EDN form, classify, then perform
   the locked atomic transaction."
-  [ledger-path record-path]
+  ([ledger-path record-path]
+   (ingest-record-file! ledger-path record-path (constantly false)))
+  ([ledger-path record-path authority-verifier]
   (try
     (let [bytes (Files/readAllBytes (.toPath (io/file record-path)))
           parsed (read-one-form (String. bytes "UTF-8"))]
@@ -198,9 +217,9 @@
               classification (terminal/classify (:value parsed) pin)]
           (if-not (= :classified (:status classification))
             classification
-            (transact-classification! ledger-path classification)))))
+            (transact-classification! ledger-path classification authority-verifier)))))
     (catch Throwable t
-      (refusal :store/record-ingest-failed {:detail (ex-message t)}))))
+      (refusal :store/record-ingest-failed {:detail (ex-message t)})))))
 
 ;; Compatibility boundary for the pre-ledger observation route. Packet 2 does
 ;; not use HEAD.edn to derive active injuries, but existing callers remain

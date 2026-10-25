@@ -116,8 +116,9 @@
 (defn- latest-transition [history injury-id]
   (last (filter #(and (= ledger/transition-schema (:schema %))
                       (= injury-id (:injury-id %))) (:entries history))))
-(defn- active-entry [durable injury-id]
-  (get-in (ledger/active-injuries (:ledger durable)) [:injuries injury-id]))
+(defn- active-entry [durable injury-id authority-verifier]
+  (get-in (ledger/effective-active-injuries (:ledger durable) authority-verifier)
+          [:injuries injury-id]))
 (defn- cause-pin [history entry]
   ;; A claimed-author-failed reopen carries the sealed failed-port receipt,
   ;; not a new failure record.  Recover the original causal pin from this
@@ -132,10 +133,11 @@
 (defn prepare
   "Build a dedicated work order from a disk-pinned active injury. No active
   injury means an explicit stop, never fallback to ordinary work."
-  [durable options]
+  ([durable options] (prepare durable options (constantly false)))
+  ([durable options authority-verifier]
   (try
     (let [history (:ledger durable)
-          active-result (ledger/active-injuries history)
+          active-result (ledger/effective-active-injuries history authority-verifier)
           active (:injuries active-result)
           injury-id (or (:injury-id options) (first (sort (keys active))))
           entry (get active injury-id)
@@ -164,7 +166,7 @@
                     (conj :durable-ledger/schema)
                     (not= :loaded (:status durable)) (conj :durable-ledger/status)
                     (not (pin? (:source-pin durable))) (conj :durable-ledger/source-pin)
-                    (not= :valid (:status (ledger/validate-ledger history)))
+                    (not= :valid (:status (ledger/validate-ledger history authority-verifier)))
                     (conj :ledger/invalid)
                     (not= :computed (:status active-result)) (conj :active-set/invalid)
                     (empty? active) (conj :active-injury/required)
@@ -177,7 +179,7 @@
          :transaction (seal-transaction {:status :active :work-order order
                                          :receipts []})}))
     (catch Throwable t
-      (refusal :coordinator/preparation-malformed {:detail (ex-message t)}))))
+      (refusal :coordinator/preparation-malformed {:detail (ex-message t)})))))
 
 (defn- receipt-for [transaction phase]
   (some #(when (= phase (:phase %)) %) (:receipts transaction)))
@@ -212,8 +214,8 @@
                   {:phase phase :detail (ex-message t)
                    :transaction transaction}))))))
 
-(defn- append-transition! [history event]
-  (let [result (ledger/append-transition history event)]
+(defn- append-transition! [history event authority-verifier]
+  (let [result (ledger/append-transition history event authority-verifier)]
     (if (= :appended (:status result)) result
         (refusal :coordinator/ledger-transition-refused
                  {:ledger-result result :ledger history}))))
@@ -262,7 +264,7 @@
   acceptance evidence by pin; no failure or success is synthesized, and an
   already-ingested evidence pin is never observed twice. Returns the
   advanced history, or nil when there is nothing durable to observe."
-  [history ports injury-id retry-click]
+  [history ports injury-id retry-click authority-verifier]
   (when-let [observed (failed-child-observation ports retry-click)]
     (if (= :refused (:status observed))
       (stop! observed)
@@ -270,7 +272,8 @@
         (when-not (some #(= pin (:record-pin %)) (:entries history))
           (let [appended (ledger/append-observation
                           history pin :retry-inconclusive
-                          {:injury-id injury-id :retry-click retry-click})]
+                          {:injury-id injury-id :retry-click retry-click}
+                          authority-verifier)]
             (if (= :appended (:status appended))
               (:ledger appended)
               (stop! (refusal :coordinator/failed-child-observation-refused
@@ -281,7 +284,7 @@
   (:receipt-pin (last (:receipts transaction))))
 
 (defn- coordinate-queued-retry
-  [history transaction ports injury-id repair-id attempt]
+  [history transaction ports injury-id repair-id attempt authority-verifier]
   (loop [history history
          transaction transaction]
     (let [latest (latest-transition history injury-id)
@@ -300,9 +303,10 @@
                               (get-in retry-receipt [:payload :retry-click])))))
         (stop! (refusal :coordinator/retry-attribution-refused
                         {:ledger history :transaction transaction})))
-      (if-not (ledger/pending-requeue history injury-id)
+      (if-not (ledger/pending-requeue history injury-id authority-verifier)
         (if-let [observed-history (observe-failed-child! history ports injury-id
-                                                         (:retry-click latest))]
+                                                         (:retry-click latest)
+                                                         authority-verifier)]
           (recur observed-history transaction)
           {:status :awaiting-retry
            :ledger history
@@ -320,7 +324,8 @@
                   (stop! (refusal :coordinator/retry-patch-unavailable
                                   {:ledger history :transaction transaction})))
               new-id (retry-click-id repair-id attempt next-n patch-sha)
-              requeued (accepted! (ledger/append-requeue history injury-id new-id))
+              requeued (accepted! (ledger/append-requeue history injury-id new-id
+                                                         authority-verifier))
               history' (:ledger requeued)]
           (if (= :abandoned (get-in requeued [:entry :state]))
             {:status :abandoned :reason :retry-budget-spent
@@ -334,18 +339,19 @@
 (defn coordinate
   "Run or resume one dedicated transaction. Every effect receipt is retained,
   so a resumed transaction never redispatches an already-recorded phase."
-  [durable transaction ports]
+  ([durable transaction ports] (coordinate durable transaction ports (constantly false)))
+  ([durable transaction ports authority-verifier]
   (try
     (let [order (:work-order transaction)
           injury-id (:injury-id order)
           repair-id (:repair-id order)
           attempt (:attempt order)
           history0 (:ledger durable)
-          active (active-entry durable injury-id)
+          active (active-entry durable injury-id authority-verifier)
           defects (cond-> []
                     (not= :valid (:status (verify-transaction transaction)))
                     (conj :transaction)
-                    (not= :valid (:status (ledger/validate-ledger history0)))
+                    (not= :valid (:status (ledger/validate-ledger history0 authority-verifier)))
                     (conj :ledger)
                     (nil? active) (conj :active-injury)
                     (not= attempt (:attempt active)) (conj :attempt)
@@ -366,7 +372,8 @@
                                 :reviewer-session (:reviewer-session order)
                                 :repair-reviewer-session
                                 (:repair-reviewer-session order)
-                                :work-order-pin (:work-order-pin order)}))
+                                :work-order-pin (:work-order-pin order)}
+                      authority-verifier))
                     {:ledger history0})
             history1 (:ledger claim)
             claim-entry (latest-transition history1 injury-id)
@@ -391,7 +398,8 @@
                            history1 {:injury-id injury-id :repair-id repair-id
                                      :reason :author-failed
                                      :port-receipt-pin
-                                     (:receipt-pin author-receipt)}))]
+                                     (:receipt-pin author-receipt)}
+                           authority-verifier))]
             (held! :author-failed :author (:ledger reopened) tx1 author-receipt)))
         (let [patch-sha (get-in author-receipt [:payload :patch-sha])
               worktree (get-in author-receipt [:payload :worktree])
@@ -404,7 +412,8 @@
                            history1 {:injury-id injury-id :state :authored
                                      :attempt attempt :repair-id repair-id
                                      :patch-sha patch-sha :worktree worktree
-                                     :port-receipt-pin (:receipt-pin author-receipt)}))
+                                     :port-receipt-pin (:receipt-pin author-receipt)}
+                           authority-verifier))
                          {:ledger history1})
               history2 (:ledger authored)
               _ (checkpoint! ports :author history2 tx1)
@@ -427,7 +436,8 @@
                                        :reviewer-sha
                                        (get-in review-receipt [:payload :reviewer-sha])
                                        :reviewer-session (:reviewer-session order)
-                                       :port-receipt-pin (:receipt-pin review-receipt)}))
+                                       :port-receipt-pin (:receipt-pin review-receipt)}
+                             authority-verifier))
                            {:ledger history2})
                 history3 (:ledger reviewed)
                 _ (checkpoint! ports :review history3 tx2)
@@ -456,7 +466,8 @@
                                            (:receipt-pin enact-receipt)}
                                           (select-keys enact-payload
                                                        [:reload-receipt
-                                                        :integration-commit]))))
+                                                        :integration-commit]))
+                                authority-verifier))
                               {:ledger history3})
                     history4 (:ledger enacted)
                     _ (checkpoint! ports :enact history4 tx3)
@@ -474,7 +485,7 @@
                 (cond
                   (= :queued (:status retry-receipt))
                   (coordinate-queued-retry history4 tx4 ports injury-id repair-id
-                                           attempt)
+                                           attempt authority-verifier)
 
                   (= :succeeded (:status retry-receipt))
                   (let [closed (accepted!
@@ -485,7 +496,8 @@
                                            :retry-click retry-click
                                            :outcome (or (:outcome retry-payload) :success)
                                            :port-receipt-pin
-                                           (:receipt-pin retry-receipt)}))]
+                                           (:receipt-pin retry-receipt)}
+                                 authority-verifier))]
                     {:status :discharged :ledger (:ledger closed) :transaction tx4})
 
                   :else
@@ -496,11 +508,12 @@
                                              :retry-click retry-click
                                              :new-cause-pin (:new-cause-pin retry-payload)
                                              :port-receipt-pin
-                                             (:receipt-pin retry-receipt)}))]
+                                             (:receipt-pin retry-receipt)}
+                                   authority-verifier))]
                     {:status (get-in reopened [:entry :state])
                      :ledger (:ledger reopened) :transaction tx4}))))))))
     (catch clojure.lang.ExceptionInfo e
       (or (:result (ex-data e))
           (refusal :coordinator/malformed {:detail (ex-message e)})))
     (catch Throwable t
-      (refusal :coordinator/malformed {:detail (ex-message t)}))))
+      (refusal :coordinator/malformed {:detail (ex-message t)})))))

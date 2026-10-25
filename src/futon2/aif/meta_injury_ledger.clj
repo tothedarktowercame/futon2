@@ -692,9 +692,10 @@
 (defn pending-requeue
   "Return the attributed inconclusive observation for an injury's latest
   enacted retry click. An older retry's observation is superseded by requeue."
-  [ledger injury-id]
-  (when (= :valid (:status (validate-ledger ledger)))
-    (pending-requeue-entry ledger injury-id)))
+  ([ledger injury-id] (pending-requeue ledger injury-id deny-medic-authority))
+  ([ledger injury-id authority-verifier]
+   (when (= :valid (:status (validate-ledger ledger authority-verifier)))
+     (pending-requeue-entry ledger injury-id))))
 
 (defn append-medic-recurrence
   "Append one fresh same-injury occurrence after exact latest medic coverage.
@@ -760,9 +761,11 @@
   "Append a fresh retry identity after an inconclusive retry without consuming
   an authoring attempt. Once the independent retry budget is spent, append the
   typed terminal abandonment instead."
-  [ledger injury-id new-retry-click]
+  ([ledger injury-id new-retry-click]
+   (append-requeue ledger injury-id new-retry-click deny-medic-authority))
+  ([ledger injury-id new-retry-click authority-verifier]
   (try
-    (let [checked (validate-ledger ledger)]
+    (let [checked (validate-ledger ledger authority-verifier)]
       (if-not (= :valid (:status checked))
         (refusal :ledger/tampered {:ledger-defects (:defects checked)})
         (let [previous (latest ledger injury-id)]
@@ -780,7 +783,7 @@
 
             :else
             (let [requeues (or (:requeues previous) 0)
-                  observation (pending-requeue ledger injury-id)
+                  observation (pending-requeue ledger injury-id authority-verifier)
                   other (other-open-injury ledger injury-id (:record-pin observation))
                   common {:injury-id injury-id
                           :attempt (:attempt previous)
@@ -789,7 +792,8 @@
                 (append-transition ledger
                                    (assoc common :state :abandoned
                                           :reason :retry-budget-spent
-                                          :requeues requeues))
+                                          :requeues requeues)
+                                   authority-verifier)
                 (append-transition
                  ledger
                  (merge common
@@ -804,6 +808,7 @@
                                   :injury-id (:injury-id other)
                                   :record-pin (:record-pin observation)}))
                         (select-keys previous
-                                     [:reload-receipt :integration-commit])))))))))
+                                     [:reload-receipt :integration-commit]))
+                 authority-verifier)))))))
     (catch Throwable t
-      (refusal :requeue/malformed {:detail (ex-message t)}))))
+      (refusal :requeue/malformed {:detail (ex-message t)})))))

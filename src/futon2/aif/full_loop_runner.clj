@@ -8754,10 +8754,13 @@
                         (run-phase!
                          raw-opts context :meta-terminal-injury-ingest
                          (fn []
-                           (meta-injury-store/ingest-record-file!
-                            (or (:meta-injury-ledger-path raw-opts)
-                                meta-self-heal/default-ledger-path)
-                            record-path))
+                           (let [ledger-path (or (:meta-injury-ledger-path raw-opts)
+                                                 meta-self-heal/default-ledger-path)]
+                             (if-let [verifier (:meta-medic-authority-verifier raw-opts)]
+                               (meta-injury-store/ingest-record-file!
+                                ledger-path record-path verifier)
+                               (meta-injury-store/ingest-record-file!
+                                ledger-path record-path))))
                          (fn [value]
                            (select-keys value [:status :transition :durability :reason
                                                :classification :entry]))))}
