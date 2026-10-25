@@ -69,7 +69,10 @@
   (let [d (validate-declaration! (or declaration (futon2.aif.run-ending-classification/declaration)))
         judgment (close-judgment close)
         _ (when-not (map? judgment) (refuse! :malformed-close))
-        _ (when (some #(= :wm/run-ending-classification-receipt-v1 (:schema %))
+        _ (when (some #(= :wm/run-ending-classification-receipt-v1
+                           (reduce-kv (fn [_ k v]
+                                        (when (= :schema k) (reduced v)))
+                                      nil %))
                       (filter map? (tree-seq coll? seq (projection judgment d))))
             (refuse! :self-reference))
         missing-close (filterv #(not (contains? judgment %)) (:required-close-keys d))

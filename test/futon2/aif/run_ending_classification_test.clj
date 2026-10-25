@@ -80,6 +80,14 @@
     (is (= :refused (:status r)))
     (is (= :self-reference (:kind r)))))
 
+(deftest projected-numeric-sorted-map-does-not-crash-schema-scan
+  ;; A retained runner judgment may contain a numeric-keyed sorted map. Keyword
+  ;; lookup on that map invokes its comparator and used to throw at close.
+  (let [close (assoc base-close :failure-kind (into (sorted-map) [[1 :one]]))
+        r (result close :focus (focus :focus))]
+    (is (= :recorded (:status r)))
+    (is (not= :close-exception (:kind r)))))
+
 (deftest exact-replay-and-verification-level
   (let [input {:close base-close :occurrence occurrence :route-attestation route
                :focus-receipt (focus :focus)}

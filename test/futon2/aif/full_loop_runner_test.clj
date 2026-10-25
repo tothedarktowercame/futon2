@@ -1083,8 +1083,10 @@
                             artifacts? reviewer-execution reviewer-events grounded?
                             cure-card cure-artifact-ref initial-author-card
                             initial-artifact-ref initial-author-job build-files-fn
-                            runner-options]}]
-   (token-fixture/with-artifact
+                            runner-options artifact-sha]}]
+   ((if artifact-sha
+      (fn [f] (f artifact-sha))
+      token-fixture/with-artifact)
    (fn [sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
            mission-path (io/file token-repo
