@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 14:32:54 UTC — Author correction formal accepted; adapter dispatched
+
+Independent460job buildgreen; unrelated-correction false qualification semantically red. Merged Lean8b304790b3; immutable request/reply qualification before unchanged abstract author gate. Review ~/notes/wm-next/offline-repair/injury9cc/author-correction/review/final-review.md. Bounded Clojure actual author-wait adapter invoke-1792938817874-3638-455350a1, park-913791e4-6957-4c6b-a1f5-d06022b8591f; no fabricated reply, no live qualification/activation. Six remain, budget0.
+
 ### 2026-10-25 14:27:53 UTC — Author correction formal held on reply identity
 
 Independent Lean CorrectionIdentityProbe compiles proving unrelated correctionId can enter response and be accepted: field unused, wait lacks correction request. Review ~/notes/wm-next/offline-repair/injury9cc/author-correction/review/coordinator-review.md. Codex3 followup invoke-1792938493819-3626-8010c978, park-daf12724-0f8c-434f-b807-b30b81ae5e73 requires retained actual correction identity and explicit completed/provenance-verified reply before unchanged gate. No Clojure/merge/live action, six remain/budget0.
