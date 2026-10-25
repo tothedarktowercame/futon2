@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T19:37:01.977493+00:00 — exact41 live disposition released
+
+Reviewed actual final envelope/driver/data installer and isolated controls;38 artifact pins match. Authorized operation244f64d6, provider gen6to7 preserving five prior scopes, expected ledger42to43/effective2to1 exactly8467. Current41 source pins and8467 runner409d0877 correspondence checked on disk; worker requires fresh serving/idle/root checks. No live completion claimed. Coordinator-final-review.md retains source drift, journal and timed-out harness limitations. No click/budget/task success or learning inference.
+
 ### 2026-10-25T19:32:59.322322+00:00 — 8467 repair acceptance released
 
 Reviewed newly declared reopened-defect acceptance1bb7d489. Isolated coordinator fixes f2f879381(resource) and8c3146900(declaration repo adapter); current exact suite4tests36assertions green. Initial4failures were fixture mismatch, retained as setup evidence. Frozen test4c5ea680/fixture9916f11d. Scope six-want producer/accounting plus separate one-want actual owner deferred composition; no six-want end-to-end claim. Release actual historical gate/caller mutation evaluation with pinned adapter; no retrospective baseline/task success or clearance. Review under injury8467/repair-acceptance/coordinator-contract-review.md.
