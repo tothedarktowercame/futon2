@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:47Z — 9cc fixture path corrected
+
+Historical evaluation stopped before assertions: fixture io/resource path lacked resources/ under test classpath. Coordinator made one-literal isolated test fix314992b2a, verified resource resolution/schema in plain JVM without loading production/tests, repinned a6d64629 and released same bounded matrix. Old run remains load error, not semantic evidence. No live state/clearance. Release: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation/resource-fix-release.md`.
+
 ### 2026-10-25 15:45Z — 9cc pinned semantic evaluation released
 
 Final070fc720 contract/static adapter accepted and test/fixture hashes independently verified. Named isolated historical5a0509f9a/repaired2c5e2ddb7/current matrix released with caller-removal mutation if green. Errors cannot count as semantic pre-red; frozen contract changes require review. Synthetic replies remain synthetic; no qualification/clearance. Release: `/home/joe/notes/wm-next/offline-repair/injury9cc/repair-acceptance/evaluation-release.md`. Budget0 unchanged.
