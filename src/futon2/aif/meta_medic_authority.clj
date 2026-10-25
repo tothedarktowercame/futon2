@@ -15,6 +15,11 @@
 (def evaluation-schema :wm/meta-medic-evaluation-v1)
 (def review-schema :wm/meta-medic-qualification-review-v1)
 (def authorization-schema :wm/meta-medic-authority-v1)
+(def genuine-intent-schema :wm/meta-medic-genuine-repair-intent-v1)
+(def genuine-evaluation-schema :wm/meta-medic-genuine-repair-evaluation-v1)
+(def genuine-review-schema :wm/meta-medic-genuine-repair-review-v1)
+(def genuine-authorization-schema :wm/meta-medic-genuine-repair-authority-v1)
+(def genuine-replay-schema :wm/meta-medic-genuine-repair-replay-v1)
 (deftype ^:private AuthorityResolution [identity verifier])
 
 (defn resolved-context? [value]
@@ -40,6 +45,12 @@
     :predecessor-entry-id :state :attempt :ledger-root :original-record-pin
     :acceptance-contract-pin :patch-revision :classifier-revision :replay
     :evaluator :reviewer})
+
+(def ^:private genuine-intent-fields
+  #{:schema :scope :disposition-kind :injury-id :ordinal :ledger-entry-id
+    :predecessor-entry-id :state :attempt :ledger-root :cause-record-pin
+    :acceptance-contract-pin :patch-revision :source-revision
+    :pre-replay-pin :post-replay-pin :negative-control-pin :evaluator :reviewer})
 
 (defn digest [value] (identity/digest value))
 (defn intent-digest [intent] (digest [:medic-intent intent]))
@@ -101,7 +112,7 @@
                    :intent-digest intent :receipt-pin pin}))
     (catch Throwable _ false)))
 
-(defn verify
+(defn- verify-historical
   "Verify one fully assembled bundle. TRUST is independent of artifact bytes
   and must authenticate exact receipt scope. Returns typed refusal otherwise."
   [{:keys [operation current ledger-entry intent artifacts evaluation-pin review-pin
@@ -132,9 +143,10 @@
               [(:injury-id intent) (str (:ordinal intent))])
         {:status :refused :reason :intent/occurrence-mismatch}
         (not= [(:injury-id ledger-entry) (:ordinal ledger-entry)
-               (:entry-id ledger-entry) (:state ledger-entry) (:attempt ledger-entry)]
+               (:entry-id ledger-entry) (:predecessor-entry-id ledger-entry)
+               (:state ledger-entry) (:attempt ledger-entry)]
               [(:injury-id intent) (:ordinal intent) (:ledger-entry-id intent)
-               (:state intent) (:attempt intent)])
+               (:predecessor-entry-id intent) (:state intent) (:attempt intent)])
         {:status :refused :reason :intent/ledger-entry-mismatch}
         (not= [(:cause-record-id current) (:cause-pin current)]
               [(:path original-pin) (:sha256 original-pin)])
@@ -206,6 +218,151 @@
     (catch Throwable t
       {:status :refused :reason :authority/malformed :detail (ex-message t)})))
 
+(defn- exact-map? [m expected] (and (map? m) (= expected (set (keys m)))))
+
+(defn- genuine-replay?
+  [receipt contract-pin phase verdict]
+  (and (exact-map? receipt #{:schema :acceptance-contract-pin :phase :verdict})
+       (= genuine-replay-schema (:schema receipt))
+       (= contract-pin (:acceptance-contract-pin receipt))
+       (= phase (:phase receipt))
+       (= verdict (:verdict receipt))))
+
+(defn- verify-genuine
+  "Verify the separate authority grammar for Lean's GenuineRepairPayload.
+  Receipt hashes establish bytes; TRUST independently authenticates the three
+  exact principal/pin bindings.  This is not a claim that a live row was
+  evaluated or approved."
+  [{:keys [operation current ledger-entry intent artifacts evaluation-pin review-pin
+           authorization-pin trust]}]
+  (try
+    (let [request (:request operation)
+          candidate (:candidate request)
+          evidence (:evidence request)
+          intent-id (intent-digest intent)
+          cause-pin (:cause-record-pin intent)
+          contract-pin (:acceptance-contract-pin intent)
+          pre-pin (:pre-replay-pin intent)
+          post-pin (:post-replay-pin intent)
+          negative-pin (:negative-control-pin intent)
+          resolved (into {}
+                         (for [[k pin] [[:cause cause-pin] [:pre pre-pin]
+                                         [:post post-pin] [:negative negative-pin]
+                                         [:evaluation evaluation-pin] [:review review-pin]
+                                         [:authorization authorization-pin]]]
+                           [k (resolve-artifact artifacts pin)]))
+          contract-result (resolve-bytes artifacts contract-pin)]
+      (cond
+        (not (and (exact-map? intent genuine-intent-fields)
+                  (= genuine-intent-schema (:schema intent))))
+        {:status :refused :reason :genuine-intent/malformed}
+        (not= candidate evidence) {:status :refused :reason :payload/swap}
+        (not (medic/payload-valid? candidate))
+        {:status :refused :reason :payload/malformed}
+        (not= :genuine-repair (:kind candidate))
+        {:status :refused :reason :genuine-intent/kind-mismatch}
+        (= (get-in intent [:evaluator :seat]) (get-in intent [:reviewer :seat]))
+        {:status :refused :reason :roles/not-independent}
+        (not= (:expected-ledger-pin operation) (:ledger-root intent))
+        {:status :refused :reason :intent/root-mismatch}
+        (not= [(:injury-id current) (:entry-id current)]
+              [(:injury-id intent) (str (:ordinal intent))])
+        {:status :refused :reason :intent/occurrence-mismatch}
+        (not= [(:injury-id ledger-entry) (:ordinal ledger-entry)
+               (:entry-id ledger-entry) (:state ledger-entry) (:attempt ledger-entry)]
+              [(:injury-id intent) (:ordinal intent) (:ledger-entry-id intent)
+               (:state intent) (:attempt intent)])
+        {:status :refused :reason :intent/ledger-entry-mismatch}
+        (not= [(:cause-record-id current) (:cause-pin current)]
+              [(:path cause-pin) (:sha256 cause-pin)])
+        {:status :refused :reason :intent/cause-mismatch}
+        (not= [(:kind candidate) (:injury-id candidate) (:entry-id candidate)
+               (:predecessor-entry-id candidate) (:cause-record-id candidate)
+               (:cause-pin candidate) (:acceptance-contract candidate)
+               (:pre-replay-receipt candidate) (:post-replay-receipt candidate)
+               (:negative-control-receipt candidate) (:patch-id candidate)
+               (:source-revision candidate) (:evaluator candidate) (:reviewer candidate)
+               (:evidence-pin candidate) (:original-acceptance-repaired? candidate)]
+              [:genuine-repair (:injury-id intent) (str (:ordinal intent))
+               (:predecessor-entry-id intent) (:path cause-pin) (:sha256 cause-pin)
+               (:sha256 contract-pin) (:sha256 pre-pin) (:sha256 post-pin)
+               (:sha256 negative-pin) (:patch-revision intent) (:source-revision intent)
+               (get-in intent [:evaluator :seat]) (get-in intent [:reviewer :seat])
+               (:sha256 evaluation-pin) true])
+        {:status :refused :reason :intent/payload-mismatch}
+        (not (every? pin-valid? [cause-pin contract-pin pre-pin post-pin negative-pin
+                                 evaluation-pin review-pin authorization-pin]))
+        {:status :refused :reason :intent/invalid-pin}
+        (not= :resolved (:status contract-result)) contract-result
+        (some #(not= :resolved (:status %)) (vals resolved))
+        (first (filter #(not= :resolved (:status %)) (vals resolved)))
+        :else
+        (let [evaluation (get-in resolved [:evaluation :value])
+              review (get-in resolved [:review :value])
+              authorization (get-in resolved [:authorization :value])
+              expected-id (final-operation-id intent-id request evaluation-pin review-pin
+                                              authorization-pin)]
+          (cond
+            (not (and (exact-map? evaluation #{:schema :intent-digest :evaluator
+                                                :acceptance-contract-pin :pre-replay-pin
+                                                :post-replay-pin :negative-control-pin :verdict})
+                      (= genuine-evaluation-schema (:schema evaluation))
+                      (= intent-id (:intent-digest evaluation))
+                      (same-identity? (:evaluator intent) (:evaluator evaluation))
+                      (= contract-pin (:acceptance-contract-pin evaluation))
+                      (= pre-pin (:pre-replay-pin evaluation))
+                      (= post-pin (:post-replay-pin evaluation))
+                      (= negative-pin (:negative-control-pin evaluation))
+                      (= :original-acceptance-repaired (:verdict evaluation))))
+            {:status :refused :reason :evaluation/not-qualified}
+            (not (and (genuine-replay? (get-in resolved [:pre :value]) contract-pin
+                                        :pre :original-contract-failed)
+                      (genuine-replay? (get-in resolved [:post :value]) contract-pin
+                                        :post :original-contract-repaired)
+                      (genuine-replay? (get-in resolved [:negative :value]) contract-pin
+                                        :negative :negative-control-refused)))
+            {:status :refused :reason :replay/not-qualified}
+            (not (and (exact-map? review #{:schema :intent-digest :evaluation-pin :reviewer :verdict})
+                      (= genuine-review-schema (:schema review))
+                      (= intent-id (:intent-digest review))
+                      (= evaluation-pin (:evaluation-pin review))
+                      (same-identity? (:reviewer intent) (:reviewer review))
+                      (= :genuine-repair-qualified (:verdict review))))
+            {:status :refused :reason :review/not-qualified}
+            (not (and (exact-map? authorization #{:schema :intent-digest :evaluation-pin
+                                                   :review-pin :scope :authorizer :verdict})
+                      (= genuine-authorization-schema (:schema authorization))
+                      (= intent-id (:intent-digest authorization))
+                      (= evaluation-pin (:evaluation-pin authorization))
+                      (= review-pin (:review-pin authorization))
+                      (= (:scope intent) (:scope authorization))
+                      (= :qualified (:verdict authorization))))
+            {:status :refused :reason :authorization/not-qualified}
+            (not (trusted? trust :evaluation (:evaluator intent) intent-id evaluation-pin))
+            {:status :refused :reason :evaluation/untrusted}
+            (not (trusted? trust :review (:reviewer intent) intent-id review-pin))
+            {:status :refused :reason :review/untrusted}
+            (not (trusted? trust :authorization (:authorizer authorization)
+                           intent-id authorization-pin))
+            {:status :refused :reason :authorization/untrusted}
+            (not= expected-id (:operation-id operation))
+            {:status :refused :reason :operation/final-binding-mismatch}
+            (not= authorization-pin (:authority-receipt-pin operation))
+            {:status :refused :reason :operation/authority-pin-mismatch}
+            :else {:status :verified :intent-digest intent-id
+                   :operation-id expected-id}))))
+    (catch Throwable t
+      {:status :refused :reason :authority/malformed :detail (ex-message t)})))
+
+(defn verify
+  "Verify either distinct medic authority grammar; the historical grammar is
+  preserved byte-for-byte and genuine repair has no fallback into it."
+  [bundle]
+  (case (get-in bundle [:intent :schema])
+    :wm/meta-medic-intent-v1 (verify-historical bundle)
+    :wm/meta-medic-genuine-repair-intent-v1 (verify-genuine bundle)
+    {:status :refused :reason :intent/malformed}))
+
 (defn authority-verifier
   "Adapt a fixed offline BUNDLE to meta-injury-ledger's supplied verifier API."
   [bundle]
@@ -235,7 +392,8 @@
       {:status :refused :reason :meta-self-heal/medic-authority-unavailable}
       (let [valid? (fn [bundle]
                      (and (map? bundle) (ifn? (:trust bundle))
-                          (= intent-schema (get-in bundle [:intent :schema]))
+                          (contains? #{intent-schema genuine-intent-schema}
+                                     (get-in bundle [:intent :schema]))
                           (map? (:artifacts bundle)) (seq (:artifacts bundle))
                           (every? pin-valid? ((juxt :evaluation-pin :review-pin
                                                    :authorization-pin) bundle))))]
