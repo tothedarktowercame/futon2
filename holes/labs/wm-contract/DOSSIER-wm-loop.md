@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25 15:08 UTC — author correction composed retention hold
+
+Repo fix accepted; independent18tests65assertionsgreen. Full-fixture actual author-wait→sealed record probe reproduces dropped correction evidence after downstream invalid-refusal gate. Narrow final retention/fixture ownership fix requested; no merge/activation/9cc clearance. Coordinator direct-helper probe without fixtures was stopped143; unknown effects not denied. Exact evidence and execution limitations: `/home/joe/notes/wm-next/offline-repair/injury9cc/author-correction/code/review/followup-coordinator-review.md`.
+
 ### 2026-10-25 15:02 UTC — 940 assembly structurally verified
 
 Read-only coordinator validation exit0 against actual combined authority ledger39/root98ce6a80: latest27/enacted1 predecessor24, pins/digest/payload match. Scope typed cascade-resume retention only. Exact independent intent review requested; no authorization inferred, no disposition, five remain. Evidence `/home/joe/notes/wm-next/offline-repair/authority/940-adoption/coordinator-assembly-review.md`.
