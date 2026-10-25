@@ -97,6 +97,10 @@ Kept unchanged. A1–A4 are now row G, O1–O3 row O2, M1–M2 row J2, M3 and R1
 
 ## Log
 
+### 2026-10-25T23:39:01+00:00 — Stocktake before any further click (claude-9)
+
+Joe: "before we run any more clicks it is worth doing a stocktake". Written as `STOCKTAKE-wm-2026-10-25.md`; tags `wm-uninjured-2026-10-25` on futon2 `9f81724b5`, mathlib4 darktower `ddf999ac97`, futon3c `c9ad3c3f4`. Verified this sitting: serving drift `[]` over 109 namespaces; debugger stops `[]`; ledger sha `5862fd76…` with 44 entries over 7 injury ids; click budget 173/173, available 0; effective injuries 0 relayed from codex-11's coordinator-check pinned to the same bytes. Found, not yet rows (break no Lean term): 13 test-origin run records written into the live `data/wm-runs/` today from two worktrees (11 `M-selected`, 2 from `futon2-mission-observation`) plus two injury-evidence projections from them; an `:active` 8467 `transaction.edn` with three deferred siblings; 13 `war-machine` R16 parks awaiting `repair-occ-…` ids with no deadline. Self-heal: no positive instance exists; every one of the seven injuries was cleared from outside (§4 of the note). No click, dispatch, reload or data move.
+
 ### 2026-10-25T21:45:20.234566+00:00 — Historical medic clearance complete
 
 Verified actual8467 append and fresh-process replay: ledger44/raw7/effective0, gen8seven scopes, ledgerSHA5862fd76bfd59259cb94da92af4248b9d55103a9e0410ac685b653443ea2b1fc. Independent full-operation equality count1 at ordinal44 corrects vacuous serving string-vs-map count0. Six receipt pins match; replay bytes unchanged; idle queue/stops0 budget0. Review /home/joe/notes/wm-next/offline-repair/authority/8467-adoption/live/coordinator-review.md. All seven historical injuries effectively cleared with raw history preserved; no task success/learning credit or queued task run. Journal defect and incident unknown effects remain separate.
