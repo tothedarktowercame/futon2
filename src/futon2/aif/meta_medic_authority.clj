@@ -8,7 +8,8 @@
             [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.medic-disposition :as medic]))
+            [futon2.aif.medic-disposition :as medic])
+  (:import [java.io PushbackReader StringReader]))
 
 (def intent-schema :wm/meta-medic-intent-v1)
 (def evaluation-schema :wm/meta-medic-evaluation-v1)
@@ -23,6 +24,12 @@
    :done-at-base :injury
    :guard-removal :rejected
    :qualifier-removal :rejected})
+
+(def ^:private intent-fields
+  #{:schema :scope :disposition-kind :injury-id :ordinal :ledger-entry-id
+    :predecessor-entry-id :state :attempt :ledger-root :original-record-pin
+    :acceptance-contract-pin :patch-revision :classifier-revision :replay
+    :evaluator :reviewer})
 
 (defn digest [value] (identity/digest value))
 (defn intent-digest [intent] (digest [:medic-intent intent]))
@@ -43,10 +50,19 @@
       (not= (:sha256 pin) (load-identity/sha256 (.getBytes bytes "UTF-8")))
       {:status :refused :reason :artifact/hash-drift}
       :else
-      (try {:status :resolved :value (edn/read-string bytes)}
-           (catch Throwable t
-             {:status :refused :reason :artifact/malformed
-              :detail (ex-message t)})))))
+      (try
+        (with-open [reader (PushbackReader. (StringReader. bytes))]
+          (let [eof (Object.)
+                value (edn/read {:eof eof} reader)
+                trailing (edn/read {:eof eof} reader)]
+            (cond
+              (identical? eof value) {:status :refused :reason :artifact/empty}
+              (not (identical? eof trailing))
+              {:status :refused :reason :artifact/multiple-forms}
+              :else {:status :resolved :value value})))
+        (catch Throwable t
+          {:status :refused :reason :artifact/malformed
+           :detail (ex-message t)})))))
 
 (defn final-operation-id
   "Digest the final request and receipt pins after the acyclic receipts exist.
@@ -82,13 +98,17 @@
           review-result (resolve-artifact artifacts review-pin)
           authorization-result (resolve-artifact artifacts authorization-pin)
           original-pin (:original-record-pin intent)
+          contract-result (resolve-artifact artifacts (:acceptance-contract-pin intent))
           original-result (resolve-artifact artifacts original-pin)]
       (cond
-        (not (and (map? intent) (= intent-schema (:schema intent))))
+        (not (and (map? intent) (= intent-fields (set (keys intent)))
+                  (= intent-schema (:schema intent))))
         {:status :refused :reason :intent/malformed}
         (not= candidate evidence) {:status :refused :reason :payload/swap}
         (not (medic/payload-valid? candidate))
         {:status :refused :reason :payload/malformed}
+        (= (get-in intent [:evaluator :seat]) (get-in intent [:reviewer :seat]))
+        {:status :refused :reason :roles/not-independent}
         (not= (:expected-ledger-pin operation) (:ledger-root intent))
         {:status :refused :reason :intent/root-mismatch}
         (not= [(:injury-id current) (:entry-id current)]
@@ -106,9 +126,23 @@
         {:status :refused :reason :intent/patch-mismatch}
         (not= (:classifier-revision candidate) (:classifier-revision intent))
         {:status :refused :reason :intent/classifier-mismatch}
+        (not= [(:kind candidate) (:injury-id candidate) (:entry-id candidate)
+               (:predecessor-entry-id candidate) (:original-record-id candidate)
+               (:original-pin candidate) (:patch-id candidate)
+               (:classifier-revision candidate) (:replay candidate)
+               (:evaluator candidate) (:reviewer candidate)
+               (:evidence-pin candidate)]
+              [(:disposition-kind intent) (:injury-id intent) (str (:ordinal intent))
+               (:predecessor-entry-id intent) (:path original-pin)
+               (:sha256 original-pin) (:patch-revision intent)
+               (:classifier-revision intent) (:replay intent)
+               (get-in intent [:evaluator :seat]) (get-in intent [:reviewer :seat])
+               (:sha256 evaluation-pin)])
+        {:status :refused :reason :intent/payload-mismatch}
         (not (pin-valid? (:acceptance-contract-pin intent)))
         {:status :refused :reason :intent/contract-mismatch}
         (not= :resolved (:status original-result)) original-result
+        (not= :resolved (:status contract-result)) contract-result
         (not= :resolved (:status evaluation-result)) evaluation-result
         (not= :resolved (:status review-result)) review-result
         (not= :resolved (:status authorization-result)) authorization-result
@@ -121,7 +155,6 @@
               expected-id (final-operation-id intent-id request evaluation-pin
                                               review-pin authorization-pin)]
           (cond
-            (= evaluator reviewer) {:status :refused :reason :roles/not-independent}
             (not (and (= evaluation-schema (:schema evaluation))
                       (= intent-id (:intent-digest evaluation))
                       (same-identity? evaluator (:evaluator evaluation))
@@ -137,7 +170,7 @@
                       (= intent-id (:intent-digest authorization))
                       (= evaluation-pin (:evaluation-pin authorization))
                       (= review-pin (:review-pin authorization))
-                      (= :a9-historical-misclassification (:scope authorization))
+                      (= (:scope intent) (:scope authorization))
                       (= :qualified (:verdict authorization))))
             {:status :refused :reason :authorization/not-qualified}
             (not (trusted? trust :evaluation evaluator intent-id evaluation-pin))

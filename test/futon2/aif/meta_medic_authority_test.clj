@@ -1,6 +1,7 @@
 (ns futon2.aif.meta-medic-authority-test
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-medic-authority :as authority]))
 
 (def evaluator {:seat "evaluator-seat" :session "eval-session"})
@@ -17,16 +18,28 @@
         [original-pin original-bytes] (pinned "artifacts/original.edn" original)
         contract-value {:contract :producer-qualified-already-satisfied}
         [contract-pin contract-bytes] (pinned "artifacts/contract.edn" contract-value)
+        opened (ledger/append-transition
+                ledger/empty-ledger
+                {:injury-id "injury/a9" :state :open :attempt 1
+                 :cause-id "cause/a9" :cause-record-pin original-pin
+                 :failure-stage :author-wait :failure-kind :already-satisfied
+                 :detected-click "click/a9"})
+        history (:ledger opened)
+        open-entry (:entry opened)
         intent {:schema authority/intent-schema
+                :scope :a9-historical-misclassification
+                :disposition-kind :historical-misclassification
                 :injury-id "injury/a9"
-                :ordinal 34
-                :ledger-entry-id (apply str (repeat 64 "a"))
+                :ordinal (:ordinal open-entry)
+                :ledger-entry-id (:entry-id open-entry)
+                :predecessor-entry-id nil
                 :state :open :attempt 1
-                :ledger-root {:path "ledger.edn" :sha256 (apply str (repeat 64 "1"))}
+                :ledger-root (:ledger-pin history)
                 :original-record-pin original-pin
                 :acceptance-contract-pin contract-pin
                 :patch-revision "36afa9142331fbe99eb99b67ae510322ca543f0c"
                 :classifier-revision "c8e65d96213c884d08b1d3a07f51c76fece0c5bb"
+                :replay :producer-qualified-non-injury
                 :evaluator evaluator :reviewer reviewer}
         intent-id (authority/intent-digest intent)
         evaluation {:schema authority/evaluation-schema :intent-digest intent-id
@@ -43,7 +56,7 @@
         [authorization-pin authorization-bytes]
         (pinned "receipts/authorization.edn" authorization)
         candidate {:kind :historical-misclassification
-                   :injury-id "injury/a9" :entry-id "34"
+                   :injury-id "injury/a9" :entry-id (str (:ordinal open-entry))
                    :predecessor-entry-id nil :patch-id (:patch-revision intent)
                    :reviewer (:seat reviewer) :evaluator (:seat evaluator)
                    :evidence-pin (:sha256 evaluation-pin)
@@ -57,13 +70,11 @@
         operation {:operation-id operation-id
                    :expected-ledger-pin (:ledger-root intent)
                    :request request :authority-receipt-pin authorization-pin}
-        current {:injury-id "injury/a9" :entry-id "34"
+        current {:injury-id "injury/a9" :entry-id (str (:ordinal open-entry))
                  :predecessor-entry-id nil
                  :cause-record-id (:path original-pin)
                  :cause-pin (:sha256 original-pin) :active? true}
-        ledger-entry {:injury-id "injury/a9" :ordinal 34
-                      :entry-id (:ledger-entry-id intent)
-                      :state :open :attempt 1}
+        ledger-entry open-entry
         artifacts {(:path original-pin) original-bytes
                    (:path contract-pin) contract-bytes
                    (:path evaluation-pin) evaluation-bytes
@@ -75,7 +86,7 @@
                    :intent-digest intent-id :receipt-pin review-pin}
                   {:kind :authorization :identity authorizer
                    :intent-digest intent-id :receipt-pin authorization-pin}}]
-    {:operation operation :current current :ledger-entry ledger-entry
+    {:operation operation :current current :ledger-entry ledger-entry :ledger history
      :intent intent :artifacts artifacts
      :evaluation-pin evaluation-pin :review-pin review-pin
      :authorization-pin authorization-pin
@@ -88,12 +99,21 @@
     (is (not= (:intent-digest result) (:operation-id result)))))
 
 (deftest artifact-presence-and-integrity-fail-closed
-  (let [f (fixture) path (get-in f [:evaluation-pin :path])]
+  (let [f (fixture) path (get-in f [:evaluation-pin :path])
+        contract-path (get-in f [:intent :acceptance-contract-pin :path])
+        two-forms "{:one 1} {:two 2}"
+        two-pin {:path "artifacts/two.edn"
+                 :sha256 (load-identity/sha256 (.getBytes two-forms "UTF-8"))}]
     (is (= :artifact/missing
            (:reason (authority/verify (update f :artifacts dissoc path)))))
     (is (= :artifact/hash-drift
            (:reason (authority/verify
-                     (assoc-in f [:artifacts path] "{:tampered true}\n")))))))
+                     (assoc-in f [:artifacts path] "{:tampered true}\n")))))
+    (is (= :artifact/missing
+           (:reason (authority/verify (update f :artifacts dissoc contract-path)))))
+    (is (= :artifact/multiple-forms
+           (:reason (authority/resolve-artifact {"artifacts/two.edn" two-forms}
+                                                two-pin))))))
 
 (deftest intent-and-final-envelope-bindings-refuse-drift
   (let [f (fixture)]
@@ -126,6 +146,10 @@
     (is (= :roles/not-independent
            (:reason (authority/verify
                      (assoc-in f [:intent :reviewer] evaluator)))))
+    (is (= :roles/not-independent
+           (:reason (authority/verify
+                     (assoc-in f [:intent :reviewer]
+                               {:seat (:seat evaluator) :session "other-session"})))))
     (is (= :artifact/hash-drift
            (:reason (authority/verify
                      (assoc-in f [:artifacts review-path] old-review-bytes)))))
@@ -137,6 +161,34 @@
                         (assoc-in [:artifacts (:path forged-pin)] forged-bytes))]
       (is (= :authorization/untrusted
              (:reason (authority/verify untrusted)))))))
+
+(deftest recomputed-envelope-cannot-authorize-substituted-payload
+  (let [f (fixture)
+        candidate (-> (get-in f [:operation :request :candidate])
+                      (assoc :evaluator "unapproved-evaluator"
+                             :reviewer "unapproved-reviewer"
+                             :evidence-pin (apply str (repeat 64 "9"))))
+        request {:candidate candidate :evidence candidate}
+        recomputed (authority/final-operation-id
+                    (authority/intent-digest (:intent f)) request
+                    (:evaluation-pin f) (:review-pin f) (:authorization-pin f))
+        altered (-> f
+                    (assoc-in [:operation :request] request)
+                    (assoc-in [:operation :operation-id] recomputed))]
+    (is (= :intent/payload-mismatch
+           (:reason (authority/verify altered))))))
+
+(deftest adapter-drives-actual-medic-admission
+  (let [f (fixture)
+        record-pin {:path "receipts/final-medic.edn"
+                    :sha256 (apply str (repeat 64 "8"))}
+        result (ledger/append-medic-repaired
+                (:ledger f) record-pin (:operation f)
+                (authority/authority-verifier f))]
+    (is (= :appended (:status result)) (pr-str result))
+    (is (= :valid (:status (ledger/validate-ledger
+                            (:ledger result)
+                            (authority/authority-verifier f)))))))
 
 (deftest source-review-cannot-substitute-for-qualification-review
   (let [f (fixture)
