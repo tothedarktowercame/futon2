@@ -50,17 +50,15 @@
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
 
 (defn- resolve-medic-authority [opts]
-  (if-not (contains? opts :meta-medic-authority-context)
-    {:status :absent :verifier (constantly false)}
-    (let [context (:meta-medic-authority-context opts)]
-      (if (and (map? context) (ifn? (:trust context))
-               (= medic-authority/intent-schema (get-in context [:intent :schema]))
-               (map? (:artifacts context)) (seq (:artifacts context))
-               (medic-authority/pin-valid? (:evaluation-pin context))
-               (medic-authority/pin-valid? (:review-pin context))
-               (medic-authority/pin-valid? (:authorization-pin context)))
-        {:status :ready :verifier (medic-authority/authority-verifier context)}
-        {:status :refused :reason :meta-self-heal/medic-authority-unavailable}))))
+  (cond
+    (medic-authority/resolved-context?
+     (:meta-medic-authority-resolution opts))
+    (:meta-medic-authority-resolution opts)
+
+    (contains? opts :meta-medic-authority-context)
+    (medic-authority/resolve-context (:meta-medic-authority-context opts))
+
+    :else {:status :absent :verifier (constantly false)}))
 
 (defn- valid-click-availability? [availability]
   (and (= :wm/ordinary-click-availability-v1 (:schema availability))

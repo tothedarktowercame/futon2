@@ -239,3 +239,21 @@
     (is (some #{:complete-original-record-bytes} (:missing manifest)))
     (is (some #{:trusted-authorizer-attestation} (:missing manifest)))
     (is (nil? (:operation manifest)))))
+
+(deftest process-context-composes-exact-nonoverlapping-scopes
+  (let [f (fixture)
+        bundle (select-keys f [:intent :artifacts :evaluation-pin :review-pin
+                               :authorization-pin :trust])
+        observation {:ledger (:ledger f) :operation (:operation f)
+                     :current (:current f)
+                     :candidate (get-in f [:operation :request :candidate])
+                     :evidence (get-in f [:operation :request :evidence])}
+        one (authority/resolve-context bundle)
+        duplicate (authority/resolve-context {:bundles [bundle bundle]})]
+    (is (= :ready (:status one)))
+    (is (true? ((:verifier one) observation)))
+    (is (= :wm/meta-medic-authority-context-identity-v1
+           (get-in one [:identity :schema])))
+    (is (= :meta-self-heal/medic-authority-ambiguous (:reason duplicate)))
+    (is (= :meta-self-heal/medic-authority-unavailable
+           (:reason (authority/resolve-context {:bundles []}))))))
