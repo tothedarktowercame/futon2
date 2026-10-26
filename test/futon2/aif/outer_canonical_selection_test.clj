@@ -102,4 +102,8 @@
               (get-in receipt [:action :cascade-digest])))
     (is (= (:action canonical) (get-in policy [:meta-selection :action])))
     (is (= :canonical-G-frontier (get-in policy [:meta-selection :selection-basis :kind])))
-    (is (= :selected (get-in policy [:policy-objective :status])))))
+    (is (= :selected (get-in policy [:policy-objective :status])))
+    ;; Q8a: the canonical route binds the Lean frontier statement — the
+    ;; receipt's :q8-frontier is a sealed :wm/q8-outer-frontier-v1 carrier,
+    ;; not the stub.
+    (is (= :wm/q8-outer-frontier-v1 (get-in receipt [:q8-frontier :schema])))))

@@ -1045,10 +1045,14 @@
         receipt (assoc receipt :q8-frontier
                        (if-not injury?
                          (if activated-carrier
-                           (if (= :assessed-population (:basis-kind activated-carrier))
+                           (condp = (:basis-kind activated-carrier)
+                             :assessed-population
                              (assoc (get-in activated-carrier [:recomputation :q8])
                                     :basis :assessed-population
                                     :scope (:scope activated-carrier))
+                             :canonical-G-frontier
+                             (q8/canonical-outer-frontier receipt)
+                             ;; unknown basis: unchanged stub
                              {:status :certified :carrier (:recomputation activated-carrier)})
                            {:status :absent :reason ordinary-reason})
                          (q8/outer-frontier

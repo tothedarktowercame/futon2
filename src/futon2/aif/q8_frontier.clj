@@ -30,6 +30,7 @@
   `verify-record` recomputes it from the persisted record alone; the
   exporter accepts the carrier only when the two agree."
   (:require [clojure.set :as set]
+            [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.previous-run :as previous-run])
@@ -198,6 +199,153 @@
                    :pairwise {:pairs (count (:pairwise selection))
                               :digest (digest (vec (:pairwise selection)))})))))
 
+;; -- the canonical-G route frontier (Q8a) --------------------------------------
+
+(def ^:private canonical-law :canonical/co-application-G-min-v1)
+
+(defn canonical-outer-frontier
+  "Sealed :wm/q8-outer-frontier-v1 carrier for the canonical-G route, a pure
+  projection of the retained outer-task-selection receipt.  Entries are the
+  canonical frontier's scored rows (one per task, least G, digest-ordered
+  tie-break); the census is the S1 open population with its typed
+  task-standing exclusions.  Eligible tasks with no entry are NOT census
+  exclusions: they are listed under :unranked with their typed reason and
+  stage, and a frontier that does not cover the eligible census is a visible
+  :decided-failure.  A task silently unaccounted for is refused
+  :not-recomputable (Lean: omitted_open_task_invalid)."
+  [receipt]
+  (let [support (:support receipt)
+        excluded (:excluded receipt)
+        families (vec (get-in receipt [:policy-field :families]))
+        fam-by (into {} (map (juxt :target-id identity)) families)
+        menu (get-in receipt [:policy :selected-outer-cascade-policy :sealed-menu])
+        menu-entry-targets (set (map :target-id (:entries menu)))
+        menu-failures-by (group-by :target-id (:failures menu))
+        menu-refusals-by (fn [target]
+                           (filter #(= target (first (str/split
+                                                      (str (:policy-id %)) #"/" 2)))
+                                   (:refusals menu)))
+        frontier (get-in receipt [:policy :canonical-g-frontier])
+        fr-rows-by (group-by :target-id (:entries frontier))
+        h (get-in frontier [:horizon-choice :horizon])
+        cps (get-in receipt [:policy :canonical-policy-selection])
+        census {:open (vec (sort (map (comp str :id) (concat support excluded))))
+                :eligible (vec (sort (map (comp str :id) support)))
+                :excluded (vec (sort-by :task
+                                        (map (fn [x] {:task (str (:id x))
+                                                      :reason (:ineligible-reason x)})
+                                             excluded)))}
+        eligible-set (set (:eligible census))
+        ;; one entry per task with a scored row: least G, digest-sorted tie-break
+        row-choice (fn [rows] (first (sort-by (juxt :G :cascade-digest) rows)))
+        entries
+        (vec (sort-by :task
+                      (for [[t rows] (seq (into (sorted-map)
+                                                (map (fn [[t all-rows]]
+                                                       [t (filter #(= :scored (:status %)) all-rows)])
+                                                     fr-rows-by)))
+                            :when (seq rows)
+                            :let [row (row-choice rows)
+                                  g (:G row)
+                                  channels {:G g}
+                                  ev (digest (select-keys
+                                              row [:policy-id :target-id :cascade-digest
+                                                   :G :action-pin]))]]
+                          {:task t
+                           :channels channels
+                           :observation (digest channels)
+                           :evidence ev
+                           :ranking-law canonical-law
+                           :ranking-version 1
+                           :dependencies (vec (sort [(digest [:wm/q8-task-observation t ev])
+                                                     (digest [:wm/q8-ranking-law
+                                                              canonical-law 1 h])]))
+                           :comparison-key (comparison-key channels 0)
+                           :absent-terms []
+                           :policy-id (:policy-id row)
+                           :cascade-digest (:cascade-digest row)})))
+        entry-tasks (set (map :task entries))
+        ;; every eligible task with no entry, with its typed reason and stage
+        unranked
+        (vec (sort-by :task
+                      (keep (fn [t]
+                              (let [family (get fam-by t)]
+                                (cond
+                                  (and family (not= :computed (:status family)))
+                                  (let [kinds (map :kind (:failures family))]
+                                    (when (seq (distinct kinds))
+                                      {:task t :stage :s2
+                                       :reason (first (sort (distinct kinds)))
+                                       :reasons (vec (sort (distinct kinds)))}))
+                                  (and family (not (contains? menu-entry-targets t)))
+                                  (let [kinds (concat (map :kind (get menu-failures-by t))
+                                                      (map :kind (menu-refusals-by t)))]
+                                    (when (seq (distinct kinds))
+                                      {:task t :stage :s4
+                                       :reason (first (sort (distinct kinds)))
+                                       :reasons (vec (sort (distinct kinds)))}))
+                                  (contains? menu-entry-targets t)
+                                  (let [reasons (vec (sort (distinct
+                                                            (keep :reason (fr-rows-by t)))))]
+                                    (when (seq reasons)
+                                      {:task t :stage :s5
+                                       :reason (first reasons)
+                                       :reasons reasons}))
+                                  :else nil)))
+                            (sort eligible-set))))
+        unranked-tasks (set (map :task unranked))
+        selected (get-in receipt [:policy :canonical-policy-selection :action :target])
+        selection-verdict (when (and (= :selected (:status cps)) (seq entries))
+                            (strict-selection-correspondence entries selected))
+        census-verdict (if (= entry-tasks eligible-set)
+                         {:status :pass}
+                         {:status :fail
+                          :reason :frontier-not-eligible-census
+                          :ranked (count entries)
+                          :unranked (count unranked)
+                          :unranked-by-reason (frequencies (map :reason unranked))})
+        base {:schema outer-schema
+              :ranking {:law canonical-law :version 1
+                        :comparison :canonical-G-min :horizon h}
+              :census census
+              :unranked unranked
+              :selected selected}
+        refusal
+        (cond
+          (some #(nil? (:reason %)) (:excluded census))
+          {:reason :exclusion-reason-absent
+           :tasks (vec (keep #(when (nil? (:reason %)) (:task %)) (:excluded census)))}
+          (not= :produced (:status frontier))
+          {:reason :canonical-frontier-absent :frontier-status (:status frontier)}
+          (some #(nil? (:comparison-key %)) entries)
+          {:reason :channel-value-not-exact
+           :tasks (vec (keep #(when (nil? (:comparison-key %)) (:task %)) entries))}
+          (seq (remove eligible-set entry-tasks))
+          {:reason :frontier-task-not-eligible
+           :tasks (vec (sort (remove eligible-set entry-tasks)))}
+          (seq (set/intersection entry-tasks unranked-tasks))
+          {:reason :entry-also-unranked
+           :tasks (vec (sort (set/intersection entry-tasks unranked-tasks)))}
+          (not= :selected (:status cps))
+          {:reason :no-outer-selection :selection-reason (or (:status cps) :selection-status-absent)}
+          (not= selected (str selected))
+          {:reason :no-outer-selection :selection-reason :selected-target-not-a-string}
+          (= :not-recomputable (:status selection-verdict))
+          selection-verdict
+          :else
+          (let [unaccounted (sort (set/difference eligible-set entry-tasks unranked-tasks))]
+            (when (seq unaccounted)
+              {:reason :eligible-task-unaccounted :tasks (vec unaccounted)})))]
+    (seal (if refusal
+            (merge base {:status :not-recomputable} (dissoc refusal :kind))
+            (assoc base
+                   :status (if (and (= :pass (:status selection-verdict))
+                                    (= :pass (:status census-verdict)))
+                             :certified :decided-failure)
+                   :selection-verdict selection-verdict
+                   :census-verdict census-verdict
+                   :entries entries)))))
+
 ;; -- refresh against the prior frontier ---------------------------------------
 
 (def ^:private lean-entry-keys
@@ -326,6 +474,8 @@
                               :predecessor (:sha256 predecessor)
                               :q6 (get-in decision [:selection-certificate :q6 :sha256])
                               :chosen-target chosen-target}}
+            (contains? outer :census-verdict)
+            (assoc :census-verdict (:census-verdict outer))
             (seq reasons) (assoc :reasons reasons)
             frontier (assoc :frontier frontier)
             (empty? reasons)

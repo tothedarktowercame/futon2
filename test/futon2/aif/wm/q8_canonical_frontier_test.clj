@@ -1,0 +1,181 @@
+(ns futon2.aif.wm.q8-canonical-frontier-test
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
+            [futon2.aif.q8-frontier :as q8]))
+
+;; Live pin: projection of wm-full-loop-machinery-150 attempt-002
+;; 002-selection.edn (:selection-as-of "2026-10-24T20:40:24.272212785Z"),
+;; values verbatim, only the paths canonical-outer-frontier reads.
+(def receipt
+  (edn/read-string (slurp "test/resources/q8-canonical-frontier/attempt-002-projection.edn")))
+
+(def ranked ["M-recommendation-bindings" "M-self-improvement-loop"
+             "M-stack-geometry" "M-war-machine-wiring"])
+
+(deftest attempt-002-canonical-frontier-is-a-visible-census-failure
+  (let [c (q8/canonical-outer-frontier receipt)
+        census (:census c)]
+    (testing "sealed and decided"
+      (is (q8/intact? c))
+      (is (= :wm/q8-outer-frontier-v1 (:schema c)))
+      (is (= :decided-failure (:status c))))
+    (testing "census: the S1 open population, verbatim"
+      (is (= 786 (count (:open census))))
+      (is (= 109 (count (:eligible census))))
+      (is (= 677 (count (:excluded census))))
+      (is (= {:pipeline/not-on-current-map 526
+              :repair-finding/root-missing 102
+              :repair-finding/attached-to-root 25
+              :repair-finding/root-not-current 13
+              :ownership/ambiguous-active-owner 6
+              :ownership/actively-held 3
+              :mission-standing-conflict 1
+              :task-document-source-unavailable 1}
+             (frequencies (map :reason (:excluded census))))))
+    (testing "entries: one per scored task, tie at the least key"
+      (is (= ranked (mapv :task (:entries c))))
+      (let [keys (mapv :comparison-key (:entries c))]
+        (is (= (keys 0) (keys 3)) "rb and wmw share the least key")
+        (is (< (keys 0) (keys 1) (keys 2)) "sil between, stack-geometry greatest")))
+    (testing "selection"
+      (is (= "M-war-machine-wiring" (:selected c)))
+      (is (= {:status :fail
+              :reason :tied-minimum
+              :tied-members ["M-recommendation-bindings" "M-war-machine-wiring"]
+              :absent-terms []}
+             (:selection-verdict c))))
+    (testing "census verdict: 105 unranked, none of them census exclusions"
+      (is (= {:status :fail
+              :reason :frontier-not-eligible-census
+              :ranked 4
+              :unranked 105
+              :unranked-by-reason {:no-current-target-reading 101
+                                   :occurrence-squares-not-authored 1
+                                   :seed-not-in-graph 1
+                                   :isolated-seed 1
+                                   :target-class-unknown 1}}
+             (:census-verdict c)))
+      (is (false? (= (set (map :task (:entries c))) (set (:eligible census)))))
+      (is (= 105 (count (:unranked c))))
+      (is (= {:task "M-formal-war-machine" :stage :s4
+              :reason :seed-not-in-graph
+              :reasons [:seed-not-in-graph :target-class-unknown]}
+             (first (filter #(= "M-formal-war-machine" (:task %)) (:unranked c)))))
+      (is (= {:task "M-digital-nomad-patterns" :stage :s4
+              :reason :isolated-seed
+              :reasons [:isolated-seed :target-class-unknown]}
+             (first (filter #(= "M-digital-nomad-patterns" (:task %)) (:unranked c)))))
+      (is (= {:task "M-pattern-posteriors" :stage :s4
+              :reason :target-class-unknown
+              :reasons [:target-class-unknown]}
+             (first (filter #(= "M-pattern-posteriors" (:task %)) (:unranked c))))))))
+
+(deftest certificate-carries-the-census-verdict
+  (let [outer (q8/canonical-outer-frontier receipt)
+        cert (q8/certificate {:outer outer :predecessor nil :decision nil
+                              :chosen-target "M-war-machine-wiring" :run-id "r"})]
+    (is (q8/intact? cert))
+    (is (not (some #{:outer-frontier-absent-or-tampered} (:reasons cert))))
+    (is (some #{:no-prior-frontier} (:reasons cert))
+        "expected on this route until the cascade packet")
+    (is (= (:census-verdict outer) (:census-verdict cert)))
+    (is (= 4 (count (get-in cert [:frontier :entries]))))
+    (is (= [:no-prior-frontier :policy-stages-absent] (:reasons cert)))))
+
+(deftest silently-unaccounted-eligible-task-is-refused
+  (testing "a family row removed from the field leaves its task unaccounted"
+    (let [victim "M-daily-scan"
+          broken (update-in receipt [:policy-field :families]
+                            #(vec (remove (fn [f] (= victim (:target-id f))) %)))
+          c (q8/canonical-outer-frontier broken)]
+      (is (= :not-recomputable (:status c)))
+      (is (= :eligible-task-unaccounted (:reason c)))
+      (is (= [victim] (:tasks c)))))
+  (testing "a support task with no family, menu row or frontier row"
+    (let [orphan "M-phantom"
+          grown (-> receipt
+                    (update :support conj {:id orphan})
+                    (assoc-in [:census-placeholder] true))
+          c (q8/canonical-outer-frontier grown)]
+      (is (= :not-recomputable (:status c)))
+      (is (= :eligible-task-unaccounted (:reason c)))
+      (is (= [orphan] (:tasks c))))))
+
+(defn- focused-receipt
+  "The four ranked tasks eligible; everyone else excluded with a
+  task-standing reason."
+  [g-adjust]
+  (let [others (remove #(some #{(str (:id %))} ranked) (:support receipt))
+        fr-entries (mapv (fn [e]
+                           (if (and (= "M-recommendation-bindings" (:target-id e))
+                                    (= :scored (:status e)))
+                             (update e :G (fnil + 0.0) g-adjust)
+                             e))
+                         (get-in receipt [:policy :canonical-g-frontier :entries]))]
+    (-> receipt
+        (assoc :support (vec (filter #(some #{(str (:id %))} ranked) (:support receipt))))
+        (update :excluded into (map (fn [t] {:id (:id t)
+                                             :ineligible-reason :pipeline/not-on-current-map})
+                                    others))
+        (assoc-in [:policy :canonical-g-frontier :entries] fr-entries))))
+
+(deftest census-passes-when-the-frontier-covers-the-eligible-census
+  (testing "tie only"
+    (let [c (q8/canonical-outer-frontier (focused-receipt 0.0))]
+      (is (= :pass (:status (:census-verdict c))))
+      (is (= :decided-failure (:status c)))
+      (is (= :tied-minimum (get-in c [:selection-verdict :reason])))))
+  (testing "nudged: both verdicts pass"
+    (let [c (q8/canonical-outer-frontier (focused-receipt 1e-9))]
+      (is (= :certified (:status c)))
+      (is (= :pass (:status (:census-verdict c))))
+      (is (= :pass (:status (:selection-verdict c)))))))
+
+(deftest two-scored-rows-of-one-task-give-one-entry
+  (let [row (fn [pid digest g]
+              {:policy-id pid :target-id "T" :status :scored
+               :G g :cascade-digest digest
+               :action-pin {:cascade-digest digest}})
+        base {:support [{:id "T"}] :excluded []
+              :policy-field {:families [{:target-id "T" :status :computed}]}
+              :policy {:selected-outer-cascade-policy
+                       {:sealed-menu {:entries [{:policy-id "T/a" :target-id "T"}
+                                                {:policy-id "T/b" :target-id "T"}]}}
+                       :canonical-g-frontier
+                       {:status :produced :horizon-choice {:horizon 1}
+                        :entries [(row "T/a" "aaa" -1.5) (row "T/b" "bbb" -2.5)]}
+                       :canonical-policy-selection
+                       {:status :selected :action {:target "T"}}}}
+        c (q8/canonical-outer-frontier base)
+        [entry] (:entries c)]
+    (is (= 1 (count (:entries c))))
+    (is (= "T/b" (:policy-id entry)) "least G wins")
+    (is (= "bbb" (:cascade-digest entry)))
+    (is (= :pass (:status (:census-verdict c))))
+    (let [tied (assoc-in base [:policy :canonical-g-frontier :entries]
+                         [(row "T/a" "zzz" -2.5) (row "T/b" "aaa" -2.5)])
+          [entry'] (:entries (q8/canonical-outer-frontier tied))]
+      (is (= "T/b" (:policy-id entry')) "equal G: digest sorts first"))))
+
+(deftest tampering-with-a-sealed-g-breaks-the-seal
+  (let [c (q8/canonical-outer-frontier receipt)
+        tampered (assoc-in c [:entries 0 :channels :G] -1.0)]
+    (is (q8/intact? c))
+    (is (false? (q8/intact? tampered)))))
+
+(deftest old-route-carrier-still-certificates-without-census-verdict
+  (let [old (q8/seal {:schema q8/outer-schema
+                      :status :decided-failure
+                      :ranking {:law q8/ranking-law :version 1
+                                :comparison :complete-union :missing-channel-cost 0}
+                      :census {:open ["A"] :eligible ["A"] :excluded []}
+                      :selected "A"
+                      :selection-verdict {:status :fail :reason :tied-minimum
+                                          :tied-members ["A" "A"] :absent-terms []}
+                      :entries [{:task "A" :channels {:x 1.0} :observation "o"
+                                 :evidence "e" :ranking-law q8/ranking-law
+                                 :ranking-version 1 :dependencies []
+                                 :comparison-key 1 :absent-terms []}]})
+        cert (q8/certificate {:outer old :predecessor nil :decision nil
+                              :chosen-target "A" :run-id "r"})]
+    (is (not (contains? cert :census-verdict)))))
