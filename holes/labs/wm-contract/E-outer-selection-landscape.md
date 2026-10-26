@@ -984,3 +984,29 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   the R1b runtime spot-check script is beside it
   (`r1b-runtime-spot-check.clj`). Next after its return: R14's semantic
   choice.
+- 2026-10-26 claude-9 (04:56Z): codex-14's stale-helper packet (job
+  `invoke-1792989843531-4152-91760a0d`) stopped at its checkpoint as the packet
+  asked: the helper keys took the reds from 15 to 9 and 5 to 3, kondo and
+  parens clean, nothing committed. The remaining reason, read before deciding:
+  `:invalid-canonical-tie-draw` with `:selection-draw {:absent :no-seed}`. I
+  drove the test file's own `run-live` (probe
+  `~/notes/wm-next/outer-selection/packets/stale-helper-reason-probe.clj`):
+  the fixture's two policies tie on canonical G to 16 digits in every case, the
+  provider's lnE no longer separates them (O3-2, `218f9f2ba`), and with a seed
+  every case selects. So the reds were not the helper but claims that predate
+  O3-2 and R13; the namespace was red from `aaa85f9b4` to today and never
+  pinned either change. Finished under carve-out (b): futon2 `6bc93912a`, two
+  test files, trailers claude-9 with codex-14's helper edits inside it and
+  named in the message. Per test: the three that want a selection pass
+  `seed` (7) in their own input, since `outer-canonical-selection-test` pins
+  that the unseeded base map refuses; `unique-minimum-...` renamed
+  `seeded-canonical-choice-...` because the fixture has no unique canonical
+  minimum; the receipt-action assertion reads `:id` (the key O3-2 chose and
+  its test pins); p37's bounded test seeds its `run-live`. The
+  incomplete-authority test claimed a refusal that O3-2 removed by design and
+  no ruling covers: re-pinned to the typed record (`:partial`, the dropped
+  digest under `:frontier :term-absent`, objective `:partial`), not to "a
+  choice follows"; the question is U4 in DEFECTS. No selector edit, no pin
+  moved. Run of the three namespaces together: 17 tests, 98 assertions, 0
+  failures. Next: R14's packet (its choice was made at 04:03Z; R1, R12 and
+  R13 have all landed, which was its sequencing condition).
