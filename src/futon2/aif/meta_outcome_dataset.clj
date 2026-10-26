@@ -51,13 +51,19 @@
            {:failure (select-keys (:failure record) [:kind :stage])})
          (when (contains? record :outer-task-selection)
            {:outer-task-selection
-            (merge (select-keys outer [:schema :status :reason :chosen])
+            (merge (select-keys outer [:schema :status :reason])
                    {:support (if (vector? (:support outer)) [] (:support outer))
                     :excluded (if (vector? (:excluded outer)) [] (:excluded outer))
                     :draw (if (map? (:draw outer)) {} (:draw outer))
+                   :chosen {:id (get-in outer [:chosen :id])}
                     :action (select-keys (:action outer) [:target])}
                    (when-let [policy (:policy outer)]
-                     {:policy (select-keys policy [:kind :selected-outer-cascade-policy])}))})
+                     {:policy
+                      (merge (select-keys policy [:kind])
+                             {:selected-outer-cascade-policy
+                              {:cascade-digest
+                               (get-in policy [:selected-outer-cascade-policy
+                                               :cascade-digest])}})}))})
          (when (contains? record :terminal-receipt)
            {:terminal-receipt (select-keys (:terminal-receipt record)
                                            [:outcome :failure-kind :failure-stage])})
