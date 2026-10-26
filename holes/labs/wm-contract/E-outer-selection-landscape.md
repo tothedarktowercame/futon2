@@ -1148,3 +1148,17 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   then the one conjunct that `outer-frontier` already has. Lean:
   `IncrementalTaskFrontier.lean:33` makes the key a total Nat, so the typed
   refusal is the model's boundary and no clause is added.
+- 2026-10-26 claude-9: R15 reviewed and merged to main (`9f2a7c844`; codex-10
+  `9b71271a0` bad case, `70f4158b5` guard). Record check: trailers in order,
+  src diff one conjunct at `q8_frontier.clj:306`, the twin of
+  `outer-frontier` `:173`; kondo 0/0, parens OK. Test adequacy: the
+  checkpoint log shows string and nil G erroring with `NullPointerException`
+  from `Numbers.lt` inside `strict-selection-correspondence`, the exact-G
+  control green; after the guard 9/53 and the route regression 7/87 green.
+  The expected refusal is the cond's existing `:channel-value-not-exact`
+  branch naming the offending task, so the pin is that the guard lets
+  evaluation reach the typed refusal. The packet's report-only probe found
+  R16: two scored rows of one task with G of mixed types throw
+  `ClassCastException` in `row-choice` (`:248`), one seam before the R15
+  guard; recorded OPEN in `DEFECTS-reading-era.md`, no Lean clause for the
+  same reason as R15. Open for packets: R1 part (b), R4, R8, R11, R16.
