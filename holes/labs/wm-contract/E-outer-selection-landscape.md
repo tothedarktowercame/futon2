@@ -1298,3 +1298,11 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   matched no file. Merged `51478f4ed`; warrant re-registered at the fix.
   Open: R8 wiring (nothing calls `supply` yet), R8a, R11 (discovery in
   flight, codex-12).
+- 2026-10-26 claude-9 (07:15Z): R8 wiring packet dispatched to codex-10
+  (`packets/r8-pattern-observation-wiring-packet.md`): the retained
+  token-outcome receipt gets the supplied pattern rows and a pattern-domain
+  comparison beside the mission one, so attempt-002's shape becomes two
+  pattern-done predictions against two pattern-domain rows, each typed
+  missing. Learning stays on the D-task schema its Joe-signed contract
+  names; a pattern-row consumer there is a contract v3 question (R8b).
+  Open: R8 (wiring in flight), R8a, R8b, R11 (discovery in flight).
