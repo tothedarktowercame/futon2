@@ -1,0 +1,44 @@
+{:schema :test/execution-receipt-v1
+ :recorded-at "2026-10-26T19:38:00Z"
+ :recorded-by "claude-9 (reviewer); author codex-14 stopped before the receipt because the namespace gate is red on a pre-existing count pin (DEFECTS-reading-era R30)"
+ :change {:author "codex-14"
+          :job "invoke-1793042474938-4350-d1a2cd6f"
+          :authored-as "8c1d280e2 on codex14/r26-error-propagation (base 230adb6f7)"
+          :landed-as "ff7afb2e4 after rebase onto 5c3630900 by claude-9"}
+ :command "clojure -X:test :vars '[futon2.aif.outer-learning-runtime-test/load-shadow-distinguishes-exception-stages futon2.aif.outer-learning-runtime-test/dataset-error-propagates-from-load-shadow]'"
+ :namespaces [futon2.aif.outer-learning-runtime-test]
+ :result :pass
+ :completed? true
+ :tests 2 :assertions 22 :failures 0 :errors 0
+ :log "~/notes/wm-next/r26-focused-post-rebase.log"
+ :r26-focused
+ {:red {:by "codex-14, before the change"
+        :test futon2.aif.outer-learning-runtime-test/dataset-error-propagates-from-load-shadow
+        :observed "actual: nil — the thrown java.lang.Error came back as a returned refusal"}
+  :green {:tests 2 :assertions 22 :failures 0 :errors 0
+          :observed {:stage-reasons [:learning-authority-unavailable
+                                     :learning-manifest-unreadable
+                                     :learning-dataset-failed
+                                     :learning-belief-failed]
+                     :conflicting-path-detail? true
+                     :error-propagates? true}}}
+ :namespace-gate
+ {:command "clojure -X:test :nses '[futon2.aif.outer-learning-runtime-test]'"
+  :by "codex-14"
+  :tests 3 :failures 2 :errors 0
+  :failing-test futon2.aif.outer-learning-runtime-test/pinned-demonstration-run-remains-in-production-learning-fold
+  :pre-existing? true
+  :reproduction {:at ["358e09116 (before R25)" "5c3630900 (main before R26)"]
+                 :tests 1 :assertions 17 :failures 2
+                 :observed {:applied [22 24] :unresolved [7 22]}
+                 :logs ["~/notes/wm-next/r26-countpin-pre-r25.log"
+                        "~/notes/wm-next/r26-countpin-r25-head.log"]}
+  :note "Aggregate count pins over the live learning fold; R26 cannot change them on the non-exception path."}
+ :additional-gates
+ {:clj-kondo {:files ["src/futon2/aif/outer_learning_runtime.clj"
+                      "test/futon2/aif/outer_learning_runtime_test.clj"]
+              :errors 0 :warnings 0}
+  :check-parens :ok}
+ :scope
+ {:live-jvm-loaded? false
+  :click-run? false}}
