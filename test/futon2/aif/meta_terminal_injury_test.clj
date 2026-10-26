@@ -405,3 +405,26 @@
     (is (= :ordinary-selection-abstention (:observation-kind last-entry)))
     (is (= :enacted (:state (get (:injuries (ledger/active-injuries (:ledger result)))
                                  injury-id))))))
+
+(deftest successful-image-with-failure-present-remains-an-injury
+  ;; Review control for the R23 finding named :failure-present (claude-9,
+  ;; 2026-10-26, entry-45 evaluation review): a successful close image whose
+  ;; record also carries a failure kind, by any of the three paths the
+  ;; classifier reads, is an injury. The :build-failed control above pins the
+  ;; contradictory no-failure image, which is a different case.
+  (doseq [[label record]
+          {:failure-kind (assoc click-1-terminal
+                               :failure {:kind :reload-failed :stage :reload})
+           :receipt-failure-kind (assoc-in click-1-terminal
+                                           [:terminal-receipt :failure-kind]
+                                           :algorithm-crashed)
+           :detail-failure-kind (assoc click-1-terminal
+                                       :failure {:detail {:failure-kind :review-failed}})}]
+    (is (= [:injury nil]
+           ((juxt :classification :non-injury-reason)
+            (classify record pin-a)))
+        (pr-str label)))
+  (is (= [:non-injury :successful-task-outcome]
+         ((juxt :classification :non-injury-reason)
+          (classify click-1-terminal pin-a)))
+      "the same image with no failure stays a non-injury"))
