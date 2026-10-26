@@ -9,6 +9,9 @@
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.policy :as policy]
+            [futon2.aif.enactment-fold-source :as fold-source]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.aif.policy-prefix-evidence :as prefix-evidence]
             [futon2.aif.trace :as trace])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -127,9 +130,28 @@
                       :horizon 2
                       :class-preference {2 {:focused 1.0}}}}))))
 
+(defn select-with-prefix-history
+  "Select with canonical evidence from a private flight census. The retained
+  explicit-absence flight is real fixture data; no policy history is invented.
+  All ranked fields (including novelty and class evidence) remain intact."
+  [ranked opts]
+  (let [root (.toFile (Files/createTempDirectory
+                       "runner-prefix-history-" (make-array FileAttribute 0)))]
+    (try
+      (io/copy (io/file "test/fixtures/prefix-history/flight-278b6988.edn")
+               (io/file root "flight-278b6988.edn"))
+      (let [steps (fold-source/conditioning-steps (.getPath root))
+            census (prefix-admission/history-census steps)
+            prefixes (prefix-admission/prefixes (mapv :action ranked) steps)]
+        (policy/select-action-cascades
+         (prefix-evidence/production-ranked ranked nil prefixes census)
+         (assoc opts :policy-history-pin (prefix-admission/census-pin census))))
+      (finally
+        (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
+
 (def ^:private judgement
   {:decision (assoc-in
-              (policy/select-action-cascades
+              (select-with-prefix-history
                [(loop-exercised-ranked-entry selected-action -2.0 1)
                 (loop-exercised-ranked-entry
                  (assoc selected-action

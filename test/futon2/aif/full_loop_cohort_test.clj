@@ -5,7 +5,9 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
-            [futon2.aif.full-loop-cohort :as cohort])
+            [futon2.aif.full-loop-cohort :as cohort]
+            [futon2.aif.mission-observation :as mission]
+            [futon2.aif.mission-observation-test :as mission-fixture])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -1187,3 +1189,51 @@
     (spit (io/file dir (:attempt/id event) "002-selection.edn") (pr-str decoy))
     (is (= #{"identity/actual"} (#'cohort/opened-opportunity-ids dir)))
     (is (= "attempt-002" (:attempt/id (open! root "identity/decoy"))))))
+
+(deftest closed-execution-validates-baseline-sidecar-separately
+  (mission-fixture/scenario
+   (fn [{:keys [dispatch repo-path]}]
+     (let [root (tmp-root)
+           binding {:preregistration prereg-path :data-root root
+                    :cohort-id (:cohort/id (cohort/read-edn prereg-path))
+                    :sha256 (#'cohort/sha256 (slurp prereg-path))}
+           _ (cohort/activate! prereg-path root)
+           attempt (:attempt/id (open! root "baseline/closed"))
+           dir (io/file root (name (:cohort-id binding)) attempt)
+           sidecar (io/file dir "pre-author-mission-baseline.edn")
+           baseline (mission/capture-before
+                     {:dispatch dispatch :repository repo-path
+                      :revision (get-in dispatch [:before :head])})]
+       (doseq [checkpoint [:selection :construction]]
+         (cohort/append-checkpoint! prereg-path root attempt checkpoint
+                                   {:sorry {:kind :fixture}}))
+       (is (= :captured (:status baseline)))
+       (cohort/append-pre-author-baseline! prereg-path root attempt baseline)
+       (doseq [checkpoint [:dispatch :build :adjudication]]
+         (cohort/append-checkpoint! prereg-path root attempt checkpoint
+                                   {:sorry {:kind :fixture}}))
+       (cohort/close-attempt! prereg-path root attempt
+                             (term {:outcome :agent-unavailable :grounded? false
+                                    :artifact-only? false :duration-ms 1
+                                    :resource-use {:agent-turns 0}}))
+       (is (= attempt (:attempt-id (cohort/closed-execution binding attempt))))
+       (let [extra (io/file dir "unknown.edn")
+             bytes (slurp sidecar)
+             record (edn/read-string bytes)]
+         (spit extra "{}")
+         (is (thrown? clojure.lang.ExceptionInfo
+                      (cohort/closed-execution binding attempt)))
+         (io/delete-file extra)
+         (doseq [invalid [(assoc record :schema :wrong)
+                          (assoc record :attempt/id "foreign")
+                          (assoc record :cohort/id :foreign)
+                          (assoc-in record [:baseline :target] "foreign")
+                          (assoc-in record [:baseline :baseline-sha256] "wrong")]]
+           (spit sidecar (pr-str invalid))
+           (is (thrown? clojure.lang.ExceptionInfo
+                        (cohort/closed-execution binding attempt))))
+         (spit sidecar (str bytes "\n{}"))
+         (is (thrown? clojure.lang.ExceptionInfo
+                      (cohort/closed-execution binding attempt)))
+         (spit sidecar bytes)
+         (is (= attempt (:attempt-id (cohort/closed-execution binding attempt)))))))))

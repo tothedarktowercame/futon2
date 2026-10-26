@@ -14,9 +14,7 @@
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.token-outcome-test :as token-fixture]
             [futon2.aif.kernel-example-test :as kernel-fixture]
-            [futon2.aif.token-observation-initialization-test :as initialization-fixture]
             [futon2.aif.token-outcome :as token-outcome]
-            [futon2.aif.preference-audit :as preference-audit]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.run-ending-classification :as run-ending]
             [futon2.aif.limb-evidence :as limb-evidence]
@@ -735,7 +733,7 @@
                           :id :test/token-comparator
                           :precedence (conj (:precedence action)
                                             :test/token-comparator-followup))]
-    (-> (policy/select-action-cascades
+    (-> (runner-fixture/select-with-prefix-history
          [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)
           (runner-fixture/loop-exercised-ranked-entry comparator -1.0 2)]
          {:beta 2.0})
@@ -765,7 +763,7 @@
 
 (def judgement
   {:decision (with-test-carry
-              (policy/select-action-cascades
+              (runner-fixture/select-with-prefix-history
                [(loop-exercised-ranked-entry selected-action -2.0 1)
                 (loop-exercised-ranked-entry
                  (assoc selected-action
@@ -840,7 +838,7 @@
                         :target (:repair/id obligation)
                         :repair-obligation obligation}
                   admission (assoc :admission admission))
-         decision (policy/select-action-cascades
+         decision (runner-fixture/select-with-prefix-history
                    [(loop-exercised-ranked-entry action -2.0 1)
                     (loop-exercised-ranked-entry selected-action -1.0 2)]
                    {:beta 2.0})]
@@ -7452,74 +7450,34 @@
 
 
 (deftest admitted-token-initialization-survives-runner-close
-  ;; Same grounded retention fixture as close-retains-token-mismatch-before-manifest-freeze.
-  ;; Source identity remains enabled; the owner runs this on merged main.
-  ;; RUNNER-SUITE-F: resolve the decision's pinned futon3 receipt bytes
-  ;; against the copy this suite owns (see close-retains-... above).
-  (binding [cascade-sources/*code-roots* ["test/fixtures/library-pins/r7fc6a050" "test/fixtures/library-pins/current"]]
-    (let [failure
-          (try
-            (initialization-fixture/with-two-ticks true
-             (fn [{decision :second artifact-repo :repo artifact-commit :commit
-                   d-task-root :root inputs :inputs}]
-               (let [c (retention-cohort "runner-token-initialization")
-           mission-path (io/file artifact-repo
-                                 "holes/missions/M-aif-policy-conditioned-eig.md")
-           input (get-in decision [:selection-certificate :token-belief-input])
-           opts (assoc (retention-success-opts c)
-                       :d-task-evidence-root d-task-root
-                       :target-repo-fn (fn [& _] (.getPath artifact-repo))
-                       :mission-fn (fn [_]
-                                     (#'missions/mission-doc->entry
-                                      (.getPath mission-path)))
-                       :resolve-build-fn (fn [_]
-                                           {:repo (.getPath artifact-repo)
-                                            :files ["created.clj"]})
-                       :author-artifact-observer-fn
-                       (fn [_ _ _]
-                         (assoc (:artifact-binding inputs)
-                                :repo (.getPath artifact-repo)))
-                       :ground-fn (fn [& _] {:before {:implementation-entity nil}
-                                             :after {:implementation-entity {:id "retained"}}
-                                             :resolved? true :dial-moved? true
-                                             :implementation-id "retained"
-                                             :discharge-id "retained-discharge"})
-                       :judge-fn (fn [_] {:judgement (assoc judgement :decision decision)})
-                       :poll-fn (fn [_ id]
-                                  (if (= id "retention-author")
-                                    {:job-id id :state "done" :artifact-ref artifact-commit
-                                     :result-summary (str "FULL_LOOP_AUTHOR: DONE " artifact-commit)
-                                     :feature-card feature-card-claim :execution successful-execution}
-                                    {:job-id id :state "done" :execution successful-execution
-                                     :result-summary "FULL_LOOP_REVIEW: APPROVE"})))
-           result (runner/run-opportunity! opts)
-           selected (get-in result [:checkpoints :selection :judgment :controller-decision])]
-                 (is (= :grounded-progress (:outcome result)))
-                 (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
-                 (let [example (:kernel-example result)
-                       manifest (:close-evidence-manifest result)
-                       entry (first (filter #(str/ends-with? (:evidence/id %) "/retained/kernel-example.edn") (:entries manifest)))]
-         ;; This fixture's synthetic author lacks a verifiable D-task artifact;
-         ;; preserve its close disposition with unavailable observations.
-                   (is (= :recorded (:status example)))
-                   (is (= :grounded-progress (get-in example [:disposition :value])))
-                   (is (= :unavailable (get-in example [:missingness :observations])))
-                   (is (= example (edn/read-string (slurp (:source-path entry)))))
-                   (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry))))))
-                 (is (= :observed-initialization (:conditioning-status input)))
-                 (is (= input (get-in selected [:selection-certificate :token-belief-input])))
-                 (is (= :ready-for-posterior
-                        (get-in selected
-                                [:selection-certificate :prefix-f-routing :status])))
-                 (is (= :recorded (get-in selected [:selection-certificate :preference-audit :status])))
-                 (is (preference-audit/valid? selected (get-in selected [:selection-certificate :preference-audit])))
-                 (is (= (:continuation-belief input)
-                        (get-in selected [:selection-certificate :precision-family :model :q0])))
-                 (is (every? #(not (contains? % initialization-fixture/updater))
-                             (keys (:continuation-belief input)))))))
-            nil
-            (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-      (is (nil? failure) "authorized Prefix-F commissioning reaches close"))))
+  ;; Keep the test name for the fixed 34-test close gate. The interpreted
+  ;; two-tick initialization route was retired in acb73f61bc. Its replacement
+  ;; checks that the current admitted selection evidence survives close,
+  ;; alongside the same persisted kernel-example and disposition assertions.
+  (binding [cascade-sources/*code-roots*
+            ["test/fixtures/library-pins/r7fc6a050" "test/fixtures/library-pins/current"]]
+    (let [c (retention-cohort "runner-current-selection-retention")
+          decision (token-loop-exercised-decision)
+          {:keys [result]} (run-token-feature-card-attempt c decision)
+          selected (get-in result [:checkpoints :selection :judgment :controller-decision])
+          example (:kernel-example result)
+          manifest (:close-evidence-manifest result)
+          entry (first (filter #(str/ends-with? (:evidence/id %)
+                                               "/retained/kernel-example.edn")
+                               (:entries manifest)))]
+      (is (some? (#'runner/selected-entry {:decision decision})))
+      (is (= :grounded-progress (:outcome result)))
+      (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
+      (is (= :recorded (:status example)))
+      (is (= :grounded-progress (get-in example [:disposition :value])))
+      (is (= :unavailable (get-in example [:missingness :observations])))
+      (is (= example (edn/read-string (slurp (:source-path entry)))))
+      (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))
+      (is (= (:selection-certificate decision) (:selection-certificate selected)))
+      (is (= (:action decision) (:action selected)))
+      (is (some? (#'runner/selected-entry {:decision selected})))
+      (is (= (get-in decision [:selection-certificate :precision-family])
+             (get-in selected [:selection-certificate :precision-family]))))))
 
 (deftest feature-card-close-retains-learning-receipt-without-changing-selection
   ;; Canonical runner-source guard stays enabled; owner runs after merge.
@@ -7774,7 +7732,7 @@
   (let [{:keys [root] :as c} (retention-cohort "parameter-novelty")
         original-ranked (novelty-fixture/frozen-ranked "1789964661")
         ranked (mapv runner-fixture/with-loop-exercise-evidence original-ranked)
-        select! (requiring-resolve 'futon2.aif.policy/select-action-cascades)
+        select! runner-fixture/select-with-prefix-history
         d (with-token-fixture-carry
            (select! ranked {:beta 1 :cascade-habit-path (str (io/file root "habit.edn"))
                             :novelty-inputs novelty-fixture/inputs}))

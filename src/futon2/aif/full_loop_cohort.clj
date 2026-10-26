@@ -11,6 +11,7 @@
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold :as fold]
+            [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.load-identity :as load-identity])
   (:import [java.nio.channels FileChannel]
            [java.nio.charset StandardCharsets]
@@ -1121,6 +1122,26 @@
     (catch clojure.lang.ExceptionInfo e (throw e))
     (catch Throwable _ (throw (ex-info "Invalid cohort evidence" {:reason reason})))))
 
+(defn- validate-closed-baseline!
+  "Validate the optional durable baseline as a sidecar, never a checkpoint.
+  This is integrity/occurrence validation, not new observation authority."
+  [file cohort-id attempt-id]
+  (let [record (read-one-file file :invalid-pre-author-baseline)
+        baseline (:baseline record)]
+    (when-not (and (= #{:schema :cohort/id :attempt/id :baseline} (set (keys record)))
+                   (= pre-author-baseline-schema (:schema record))
+                   (= cohort-id (:cohort/id record))
+                   (= attempt-id (:attempt/id record))
+                   (= :wm/mission-observation-baseline-v1 (:schema baseline))
+                   (= :captured (:status baseline))
+                   (string? (:baseline-sha256 baseline))
+                   (= (:baseline-sha256 baseline)
+                      (interpretation-evidence/value-digest
+                       (dissoc baseline :baseline-sha256))))
+      (throw (ex-info "Closed mission baseline invalid"
+                      {:reason :closed-execution-unavailable
+                       :failed [:pre-author-baseline]})))))
+
 (defn- validate-closed-execution
   "Validate BINDING against its immutable preregistration, activation, and
   ledger, then return the qualified identity of one exact closed attempt.
@@ -1131,8 +1152,15 @@
         dir (cohort-dir p (:data-root binding))
         activation (read-one-file (activation-path dir) :invalid-cohort-activation)
         attempt-dir (io/file dir attempt-id)
-        files (->> (or (.listFiles attempt-dir) []) (filter #(.isFile %))
-                   (sort-by #(.getName %)) vec)
+        all-files (->> (or (.listFiles attempt-dir) []) (filter #(.isFile %))
+                       (sort-by #(.getName %)) vec)
+        baseline-file (first (filter #(= "pre-author-mission-baseline.edn"
+                                         (.getName %)) all-files))
+        _ (when baseline-file
+            (validate-closed-baseline! baseline-file (:cohort-id binding) attempt-id))
+        ;; Only this validated sidecar is exempt. Every other extra file
+        ;; still participates in the strict checkpoint filename/envelope gate.
+        files (filterv #(not= baseline-file %) all-files)
         events (mapv #(read-one-file % :invalid-cohort-event) files)
         first-event (first events)
         contract (recorded-contract first-event)
