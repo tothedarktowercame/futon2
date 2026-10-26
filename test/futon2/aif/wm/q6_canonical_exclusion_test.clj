@@ -118,9 +118,16 @@
     (is (= #{} (:requirement-excluded cascade)))))
 
 (deftest canonical-digest-does-not-read-the-tie-draw
-  (let [{:keys [menu frontier]} (fixture)]
+  (let [{:keys [menu frontier]} (fixture)
+        reversed (assoc menu :entries (vec (rseq (:entries menu))))]
     (is (= (previous-run/canonical-selection-inputs-digest menu frontier)
            (previous-run/canonical-selection-inputs-digest menu frontier)))
+    ;; The digest is a function of the key set, not of the sealing process's
+    ;; printer: under a REPL's *print-length* every key once printed alike,
+    ;; so the order, and the digest, followed menu order.
+    (is (= (previous-run/canonical-selection-inputs-digest menu frontier)
+           (binding [*print-length* 1 *print-level* 1 *print-namespace-maps* false]
+             (previous-run/canonical-selection-inputs-digest reversed frontier))))
     (is (= (canonical-selection/evaluate frontier menu 0.1 #{})
            (canonical-selection/evaluate frontier menu 0.1 nil)))
     (is (not= (canonical-selection/evaluate frontier menu 0.1 nil)

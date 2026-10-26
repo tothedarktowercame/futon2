@@ -166,6 +166,14 @@
 (defn reading-key? [k]
   (and (vector? k) (= :wm/reading-policy-v1 (first k))))
 
+(defn- stable-order
+  "Order VALUES by their value digests: an order that is a function of the
+  values alone. Sorting by pr-str read the ambient printer (*print-length*
+  truncates, *print-namespace-maps* reshapes), so the same keys could digest
+  differently in two processes (R18 sibling, 2026-10-26)."
+  [values]
+  (vec (sort-by evidence/value-digest values)))
+
 (defn selection-inputs-digest
   "The digest of every input the one selector call consumes, taken over the
   whole scored family before any exclusion: each policy's structural key,
@@ -176,12 +184,12 @@
   [ranked selector-opts beta precision-identity]
   (evidence/value-digest
    {:schema inputs-schema
-    :policies (vec (sort-by pr-str
-                            (map (fn [e] {:policy-key (get-in e [:action :policy-key])
-                                          :g (:G-cascade e)
-                                          :g-terms (get-in e [:certificate :g-terms])
-                                          :f-prefix (:f-prefix e)})
-                                 ranked)))
+    :policies (stable-order
+               (map (fn [e] {:policy-key (get-in e [:action :policy-key])
+                             :g (:G-cascade e)
+                             :g-terms (get-in e [:certificate :g-terms])
+                             :f-prefix (:f-prefix e)})
+                    ranked))
     :beta beta
     :precision-identity precision-identity
     :selector-opts (select-keys selector-opts
@@ -263,9 +271,8 @@
    {:schema canonical-inputs-schema
     :menu-pin (:menu-pin sealed-menu)
     :frontier-pin (:frontier-pin frontier)
-    :policy-keys (vec (sort-by pr-str
-                               (map #(get-in % [:action :policy-key])
-                                    (:entries sealed-menu))))}))
+    :policy-keys (stable-order (map #(get-in % [:action :policy-key])
+                                    (:entries sealed-menu)))}))
 
 (defn canonical-exclusion
   "Q6 for canonical selection. Preserve the sealed menu/frontier and return
