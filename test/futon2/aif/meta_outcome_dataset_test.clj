@@ -77,10 +77,8 @@
         first-result (dataset/produce authority)
         second-result (dataset/produce authority)]
     (is (= :produced (:status first-result)))
-    (is (= {#{} 1}
-           (get-in first-result [:rows 0 :verified-record
-                                 :d-task-enactment :verification
-                                 :precision-family :model :q0])))
+    (is (nil? (get-in first-result [:rows 0 :verified-record
+                                    :d-task-enactment :verification])))
     (is (= (:source-pin first-result) (:source-pin second-result)))
     (is (= first-result second-result))))
 
