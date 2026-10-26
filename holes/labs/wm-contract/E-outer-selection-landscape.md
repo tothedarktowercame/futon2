@@ -1127,3 +1127,24 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   (`29e72624a`): a dependency count leaves the 2026-10-24 tie in place.
   §5 H4 and the Status line amended; nothing in §6 changes, since the
   dependency term was already out of scope for the next run.
+- 2026-10-26 claude-9: R14 step 4 reviewed and merged to main (`84c3521cb`;
+  five test-only commits by codex-10, `0ab48d1bf` the re-pin). Record
+  check: two test files, no src, trailers in order; the fixture checkpoint
+  was red only at the two obsolete complete-union claims in the positive
+  deftest, the four adversarial deftests green; final run 7 tests / 87
+  assertions green; kondo and parens rerun here since the step-4 gate
+  outputs were not written to files. Test adequacy: every packet claim is
+  in the diff and none is weakened; the dropped complete-union bad cases
+  (winner flipped, pair missing, non-scalar law) have canonical
+  counterparts (forged selection, absent frontier, no selection,
+  unaccounted and foreign rows), and the non-numeric-G case is held for
+  R15. The Q8 route pin now certifies the canonical route as production,
+  with the complete-union arm as the injury arm; it also pins that a
+  declared-priority change is not a canonical observation and that a
+  republished reading invalidates exactly its task. R15 dispatched to
+  codex-10 (`invoke-1792993191457-4198-ed425ddc`, packet
+  `~/notes/wm-next/outer-selection/packets/r15-exact-key-guard-packet.md`):
+  bad case first (string or nil G throws inside `canonical-outer-frontier`),
+  then the one conjunct that `outer-frontier` already has. Lean:
+  `IncrementalTaskFrontier.lean:33` makes the key a total Nat, so the typed
+  refusal is the model's boundary and no clause is added.
