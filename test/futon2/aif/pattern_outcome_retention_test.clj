@@ -94,7 +94,8 @@
          (spit record (pr-str {:after-token-evidence
                                (token-fixture/measurements sha)}))
          (let [d-result {:source {:path (.getPath record)
-                                  :sha256 (evidence/sha256 (slurp record))}}
+                                  :sha256 (evidence/sha256
+                                           (.getBytes (slurp record) "UTF-8"))}}
                base-context {:ledger-root (io/file root "ledger")}
                baseline (retain! root "baseline" (:prediction fixture)
                                  d-result sha base-context)
@@ -126,7 +127,8 @@
          (spit record (pr-str {:after-token-evidence
                                (token-fixture/measurements sha)}))
          (let [d-result {:source {:path (.getPath record)
-                                  :sha256 (evidence/sha256 (slurp record))}}
+                                  :sha256 (evidence/sha256
+                                           (.getBytes (slurp record) "UTF-8"))}}
                retained (retain! root "attempt" (:prediction fixture)
                                  d-result sha {:ledger-root (io/file root "ledger")})
                disk (edn/read-string (slurp (get-in retained [:entry :source-path])))]

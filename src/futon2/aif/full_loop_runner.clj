@@ -30,6 +30,7 @@
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.token-outcome-pair :as token-outcome-pair]
+            [futon2.aif.pattern-observation :as pattern-observation]
             [futon2.aif.selected-want-outcome :as selected-want-outcome]
             [futon2.aif.reviewer-falsifier :as reviewer-falsifier]
             [futon2.aif.surprise :as surprise]
@@ -5340,9 +5341,22 @@
                               {:token-outcome/refusal :evidence-digest-mismatch})))
             (edn/read-string (String. bytes "UTF-8"))))
         measurements (:after-token-evidence source-record)
-        receipt (assoc (token-outcome/compare-outcomes prediction measurements artifact-sha)
-                       :measurement-source source
-                       :measurement-verification (:verification d-result))
+        mission-comparison
+        (assoc (token-outcome/compare-outcomes prediction measurements artifact-sha)
+               :measurement-source source
+               :measurement-verification (:verification d-result))
+        supplied (if (contains? context :fold-conditions)
+                   (pattern-observation/supply
+                    {:prediction prediction
+                     :fold-conditions (:fold-conditions context)
+                     :revision {:repo (:repo context) :sha artifact-sha}
+                     :source (:construction-source context)})
+                   {:status :absent :reason :fold-conditions-not-supplied})
+        pattern-comparison
+        (token-outcome/compare-supplied-outcomes prediction supplied artifact-sha)
+        receipt (assoc mission-comparison
+                       :pattern-observations supplied
+                       :pattern-comparison pattern-comparison)
         ;; OBS-P (strategy row 18): the occurrence-bound measurement pairs
         ;; travel beside the comparison. No independent truth channel
         ;; exists at this seam today, so every pair's truth leg is the
@@ -5355,7 +5369,7 @@
                                          (get-in source-record [:dispatch :occurrence]))
                          :reviewed-revision artifact-sha}))
         learning (attempt-learning/receipt
-                  {:comparison receipt :source-record source-record
+                  {:comparison mission-comparison :source-record source-record
                    :occurrence (or (:occurrence context) (get-in source-record [:dispatch :occurrence]))
                    :route (or (:route context) (:route source-record))
                    :expected (:expected context) :read-job (:read-job context)})
@@ -6469,27 +6483,51 @@
                                       (str (Instant/now))))
                        outcome-entity (outcome-entity-at-close
                                        @selected-entity-belief close-state)
+                       effective-artifact-binding
+                       (or (:artifact-binding data)
+                           (get-in @checkpoints
+                                   [:build :judgment :validation :artifact-binding]))
                        d-task-result
                        (when @action-occurrence
                          (d-task/complete!
                           (or (:d-task-evidence-root opts) d-task/default-root)
                           @d-task-dispatch @d-task-context
                           (assoc data :dispatch-route @author-dispatch-route
-                                      :artifact-binding (or (:artifact-binding data)
-                                                            (get-in @checkpoints [:build :judgment :validation :artifact-binding]))
+                                      :artifact-binding effective-artifact-binding
                                       :files (get-in @checkpoints [:build :judgment :artifacts])
                                       :historical? (= :historical-verification-awaiting-validation outcome))
                           #(read-job! opts %)))
+                       token-outcome-data-root
+                       (or (:data-root execution-cohort) cohort/default-data-root)
+                       construction-checkpoint
+                       (when cohort?
+                         (io/file token-outcome-data-root
+                                  (name (:cohort/id start-event)) attempt-id
+                                  "003-construction.edn"))
+                       construction-source
+                       (when (and construction-checkpoint
+                                  (.isFile construction-checkpoint))
+                         (let [bytes (Files/readAllBytes
+                                      (.toPath construction-checkpoint))]
+                           {:record-path (.getAbsolutePath construction-checkpoint)
+                            :record-sha256 (sha256-bytes bytes)}))
                        token-comparison
                        (when (and cohort? @action-occurrence)
                          (retain-token-outcome!
-                          (or (:data-root execution-cohort) cohort/default-data-root)
+                          token-outcome-data-root
                           (:cohort/id start-event) attempt-id
                           (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
                           d-task-result (:commit data)
                           {:occurrence @action-occurrence :route @author-dispatch-route
                            :selection-recorded-at (get-in @checkpoint-events [:selection :recorded-at])
                            :expected @d-task-context :read-job #(read-job! opts %)
+                           :fold-conditions
+                           (mapcat :conditions
+                                   (get-in @checkpoints
+                                           [:construction :judgment :fold-output
+                                            :wiring :boxes]))
+                           :repo (:repo effective-artifact-binding)
+                           :construction-source construction-source
                            :ledger-root (or (:learning-trial-ledger-root opts) learning-ledger/default-root)}))
                        want-outcome-accounting
                        (when selected-action
