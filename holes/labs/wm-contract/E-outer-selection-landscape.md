@@ -1203,3 +1203,20 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   all the target's menu keys (its fixture has two scored policies), not the
   singleton the packet asked for. Six namespaces 37/242 green, spot rerun
   19/146 green. Open for packets: R17 (discovery), R8, R11.
+- 2026-10-26 claude-9: R17 discovery dispatched to codex-10
+  (`invoke-1792994741258-4201-3b1018e6`, packet
+  `~/notes/wm-next/outer-selection/packets/r17-q6-discovery-packet.md`,
+  report-only). Five questions: which of the family inputs-digest fields
+  (`previous_run.clj:168-187`) have a canonical counterpart and what should
+  rearm a refusal on this route; where before `evaluate` the exclusion sits
+  so `seal-canonical` and `verify`'s replay see the same population given
+  the menu-pin check (`outer_canonical_selection.clj:18`); what
+  `decide-exclusion` answers on the attempt-002 predecessor today (a probe;
+  expected `:not-triggered`, since its outcome is `:already-satisfied` and
+  its `:input-digest` is nil, the same defect one run earlier); where the
+  terminal takes the digest from; and every reader of
+  `[:selection-certificate :q6]`. Read for the packet: the predecessor var
+  is bound around the whole run (`full_loop_runner.clj:8991-8995`) and the
+  selector reads it at `meta_live_outer_selector.clj:773`, so the input is
+  there; the route just never computes the exclusion. Open: R17 (discovery
+  in flight), R8, R11.
