@@ -19,9 +19,11 @@
 (deftest click-retains-the-selected-scan-even-if-renderer-fails
   ;; Canonical checkout required: preserve the source-authority guard.
   (let [root (.toFile (Files/createTempDirectory "click-scan-" (make-array FileAttribute 0)))
+        ;; with-hermetic-stores rebinds learning-manifest/default-path to a
+        ;; suite temp file; the fixture captured the production path at load.
+        production-path hermetic/production-learning-manifest-path
         production-before (field/sha256
-                           (Files/readAllBytes
-                            (.toPath (io/file learning-manifest/default-path))))]
+                           (Files/readAllBytes (.toPath (io/file production-path))))]
     (try
       (doseq [[id fail?] [["scan-success" false] ["scan-failure" true]]]
         (let [calls (atom 0) rendered (atom nil)
@@ -57,11 +59,10 @@
               published (learning-manifest/read-manifest isolated-manifest)]
           (is (= production-before
                  (field/sha256
-                  (Files/readAllBytes
-                   (.toPath (io/file learning-manifest/default-path))))))
-          (is (= (inc (.indexOf [["scan-success" false] ["scan-failure" true]]
-                                [id fail?]))
-                 (count (:entries published))))
+                  (Files/readAllBytes (.toPath (io/file production-path))))))
+          ;; isolated-runner-opts mints a fresh fixture root per call, so each
+          ;; iteration publishes into its own manifest: one entry, never two.
+          (is (= 1 (count (:entries published))))
           (is (every? :projection (:entries published)))
           (is (= 1 @calls) "selection uses one generation")
           (is (= (:decision fixture/judgement)

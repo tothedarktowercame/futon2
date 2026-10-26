@@ -17,6 +17,7 @@
 (def production-meta-injury-root meta-injury-store/default-root)
 (def production-meta-injury-ledger-path meta-self-heal/default-ledger-path)
 (def production-meta-injury-transaction-path meta-self-heal/default-transaction-path)
+(def production-learning-manifest-path outer-learning-manifest/default-path)
 
 (defn- temp-root [prefix]
   (.getPath (.toFile (Files/createTempDirectory
@@ -47,6 +48,7 @@
         injuries-before (production-file-set production-meta-injury-root)
         ledger-before (production-file-set production-meta-injury-ledger-path)
         transaction-before (production-file-set production-meta-injury-transaction-path)
+        learning-manifest-before (production-file-set production-learning-manifest-path)
         repair-root (temp-root "wm-repair-suite-")
         trip-root (temp-root "wm-trip-suite-")
         injury-root (str (io/file repair-root "wm-meta-injuries"))
@@ -72,7 +74,11 @@
           "the durable ledger (meta-self-heal/default-ledger-path) must stay
            byte-for-byte untouched: a sealed-ledger append cannot be undone")
       (is (= transaction-before (production-file-set production-meta-injury-transaction-path))
-          "the durable terminal transaction file must stay untouched"))))
+          "the durable terminal transaction file must stay untouched")
+      (is (= learning-manifest-before (production-file-set production-learning-manifest-path))
+          "the production outer-learning manifest (outer-learning-manifest/default-path)
+           must stay byte-for-byte untouched: a test close must publish only into
+           the rebound suite manifest or the fixture's explicit temp manifest"))))
 
 (defn runner-repair-options
   "Explicit temporary store callbacks also protect direct REPL/debug callers,

@@ -1,15 +1,19 @@
 {:schema :test/execution-receipt-v1
- :recorded-at "2026-10-26T19:50:00Z"
+ :recorded-at "2026-10-26T19:55:00Z"
  :command "clojure -X:test :nses '[futon2.aif.scan-report-runner-test futon2.aif.outer-learning-manifest-test]'"
  :namespaces [futon2.aif.scan-report-runner-test
               futon2.aif.outer-learning-manifest-test]
  :tests 2
- :assertions 37
- :failures 3
+ :assertions 38
+ :failures 2
  :errors 0
- :result :pre-existing-scan-selection-assertion-failures
+ :result :pre-existing-controller-decision-pin-stale
  :new-boundary {:production-manifest-unchanged :passed
-                :isolated-manifest-projection-publication :passed}
- :note "The three failures compare a stale full controller-decision fixture against the current expanded selection certificate. They are unrelated to manifest publication and occur after the new isolation assertions pass."
+                :isolated-manifest-projection-publication :passed
+                :suite-manifest-unchanged :passed}
+ :log "/home/joe/notes/wm-next/outer-selection/r25-manifest-trim/review-rerun-tests-2.log"
+ :supersedes {:recorded-at "2026-10-26T19:50:00Z"
+              :why "That run predated ffa3d9fba, whose rebinding of outer-learning-manifest/default-path made the production read at line 23 throw NoSuchFileException; and one of its three failures was the new count assertion (expected 2, got 1: isolated-runner-opts mints a fresh root per call), not a stale pin."}
+ :note "The two failures are the pre-existing line-68 pin of (:decision fixture/judgement) against the expanded selection certificate (test last touched 10-14, fixture judgement since 10-26 02:53). They occur after every manifest assertion passes."
  :additional-gates {:clj-kondo {:errors 0 :warnings 0}
                     :check-parens :ok}}
