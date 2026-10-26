@@ -36,9 +36,12 @@
          (let [minimum (apply min (map :G scored))
                tied (filterv #(== (double minimum) (double (:G %))) scored)
                tie? (> (count tied) 1)
-               u (when tie? (if (nil? draw) (rand) draw))]
+               u (when tie? draw)]
            (if (and tie? (not (and (finite? u) (<= 0.0 u) (< u 1.0))))
              {:status :no-choice :reason :invalid-canonical-tie-draw
+              :draw (if (nil? draw)
+                      {:absent :no-sealed-draw}
+                      {:invalid draw})
               :frontier-pin (:frontier-pin frontier)}
              (let [selected (nth tied (if tie? (int (* u (count tied))) 0))]
                {:status :selected :basis :canonical-G-min-over-scored-frontier

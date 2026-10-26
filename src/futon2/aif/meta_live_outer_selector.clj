@@ -669,7 +669,7 @@
 
 (defn select-live
   "Run the live adapter. Dependencies are injectable for exact replay."
-  [{:keys [tasks fetch-snapshot candidate-fn retain-manifest? outer-learning
+  [{:keys [tasks seed fetch-snapshot candidate-fn retain-manifest? outer-learning
            policy-field-config policy-field-fn policy-menu-fn
            policy-menu-join outer-policy-evidence-provider selection-as-of
            focus-inputs focus-context focus-classify-fn focus-classify-context]
@@ -677,7 +677,12 @@
          candidate-fn task-state-candidates
          policy-field-fn family-selection/full-eligible-target-field
          policy-menu-fn family-selection/sealed-pre-choice-menu}}]
-  (let [algorithm-tasks (filterv #(= :algorithm (:kind %)) tasks)
+  (let [selection-u (when (some? seed)
+                      (.nextDouble (java.util.Random. (long seed))))
+        selection-draw (if (some? seed)
+                         {:status :sealed :seed seed :u selection-u}
+                         {:absent :no-seed})
+        algorithm-tasks (filterv #(= :algorithm (:kind %)) tasks)
         registry-tasks (filterv #(not= :algorithm (:kind %)) tasks)
         {ordinary-tasks :tasks repair-excluded :excluded}
         (attach-repair-observations registry-tasks)
@@ -846,7 +851,8 @@
         canonical-g-frontier (when (= :sealed (:status sealed-menu))
                                (outer-canonical-g/produce sealed-menu))
         canonical-policy-selection (when canonical-g-frontier
-                                     (canonical-selection/evaluate canonical-g-frontier sealed-menu))
+                                     (canonical-selection/evaluate canonical-g-frontier sealed-menu
+                                                                   selection-u))
         provided (when (= :sealed (:status sealed-menu))
                    (evidence-provider/resolve-provider
                     outer-policy-evidence-provider sealed-menu))
@@ -1008,6 +1014,7 @@
                                       :policy-objective policy-objective
                                       :canonical-g-frontier canonical-g-frontier
                                       :canonical-policy-selection canonical-policy-selection
+                                      :selection-draw selection-draw
                                       :assessed-policy-basis assessed-basis
                                       :selected-outer-cascade-policy activated-carrier
                                       :missing-targets (mapv :target-id incomplete)
@@ -1120,7 +1127,7 @@
       receipt)))
 
 (defn selector
-  [{:keys [tasks meta-field-observation meta-field-source-pin
+  [{:keys [tasks seed meta-field-observation meta-field-source-pin
            policy-field-config policy-field-fn policy-menu-fn policy-menu-join
            outer-policy-evidence-provider selection-as-of]}]
   (if-not selection-as-of
@@ -1141,7 +1148,8 @@
                           :reason :meta-field-observation-unverified
                           :details {:verification verification}})
                :selection-as-of selection-as-of)
-        (select-live {:tasks (into (vec tasks) algorithms) :retain-manifest? true
+        (select-live {:tasks (into (vec tasks) algorithms) :seed seed
+                      :retain-manifest? true
                       :selection-as-of selection-as-of
                       :policy-field-config policy-field-config
                       :policy-field-fn policy-field-fn

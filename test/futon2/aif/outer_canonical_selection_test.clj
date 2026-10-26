@@ -5,6 +5,7 @@
             [futon2.aif.outer-policy-evidence :as evidence]
             [futon2.aif.outer-policy-objective :as objective]
             [futon2.aif.outer-canonical-selection :as sut]
+            [futon2.aif.meta-live-outer-selector :as live]
             [futon2.aif.selected-outer-cascade-policy :as carrier]
             [futon2.aif.selected-outer-cascade-policy-test]
             [futon2.aif.outer-policy-runtime-selection-test]))
@@ -15,6 +16,24 @@
 (def bindings "M-recommendation-bindings/policy-7e8a0806fea29fa47914")
 (def self-improvement "M-self-improvement-loop/policy-1bbcf6a06eb2766b5e77")
 (def stack "M-stack-geometry/policy-c7d7518e1e185c2e2318")
+
+(deftest canonical-tie-requires-a-sealed-draw
+  (let [f (frontier/produce menu)
+        absent (sut/evaluate f menu nil)
+        repaired (sut/evaluate f menu 0.22534045104810763)
+        other (sut/evaluate f menu 0.75)
+        unit-draw (sut/evaluate f menu 1.0)
+        untied (update f :entries
+                       #(filterv (fn [row] (not= bindings (:policy-id row))) %))
+        untied-selection (sut/evaluate untied menu 0.75)]
+    (is (= [:no-choice :invalid-canonical-tie-draw {:absent :no-sealed-draw}]
+           ((juxt :status :reason :draw) absent)))
+    (is (= wiring (get-in repaired [:action :policy-id])))
+    (is (= bindings (get-in other [:action :policy-id])))
+    (is (= [:no-choice :invalid-canonical-tie-draw {:invalid 1.0}]
+           ((juxt :status :reason :draw) unit-draw)))
+    (is (= wiring (get-in untied-selection [:action :policy-id])))
+    (is (nil? (:draw untied-selection)))))
 
 (deftest b5-canonical-draw-replaces-the-objective-tie-only-for-choice
   (let [f (frontier/produce menu) first (sut/evaluate f menu 0.0) last (sut/evaluate f menu 0.9)]
@@ -85,7 +104,8 @@
         as-of "2026-10-22T12:34:56Z"
         receipt ((runtime-var 'run-live)
                  ((runtime-var 'explicit-provider) [0.0 1.0] [])
-                 {:selection-as-of as-of
+                 {:seed -7
+                  :selection-as-of as-of
                   :focus-inputs {}
                   :focus-context {:as-of as-of :status :retained :focus "WM"}
                   :focus-classify-fn (fn [_ _ _ target _] {:target target :class :focus})})
@@ -107,3 +127,39 @@
     ;; receipt's :q8-frontier is a sealed :wm/q8-outer-frontier-v1 carrier,
     ;; not the stub.
     (is (= :wm/q8-outer-frontier-v1 (get-in receipt [:q8-frontier :schema])))))
+
+(deftest select-live-seals-the-click-seed-as-its-draw
+  (let [runtime-var #(var-get (ns-resolve 'futon2.aif.outer-policy-runtime-selection-test %))
+        as-of "2026-10-22T12:34:56Z"
+        base {:selection-as-of as-of
+              :focus-inputs {}
+              :focus-context {:as-of as-of :status :retained :focus "WM"}
+              :focus-classify-fn (fn [_ _ _ target _] {:target target :class :focus})}
+        provider ((runtime-var 'explicit-provider) [0.0 1.0] [])
+        seeded ((runtime-var 'run-live) provider (assoc base :seed 7))
+        unseeded ((runtime-var 'run-live) provider base)
+        u (.nextDouble (java.util.Random. 7))]
+    (is (= {:status :sealed :seed 7 :u u}
+           (get-in seeded [:policy :selection-draw])))
+    (is (= (get-in seeded [:policy :canonical-policy-selection :action :policy-id])
+           (get-in seeded [:action :id])))
+    (is (= (get-in seeded [:policy :selected-outer-cascade-policy
+                           :sealed-menu :entries 1 :policy-id])
+           (get-in seeded [:action :id])))
+    (is (= [:no-choice :invalid-canonical-tie-draw]
+           ((juxt :status :reason) (:policy unseeded))))
+    (is (= {:absent :no-seed} (get-in unseeded [:policy :selection-draw])))))
+
+(deftest selector-forwards-the-click-seed
+  (let [seen (atom nil)
+        u (.nextDouble (java.util.Random. 7))
+        receipt {:policy {:selection-draw {:status :sealed :seed 7 :u u}}}]
+    (with-redefs [live/select-live (fn [input]
+                                    (reset! seen input)
+                                    receipt)]
+      (is (= receipt
+             (live/selector {:tasks [] :seed 7
+                             :selection-as-of "2026-10-22T12:34:56Z"})))
+      (is (= 7 (:seed @seen)))
+      (is (= {:status :sealed :seed 7 :u u}
+             (get-in receipt [:policy :selection-draw]))))))
