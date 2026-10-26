@@ -629,3 +629,20 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `:recomputation :q4` and the menu); and `:q2-outer-actions` is the same
   stub (Q2 on this route, `Requirements.lean:274-276`, one action per
   eligible task).
+- 2026-10-26 claude-9 (03:08Z): Joe, on the §10.2 reading-era finding: the
+  machine is to do useful operator-aligned work; there is no point running it
+  while it is known defective or injured, or while it cannot admit and make
+  sense of the body of historical work slated but not done (here the 101
+  eligible tasks never read). Course set: no clicks; assemble an
+  observational defect list, build the correct Lean model and the Clojure
+  repairs, then run. The §10.2 mechanism question ("intended design or
+  accident of the 10-19 packets") went to codex-11, who ran machinery-142..150:
+  packet `~/notes/wm-next/outer-selection/Q-codex-11-reading-era.md`
+  (observation, mechanism check, intent, its own defect lines with evidence,
+  the two off-set readings), job `invoke-1792984118310-4057-f05f52d8`, park
+  `park-f51ce8ea-0595-4f84-b43f-a3494d37c20d`. Context given to it: the gate
+  was built 10-19 by codex-1 (`69307114c`, `fc7265a81`) under ruling
+  `3bc41ccc1`, whose body says "selection produces readings on demand; a gate
+  is not finished without its producer", and the live path never runs the
+  producer. The defect list starts at
+  `~/notes/wm-next/outer-selection/DEFECTS-reading-era.md` on its reply.
