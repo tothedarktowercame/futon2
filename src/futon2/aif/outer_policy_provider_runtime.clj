@@ -70,7 +70,13 @@
   receipt; it never erases another entry or substitutes a numerical score."
   [state menu records]
   (if-not (= :produced (get-in state [:belief :status]))
-    {:schema provider/schema :status :refused :reason :learning-authority-unavailable}
+    (let [learning-belief (:belief state)]
+      (cond-> {:schema provider/schema
+               :status :refused
+               :reason (or (:reason learning-belief) :learning-belief-not-produced)
+               :belief-status (:status learning-belief)}
+        (contains? learning-belief :details)
+        (assoc :details (:details learning-belief))))
     (let [vocab belief/outcome-vocabulary
           source (get-in state [:preference-authority :source])
           component-pin {:path "wm://existing-outer-controller-inputs"

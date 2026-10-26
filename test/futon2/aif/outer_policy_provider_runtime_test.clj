@@ -27,6 +27,30 @@
 (defn menu []
   (:menu ((var-get (ns-resolve 'futon2.aif.selected-outer-cascade-policy-test 'production-carriers)))))
 
+(deftest non-produced-belief-refusal-is-carried
+  (let [details {:path "/home/joe/code/futon2/resources/wm/outer-learning-authority.edn"
+                 :error-class "java.lang.ClassCastException"
+                 :error-message "Default comparator requires nil, Number, or Comparable: #{}"}
+        m142 (sut/provide {:belief {:status :refused
+                                   :reason :learning-authority-unavailable
+                                   :details details}}
+                          nil nil)
+        schema-invalid (sut/provide {:belief {:status :refused
+                                             :reason :learning-authority-schema-invalid}}
+                                    nil nil)
+        pending (sut/provide {:belief {:status :pending}} nil nil)]
+    (is (= {:schema provider/schema
+            :status :refused
+            :reason :learning-authority-unavailable
+            :details details
+            :belief-status :refused}
+           m142))
+    (is (= :learning-authority-schema-invalid (:reason schema-invalid)))
+    (is (= :refused (:belief-status schema-invalid)))
+    (is (not (contains? schema-invalid :details)))
+    (is (= :learning-belief-not-produced (:reason pending)))
+    (is (= :pending (:belief-status pending)))))
+
 (deftest no-history-can-produce-and-execute-a-verified-policy
   (let [m (menu) p (sut/provide (state) m [])
         e (evidence/join m (:declaration p) (:records p))
