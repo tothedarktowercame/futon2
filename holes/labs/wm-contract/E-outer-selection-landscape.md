@@ -2,7 +2,7 @@
 
 **Opened:** 2026-10-26 (Joe's question put on 2026-10-25, relayed by claude-11)
 **Owner:** claude-9 (research question, record, conclusions). Implementation may go to zai-2.
-**Status:** OPEN. Capture C1–C4 to land before the next click; findings F1–F6 recorded (F3 corrected in §10.2); hypotheses H1–H4 open; §10 answers Joe's 2026-10-26 questions.
+**Status:** OPEN. Capture C1–C3 landed (C3 reviewed 2026-10-26); C4 split into C4a (projection, in flight) and C4b (retain wiring); H2 mechanism answered in §10.2; findings F1–F6 recorded (F3 corrected in §10.2); hypotheses H1–H4 open; §10 answers Joe's 2026-10-26 questions.
 **Related:** `futon3c/holes/missions/M-giraffe.md` (`357edb090`, one work item as data, with dependencies);
 `STOCKTAKE-wm-2026-10-25.md`; `PROPOSAL-outer-focus-class-2026-10-21.md`;
 `mathlib4/DarkTower/WarMachine/Proof2/OuterSelectionCanonicalG.md` (O2/O3 notes);
@@ -146,7 +146,7 @@ selection active with no objective fallback (`select-live` 865-875).
   after C1–C3: of the 4 scored, which have unbuilt dependencies named in their
   mission text? (Hand-read; feeds M-giraffe's field list.)
 
-## 6. Capture to land before the next run (C1–C3)
+## 6. Capture to land before the next run (C1–C4)
 
 Joe's invariant: the machine stays runnable, and the capture must not change
 what is selected. The design principle that guarantees the second: **every
@@ -195,6 +195,23 @@ extra key on a row that `evaluate` never reads.** `evaluate`
   equals the row's `:cascade-digest` (checked on attempt-002: 4 rows, 4
   scored entries, every digest matched). The locator is the index path into
   the same receipt map.
+- **C4 reading-preparation outcome.** Added 2026-10-26 from §10.2. Not "retain
+  the `prepare!` result": on every reading-era click `prepare!` was never
+  called (mechanism in §10.2), so retaining its result would retain nothing
+  again. Instead a typed outcome on every click. C4a: a pure projection
+  `futon2.aif.reading-preparation-outcome/outcome` of (judgement, the
+  `:record` that `selected-target-reading-step` returned) with schema
+  `:wm/reading-preparation-outcome-v1` and `:status` one of `:not-run`
+  (reason `:no-selected-need` or `:reading-fn-absent`), `:ran` (the
+  `prepare!` reason, preparation status, attempted/published/pending
+  targets), `:selected-target-reading` (the per-target request), or
+  `:unrecognised`; always with `:chosen` and `:policy {:status :reason}`
+  copied from the receipt. Live pin on attempt-002: `:not-run`,
+  `:no-selected-need`, chosen `M-war-machine-wiring`. C4b, after C4a's
+  review: a 4-arity `retain-outer-task-selection` taking the record, call
+  site `full_loop_runner.clj:7766` passing `selected-target-reading-record`,
+  the outcome retained at `[<arm> :reading-preparation]` beside the trace.
+  `evaluate` reads neither key.
 
 Not in scope before the run: any dependency or readiness term (that is H4 and
 M-giraffe), any change to reading order or the batch limit of 3, any change to
@@ -343,6 +360,39 @@ run's capture needs one more item (C4): retain the `prepare!` result (its
 `:reason`, one of `:batch-complete`, `:batch-limit`, `:deadline`, or a refusal,
 and the needs it took) beside the selection trace.
 
+**Mechanism (read 2026-10-26, before the C4 packet).** The receipt cannot
+say because nothing ran, and nothing ran by construction:
+
+- `full_loop_runner.clj` `selected-target-reading-step` calls the reading
+  function only when `selected-target-reading/selected-need` is non-nil, that
+  is when the chosen target (or the sole family) has a
+  `:no-current-target-reading` / `:stale-target-reading` failure. Otherwise it
+  returns `:record nil`, and the runner's `cond->` at `:7756` retains a
+  `:selected-target-reading-request` only for a non-nil record. So "not
+  needed" and "never retained" are the same absence on the checkpoint.
+- Inside that function (`full_loop_runtime.clj:476-492`) the 3-per-click
+  `prepare!` batch over the pre-choice field runs only when
+  `prechoice-field` is non-nil, which needs `[:policy :reason]` in
+  `#{:incomplete-policy-menu-coverage :no-canonically-bound-policy}` and no
+  chosen target. Otherwise the function prepares the chosen target's own
+  reading and nothing else.
+- Over the 18 reading-era receipts (machinery-142..150, both attempts),
+  `[:policy :reason]` is nil on the 15 selected and
+  `:learning-authority-unavailable` on the one refused (m142-002); none
+  carries either reading-record schema. The chosen target always comes from
+  the read set, so it never has a reading need, so the function is never
+  called, so `prepare!` never runs. The 101 unread targets can only get a
+  reading on a click where the outer selection refuses for menu coverage,
+  and with 7 readable targets it never does.
+
+So H2's mechanism: the readings gate (S2) and the reading preparation are
+mutually exclusive by the gating condition. Preparation is the path for an
+empty menu; the menu is never empty. Whether that is the intended design or
+an accident of the 10-19 readings-gate change is a question for Joe (the
+answer decides whether C4 is followed by a producer change). C4 as now
+specified (§6) retains a typed `:not-run :no-selected-need` on every such
+click, so the next receipt says this itself.
+
 ### 10.3 Precedence: built from what each step needs, or from document order
 
 **From needs.** `construction.clj:125` `containment-order` derives the descent
@@ -451,3 +501,23 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   C3 dispatched to zai-2 (`invoke-1792975064828-4026-26cfc9b7`, park
   `park-37949f42-f55f-473d-a525-dd900355184f`), packet at
   `~/notes/wm-next/C3/C3-cascade-locator-packet.md`; §6 C3 corrected.
+- 2026-10-26 00:45Z claude-9: C3 reviewed and accepted (futon3c `970690d5e`,
+  zai-2, two files). Record check: shas match, gates reported (kondo 0/0,
+  parens OK, 6 tests / 38 assertions green). Adequacy: the four
+  `:cascade-at` index paths are pinned on a fixture whose q4 order, digests,
+  ranks and horizon I re-read from the attempt-002 receipt this turn (G
+  values rounded to 3 dp and policy-ids synthetic in the fixture; digests,
+  targets, ranks, horizon verbatim); round-trip `get-in` asserted; the three
+  bad cases (orphan digest, no `:outer-policy-recomputation`, one-character
+  digest change) each produce the typed absence; pre-change summary equal
+  after `dissoc :cascade-at`. No warrant registered; dirty tree, not a
+  block. `futon3c.wm.meta-latest` reloaded from master in the :6768 JVM
+  (`cascade-at` bound; sample frontier gives `[:outer-policy-recomputation
+  :q4 0]`). Then the C4 premise read above (§10.2 mechanism): C4 respecified
+  in §6 and split. C4a dispatched to zai-2: job
+  `invoke-1792975449233-4029-e42fd9ca`, park
+  `park-1411a0c6-9f39-42dd-b259-2b93938531dd` (deadline 45 min, read back
+  at 44.6), packet `~/notes/wm-next/C4/C4a-reading-preparation-outcome-packet.md`.
+  Packet note: the sent text asks the agent to check whether the live
+  `:policy` map holds `:reason`; it does, with value nil (checked after
+  send), so the case-1 pin is `:policy {:status :selected :reason nil}`.
