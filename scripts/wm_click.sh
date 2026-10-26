@@ -428,6 +428,12 @@ while :; do
   [ $(( $(date +%s) - t0 )) -gt 5400 ] && { echo "still running after 90 min; report this, do not re-fire"; exit 1; }
 done
 
+if ! python3 "$F2/scripts/wm_click_wait_child.py" --base "$BASE" --click-id "$clickid"; then
+  echo "ALERT FOR JOE"
+  echo "requirements NOT CHECKED: self-heal child did not complete"
+  exit 1
+fi
+
 echo; echo "terminal state:"
 curl -s -m 20 "$BASE/api/alpha/wm/click" | python3 -m json.tool | sed -n '1,24p'
 echo; echo "newest repair finding, if the click opened one:"

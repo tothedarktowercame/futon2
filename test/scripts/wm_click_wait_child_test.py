@@ -1,7 +1,9 @@
 import importlib.util
+import io
 import json
 import threading
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -68,37 +70,45 @@ def child(status):
 class WaitChildTest(unittest.TestCase):
     def run_waiter(self, responses, *extra):
         waiter = load_waiter()
+        output = io.StringIO()
         with StatusServer(responses) as (base, script):
-            result = waiter.run(["--base", base, "--click-id", "parent",
-                                 "--poll-s", "0", *extra])
-        return result, script.requests
+            with redirect_stdout(output), redirect_stderr(output):
+                result = waiter.run(["--base", base, "--click-id", "parent",
+                                     "--poll-s", "0", *extra])
+        return result, script.requests, output.getvalue()
 
     def test_no_child_returns_after_one_get(self):
-        result, requests = self.run_waiter([(200, {"click-id": "parent",
-                                                   "status": "completed"})])
+        result, requests, output = self.run_waiter(
+            [(200, {"click-id": "parent", "status": "completed"})])
         self.assertEqual(0, result)
         self.assertEqual(1, requests)
+        self.assertIn("no child bound", output)
 
     def test_pending_then_complete(self):
-        result, requests = self.run_waiter(
+        result, requests, output = self.run_waiter(
             [(200, child("pending")), (200, child("pending")),
              (200, child("complete"))])
         self.assertEqual(0, result)
         self.assertEqual(3, requests)
+        self.assertIn("child retry-child complete", output)
 
     def test_zero_cap_refuses_pending_child(self):
-        result, requests = self.run_waiter([(200, child("pending"))],
-                                           "--max-s", "0")
+        result, requests, output = self.run_waiter(
+            [(200, child("pending"))], "--max-s", "0")
         self.assertEqual(1, result)
         self.assertEqual(1, requests)
+        self.assertIn("child still pending after 0s", output)
 
     def test_two_route_failures_refuse_but_one_recovers(self):
-        result, requests = self.run_waiter([(500, {}), (500, {})])
+        result, requests, output = self.run_waiter([(500, {}), (500, {})])
         self.assertEqual(1, result)
         self.assertEqual(2, requests)
-        result, requests = self.run_waiter([(500, {}), (200, child("complete"))])
+        self.assertIn("HTTP Error 500", output)
+        result, requests, output = self.run_waiter(
+            [(500, {}), (200, child("complete"))])
         self.assertEqual(0, result)
         self.assertEqual(2, requests)
+        self.assertIn("child retry-child complete", output)
 
     def test_shell_call_precedes_run_record_check(self):
         shell = (ROOT / "scripts/wm_click.sh").read_text()
