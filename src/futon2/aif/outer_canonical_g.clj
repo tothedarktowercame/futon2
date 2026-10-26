@@ -20,6 +20,19 @@
    :cascade-digest (get-in entry [:action :cascade-digest])
    :status :refused :reason reason})
 
+(defn- certificate-terms
+  "Bounded per-row G terms from the scorer certificate.  Nil paths become
+   typed absences, never nil; the :belief maps are dropped on purpose."
+  [r]
+  (let [absent {:absent :certificate-term-not-retained}]
+    {:g-terms (or (get-in r [:certificate :g-terms]) absent)
+     :parameter-novelty (or (some-> (get-in r [:certificate :parameter-novelty])
+                                     (select-keys [:law :lean :total :counts]))
+                            absent)
+     :steps (or (when-let [steps (get-in r [:certificate :steps])]
+                  (mapv #(select-keys % [:tau :g :expected-information-gain]) steps))
+               absent)}))
+
 (defn- candidate-and-model [entry h]
   (let [action (:action entry)
         target (:target-id entry)
@@ -94,7 +107,8 @@
                                                  (get-in r [:refusal :kind]))
                                      :action-pin {:cascade-digest (:cascade-digest action)})
                         (= :scored (:status r))
-                        (assoc :G (:G-efe r) :rank (:rank r)))
+                        (assoc :G (:G-efe r) :rank (:rank r)
+                               :terms (certificate-terms r)))
                     @thrown
                     (assoc (refusal entry :canonical-score-threw)
                            :exception @thrown
