@@ -2,7 +2,7 @@
 
 **Opened:** 2026-10-26 (Joe's question put on 2026-10-25, relayed by claude-11)
 **Owner:** claude-9 (research question, record, conclusions). Implementation may go to zai-2.
-**Status:** OPEN. Capture C1–C3 landed (C3 reviewed 2026-10-26); C4 split into C4a (projection, in flight) and C4b (retain wiring); H2 mechanism answered in §10.2; findings F1–F6 recorded (F3 corrected in §10.2); hypotheses H1–H4 open; §10 answers Joe's 2026-10-26 questions.
+**Status:** OPEN. Capture C1–C3 landed (C3 reviewed 2026-10-26); C4 split into C4a (projection, landed `bc7ad6c93`, reviewed 2026-10-26) and C4b (retain wiring, in flight); H2 mechanism answered in §10.2; findings F1–F6 recorded (F3 corrected in §10.2); hypotheses H1–H4 open; §10 answers Joe's 2026-10-26 questions.
 **Related:** `futon3c/holes/missions/M-giraffe.md` (`357edb090`, one work item as data, with dependencies);
 `STOCKTAKE-wm-2026-10-25.md`; `PROPOSAL-outer-focus-class-2026-10-21.md`;
 `mathlib4/DarkTower/WarMachine/Proof2/OuterSelectionCanonicalG.md` (O2/O3 notes);
@@ -207,7 +207,8 @@ extra key on a row that `evaluate` never reads.** `evaluate`
   targets), `:selected-target-reading` (the per-target request), or
   `:unrecognised`; always with `:chosen` and `:policy {:status :reason}`
   copied from the receipt. Live pin on attempt-002: `:not-run`,
-  `:no-selected-need`, chosen `M-war-machine-wiring`. C4b, after C4a's
+  `:no-selected-need`, chosen `M-war-machine-wiring`. Landed as futon2
+  `bc7ad6c93` (zai-2), reviewed below. C4b, after C4a's
   review: a 4-arity `retain-outer-task-selection` taking the record, call
   site `full_loop_runner.clj:7766` passing `selected-target-reading-record`,
   the outcome retained at `[<arm> :reading-preparation]` beside the trace.
@@ -521,3 +522,32 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   Packet note: the sent text asks the agent to check whether the live
   `:policy` map holds `:reason`; it does, with value nil (checked after
   send), so the case-1 pin is `:policy {:status :selected :reason nil}`.
+- 2026-10-26 00:55Z claude-9: C4a reviewed and accepted (futon2 `bc7ad6c93`,
+  zai-2, two new files, +188). Record check: shas match, gates reported
+  (kondo 0/0, parens OK, 1 test / 34 assertions green). Adequacy: case 1 is
+  pinned as a whole map with the live `:policy {:status :selected :reason
+  nil}` (the receipt carries `:reason` with value nil; the packet's own
+  pin said so after the correction); case 2 is non-vacuous (the test runs
+  `selected-need` and asserts the need before the outcome); case 3 asserts
+  the exact key set, so `:records`/`:frontier` cannot leak; both bad cases
+  are constructed and caught (`:records` nil gives `:ran` with `[]`;
+  `:published true` on the request schema stays case 4); `(outcome nil
+  nil)` is pinned. No warrant registered; dirty tree, not a block. Packet
+  premise correction, found by zai-2 and confirmed in
+  `selected_target_reading.clj:223-250` this turn: `selected-need` reads
+  families from `[:decision :selection-certificate :target-policy-field
+  :families]` and source rows from `[:cascade-problems :target-sources]`;
+  the packet's `[:outer-task-selection :policy-field]` is `prechoice-field`'s
+  input (line 209), a different function. With the packet's shape case 2
+  would have been vacuous; the test builds the real paths. Runner
+  observation for C4b: a non-nil reading record is already retained at
+  `[:judgment :selected-target-reading-request]` (`full_loop_runner.clj:7756`),
+  whole, `:frontier` and `:records` included; a nil record is retained
+  nowhere, and `retained-selected-target-reading` (line ~1155) then reads
+  it as `{:status :not-applicable :reason :selected-target-reading-not-required}`,
+  the same answer whether the reading fn was absent or no need existed.
+  C4b adds the typed key beside that reader and leaves it unchanged
+  (exempted, not changed). C4b dispatched to zai-2: job
+  `invoke-1792975687531-4030-0c0f0b1e`, park
+  `park-634eabc8-07e9-44f6-b2c6-b1c829f42383` (deadline 45 min, read back
+  at 45.0), packet `~/notes/wm-next/C4/C4b-reading-preparation-retain-packet.md`.
