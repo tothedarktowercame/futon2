@@ -1,16 +1,20 @@
 (ns futon2.aif.wm.q8-frontier-route-test
-  "Requirements Q8 on the production route (codex-68 rulings 1a, 2b, 3):
-  the outer frontier certified by select-live in live (:complete-union)
-  mode, the run's predecessor frontier from the run stream, the reading-
+  "Requirements Q8 on the canonical production route (R14, 2026-10-26;
+  codex-68 rulings 1a, 2b, 3). The :complete-union comparison was live mode
+  on 2026-10-15; this pins the canonical-G frontier, the run's predecessor
+  frontier from the run stream, the reading-
   family decision's policy stages and Q6 carrier, sealed by the runner into
   the record and accepted by the exporter only when the record recomputes
   it."
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as live]
+            [futon2.aif.outer-policy-provider-runtime :as provider-runtime]
             [futon2.aif.outer-target-belief :as outer-belief]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.q8-frontier :as q8]
@@ -40,7 +44,11 @@
              :standards {:s1-regenerates true :s2-evidence true
                          :s3-reconstitution true :s4-honest-holes true
                          :s5-composed true}}
-   :graph {:section-status {:clusters {:status :ok}}
+   :graph {:section-status {:clusters {:status :ok}
+                            :lineage {:status :ok}
+                            :arrows {:status :ok}
+                            :held {:status :ok}
+                            :patterns {:status :ok}}
            :lineage [] :clusters (mapv #(hash-map :mission %) on-map)
            :arrows [] :held []
            :tickets {:items (mapv (fn [t] {:stem t :mtime-ms (mtimes t)}) on-map)}
@@ -51,9 +59,24 @@
 
 (def base-map [route/target "M-other" "M-third"])
 
-(defn- tasks [priorities]
+(def base-reads
+  {route/target ["p/a" "p/b"]
+   "M-other" ["p/a" "p/b" "p/c"]
+   "M-third" ["p/a" "p/b" "p/c"]
+   "M-off" ["p/a" "p/b" "p/c"]})
+
+(def reading-field
+  (route/field base-reads))
+
+(defn- tasks [field priorities]
   (vec (for [[id p] (sort priorities)]
-         {:id id :kind :mission :priority p :source (pin (str id ".md") "c")})))
+         (let [source (some->> (:rows field)
+                               (some #(when (= id (:target-id %)) (:source-path %)))
+                               io/file)]
+           {:id id :kind :mission :priority p
+            :source {:path (.getPath source)
+                     :sha256 (load-identity/sha256
+                              (.getBytes (slurp source) "UTF-8"))}}))))
 
 (def outer-learning
   {:mode :live
@@ -75,12 +98,42 @@
    :controller {:missing-channel-cost 1.0 :recent-selection-cost 0.5
                 :continuation-credit 0.7}})
 
+(def provider-state
+  "What full-loop-runtime's default provider reads from the learning
+   authority, owned by the test: the same belief, costs, transform and
+   controller as `outer-learning`, a pinned preference source (the
+   declaration's :preference-authority must be a pin), and the outer-policy
+   gamma the declaration carries."
+  (assoc outer-learning
+         :authority {:outer-policy {:gamma 1.0}}
+         :preference-authority
+         {:kind :operator
+          :source (pin "wm://q8-route-preference-authority" "f")}))
+
 (defn- outer-receipt
-  ([] (outer-receipt base-tasks base-map))
-  ([priorities on-map]
-   (live/select-live {:tasks (tasks priorities)
-                      :fetch-snapshot (constantly (snapshot on-map))
-                      :outer-learning outer-learning})))
+  ([] (outer-receipt {:priorities base-tasks :on-map base-map :field reading-field}))
+  ([{:keys [priorities on-map field]
+     :or {priorities base-tasks on-map base-map field reading-field}}]
+   (let [selection-as-of "2026-10-26T05:00:00Z"]
+     (live/select-live {:tasks (tasks field priorities)
+                        :fetch-snapshot (constantly (snapshot on-map))
+                        :outer-learning outer-learning
+                        :selection-as-of selection-as-of
+                        :focus-inputs {}
+                        :focus-context {:as-of selection-as-of
+                                        :status :retained
+                                        :focus "WM"}
+                        :focus-classify-fn
+                        (fn [_ _ _ target _] {:target target :class :focus})
+                        :seed 14
+                        :outer-policy-evidence-provider
+                        (fn [menu]
+                          (provider-runtime/provide provider-state menu []))
+                        :policy-field-config
+                        {:target-reading-root (.getPath (io/file (:root field)))
+                         :pattern-graph-path (.getPath (io/file (:graph field)))
+                         :occurrence-square-root (.getPath (io/file (:squares field)))
+                         :pattern-library-root (.getPath (io/file (:library field)))}}))))
 
 ;; -- the production run -------------------------------------------------------------
 
@@ -92,14 +145,17 @@
 (defn- click!
   "One production run: the outer selection is select-live's, the inner
   decision the real reading-family decision for the selected task."
-  ([fx dir] (click! fx dir base-tasks base-map))
-  ([fx dir priorities on-map]
+  ([fx dir] (click! fx dir {:priorities base-tasks :on-map base-map :field reading-field}))
+  ([fx dir {:keys [priorities on-map field]
+            :or {priorities base-tasks on-map base-map field reading-field}}]
    (let [calls (atom 0)
          result (runner/run-opportunity!
                  (merge (fixture/isolated-runner-opts)
                         {:run-record-dir (str dir)
                          :judge-fn (fn [_]
-                                     (let [receipt (outer-receipt priorities on-map)
+                                     (let [receipt (outer-receipt {:priorities priorities
+                                                                   :on-map on-map
+                                                                   :field field})
                                            r (route/decide fx)]
                                        (swap! calls + (:selector-calls r))
                                        {:judgement (judgement-for (:decision r) receipt)}))
@@ -149,13 +205,24 @@
         rec (:record two)
         q (:q8 rec)
         k1 (get-in (:record one) [:q6 :terminal :choice :policy-key])]
-    (testing "outer: the effective selection was the complete-union comparison"
+    (testing "outer: the effective selection was the canonical-G minimum"
       (let [o (get-in rec [:outer-task-selection :q8-frontier])]
         (is (= :certified (:status o)))
         (is (= route/target (:selected o) (get-in rec [:outer-task-selection :chosen :id])))
-        (is (= {:law q8/ranking-law :version 1 :comparison :complete-union
-                :missing-channel-cost 1.0} (:ranking o)))
-        (is (= 3 (get-in o [:pairwise :pairs])) "every eligible pair, once")))
+        (is (= {:law :canonical/co-application-G-min-v1
+                :version 1 :comparison :canonical-G-min :horizon 3}
+               (:ranking o)))
+        (is (= {:status :pass} (:selection-verdict o)))
+        (is (= {:status :pass} (:census-verdict o)))
+        (is (= [] (:unranked o)))
+        (is (= [route/target "M-other" "M-third"] (mapv :task (:entries o))))
+        (let [[current other third] (:entries o)]
+          (is (< (get-in current [:channels :G]) (get-in other [:channels :G])))
+          (is (= (get-in other [:channels :G]) (get-in third [:channels :G])))
+          (is (every? #(= :canonical/co-application-G-min-v1 (:ranking-law %))
+                      (:entries o)))
+          (is (every? #(= 2 (count (:dependencies %))) (:entries o))))
+        (is (= 3 (count (:entries o))))))
     (testing "run one has no prior frontier: not recomputable, frontier persisted"
       (is (= [:not-recomputable [:no-prior-frontier]]
              ((juxt :status :reasons) (get-in one [:record :q8]))))
@@ -193,16 +260,27 @@
 (deftest refresh-classifies-changed-added-and-removed-tasks
   (let [fx (route/fixture)
         dir (route/temp-dir "q8-stream-")
-        _ (click! fx dir)
-        ;; M-third's priority moves inside the range: only its channel value
-        ;; changes; M-new joins the map; nothing else moves
-        changed (click! fx dir (assoc base-tasks "M-third" 6) base-map)
-        added (click! fx dir (assoc base-tasks "M-third" 6 "M-new" 4)
-                      (conj base-map "M-new"))
-        removed (click! fx dir (assoc base-tasks "M-new" 4) [route/target "M-other" "M-new"])
+        field (route/field base-reads)
+        _ (click! fx dir {:field field})
+        priority-changed (click! fx dir {:priorities (assoc base-tasks "M-third" 6)
+                                         :field field})
+        changed-field (route/republish! field "M-third" ["p/b" "p/a" "p/c"])
+        changed (click! fx dir {:field changed-field})
+        added-field (route/republish! changed-field "M-new" ["p/a" "p/b" "p/c"])
+        added (click! fx dir {:priorities (assoc base-tasks "M-new" 4)
+                              :on-map (conj base-map "M-new") :field added-field})
+        removed (click! fx dir {:priorities (assoc base-tasks "M-new" 4)
+                                :on-map [route/target "M-other" "M-new"]
+                                :field added-field})
         r (fn [run] (get-in run [:record :q8 :refresh]))
         tasks-of (fn [es] (set (map :task es)))]
-    (testing "a changed observation invalidates exactly that task"
+    (testing "a declared-priority change is not a canonical observation"
+      (is (empty? (:invalidated (r priority-changed))))
+      (is (empty? (:recomputed (r priority-changed))))
+      (is (= #{route/target "M-other" "M-third"}
+             (tasks-of (:retained (r priority-changed)))))
+      (is (true? (q8-holds? (:record priority-changed)))))
+    (testing "a changed reading invalidates exactly that task"
       (is (= #{"M-third"} (tasks-of (:invalidated (r changed)))))
       (is (= #{"M-third"} (tasks-of (:recomputed (r changed)))))
       (is (= #{route/target "M-other"} (tasks-of (:retained (r changed)))))
@@ -239,34 +317,51 @@
           (is (= :verified (:status (q8/verify-record forged))) "consistently resealed")
           (is (false? (q8-holds? forged)) "and Requirements.Q8 refuses it"))))))
 
-(deftest pairwise-key-disagreement-is-not-recomputable
-  (let [captured (atom nil)
-        produce q8/outer-frontier]
-    (with-redefs [q8/outer-frontier (fn [m] (reset! captured m) (produce m))]
-      (outer-receipt))
-    (let [m @captured
-          flip (fn [p] (assoc p :winner (if (= (:winner p) (:left p)) (:right p) (:left p))))]
-      (is (= :certified (:status (produce m))))
-      (testing "one recorded winner flipped"
-        (is (= [:not-recomputable :pairwise-key-order-mismatch]
-               ((juxt :status :reason) (produce (update-in m [:selection :pairwise 0] flip))))))
-      (testing "a pair missing"
-        (is (= :pairwise-incomplete
-               (:reason (produce (update-in m [:selection :pairwise] (comp vec rest)))))))
-      (testing "a shared-only comparison has no scalar key"
-        (is (= :ranking-law-not-scalar (:reason (produce (assoc m :comparison :shared-only))))))
-      (testing "a non-numeric channel value"
-        (is (= :channel-value-not-exact
-               (:reason (produce (assoc-in m [:candidates 0 :channels :declared-priority-cost
-                                               :value] "0.5"))))))
-      (testing "the selected task is not the key minimum"
-        (is (= :selected-not-strict-key-minimum
-               (:reason (produce (assoc-in m [:selection :selected] "M-other"))))))
-      (testing "a key that disagrees with the recorded pairs, kept in the record"
-        (let [{:keys [record]} (certified-record)
-              forged (reseal-outer record #(update-in % [:entries 0 :comparison-key] + 1))]
-          (is (= :nr (q8-holds? forged))
-              "the record's carrier no longer equals one recomputed from it"))))))
+(deftest canonical-frontier-disagreement-is-not-recomputable
+  (let [r (outer-receipt)
+        base (dissoc r :q8-frontier)
+        produce q8/canonical-outer-frontier]
+    (testing "the carrier is a pure projection of the retained receipt"
+      (is (= (:q8-frontier r) (produce base))))
+    (testing "the selected target is not the key minimum"
+      (is (= {:status :decided-failure
+              :selection-verdict {:status :fail
+                                  :reason :selected-not-strict-key-minimum
+                                  :lower-members [route/target]}}
+             (select-keys
+              (produce (assoc-in base
+                                 [:policy :canonical-policy-selection :action :target]
+                                 "M-other"))
+              [:status :selection-verdict]))))
+    (testing "the canonical frontier is not produced"
+      (is (= [:not-recomputable :canonical-frontier-absent]
+             ((juxt :status :reason)
+              (produce (assoc-in base [:policy :canonical-g-frontier :status]
+                                 :refused))))))
+    (testing "no outer selection"
+      (is (= [:not-recomputable :no-outer-selection]
+             ((juxt :status :reason)
+              (produce (assoc-in base
+                                 [:policy :canonical-policy-selection :status]
+                                 :no-choice))))))
+    (testing "an eligible task with no row and no reason"
+      (let [result (produce
+                    (update-in base [:policy :canonical-g-frontier :entries]
+                               #(filterv (fn [row] (not= "M-third" (:target-id row))) %)))]
+        (is (= [:not-recomputable :eligible-task-unaccounted ["M-third"]]
+               ((juxt :status :reason :tasks) result)))))
+    (testing "a frontier row for a task outside the eligible census"
+      (let [row (-> (get-in base [:policy :canonical-g-frontier :entries 0])
+                    (assoc :target-id "M-ghost"))
+            result (update-in base [:policy :canonical-g-frontier :entries] conj row)
+            result (produce result)]
+        (is (= [:not-recomputable :frontier-task-not-eligible ["M-ghost"]]
+               ((juxt :status :reason :tasks) result)))))
+    (testing "a key that disagrees with the recorded pairs, kept in the record"
+      (let [{:keys [record]} (certified-record)
+            forged (reseal-outer record #(update-in % [:entries 0 :comparison-key] + 1))]
+        (is (= :nr (q8-holds? forged))
+            "the record's carrier no longer equals one recomputed from it")))))
 
 (deftest q6-exclusion-must-be-justified
   (let [{:keys [record]} (certified-record)
