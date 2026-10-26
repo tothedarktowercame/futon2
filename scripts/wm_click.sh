@@ -467,4 +467,10 @@ if [ ! -f "$verdict_file" ]; then
   echo "requirements NOT CHECKED: verdict file absent after post-run check: $verdict_file"
   exit 1
 fi
+# R11: when a self-heal child ran, its verdict is carried into the parent's
+# durable click state (the service refuses a file naming another run record).
+# An unrecorded child verdict is not a passed click.
+if ! python3 "$F2/scripts/wm_click_record_child_verdict.py" --base "$BASE" --click-id "$clickid" --verdict-file "$verdict_file"; then
+  exit 1
+fi
 exit "$requirements_status"
