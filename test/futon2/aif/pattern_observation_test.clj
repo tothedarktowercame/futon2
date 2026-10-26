@@ -1,13 +1,12 @@
 (ns futon2.aif.pattern-observation-test
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.pattern-observation :as pattern-observation]))
 
 (def fixture
   (edn/read-string
-   (slurp (io/resource "wm/retained-25e24-pattern-fold-projection.edn"))))
+   (slurp "test/resources/wm/retained-25e24-pattern-fold-projection.edn")))
 
 (def revision {:repo "futon5a" :sha (:after fixture)})
 (def source

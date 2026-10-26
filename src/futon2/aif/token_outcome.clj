@@ -21,7 +21,9 @@
                    (select-keys input pattern-model-keys))]
     (load-identity/sha256 (.getBytes (pr-str canonical) "UTF-8"))))
 
-(defn- pattern-token? [target token]
+(defn pattern-token?
+  "True when TOKEN is a qualified pattern-done occurrence for TARGET."
+  [target token]
   (and (vector? token) (= 3 (count token)) (= target (first token))
        (= :pattern-done (second token))
        (vector? (nth token 2)) (= 2 (count (nth token 2)))
