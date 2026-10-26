@@ -48,6 +48,8 @@
              :attempted (mapv #(get-in % [:need :target]) (:records record))
              :published (mapv #(get-in % [:need :target])
                               (filter :published (:records record)))
+             :refused (mapv #(get-in % [:need :target])
+                            (remove :published (:records record)))
              :pending (mapv :target (:pending record)))
 
       (= :wm/selected-target-reading-request-v1 (:schema record))

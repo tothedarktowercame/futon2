@@ -66,7 +66,7 @@
           r (sut/outcome pinned-judgement record)]
       (is (= :ran (:status r)))
       (is (= #{:schema :status :policy :chosen :reason :preparation-status
-               :deadline-ms :field-source-pin :attempted :published :pending}
+               :deadline-ms :field-source-pin :attempted :published :refused :pending}
              (set (keys r))))
       (is (= :batch-limit (:reason r)))
       (is (= :pending (:preparation-status r)))
@@ -74,6 +74,7 @@
       (is (= "pin-1" (:field-source-pin r)))
       (is (= ["A" "B"] (:attempted r)))
       (is (= ["A"] (:published r)))
+      (is (= ["B"] (:refused r)))
       (is (= ["C"] (:pending r)))
       (is (nil? (:records r)))
       (is (nil? (:frontier r))))
@@ -84,6 +85,7 @@
         (is (= :ran (:status r)))
         (is (= [] (:attempted r)))
         (is (= [] (:published r)))
+        (is (= [] (:refused r)))
         (is (= [] (:pending r))))))
   (testing "case 4: the two repair-need! shapes"
     (is (= {:schema :wm/reading-preparation-outcome-v1

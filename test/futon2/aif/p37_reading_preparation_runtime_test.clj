@@ -99,11 +99,13 @@
                                 :via :abstained}]
                     :checkpoints {:selection {:judgment (:judgement result)}}})
         terminal (edn/read-string (slurp (:run-record persisted)))]
-        (is (= :refused (:status record)))
-        (is (= :publication-refused (:reason record)))
+        (is (= :pending (:status record)))
+        (is (= :batch-limit (:reason record)))
         (is (= [["T-001" digest-1]] (:published-ids frontier)))
-        (is (= [["T-002" (apply str (repeat 64 "2"))]] (:refused-ids frontier)))
-        (is (= 697 (count (:pending-ids frontier)))
+        (is (= [["T-002" (apply str (repeat 64 "2"))]
+                ["T-003" (apply str (repeat 64 "2"))]]
+               (:refused-ids frontier)))
+        (is (= 695 (count (:pending-ids frontier)))
             "bounded preparation leaves the rest queued")
         (is (= 700 (count (:eligible-target-ids frontier))))
         (is (= ["T-occ" "T-ready"] (:assessed-target-ids frontier)))
@@ -122,7 +124,7 @@
                (get-in terminal [:reading-frontiers :selection-frontier :assessed-ids])))
         (is (= reading-absent-ids
                (get-in terminal [:reading-frontiers :selection-frontier :reading-absent-ids])))
-        (is (= 697 (count (get-in terminal [:reading-frontiers :preparation-backlog
+        (is (= 695 (count (get-in terminal [:reading-frontiers :preparation-backlog
                                              :frontier :pending-ids]))))
         (is (nil? (selected/verify
                    (get-in result [:judgement :outer-task-selection :policy

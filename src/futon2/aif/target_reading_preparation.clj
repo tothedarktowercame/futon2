@@ -54,13 +54,12 @@
     (loop [pending needs, records []]
       (let [failed? (some #(not (:published %)) records)
             reason (cond
-                     failed? :publication-refused
                      (empty? pending) :batch-complete
                      (>= (count records) limit) :batch-limit
                      (>= (now-fn) deadline-ms) :deadline)]
         (if reason
           {:schema :wm/target-reading-preparation-v1
-           :status (cond failed? :refused (seq pending) :pending :else :prepared)
+           :status (cond (seq pending) :pending failed? :refused :else :prepared)
            :reason reason :deadline-ms deadline-ms
            :field-source-pin (:field-source-pin planned)
            :records records :pending pending
@@ -73,5 +72,5 @@
                                :kind :reading-preparation-threw
                                :message (ex-message e)}))
                 record (assoc result :need need)]
-            (recur (if (:published record) (subvec pending 1) pending)
+            (recur (subvec pending 1)
                    (conj records record))))))))
