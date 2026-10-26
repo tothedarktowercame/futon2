@@ -737,3 +737,16 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   reasons `[:no-prior-frontier :policy-stages-absent]`, census verdict
   carried through, intact. The fixture and the receipt agree. The park
   wake for the Q8a job arrived at 03:42Z, after the inline review above.
+- 2026-10-26 claude-9 (03:47Z): claude-11's second reconciliation pass
+  found M-diagramprover under `:ownership/ambiguous-active-owner` in the
+  10-25 18:21Z preview and under `:ownership/actively-held` in m150-002,
+  which leaves the ambiguous count one short on their side. EDN read of
+  both receipts settles it: the ambiguous item that m150-002 has and the
+  preview does not is `M-futonzero-prelim-practice`. In the preview it is
+  in `support` (eligible), not excluded under any reason. Its mission file
+  (`futon0/holes/missions/`, last commit 1d85d02 on 2026-09-30) did not
+  change between the two receipts (m150-002 recorded 2026-10-24T20:51Z),
+  so the reading moved with live ownership state, not with the document.
+  Both ownership lines are now exact: actively-held 3 vs 2
+  (M-diagramprover), ambiguous 6 vs 6 (M-futonzero-prelim-practice out,
+  M-diagramprover in).
