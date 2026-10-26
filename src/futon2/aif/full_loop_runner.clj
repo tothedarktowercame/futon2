@@ -2382,7 +2382,7 @@
   before the first outer choice. REPAIR-FN owns contact, validation and durable
   publication; this seam itself never invents a fallback target."
   [opts judgement repair-fn redecide]
-  (if-not (and repair-fn (selected-target-reading/selected-need judgement))
+  (if-not (and repair-fn (selected-target-reading/preparation-needed? judgement))
     {:judgement judgement :record nil}
     (let [record (try (repair-fn opts judgement)
                       (catch Throwable e
@@ -7295,7 +7295,7 @@
                ;; terminal. Every other no-entry result is the selection
                ;; phase's final answer and must be restartable when attached.
                (when-not (or (and target-reading-fn (nil? (:flight opts))
-                                  (selected-target-reading/selected-need judgement))
+                                  (selected-target-reading/preparation-needed? judgement))
                              (and square-authoring-fn (nil? (:flight opts))
                                   (square-authoring/selected-need judgement))
                              (and interpretation-ask-fn (nil? (:flight opts))

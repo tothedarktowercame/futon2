@@ -481,19 +481,31 @@
        (let [live-opts (merge opts runner-opts)
              answer-fn (or (:selected-target-reading-answer-fn live-opts)
                            (designated-author-answer-fn
-                            live-opts selected-target-reading/prompt))]
-         (if-let [field (selected-target-reading/prechoice-field judgement)]
-           (let [needs (selected-target-reading/prechoice-needs field)
+                            live-opts selected-target-reading/prompt))
+             field (get-in judgement [:outer-task-selection :policy-field])
+             needs (selected-target-reading/preparation-needs judgement)
+             chosen-need (selected-target-reading/selected-need judgement)]
+         (if (seq needs)
+           (let [first-target (:target (first needs))
+                   ;; prepare! plans from family order. Move only the requested
+                   ;; first target, preserving the relative order of all others.
+                   families (:families field)
+                   field (assoc field :families
+                                (vec (concat
+                                      (filter #(= first-target (:target-id %)) families)
+                                      (remove #(= first-target (:target-id %)) families))))
                  result (reading-preparation/prepare!
                          (assoc live-opts :answer-fn answer-fn) field
                          {:deadline-ms (+ (System/currentTimeMillis) 1800000)
                           :limit (min 3 (max 1 (count needs)))})]
-             ;; The existing runner redecides once after publication. There
-             ;; is no retained target yet: this pass builds the first menu.
-             (assoc result :published (boolean (some :published (:records result)))))
-           (selected-target-reading/repair!
-            (assoc live-opts :answer-fn answer-fn)
-            judgement))))
+               ;; The existing runner redecides once after any publication.
+               ;; A retained outer choice stays retained while its inner
+               ;; construction and the bounded reading batch are rebuilt.
+               (assoc result :published (boolean (some :published (:records result)))))
+             (when (and (nil? field) chosen-need)
+               (selected-target-reading/repair!
+                (assoc live-opts :answer-fn answer-fn)
+                 judgement)))))
      :occurrence-square-authoring-fn
      (fn [runner-opts judgement]
        (let [live-opts (merge opts runner-opts)

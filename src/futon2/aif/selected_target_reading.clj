@@ -263,6 +263,28 @@
        :failure (:kind failure)})
         (first (prechoice-needs (prechoice-field judgement))))))
 
+(defn preparation-needs
+  "Return every unmet need in the retained outer policy field.
+  When the chosen target itself has a selected need, put that need first and
+  omit its policy-field duplicate."
+  [judgement]
+  (if-let [field (get-in judgement [:outer-task-selection :policy-field])]
+    (let [chosen-target (get-in judgement [:outer-task-selection :chosen :id])
+          chosen-need (selected-need judgement)
+          chosen-need (when (= chosen-target (:target chosen-need)) chosen-need)
+          field-needs (prechoice-needs field)]
+      (if chosen-need
+        (into [chosen-need]
+              (remove #(= (:target chosen-need) (:target %)) field-needs))
+        field-needs))
+    []))
+
+(defn preparation-needed?
+  "True when either an exact selected need or any retained field need exists."
+  [judgement]
+  (boolean (or (selected-need judgement)
+               (seq (preparation-needs judgement)))))
+
 (defn prompt
   "Prompt for the designated author.  The reply is analysis JSON only; the
   machine, not the seat, validates and publishes it."
