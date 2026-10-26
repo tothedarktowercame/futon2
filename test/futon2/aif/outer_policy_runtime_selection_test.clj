@@ -37,9 +37,17 @@
 (defn- run-live
   ([evidence-provider] (run-live evidence-provider {}))
   ([evidence-provider extra]
-   (let [{:keys [menu]} (fixture)]
+   (let [{:keys [menu]} (fixture)
+         selection-as-of "2026-10-22T12:34:56Z"]
      (live/select-live
       (merge {:tasks tasks :fetch-snapshot (constantly snapshot)
+              :selection-as-of selection-as-of
+              :focus-inputs {}
+              :focus-context {:as-of selection-as-of
+                              :status :retained
+                              :focus "WM"}
+              :focus-classify-fn
+              (fn [_ _ _ target _] {:target target :class :focus})
               :policy-field-config {:authority :production-shaped-test}
               :policy-field-fn
               (fn [rows _]
@@ -53,6 +61,14 @@
               :policy-menu-fn (fn [_ _] menu)
               :outer-policy-evidence-provider evidence-provider}
              extra)))))
+
+(def seed
+  "The fixture's two policies tie on canonical G to 16 digits, so a choice
+  needs the click seed R13 (`726d38432`) seals as the tie draw; a test that
+  wants a selection passes it in its own input (the base map stays unseeded
+  for `outer-canonical-selection-test`, which pins that an unseeded call
+  refuses)."
+  7)
 
 (defn- explicit-provider [ln-es records]
   (fn [menu]
@@ -86,7 +102,8 @@
                  :policy-field field}
         select (runtime/retained-outer-selector
                 (fn [_] (if @published
-                          (run-live (explicit-provider [0.0 1.0] [])) refusal)) {})
+                          (run-live (explicit-provider [0.0 1.0] []) {:seed seed})
+                          refusal)) {})
         result (runner/selected-target-reading-step
                 {} {:outer-task-selection (select {:tasks tasks})}
                 (fn [opts judgement]
@@ -116,10 +133,14 @@
     (is (= :authority-offline (get-in refused [:policy :reason])))
     (is (nil? (:action refused)))))
 
-(deftest unique-minimum-seals-and-consumes-without-reselection
+(deftest seeded-canonical-choice-seals-and-consumes-without-reselection
+  ;; Was `unique-minimum-...`: lnE [0.0 1.0] gives the objective a unique
+  ;; minimum, but since O3-2 (`218f9f2ba`) the objective is evidence only
+  ;; and the canonical frontier ties, so the seed makes the choice.
   (let [legacy-calls (atom 0) target-selector-calls (atom 0)
         receipt (run-live (explicit-provider [0.0 1.0] [])
-                          {:candidate-fn (fn [& _]
+                          {:seed seed
+                           :candidate-fn (fn [& _]
                                            (swap! target-selector-calls inc)
                                            [])})
         carrier (get-in receipt [:policy :selected-outer-cascade-policy])
@@ -139,7 +160,9 @@
     (is (= :selected (get-in receipt [:policy :status])))
     (is (nil? (selected/verify carrier)))
     (is (= (:target-id carrier) (get-in receipt [:action :target])))
-    (is (= (:policy-id carrier) (get-in receipt [:action :policy-id])))
+    ;; The receipt's action is the sealed menu entry's action, keyed :id
+    ;; (O3-2; pinned in outer-canonical-selection-test).
+    (is (= (:policy-id carrier) (get-in receipt [:action :id])))
     (is (= (:cascade-digest carrier) (get-in receipt [:action :cascade-digest])))
     (is (= (:canonical-cascade (:selected-entry carrier))
            (get-in downstream [:decision :selection-certificate
@@ -152,7 +175,7 @@
                     (get-in second-pass [:policy :selected-outer-cascade-policy])))))
 
 (deftest exact-objective-tie-can-begin-a-cycle
-  (let [receipt (run-live (explicit-provider [0.0 0.0] []))]
+  (let [receipt (run-live (explicit-provider [0.0 0.0] []) {:seed seed})]
     (is (= :selected (get-in receipt [:policy :status])))
     (is (= :uniform-over-equal-minima
            (get-in receipt [:policy :policy-objective :draw :law])))
@@ -166,15 +189,24 @@
         incomplete (assoc-in incomplete [:pin :sha256]
                              (identity/sha256
                               (.getBytes (pr-str (dissoc incomplete :pin)) "UTF-8")))
-        refusal (run-live (constantly (provider/provided incomplete [] {:kind :test})))
+        dropped (:cascade-digest (second (:entries menu)))
+        ;; Since O3-2 (`218f9f2ba`) the objective does not choose, so a
+        ;; declaration missing a policy is recorded as :partial evidence that
+        ;; names the dropped policy, not refused.  Whether partial evidence
+        ;; should gate the canonical choice is unruled (DEFECTS U4); the
+        ;; unseeded call ties and refuses on the draw, which is not the claim.
+        partial (run-live (constantly (provider/provided incomplete [] {:kind :test})))
         apparatus {:run/id "apparatus" :selected-cascade-digest
                    (:cascade-digest (first (:entries menu)))
                    :terminal {:outcome :incomplete}
                    :failure {:kind :phase-failure :stage :build}
                    :observed-outcome :failure}
         accepted (run-live (explicit-provider [0.0 1.0] [apparatus]))]
-    (is (= :refused (get-in refusal [:policy :status])))
-    (is (seq (get-in refusal [:policy :policy-evidence :missing])))
+    (is (= :partial (get-in partial [:policy :policy-evidence :status])))
+    (is (= [dropped]
+           (mapv :cascade-digest
+                 (get-in partial [:policy :policy-evidence :frontier :term-absent :policies]))))
+    (is (= :partial (get-in partial [:policy :policy-objective :status])))
     (is (= [0 0] (get-in accepted [:policy :policy-evidence :entries 0 :task-counts])))
     (is (= "apparatus"
            (get-in accepted [:policy :policy-evidence :entries 0 :excluded 0 :run/id])))))

@@ -76,7 +76,8 @@
         run-live (outer-var 'run-live)
         explicit-provider (outer-var 'explicit-provider)
         tasks (outer-var 'tasks)
-        selected-receipt (run-live (explicit-provider [0.0 1.0] []))
+        selected-receipt (run-live (explicit-provider [0.0 1.0] [])
+                                   {:seed (outer-var 'seed)})
         select (runtime/retained-outer-selector (fn [_] selected-receipt) {})
         defaults (runtime/production-defaults
                   {:run-id "p37-prechoice" :author "wm-author"
@@ -139,6 +140,7 @@
   ;; :incomplete-policy-menu-coverage came from cascade-decision's
   ;; select-over-families route and is covered by P38b, not fabricated here.
   (let [work (temp-dir "p38-no-choice-work-")
+        selection-as-of "2026-10-22T12:34:56Z"
         readings (temp-dir "p38-no-choice-readings-")
         graph (graph-file work)
         sources (into {}
@@ -155,10 +157,18 @@
         snapshot (meta-var 'snapshot)
         receipt (war-machine/select-outer-task
                  {:outer-task-policy :meta
+                  :selection-as-of selection-as-of
                   :outer-task-selection-fn
                   (fn [input]
                     (meta-live/select-live
                      (assoc input
+                            :focus-inputs {}
+                            :focus-context {:as-of selection-as-of
+                                            :status :retained
+                                            :focus "WM"}
+                            :focus-classify-fn
+                            (fn [_ _ _ target _]
+                              {:target target :class :focus})
                             :fetch-snapshot (constantly snapshot)
                             :policy-field-config
                             {:target-reading-root (.getPath readings)
