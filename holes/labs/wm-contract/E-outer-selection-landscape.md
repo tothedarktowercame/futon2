@@ -692,7 +692,47 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   (line 101 digest equality fails 3/4 isolated runs); recorded as U3 on the
   defect list, needs its own discovery packet. Defect list R3 moves to
   REPAIRED-FORWARD. Q8b (policy stages, R4) and Q2 (R5) remain open.
-- 2026-10-26 claude-9 (04:00Z): defect list closed for the Lean pass
+- 2026-10-26 claude-9 (04:02Z): claude-5's Lean pass reviewed and accepted.
+  Five modules on mathlib4 darktower, one commit each: SelectionPreparation
+  `8683505654` (R1, R2), IncrementalTaskFrontier additions `bf7fa3f6a4`
+  (R3, R12, R4, U1 conjecture), SeamRefusal `feb1c7cf35` (R6, R9),
+  AdmissionInputs `1c1045c81d` (R7, R8), ClickRecordBinding `bed6efedba`
+  (R10, R11). Record check: each lake warrant's code-file sha256 equals the
+  committed file's, exit 0, no errors, no sorries. Witness mode holds on
+  every clause: the observed receipt is a control that provably fails a
+  forward predicate; nothing cites Clojure as the definition. The m150
+  encoding was checked against `attempt-002-projection.edn` by EDN read:
+  109 support ids with the eight read tasks at sorted positions 31, 40, 65,
+  71, 73, 79, 93, 98; 101 unmet families; ranked menu failure kinds
+  {seed-not-in-graph, isolated-seed, void-pattern-citation,
+  frontier-too-wide-for-exact-enumeration, occurrence-identity-absent};
+  `:target-class-unknown` on the three S4-unranked only (4 + 4 + 2 rows).
+  Verdicts, shas and terms are on each line of
+  `~/notes/wm-next/outer-selection/DEFECTS-reading-era.md`. Two changes to
+  the list from the review: R5 is not a defect (claude-5 stopped it: the
+  clause contradicted the ruled Q2, `Requirements.lean:257-266`, codex-68
+  option (c); the residual question, whether the task-level outer action
+  relates to the retained menu's action pin, goes on Joe's next sheet); R2
+  was already repaired forward by C4a `bc7ad6c93` and C4b `a625a08a8`, which
+  the list had as "written, not dispatched". One amendment asked of
+  claude-5: R1's deferral conjunct counts only attempted rows against the
+  budget, so a batch with a refusal in it could never be valid; a refusal
+  spends a slot (`prepare!` today stops the whole batch at the first
+  refusal, which the clause rightly refuses). Dispatched 04:02Z, each
+  parked: claude-5 the R1 amendment and the R13 clause
+  (`invoke-1792987323665-4086-b92c5664`); codex-9 the R12 Clojure repair,
+  headline `:reason` as the set difference against the ranked kinds,
+  `:unexplained` when empty, `:ranked-kinds` on the census verdict, fixture
+  re-pinned (`invoke-1792987328646-4087-b09b22b7`); codex-10 the R6
+  pass-through, `provide` carrying the belief's `:reason` and `:details`
+  with `:belief-status`, no default reason for an absent one
+  (`invoke-1792987332764-4088-2648f36a`). Packets under
+  `~/notes/wm-next/outer-selection/packets/`. R13 and R1 Clojure repairs
+  follow their clauses; R14 waits on its semantic choice. zai-3's U3 report
+  still running. Times in two earlier entries of today (stamped 04:00Z and
+  04:10Z) were written ahead of the clock and are corrected in place to
+  their commit times.
+- 2026-10-26 claude-9 (03:37Z; first stamped 04:00Z, ahead of the clock; commit time is authoritative): defect list closed for the Lean pass
   (`~/notes/wm-next/outer-selection/DEFECTS-reading-era.md`). R6: the cause
   was retained all along in m142-002's learning belief details
   (`ClassCastException`, "Default comparator requires nil, Number, or
@@ -712,7 +752,7 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   binding refusals with no origin tag (`family_selection.clj:411-429`).
   Repair is a small follow-on to Q8a. claude-11's overview field (789 items,
   10-25 18:21Z) reconciles with m150-002 (786) on every shared item.
-- 2026-10-26 claude-9 (04:10Z): claude-11's reconciliation returned. The
+- 2026-10-26 claude-9 (03:41Z; first stamped 04:10Z, ahead of the clock): claude-11's reconciliation returned. The
   one count they could not match, `:ownership/actively-held` 2 against 3,
   resolves by an EDN read of `attempt-002-projection.edn`: M-G-wm-wiring,
   E-implementing-G-over-cascades, M-diagramprover (their regex missed the
