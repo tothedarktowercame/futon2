@@ -46,16 +46,21 @@
   (let [outer (:outer-task-selection record)
         feedback (:cascade-feedback record)]
     (merge {:schema projection-schema :record-pin record-pin}
-         (select-keys record [:run/id :click/id :startedAt :failure :traceWritten])
+         (select-keys record [:run/id :click/id :startedAt :traceWritten])
+         (when (contains? record :failure)
+           {:failure (select-keys (:failure record) [:kind :stage])})
          (when (contains? record :outer-task-selection)
            {:outer-task-selection
-            (merge (select-keys outer [:schema :status :reason :support :excluded :draw
-                                       :chosen :action])
+            (merge (select-keys outer [:schema :status :reason :chosen])
+                   {:support (if (vector? (:support outer)) [] (:support outer))
+                    :excluded (if (vector? (:excluded outer)) [] (:excluded outer))
+                    :draw (if (map? (:draw outer)) {} (:draw outer))
+                    :action (select-keys (:action outer) [:target])}
                    (when-let [policy (:policy outer)]
                      {:policy (select-keys policy [:kind :selected-outer-cascade-policy])}))})
          (when (contains? record :terminal-receipt)
            {:terminal-receipt (select-keys (:terminal-receipt record)
-                                           [:outcome :failure-kind :failure-stage :failure-detail])})
+                                           [:outcome :failure-kind :failure-stage])})
          (when (contains? record :run-output)
            {:run-output (select-keys (:run-output record) [:outcome])})
          (when (contains? record :terminal)
@@ -77,9 +82,16 @@
                    (when-let [outcomes (get-in feedback [:mission-state :execution-outcomes])]
                      {:mission-state {:execution-outcomes outcomes}}))})
          (when-let [decision (:decision record)]
-           {:decision (select-keys decision [:selection-law
-                                             :selected-enacted-identity
-                                             :selection-certificate])}))))
+           {:decision
+            (merge (select-keys decision [:selected-enacted-identity])
+                   {:selection-law
+                    {:per-policy-argmax
+                     {:action {:target (get-in decision [:selection-law :per-policy-argmax
+                                                         :action :target])}}}
+                    :selection-certificate
+                    {:selected-canonical-cascade
+                     {:digest (get-in decision [:selection-certificate
+                                                :selected-canonical-cascade :digest])}}})}))))
 
 (defn- read-input [read-bytes source]
   (let [record-source (record-entry source)
