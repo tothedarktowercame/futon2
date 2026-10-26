@@ -76,7 +76,11 @@
             :unbound-targets
             ["M-formal-war-machine"
              "M-digital-nomad-patterns"
-             "M-pattern-posteriors"]}
+             "M-pattern-posteriors"],
+            :policies-without-binding-record
+            ["M-self-improvement-loop/policy-e9bc5a3020f511e2a257"
+             "M-self-improvement-loop/policy-ae9b63bacd017fcb492d"
+             "M-self-improvement-loop/policy-e61ff4e7504654de2d14"]}
            {:stage :s5-canonical-g-frontier,
             :where
             "[:policy :canonical-g-frontier :entries] by :status, :reason over :refused",

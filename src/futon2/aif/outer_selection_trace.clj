@@ -77,6 +77,20 @@
         refused-policy-ids (when entries
                              (into {} (map (fn [[k rows]] [k (mapv :policy-id rows)]))
                                    (group-by :kind (:refusals menu))))
+        entry-policy-ids (set (map :policy-id entries))
+        refused-policy-id-set (set (map :policy-id (:refusals menu)))
+        ;; Policies of a bound target that the menu neither bound nor
+        ;; refused: the receipt holds no per-policy record for them
+        ;; (menu :failures carry :target-id only), so S4's in/out/dropped
+        ;; arithmetic cannot close without listing them.
+        policies-without-binding-record
+        (when entries
+          (vec (for [f computed
+                     :when (entry-targets (:target-id f))
+                     p (:policies f)
+                     :let [pid (:policy-id p)]
+                     :when (not (or (entry-policy-ids pid) (refused-policy-id-set pid)))]
+                 pid)))
         frontier (get-in receipt [:policy :canonical-g-frontier])
         fr-entries (:entries frontier)
         refused-rows (:refused frontier)
@@ -113,7 +127,9 @@
        :out s4-out
        :dropped s4-dropped
        :refused-policy-ids (or refused-policy-ids {:absent absent-count-reason})
-       :unbound-targets unbound-targets}
+       :unbound-targets unbound-targets
+       :policies-without-binding-record
+       (or policies-without-binding-record {:absent absent-count-reason})}
       {:stage :s5-canonical-g-frontier
        :where "[:policy :canonical-g-frontier :entries] by :status, :reason over :refused"
        :in s5-in
