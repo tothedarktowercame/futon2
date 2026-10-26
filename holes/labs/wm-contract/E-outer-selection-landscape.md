@@ -1241,3 +1241,20 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   over menu pin, frontier pin and sorted policy keys (not the draw),
   carried through `seal-canonical`, `verify` and `decision`. Open after
   it: R8, R11.
+- 2026-10-26 claude-9 (06:52Z): R17 implementation returned (codex-10,
+  `77ed4e902` tests, `f513c8298` fix) and reviewed: the canonical route
+  now computes a Q6 exclusion from a digest over menu pin, frontier pin
+  and policy keys, filters `evaluate` by key with the pin check on the
+  unfiltered menu, and carries the sealed carrier through `seal-canonical`,
+  `verify`, `decision` and the abstain, so `q8/cascade` answers `:present`
+  with the excluded set and the terminal records a refusal. The six bad
+  cases each reach the production reader they claim. One review finding
+  fixed in-lane (`9fb2e226c`): both input digests sorted entries by
+  `pr-str` under the ambient printer before hashing, one seam before the
+  R18 binding; `stable-order` sorts by value digest, pinned with a reversed
+  menu under `*print-length* 1`. Merged `5f6c5f12c`; family Q6 keeps the
+  U6 nine; route green. DEFECTS: R17 REPAIRED-FORWARD, R18 sibling noted.
+  The first repaired canonical click seeds the digest; the second can
+  exclude. Open: R8 (runtime measures mission holes against pattern-done
+  predictions), R11 (parent verdict unbound from child completion).
+
