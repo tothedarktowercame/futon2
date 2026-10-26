@@ -22,5 +22,5 @@
   {:command "python3 test/scripts/wm_click_post_timeout_test.py"
    :status :passed :by "codex-12"
    :tests 3 :failures 0 :errors 0
-   :note "Follow-up confirms curl exit 28 recovers even if a partial body was captured."
+   :note "Follow-up confirms the exit-28 recovery guard retains the three reviewed controls."
    :log "/home/joe/notes/r19-post-timeout/focused-followup.log"}]}
