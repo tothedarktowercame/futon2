@@ -7,6 +7,7 @@
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.pattern-retraction :as pattern-retraction]
+            [futon2.aif.retraction-cascade :as retraction-cascade]
             [futon2.aif.target-policy-family :as sut]
             [futon2.aif.target-reading-registry :as registry]))
 
@@ -39,9 +40,19 @@
            {:a "p/b" :b "p/c" :kind "why" :weight 1 :evidence []}]})
 
 (defn- retraction-policy [analysis graph]
-  (first (filter #(= :retraction (:kind %))
-                 (:policies (sut/policy-family {:reading (reading analysis)
-                                                :graph graph})))))
+  (let [seeds (vec (sort (for [sentence (:sentences analysis)
+                               fragment (:fragments sentence)
+                               ref (:pattern_refs fragment)
+                               :when (= "candidate" (:status ref))]
+                           (:id ref))))
+        result (pattern-retraction/retractions
+                graph {:seeds seeds :k 3
+                       :weights graph-pin/default-weights})]
+    {:target "M-test" :mission "M-test" :kind :retraction
+     :policy-id "M-test/retraction-fixture"
+     :analysis analysis
+     :cascade (retraction-cascade/from-retraction
+               "M-test" analysis (first (:retractions result)))}))
 
 (defn- roots [policy]
   (let [co (get-in (shape-g/arranged->candidate
@@ -102,13 +113,15 @@
     (is (= (:g original-score) (:g renamed-score))
         "renaming a structurally identical authored edge does not change G")))
 
-(deftest reading-and-retraction-form-one-family
+(deftest retractions-are-computed-and-excluded-from-the-family
   (let [result (sut/policy-family {:reading (reading (analysis-map)) :graph graph})]
     (is (= :computed (:status result)))
-    (is (= 3 (:reported-count result)))
-    (is (= 2 (:distinct-count result)))
-    (is (= #{:reading-alternatives :retraction} (set (map :kind (:policies result)))))
+    (is (= 2 (:reported-count result)))
+    (is (= 1 (:distinct-count result)))
+    (is (= #{:reading-alternatives} (set (map :kind (:policies result)))))
     (is (every? :policy-id (:policies result)))
+    (is (pos? (get-in result [:provenance :retraction :computed-count])))
+    (is (seq (get-in result [:provenance :retraction :excluded-policy-ids])))
     (is (zero? (:failure-count result)))))
 
 (deftest occurrence-squares-attach-before-policy-scoring
@@ -165,14 +178,11 @@
   ;; retraction because a single reading pattern had no edges.
   (let [g {:pattern-ids ["p/a" "p/b" "p/c"] :nodes ["p/b" "p/c"]
            :edges [{:a "p/b" :b "p/c" :kind "why" :weight 1 :evidence []}]}
-        result (sut/policy-family {:reading (reading (analysis-map)) :graph g})
-        retractions (filter #(= :retraction (:kind %)) (:policies result))]
+        result (sut/policy-family {:reading (reading (analysis-map)) :graph g})]
     (is (= [{:kind :isolated-seed :seeds ["p/a"]}] (:failures result)))
     (is (= ["p/b"] (get-in result [:provenance :retraction :seeds])))
-    (is (seq retractions))
-    (is (not-any? #(some #{"p/a"} (map (fn [n] (or (:pattern n) n))
-                                       (get-in % [:cascade :nodes])))
-                  retractions))))
+    (is (pos? (get-in result [:provenance :retraction :computed-count])))
+    (is (not-any? #(= :retraction (:kind %)) (:policies result)))))
 
 (def lab-root "holes/labs/wm-contract/mission-head-cascades-2026-09-30")
 (def graph-path "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")
@@ -198,16 +208,24 @@
                :edges (vec (mapcat :edges (:retractions stored)))}
         reading {:status :current-candidate :target-id target :analysis a
                  :excerpt-digest (apply str (repeat 64 "1"))}
-        family (with-redefs [pattern-retraction/retractions (fn [& _] stored)]
-                 (sut/policy-family {:reading reading :graph graph}))
-        from-family (set (map shape-g/structural-identity
-                              (filter #(= :retraction (:kind %)) (:policies family))))
+        computed (map #(hash-map :target target :mission target :kind :retraction
+                                 :analysis a
+                                 :cascade (retraction-cascade/from-retraction target a %))
+                      (:retractions stored))
+        from-computation (set (map shape-g/structural-identity computed))
         from-lab (set (map shape-g/structural-identity
                            (filter #(and (= stem (:mission %))
                                          (= :retraction (:kind %)))
                                    (shape-g/materialize-policies lab-root))))]
-    (is (= from-family from-lab))
+    (is (= from-computation from-lab))
     (is (seq from-lab))))
+
+(deftest lowest-g-retraction-is-recorded-but-cannot-enter-the-family
+  (let [result (sut/policy-family {:reading (reading (analysis-map)) :graph graph})
+        excluded (get-in result [:provenance :retraction :excluded-policy-ids])]
+    (is (seq excluded))
+    (is (not-any? (set excluded) (map :policy-id (:policies result))))
+    (is (every? #(not= :retraction (:kind %)) (:policies result)))))
 
 (deftest ^:slow seven-real-policy-families-report-current-graph-differences
   (let [dir (temp-dir) graph-copy (io/file dir "graph.json")
