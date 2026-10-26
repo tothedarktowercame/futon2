@@ -884,3 +884,44 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   An addendum bell carries the wrapper fix, since the packet's checkpoint
   would otherwise stop the job on it. Parks `park-aa3f4f39` and
   `park-807ebff3`, 45 min each.
+- 2026-10-26 claude-9 (04:33Z): codex-9's R1 part (a) returned (futon2
+  `ff789d5e7`, job `invoke-1792988536265-4122-7a2d54a5`). Record check:
+  five files, the four named plus the p37 runtime test whose pins moved
+  with the batch semantics; trailers codex-9 / Dispatched-By claude-9.
+  Accepted: `prepare!` no longer stops at the first refusal; a refused need
+  leaves `:pending`, every attempt spends a slot, `:reason` is only
+  batch-complete / batch-limit / deadline, status is pending while needs
+  remain, else refused when any row refused, else prepared; the outcome
+  projection gains `:refused`. The tests build the amended clause's
+  controls (one throw among publishes at limit 3: three rows, 768 pending,
+  the `m150TwoAttemptedOneRefused` shape; all-refusing at limit 3: three
+  refused rows; a completed batch with one refusal: refused /
+  batch-complete). No warrant; I ran the three namespaces once as the
+  first run of new tests: the two preparation namespaces green, p37 red
+  with five assertions whose cause is `:selection-as-of-required` from the
+  selector. That red is at HEAD since `aaa85f9b4` (10-22), after p37's
+  last edit before tonight; codex-9 laid it at codex-14's dirty selector
+  files, which the reason string rules out. codex-14's R13 addendum
+  stopped on the same red in `outer_policy_runtime_selection_test` (15
+  failures in a clean worktree at `ff789d5e7` without its change) and
+  asked for a fourth-file licence or a waiver: waived as pre-existing,
+  commit the three files, bell `invoke-1792989109914-4132-7eb140f6`, park
+  `park-d7ce48de`. One stale-helper defect behind both reds (`run-live`
+  and the p37 fixture omit `:selection-as-of`); it gets its own small
+  packet after R1b, not a line on the defect list. R1 part (b) dispatched
+  to codex-9 from a read of the three gates (runner 2385 and 7295, runtime
+  485 via `prechoice-field`, all on `selected-need`, which is nil under a
+  readable winner): a `preparation-needs` / `preparation-needed?` pair in
+  `selected_target_reading.clj`, the two runner gates swapped to it, the
+  runtime branch running the batch over the receipt's `:policy-field` with
+  the chosen target's need first, a checkpoint if the retained-selection
+  path needs more than the predicate swap, and a new namespace under
+  `test/futon2/aif/wm/` that pins the bad case (readable winner, four
+  unmet families: the step at HEAD never calls the fn). Premises checked
+  before dispatch: `:policy-field` is on every ordinary receipt
+  (`meta_live_outer_selector.clj:1039`); `retained-outer-selector`
+  (`full_loop_runtime.clj:378`) keeps the winner across the redecide;
+  `repair!` is `repair-need!` on the selected need. Job
+  `invoke-1792989152008-4137-2285ef7d`, park `park-c503c4a7`, deadline
+  05:17Z. Packets under `~/notes/wm-next/outer-selection/packets/`
+  (`R1b-batch-fires-with-a-winner-packet.md`, `R13-gate-waiver-bell.md`).
