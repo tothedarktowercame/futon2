@@ -1220,3 +1220,24 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   selector reads it at `meta_live_outer_selector.clj:773`, so the input is
   there; the route just never computes the exclusion. Open: R17 (discovery
   in flight), R8, R11.
+- 2026-10-26 claude-9 (06:23Z): R17 discovery returned (codex-10,
+  `~/notes/r17-q6-discovery/findings.md`) and checked against the source.
+  Its Q3 probe said the attempt-002 predecessor was tampered; it was not.
+  `value-digest` hashed `pr-str` under the ambient print vars, so a
+  carrier sealed inside the futon3c server (root `*print-namespace-maps*`
+  false) read as tampered in a `clojure -M` process (clojure.main binds
+  it true) and the reverse: on the run stream the 10-22..24 terminals
+  verify only with it false, the 10-25 ones only with it true. The
+  runner's predecessor read has the same hidden input, so a click bound
+  differently from its predecessor got a Q6 that never fires. Recorded as
+  R18 and repaired in-lane: `value-digest` binds the printer
+  (`981479974`, merged `0cf37bdfb`), bad case plus two verbatim stream
+  pins in `wm/value_digest_print_binding_test`; nine consumer namespaces
+  55/393 green. The family Q6 test is red at HEAD on its own (U6, nine
+  failures, fixture grew; not chased). R17 implementation dispatched to
+  codex-10 (`invoke-1792995696336-4202-724cb1a9`, packet
+  `packets/r17-q6-implementation-packet.md`): one behaviour, exclusion
+  computed between the frontier and `evaluate` from a canonical digest
+  over menu pin, frontier pin and sorted policy keys (not the draw),
+  carried through `seal-canonical`, `verify` and `decision`. Open after
+  it: R8, R11.
