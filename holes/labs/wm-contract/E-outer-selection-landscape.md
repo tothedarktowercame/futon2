@@ -1173,3 +1173,17 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   green; after the repair 10/56 and the route 7/87 green, kondo 0/0,
   parens OK. The existing two-rows test is untouched. Open for packets:
   R4 (Q8b), R8, R11.
+- 2026-10-26 claude-9: R4/Q8b dispatched to codex-10
+  (`invoke-1792994044346-4200-1c69bd9d`, packet
+  `~/notes/wm-next/outer-selection/packets/r4-q8b-stages-packet.md`). Read
+  before writing it: the canonical-route certificate carries `:q4` rows, the
+  frontier pin and the menu pin but no `:policy-stages`; menu entries carry
+  reading-policy keys at `[:action :policy-key]`, so the stages use the
+  family route's Id type; `:selection-law` has no `:posterior` on this
+  route, so `cascade` also needs a posterior fallback. Found while reading:
+  the canonical route never computes a Q6 exclusion (`previous-run/exclusion`
+  is only called at `cascade_decision.clj:1248`), so `[:selection-certificate
+  :q6]` is nil on attempt-002 and `cascade` refuses
+  `:q6-carrier-absent-or-tampered` next; recorded as R17 in
+  `DEFECTS-reading-era.md`, discovery packet after Q8b. Open: R4 (in
+  flight), R17, R8, R11.
