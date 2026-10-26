@@ -13,7 +13,10 @@
 (def schema :wm/medic-disposition-v1)
 (def correction-kinds #{:historical-misclassification :genuine-repair})
 (def replay-results #{:producer-qualified-non-injury
-                      :unsupported-author-refusal :done-at-base-revision :injury})
+                      :unsupported-author-refusal :done-at-base-revision :injury
+                      :successful-close-non-injury})
+(def non-injury-replays
+  #{:producer-qualified-non-injury :successful-close-non-injury})
 
 (declare payload-valid?)
 
@@ -109,7 +112,7 @@
          :historical-misclassification
          (and (= (:cause-record-id current) (:original-record-id candidate))
               (= (:cause-pin current) (:original-pin candidate))
-              (= :producer-qualified-non-injury (:replay candidate)))
+              (contains? non-injury-replays (:replay candidate)))
          :genuine-repair
          (and (= (:cause-record-id current) (:cause-record-id candidate))
               (= (:cause-pin current) (:cause-pin candidate))
