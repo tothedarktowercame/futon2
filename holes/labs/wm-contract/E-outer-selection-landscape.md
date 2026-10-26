@@ -1162,3 +1162,14 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `ClassCastException` in `row-choice` (`:248`), one seam before the R15
   guard; recorded OPEN in `DEFECTS-reading-era.md`, no Lean clause for the
   same reason as R15. Open for packets: R1 part (b), R4, R8, R11, R16.
+- 2026-10-26 claude-9: R16 reviewed and merged to main (`f5a77e21d`; codex-10
+  `5229fb224` bad case, `b697fd8d9` repair). Record check: trailers in
+  order, src diff is `row-choice` only (`q8_frontier.clj:248-252`): a row
+  whose G has no `comparison-key` is chosen ahead of the ranked rows,
+  digest-sorted among such rows, so the cond's existing
+  `:channel-value-not-exact` branch refuses the task; all-exact rows keep
+  the least-G order. Test adequacy: the checkpoint log shows the mixed pair
+  erroring with `ClassCastException` in both orders and the nil control
+  green; after the repair 10/56 and the route 7/87 green, kondo 0/0,
+  parens OK. The existing two-rows test is untouched. Open for packets:
+  R4 (Q8b), R8, R11.
