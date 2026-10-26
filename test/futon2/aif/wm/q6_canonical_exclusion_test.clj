@@ -6,6 +6,7 @@
             [futon2.aif.q8-frontier :as q8]
             [futon2.aif.selected-outer-cascade-policy :as selected]
             [futon2.aif.selected-outer-cascade-policy-test]
+            [futon2.aif.wm.cascade-decision :as cascade-decision]
             [futon2.aif.wm.family-selection :as family-selection]))
 
 (defn- production-carriers []
@@ -65,7 +66,7 @@
     (is (= #{refused-key} (:requirement-excluded cascade)))))
 
 (deftest excluding-the-only-policy-is-a-typed-repeat-refusal
-  (let [{:keys [menu frontier]} (fixture)
+  (let [{:keys [menu evidence objective]} (fixture)
         entry (first (:entries menu))
         menu (assoc menu :entries [entry])
         menu (assoc menu :menu-pin (family-selection/sealed-menu-pin menu))
@@ -75,7 +76,11 @@
         pred (predecessor :refused key digest)
         exclusion (previous-run/canonical-exclusion pred menu frontier)
         selection (canonical-selection/evaluate frontier menu nil
-                                                (:excluded-keys exclusion))]
+                                                (:excluded-keys exclusion))
+        refused (selected/seal-canonical menu evidence objective frontier selection
+                                         (:carrier exclusion))
+        projected (cascade-decision/cascade-decision
+                   {} {:selected-outer-cascade-policy refused})]
     (is (= [:no-choice :repeat-choice-after-refusal]
            ((juxt :status :reason) selection)))
     (is (= {:condition :selection-inputs-change
@@ -83,10 +88,12 @@
             :excluded-key key}
            (get-in exclusion [:carrier :rearm])))
     (is (= :refused (get-in exclusion [:carrier :status])))
-    (is (= (:carrier exclusion) (:refusal exclusion)))))
+    (is (= (:carrier exclusion) (:refusal exclusion)))
+    (is (= (:carrier exclusion)
+           (get-in projected [:decision :selection-certificate :q6])))))
 
 (deftest legacy-nil-digest-warms-the-next-terminal
-  (let [{:keys [menu frontier]} (fixture)
+  (let [{:keys [menu]} (fixture)
         key (get-in (first (:entries menu)) [:action :policy-key])
         pred (predecessor :refused key nil)
         {:keys [exclusion selection decision]} (selected-case pred 0.0)

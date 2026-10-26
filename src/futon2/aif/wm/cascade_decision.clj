@@ -1353,10 +1353,12 @@
       (if (= :selected (:status projected))
         (dissoc projected :status)
         {:decision
-         (abstain [{:target (get-in opts [:selected-outer-cascade-policy :target-id])
-                    :stage :outer-policy-handoff
-                    :kind :outer-task-selection-refused
-                    :failure-kind (:reason projected)}])}))
+         (cond-> (abstain [{:target (get-in opts [:selected-outer-cascade-policy :target-id])
+                            :stage :outer-policy-handoff
+                            :kind :outer-task-selection-refused
+                            :failure-kind (:reason projected)}])
+           (:q6 projected)
+           (assoc-in [:selection-certificate :q6] (:q6 projected)))}))
 
     (:outer-policy-selection-claimed? opts)
     {:decision
