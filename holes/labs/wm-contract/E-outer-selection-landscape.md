@@ -810,3 +810,27 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   and R14. zai-3's fix alternative, deriving the draw from the frontier
   pin, is recorded under R13 and not taken. One packet slip of mine: the
   dispatch gave the q8 test path without its `wm/` directory.
+- 2026-10-26 claude-9 (04:09Z): codex-9's R12 repair returned (futon2
+  `5c4e8b2df`, "Make outer frontier reasons discriminating") and was
+  reviewed. Record check: the diff touches only `q8_frontier.clj` and
+  `wm/q8_canonical_frontier_test.clj`; trailers name codex-9 under my
+  dispatch. Adequacy: the carrier now computes `ranked-kinds` from the
+  menu failure and refusal rows of targets with menu entries, and an
+  unranked task's headline is the first sorted kind outside that set, or
+  `:unexplained`; the census verdict carries `:ranked-kinds`. On the
+  fixture the set is the five kinds the Lean clause took as its
+  `rankedKinds` parameter, so the Clojure and the Lean agree on the input
+  as well as the output. The re-pins match `m150_repaired_discriminating`
+  (both headlines `:target-class-unknown`, histogram 101 / 1 / 3). The
+  test derives the ranked kinds from the fixture's rows rather than typing
+  them, and the bad case is constructed: an unranked task carrying only a
+  shared kind headlines `:unexplained`, and gains its own kind as headline
+  when one is added. Two observations, neither needing a change: the
+  test's refusal-row target reads `:target-id` before the policy-id
+  prefix while the source reads the prefix only (equal on the fixture,
+  asserted); and the S2 and S5 branches take the same headline rule,
+  which the clause's wording covers. No warrant; spot-run at 04:07Z, 8
+  tests, 49 assertions, green. R12 is REPAIRED-FORWARD in the defect
+  list. Packet slip of mine, the second tonight of the same kind: the
+  packet named `futon2.aif.q8-frontier-test`, which does not exist; the
+  q8 tests live under `wm/`.
