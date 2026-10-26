@@ -1,5 +1,6 @@
 (ns futon2.aif.meta-outcome-dataset-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-outcome-dataset :as dataset]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.outer-target-belief :as belief]
@@ -245,7 +246,10 @@
             :missing 1 :drifted 1
             :reasons {:record-missing 1 :record-source-drift 1}}
            (get-in result [:counts :record-read])))
-    (is (= (records "/runs/one.edn")
+    (is (= (dataset/projection
+            (records "/runs/one.edn")
+            {:path "/runs/one.edn"
+             :sha256 (field/sha256 (utf8 (records "/runs/one.edn")))})
            (:verified-record (first (:rows result)))))))
 
 (deftest provider-terminal-projection-uses-the-verified-record-not-the-path
@@ -260,6 +264,43 @@
     (is (= "run-1" (:run/id result)))
     (is (= :closure (:observed-outcome result)))
     (is (nil? (:selected-cascade-digest result)))))
+
+(deftest learning-projections-are-equivalent-and-record-bound
+  (let [paths ["/runs/one.edn" "/runs/two.edn"]
+        whole (dataset/manifest paths read-bytes)
+        projections (into {}
+                          (map (fn [path]
+                                 (let [pin {:path path :sha256 (field/sha256 (read-bytes path))}
+                                       p (dataset/projection (records path) pin)
+                                       pp (str path ".learning")]
+                                   [pp (utf8 p)]))
+                               paths))
+        entries (mapv (fn [{:keys [path] :as entry}]
+                        (let [pp (str path ".learning")]
+                          (assoc entry :projection
+                                 {:path pp :sha256 (field/sha256 (projections pp))})))
+                      (:entries whole))
+        projected (assoc whole :entries entries)
+        reader #(or (projections %) (read-bytes %))
+        whole-result (dataset/produce {:manifest whole
+                                       :expected-manifest-pin (:source-pin whole)
+                                       :read-bytes reader})
+        projected-result (dataset/produce {:manifest projected
+                                           :expected-manifest-pin (:source-pin whole)
+                                           :read-bytes reader})]
+    (is (= whole-result projected-result))
+    (is (every? #(< (alength ^bytes %) (* 64 1024)) (vals projections)))
+    (let [bad-path (get-in entries [0 :projection :path])
+          bad (assoc (edn/read-string (String. ^bytes (projections bad-path) "UTF-8"))
+                     :record-pin {:path "/foreign" :sha256 (apply str (repeat 64 "0"))})
+          bad-bytes (utf8 bad)
+          bad-entry (assoc-in (first entries) [:projection :sha256] (field/sha256 bad-bytes))
+          bad-manifest (assoc projected :entries (assoc entries 0 bad-entry))
+          bad-result (dataset/produce {:manifest bad-manifest
+                                       :expected-manifest-pin (:source-pin whole)
+                                       :read-bytes #(if (= % bad-path) bad-bytes (reader %))})]
+      (is (= :projection-record-pin-mismatch
+             (get-in bad-result [:exclusions 0 :reason]))))))
 
 (deftest canonical-outcome-vocabulary-is-explicit
   (is (= :closure (dataset/outcome-class :grounded-change)))

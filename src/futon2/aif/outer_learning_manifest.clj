@@ -2,7 +2,8 @@
   "Atomic append-only authority over run records admitted to outer learning."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [futon2.aif.meta-field-observation :as field])
+            [futon2.aif.meta-field-observation :as field]
+            [futon2.aif.meta-outcome-dataset :as dataset])
   (:import [java.nio.file Files StandardCopyOption]
            [java.util UUID]))
 
@@ -49,21 +50,47 @@
                        {:kind :outer-learning-record-unavailable
                         :path run-record-path})))
      (let [canonical (.getCanonicalPath record-file)
-           sha (field/sha256 (Files/readAllBytes (.toPath record-file)))
-           entry {:path canonical :sha256 sha}
+           bytes (Files/readAllBytes (.toPath record-file))
+           sha (field/sha256 bytes)
+           record-pin {:path canonical :sha256 sha}
+           record (edn/read-string (String. ^bytes bytes "UTF-8"))
+           projection-path (str (subs canonical 0 (- (count canonical) 4)) ".learning.edn")
+           projected (dataset/projection record record-pin)
+           projection-bytes (.getBytes (str (pr-str projected) "\n") "UTF-8")
+           projection-pin {:path projection-path :sha256 (field/sha256 projection-bytes)}
+           entry (assoc record-pin :projection projection-pin)
            current (read-manifest manifest-path)]
        (when-not (valid? current)
          (throw (ex-info "Outer-learning manifest is invalid"
                          {:kind :outer-learning-manifest-invalid
                           :path manifest-path})))
        (if-let [existing (some #(when (= canonical (:path %)) %) (:entries current))]
-         (if (= entry existing)
-           {:schema schema :status :already-recorded :entry entry
-            :manifest-path manifest-path}
-           (throw (ex-info "Outer-learning run record drifted after publication"
-                           {:kind :outer-learning-record-drift
-                            :existing existing :observed entry})))
-         (let [next (update current :entries conj entry)]
+         (do
+           (when-not (= record-pin (select-keys existing [:path :sha256]))
+             (throw (ex-info "Outer-learning run record drifted after publication"
+                             {:kind :outer-learning-record-drift
+                              :existing existing :observed entry})))
+           (when (.isFile (io/file projection-path))
+             (let [actual (field/sha256 (Files/readAllBytes (.toPath (io/file projection-path))))]
+               (when-not (= actual (:sha256 projection-pin))
+                 (throw (ex-info "Outer-learning projection drifted after publication"
+                                 {:kind :outer-learning-projection-drift
+                                  :path projection-path :expected (:sha256 projection-pin)
+                                  :actual actual})))))
+           (if (= entry existing)
+             {:schema schema :status :already-recorded :entry entry
+              :manifest-path manifest-path}
+             (let [_ (when-not (.isFile (io/file projection-path))
+                       (atomic-write! projection-path projected))
+                   next (update current :entries
+                                (fn [entries]
+                                  (mapv #(if (= canonical (:path %)) entry %) entries)))]
+               (atomic-write! manifest-path next)
+               {:schema schema :status :projection-recorded :entry entry
+                :manifest-path manifest-path :manifest-sha256 (field/digest next)})))
+         (let [_ (when-not (.isFile (io/file projection-path))
+                   (atomic-write! projection-path projected))
+               next (update current :entries conj entry)]
            (atomic-write! manifest-path next)
            {:schema schema :status :recorded :entry entry
             :manifest-path manifest-path

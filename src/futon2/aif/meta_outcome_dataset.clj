@@ -8,6 +8,15 @@
 
 (def schema :wm/meta-outcome-dataset-v1)
 (def manifest-schema :wm/run-record-manifest-v1)
+(def projection-schema :wm/learning-projection-v1)
+(declare read-record-bytes)
+
+(defn record-entry [entry]
+  (select-keys entry [:path :sha256]))
+
+(defn manifest-source-pin [entries]
+  (let [body {:schema manifest-schema :entries (mapv record-entry entries)}]
+    {:path "wm://run-record-manifest-v1" :sha256 (field/digest body)}))
 
 (defn- refusal [reason details]
   {:schema schema :status :refused :reason reason :details details})
@@ -18,11 +27,10 @@
   ([paths read-bytes]
    (let [entries (mapv (fn [path] {:path path :sha256 (field/sha256 (read-bytes path))}) paths)
          body {:schema manifest-schema :entries entries}]
-     (assoc body :source-pin {:path "wm://run-record-manifest-v1"
-                              :sha256 (field/digest body)}))))
+     (assoc body :source-pin (manifest-source-pin entries)))))
 
 (defn- manifest-check [m expected-pin]
-  (let [body (dissoc m :source-pin)
+  (let [body {:schema (:schema m) :entries (mapv record-entry (:entries m))}
         paths (map :path (:entries m))]
     (cond
       (not= expected-pin (:source-pin m)) :external-manifest-pin-mismatch
@@ -30,6 +38,62 @@
       (not= manifest-schema (:schema m)) :manifest-schema-invalid
       (not= (count paths) (count (set paths))) :manifest-paths-duplicated
       :else nil)))
+
+(defn projection
+  "Retain exactly the run-record fields consumed by the outcome dataset and
+  its policy-provider adapter. RECORD-PIN is the verified source identity."
+  [record record-pin]
+  (merge {:schema projection-schema :record-pin record-pin}
+         (select-keys record [:run/id :click/id :startedAt :outer-task-selection
+                              :failure :terminal-receipt :run-output :terminal
+                              :registered-run/timing :registered-run/model-usage
+                              :d-task-enactment :cascade-feedback :traceWritten])
+         (when-let [decision (:decision record)]
+           {:decision (select-keys decision [:selection-law
+                                             :selected-enacted-identity
+                                             :selection-certificate])})))
+
+(defn- read-input [read-bytes source]
+  (let [record-source (record-entry source)
+        projection-source (:projection source)
+        chosen (or projection-source record-source)
+        {read-status :status bytes :bytes read-reason :reason
+         read-details :details} (read-record-bytes read-bytes (:path chosen))
+        actual (when (= :readable read-status) (field/sha256 bytes))]
+    (cond
+      (= :absent read-status)
+      {:status :excluded :exclusion (cond-> {:source record-source
+                                             :reason (if projection-source
+                                                       (keyword (str "projection-" (name read-reason)))
+                                                       read-reason)}
+                                      read-details (assoc :details read-details))}
+      (not= (:sha256 chosen) actual)
+      {:status :excluded :exclusion {:source record-source
+                                     :reason (if projection-source
+                                               :projection-source-drift
+                                               :record-source-drift)
+                                     :expected (:sha256 chosen) :actual actual}}
+      :else
+      (let [value (try (edn/read-string (String. ^bytes bytes "UTF-8"))
+                       (catch Throwable _ ::invalid))]
+        (cond
+          (= ::invalid value)
+          {:status :excluded :exclusion {:source record-source
+                                         :reason (if projection-source
+                                                   :projection-invalid-edn
+                                                   :record-invalid-edn)}}
+          (and projection-source
+               (or (not= projection-schema (:schema value))
+                   (not= record-source (:record-pin value))))
+          {:status :excluded :exclusion {:source record-source
+                                         :reason (if (not= projection-schema (:schema value))
+                                                   :projection-schema-invalid
+                                                   :projection-record-pin-mismatch)
+                                         :expected record-source
+                                         :actual (:record-pin value)}}
+          :else
+          {:status :admitted
+           :record (if projection-source value (projection value record-source))})))))
 
 (defn- target-kind [target]
   (cond
@@ -263,27 +327,13 @@
   (if-let [bad (manifest-check manifest expected-manifest-pin)]
     (refusal bad {})
     (loop [entries (:entries manifest) rows [] exclusions [] interoception []]
-      (if-let [{:keys [path sha256] :as source} (first entries)]
-        (let [{read-status :status bytes :bytes read-reason :reason
-               read-details :details} (read-record-bytes read-bytes path)
-              actual (when (= :readable read-status) (field/sha256 bytes))]
-          (cond
-            (= :absent read-status)
-            (recur (next entries) rows
-                   (conj exclusions (cond-> {:source source :reason read-reason}
-                                      read-details (assoc :details read-details)))
-                   interoception)
-            (not= sha256 actual)
-            (recur (next entries) rows
-                   (conj exclusions {:source source :reason :record-source-drift
-                                     :expected sha256 :actual actual}) interoception)
-            :else
-            (let [record (try (edn/read-string (String. ^bytes bytes "UTF-8"))
-                              (catch Throwable _ ::invalid))]
-              (if (= ::invalid record)
-                (recur (next entries) rows
-                       (conj exclusions {:source source :reason :record-invalid-edn}) interoception)
-                (let [run-id (:run/id record) click-id (:click/id record)
+      (if-let [entry (first entries)]
+        (let [source (record-entry entry)
+              input (read-input read-bytes entry)]
+          (if (= :excluded (:status input))
+            (recur (next entries) rows (conj exclusions (:exclusion input)) interoception)
+            (let [record (:record input)
+                  run-id (:run/id record) click-id (:click/id record)
                       selection (selected-target record)
                       cause (terminal-cause record)
                       intero (interoceptive-evidence record source selection cause)
@@ -347,7 +397,7 @@
                                {:target-source (if (= :canonical-outer (:source selection))
                                                  [:outer-task-selection :chosen :id]
                                                  [:decision :selection-law :per-policy-argmax :action :target])}}]
-                        (recur (next entries) (conj rows row) exclusions interoception)))))))))
+                        (recur (next entries) (conj rows row) exclusions interoception)))))))
         (let [duplicate-identities (->> rows
                                         (group-by (juxt :run/id :click/id))
                                         (keep (fn [[identity matches]]

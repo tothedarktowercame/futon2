@@ -14,7 +14,7 @@
 (defn- manifest-from [entries]
   (let [body {:schema dataset/manifest-schema :entries (vec entries)}]
     (assoc body :source-pin
-           {:path "wm://run-record-manifest-v1" :sha256 (field/digest body)})))
+           (dataset/manifest-source-pin entries))))
 
 (defn load-shadow
   ([] (load-shadow default-authority-path))
@@ -27,7 +27,10 @@
            entries (->> (concat (:run-records authority) (:entries dynamic))
                         (reduce (fn [by-path entry]
                                   (if-let [prior (get by-path (:path entry))]
-                                    (if (= prior entry) by-path
+                                    (if (= (dataset/record-entry prior)
+                                           (dataset/record-entry entry))
+                                      (assoc by-path (:path entry)
+                                             (merge prior entry))
                                       (throw (ex-info "Conflicting outer-learning pins"
                                                       {:path (:path entry)})))
                                     (assoc by-path (:path entry) entry))) {})

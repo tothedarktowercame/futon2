@@ -1,0 +1,19 @@
+{:schema :test/execution-receipt-v1
+ :recorded-at "2026-10-26T19:55:00Z"
+ :command "clojure -X:test :nses '[futon2.aif.meta-outcome-dataset-test futon2.aif.outer-learning-manifest-test]'"
+ :namespaces [futon2.aif.meta-outcome-dataset-test
+              futon2.aif.outer-learning-manifest-test]
+ :tests 13
+ :assertions 80
+ :failures 0
+ :errors 0
+ :result :passed
+ :additional-gates
+ {:clj-kondo {:errors 0 :warnings 0}
+  :check-parens :ok
+  :outer-learning-runtime-test
+  {:result :pre-existing-live-fixture-failures
+   :baseline-command "clojure -X:test :nses '[futon2.aif.outer-learning-runtime-test]'"
+   :baseline-revision "89fa31cbad05eb692e3104e15a29ce0c778df7ea"
+   :tests 1 :assertions 17 :failures 14 :errors 0
+   :note "The unchanged main baseline is stale against the growing live manifest; the projection change does not alter those expected-count fixtures."}}}
