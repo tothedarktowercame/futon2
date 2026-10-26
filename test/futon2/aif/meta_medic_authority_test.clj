@@ -122,6 +122,36 @@
            (:reason (authority/resolve-artifact {"artifacts/two.edn" two-forms}
                                                 two-pin))))))
 
+(deftest verified-artifacts-parse-once-and-refusals-never-enter-the-cache
+  (authority/reset-artifact-parse-cache!)
+  (try
+    (let [value {:artifact (vec (range 128))}
+          [pin bytes] (pinned "artifacts/cached.edn" value)
+          parses (atom [])
+          resolve #(binding [authority/*artifact-parse-observer*
+                             (fn [sha256] (swap! parses conj sha256))]
+                     (authority/resolve-artifact % pin))
+          first-result (resolve {(:path pin) bytes})
+          second-result (resolve {(:path pin) bytes})]
+      (is (= {:status :resolved :value value} first-result))
+      (is (= first-result second-result))
+      (is (= [(:sha256 pin)] @parses))
+      (is (= :artifact/hash-drift
+             (:reason (resolve {(:path pin) (str bytes "x")}))))
+      (is (= [(:sha256 pin)] @parses)))
+    (let [malformed "{:unclosed [1 2}"
+          pin {:path "artifacts/malformed.edn"
+               :sha256 (load-identity/sha256 (.getBytes malformed "UTF-8"))}
+          parses (atom 0)
+          resolve #(binding [authority/*artifact-parse-observer*
+                             (fn [_] (swap! parses inc))]
+                     (authority/resolve-artifact {(:path pin) malformed} pin))]
+      (is (= :artifact/malformed (:reason (resolve))))
+      (is (= :artifact/malformed (:reason (resolve))))
+      (is (= 2 @parses)))
+    (finally
+      (authority/reset-artifact-parse-cache!))))
+
 (deftest pinned-markdown-contract-is-opaque-and-hash-verified
   (let [f (fixture)
         pin (get-in f [:intent :acceptance-contract-pin])]
