@@ -2,7 +2,7 @@
 
 **Opened:** 2026-10-26 (Joe's question put on 2026-10-25, relayed by claude-11)
 **Owner:** claude-9 (research question, record, conclusions). Implementation may go to zai-2.
-**Status:** OPEN. Capture C1–C3 to land before the next click; findings F1–F6 recorded; hypotheses H1–H4 open.
+**Status:** OPEN. Capture C1–C4 to land before the next click; findings F1–F6 recorded (F3 corrected in §10.2); hypotheses H1–H4 open; §10 answers Joe's 2026-10-26 questions.
 **Related:** `futon3c/holes/missions/M-giraffe.md` (`357edb090`, one work item as data, with dependencies);
 `STOCKTAKE-wm-2026-10-25.md`; `PROPOSAL-outer-focus-class-2026-10-21.md`;
 `mathlib4/DarkTower/WarMachine/Proof2/OuterSelectionCanonicalG.md` (O2/O3 notes);
@@ -225,6 +225,154 @@ sealed menu and a canonical selection).
 - C1–C3 are three packets, one file/behaviour each, in order C1, C2, C3, each
   reviewed before the next is dispatched.
 
+## 10. Additions of 2026-10-26 (Joe, via claude-11): Lean at selection, receipts history, precedence
+
+Joe treats three findings as stop-the-line, each on its own
+(`futon3c/holes/missions/M-giraffe.md`, `720ee5ae0`): unreachable eligible
+missions (F3/F4), unselectable tickets, and G without a dependency input (F2).
+Three questions were put to this record. Answers from this turn's reads; every
+count is from the files named.
+
+### 10.1 Which Lean statement should rule out "eligible but never read"
+
+**The statement exists, and the runtime hands it nothing to check.**
+
+- `IncrementalTaskFrontier.lean:126` `SelectionCertificate.Valid frontier openTasks`
+  requires `taskSet frontier = openTasks` and the selected entry to be a strict
+  key-minimum against every other frontier member. `Requirements.lean:362`
+  instantiates it with `openTasks = r.frontierCensus.eligible`, and
+  `Requirements.lean:274-276` require one outer action per eligible task. Under
+  these, a frontier of 4 rows over 109 eligible is invalid. `EligibilityCensus.Valid`
+  (`IncrementalTaskFrontier.lean:184`) separately requires every open task to be
+  eligible or excluded with a typed reason (reason `0` refused).
+- What the runtime binds to that frontier: the receipt's `:q8-frontier`
+  (`q8_frontier_certificate.clj`, `q8_frontier.clj:143` `outer-frontier`), whose
+  ranking law is `:meta-pipeline/complete-union-channel-sum-v1`, the pairwise
+  ranking over all eligible tasks of the selector that O3-2 replaced.
+- Since the canonical carrier activates, `meta_live_outer_selector.clj:1045-1052`
+  writes `:q8-frontier` as `{:status :certified :carrier (:recomputation
+  activated-carrier)}`: no schema, no census, no entries, no selected.
+  `q8-frontier/certificate` over that stub, run in the live JVM over the
+  attempt-002 receipt this turn, returns `:status :not-recomputable`, reasons
+  `[:outer-frontier-absent-or-tampered]`. The attempt-002 checkpoints and
+  `retained/` hold no Q8 certificate at all.
+- `Proof2/OuterSelectionCanonicalG.lean` states the per-menu law only (minimum
+  G, equal minima in menu order, the tie draw, assessed pairs). Nothing in it or
+  in `GOverCascades.lean` relates the menu to the eligible census.
+
+So the 101 are, at the Lean layer, neither ranked nor excluded with a reason:
+exactly the silence `EligibilityCensus.Valid` is written to refuse, and it is not
+reached. The canonical G frontier is bound to no Lean frontier statement.
+
+**What would catch it.** Bind the canonical frontier to Q8 instead of the stub:
+an `outer-frontier` whose entries are the S5 rows and whose census lists the S2
+`:no-current-target-reading` 101, the S2 `:occurrence-squares-not-authored` 1,
+and the S4 refusals and unbound targets as typed exclusions. Then
+`Requirements.lean:362` is decidable on this run: it passes only if every one of
+the 101 is carried as an exclusion with its reason, and Joe's rule (a field most
+of whose eligible items can never reach G is the whitelist in another form) is
+then a judgement over a recorded reason count rather than over an absence. A
+stricter statement, if Joe wants Lean itself to refuse: an exclusion reason that
+is a reading-availability reason, not a task-standing reason, is not admissible
+at the frontier census. That statement does not exist today; the census admits
+any non-zero reason id.
+
+### 10.2 Selection receipts across runs
+
+Source: every `002-selection.edn` under `futon2/data` (293 files, 3.4 GB; index
+at `~/notes/wm-next/selection-receipts-index.txt`), projected by
+`~/notes/wm-next/scripts-sel-history.clj` into
+`~/notes/wm-next/selection-receipts-history.tsv` (one row per receipt: arm,
+support and excluded counts, read ids with their positions in support order,
+unread count, scored ids, policy status, chosen id and its position). Two files
+were not parsed, machinery-107 attempt-001 (2.4 GB) and machinery-108
+attempt-001 (164 MB).
+
+Three eras of selection receipt:
+
+| Era | Receipts | Span | Selector | Scored | Read set |
+|---|---|---|---|---|---|
+| wm-full-loop / machinery 47-66 | 86 + 14 | 2026-07-14 to 09-20 | controller over 4 actions (`:ranked-candidates`, `:selected-mission ":C1"`) | no target field | none |
+| machinery 100-138 (`:meta-pipeline`) | 41 | 2026-10-03 to 10-19 | pairwise `:complete-union` over all eligible (109 tasks, 5886 pairs on m130) | all eligible | none required |
+| machinery 142-150 (`:readings`) | 15 | 2026-10-19 to 10-24 | readings gate S2, then canonical G from m149 | 4 (m149-150 only) | 6-7, constant |
+
+Over the 15 reading-era receipts:
+
+- distinct targets ever read: 7 (M-digital-nomad-patterns, M-formal-war-machine,
+  M-pattern-posteriors, M-recommendation-bindings, M-self-improvement-loop,
+  M-stack-geometry, M-war-machine-wiring);
+- distinct ever scored by canonical G: 4 (the sealed-menu entries of §3);
+- distinct ever chosen: 7, equal to the read set;
+- read count per receipt: 6, 7, 7, 7, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7. It never grew.
+- positions of the read set in support order (m150): 6, 12, 54, 58, 70, 88, 101.
+
+Over the 41 meta-pipeline receipts: 34 distinct chosen, including 4 repair
+tickets (m101-102, support 35) and `A-self-heal` (m137-138); chosen positions
+spread over 6 to 104 of the field.
+
+**Correction to F3.** The read set is not the first few in field order. It is
+the set of targets the meta-pipeline selector chose on 2026-10-16 to 10-18:
+the 9 reading records on disk (`storage/wm-target-readings/targets/`) were
+written 2026-10-16 03:58 to 10-18 22:38, each the selected-target reading of
+that era's chosen target (m117-002 M-vsatarcs-writer, m124-002 M-stack-geometry,
+m125-001 M-pattern-posteriors, m125-002 M-custom-harness, m127-001
+M-recommendation-bindings, m130-001 M-formal-war-machine, m130-002
+M-digital-nomad-patterns, m131-001 M-self-improvement-loop, then
+M-war-machine-wiring). No reading has been written since 10-18 22:38, across
+15 reading-era clicks. The 3-per-click preparation
+(`full_loop_runtime.clj:486-491`, `reading-preparation/prepare!`, limit
+`(min 3 (max 1 (count needs)))`, 30-minute deadline) has added no target in
+this era, and its outcome is retained in no checkpoint of attempt-002 (001-007,
+`retained/`, `evidence/` checked). Whether it ran and refused, or did not run,
+the receipt cannot say. Measured, then: the field G can score is frozen at what
+the previous selector happened to choose in its last three days, and the 101
+have been unreachable on every click since the readings gate went in.
+Two readings on disk (M-vsatarcs-writer, M-custom-harness) are not in the
+read set; whether they left the eligible 109 at S1 or went stale was not checked.
+
+**H2 is answered for the history and reopened for the mechanism.** Reading
+order did not select the landscape; nothing did, because nothing read. The next
+run's capture needs one more item (C4): retain the `prepare!` result (its
+`:reason`, one of `:batch-complete`, `:batch-limit`, `:deadline`, or a refusal,
+and the needs it took) beside the selection trace.
+
+### 10.3 Precedence: built from what each step needs, or from document order
+
+**From needs.** `construction.clj:125` `containment-order` derives the descent
+edge `[A B]` exactly when A produces a token that B's guard needs; this is the
+mechanism of `cascade-construction/order-by-what-each-step-needs` ("take
+precedence from those dependencies"). Document order enters only as the
+candidate's `:precedence` list, which is checked against the derived descent;
+edges the list reverses are recorded as `:precedence-violations`, not refused.
+
+**What canonical G reads.** `cascade_coapply_g.clj:31-45` (`candidate!`)
+accepts only `{:co-apply {:units :descent :patterns}}`, refuses a cyclic
+descent, and reads the descent in the novelty term
+(`expected-novelty` over `model/enabled-frontier units descent patterns`) and,
+through the co-application kernel, in risk and ambiguity. The list-kernel
+fallback that would score a violating `:precedence` (`efe.clj:1006`
+`order-use`) is not on the canonical path.
+
+**Answer to "can G score two cascades equally when one has its steps in an
+impossible order".** Not in the canonical G: it never sees an order other than
+the one the steps' needs dictate, and a cyclic one is refused. What it cannot
+see is a need satisfied by nothing inside the cascade: a step whose guard needs
+a token no unit produces and q0 does not hold. That is F2 and M-giraffe's third
+finding, restated at the cascade grain: the dependency G lacks is on things
+outside the cascade, not on the order within it. The H1 tie (27 vs 12 units,
+equal G to 16 digits) is therefore not an order blindness; C2's retained terms
+will say whether it is the class-model collapse H1 proposes. Constructing the
+case was not cheap: the scoring inputs (observation model, pattern counts,
+state) are not in the retained receipt in the form `compare-at-horizon` takes.
+With C2 landed the cheap version is: compare the per-step novelty of the two
+tied rows, since novelty is the one term that reads the descent.
+
+### 10.4 Not duplicated
+
+codex-11's migration of the 61 rotted close/brief fixtures
+(`~/notes/wm-next/close-test-triage/report.md`) is dispatched by claude-11 and
+touches tests only; nothing in C1-C3 or C4 overlaps it.
+
 ## 9. Log
 
 - 2026-10-26 00:04Z claude-9: record opened; §3–§5 from the attempt-002
@@ -272,3 +420,15 @@ sealed menu and a canonical selection).
   job `invoke-1792974125398-4005-03399257`, park
   `park-6421b795-af87-4356-b60b-b1b123ba5823` (deadline 60 min), packet
   `~/notes/wm-next/packets/c2-outer-canonical-g-terms.md`. C3 waits on its review.
+- 2026-10-26 claude-9: §10 added on claude-11's bell (Joe's three questions).
+  Lean: the frontier statement exists (`Requirements.lean:362` via
+  `IncrementalTaskFrontier.SelectionCertificate.Valid`) and is handed a stub;
+  `q8-frontier/certificate` over attempt-002 returns `:not-recomputable`
+  `[:outer-frontier-absent-or-tampered]` (live JVM). History: 293 receipts
+  indexed, 58 with `:outer-task-selection` projected to
+  `~/notes/wm-next/selection-receipts-history.tsv`; reading era 15 receipts,
+  read set 7 and never growing, scored 4, chosen 7 = read set; no reading
+  written since 2026-10-18 22:38. F3 corrected (read set = previous selector's
+  choices, not field order). Precedence: needs-derived (`containment-order`);
+  canonical G sees no other order. C4 (retain `prepare!` result) added to the
+  capture list.
