@@ -672,3 +672,23 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   unclassified observations. Each line names the Lean clause that should
   catch it and the repair. No clicks until the list is closed, the Lean
   clauses exist, and the repairs land.
+- 2026-10-26 claude-9 (03:36Z): Q8a reviewed and accepted. zai-2 landed
+  `f764d36a4` (job `invoke-1792983612964-4051-84eb31d0`): on the canonical-G
+  route the receipt's `:q8-frontier` is now a sealed
+  `:wm/q8-outer-frontier-v1` carrier (`q8_frontier.clj`
+  `canonical-outer-frontier`); its census is the S1 open population with
+  typed exclusions, its entries the S5 scored rows one per task, and every
+  eligible task without an entry is listed `:unranked` with stage and typed
+  reason, else the carrier refuses `:eligible-task-unaccounted`. Record
+  check: diff matches the report. Test adequacy: the stub bad case, the
+  unaccounted-task refusal (two constructions), the non-vacuous census pass,
+  the seal, and the old-route certificate are each pinned; the m150-002
+  fixture is a projection that re-extracts byte-identical from the retained
+  receipt (checked). One run of the new namespace: 7 tests, 44 assertions,
+  green. On m150-002 the verdict is `:decided-failure`, census
+  `:frontier-not-eligible-census` 4 ranked / 105 unranked, selection
+  `:tied-minimum`. zai-2 reports that `outer_canonical_selection_test` and
+  `q8-frontier-route-test` are nondeterministic at HEAD before its change
+  (line 101 digest equality fails 3/4 isolated runs); recorded as U3 on the
+  defect list, needs its own discovery packet. Defect list R3 moves to
+  REPAIRED-FORWARD. Q8b (policy stages, R4) and Q2 (R5) remain open.
