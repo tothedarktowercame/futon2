@@ -173,7 +173,13 @@ extra key on a row that `evaluate` never reads.** `evaluate`
   `:scored` row a `:terms` key: `(get-in r [:certificate :g-terms])` and
   `(get-in r [:certificate :parameter-novelty])` with the per-step `:tau`,
   `:g`, `:expected-information-gain`. Refused rows unchanged. Size: a few KB per
-  row. The frontier pin is a digest of the body and is minted per run, so
+  row. Correction (2026-10-26, packet premise check): the per-step `:tau`, `:g`,
+  `:expected-information-gain` live at `[:certificate :steps]`
+  (`cascade_coapply_g.clj:82-85`), not under `:parameter-novelty`, whose own
+  `:steps` carry `:tau :before :expected-novelty`. The packet keeps `:steps`
+  projected to the three keys and `:parameter-novelty` without its `:steps`.
+  `evaluate` returns the whole selected row under `:selected`, so that map will
+  carry `:terms` too; the selection (status, action, policy-id, draw) does not change. The frontier pin is a digest of the body and is minted per run, so
   adding the key changes no cross-run comparison; a test pins that
   `evaluate` over a frontier with and without `:terms` returns the same
   selection for the same draw.
@@ -243,3 +249,26 @@ sealed menu and a canonical selection).
   `[:policy :canonical-g-frontier :horizon-choice :horizon]` while the
   receipt-level `[:horizon-choice :horizon]` is nil. S5 keeps no `:refused`
   rows; the trace records `{:absent :refused-rows-not-retained}`. C1b next.
+- 2026-10-26 00:24Z claude-9: C1b reviewed and accepted. zai-2's commit `fa18ace07`
+  (runner `retain-outer-task-selection` + the require; new ns
+  `outer-selection-trace-retain-test`). Checked: (1) receipt stored unchanged at
+  `[arm :outer-task-selection]`, trace beside it at `[arm :outer-selection-trace]`,
+  arm chosen as before; (2) the runner diff is those two hunks only, no selector
+  file touched; (3) the test pins the selected arm (identical receipt, trace equal
+  to `trace`, existing key kept, no sorry arm), the sorry arm, and the absent
+  receipt with typed absences at every stage. First run of a new test, so rerun
+  once: 1 test, 39 assertions, 0 failures. Bad cases run here: `(retain … true nil)`
+  (the live call site at runner `:7766` passes `(:outer-task-selection judgement)`,
+  which can be nil) does not throw and gives a trace of typed absences; the
+  `:status :absent` receipt on the sorry arm likewise. Observation, not changed:
+  the trace for a nil receipt and for an `:absent` receipt are the same map; the
+  trace carries no receipt-status field, so the receipt beside it is what says
+  which. Discovery item read: the only closed key-set checks are
+  `receipt_construction.clj:213-224` (record envelope and the construction sorry
+  payload) and neither reaches the selection arm; `full_loop_cohort.clj:82` is
+  open-world (missing keys only). No consumer refuses the new key. C2 packet
+  premises checked against `cascade_coapply_g.clj:73-94` and `evaluate`; §6
+  corrected (per-step terms at `[:certificate :steps]`). C2 dispatched to zai-2:
+  job `invoke-1792974125398-4005-03399257`, park
+  `park-6421b795-af87-4356-b60b-b1b123ba5823` (deadline 60 min), packet
+  `~/notes/wm-next/packets/c2-outer-canonical-g-terms.md`. C3 waits on its review.
