@@ -1,10 +1,14 @@
 (ns futon2.aif.pattern-observation
   "Projection of frozen pattern-domain wants into supplied observations.
 
-  This producer deliberately supplies typed absences only. A retained fold
-  condition is not an after-revision measurement, regardless of its status or
-  any boolean-looking fields it happens to carry."
-  (:require [futon2.aif.interpretation-evidence :as evidence]
+  A row's :observed is a boolean only when the retained condition's authored
+  :completion-check is an executable artifact locator, evaluated by
+  futon2.aif.completion-check at the supplied after revision. Everything else
+  is a typed absence. A retained fold condition is never itself an
+  after-revision measurement, regardless of its status or any boolean-looking
+  fields it happens to carry."
+  (:require [futon2.aif.completion-check :as completion-check]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.token-outcome :as token-outcome]))
 
@@ -23,31 +27,40 @@
 (defn- occurrence-order [[pattern index]]
   [pattern index])
 
-(defn- absent-observation [matches]
+(defn- completion-check [condition]
+  (get-in condition [:witness :authored-clause :completion-check]))
+
+(defn- observation
+  "The evaluator's result for the one matching condition, or a typed absence
+  for none or several. Only an executable completion check can observe."
+  [revision matches]
   (case (count matches)
     0 {:status :missing :reason :occurrence-not-in-fold}
-    1 {:status :missing :reason :completion-check-not-executable}
+    1 (completion-check/evaluate (completion-check (first matches)) revision)
     {:status :missing :reason :occurrence-ambiguous-in-fold
      :count (count matches)}))
 
 (defn- supplied-row [revision source by-occurrence occurrence effect]
   (let [matches (get by-occurrence occurrence)
-        condition (when (= 1 (count matches)) (first matches))]
+        condition (when (= 1 (count matches)) (first matches))
+        result (observation revision matches)
+        observed? (= :observed (:status result))]
     {:schema row-schema
      :pattern (first occurrence)
      :occurrence occurrence
      :effect effect
      :revision revision
-     :observed (absent-observation matches)
-     :authority-evidence nil
+     :observed (if observed? (:value result) result)
+     :authority-evidence (when observed?
+                           (select-keys result [:check :evidence]))
      :source (assoc source
                     :fold-status (:status condition)
-                    :completion-check
-                    (get-in condition [:witness :authored-clause
-                                       :completion-check]))}))
+                    :completion-check (completion-check condition))}))
 
 (defn supply
-  "Supply one revision-bound typed absence for every frozen pattern want.
+  "Supply one revision-bound observation for every frozen pattern want: a
+  boolean where the condition's completion check is executable, a typed
+  absence otherwise.
 
   Fold status and result-like fields are retained only as provenance and can
   never become the observation value."
