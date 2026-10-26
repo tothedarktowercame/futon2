@@ -6,10 +6,12 @@
   the record and accepted by the exporter only when the record recomputes
   it."
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as live]
             [futon2.aif.outer-target-belief :as outer-belief]
             [futon2.aif.previous-run :as previous-run]
@@ -51,9 +53,18 @@
 
 (def base-map [route/target "M-other" "M-third"])
 
+(def reading-field
+  (route/field (zipmap (keys base-tasks) (repeat ["p/a" "p/b"]))))
+
 (defn- tasks [priorities]
   (vec (for [[id p] (sort priorities)]
-         {:id id :kind :mission :priority p :source (pin (str id ".md") "c")})))
+         (let [source (some->> (:rows reading-field)
+                               (some #(when (= id (:target-id %)) (:source-path %)))
+                               io/file)]
+           {:id id :kind :mission :priority p
+            :source {:path (.getPath source)
+                     :sha256 (load-identity/sha256
+                              (.getBytes (slurp source) "UTF-8"))}}))))
 
 (def outer-learning
   {:mode :live
@@ -78,9 +89,21 @@
 (defn- outer-receipt
   ([] (outer-receipt base-tasks base-map))
   ([priorities on-map]
-   (live/select-live {:tasks (tasks priorities)
-                      :fetch-snapshot (constantly (snapshot on-map))
-                      :outer-learning outer-learning})))
+   (let [selection-as-of "2026-10-26T05:00:00Z"]
+     (live/select-live {:tasks (tasks priorities)
+                        :fetch-snapshot (constantly (snapshot on-map))
+                        :outer-learning outer-learning
+                        :selection-as-of selection-as-of
+                        :focus-inputs {}
+                        :focus-context {:as-of selection-as-of
+                                        :status :retained
+                                        :focus "WM"}
+                        :focus-classify-fn
+                        (fn [_ _ _ target _] {:target target :class :focus})
+                        :seed 14
+                        :policy-field-config
+                        {:target-reading-root (.getPath (io/file (:root reading-field)))
+                         :pattern-graph-path (.getPath (io/file (:graph reading-field)))}}))))
 
 ;; -- the production run -------------------------------------------------------------
 
