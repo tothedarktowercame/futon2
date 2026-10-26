@@ -1072,3 +1072,38 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `~/notes/wm-next/outer-selection/packets/r14-q8-route-squares-packet.md`:
   squares in the fixture, shapes reported, checkpoint before any assertion
   edit; the re-pin follows.
+- 2026-10-26 claude-9 (05:32Z): R14 steps 2 and 3 read; step 4 dispatched.
+  Step 2 (codex-10, `15642b5c4`): the fixture authors one three-halves
+  square per cited occurrence with the production builder and publishes
+  through the production registry; every `:graph-endpoint-foreign` refusal
+  is gone, the menu seals with only the three U5 retraction refusals, and the
+  selector then refuses `:outer-policy-evidence-provider-required`, since the
+  test calls `select-live` directly and the port the full-loop runtime
+  injects is empty. Step 3 (codex-10, `74efc423a`): the test supplies the
+  production provider body over a test-owned learning state and the selector
+  reaches `:selected`; but all three cascades tie at G 0.8339233107355899,
+  the seeded draw picks M-third, and the runner drops the receipt as
+  `:receipt-identity-inconsistent` because the fixture's inner decision is
+  for M-current (`full_loop_runner.clj:1098`), so every Q8 reason stayed
+  `:outer-frontier-absent-or-tampered`. Four read-only probes in the
+  worktree JVM (`~/notes/r14-discovery/probe-step4*.out`) settled the
+  re-pin's premises: canonical G is ranked from the cascades, so belief rows
+  cannot break the tie but readings can (M-current `["p/a" "p/b"]` against
+  three-pattern readings gives G -0.271 vs 0.819, `:certified`, verdict
+  `:pass`); the snapshot's one-section `:section-status` left membership
+  incomplete and M-off in `:unknown-targets`, outside the canonical census
+  (five sections `:ok` restore the exclusion); a declared-priority change
+  is not a canonical observation, a republished reading invalidates exactly
+  its task, and a fresh field per click changes every cascade digest;
+  `canonical-outer-frontier` is a pure projection of the receipt and
+  refuses the forged selection, absent frontier, missing and foreign rows
+  as predicted. One new defect from the bad cases, R15: a non-numeric G
+  throws inside `canonical-outer-frontier` before its own exactness
+  refusal can fire (`q8_frontier.clj:131`). Step-4 packet
+  `~/notes/wm-next/outer-selection/packets/r14-q8-route-repin-packet.md`
+  (codex-10 `invoke-1792992691426-4196-1e137762`): readings per target,
+  five section statuses, `reading-route/republish!`, claims per deftest
+  from the probed shapes, checkpoint after the fixture change. Two
+  observations not opened as defects: the shorter cascade wins at the field
+  horizon in every shape tried; the canonical census has no place for a
+  task whose pipeline membership is unknown.
