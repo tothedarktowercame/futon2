@@ -122,3 +122,51 @@
     (is (= [:refused :after-revision-missing]
            ((juxt :status :kind) result)))
     (is (not (contains? result :rows)))))
+
+(defn with-check [occurrence check]
+  (mapv #(if (= occurrence (get-in % [:witness :occurrence-id]))
+           (assoc-in % [:witness :authored-clause :completion-check] check)
+           %)
+        (:fold-conditions fixture)))
+
+(def mission-locator
+  [:artifact-locator {:class :C3 :repo "futon5a"
+                      :path "holes/missions/M-war-machine-wiring.md"}])
+
+(deftest executable-check-yields-a-boolean-at-the-after-revision
+  (let [nineteen ["gauntlet/world-is-hypergraph" 19]
+        zero ["gauntlet/world-is-hypergraph" 0]
+        result (supply (with-check nineteen mission-locator))
+        row (row-for result nineteen)]
+    (is (= true (:observed row)))
+    (is (= :C3 (get-in row [:authority-evidence :check])))
+    (is (= (:after fixture)
+           (get-in row [:authority-evidence :evidence :resolved-sha])))
+    (is (= :artifact-locator (get-in row [:source :completion-check 0])))
+    (is (= {:status :missing :reason :completion-check-not-executable}
+           (:observed (row-for result zero))))
+    (is (nil? (:authority-evidence (row-for result zero))))))
+
+(deftest executable-check-false-overrides-an-established-fold-status
+  (let [nineteen ["gauntlet/world-is-hypergraph" 19]
+        conditions (mapv #(if (= nineteen (get-in % [:witness :occurrence-id]))
+                            (assoc % :status :established :observed true)
+                            %)
+                         (with-check nineteen
+                           [:artifact-locator
+                            {:class :C3 :repo "futon5a"
+                             :path "holes/missions/no-such-file.md"}]))
+        row (row-for (supply conditions) nineteen)]
+    (is (= :established (get-in row [:source :fold-status])))
+    (is (= false (:observed row)))
+    (is (= :C3 (get-in row [:authority-evidence :check])))))
+
+(deftest evaluator-refusals-reach-the-row-typed
+  (let [nineteen ["gauntlet/world-is-hypergraph" 19]
+        row (row-for (supply (with-check nineteen
+                               [:artifact-locator
+                                {:class :C3 :repo "futon2" :path "deps.edn"}]))
+                     nineteen)]
+    (is (= [:missing :different-artifact-repository]
+           ((juxt :status :reason) (:observed row))))
+    (is (nil? (:authority-evidence row)))))
