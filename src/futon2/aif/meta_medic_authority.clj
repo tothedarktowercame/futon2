@@ -73,25 +73,63 @@
       {:status :refused :reason :artifact/hash-drift}
       :else {:status :resolved :bytes bytes})))
 
+(def ^:private max-artifact-parse-cache-entries 384)
+
+(defonce ^:private !artifact-parse-cache
+  (atom {:entries {} :order []}))
+
+(def ^:dynamic *artifact-parse-observer*
+  "Test/diagnostic observer invoked with the verified sha before each parse."
+  (fn [_] nil))
+
+(defn reset-artifact-parse-cache!
+  "Clear the bounded memo of successfully parsed artifacts. Intended for tests."
+  []
+  (reset! !artifact-parse-cache {:entries {} :order []})
+  nil)
+
+(defn- cache-artifact! [sha256 result]
+  (swap! !artifact-parse-cache
+         (fn [{:keys [entries order]}]
+           (let [present? (contains? entries sha256)
+                 order (cond-> order (not present?) (conj sha256))
+                 entries (assoc entries sha256 result)
+                 overflow (- (count order) max-artifact-parse-cache-entries)
+                 evicted (if (pos? overflow) (subvec order 0 overflow) [])
+                 order (if (pos? overflow) (subvec order overflow) order)]
+             {:entries (apply dissoc entries evicted) :order order})))
+  result)
+
+(defn- parse-artifact [sha256 bytes]
+  (*artifact-parse-observer* sha256)
+  (try
+    (with-open [reader (PushbackReader. (StringReader. bytes))]
+      (let [eof (Object.)
+            value (edn/read {:eof eof} reader)
+            trailing (edn/read {:eof eof} reader)]
+        (cond
+          (identical? eof value) {:status :refused :reason :artifact/empty}
+          (not (identical? eof trailing))
+          {:status :refused :reason :artifact/multiple-forms}
+          :else {:status :resolved :value value})))
+    (catch Throwable t
+      {:status :refused :reason :artifact/malformed
+       :detail (ex-message t)})))
+
 (defn resolve-artifact
   "Resolve one strict typed EDN artifact after opaque hash verification."
   [artifacts pin]
   (let [resolved (resolve-bytes artifacts pin)]
     (if-not (= :resolved (:status resolved))
       resolved
-      (try
-        (with-open [reader (PushbackReader. (StringReader. (:bytes resolved)))]
-          (let [eof (Object.)
-                value (edn/read {:eof eof} reader)
-                trailing (edn/read {:eof eof} reader)]
-            (cond
-              (identical? eof value) {:status :refused :reason :artifact/empty}
-              (not (identical? eof trailing))
-              {:status :refused :reason :artifact/multiple-forms}
-              :else {:status :resolved :value value})))
-        (catch Throwable t
-          {:status :refused :reason :artifact/malformed
-           :detail (ex-message t)})))))
+      (let [sha256 (:sha256 pin)]
+        (or (get-in @!artifact-parse-cache [:entries sha256])
+            (locking !artifact-parse-cache
+              (or (get-in @!artifact-parse-cache [:entries sha256])
+                  (let [result (parse-artifact sha256 (:bytes resolved))]
+                    (if (= :resolved (:status result))
+                      (cache-artifact! sha256 result)
+                      result)))))))))
 
 (defn final-operation-id
   "Digest the final request and receipt pins after the acyclic receipts exist.
