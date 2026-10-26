@@ -92,6 +92,7 @@
             [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
+            [futon2.aif.outer-selection-trace :as outer-selection-trace]
             [futon2.aif.terminal-publication-receipt :as terminal-publication]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
@@ -1133,11 +1134,15 @@
       :else receipt)))
 
 (defn retain-outer-task-selection
-  "Carry the judge's receipt on the native selected or abstained checkpoint arm."
+  "Carry the judge's receipt on the native selected or abstained checkpoint arm.
+  The pure outer-selection-trace projection rides beside the receipt; the
+  receipt itself is stored unchanged at its existing path."
   [selection-cell selected? receipt]
-  (assoc-in selection-cell
-            [(if selected? :judgment :sorry) :outer-task-selection]
-            receipt))
+  (let [arm (if selected? :judgment :sorry)]
+    (-> selection-cell
+        (assoc-in [arm :outer-task-selection] receipt)
+        (assoc-in [arm :outer-selection-trace]
+                  (outer-selection-trace/trace receipt)))))
 
 (defn- retained-interpretation-ask [result]
   (or (get-in result [:checkpoints :selection :judgment :interpretation-ask])
