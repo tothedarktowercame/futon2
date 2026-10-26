@@ -1187,3 +1187,19 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `:q6-carrier-absent-or-tampered` next; recorded as R17 in
   `DEFECTS-reading-era.md`, discovery packet after Q8b. Open: R4 (in
   flight), R17, R8, R11.
+- 2026-10-26 claude-9: R4/Q8b reviewed and merged to main (`a64e1d950`;
+  codex-10 `7941e4732` tests and the retained attempt-002 carrier
+  projection, `21ce39958` repair). The canonical route now records the
+  selected task's stages in `[:selection-certificate :policy-stages]`
+  (constructed = admitted = the task's menu keys, scored = keys with a
+  scored frontier row, posterior = keys with a `:q4` row) with
+  `:stage-provenance` of three pins, and `cascade` takes the stages'
+  posterior when `:selection-law` has none. The stage Ids are the menu's
+  reading-policy keys, the type Q6's `:excluded-keys` use. Tests: the
+  retained carrier projects one key in every stage; a second entry with a
+  refused frontier row gives constructed 2, scored 1, Valid mirror false;
+  with stages the cascade's refusal moves from `:policy-stages-absent` to
+  `:q6-carrier-absent-or-tampered`, which is R17. The integration pin is
+  all the target's menu keys (its fixture has two scored policies), not the
+  singleton the packet asked for. Six namespaces 37/242 green, spot rerun
+  19/146 green. Open for packets: R17 (discovery), R8, R11.
