@@ -52,9 +52,18 @@ Every number below is a count over the receipt. Stage names are the code's own.
 | S1 standing + map + ownership | `select-live` 690-760 | 786 | 109 | `:pipeline/not-on-current-map` 526; `:repair-finding/root-missing` 102; `:repair-finding/attached-to-root` 25; `:repair-finding/root-not-current` 13; `:ownership/ambiguous-active-owner` 6; `:ownership/actively-held` 3; `:mission-standing-conflict` 1; `:task-document-source-unavailable` 1 |
 | S2 target-policy field (readings → families) | `full-eligible-target-field` | 109 | 7 computed | `:no-current-target-reading` 101; `:occurrence-squares-not-authored` 1 |
 | S3 policies per family | same | 7 families | 26 policies | (6 families × 4, 1 family × 2) |
-| S4 canonical binding → sealed menu | `sealed-pre-choice-menu` + `bind-ranked` | 26 | 4 entries | `:embedding-node-not-retained` 10 (all policies of M-formal-war-machine, M-digital-nomad-patterns, M-pattern-posteriors); `:occurrence-identity-absent` 9 (three further policies each of M-stack-geometry, M-war-machine-wiring, M-recommendation-bindings); other family failures recorded but not menu-blocking: `:void-pattern-citation` 8, `:isolated-seed` 6, `:seed-not-in-graph` 4, `:frontier-too-wide-for-exact-enumeration` 3 |
+| S4 canonical binding → sealed menu | `sealed-pre-choice-menu` + `bind-ranked` | 26 | 4 entries | `:occurrence-identity-absent` 9 refusals (three further policies each of M-stack-geometry, M-war-machine-wiring, M-recommendation-bindings); 10 policies of M-formal-war-machine, M-digital-nomad-patterns, M-pattern-posteriors unbound, their menu failure rows `:target-class-unknown` 10, `:seed-not-in-graph` 2, `:isolated-seed` 2; 3 policies of M-self-improvement-loop neither bound nor refused, with no per-policy record (menu failure rows carry a target id only; that target's rows are `:frontier-too-wide-for-exact-enumeration` 3, `:seed-not-in-graph` 2); the remaining failure rows belong to bound targets and did not block the menu: `:void-pattern-citation` 8, `:isolated-seed` 4 |
 | S5 canonical G frontier | `outer-canonical-g/produce` | 4 | 4 scored | refused 0; horizon 10 = min(limit 10, max unit count 27) |
 | S6 selection | `outer-canonical-selection/evaluate` | 4 | 1 | min G; two equal minima (M-war-machine-wiring, M-recommendation-bindings, both G = −3.9560226735640867); uniform draw u = 0.2253 → M-war-machine-wiring |
+
+Correction (2026-10-26 00:15Z, from the C1a review): the S4 row first named
+`:embedding-node-not-retained` 10. That keyword occurs in the receipt 88 times,
+all under the sealed menu's `:target-relations` as a relation reason, never as
+a failure or refusal kind. The counts above are the menu's `:refusals` and
+`:failures` kinds, which is what the C1a trace reads. S4's arithmetic does not
+close from the receipt alone: 26 in, 4 bound, 9 refused, 10 unbound by target,
+and 3 policies with no record at all. The trace lists those 3 under
+`:policies-without-binding-record`.
 
 Corrections to what was passed to me as established:
 
@@ -151,9 +160,15 @@ extra key on a row that `evaluate` never reads.** `evaluate`
   of §3 as data, each stage with `:in`, `:out`, `:dropped` as a map reason →
   count, and for S4 and S6 the ids involved. Being a projection, it can be run
   today over attempt-002 and must reproduce §3 exactly; that is its test pin
-  (live-pin rule: values verbatim from the retained receipt). The runner adds
-  it to the receipt at retain time (`full_loop_runner` retain-outer-task-selection),
-  after the selection is final.
+  (live-pin rule: values verbatim from the retained receipt). The runner retains
+  it at retain time (`full_loop_runner` `retain-outer-task-selection`), after
+  the selection is final. Placement (decided at the C1a review, 2026-10-26):
+  beside the receipt, not inside it, at `[<arm> :outer-selection-trace]` on the
+  selection cell, where `<arm>` is `:judgment` or `:sorry` as for the receipt.
+  Reason: the receipt's schema `:wm/outer-task-selection-v1` is checked by
+  `selection_world.clj` and `construction_receipt_lean_adapter.clj`; the trace
+  has its own schema `:wm/outer-selection-trace-v1`, and keeping it beside the
+  receipt leaves every receipt consumer reading exactly what it read before.
 - **C2 per-row G terms.** In `outer_canonical_g.clj` results, keep on each
   `:scored` row a `:terms` key: `(get-in r [:certificate :g-terms])` and
   `(get-in r [:certificate :parameter-novelty])` with the per-step `:tau`,
@@ -212,3 +227,19 @@ sealed menu and a canonical selection).
   C1a dispatched to zai-2: job `invoke-1792973141191-3983-7b83c696`, park
   `park-57f2ee01-3c56-4372-a837-16df58912ef7` (deadline 60 min). C1b (retain-time
   wiring), C2 and C3 wait on its review.
+- 2026-10-26 00:15Z claude-9: C1a reviewed and accepted. zai-2's commit
+  `f12700102` (5 files, reader only; selector, runner and canonical-G files
+  untouched). Checked: (1) `trace` is a pure function of the receipt map, no
+  IO, total over absent paths (typed absences); (2) the fixture reproduces
+  byte-for-byte from `extract.clj` over the attempt-002 receipt
+  (sha256 of receipt `d02726f2…`, of fixture `09a51e10…`); (3) the pin matches
+  §3 at every stage, with the S4 correction above. Bad case constructed:
+  renaming the refusal kind `:occurrence-identity-absent` in the fixture makes
+  the one test fail with the renamed kind visible in the diff. Review fix,
+  carve-out (b), `5637a787d`: S4 now lists the 3 M-self-improvement-loop
+  policies with no binding record; test, clj-kondo and check-parens green.
+  Two differences from the packet's expectations, both the file's: the S4
+  reason names (above) and the horizon, which the receipt keeps at
+  `[:policy :canonical-g-frontier :horizon-choice :horizon]` while the
+  receipt-level `[:horizon-choice :horizon]` is nil. S5 keeps no `:refused`
+  rows; the trace records `{:absent :refused-rows-not-retained}`. C1b next.
