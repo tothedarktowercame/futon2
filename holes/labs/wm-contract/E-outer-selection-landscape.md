@@ -212,7 +212,12 @@ extra key on a row that `evaluate` never reads.** `evaluate`
   review: a 4-arity `retain-outer-task-selection` taking the record, call
   site `full_loop_runner.clj:7766` passing `selected-target-reading-record`,
   the outcome retained at `[<arm> :reading-preparation]` beside the trace.
-  `evaluate` reads neither key.
+  `evaluate` reads neither key. Landed as futon2 `a625a08a8` (zai-2),
+  reviewed in §9. Status: C1–C4 all landed (C1 `f12700102`+`5637a787d`,
+  `fa18ace07`; C2 `725a7a70f`; C3 futon3c `970690d5e`; C4 `bc7ad6c93`,
+  `a625a08a8`). The capture of §6 is complete; nothing in it is loaded into
+  a running JVM except `meta-latest` (C3), so a click on the futon2 side
+  needs a reload from master first.
 
 Not in scope before the run: any dependency or readiness term (that is H4 and
 M-giraffe), any change to reading order or the batch limit of 3, any change to
@@ -522,7 +527,7 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   Packet note: the sent text asks the agent to check whether the live
   `:policy` map holds `:reason`; it does, with value nil (checked after
   send), so the case-1 pin is `:policy {:status :selected :reason nil}`.
-- 2026-10-26 00:55Z claude-9: C4a reviewed and accepted (futon2 `bc7ad6c93`,
+- 2026-10-26 00:48Z claude-9 (entry first written as 00:55Z, ahead of the clock; the commit is 00:48:37Z): C4a reviewed and accepted (futon2 `bc7ad6c93`,
   zai-2, two new files, +188). Record check: shas match, gates reported
   (kondo 0/0, parens OK, 1 test / 34 assertions green). Adequacy: case 1 is
   pinned as a whole map with the live `:policy {:status :selected :reason
@@ -551,3 +556,29 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `invoke-1792975687531-4030-0c0f0b1e`, park
   `park-634eabc8-07e9-44f6-b2c6-b1c829f42383` (deadline 45 min, read back
   at 45.0), packet `~/notes/wm-next/C4/C4b-reading-preparation-retain-packet.md`.
+- 2026-10-26 00:50Z claude-9: C4b reviewed and accepted (futon2 `a625a08a8`,
+  zai-2; runner +24/−8 in three hunks, new ns
+  `reading-preparation-retain-test`). Record check: shas match, the diff is
+  the require, the arity split and the call site only; the
+  `:selected-target-reading-request` clause and the other `cond->` clauses
+  are untouched; the 3-arity body is the C1b body verbatim. Gates reported:
+  kondo on the runner 0 errors / 4 warnings before and after (the same
+  four), test file 0/0, parens OK, 3 tests / 92 assertions green including
+  C1b's retain test. First run of a new test, so rerun once here: 1 test,
+  19 assertions, 0 failures. Adequacy: the selected arm pins the outcome as a
+  whole map (`:not-run`, `:no-selected-need`) and the non-vacuity check runs
+  `selected-need` on the judgement and asserts nil before the outcome is
+  used; the sorry arm carries all three keys with `:judgment` untouched; the
+  3-arity leaves no `:reading-preparation` on either arm; a hand-built
+  `:wm/target-reading-preparation-v1` record with `:records` and `:frontier`
+  is retained as `:ran` with neither key, which is the size bound C4 is for;
+  the nil-outcome bad case does not throw. One thing the test does not pin:
+  that the call site passes the fourth argument. That is read from the diff
+  (hunk 3) and smoke-covered by `full-loop-runner-1-4-wiring-test` (4 tests
+  / 19 assertions, reported green); a live record with the key waits on the
+  next click. Note on the 4-arity: its parameter is named
+  `reading-preparation-outcome`, the same as the namespace alias; the body
+  uses only the local, and the alias resolves as a qualified symbol
+  elsewhere, so nothing is shadowed in effect. No warrant registered; dirty
+  tree, not a block. **C1–C4 complete.** Next: the capability narrative for
+  Joe and the click budget grant.
