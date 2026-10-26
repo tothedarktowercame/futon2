@@ -30,10 +30,16 @@
                 :kind :universe-not-admitted
                 :missing :universes}]}})
 
-(def selected-judgement
+(def uncertified-selected-judgement
   {:decision {:status :selected
               :selection-law {:applied :cascade-selection-posterior}
               :action {:id :C1 :target "M-self-documenting-stack"}}})
+
+;; Use the same canonical Prefix-F producer as full-loop-runner-test's
+;; `judgement` fixture. A nominal :selected map without this certificate is
+;; deliberately not enactable since 40fb107f3.
+(def selected-judgement
+  (:judgement ((:judge-fn (fixture/isolated-runner-opts)) nil)))
 
 (defn- terminal-selection-condition [judgement]
   (runner/selection-terminal-condition :selection judgement))
@@ -589,10 +595,12 @@
   (debugger/attach!)
   (let [calls (atom 0)
         events (atom [])
+        ledger (debugger/new-dwell-ledger "abstention-retry")
         running
         (future
           (runner/run-phase!
-           (phase-opts "abstention-retry" events)
+           (assoc (phase-opts "abstention-retry" events)
+                  :debugger-dwell/state ledger)
            {:opportunity-id "op" :attempt-id "same-attempt"}
            :selection
            #(if (= 1 (swap! calls inc))
@@ -605,6 +613,45 @@
     (debugger/continue! "abstention-retry" :retry)
     (is (= selected-judgement (deref running 2000 ::timeout)))
     (is (= 2 @calls))
+    (is (= [{:restart-choice :retry :disposition :unrecorded}]
+           (mapv #(select-keys % [:restart-choice :disposition])
+                 (:receipts @ledger))))
     (is (= [[:selection :start] [:selection :end]
             [:selection :start] [:selection :end]]
            (mapv (juxt :phase :transition) (take-nth 2 @events))))))
+
+(deftest retrying-into-an-uncertified-selection-stops-again-and-is-answered
+  (debugger/attach!)
+  (let [run-id "abstention-retry-uncertified"
+        calls (atom 0)
+        running
+        (future
+          (try
+            (runner/run-phase!
+             (phase-opts run-id (atom []))
+             {:opportunity-id "op" :attempt-id "same-attempt"}
+             :selection
+             #(if (= 1 (swap! calls inc))
+                recorded-terminal-abstention
+                uncertified-selected-judgement)
+             nil terminal-selection-condition)
+            (catch Throwable e e)))]
+    (wait-for-stop run-id running)
+    (debugger/continue! run-id :retry)
+    (let [second-stop
+          (loop [remaining 400]
+            (let [stop (first (filter #(= run-id (:run-id %))
+                                      (debugger/stopped)))]
+              (cond
+                (= :no-selection (get-in stop [:ex-data :failure-kind])) stop
+                (realized? running) nil
+                (pos? remaining) (do (Thread/sleep 5) (recur (dec remaining)))
+                :else nil)))]
+      (is (= :wm/selection-terminal-abstention
+             (get-in second-stop [:ex-data :kind])))
+      (is (= :no-selection (get-in second-stop [:ex-data :failure-kind])))
+      (is (= 2 @calls))
+      (debugger/continue! run-id :abort)
+      (is (instance? Throwable (deref running 2000 ::timeout)))
+      (is (empty? (debugger/stopped))
+          "answering the negative control must not leak a stop"))))

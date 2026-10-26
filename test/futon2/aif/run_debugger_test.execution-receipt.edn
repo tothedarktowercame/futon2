@@ -1,43 +1,27 @@
 {:schema :test/execution-receipt-v1
- :recorded-at "2026-10-26T19:24:00Z"
+ :recorded-at "2026-10-26T20:02:38Z"
  :command "clojure -X:test :nses '[futon2.aif.run-debugger-test]'"
  :namespaces [futon2.aif.run-debugger-test]
- :result :pre-existing-test-timeout
- :completed? false
- :observed-failures 5
+ :tests 23
+ :assertions 100
+ :failures 0
  :errors 0
- :termination
- {:reason :pre-existing-future-remained-stopped
-  :process "terminated after the namespace could not complete"
-  :first-failing-test
-  futon2.aif.run-debugger-test/terminal-abstention-retry-reruns-only-the-same-selection-phase
-  :main-reproduction
+ :result :passed
+ :r29
+ {:before
   {:command "clojure -M:test -n futon2.aif.run-debugger-test -v futon2.aif.run-debugger-test/terminal-abstention-retry-reruns-only-the-same-selection-phase"
    :tests 1 :assertions 11 :failures 2 :errors 0
-   :note "Unchanged main times out after the retry and leaves its future stopped."}
-  :consequential-failures
-  ["The leaked abstention-retry stop makes the new test's global stopped assertion fail."
-   "The later real-run fixture stops at :runner-source because worktree bytes differ from canonical source."]}
- :r27-focused
- {:red
-  {:command "clojure -M:test -n futon2.aif.run-debugger-test -v futon2.aif.run-debugger-test/aborting-an-inner-phase-does-not-stop-again-at-its-enclosing-phase"
-   :tests 1 :assertions 13 :failures 2 :errors 0
-   :observed {:outer-stop? true :dwell-receipts 2}}
-  :green
-  {:command "clojure -M:test -n futon2.aif.run-debugger-test -v futon2.aif.run-debugger-test/aborting-an-inner-phase-does-not-stop-again-at-its-enclosing-phase"
-   :tests 1 :assertions 13 :failures 0 :errors 0
-   :observed {:outer-stop? false :dwell-receipts 1
-              :wrapper-rethrown-identically? true
-              :inner-cause-preserved? true}}}
+   :note "Unchanged main timed out after retry and left its future stopped."}
+  :after
+  {:positive {:calls 2 :retry-dwell-receipts 1 :future-realized? true}
+   :uncertified-control {:calls 2 :second-failure-kind :no-selection
+                         :second-stop-answered? true :stop-leaked? false}}
+  :certificate-source
+  {:var futon2.test-support.runner-fixture/isolated-runner-opts
+   :producer :judge-fn
+   :note "This is the canonical Prefix-F judgement producer already used by full-loop-runner-test; it builds the certificate through select-with-prefix-history and loop-exercised-ranked-entry."}}
  :additional-gates
- {:clj-kondo
-  {:errors 0
-   :warnings 5
-   :baseline-warnings 5
-   :new-warnings 0
-   :note "The same four source warnings and one test warning occur on unchanged main."}
+ {:clj-kondo {:errors 0 :warnings 1 :new-warnings 0
+              :note "The redundant-let warning at line 266 exists on unchanged main."}
   :check-parens :ok}
- :scope
- {:live-jvm-loaded? false
-  :click-run? false
-  :wrapper-sites-changed? false}}
+ :scope {:source-changed? false :live-jvm-loaded? false :click-run? false}}
