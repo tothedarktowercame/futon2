@@ -59,3 +59,21 @@
             (is (= (:draw a) (:draw b)))
             (is (= (:policy-id (:selected a)) (:policy-id (:selected b))))
             (is (= (dissoc (:selected a) :terms) (:selected b)))))))))
+
+;; Review addition (claude-9, 2026-10-26): the typed-absence path the helper is
+;; named for, constructed directly.  A scorer result with no certificate, or a
+;; certificate missing a part, must yield the marker, never nil.
+(deftest nil-certificate-parts-are-typed-absences
+  (let [terms #'sut/certificate-terms
+        absent {:absent :certificate-term-not-retained}]
+    (is (= {:g-terms absent :parameter-novelty absent :steps absent} (terms {})))
+    (is (= {:g-terms absent :parameter-novelty absent :steps absent}
+           (terms {:status :scored :G-efe -1.0 :rank 1})))
+    (let [t (terms {:certificate {:g-terms {:expected-information-gain 1N :raw {}}
+                                  :parameter-novelty {:law :l :lean :n :total 1N :counts {}
+                                                      :steps [{:tau 1 :before {} :expected-novelty 1N}]}}})]
+      (is (= {:expected-information-gain 1N :raw {}} (:g-terms t)))
+      (is (= {:law :l :lean :n :total 1N :counts {}} (:parameter-novelty t))
+          "the before-belief steps are dropped")
+      (is (= absent (:steps t)) "a missing part is the marker, not nil")
+      (is (not-any? nil? (vals t))))))
