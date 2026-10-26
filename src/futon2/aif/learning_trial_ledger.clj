@@ -110,10 +110,14 @@
    as the :trial-nested one, so a top-level row attributes instead of
    degrading silently to :no-declared-producer (claude-2's review)."
   [row]
-  (producer-of (or (get-in row [:trial :selected-cascade :precedence])
-                   (get-in row [:selected-cascade :precedence]))
-               (or (get-in row [:trial :effect])
-                   (:effect row))))
+  ;; A pattern-domain trial (attempt-learning/pattern-receipt, contract v3)
+  ;; names its own key: the occurrence's pattern. Nothing is derived for it.
+  (or (get-in row [:trial :pattern-key])
+      (:pattern-key row)
+      (producer-of (or (get-in row [:trial :selected-cascade :precedence])
+                       (get-in row [:selected-cascade :precedence]))
+                   (or (get-in row [:trial :effect])
+                       (:effect row)))))
 
 (defn read-trials
   "PROOF-wm-works ⟨1⟩4: the production reader. Reads every recorded trial
@@ -149,7 +153,11 @@
                                 (pos? (:success (:increment row))))
                     ;; v1 rows carry :consumption :not-authorized under
                     ;; :trial; v2 rows are read without a veto
-                    :contract-version (if (get-in row [:trial :consumption]) :v1 :v2)
+                    :contract-version (cond
+                                        (get-in row [:trial :consumption]) :v1
+                                        (= :wm/attempt-learning-contract-v3
+                                           (get-in row [:contract :schema])) :v3
+                                        :else :v2)
                     :row row})
                  (records (String. bytes "UTF-8")))))))))
 

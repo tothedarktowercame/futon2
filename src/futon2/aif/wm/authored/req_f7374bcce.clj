@@ -22,9 +22,17 @@
     :capability :wm/pattern-apply
     :consumes :mission-title-line
     :produces :mission-identity-vertex
+    ;; Executable form (R8b, decision sheet 2026-10-26 item 1 (a)). The prose
+    ;; this replaces read "mission title names 'War Machine Wiring' as the
+    ;; last-mile bridge to M-live-geometric-stack"; that condition is the
+    ;; mission's title line, read as a C4 declaration head at the after
+    ;; revision by futon2.aif.completion-check/evaluate. The other
+    ;; twenty-six clauses stay prose and stay typed missing.
     :completion-check
-    [:title-names-bridge
-     "mission title names 'War Machine Wiring' as the last-mile bridge to M-live-geometric-stack"]}
+    [:artifact-locator
+     {:class :C4 :repo "futon5a"
+      :path "holes/missions/M-war-machine-wiring.md"
+      :decl "# Mission: War Machine Wiring (last-mile bridge to M-live-geometric-stack)"}]}
    ["futon-theory/mission-lifecycle" 1]
    {:operation :record-open-verify-status-with-checkpoints
     :capability :wm/pattern-apply

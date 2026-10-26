@@ -5374,7 +5374,16 @@
                    :route (or (:route context) (:route source-record))
                    :expected (:expected context) :read-job (:read-job context)})
         learning (learning-ledger/record! (or (:ledger-root context) learning-ledger/default-root) learning)
-        receipt (assoc receipt :learning-trial-receipt learning)
+        ;; R8b (decision sheet 2026-10-26 item 1 (a), contract v3): the
+        ;; pattern-domain rows are consumed beside the mission-domain ones,
+        ;; each admitted row updating its occurrence's own pattern key.
+        pattern-learning (attempt-learning/pattern-receipt
+                          {:pattern-comparison pattern-comparison
+                           :occurrence (or (:occurrence context) (get-in source-record [:dispatch :occurrence]))
+                           :route (or (:route context) (:route source-record))})
+        pattern-learning (learning-ledger/record! (or (:ledger-root context) learning-ledger/default-root) pattern-learning)
+        receipt (assoc receipt :learning-trial-receipt learning
+                       :pattern-learning-trial-receipt pattern-learning)
         surprises (surprise/records
                    {:comparison receipt
                     :occurrence (or (:occurrence context) (get-in source-record [:dispatch :occurrence]))
