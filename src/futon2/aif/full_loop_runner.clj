@@ -93,6 +93,7 @@
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-selection-trace :as outer-selection-trace]
+            [futon2.aif.reading-preparation-outcome :as reading-preparation-outcome]
             [futon2.aif.terminal-publication-receipt :as terminal-publication]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
@@ -1136,13 +1137,18 @@
 (defn retain-outer-task-selection
   "Carry the judge's receipt on the native selected or abstained checkpoint arm.
   The pure outer-selection-trace projection rides beside the receipt; the
-  receipt itself is stored unchanged at its existing path."
-  [selection-cell selected? receipt]
-  (let [arm (if selected? :judgment :sorry)]
-    (-> selection-cell
-        (assoc-in [arm :outer-task-selection] receipt)
-        (assoc-in [arm :outer-selection-trace]
-                  (outer-selection-trace/trace receipt)))))
+  receipt itself is stored unchanged at its existing path.  The 4-arity also
+  retains the typed reading-preparation outcome beside the trace."
+  ([selection-cell selected? receipt]
+   (let [arm (if selected? :judgment :sorry)]
+     (-> selection-cell
+         (assoc-in [arm :outer-task-selection] receipt)
+         (assoc-in [arm :outer-selection-trace]
+                   (outer-selection-trace/trace receipt)))))
+  ([selection-cell selected? receipt reading-preparation-outcome]
+   (let [arm (if selected? :judgment :sorry)]
+     (-> (retain-outer-task-selection selection-cell selected? receipt)
+         (assoc-in [arm :reading-preparation] reading-preparation-outcome)))))
 
 (defn- retained-interpretation-ask [result]
   (or (get-in result [:checkpoints :selection :judgment :interpretation-ask])
@@ -7765,7 +7771,9 @@
                                true
                                (retain-outer-task-selection
                                 (boolean entry)
-                                (:outer-task-selection judgement)))]
+                                (:outer-task-selection judgement)
+                                (reading-preparation-outcome/outcome
+                                 judgement selected-target-reading-record)))]
           (reset! pending-selection selection-cell)
           (swap! checkpoints assoc :selection selection-cell))
         (when-not entry
