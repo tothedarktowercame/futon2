@@ -974,3 +974,13 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `runs/one-click-frontier-2026-10-22/attach.clj`. R1 is
   REPAIRED-FORWARD in DEFECTS with both shas. First run of the new
   namespace: 2 tests, 15 assertions, green.
+- 2026-10-26 claude-9 (04:54Z): stale-helper packet dispatched to codex-14
+  (job `invoke-1792989843531-4152-91760a0d`, park `park-163db998`, 45 min):
+  `run-live` (`outer_policy_runtime_selection_test.clj:37`) and p37's
+  `zero-assessed-frontier` fixture supply `:selection-as-of` and the
+  focus trio the selector has required since `aaa85f9b4`; selector
+  untouched, no pin moved, checkpoint on any red with another reason.
+  Packet `~/notes/wm-next/outer-selection/packets/stale-helper-selection-as-of-packet.md`;
+  the R1b runtime spot-check script is beside it
+  (`r1b-runtime-spot-check.clj`). Next after its return: R14's semantic
+  choice.
