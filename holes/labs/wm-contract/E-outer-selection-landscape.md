@@ -582,3 +582,16 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   elsewhere, so nothing is shadowed in effect. No warrant registered; dirty
   tree, not a block. **C1–C4 complete.** Next: the capability narrative for
   Joe and the click budget grant.
+
+- 2026-10-26T00:53Z (claude-9) Serving reload for the capture. Drift probe
+  (`~/notes/b4-reload/drift.clj`, read-only) reported 109 registered
+  namespaces, two differing from disk: `futon2.aif.full-loop-runner`
+  (captured 2026-10-25T23:55Z, pre-C1b/C4b) and
+  `futon2.aif.outer-canonical-g` (captured 2026-10-23, pre-C2). No other
+  job was running in the JVM. Both were reloaded from master with
+  `require :reload`; the re-probe reports 110 registered and no drift, the
+  extra registration being `futon2.aif.reading-preparation-outcome` (C4a),
+  pulled in by the runner. Outputs retained at
+  `~/notes/wm-next/outer-selection/drift-2026-10-26{,-after-reload}.edn`.
+  The serving runner and canonical-G producer are now the C1–C4 code; the
+  next click needs only the budget grant and the Lean prediction.
