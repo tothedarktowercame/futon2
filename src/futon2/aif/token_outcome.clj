@@ -165,6 +165,13 @@
                                                 0 belief)}))
                                (sort-by pr-str want))))))))
 
+(defn- outcome-verdict [predicted observed missing]
+  (cond missing :observation-missing
+        (pos? predicted) (if observed :predicted-and-observed
+                              :predicted-not-observed)
+        observed :not-predicted-observed
+        :else :neither))
+
 (defn compare-outcomes
   "Compare raw measurements, never the positive-only D-task carry projection.
    Missing, duplicate, or wrong-artifact evidence remains typed missing."
@@ -190,13 +197,49 @@
                                 (or (nil? artifact-sha)
                                     (not= artifact-sha (get-in result [:evidence :resolved-sha])))
                                 :artifact-revision-mismatch)
-                      verdict (cond missing :observation-missing
-                                    (pos? predicted) (if observed :predicted-and-observed
-                                                        :predicted-not-observed)
-                                    observed :not-predicted-observed
-                                    :else :neither)]
+                      verdict (outcome-verdict predicted observed missing)]
                   (cond-> {:token token :predicted predicted
                            :observed (if missing {:status :missing :kind missing} observed)
+                           :verdict verdict :measurement row}
+                    missing (assoc :reason missing))))
+              (:wanted prediction))))))
+
+(defn compare-supplied-outcomes
+  "Compare pattern-domain supplied rows without translating them into the
+  mission measurement shape. Missing and revision-mismatched rows stay typed."
+  [prediction supplied artifact-sha]
+  (let [base {:schema :wm/pattern-outcome-comparison-v1
+              :prediction prediction :artifact-sha artifact-sha
+              :supplied supplied
+              :evidence-sha256 (evidence/value-digest supplied)}]
+    (cond
+      (not= :frozen (:status prediction))
+      (assoc base :status :refused :reason :prediction-unavailable)
+
+      (not= :supplied (:status supplied))
+      (assoc base :status :refused
+             :reason (or (:kind supplied) (:reason supplied)
+                         :supplied-observations-unavailable))
+
+      :else
+      (assoc base :status :compared
+             :tokens
+             (mapv
+              (fn [{:keys [token predicted]}]
+                (let [rows (filter #(= token (:effect %)) (:rows supplied))
+                      row (first rows)
+                      observed (:observed row)
+                      missing (cond
+                                (empty? rows) :measurement-unavailable
+                                (not= 1 (count rows)) :ambiguous-measurement
+                                (not= artifact-sha (get-in row [:revision :sha]))
+                                :artifact-revision-mismatch
+                                (not (boolean? observed))
+                                (or (:reason observed) :measurement-unavailable))
+                      verdict (outcome-verdict predicted observed missing)]
+                  (cond-> {:token token :predicted predicted
+                           :observed (if missing {:status :missing :kind missing}
+                                         observed)
                            :verdict verdict :measurement row}
                     missing (assoc :reason missing))))
               (:wanted prediction))))))
