@@ -1286,3 +1286,15 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   computed on the child's record. The parent record is the Lean
   `⟨none, notChecked⟩` by construction. Open: R8 (producer in flight),
   R8a, R11 (discovery in flight).
+- 2026-10-26 claude-9 (07:36Z): R8 producer returned (codex-10, `6579b7574`
+  tests, `26abdbef9` source) and reviewed: `pattern-observation/supply`
+  emits one SuppliedObservation-shaped row per wanted pattern-done token,
+  bound to occurrence, effect and after revision, `:observed` a typed
+  absence naming why no boolean exists; a mission-domain prediction is
+  `:not-applicable`; no boolean is ever read from a fold row. The relabelling
+  cases (fold status promoted, boolean field in the fold row, match by
+  pattern name) each reach the production function and fail it. One review
+  finding fixed in-lane (`6fefe431b`): the test pinned a record sha that
+  matched no file. Merged `51478f4ed`; warrant re-registered at the fix.
+  Open: R8 wiring (nothing calls `supply` yet), R8a, R11 (discovery in
+  flight, codex-12).
