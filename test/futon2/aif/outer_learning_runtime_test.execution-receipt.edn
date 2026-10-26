@@ -39,6 +39,13 @@
                       "test/futon2/aif/outer_learning_runtime_test.clj"]
               :errors 0 :warnings 0}
   :check-parens :ok}
+ :r30-repair
+ {:by "claude-9" :at "2026-10-26T19:52:00Z"
+  :change "pinned-demonstration-run-remains-in-production-learning-fold: the two fold totals (applied 22, unresolved 7) replaced by agreement between :counts and the :events they summarise"
+  :command "clojure -X:test :nses '[futon2.aif.outer-learning-runtime-test]'"
+  :tests 3 :assertions 39 :failures 0 :errors 0 :completed? true
+  :log "~/notes/wm-next/r30-runtime-test.log"
+  :clj-kondo {:errors 0 :warnings 0} :check-parens :ok}
  :scope
  {:live-jvm-loaded? false
   :click-run? false}}

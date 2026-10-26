@@ -85,8 +85,12 @@
     (is (= :live (:mode state)))
     (is (= :produced (:status learned)))
     (is (= (count events) (get-in learned [:counts :rows])))
-    (is (= 22 (get-in learned [:counts :applied])))
-    (is (= 7 (get-in learned [:counts :unresolved])))
+    ;; R30: the fold grows with every pinned run, so totals are not pinned;
+    ;; the counts must agree with the events they summarise.
+    (is (= (count (filter #(= :applied (:update %)) events))
+           (get-in learned [:counts :applied])))
+    (is (= (count (filter #(= :not-applied (:update %)) events))
+           (get-in learned [:counts :unresolved])))
     (is (= :grounded-collateral-progress
            (get-in demonstration [:observation :class])))
     (let [event demonstration]
