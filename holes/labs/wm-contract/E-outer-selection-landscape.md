@@ -925,3 +925,22 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `invoke-1792989152008-4137-2285ef7d`, park `park-c503c4a7`, deadline
   05:17Z. Packets under `~/notes/wm-next/outer-selection/packets/`
   (`R1b-batch-fires-with-a-winner-packet.md`, `R13-gate-waiver-bell.md`).
+- 2026-10-26 claude-9 (04:36Z): codex-14's R13 repair returned (futon2
+  `726d38432`, waiver job `invoke-1792989109914-4132-7eb140f6`; the
+  first job's wake arrived after the commit had landed, so the review ran
+  on this wake). Record check: the three named files, trailers codex-14 /
+  Dispatched-By claude-9, no warrant, kondo clean. Adequacy: `evaluate`
+  has no `rand`; nil draw on a tie refuses `{:absent :no-sealed-draw}`,
+  1.0 refuses `{:invalid 1.0}`; `select-live` seals `:seed` as
+  `[:policy :selection-draw]` via `java.util.Random` and `selector`
+  forwards it. The tests are the Lean controls on the m150 menu
+  (`m150_repaired_valid`, `m150Other`, `m150UnitDraw`,
+  `m150_untied_needs_no_draw`) plus a seeded `run-live` whose chosen
+  action matches the carrier's entry and an unseeded one that refuses.
+  Production path read: `war_machine.clj:1551` already passes `:seed`,
+  and the runtime wrappers pass the input through, so the wrapper line
+  was the whole gap. Carrier replay unchanged (recorded `:u` at
+  `selected_outer_cascade_policy.clj:190`). First run of new tests: 8
+  tests, 40 assertions, green. R13 REPAIRED-FORWARD in DEFECTS. The waived
+  red (`run-live` helper omits `:selection-as-of`) is the stale-helper
+  packet, queued after R1b.
