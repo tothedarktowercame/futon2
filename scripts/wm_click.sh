@@ -146,7 +146,9 @@ if not heap or not regions:
     raise SystemExit(1)
 used_kib = int(heap.group(2))
 young_kib, survivor_kib = map(int, regions.groups())
-old_used_kib = max(0, used_kib - young_kib - survivor_kib)
+# G1 counts survivor regions inside the young total, so subtract young only;
+# survivors are reported for the record (after GC.run they are usually 0).
+old_used_kib = max(0, used_kib - young_kib)
 max_kib = (int(heap.group(4), 16) - int(heap.group(3), 16)) // 1024
 print((old_used_kib + 1023) // 1024, max_kib // 1024)
 '); then
