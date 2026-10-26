@@ -6,6 +6,7 @@
             [futon2.aif.scoring-input-receipts :as scoring-inputs]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.assessed-policy-basis :as assessed-basis]
+            [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.outer-policy-evidence :as evidence]
             [futon2.aif.outer-policy-objective :as objective]
             [futon2.aif.outer-canonical-g :as canonical-g]
@@ -128,6 +129,46 @@
                                 :q4 (:policies objective-receipt) :q8 (:comparison objective-receipt)}}]
       (seal-body body))))
 
+(defn canonical-policy-stages
+  "Project the selected target's canonical menu, frontier and q4 rows into
+   the policy-stage shape consumed by Q8. Non-canonical carriers have no such
+   projection."
+  [carrier]
+  (when (= :canonical-G-frontier (:basis-kind carrier))
+    (let [target (:target-id carrier)
+          entries (filterv #(= target (:target-id %))
+                           (get-in carrier [:sealed-menu :entries]))
+          frontier (get-in carrier [:canonical-frontier :entries])
+          q4-rows (vec (get-in carrier [:recomputation :q4]))
+          ordered (fn [keys] (vec (sort-by pr-str keys)))
+          key-of #(get-in % [:action :policy-key])
+          matched? (fn [entry row]
+                     (let [digest (get-in entry [:action :cascade-digest])]
+                       (and (= :scored (:status row))
+                            (= (:policy-id entry) (:policy-id row))
+                            (= digest (:cascade-digest row))
+                            (= digest (get-in row [:action-pin :cascade-digest])))))
+          q4-matched? (fn [entry row]
+                        (and (= (:policy-id entry) (:policy-id row))
+                             (= (get-in entry [:action :cascade-digest])
+                                (:cascade-digest row))))
+          constructed (ordered (map key-of entries))
+          scored (ordered (for [entry entries
+                                :when (some #(matched? entry %) frontier)]
+                            (key-of entry)))
+          posterior (ordered (for [entry entries
+                                   :when (some #(q4-matched? entry %) q4-rows)]
+                               (key-of entry)))]
+      {:stages {target {:constructed constructed
+                        :admitted constructed
+                        :scored scored
+                        :posterior posterior}}
+       :provenance
+       {:menu-pin (or (get-in carrier [:sealed-menu :menu-pin :sha256])
+                      (get-in carrier [:menu-pin :sha256]))
+        :frontier-pin (get-in carrier [:canonical-frontier :frontier-pin :sha256])
+        :q4-pin (interpretation-evidence/value-digest q4-rows)}})))
+
 (defn verify
   "Total semantic verification. Returns nil when valid, otherwise a keyword."
   [carrier]
@@ -248,6 +289,7 @@
     (let [entry (:selected-entry carrier)
           assessed? (= :assessed-population (:basis-kind carrier))
           canonical? (= :canonical-G-frontier (:basis-kind carrier))
+          canonical-stages (when canonical? (canonical-policy-stages carrier))
           raw-receipt (dissoc (:objective-receipt carrier) :objective-pin)
           selection (when assessed? (:assessed-selection raw-receipt))]
       {:status :selected
@@ -294,6 +336,12 @@
                    ;; Observed outer-route terms, not a beta update: the
                    ;; objective receipt is sealed and replay-verified above.
                             :precision-row (:precision-row raw-receipt)}}
+                   canonical-stages
+                   (assoc-in [:selection-certificate :policy-stages]
+                             (:stages canonical-stages))
+                   canonical-stages
+                   (assoc-in [:selection-certificate :stage-provenance]
+                             (:provenance canonical-stages))
                    (some? (:cascade-id entry))
                    (assoc :selection-law {:candidate (:cascade-id entry)}))
                  (str "outer-selection/" (get-in carrier [:carrier-pin :sha256])))

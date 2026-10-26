@@ -93,11 +93,15 @@
         forged (carrier/seal-canonical menu evidence objective f wrong-selection)
         forged (assoc forged :carrier-pin (carrier/carrier-pin forged))
         decision (:decision (carrier/decision sealed))
-        selected-key (get-in sealed [:selected-entry :action :policy-key])
-        target (:target-id sealed)]
+        target (:target-id sealed)
+        target-keys (->> (get-in sealed [:sealed-menu :entries])
+                         (filter #(= target (:target-id %)))
+                         (map #(get-in % [:action :policy-key]))
+                         (sort-by pr-str)
+                         vec)]
     (is (nil? (carrier/verify sealed)))
     (is (= :selected (get-in (carrier/decision sealed) [:decision :status])))
-    (is (= [selected-key]
+    (is (= target-keys
            (get-in decision [:selection-certificate :policy-stages target :constructed])
            (get-in decision [:selection-certificate :policy-stages target :scored])))
     (is (= (get-in sealed [:sealed-menu :menu-pin :sha256])
