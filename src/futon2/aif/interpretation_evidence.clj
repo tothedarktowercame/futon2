@@ -68,7 +68,16 @@
                       (map (fn [[k v]] [k (stable v)])) x)
         (vector? x) (mapv stable x)
         :else x))
-(defn value-digest [x] (sha256 (.getBytes (pr-str (stable x)) "UTF-8")))
+(defn value-digest
+  "SHA-256 of the stable printed form of X. The print vars are bound here:
+  a seal is a function of the value alone, never of the sealing process's
+  ambient printer. Without this a carrier sealed inside the futon3c server
+  (root `*print-namespace-maps*` false) read as tampered in a `clojure -M`
+  process (clojure.main binds it true), and the reverse (R18, 2026-10-26)."
+  [x]
+  (binding [*print-namespace-maps* true *print-length* nil *print-level* nil
+            *print-meta* false *print-dup* false *print-readably* true]
+    (sha256 (.getBytes (pr-str (stable x)) "UTF-8"))))
 
 (defn supply-machine-digests
   "Fill byte/value digests that the validator can compute itself. READER returns
