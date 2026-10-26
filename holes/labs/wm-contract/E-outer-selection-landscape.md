@@ -2,7 +2,7 @@
 
 **Opened:** 2026-10-26 (Joe's question put on 2026-10-25, relayed by claude-11)
 **Owner:** claude-9 (research question, record, conclusions). Implementation may go to zai-2.
-**Status:** OPEN. Capture C1–C3 landed (C3 reviewed 2026-10-26); C4 split into C4a (projection, landed `bc7ad6c93`, reviewed 2026-10-26) and C4b (retain wiring, in flight); H2 mechanism answered in §10.2; findings F1–F6 recorded (F3 corrected in §10.2); hypotheses H1–H4 open; §10 answers Joe's 2026-10-26 questions.
+**Status:** OPEN. Capture C1–C3 landed (C3 reviewed 2026-10-26); C4 split into C4a (projection, landed `bc7ad6c93`, reviewed 2026-10-26) and C4b (retain wiring, in flight); H2 mechanism answered in §10.2; findings F1–F6 recorded (F3 corrected in §10.2); hypotheses H1–H3 open, H4 answered (no, by hand-read; §5); §10 answers Joe's 2026-10-26 questions.
 **Related:** `futon3c/holes/missions/M-giraffe.md` (`357edb090`, one work item as data, with dependencies);
 `STOCKTAKE-wm-2026-10-25.md`; `PROPOSAL-outer-focus-class-2026-10-21.md`;
 `mathlib4/DarkTower/WarMachine/Proof2/OuterSelectionCanonicalG.md` (O2/O3 notes);
@@ -145,6 +145,21 @@ selection active with no objective fallback (`select-live` 865-875).
 - **H4.** A dependency term would have changed the 2026-10-24 choice. Test
   after C1–C3: of the 4 scored, which have unbuilt dependencies named in their
   mission text? (Hand-read; feeds M-giraffe's field list.)
+  **Answered, probably not (claude-11, hand-read, 2026-10-26; table in
+  `futon3c/holes/missions/M-giraffe.md`, commit `29e72624a`).** The tied pair
+  (M-war-machine-wiring, M-recommendation-bindings) each name one unmet need
+  that can be checked now and one that cannot (a ruling on WM-I4; a dangling
+  mission name), so a count of unmet needs leaves the tie where G left it.
+  What the read adds to the field: needs come in five kinds (an artifact or
+  field exists; another item's status; a ruling; a dangling name; an
+  operator practice) and only the first two are machine-checkable, so the
+  rest need a typed cannot-determine reason; the edge must say which side
+  owns the need, since only M-stack-geometry separates its own Missing
+  column from its dependencies in its text; and "enables" edges are needed
+  beside "needs" (M-recommendation-bindings names M-portfolio-inference as
+  something it enables). Limit: for E-live-means-live only the Status line
+  was read, not whether the coverage gap persists. Closed here; the field
+  design continues in M-giraffe.
 
 ## 6. Capture to land before the next run (C1–C4)
 
@@ -1107,3 +1122,8 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   observations not opened as defects: the shorter cascade wins at the field
   horizon in every shape tried; the canonical census has no place for a
   task whose pipeline membership is unknown.
+- 2026-10-26 claude-9: H4 closed on claude-11's bell. The hand-read of the
+  four scored missions is in `futon3c/holes/missions/M-giraffe.md`
+  (`29e72624a`): a dependency count leaves the 2026-10-24 tie in place.
+  §5 H4 and the Status line amended; nothing in §6 changes, since the
+  dependency term was already out of scope for the next run.
