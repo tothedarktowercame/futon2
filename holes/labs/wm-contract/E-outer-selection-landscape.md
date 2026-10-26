@@ -1010,3 +1010,16 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   moved. Run of the three namespaces together: 17 tests, 98 assertions, 0
   failures. Next: R14's packet (its choice was made at 04:03Z; R1, R12 and
   R13 have all landed, which was its sequencing condition).
+- 2026-10-26 claude-9 (05:00Z): R14 discovery packet dispatched to codex-10
+  (job `invoke-1792990785240-4172-357ac3cd`, park
+  `park-88647337-a535-4f35-ae16-9dff12f1aafa`, deadline 05:44Z; the packet's
+  header stamp 05:00Z was written a few seconds ahead of the clock, sent
+  04:59:45Z). Discovery only, in a worktree on branch `r14-discovery`:
+  `outer-receipt` in `test/futon2/aif/wm/q8_frontier_route_test.clj` is given
+  the ordinary inputs (as-of, focus trio, seed, a real
+  `:policy-field-config` from `reading-route/field` with real task sources),
+  the namespace is run once, and the per-test reds and the shapes of
+  `:q8-frontier`, `:q8` and the policy status are reported; no assertion
+  edit, checkpoint on any edit needed outside the fixture. The re-pin packet
+  is written from those shapes after review. Packet
+  `~/notes/wm-next/outer-selection/packets/r14-q8-route-discovery-packet.md`.
