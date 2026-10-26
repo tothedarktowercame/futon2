@@ -203,6 +203,38 @@
           [entry'] (:entries (q8/canonical-outer-frontier tied))]
       (is (= "T/b" (:policy-id entry')) "equal G: digest sorts first"))))
 
+(deftest non-exact-g-is-refused-not-thrown
+  (let [row (fn [pid target digest g]
+              {:policy-id pid :target-id target :status :scored
+               :G g :cascade-digest digest
+               :action-pin {:cascade-digest digest}})
+        base (fn [g]
+               {:support [{:id "T"} {:id "U"}]
+                :excluded []
+                :policy-field {:families [{:target-id "T" :status :computed}
+                                          {:target-id "U" :status :computed}]}
+                :policy {:selected-outer-cascade-policy
+                         {:sealed-menu {:entries [{:policy-id "T/a" :target-id "T"}
+                                                  {:policy-id "U/a" :target-id "U"}]}}
+                         :canonical-g-frontier
+                         {:status :produced :horizon-choice {:horizon 1}
+                          :entries [(row "T/a" "T" "aaa" -1.5)
+                                    (row "U/a" "U" "uuu" g)]}
+                         :canonical-policy-selection
+                         {:status :selected :action {:target "T"}}}})]
+    (testing "a string G is refused, not thrown"
+      (is (= [:not-recomputable :channel-value-not-exact ["U"]]
+             ((juxt :status :reason :tasks)
+              (q8/canonical-outer-frontier (base "0.5"))))))
+    (testing "a nil G is refused, not thrown"
+      (is (= [:not-recomputable :channel-value-not-exact ["U"]]
+             ((juxt :status :reason :tasks)
+              (q8/canonical-outer-frontier (base nil))))))
+    (testing "control: an exact G certifies"
+      (let [c (q8/canonical-outer-frontier (base -0.5))]
+        (is (= :certified (:status c)))
+        (is (= {:status :pass} (:selection-verdict c)))))))
+
 (deftest tampering-with-a-sealed-g-breaks-the-seal
   (let [c (q8/canonical-outer-frontier receipt)
         tampered (assoc-in c [:entries 0 :channels :G] -1.0)]
