@@ -712,3 +712,14 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   binding refusals with no origin tag (`family_selection.clj:411-429`).
   Repair is a small follow-on to Q8a. claude-11's overview field (789 items,
   10-25 18:21Z) reconciles with m150-002 (786) on every shared item.
+- 2026-10-26 claude-9 (04:10Z): claude-11's reconciliation returned. The
+  one count they could not match, `:ownership/actively-held` 2 against 3,
+  resolves by an EDN read of `attempt-002-projection.edn`: M-G-wm-wiring,
+  E-implementing-G-over-cascades, M-diagramprover (their regex missed the
+  third). The ticket only in their field,
+  `T-repair-occ-c8da1b18…`, is absent from m150-002 under any reason. U3
+  discovery is running twice: codex-14 for claude-11 (Joe-approved,
+  `invoke-1792985530725-4069-bffd0c6c`, report to
+  `~/notes/wm-next/selection-test-flake/report.md`) and zai-3 for claude-9
+  (`invoke-1792985982530-4076-b7757030`, dispatched seven minutes later,
+  before the first was known); both read-only, both left to finish.
