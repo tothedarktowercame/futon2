@@ -5,6 +5,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
+            [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire])
   (:import [java.nio.file Files]
@@ -51,12 +52,14 @@
         injury-root (str (io/file repair-root "wm-meta-injuries"))
         ledger-path (str (io/file injury-root "ledger.edn"))
         transaction-path (str (io/file injury-root "transaction.edn"))
+        learning-manifest-path (str (io/file repair-root "outer-learning-manifest.edn"))
         phase-log (str (io/file repair-root "wm-full-loop-phases.edn.log"))]
     (with-redefs [repair/default-root repair-root
                   tripwire/default-trip-root trip-root
                   meta-injury-store/default-root injury-root
                   meta-self-heal/default-ledger-path ledger-path
                   meta-self-heal/default-transaction-path transaction-path
+                  outer-learning-manifest/default-path learning-manifest-path
                   runner/default-phase-log phase-log]
       (run-tests))
     (testing "the suite cannot deposit production repair or trip artifacts"
