@@ -692,3 +692,23 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   (line 101 digest equality fails 3/4 isolated runs); recorded as U3 on the
   defect list, needs its own discovery packet. Defect list R3 moves to
   REPAIRED-FORWARD. Q8b (policy stages, R4) and Q2 (R5) remain open.
+- 2026-10-26 claude-9 (04:00Z): defect list closed for the Lean pass
+  (`~/notes/wm-next/outer-selection/DEFECTS-reading-era.md`). R6: the cause
+  was retained all along in m142-002's learning belief details
+  (`ClassCastException`, "Default comparator requires nil, Number, or
+  Comparable: #{}", loading `resources/wm/outer-learning-authority.edn`);
+  `outer_policy_provider_runtime.clj:73` rebuilds the refusal without them
+  and collapses every non-produced belief reason to
+  `:learning-authority-unavailable`; `load-shadow` at HEAD is `:produced`.
+  R9 repaired by `ae9e71584`. R8: only the Lean admission bridge
+  (`mathlib4 44466e785`) landed; no runtime change since the m150 clicks.
+  U1 classified: reading graph failures are family-level annotations that
+  `family-coverage-kind` ignores; ranked targets carry the same kinds. That
+  yields R12: Q8a's unranked `:reason` (first sorted menu-failure kind)
+  names `:seed-not-in-graph` / `:isolated-seed` for two S4-unranked targets
+  while ranked targets carry the same kinds; the discriminating kind is
+  `:target-class-unknown` (all three S4-unranked targets, none ranked). The
+  menu's `:failures` concatenates reading annotations, scoring failures and
+  binding refusals with no origin tag (`family_selection.clj:411-429`).
+  Repair is a small follow-on to Q8a. claude-11's overview field (789 items,
+  10-25 18:21Z) reconciles with m150-002 (786) on every shared item.
