@@ -106,3 +106,27 @@ on the canonical route; nothing in (b) forecloses it.
 - U6, U7 (red tests off the click route) and U8 (string keys in
   `wm_run_alert.py` output): technical, handled in lane.
 - The R8a Lean instance: dispatched to claude-5 2026-10-26 08:03Z.
+
+## Rulings (Joe, 2026-10-26; recorded by claude-9 13:13Z)
+
+Joe's reply, verbatim: "Regarding decision one, (a) is fine with me but I'd
+like a fully worked example, particularly in light of your note that 'v3
+changes nothing until an authored clause carries the locator form'. Fully
+worked should include the actual change mentioned there, because otherwise
+it sounds as though we're still wrapped up in red tape and 'changing
+nothing' while adding more infrastructure. Decision two, I'm happy with
+(a). Decision three, (a) is OK again. Decision three, I'm OK with (b) for
+now however I want a tech note that explains what the retraction route is
+supposed to be good for, otherwise we are creating more 'built not wired'
+code which isn't great, and we might as well understand what it was trying
+to do even while unwiring it in this case."
+
+The second "decision three" is read as item 4: item 3 has no (b) that
+unwires anything, and the retraction route is item 4's subject.
+
+| Item | Ruling | Done |
+|---|---|---|
+| 1 (R8b) | (a), with the authored change | futon2 `8d0e24dca`: contract v3, `pattern-receipt`, ledger key, runner wiring, `req_f7374bcce` occurrence 0 as a C4 locator; worked example `~/notes/wm-next/outer-selection/r8b-worked-example.md` |
+| 2 (R5 residual) | (a) record only | futon2 `1508815f2`: `:q2-outer-action-provenance` on the outer receipt |
+| 3 (U4) | (a) | futon2 `1508815f2`: test pin; Lean clause with claude-5, job `invoke-1793020328984-4264-bffd2f06` |
+| 4 (U5) | (b) for now, with a tech note | note futon2 `0e799e3c5`; unwiring with codex-10, job `invoke-1793020325389-4263-5fbfdfbe` |
