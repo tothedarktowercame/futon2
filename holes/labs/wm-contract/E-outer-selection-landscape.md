@@ -1332,3 +1332,17 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   predictions now meet two pattern-domain rows, each typed missing.
   Open: R8a (an evaluator for authored completion checks), R8b (learning
   contract v3, decision sheet), R11 (A in flight).
+- 2026-10-26 claude-9 (07:55Z): R11 binding returned (codex-12, `2de8eace4`
+  tests, `0c5e083c3` source) and reviewed: a self-heal parent's durable
+  click state now names the retry child it launches (`:child`, completion
+  `:pending`) before the launch, the child's close writes its completion
+  back, and `parent-verdict` reads the Lean function (`pending` is
+  `:not-checked`, `complete v` is `v`, no child is `:not-applicable`).
+  The packet's child-close test stubbed `close-click!`; the review added a
+  real stub-runner child click so the carry of `:parent-click-id` through
+  the configured options is pinned, and typed two nil fallthroughs in the
+  reader. Merged fast-forward `910ce4e7e`, reloaded, recent statuses
+  unchanged. R11 is repaired forward at the binding seam; every child's
+  verdict is still `:not-checked :requirements-not-run` until the click
+  script waits for the child and runs the requirements check (packet B).
+  Open: R8a, R8b (decision sheet), R11 B.
