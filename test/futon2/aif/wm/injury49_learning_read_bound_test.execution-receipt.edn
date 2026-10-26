@@ -1,5 +1,5 @@
 {:schema :test/execution-receipt-v1
- :recorded-at "2026-10-26T20:08:49Z"
+ :recorded-at "2026-10-26T20:14:04Z"
  :command "clojure -X:test :nses '[futon2.aif.wm.injury49-learning-read-bound-test]'"
  :namespaces [futon2.aif.wm.injury49-learning-read-bound-test]
  :tests 2
@@ -7,27 +7,33 @@
  :failures 0
  :errors 0
  :result :passed
- :contract-sha256 "a60921c95edb58056e747456289ff948e5f699f339a516dcfa36e0e1c5550f12"
+ :contract-sha256 "c484b2fb9c567183edf2a71f69677ea9ee746bc533d504c5b56656ba7bd618e3"
+ :supersedes {:contract-sha256 "a60921c95edb58056e747456289ff948e5f699f339a516dcfa36e0e1c5550f12"
+              :commit "e931ec082"
+              :change "child form prints [:belief :status], [:belief :reason] and [:belief :details :error-class] so the pre log shows why the dataset is absent"}
  :replays
  {:pre {:revision "358e09116"
         :tests 2 :assertions 14 :failures 4 :errors 0
-        :runner-exit 1 :child-exit 0 :child-wall-ms 60415
+        :runner-exit 1 :child-exit 0 :child-wall-ms 57659
         :child-last-line
-        "{:result {}, :dataset-status nil, :record-read nil}"
+        "{:belief-status :refused, :refusal :learning-authority-unavailable, :error-class \"java.lang.OutOfMemoryError\", :dataset-status nil, :record-read nil}"
+        :log "~/notes/wm-next/offline-repair/authority/49-evaluation/pre-red-reason.log"
         :verdict :original-contract-failed}
   :post {:revision "f7eacfabf"
          :tests 2 :assertions 15 :failures 0 :errors 0
-         :runner-exit 0 :child-exit 0 :child-wall-ms 2213
+         :runner-exit 0 :child-exit 0 :child-wall-ms 1572
          :child-last-line
-         "{:result {}, :dataset-status :produced, :record-read {:declared 80, :readable 80, :verified 46, :excluded 34, :missing 0, :drifted 0, :reasons {:outer-task-identity-missing 32, :outer-task-kind-invalid 2}}}"
+         "{:belief-status :produced, :refusal nil, :error-class nil, :dataset-status :produced, :record-read {:declared 80, :readable 80, :verified 46, :excluded 34, :missing 0, :drifted 0, :reasons {:outer-task-identity-missing 32, :outer-task-kind-invalid 2}}}"
+         :log "~/notes/wm-next/offline-repair/authority/49-evaluation/post-green-reason.log"
          :verdict :original-contract-repaired}
   :negative
-  {:revision "f7eacfabf"
-   :mutation "read-input ignores :projection and returns the whole parsed record"
+  {:revision "e931ec082"
+   :mutation "read-input ignores :projection and returns the whole parsed record (49-evaluation/negative.diff)"
    :tests 2 :assertions 15 :failures 6 :errors 0
-   :runner-exit 1 :child-exit 1 :child-wall-ms 20343
+   :runner-exit 1 :child-exit 1 :child-wall-ms 20629
    :child-last-line nil
    :child-error "java.lang.OutOfMemoryError: Java heap space"
+   :log "~/notes/wm-next/offline-repair/authority/49-evaluation/negative-red-reason.log"
    :verdict :negative-control-refused}}
  :additional-gates
  {:clj-kondo {:errors 0 :warnings 0}

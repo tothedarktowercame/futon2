@@ -15,7 +15,9 @@
 (def child-form
   (str "(require '[futon2.aif.outer-learning-runtime :as runtime]) "
        "(let [result (runtime/load-shadow)] "
-       "(prn {:result (select-keys result [:status]) "
+       "(prn {:belief-status (get-in result [:belief :status]) "
+       ":refusal (get-in result [:belief :reason]) "
+       ":error-class (get-in result [:belief :details :error-class]) "
        ":dataset-status (get-in result [:dataset :status]) "
        ":record-read (get-in result [:dataset :counts :record-read])}))"))
 
