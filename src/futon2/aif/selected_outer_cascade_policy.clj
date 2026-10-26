@@ -11,6 +11,7 @@
             [futon2.aif.outer-policy-objective :as objective]
             [futon2.aif.outer-canonical-g :as canonical-g]
             [futon2.aif.outer-canonical-selection :as canonical-selection]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.wm.executable-cascade :as executable]
             [futon2.aif.wm.family-selection :as family]))
 
@@ -22,7 +23,7 @@
    :sealed-menu :menu-pin :evidence-carrier :evidence-pin
    :objective-receipt :objective-pin :recomputation
    :basis-kind :scope :assessed-basis :canonical-frontier :canonical-selection
-   :pattern-prediction-input])
+   :pattern-prediction-input :q6-exclusion])
 
 (defn- pin [path value]
   ;; Pinned text must not depend on the caller's print bindings: a REPL binds
@@ -110,11 +111,15 @@
 (defn seal-canonical
   "Seal a selection already made over O3-1's retained canonical frontier.
    The objective receipt remains evidence/reporting, not this choice basis."
-  [menu evidence-carrier objective-receipt frontier selection]
-  (if-not (= :selected (:status selection))
-    {:schema schema :status :refused :reason :canonical-policy-selection-required
-     :canonical-status (:status selection)}
-    (let [action (:action selection)
+  ([menu evidence-carrier objective-receipt frontier selection]
+   (seal-canonical menu evidence-carrier objective-receipt frontier selection
+                   (:carrier (previous-run/canonical-exclusion nil menu frontier))))
+  ([menu evidence-carrier objective-receipt frontier selection q6-exclusion]
+   (if-not (= :selected (:status selection))
+     {:schema schema :status :refused :basis-kind :canonical-G-frontier
+      :reason :canonical-policy-selection-required
+      :canonical-status (:status selection) :q6-exclusion q6-exclusion}
+     (let [action (:action selection)
           entry (first (filter #(and (= (:policy-id %) (:policy-id action))
                                      (= (:cascade-digest %) (:cascade-digest action))) (:entries menu)))
           objective-receipt (assoc objective-receipt :objective-pin (objective-pin objective-receipt))
@@ -125,9 +130,10 @@
                 :evidence-carrier evidence-carrier :evidence-pin (:evidence-pin evidence-carrier)
                 :objective-receipt objective-receipt :objective-pin (:objective-pin objective-receipt)
                 :canonical-frontier frontier :canonical-selection selection
+                :q6-exclusion q6-exclusion
                 :recomputation {:q2 (select-keys action [:target :policy-id :cascade-digest])
                                 :q4 (:policies objective-receipt) :q8 (:comparison objective-receipt)}}]
-      (seal-body body))))
+       (seal-body body)))))
 
 (defn canonical-policy-stages
   "Project the selected target's canonical menu, frontier and q4 rows into
@@ -224,12 +230,17 @@
              (not= receipt (assoc recomputed :objective-pin (objective-pin recomputed))))
         :selected-policy-objective-recomputation
         (and (= :canonical-G-frontier basis-kind)
+             (not (previous-run/intact? (:q6-exclusion carrier))))
+        :selected-policy-q6-carrier-tampered
+        (and (= :canonical-G-frontier basis-kind)
              (not= (:canonical-frontier carrier) (canonical-g/produce menu)))
         :selected-policy-canonical-frontier-replay
         (and (= :canonical-G-frontier basis-kind)
              (not= (:canonical-selection carrier)
-                   (canonical-selection/evaluate (:canonical-frontier carrier) menu
-                                                 (get-in carrier [:canonical-selection :draw :u]))))
+                   (canonical-selection/evaluate
+                    (:canonical-frontier carrier) menu
+                    (get-in carrier [:canonical-selection :draw :u])
+                    (set (get-in carrier [:q6-exclusion :excluded-keys])))))
         :selected-policy-canonical-replay
         (nil? entry) :selected-policy-entry-missing
         (not= entry expected-entry) :selected-policy-entry-substitution
@@ -285,7 +296,10 @@
   "Project a verified handoff into the downstream decision shape without selection."
   [carrier]
   (if-let [defect (verify carrier)]
-    {:status :refused :reason defect}
+    (cond-> {:status :refused :reason defect}
+      (and (= :canonical-G-frontier (:basis-kind carrier))
+           (previous-run/intact? (:q6-exclusion carrier)))
+      (assoc :q6 (:q6-exclusion carrier)))
     (let [entry (:selected-entry carrier)
           assessed? (= :assessed-population (:basis-kind carrier))
           canonical? (= :canonical-G-frontier (:basis-kind carrier))
@@ -342,6 +356,9 @@
                    canonical-stages
                    (assoc-in [:selection-certificate :stage-provenance]
                              (:provenance canonical-stages))
+                   canonical?
+                   (assoc-in [:selection-certificate :q6]
+                             (:q6-exclusion carrier))
                    (some? (:cascade-id entry))
                    (assoc :selection-law {:candidate (:cascade-id entry)}))
                  (str "outer-selection/" (get-in carrier [:carrier-pin :sha256])))

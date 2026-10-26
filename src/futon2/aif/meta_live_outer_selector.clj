@@ -850,9 +850,14 @@
         ;; nothing in this packet consumes it to make a choice.
         canonical-g-frontier (when (= :sealed (:status sealed-menu))
                                (outer-canonical-g/produce sealed-menu))
+        canonical-exclusion (when canonical-g-frontier
+                              (previous-run/canonical-exclusion
+                               previous-run/*predecessor* sealed-menu
+                               canonical-g-frontier))
         canonical-policy-selection (when canonical-g-frontier
                                      (canonical-selection/evaluate canonical-g-frontier sealed-menu
-                                                                   selection-u))
+                                                                   selection-u
+                                                                   (:excluded-keys canonical-exclusion)))
         provided (when (= :sealed (:status sealed-menu))
                    (evidence-provider/resolve-provider
                     outer-policy-evidence-provider sealed-menu))
@@ -867,9 +872,11 @@
                          (assessed-basis/seal sealed-menu policy-evidence policy-objective))
         candidate-carrier
         (cond
-          (= :selected (:status canonical-policy-selection))
+          (or (= :selected (:status canonical-policy-selection))
+              (:refusal canonical-exclusion))
           (selected-policy/seal-canonical sealed-menu policy-evidence policy-objective
-                                          canonical-g-frontier canonical-policy-selection)
+                                          canonical-g-frontier canonical-policy-selection
+                                          (:carrier canonical-exclusion))
 
           ;; O3-2 deliberately has no objective fallback: canonical refusal is
           ;; a typed outer no-choice, while the objective remains recorded.
@@ -1014,9 +1021,13 @@
                                       :policy-objective policy-objective
                                       :canonical-g-frontier canonical-g-frontier
                                       :canonical-policy-selection canonical-policy-selection
+                                      :q6-exclusion (:carrier canonical-exclusion)
                                       :selection-draw selection-draw
                                       :assessed-policy-basis assessed-basis
-                                      :selected-outer-cascade-policy activated-carrier
+                                      :selected-outer-cascade-policy
+                                      (or activated-carrier
+                                          (when (:refusal canonical-exclusion)
+                                            candidate-carrier))
                                       :missing-targets (mapv :target-id incomplete)
                                       :absent-terms (vec (distinct (concat
                                                                     (:absent-terms provided)

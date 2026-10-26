@@ -40,6 +40,7 @@
 (def terminal-schema :wm/q6-terminal-v1)
 (def exclusion-schema :wm/q6-exclusion-v1)
 (def inputs-schema :wm/q6-selection-inputs-v1)
+(def canonical-inputs-schema :wm/q6-canonical-selection-inputs-v1)
 
 (defn seal [value] (assoc value :sha256 (evidence/value-digest value)))
 
@@ -165,6 +166,14 @@
 (defn reading-key? [k]
   (and (vector? k) (= :wm/reading-policy-v1 (first k))))
 
+(defn- stable-order
+  "Order VALUES by their value digests: an order that is a function of the
+  values alone. Sorting by pr-str read the ambient printer (*print-length*
+  truncates, *print-namespace-maps* reshapes), so the same keys could digest
+  differently in two processes (R18 sibling, 2026-10-26)."
+  [values]
+  (vec (sort-by evidence/value-digest values)))
+
 (defn selection-inputs-digest
   "The digest of every input the one selector call consumes, taken over the
   whole scored family before any exclusion: each policy's structural key,
@@ -175,12 +184,12 @@
   [ranked selector-opts beta precision-identity]
   (evidence/value-digest
    {:schema inputs-schema
-    :policies (vec (sort-by pr-str
-                            (map (fn [e] {:policy-key (get-in e [:action :policy-key])
-                                          :g (:G-cascade e)
-                                          :g-terms (get-in e [:certificate :g-terms])
-                                          :f-prefix (:f-prefix e)})
-                                 ranked)))
+    :policies (stable-order
+               (map (fn [e] {:policy-key (get-in e [:action :policy-key])
+                             :g (:G-cascade e)
+                             :g-terms (get-in e [:certificate :g-terms])
+                             :f-prefix (:f-prefix e)})
+                    ranked))
     :beta beta
     :precision-identity precision-identity
     :selector-opts (select-keys selector-opts
@@ -220,6 +229,23 @@
       {:status :excluded :reason :previous-choice-refused-on-same-inputs
        :excluded-keys [(:policy-key choice)]})))
 
+(defn- exclusion-carrier
+  [predecessor digest menu-count removed decided refused?]
+  (seal (cond-> (merge {:schema exclusion-schema
+                        :input-digest digest
+                        :predecessor (select-keys predecessor
+                                                  [:status :reason :sha256
+                                                   :previous-run/id])
+                        :menu menu-count
+                        :removed removed}
+                       decided)
+          refused?
+          (assoc :status :refused
+                 :kind :repeat-choice-after-refusal
+                 :rearm {:condition :selection-inputs-change
+                         :input-digest digest
+                         :excluded-key (first (:excluded-keys decided))}))))
+
 (defn exclusion
   "Q6 before the one selector: PREDECESSOR (the run's sealed predecessor
   carrier, or nil) against RANKED (the certified scored family). Returns
@@ -232,21 +258,47 @@
         kept (vec (remove #(contains? excluded (get-in % [:action :policy-key])) ranked))
         removed (- (count ranked) (count kept))
         refused? (and (= :excluded (:status decided)) (empty? kept))
-        carrier (seal (cond-> (merge {:schema exclusion-schema
-                                      :input-digest digest
-                                      :predecessor (select-keys predecessor
-                                                                [:status :reason :sha256
-                                                                 :previous-run/id])
-                                      :menu (count ranked)
-                                      :removed removed}
-                                     decided)
-                        refused?
-                        (assoc :status :refused
-                               :kind :repeat-choice-after-refusal
-                               :rearm {:condition :selection-inputs-change
-                                       :input-digest digest
-                                       :excluded-key (first (:excluded-keys decided))})))]
+        carrier (exclusion-carrier predecessor digest (count ranked) removed
+                                   decided refused?)]
     (cond-> {:carrier carrier :ranked kept}
+      refused? (assoc :refusal carrier))))
+
+(defn canonical-selection-inputs-digest
+  "Digest the whole canonical population before Q6 exclusion. The draw is
+  sealed entropy for resolving a tie, not an input to the rearm identity."
+  [sealed-menu frontier]
+  (evidence/value-digest
+   {:schema canonical-inputs-schema
+    :menu-pin (:menu-pin sealed-menu)
+    :frontier-pin (:frontier-pin frontier)
+    :policy-keys (stable-order (map #(get-in % [:action :policy-key])
+                                    (:entries sealed-menu)))}))
+
+(defn canonical-exclusion
+  "Q6 for canonical selection. Preserve the sealed menu/frontier and return
+  the keys the selector must omit. A refusal is present only when exclusion
+  removes the last scored canonical entry."
+  [predecessor sealed-menu frontier]
+  (let [digest (canonical-selection-inputs-digest sealed-menu frontier)
+        decided (decide-exclusion predecessor digest)
+        excluded (set (:excluded-keys decided))
+        entries (:entries sealed-menu)
+        by-id (into {} (map (juxt :policy-id identity)) (:entries frontier))
+        removed (count (filter #(contains? excluded
+                                           (get-in % [:action :policy-key]))
+                               entries))
+        scored? (fn [entry] (= :scored (:status (get by-id (:policy-id entry)))))
+        had-scored? (some scored? entries)
+        scored-left? (some (fn [entry]
+                             (and (not (contains? excluded
+                                                  (get-in entry [:action :policy-key])))
+                                  (scored? entry)))
+                           entries)
+        refused? (and (= :excluded (:status decided)) had-scored?
+                      (not scored-left?))
+        carrier (exclusion-carrier predecessor digest (count entries) removed
+                                   decided refused?)]
+    (cond-> {:carrier carrier :excluded-keys excluded}
       refused? (assoc :refusal carrier))))
 
 ;; -- this run's terminal carrier ----------------------------------------------

@@ -10,7 +10,8 @@
   "Choose the least scored canonical G in sealed-menu order.  Refusals are
    deliberately absent from the candidate population, never numeric scores."
   ([frontier menu] (evaluate frontier menu nil))
-  ([frontier menu draw]
+  ([frontier menu draw] (evaluate frontier menu draw nil))
+  ([frontier menu draw excluded-keys]
    (cond
      (not= :produced (:status frontier))
      {:status :no-choice :reason :canonical-frontier-unavailable}
@@ -20,18 +21,27 @@
 
      :else
      (let [by-id (into {} (map (juxt :policy-id identity)) (:entries frontier))
+           excluded-keys (set excluded-keys)
+           score-entry (fn [entry]
+                         (let [row (get by-id (:policy-id entry))]
+                           (when (and (= :scored (:status row))
+                                      (finite? (:G row))
+                                      (= (get-in entry [:action :cascade-digest])
+                                         (:cascade-digest row))
+                                      (= (get-in entry [:action :cascade-digest])
+                                         (get-in row [:action-pin :cascade-digest])))
+                             (assoc row :menu-entry entry))))
+           all-scored (vec (keep score-entry (:entries menu)))
            scored (->> (:entries menu)
-                       (keep (fn [entry]
-                               (let [row (get by-id (:policy-id entry))]
-                                 (when (and (= :scored (:status row))
-                                            (finite? (:G row))
-                                            (= (get-in entry [:action :cascade-digest]) (:cascade-digest row))
-                                            (= (get-in entry [:action :cascade-digest])
-                                               (get-in row [:action-pin :cascade-digest])))
-                                   (assoc row :menu-entry entry)))))
+                       (remove #(contains? excluded-keys
+                                           (get-in % [:action :policy-key])))
+                       (keep score-entry)
                        vec)]
        (if (empty? scored)
-         {:status :no-choice :reason :no-scored-canonical-policy
+         {:status :no-choice :reason (if (and (seq excluded-keys)
+                                              (seq all-scored))
+                                      :repeat-choice-after-refusal
+                                      :no-scored-canonical-policy)
           :frontier-pin (:frontier-pin frontier)}
          (let [minimum (apply min (map :G scored))
                tied (filterv #(== (double minimum) (double (:G %))) scored)

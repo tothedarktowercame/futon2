@@ -3,6 +3,7 @@
             [clojure.set :as set]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.interpretation-evidence :as interpretation-evidence]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.q8-frontier :as q8]
             [futon2.aif.selected-outer-cascade-policy :as selected]))
 
@@ -39,14 +40,28 @@
            (get-in r [:provenance :q4-pin])))
     (is (valid-stages? stages))))
 
-(deftest cascade-advances-from-stages-to-the-q6-refusal
+(deftest cascade-consumes-a-present-canonical-q6-carrier
   (let [r (selected/canonical-policy-stages carrier)
+        predecessor (previous-run/seal
+                     {:schema previous-run/predecessor-schema
+                      :status :present
+                      :previous-run/id "previous"
+                      :previous {:outcome {:status :present :outcome :already-satisfied}}})
+        q6 (previous-run/seal
+            {:schema previous-run/exclusion-schema
+             :input-digest "canonical-digest"
+             :predecessor (select-keys predecessor
+                                       [:status :reason :sha256 :previous-run/id])
+             :menu 1 :removed 0
+             :status :not-triggered :reason :previous-outcome-not-refused})
         decision {:selection-certificate
                   {:policy-stages (:stages r)
-                   :stage-provenance (:provenance r)}
+                   :stage-provenance (:provenance r)
+                   :q6 q6}
                   :selection-law {:candidate "x"}}]
-    (is (= [:not-recomputable :q6-carrier-absent-or-tampered]
-           ((juxt :status :reason) (q8/cascade decision nil target))))
+    (is (= [:present #{}]
+           ((juxt :status :requirement-excluded)
+            (q8/cascade decision predecessor target))))
     (is (= [:not-recomputable :policy-stages-absent]
            ((juxt :status :reason)
             (q8/cascade (update decision :selection-certificate
