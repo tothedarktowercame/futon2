@@ -6,6 +6,7 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
+            [futon2.aif.meta-terminal-injury :as terminal]
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-self-heal-production :as production]
             [futon2.aif.meta-self-heal-harness :as harness]
@@ -139,7 +140,84 @@
                                         :acceptance-review-port]}}
            (select-keys ordinary [:status :self-heal])))
     (is (= :refused (:status dedicated)))
-    (is (= :meta-self-heal/production-config-required (:reason dedicated)))))
+    (is (= :meta-self-heal/production-config-required (:reason dedicated))))
+  ;; The real bad case: a durable ledger with a :medic-repaired observation
+  ;; used to invoke its authority verifier once during load and once again
+  ;; during the active projection.
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        authority-pin {:path "fixture://diagnosis-context-authority"
+                       :sha256 (apply str (repeat 64 "3"))}
+        opening-pin {:path "fixture://diagnosis-context-opening"
+                     :sha256 (apply str (repeat 64 "1"))}
+        medic-pin {:path "fixture://diagnosis-context-medic"
+                   :sha256 (apply str (repeat 64 "2"))}
+        authority (fn [{:keys [operation candidate evidence current]}]
+                    (and (= authority-pin (:authority-receipt-pin operation))
+                         (= candidate evidence)
+                         (= [(:injury-id candidate) (:entry-id candidate)]
+                            [(:injury-id current) (:entry-id current)])))
+        opened (:ledger
+                (terminal/integrate
+                 ledger/empty-ledger
+                 (terminal/classify
+                  {:run/id "diagnosis-context-open"
+                   :click/id "diagnosis-context-detect"
+                   :failure {:kind :diagnosis-context-fixture
+                             :stage :construction
+                             :detail {:target "one-validation"}}}
+                  opening-pin)))
+        entry (last (:entries opened))
+        payload {:kind :historical-misclassification
+                 :injury-id (:injury-id entry)
+                 :entry-id (str (:ordinal entry))
+                 :predecessor-entry-id nil
+                 :patch-id "patch/diagnosis-context"
+                 :reviewer "reviewer/diagnosis-context"
+                 :evaluator "evaluator/diagnosis-context"
+                 :evidence-pin "evidence/diagnosis-context"
+                 :original-record-id (:path opening-pin)
+                 :original-pin (:sha256 opening-pin)
+                 :classifier-revision "classifier/diagnosis-context"
+                 :replay :producer-qualified-non-injury}
+        operation {:operation-id "medic/diagnosis-context"
+                   :expected-ledger-pin (:ledger-pin opened)
+                   :request {:candidate payload :evidence payload}
+                   :authority-receipt-pin authority-pin}
+        repaired (ledger/append-medic-repaired
+                  opened medic-pin operation authority)
+        history (:ledger repaired)
+        direct-calls (atom 0)
+        context-calls (atom 0)
+        direct-verifier (fn [request]
+                          (swap! direct-calls inc)
+                          (authority request))
+        context-verifier (fn [request]
+                           (swap! context-calls inc)
+                           (authority request))]
+    (is (= :appended (:status repaired)) (pr-str repaired))
+    (spit ledger-path (str (pr-str history) "\n"))
+    (is (= :valid (:status (ledger/validate-ledger history direct-verifier))))
+    (let [context (production/diagnosis-context
+                   {:meta-injury-ledger-path ledger-path
+                    :meta-medic-authority-verifier context-verifier})]
+      (is (= @direct-calls @context-calls))
+      (is (pos? @context-calls))
+      (is (= (ledger/effective-active-injuries history authority)
+             (:active-injuries context))))
+    ;; Change one sealed entry byte.  The next call must read and validate the
+    ;; new snapshot rather than reuse the previous successful validation.
+    (spit ledger-path
+          (str/replace-first (slurp ledger-path)
+                             ":diagnosis-context-fixture"
+                             ":diagnosis-context-tampered"))
+    (let [tampered (production/diagnosis-context
+                    {:meta-injury-ledger-path ledger-path
+                     :meta-medic-authority-verifier context-verifier})]
+      (is (= :refused (get-in tampered [:durable-ledger :status])))
+      (is (= :store/tampered-ledger
+             (get-in tampered [:durable-ledger :reason])))
+      (is (nil? (:active-injuries tampered))))))
 
 (deftest active-injury-preempts-ordinary-runtime-and-persists-every-boundary
   (let [env (harness/prepare-environment! (root))
@@ -1770,15 +1848,16 @@
 
 (deftest uncomputable-active-set-ends-the-click-before-acceptance
   ;; Not reachable from a file today: load-ledger validates before :loaded and
-  ;; active-injuries runs the same validate-ledger (meta_injury_store.clj L36-49,
-  ;; meta_injury_ledger.clj L284-288), so the dependency is scripted to return the
-  ;; refusal it would return.  The branch exists in prepare-diagnosis (P:786) and the
-  ;; table makes it terminal.
+  ;; the active projection consumes the load's successful validation, so the
+  ;; projection dependency is scripted to return the refusal it would return.
+  ;; The branch exists in prepare-diagnosis (P:786) and the table makes it
+  ;; terminal.
   (let [env (harness/prepare-environment! (root))
         ports (harness/fake-ports (:repo env) (atom {}) :success)
         acceptance-calls (atom 0) ordinary-calls (atom 0)
-        result (with-redefs [ledger/active-injuries
-                             (constantly {:status :refused :reason :ledger/invalid :defects [:entry/seal]})]
+        result (with-redefs [ledger/effective-active-injuries-from-validated-ledger
+                             (constantly {:status :refused :reason :ledger/invalid
+                                          :defects [:entry/seal]})]
                  (with-redefs-fn {#'production/prepare-acceptance (fn [& _] (swap! acceptance-calls inc) nil)
                                   #'runtime/run-ordinary-opportunity! (fn [& _] (swap! ordinary-calls inc) nil)}
                    ;; No supplied pin: with one, prepare-diagnosis answers :present before
@@ -1798,8 +1877,9 @@
     ;; read decides before the pin (prepare-diagnosis, M8R finding 15); before that
     ;; reorder the pin answered :present and only route!'s guard caught the case,
     ;; after an acceptance observation the rev 6 table has no edge for.
-    (let [pinned (with-redefs [ledger/active-injuries
-                               (constantly {:status :refused :reason :ledger/invalid :defects [:entry/seal]})]
+    (let [pinned (with-redefs [ledger/effective-active-injuries-from-validated-ledger
+                               (constantly {:status :refused :reason :ledger/invalid
+                                            :defects [:entry/seal]})]
                    (with-redefs-fn {#'production/prepare-acceptance (fn [& _] (swap! acceptance-calls inc) nil)
                                     #'runtime/run-ordinary-opportunity! (fn [& _] (swap! ordinary-calls inc) nil)}
                      #(runtime/run-opportunity! (opts env ports))))]
