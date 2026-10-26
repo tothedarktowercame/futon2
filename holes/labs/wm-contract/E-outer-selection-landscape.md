@@ -1023,3 +1023,52 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   edit, checkpoint on any edit needed outside the fixture. The re-pin packet
   is written from those shapes after review. Packet
   `~/notes/wm-next/outer-selection/packets/r14-q8-route-discovery-packet.md`.
+- 2026-10-26 claude-9 (05:12Z): R14 discovery returned (codex-10, job
+  `invoke-1792990785240-4172-357ac3cd`, branch `r14-discovery` `f759c5ce6`).
+  Record check: fixture only, as the packet asked (`outer-receipt` given as-of,
+  the focus trio, seed 14, real task sources and a `:policy-field-config` from
+  `reading-route/field`); no assertion edit; trailers codex-10, dispatched by
+  claude-9; kondo 0/0, parens OK. The seat reports one slip, a
+  `clojure -M:test -e` that started the broad suite and was killed, results
+  unused. Checkpoint fired: `[:policy :status] :refused`,
+  `:canonical-binding-refused`. All three families `:computed` (3 reported, 2
+  distinct each) and S4 refuses all six policies: each reading-alternatives
+  policy `:cascade-validation-error :graph-endpoint-foreign` on its one
+  reading-order edge `["p/a" 0] → ["p/b" 1]`; each retraction policy
+  `:occurrence-identity-absent` (nodes `"p/a"`, `"p/b"`, no fragment index).
+  Q8 frontier absent, Q8 `:not-recomputable :outer-frontier-absent-or-tampered`;
+  7 tests, 75 assertions, 47 failures, 1 error, one green
+  (`forged-stale-and-omitting-carriers-are-not-accepted`). Cause, read in
+  source and confirmed by a probe in the worktree JVM
+  (`~/notes/r14-discovery/probe-readings.clj`): `executable_cascade.clj`
+  `occurrence-node` makes a node only from an occurrence whose reading carries
+  a validated three-halves square; without one the occurrence is an unread
+  census entry, not a node. `cascade_decision/occurrence-readings` finds both
+  fixture occurrences readable (span, source sha, both pinned digests
+  present), but the reading-route fixture publishes no occurrence squares, so
+  both are unread, the structural layer has no nodes, and the reading-order
+  edge's endpoints are foreign to an empty node set. The clause names the edge;
+  the census carries the unread reason. The 2026-10-24 click bound four entries
+  because those targets have squares in `storage/wm-occurrence-squares` (8
+  records). Two things this settles. (i) The inner route
+  (`cascade_decision.clj:1262`) binds only under `:require-occurrence-squares?`,
+  which is why `cascade_decision_test` selects on the same fixture: it never
+  binds; the outer route binds unconditionally in `sealed-pre-choice-menu`. A
+  green inner-route test on this fixture is therefore no evidence that its
+  policies are canonically bindable. (ii) Retraction policies are pattern-grain
+  by construction (`retraction_cascade/from-retraction` carries no fragment
+  index) and collapse at the pre-selector identity check on every bind: the
+  fixture's 3 and the 9 of the 2026-10-24 click (S4 row) are one refusal. No
+  retraction policy is selectable on the canonical route, though every one is
+  generated and scored first. Opened as U5 in DEFECTS. R14 itself needs one
+  more fixture input before the re-pin, the artifact the real click had:
+  squares for the cited occurrences, built with
+  `three-halves-square/build-from-situation-maps` against pattern files that
+  carry the four parts (`parts-check` refuses the fixture's one-line
+  flexiargs) and published through `occurrence-square-registry/publish!`, with
+  `:occurrence-square-root` and `:pattern-library-root` in the config (absent,
+  `families-for-field` reads the production store, a hermetic leak). The same
+  publisher and validator production reads, not a stub. Step-2 packet
+  `~/notes/wm-next/outer-selection/packets/r14-q8-route-squares-packet.md`:
+  squares in the fixture, shapes reported, checkpoint before any assertion
+  edit; the re-pin follows.
