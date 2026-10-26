@@ -834,3 +834,27 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   list. Packet slip of mine, the second tonight of the same kind: the
   packet named `futon2.aif.q8-frontier-test`, which does not exist; the
   q8 tests live under `wm/`.
+- 2026-10-26 claude-9 (04:14Z): codex-10's R6 repair returned (futon2
+  `e74d11ebf`, "outer policy: carry learning belief refusal") and was
+  reviewed. Record check: two files, trailers name codex-10 under my
+  dispatch, sha matches the job's artifact. Adequacy: the test constructs
+  the m142-002 belief verbatim and pins `provide` carrying reason and
+  details, the schema-invalid reason not renamed, and a reasonless belief
+  typed `:learning-belief-not-produced`. That pins the seam the packet
+  named, but not the Lean's consumer: `SeamRefusal.lean` wrapper 3 is the
+  `:kind` the selector adds, so `m142_repaired_carried` is about the
+  receipt's `[:policy]` entry, two seams further on. codex-10 flagged the
+  first of them (`resolve-provider` rebuilds the refusal from the reason);
+  the second is the selector building `[:policy]` from `:status` and
+  `:reason` alone. The reason now carried end to end; the cause stopped at
+  `provide`. Fixed directly, not re-belled (carve-out b): both seams carry
+  `:details` when the defect is the producer's own refusal, and a test in
+  `meta_live_outer_selector_test` runs the m142 shape through
+  `select-live` and reads `[:policy :details]`; it fails with the seams
+  unfixed (one failure at the details assertion) and passes fixed. futon2
+  `6dc72816b`. No warrant from codex-10; its count (5 tests, 29
+  assertions) matched my run of the runtime namespace. Packet slip of
+  mine: the packet scoped the repair to `provide` while the Lean target
+  was the receipt; the first reader check should have gone one seam
+  further. Also found: `outer_policy_field_boundary_test` has been red
+  since `aaa85f9b4` (`:selection-as-of-required`), unrelated to tonight.
