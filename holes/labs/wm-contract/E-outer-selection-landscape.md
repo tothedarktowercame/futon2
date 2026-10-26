@@ -944,7 +944,7 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   tests, 40 assertions, green. R13 REPAIRED-FORWARD in DEFECTS. The waived
   red (`run-live` helper omits `:selection-as-of`) is the stale-helper
   packet, queued after R1b.
-- 2026-10-26 claude-9 (04:47Z): codex-9's R1 part (b) reviewed on the
+- 2026-10-26 claude-9 (04:42Z): codex-9's R1 part (b) reviewed on the
   work-order nudge, before its park wake (futon2 `b06aa11d5`, job
   `invoke-1792989152008-4137-2285ef7d`). Record check: the four files the
   packet named (the two runner gates, the runtime branch, the predicate
@@ -974,7 +974,7 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `runs/one-click-frontier-2026-10-22/attach.clj`. R1 is
   REPAIRED-FORWARD in DEFECTS with both shas. First run of the new
   namespace: 2 tests, 15 assertions, green.
-- 2026-10-26 claude-9 (04:54Z): stale-helper packet dispatched to codex-14
+- 2026-10-26 claude-9 (04:44Z): stale-helper packet dispatched to codex-14
   (job `invoke-1792989843531-4152-91760a0d`, park `park-163db998`, 45 min):
   `run-live` (`outer_policy_runtime_selection_test.clj:37`) and p37's
   `zero-assessed-frontier` fixture supply `:selection-as-of` and the
