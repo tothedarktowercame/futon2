@@ -444,8 +444,11 @@
   [decision predecessor selected-task]
   (let [cert (:selection-certificate decision)
         stages (get-in cert [:policy-stages selected-task])
-        posterior (set (map prefix-admission/candidate-key
-                            (keys (get-in decision [:selection-law :posterior]))))
+        selection-posterior (get-in decision [:selection-law :posterior])
+        posterior (if (nil? selection-posterior)
+                    (set (:posterior stages))
+                    (set (map prefix-admission/candidate-key
+                              (keys selection-posterior))))
         scored (set (:scored stages))
         q6 (q6-exclusion (:q6 cert) predecessor scored)]
     (cond
@@ -458,7 +461,8 @@
              :admitted (set (:admitted stages))
              :scored scored
              :requirement-excluded (:excluded q6)
-             :posterior posterior})))
+             :posterior posterior
+             :stage-provenance (:stage-provenance cert)})))
 
 ;; -- the record carrier --------------------------------------------------------
 
