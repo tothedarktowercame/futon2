@@ -723,3 +723,17 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `~/notes/wm-next/selection-test-flake/report.md`) and zai-3 for claude-9
   (`invoke-1792985982530-4076-b7757030`, dispatched seven minutes later,
   before the first was known); both read-only, both left to finish.
+- 2026-10-26 claude-9 (03:44Z): Q8a loaded into the serving JVM. Reloaded
+  `futon2.aif.q8-frontier` and `futon2.aif.meta-live-outer-selector` from
+  the master checkout (03:43Z); `drift.clj` then reports no drift over 110
+  registered namespaces. Ran `canonical-outer-frontier` and `certificate`
+  in that JVM over the retained `attempt-002/002-selection.edn` itself,
+  not the projection: open 786, eligible 109, excluded 677, 4 entries
+  (recommendation-bindings, self-improvement-loop, stack-geometry,
+  war-machine-wiring), 105 unranked, selected M-war-machine-wiring,
+  carrier `:decided-failure`, selection `:tied-minimum`, census
+  `:frontier-not-eligible-census` with the same by-reason counts the
+  fixture gives, carrier intact; certificate `:not-recomputable` with
+  reasons `[:no-prior-frontier :policy-stages-absent]`, census verdict
+  carried through, intact. The fixture and the receipt agree. The park
+  wake for the Q8a job arrived at 03:42Z, after the inline review above.
