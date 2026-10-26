@@ -22,6 +22,80 @@
 (def allow (constantly true))
 (defn req [candidate evidence] {:candidate candidate :evidence evidence})
 
+(def e45
+  {:injury-id "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0"
+   :entry-id "45"
+   :predecessor-entry-id nil
+   :cause-record-id
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-8be8ff03-5009-4f3d-8c12-5b11cfd46d92.edn"
+   :cause-pin "e9a5eb355f9a6f70b41d5bdbd99e127badcd6d13e6bd7165867fa2bb9477f404"
+   :active? true})
+
+;; These five strings stand in for the correction envelope that does not yet
+;; exist. Reviewer and evaluator remain distinct, as the admission requires.
+(def entry45-successful-close
+  {:kind :historical-misclassification
+   :injury-id (:injury-id e45)
+   :entry-id (:entry-id e45)
+   :predecessor-entry-id nil
+   :original-record-id (:cause-record-id e45)
+   :original-pin (:cause-pin e45)
+   :classifier-revision "classifier-revision-placeholder"
+   :replay :successful-close-non-injury
+   :patch-id "patch-placeholder"
+   :reviewer "reviewer-placeholder"
+   :evaluator "evaluator-placeholder"
+   :evidence-pin "evidence-pin-placeholder"})
+
+(deftest only-non-injury-replays-qualify
+  (doseq [replay [:injury :unsupported-author-refusal :done-at-base-revision]]
+    (let [candidate (assoc hist :replay replay)
+          result (medic/process allow base (req candidate candidate))]
+      (is (= [:refused :binding-mismatch]
+             ((juxt :status :reason) result))
+          (str "injury_replay_refuses / qualified_replay_nonInjury: " replay)))))
+
+(deftest a9-successful-close-value-requires-its-exact-binding
+  (let [candidate (assoc hist :replay :successful-close-non-injury)
+        old-evidence (medic/process allow base (req candidate hist))
+        old-authority (fn [_ c _] (= c hist))
+        rejected (medic/process old-authority base (req candidate candidate))
+        appended (medic/process allow base (req candidate candidate))]
+    (is (= [:refused :binding-mismatch]
+           ((juxt :status :reason) old-evidence))
+        "a9_new_value_qualifies_only_under_binding: old evidence")
+    (is (= [:refused :authority-rejected]
+           ((juxt :status :reason) rejected))
+        "a9_new_value_qualifies_only_under_binding: old authority")
+    (is (= :appended (:status appended))
+        "a9_new_value_qualifies_only_under_binding: exact binding")
+    (is (= [["41" "e2"]]
+           (medic/effective-active (:state appended))))
+    (is (= (:history base) (get-in appended [:state :history])))))
+
+(deftest entry45-successful-close-correction-and-reopening
+  (let [state {:history [e45 e2] :corrections []}
+        appended (medic/process allow state
+                                (req entry45-successful-close
+                                     entry45-successful-close))
+        old-value (assoc entry45-successful-close
+                         :replay :producer-qualified-non-injury)
+        only-successful-close (fn [_ candidate _]
+                                (= candidate entry45-successful-close))
+        old-refused (medic/process only-successful-close state
+                                   (req old-value old-value))
+        reopened (assoc e45 :entry-id "46" :predecessor-entry-id "45")
+        reopened-state (update (:state appended) :history conj reopened)]
+    (is (= :appended (:status appended))
+        "entry45_correction_qualifies_with_successful_close_replay")
+    (is (= (:history state) (get-in appended [:state :history])))
+    (is (= [["41" "e2"]]
+           (medic/effective-active (:state appended))))
+    (is (= :refused (:status old-refused)))
+    (is (= [["41" "e2"] [(:injury-id e45) "46"]]
+           (medic/effective-active reopened-state))
+        "entry45_later_reopening_remains_active")))
+
 (deftest both-evidence-kinds-and-certified-clear-all
   (let [partial (medic/certified-sweep allow base [(req hist hist)])
         all (medic/certified-sweep allow base [(req hist hist) (req genuine genuine)])]
