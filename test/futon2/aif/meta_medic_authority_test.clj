@@ -8,11 +8,29 @@
 (def reviewer {:seat "reviewer-seat" :session "review-session"})
 (def authorizer {:seat "operator-seat" :session "operator-session"})
 
+(def successful-close-findings
+  {:classification :successful-task-outcome
+   :empty-history :no-injury
+   :attributable-retry :discharged
+   :unsupported-refusal :injury
+   :done-at-base :injury
+   :image-removal :injury
+   :failure-present :injury})
+
+(defn- producer-qualified-findings []
+  ;; This fallback lets the red run exercise the new tests against the old,
+  ;; unkeyed constant before the source change is applied.
+  (or (get authority/required-findings :producer-qualified-non-injury)
+      authority/required-findings))
+
 (defn pinned [path value]
   (let [text (str (pr-str value) "\n")]
     [{:path path :sha256 (load-identity/sha256 (.getBytes text "UTF-8"))} text]))
 
-(defn fixture []
+(defn fixture
+  ([] (fixture :producer-qualified-non-injury
+               (producer-qualified-findings)))
+  ([replay findings]
   (let [original {:failure {:kind :already-satisfied :stage :author-wait}
                   :run-output {:outcome :already-satisfied}}
         [original-pin original-bytes] (pinned "artifacts/original.edn" original)
@@ -42,11 +60,11 @@
                 :acceptance-contract-pin contract-pin
                 :patch-revision "36afa9142331fbe99eb99b67ae510322ca543f0c"
                 :classifier-revision "c8e65d96213c884d08b1d3a07f51c76fece0c5bb"
-                :replay :producer-qualified-non-injury
+                :replay replay
                 :evaluator evaluator :reviewer reviewer}
         intent-id (authority/intent-digest intent)
         evaluation {:schema authority/evaluation-schema :intent-digest intent-id
-                    :evaluator evaluator :findings authority/required-findings}
+                    :evaluator evaluator :findings findings}
         [evaluation-pin evaluation-bytes] (pinned "receipts/evaluation.edn" evaluation)
         review {:schema authority/review-schema :intent-digest intent-id
                 :evaluation-pin evaluation-pin :reviewer reviewer
@@ -66,7 +84,7 @@
                    :original-record-id (:path original-pin)
                    :original-pin (:sha256 original-pin)
                    :classifier-revision (:classifier-revision intent)
-                   :replay :producer-qualified-non-injury}
+                   :replay replay}
         request {:candidate candidate :evidence candidate}
         operation-id (authority/final-operation-id
                       intent-id request evaluation-pin review-pin authorization-pin)
@@ -93,7 +111,30 @@
      :intent intent :artifacts artifacts
      :evaluation-pin evaluation-pin :review-pin review-pin
      :authorization-pin authorization-pin
-     :trust (fn [attestation] (contains? trusted attestation))}))
+     :trust (fn [attestation] (contains? trusted attestation))})))
+
+(deftest findings-are-qualified-by-replay-kind
+  (is (= :verified
+         (:status (authority/verify
+                   (fixture :successful-close-non-injury
+                            successful-close-findings))))
+      "successful-close replay verifies with its findings")
+  (is (= [:refused :evaluation/not-qualified]
+         ((juxt :status :reason)
+          (authority/verify
+           (fixture :successful-close-non-injury
+                    (producer-qualified-findings)))))
+      "successful-close replay refuses the a9 findings")
+  (is (= [:refused :evaluation/not-qualified]
+         ((juxt :status :reason)
+          (authority/verify (fixture :injury nil))))
+      "unknown replay with nil findings never verifies")
+  (is (= [:refused :evaluation/not-qualified]
+         ((juxt :status :reason)
+          (authority/verify
+           (fixture :successful-close-non-injury
+                    (dissoc successful-close-findings :failure-present)))))
+      "successful-close findings are exact"))
 
 (deftest acyclic-trusted-bundle-verifies
   (let [f (fixture) result (authority/verify f)]
