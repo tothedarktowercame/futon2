@@ -107,9 +107,64 @@ prepare_sources() {
     return 3
   fi
 }
+
+probe_heap() {
+  local listing pids pid gc_output heap_output metrics old_used_mb max_mb threshold_mb
+  # Measured after a full GC on 2026-10-26: 4645 MiB old/non-young use in a
+  # 12288 MiB heap. 8192 MiB preserves about 4 GiB for one click; this is an
+  # empirical operating threshold, not a semantic limit on the War Machine.
+  threshold_mb="${WM_CLICK_HEAP_REFUSE_MB:-8192}"
+  if ! [[ "$threshold_mb" =~ ^[0-9]+$ ]]; then
+    cannot "heap after GC" "WM_CLICK_HEAP_REFUSE_MB must be a non-negative integer (got $threshold_mb)"
+    return 3
+  fi
+  if ! listing=$(jcmd -l 2>&1); then
+    cannot "heap after GC" "jcmd could not list JVMs: $listing"
+    return 3
+  fi
+  pids=$(printf '%s\n' "$listing" |
+    awk '$2 == "clojure.main" && $0 ~ / -m futon3c[.]dev([[:space:]]|$)/ {print $1}')
+  if [ "$(printf '%s\n' "$pids" | awk 'NF {n++} END {print n+0}')" -ne 1 ]; then
+    cannot "heap after GC" "expected one futon3c.dev JVM, found: ${pids:-none}"
+    return 3
+  fi
+  pid="$pids"
+  if ! gc_output=$(jcmd "$pid" GC.run 2>&1); then
+    cannot "heap after GC" "jcmd $pid GC.run failed: $gc_output"
+    return 3
+  fi
+  if ! heap_output=$(jcmd "$pid" GC.heap_info 2>&1); then
+    cannot "heap after GC" "jcmd $pid GC.heap_info failed: $heap_output"
+    return 3
+  fi
+  if ! metrics=$(printf '%s\n' "$heap_output" | python3 -c '
+import re, sys
+text = sys.stdin.read()
+heap = re.search(r"garbage-first heap\s+total\s+(\d+)K, used\s+(\d+)K\s+\[(0x[0-9a-f]+),\s*(0x[0-9a-f]+)\)", text)
+regions = re.search(r"region size\s+\d+K,\s+\d+ young \((\d+)K\),\s+\d+ survivors \((\d+)K\)", text)
+if not heap or not regions:
+    raise SystemExit(1)
+used_kib = int(heap.group(2))
+young_kib, survivor_kib = map(int, regions.groups())
+old_used_kib = max(0, used_kib - young_kib - survivor_kib)
+max_kib = (int(heap.group(4), 16) - int(heap.group(3), 16)) // 1024
+print((old_used_kib + 1023) // 1024, max_kib // 1024)
+'); then
+    cannot "heap after GC" "could not parse G1 old-generation use from jcmd output"
+    return 3
+  fi
+  read -r old_used_mb max_mb <<<"$metrics"
+  say "heap after GC" "$old_used_mb MiB of $max_mb MiB old gen"
+  if [ "$old_used_mb" -gt "$threshold_mb" ]; then
+    cannot "heap after GC" "$old_used_mb MiB exceeds WM_CLICK_HEAP_REFUSE_MB=$threshold_mb; no click posted"
+    return 3
+  fi
+}
+
 if [ "$RUN" = "1" ]; then
   prepare_sources || exit 3
 fi
+probe_heap || exit 3
 
 # 2. Casting: three distinct seats, all on the roster AND idle.
 # Misconfiguration (non-distinct seats) cannot be waited out: terminal now.
@@ -384,6 +439,7 @@ while [ -z "$clickid" ]; do
 
   # ---------------------------------------------------------------- fire
   prepare_sources || exit 3
+  probe_heap || exit 3
   # The kernel's UUID source, not uuidgen: zone 1.1 (2026-10-09) shipped
   # without uuid-runtime, and the old `|| date +%s` fallback minted an id the
   # endpoint refuses as :wm-click-run-id-malformed.
