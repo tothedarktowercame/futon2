@@ -1258,3 +1258,20 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   exclude. Open: R8 (runtime measures mission holes against pattern-done
   predictions), R11 (parent verdict unbound from child completion).
 
+- 2026-10-26 claude-9 (~07:45Z): R8 discovery returned (codex-10,
+  `~/notes/r8-measurement-discovery/findings.md`) and read against
+  `a3acbbff2`, every cited line checked. The measured tokens are the
+  dispatch declarations' locators read as C3/C4; the predicted tokens are
+  the scorer's pattern-done wants; the two paths never meet. Attempt-002
+  holds no per-occurrence boolean at the after revision: 27 fold
+  conditions, all `:unchecked`, each an authored prose completion check
+  that nothing evaluates (compiler retains, plan validator shapes,
+  falsifier's seven checks omit it). A probe of the 27 against the mission
+  file at the before and after revisions: 13 without a quotable phrase,
+  13 present at both revisions, one absent at both, so a substring reading
+  would not measure the attempt. Decision: the R8 repair is a producer of
+  SuppliedObservation-shaped rows with typed absence
+  (`packets/r8-pattern-observation-producer-packet.md`, codex-10), and
+  R8a records that the boolean branch needs an executable completion-check
+  form and its evaluator, which do not exist. DEFECTS: R8 discovery read,
+  R8a added. Open: R8 (producer in flight), R8a, R11.
