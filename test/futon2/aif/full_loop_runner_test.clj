@@ -1081,7 +1081,7 @@
                             artifacts? reviewer-execution reviewer-events grounded?
                             cure-card cure-artifact-ref initial-author-card
                             initial-artifact-ref initial-author-job build-files-fn
-                            runner-options artifact-sha]}]
+                            runner-options artifact-sha occurrence-bound-task?]}]
    ((if artifact-sha
       (fn [f] (f artifact-sha))
       token-fixture/with-artifact)
@@ -1092,6 +1092,7 @@
            fold-file (io/file token-repo
                               "holes/missions/M-aif-policy-conditioned-eig.executed.edn")
            proof-file (io/file token-repo "logic/feature-witness.edn")
+           production-complete d-task/complete!
            record (io/file (:root cohort) "d-task.edn")
            _ (when artifacts?
                (spit fold-file (pr-str {:boxes [:author :store]
@@ -1105,9 +1106,12 @@
                  ["test/fixtures/library-pins/r7fc6a050"
                   "test/fixtures/library-pins/current"]]
          (with-redefs [d-task/complete!
-                       (fn [& _]
-                         {:source {:path (.getPath record)
-                                   :sha256 (digest/sha256 (slurp record))}})]
+                       (fn [root captured expected data _read-job]
+                         (if occurrence-bound-task?
+                           (runner-fixture/complete-occurrence-bound-task!
+                            production-complete root captured expected data)
+                           {:source {:path (.getPath record)
+                                     :sha256 (digest/sha256 (slurp record))}}))]
            (let [result (run-feature-card-attempt
                          {:author-card (or initial-author-card
                                            (when-not cure-card feature-card-claim))
@@ -7458,13 +7462,20 @@
             ["test/fixtures/library-pins/r7fc6a050" "test/fixtures/library-pins/current"]]
     (let [c (retention-cohort "runner-current-selection-retention")
           decision (token-loop-exercised-decision)
-          {:keys [result]} (run-token-feature-card-attempt c decision)
+          attempt (try
+                    (run-token-feature-card-attempt
+                     c decision {:occurrence-bound-task? true})
+                    (catch Exception e {:failure (ex-data e) :exception e}))
+          failure (or (:exception attempt) (:failure attempt)
+                      (get-in attempt [:result :data :failure-kind]))
+          result (:result attempt)
           selected (get-in result [:checkpoints :selection :judgment :controller-decision])
           example (:kernel-example result)
           manifest (:close-evidence-manifest result)
           entry (first (filter #(str/ends-with? (:evidence/id %)
                                                "/retained/kernel-example.edn")
                                (:entries manifest)))]
+      (is (nil? failure) "authorized current-route Prefix-F selection reaches close without failure")
       (is (some? (#'runner/selected-entry {:decision decision})))
       (is (= :grounded-progress (:outcome result)))
       (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
@@ -7473,7 +7484,12 @@
       (is (= :unavailable (get-in example [:missingness :observations])))
       (is (= example (edn/read-string (slurp (:source-path entry)))))
       (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))
-      (is (= (:selection-certificate decision) (:selection-certificate selected)))
+      (let [exercise (get-in selected [:selection-certificate :loop-node-exercise])]
+        (is (= :wm/loop-node-exercise-v1 (:schema exercise)))
+        (is (= :complete (:status exercise)))
+        (is (= (loop-node-exercise/receipt decision) exercise))
+        (is (= (:selection-certificate decision)
+               (dissoc (:selection-certificate selected) :loop-node-exercise))))
       (is (= (:action decision) (:action selected)))
       (is (some? (#'runner/selected-entry {:decision selected})))
       (is (= (get-in decision [:selection-certificate :precision-family])

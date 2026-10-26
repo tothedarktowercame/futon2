@@ -16,6 +16,17 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
+(defn complete-occurrence-bound-task!
+  "Use the runner's real D-task producer with its captured occurrence and
+  artifact binding. Synthetic author jobs have no independent Agency records:
+  keep that absence explicit and never contact the live service."
+  [complete root captured expected data]
+  (complete root captured expected data
+            (fn [job-id]
+              (throw (ex-info "Synthetic job has no independent Agency record"
+                              {:fixture/job-id job-id
+                               :fixture/independent-job-unavailable true})))))
+
 (defn declared-effective-configuration [opts]
   {:schema :wm/effective-run-configuration-v1
    :run/id (:run-id opts)
