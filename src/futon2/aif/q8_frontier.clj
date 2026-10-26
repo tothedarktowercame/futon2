@@ -303,7 +303,8 @@
                             (sort eligible-set))))
         unranked-tasks (set (map :task unranked))
         selected (get-in receipt [:policy :canonical-policy-selection :action :target])
-        selection-verdict (when (and (= :selected (:status cps)) (seq entries))
+        selection-verdict (when (and (= :selected (:status cps)) (seq entries)
+                                     (every? (comp some? :comparison-key) entries))
                             (strict-selection-correspondence entries selected))
         census-verdict (if (= entry-tasks eligible-set)
                          {:status :pass}
