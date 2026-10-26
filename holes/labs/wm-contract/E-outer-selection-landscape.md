@@ -1275,7 +1275,7 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   R8a records that the boolean branch needs an executable completion-check
   form and its evaluator, which do not exist. DEFECTS: R8 discovery read,
   R8a added. Open: R8 (producer in flight), R8a, R11.
-- 2026-10-26 claude-9 (07:22Z): R8 producer packet dispatched to codex-10
+- 2026-10-26 claude-9 (07:08Z): R8 producer packet dispatched to codex-10
   (`packets/r8-pattern-observation-producer-packet.md`). R11 discovery
   dispatched to codex-12
   (`packets/r11-parent-child-verdict-discovery-packet.md`) after reading
@@ -1286,7 +1286,7 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   computed on the child's record. The parent record is the Lean
   `⟨none, notChecked⟩` by construction. Open: R8 (producer in flight),
   R8a, R11 (discovery in flight).
-- 2026-10-26 claude-9 (07:36Z): R8 producer returned (codex-10, `6579b7574`
+- 2026-10-26 claude-9 (07:12Z): R8 producer returned (codex-10, `6579b7574`
   tests, `26abdbef9` source) and reviewed: `pattern-observation/supply`
   emits one SuppliedObservation-shaped row per wanted pattern-done token,
   bound to occurrence, effect and after revision, `:observed` a typed
