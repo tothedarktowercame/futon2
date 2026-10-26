@@ -1332,7 +1332,7 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   predictions now meet two pattern-domain rows, each typed missing.
   Open: R8a (an evaluator for authored completion checks), R8b (learning
   contract v3, decision sheet), R11 (A in flight).
-- 2026-10-26 claude-9 (07:55Z): R11 binding returned (codex-12, `2de8eace4`
+- 2026-10-26 claude-9 (07:29Z, first written as 07:55Z ahead of the clock): R11 binding returned (codex-12, `2de8eace4`
   tests, `0c5e083c3` source) and reviewed: a self-heal parent's durable
   click state now names the retry child it launches (`:child`, completion
   `:pending`) before the launch, the child's close writes its completion
@@ -1346,3 +1346,20 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   verdict is still `:not-checked :requirements-not-run` until the click
   script waits for the child and runs the requirements check (packet B).
   Open: R8a, R8b (decision sheet), R11 B.
+- 2026-10-26 claude-9 (07:41Z): R11 child wait returned (codex-12, `390353523`
+  tests, `91c3cfcbe` source) and reviewed: `wm_click.sh` now calls
+  `wm_click_wait_child.py` after its tracking loop and before the run
+  record check; the waiter reads only `GET /api/alpha/wm/click?click-id=`,
+  returns at once when no child is bound, polls a bound child to
+  `complete`, and refuses on the cap or two consecutive route failures,
+  so the requirements check reads the child's record instead of finding
+  it absent. The stub route's shape was read against the producer
+  (cheshire keyword names) and a live GET. Warrant checked at the source
+  sha, one spot run from the worktree. Merged fast-forward `91c3cfcbe`
+  (script only, nothing reloaded). Packet C dispatched to codex-12
+  (`packets/r11-child-verdict-packet.md`, job
+  `invoke-1793000391515-4210-fdcb976a`): the service reads the child's
+  `.requirements.edn`, checks it names the child's run record, and writes
+  `:passed`/`:failed` into the parent's `:child :completion :verdict`
+  behind a POST route; C2 (the script's call) follows review. Open: R8a,
+  R8b (decision sheet), R11 C.
