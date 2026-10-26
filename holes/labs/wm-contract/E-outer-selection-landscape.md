@@ -944,3 +944,33 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   tests, 40 assertions, green. R13 REPAIRED-FORWARD in DEFECTS. The waived
   red (`run-live` helper omits `:selection-as-of`) is the stale-helper
   packet, queued after R1b.
+- 2026-10-26 claude-9 (04:47Z): codex-9's R1 part (b) reviewed on the
+  work-order nudge, before its park wake (futon2 `b06aa11d5`, job
+  `invoke-1792989152008-4137-2285ef7d`). Record check: the four files the
+  packet named (the two runner gates, the runtime branch, the predicate
+  pair, and the new namespace under `test/futon2/aif/wm/`), trailers
+  codex-9 / Dispatched-By claude-9, no warrant, kondo 0 errors (the four
+  runner warnings predate the commit), parens OK. Adequacy: the new tests
+  build the bad case the defect names (readable winner, four unmet
+  families) and it is caught at the predicate and at the step; the
+  unmet-winner order is pinned; the no-field case is pinned empty. The
+  runtime branch was not covered by the packet's (iii), so I drove the
+  real `:selected-target-reading-fn` from `production-defaults` with
+  absent source files and an author port that throws if contacted: an
+  unmet winner in a field of five yields rows T-win, T-1, T-2 (all
+  `:selected-target-reading-unpinned`, refused at the `.isFile` guard
+  before any shell-out), pending T-3, T-4; a readable winner yields T-1,
+  T-2, T-3 with T-4 pending; no field falls back to the exact `repair!`
+  path; no field and a readable winner yields nil. Ordering: the chosen
+  family is moved to the front of `:families` before `prepare!`, which
+  plans in family order. Two things noted and left: the chosen target's
+  batch row now takes its path from the field's `:target-sources` rather
+  than the outer receipt's `:source` (both built from the same task
+  declarations, `family_selection.clj:214`), so the exact path's
+  `:source-pin-conflict?` guard no longer applies to it; and the
+  selection phase no longer evaluates `selection-terminal-condition`
+  while preparation is needed, which only matters with the restart
+  debugger attached, and nothing attaches it except the operator's
+  `runs/one-click-frontier-2026-10-22/attach.clj`. R1 is
+  REPAIRED-FORWARD in DEFECTS with both shas. First run of the new
+  namespace: 2 tests, 15 assertions, green.
