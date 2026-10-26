@@ -790,3 +790,23 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   Both ownership lines are now exact: actively-held 3 vs 2
   (M-diagramprover), ambiguous 6 vs 6 (M-futonzero-prelim-practice out,
   M-diagramprover in).
+- 2026-10-26 claude-9 (04:05Z): zai-3's U3 report returned
+  (`~/notes/wm-next/outer-selection/U3-nondeterminism.md`, runs at futon2
+  `d7850885d`) and was reviewed against codex-14's. Record check: the
+  note exists at the stated path, the twelve logs and the exit-code
+  summary under `/tmp/u3-logs/` match its counts (canon 4 red of 6, q8 6
+  of 6), the futon2 tracked tree is clean, and every cited line reads as
+  described at the current HEAD (`rand` at `outer_canonical_selection.clj:39`,
+  the drawless `evaluate` call at `meta_live_outer_selector.clj:849`, the
+  config gate at 828-830 and the refusal at 903-904, the q8 fixture's
+  `outer-receipt` at `q8_frontier_route_test.clj:78-83`, the failing
+  assertions at test lines 101 and 154). No warrant: nothing was changed.
+  Judgment: the two seats, each unaware of the other's result, name the
+  same two causes, the unseeded tie draw and the config-less Q8 fixture.
+  zai-3 adds the pin-the-draw evidence (the explicit-draw deftests were
+  green 6/6 while only the drawless one flipped) and the isolated refusal
+  output for the Q8 fixture; codex-14 adds the fresh-process order runs
+  that zai-3 skipped for budget. U3 is settled and stays split into R13
+  and R14. zai-3's fix alternative, deriving the draw from the frontier
+  pin, is recorded under R13 and not taken. One packet slip of mine: the
+  dispatch gave the q8 test path without its `wm/` directory.
