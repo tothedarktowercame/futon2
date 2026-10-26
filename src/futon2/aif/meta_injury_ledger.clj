@@ -688,6 +688,28 @@
                                   [injury-id entry]))))
                       (into {}))}))))
 
+(defn effective-active-injuries-from-validated-ledger
+  "Compute the medic-corrected active projection without validating LEDGER.
+
+  The caller asserts that this exact ledger value has already passed
+  `validate-ledger` under the authority verifier governing the operation.
+  This entry point is for a validation-bearing boundary such as
+  `meta-injury-store/load-durable-ledger`; callers without that evidence must
+  use `effective-active-injuries`."
+  [ledger]
+  (let [corrections (->> (:corrections (:state (medic-state ledger)))
+                         (map medic/occurrence) set)]
+    {:status :computed
+     :injuries (->> (transitions ledger)
+                    (group-by :injury-id)
+                    (keep (fn [[injury-id history]]
+                            (let [entry (last history)
+                                  occurrence [injury-id (str (:ordinal entry))]]
+                              (when (and (contains? active-states (:state entry))
+                                         (not (contains? corrections occurrence)))
+                                [injury-id entry]))))
+                    (into {}))}))
+
 (defn effective-active-injuries
   "Authority-checked active projection. A medic correction masks only the
   exact latest [injury-id ordinal] occurrence it names. Raw history is kept."
@@ -695,18 +717,7 @@
   (let [checked (validate-ledger ledger authority-verifier)]
     (if-not (= :valid (:status checked))
       checked
-      (let [corrections (->> (:corrections (:state (medic-state ledger)))
-                             (map medic/occurrence) set)]
-        {:status :computed
-         :injuries (->> (transitions ledger)
-                        (group-by :injury-id)
-                        (keep (fn [[injury-id history]]
-                                (let [entry (last history)
-                                      occurrence [injury-id (str (:ordinal entry))]]
-                                  (when (and (contains? active-states (:state entry))
-                                             (not (contains? corrections occurrence)))
-                                    [injury-id entry]))))
-                        (into {}))}))))
+      (effective-active-injuries-from-validated-ledger ledger))))
 
 (defn pending-requeue
   "Return the attributed inconclusive observation for an injury's latest

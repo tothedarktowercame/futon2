@@ -24,10 +24,18 @@
   (if authority-verifier
     (store/load-durable-ledger path authority-verifier)
     (store/load-durable-ledger path)))
-(defn- effective-active [history authority-verifier]
-  (if authority-verifier
-    (ledger/effective-active-injuries history authority-verifier)
-    (ledger/active-injuries history)))
+(defn- effective-active [durable-or-history authority-verifier]
+  (if (and (= :wm/durable-meta-injury-ledger-v1 (:schema durable-or-history))
+           (map? (:source-pin durable-or-history)))
+    ;; `load-durable` validated this exact value under the selected verifier
+    ;; and pinned the bytes it came from.  Keep the durable result intact
+    ;; across this boundary so the projection cannot be asked to trust
+    ;; another value.  A merely `:loaded` map is not validation evidence.
+    (ledger/effective-active-injuries-from-validated-ledger
+     (:ledger durable-or-history))
+    (if authority-verifier
+      (ledger/effective-active-injuries durable-or-history authority-verifier)
+      (ledger/active-injuries durable-or-history))))
 (defn- prepare-repair [durable options authority-verifier]
   (if authority-verifier
     (coordinator/prepare durable options authority-verifier)
@@ -1244,7 +1252,7 @@
         durable (when (.isFile (io/file ledger-path))
                   (load-durable ledger-path authority-verifier))
         active (when (= :loaded (:status durable))
-                 (effective-active (:ledger durable) authority-verifier))]
+                 (effective-active durable authority-verifier))]
     {:meta-injury-ledger-path ledger-path
      :durable-ledger durable
      :active-injuries active
