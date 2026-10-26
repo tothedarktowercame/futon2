@@ -103,7 +103,9 @@
                         :seed 14
                         :policy-field-config
                         {:target-reading-root (.getPath (io/file (:root reading-field)))
-                         :pattern-graph-path (.getPath (io/file (:graph reading-field)))}}))))
+                         :pattern-graph-path (.getPath (io/file (:graph reading-field)))
+                         :occurrence-square-root (.getPath (io/file (:squares reading-field)))
+                         :pattern-library-root (.getPath (io/file (:library reading-field)))}}))))
 
 ;; -- the production run -------------------------------------------------------------
 

@@ -11,11 +11,13 @@
             [futon2.aif.enactment-fold-source :as fold-source]
             [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.load-identity :as identity]
+            [futon2.aif.occurrence-square-registry :as occurrence-square-registry]
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-prefix-admission :as admission]
             [futon2.aif.reading-policy-precision :as precision]
             [futon2.aif.target-reading-registry :as reading-registry]
+            [futon2.aif.three-halves-square :as three-halves-square]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.wm.cascade-decision :as wm-cd])
   (:import [java.nio.file Files]
@@ -47,7 +49,12 @@
     (doseq [p library-patterns]
       (let [f (io/file root (str p ".flexiarg"))]
         (.mkdirs (.getParentFile f))
-        (spit f (str "@flexiarg " p "\n! conclusion: fixture pattern " p "\n"))))
+        (spit f (str "@flexiarg " p "\n"
+                     "+ IF: fixture condition for " p "\n"
+                     "+ HOWEVER: fixture contrast for " p "\n"
+                     "+ BECAUSE: fixture reason for " p "\n"
+                     "+ THEN: fixture consequence for " p "\n"
+                     "! conclusion: fixture pattern " p "\n"))))
     root))
 
 (defn library-sha256
@@ -190,19 +197,66 @@
   [target->read]
   (let [root (temp-dir "reading-route-field-")
         flights (temp-dir "reading-route-field-flights-")
-        library (pattern-library)]
+        library (pattern-library)
+        squares (temp-dir "reading-route-field-squares-")
+        pattern-texts (occurrence-square-registry/library-resolver library)
+        author-maps (into {}
+                          (for [role three-halves-square/roles]
+                            [role {:element (str "fixture situation " (name role))
+                                   :source "reading-route fixture"}]))]
     (io/copy (io/file real-flight) (io/file flights "flight-278b6988.edn"))
-    {:root root :flights flights :graph (pinned-graph) :library library
+    {:root root :flights flights :graph (pinned-graph) :library library :squares squares
      :rows (vec (for [[t read] target->read]
                   (let [f (io/file root (str t ".md"))]
                     (spit f (str "# " t "\n\n## HEAD\nWork on " t ".\n"))
                     (when read
-                      (let [digest (reading-registry/excerpt-digest f)]
+                      (let [digest (reading-registry/excerpt-digest f)
+                            analysis (analysis library read)]
                         (reading-registry/publish!
                          root {:target-id t :source-path (.getPath f)
                                :excerpt-digest digest
                                :request {:task {:target_id t :excerpt_sha256 digest}}
-                               :analysis (analysis library read) :validator-version 1})))
+                               :analysis analysis :validator-version 1})
+                        (let [reading (reading-registry/current-reading root t digest)
+                              analysis-digest (:analysis-digest reading)
+                              entries
+                              (into {}
+                                    (mapcat
+                                     (fn [[i cited]]
+                                       (for [pattern (if (string? cited) [cited] cited)
+                                             :let [pattern-file
+                                                   (io/file library (str pattern ".flexiarg"))
+                                                   pattern-text (slurp pattern-file)
+                                                   pattern-sha (library-sha256 library pattern)
+                                                   occurrence-id [pattern i]]]
+                                         [occurrence-id
+                                          {:occurrence-id occurrence-id
+                                           :pattern pattern
+                                           :pattern-sha256 pattern-sha
+                                           :square
+                                           (three-halves-square/build-from-situation-maps
+                                            pattern pattern-text
+                                            {:path (.getPath pattern-file)
+                                             :sha256 pattern-sha}
+                                            author-maps)}]))
+                                     (map-indexed vector read)))
+                              published
+                              (occurrence-square-registry/publish!
+                               squares
+                               {:target-id t
+                                :excerpt-digest digest
+                                :analysis-digest analysis-digest
+                                :author "reading-route-fixture"
+                                :entries entries}
+                               pattern-texts)
+                              current
+                              (occurrence-square-registry/current
+                               squares t analysis-digest pattern-texts)]
+                          (when-not (= published current)
+                            (throw (ex-info "Reading-route occurrence squares invalid"
+                                            {:target-id t
+                                             :published published
+                                             :current current}))))))
                     {:target-id t :source-kind :head :source-path (.getPath f)
                      :source-absent nil})))}))
 
