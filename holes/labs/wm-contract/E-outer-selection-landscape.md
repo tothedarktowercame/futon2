@@ -595,3 +595,37 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `~/notes/wm-next/outer-selection/drift-2026-10-26{,-after-reload}.edn`.
   The serving runner and canonical-G producer are now the C1–C4 code; the
   next click needs only the budget grant and the Lean prediction.
+
+- 2026-10-26T03:00Z (claude-9) Q8a dispatched: the §10.1 fix, approved by
+  Joe via claude-11. Packet
+  `~/notes/wm-next/outer-selection/Q8a-canonical-frontier-packet.md`, zai-2,
+  job `invoke-1792983612964-4051-84eb31d0` (running at 03:00:13Z), park
+  `park-50fab59e-8c5f-4469-b6b4-6a0b1e20117d` (deadline read back at 44.7
+  min). One behaviour: on the canonical-G route the receipt's `:q8-frontier`
+  becomes a sealed `:wm/q8-outer-frontier-v1` carrier computed from the
+  receipt alone (new `q8-frontier/canonical-outer-frontier`), entries the S5
+  scored rows one per task with `comparison-key` over `{:G g}`, census the
+  S1 population and its `:ineligible-reason` exclusions, and a new
+  `:unranked` list carrying the S2/S4/S5 drops with their typed reasons. The
+  design choice, stated to claude-11: S1 reasons are task-standing and shrink
+  `eligible`; reading-availability and binding reasons do not, so on
+  attempt-002 the carrier is a `:decided-failure` with
+  `:census-verdict :frontier-not-eligible-census` (4 ranked, 105 unranked by
+  reason) beside the existing `:tied-minimum` verdict, and an eligible task
+  with neither an entry nor a typed reason is refused
+  `:eligible-task-unaccounted`. `certificate` passes `:census-verdict`
+  through when the outer carrier has one; old records recompute unchanged.
+  Baselines taken this turn in a fresh JVM: the retained attempt-002 run
+  record (`data/wm-runs/tick-run-record-2026-10-24-25e24e8b…edn`) stores
+  `:q8 {:status :not-recomputable :reasons [:outer-frontier-absent-or-tampered]}`,
+  `verify-record` and a fresh `certificate` agree; its Q6 predecessor is
+  `:present` with no `:frontier`, and 0 of the 102 closed events in
+  `data/wm-runs/run-stream.edn` carry a `:q8-frontier`, so the first run
+  after Q8a will still report `:no-prior-frontier` and the second will have
+  a prior. Two further gaps found for the "recomputable" bar, each its own
+  packet after Q8a: the canonical-route decision has no
+  `[:selection-certificate :policy-stages]` or `:q6`, so `cascade` returns
+  `:policy-stages-absent` (Q8b: the selected task's stages from the carrier's
+  `:recomputation :q4` and the menu); and `:q2-outer-actions` is the same
+  stub (Q2 on this route, `Requirements.lean:274-276`, one action per
+  eligible task).
