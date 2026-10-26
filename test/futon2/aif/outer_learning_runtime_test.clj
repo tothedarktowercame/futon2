@@ -1,6 +1,78 @@
 (ns futon2.aif.outer-learning-runtime-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.meta-outcome-dataset :as dataset]
+            [futon2.aif.outer-learning-manifest :as learning-manifest]
+            [futon2.aif.outer-target-belief :as belief]
             [futon2.aif.outer-learning-runtime :as runtime]))
+
+(defn- refusal-details [result]
+  (get-in result [:belief :details]))
+
+(deftest load-shadow-distinguishes-exception-stages
+  (testing "authority read"
+    (let [path "/definitely-absent/r26-learning-authority.edn"
+          result (runtime/load-shadow path)]
+      (is (= :learning-authority-unavailable
+             (get-in result [:belief :reason])))
+      (is (= path (:path (refusal-details result))))
+      (is (= "java.nio.file.NoSuchFileException"
+             (:error-class (refusal-details result))))
+      (is (string? (:error-message (refusal-details result))))))
+  (testing "manifest read"
+    (with-redefs [learning-manifest/read-manifest
+                  (fn [] (throw (Exception. "manifest-x")))]
+      (let [result (runtime/load-shadow)]
+        (is (= :learning-manifest-unreadable
+               (get-in result [:belief :reason])))
+        (is (= learning-manifest/default-path
+               (:path (refusal-details result))))
+        (is (= "java.lang.Exception"
+               (:error-class (refusal-details result))))
+        (is (= "manifest-x" (:error-message (refusal-details result)))))))
+  (testing "manifest pin union"
+    (let [conflicting-path
+          "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-14-6a64c83f-4732-4af1-b286-561f22109667.edn"]
+      (with-redefs [learning-manifest/read-manifest
+                    (fn [] {:entries [{:path conflicting-path
+                                       :sha256 (apply str (repeat 64 "0"))}]})]
+        (let [result (runtime/load-shadow)]
+          (is (= :learning-manifest-unreadable
+                 (get-in result [:belief :reason])))
+          (is (= learning-manifest/default-path
+                 (:path (refusal-details result))))
+          (is (= conflicting-path
+                 (:conflicting-path (refusal-details result))))
+          (is (= "clojure.lang.ExceptionInfo"
+                 (:error-class (refusal-details result))))
+          (is (= "Conflicting outer-learning pins"
+                 (:error-message (refusal-details result))))))))
+  (testing "dataset build"
+    (with-redefs [dataset/produce
+                  (fn [_] (throw (Exception. "dataset-x")))]
+      (let [result (runtime/load-shadow)]
+        (is (= :learning-dataset-failed
+               (get-in result [:belief :reason])))
+        (is (= learning-manifest/default-path
+               (:path (refusal-details result))))
+        (is (= "java.lang.Exception"
+               (:error-class (refusal-details result))))
+        (is (= "dataset-x" (:error-message (refusal-details result)))))))
+  (testing "belief build"
+    (with-redefs [dataset/produce (fn [_] {:status :produced})
+                  belief/build
+                  (fn [_] (throw (Exception. "belief-x")))]
+      (let [result (runtime/load-shadow)]
+        (is (= :learning-belief-failed
+               (get-in result [:belief :reason])))
+        (is (= learning-manifest/default-path
+               (:path (refusal-details result))))
+        (is (= "java.lang.Exception"
+               (:error-class (refusal-details result))))
+        (is (= "belief-x" (:error-message (refusal-details result))))))))
+
+(deftest dataset-error-propagates-from-load-shadow
+  (with-redefs [dataset/produce (fn [_] (throw (Error. "x")))]
+    (is (thrown-with-msg? Error #"^x$" (runtime/load-shadow)))))
 
 (deftest pinned-demonstration-run-remains-in-production-learning-fold
   (let [state (runtime/load-shadow)

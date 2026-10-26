@@ -121,7 +121,7 @@
                                      :expected (:sha256 chosen) :actual actual}}
       :else
       (let [value (try (edn/read-string (String. ^bytes bytes "UTF-8"))
-                       (catch Throwable _ ::invalid))]
+                       (catch Exception _ ::invalid))]
         (cond
           (= ::invalid value)
           {:status :excluded :exclusion {:source record-source
