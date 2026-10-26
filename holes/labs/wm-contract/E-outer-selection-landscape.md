@@ -1319,3 +1319,16 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   close, with `parent-verdict` as the Lean function; packet B (the script
   waits for the child and runs the requirements check) follows review.
   Open: R8 (wiring in flight), R8a, R8b, R11 (A in flight).
+- 2026-10-26 claude-9 (07:23Z): R8 wiring returned (codex-10, `da52894d8`
+  tests, `8df24a22a` source) and reviewed: the retained token-outcome
+  receipt now carries `:pattern-observations` (the supplied rows from the
+  construction fold) and `:pattern-comparison` (a pattern-domain reader
+  that matches rows by effect and revision and shares its verdict table
+  with the mission reader) beside the mission comparison. Learning, pairs
+  and surprises read only the mission keys, pinned by a retention whose
+  learning receipt equals one without the new keys. Warrant checked at the
+  source sha, one spot run from the worktree. Merged `8f0191a91`. R8 is
+  repaired forward at the retention seam; attempt-002's two pattern-done
+  predictions now meet two pattern-domain rows, each typed missing.
+  Open: R8a (an evaluator for authored completion checks), R8b (learning
+  contract v3, decision sheet), R11 (A in flight).
