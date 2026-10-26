@@ -405,7 +405,7 @@ PYJSON
     -d "$payload")
   post_rc=$?
   echo "$resp"
-  if [ -z "$resp" ]; then
+  if [ "$post_rc" -eq 28 ] || [ -z "$resp" ]; then
     echo "admission answer not received (curl exit $post_rc; POST left $post_left)"
     recovery_started=$(date +%s)
     while [ -z "$clickid" ]; do

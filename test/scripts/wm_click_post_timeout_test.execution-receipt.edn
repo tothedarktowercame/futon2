@@ -18,4 +18,9 @@
    :reason :test-scripts-is-not-a-python-package
    :log "/home/joe/notes/r19-post-timeout/focused.log"}
   {:command "shellcheck scripts/wm_click.sh"
-   :status :not-runnable :reason :shellcheck-unavailable}]}
+   :status :not-runnable :reason :shellcheck-unavailable}
+  {:command "python3 test/scripts/wm_click_post_timeout_test.py"
+   :status :passed :by "codex-12"
+   :tests 3 :failures 0 :errors 0
+   :note "Follow-up confirms curl exit 28 recovers even if a partial body was captured."
+   :log "/home/joe/notes/r19-post-timeout/focused-followup.log"}]}
