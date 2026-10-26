@@ -45,6 +45,16 @@
     {:menu menu :frontier frontier :exclusion exclusion :selection selection
      :sealed sealed :decision decision}))
 
+(deftest grounded-progress-is-a-changed-run-outcome
+  ;; The retained closed event for run 2026-10-26-8be8ff03… in
+  ;; data/wm-runs/run-stream.edn currently records the pre-R22 image:
+  ;; {:outcome :invalid, :raw :grounded-progress}.
+  (is (= {:status :present
+          :outcome :changed
+          :raw :grounded-progress}
+         (previous-run/typed-outcome
+          :grounded-progress nil {:status :selected :action {:target "T"}}))))
+
 (deftest canonical-selection-excludes-the-refused-previous-choice
   (let [{:keys [menu frontier]} (fixture)
         initial (canonical-selection/evaluate frontier menu 0.0)

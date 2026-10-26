@@ -1,6 +1,6 @@
 (ns futon2.aif.meta-terminal-injury-test
   (:require [clojure.edn :as edn]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-terminal-injury :as terminal]))
 
@@ -12,11 +12,42 @@
 (def review "42bfb4bb542bfb4bb542bfb4bb542bfb4bb542bf")
 (def integration "5a5b421bc5a5b421bc5a5b421bc5a5b421bc5a5b")
 
+;; Projected by extract_click1_terminal_projection.clj from retained record
+;; sha256 e9a5eb355f9a6f70b41d5bdbd99e127badcd6d13e6bd7165867fa2bb9477f404.
+(def click-1-terminal
+  {:run/id "2026-10-26-8be8ff03-5009-4f3d-8c12-5b11cfd46d92"
+   :click/id "wm-click-2cea5ee6-4470-4ecc-a6b3-96ada0dab4e7"
+   :terminal-receipt {:outcome :grounded-progress}
+   :failure {:absent :no-failure}
+   :traceWritten true
+   :run-output {}})
+
 (defn classify [record pin] (terminal/classify record pin))
 (defn append! [history event]
   (let [result (ledger/append-transition history event)]
     (is (= :appended (:status result)) (pr-str result))
     (:ledger result)))
+
+(deftest successful-close-images-are-non-injuries
+  (testing "click 1's retained grounded progress is a non-injury"
+    (is (= [:non-injury :successful-task-outcome]
+           ((juxt :classification :non-injury-reason)
+            (classify click-1-terminal pin-a)))))
+  (testing "the other two successful images are non-injuries"
+    (doseq [outcome [:already-satisfied :grounded-no-change]]
+      (is (= [:non-injury :successful-task-outcome]
+             ((juxt :classification :non-injury-reason)
+              (classify (assoc-in click-1-terminal
+                                  [:terminal-receipt :outcome] outcome)
+                        pin-a))))))
+  (testing "an invalid-image close remains an injury"
+    ;; CloseOutcomeImage.lean does not decide this contradictory no-failure
+    ;; record; this packet deliberately preserves the classifier's behavior.
+    (is (= :injury
+           (:classification
+            (classify (assoc-in click-1-terminal
+                                [:terminal-receipt :outcome] :build-failed)
+                      pin-a))))))
 
 (deftest campaign-replay-census-is-pinned-and-fail-closed
   (let [classified (mapv #(classify (:record %) (:source-pin %)) campaign)
