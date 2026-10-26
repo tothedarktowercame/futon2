@@ -12,7 +12,7 @@
 (def source
   {:record-path
    "data/wm-full-loop-machinery-150/wm-contract-machinery-150-v1/attempt-002/003-construction.edn"
-   :record-sha256 "8ef1a386b7a54fc4e403f70815ef731342f767f3438a38e676c405e23eff6362"})
+   :record-sha256 "15d855b11777c3afae1ec7d523ee91433098cd7b8dc4d9812e15a0f63e25c16c"})
 
 (defn supply
   ([] (supply (:fold-conditions fixture)))
@@ -42,6 +42,8 @@
                     (:observed %))
                 rows))
     (is (every? #(nil? (:authority-evidence %)) rows))
+    (is (every? #(= source (select-keys (:source %) [:record-path :record-sha256]))
+                rows))
     (is (= :emission-per-mission
            (get-in (row-for result ["gauntlet/world-is-hypergraph" 19])
                    [:source :completion-check 0])))
