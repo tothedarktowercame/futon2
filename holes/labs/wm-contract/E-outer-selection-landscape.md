@@ -858,3 +858,29 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   was the receipt; the first reader check should have gone one seam
   further. Also found: `outer_policy_field_boundary_test` has been red
   since `aaa85f9b4` (`:selection-as-of-required`), unrelated to tonight.
+- 2026-10-26 claude-9 (04:20Z): claude-5's clause job returned (mathlib4
+  darktower `88f6cb59f4` SelectionPreparation amendment, `26beba373a`
+  SelectionDraw). Record check: each sha touches one module; the commits
+  carry `Agent-Session` matching the job's session but no `Agent-Id` or
+  `Agency-Job` trailer (mathlib4 may lack the hook; noted, not acted on).
+  R1 amendment accepted: the budget conjuncts count refusals as spent
+  slots, the one existing theorem that becomes false under the amendment
+  gained the hypothesis that makes it true again, and the three controls
+  bracket the budget and refuse today's stop-at-first-refusal shape by
+  totality. R13 accepted: validity is `expectedOutput inputs = some
+  output`, so a tie with no sealed draw has no valid output and the only
+  conforming behaviour is a typed refusal; the controls are the
+  attempt-002 rows with the receipt's `:u` sealed as input, selecting what
+  the click selected. I checked the entry order against attempt-001's
+  frontier (same four rows, same tie) and the floor arithmetic against
+  `evaluate`'s `(int (* u (count tied)))`. Warrants are claude-5's
+  record (lake exit 0, 2946 jobs); I did not find a registry lookup
+  route for the ids and did not rebuild. R13 Clojure packet dispatched to
+  codex-14 with one finding of my own first: the click script already
+  seals a per-run seed (`outer-task-seed`, war_machine.clj:6648) and
+  passes it to the selector, so the entropy input exists in the record
+  and is dropped at `selector` (line 1122) and ignored by `select-live`.
+  The repair derives the draw from that seed; the runner needs no change.
+  An addendum bell carries the wrapper fix, since the packet's checkpoint
+  would otherwise stop the job on it. Parks `park-aa3f4f39` and
+  `park-807ebff3`, 45 min each.
