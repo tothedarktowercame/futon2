@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
@@ -1028,6 +1029,83 @@
                                       nil
                                       (catch clojure.lang.ExceptionInfo e e))))))))))
 
+
+(deftest resolve-lineage-memoizes-ledgers-by-complete-input-fingerprint
+  (let [root (tmp-root)
+        lab (io/file root "M-aif-full-loop-195")
+        _ (.mkdirs lab)
+        path (.getPath (io/file lab "cohort.edn"))
+        data-root (.getPath (io/file root "wm-full-loop-machinery-195"))
+        prereg (-> (read-string (slurp "holes/labs/M-aif-full-loop-57/cohort.edn"))
+                   (assoc :cohort/id :wm-contract-machinery-195-v1)
+                   (assoc-in [:stopping-rule :target] 1))
+        _ (spit path (with-out-str (pp/pprint prereg)))
+        _ (.mkdirs (io/file data-root))
+        _ (cohort/activate! path data-root)
+        binding {:preregistration path :data-root data-root
+                 :cohort-id :wm-contract-machinery-195-v1
+                 :sha256 (@#'cohort/sha256 (slurp path))}
+        cell (fn [n]
+               (term {:opportunity-id (str "lineage-cache/" n)
+                      :trigger :duree-click-on-demand
+                      :machine-state {} :agent-roster []
+                      :code-state {:git-sha "cache-test" :git-dirty? false
+                                   :resolved-mode-flags {}
+                                   :configuration-digest "cache-test"}
+                      :semantic-epoch :test}))
+        exhausted
+        (loop [b binding n 0 result []]
+          (if (= n 3)
+            result
+            (do
+              (cohort/start-attempt! (:preregistration b) (:data-root b) (cell n))
+              (let [next (cohort/succeed! (:preregistration b) (:data-root b)
+                                          (constantly "2026-10-26"))]
+                (recur next (inc n) (conj result b))))))
+        middle (second exhausted)
+        reads (atom [])]
+    (cohort/reset-lineage-cache!)
+    (let [first-result
+          (with-redefs [cohort/*attempt-history-read-observer*
+                        #(swap! reads conj (.getAbsolutePath ^java.io.File %))]
+            (cohort/resolve-lineage! binding))]
+      (is (pos? (count @reads)) (pr-str (cohort/lineage-history first-result)))
+      (reset! reads [])
+      (let [second-result
+            (with-redefs [cohort/*attempt-history-read-observer*
+                          #(swap! reads conj (.getAbsolutePath ^java.io.File %))]
+              (cohort/resolve-lineage! binding))]
+        (is (= first-result second-result))
+        (is (= (meta first-result) (meta second-result)))
+        (is (empty? @reads) "an unchanged walk performs no checkpoint reads"))
+
+      (spit (io/file (:data-root middle)
+                     (name (:cohort-id middle))
+                     "attempt-001" "002-selection.edn")
+            "{:checkpoint/type")
+      (reset! reads [])
+      (let [changed
+            (with-redefs [cohort/*attempt-history-read-observer*
+                          #(swap! reads conj (.getAbsolutePath ^java.io.File %))]
+              (cohort/resolve-lineage! binding))
+            read-paths @reads]
+        (is (seq read-paths) (pr-str (cohort/lineage-history changed)))
+        (is (every? #(str/includes? % (name (:cohort-id middle))) read-paths)
+            "only the changed middle cohort is re-read")
+        (is (not= (meta first-result) (meta changed)))
+        (is (= :history-discovery-invalid
+               (-> changed cohort/lineage-history :history-exclusions first
+                   :history/refusal))))
+
+      (let [successor (second exhausted)
+            successor-path (:preregistration successor)
+            forged (assoc (read-string (slurp successor-path))
+                          :casting {:author "forged" :reviewer "forged"})]
+        (spit successor-path (with-out-str (pp/pprint forged)))
+        (is (= :cohort-successor-not-derivable
+               (:reason (ex-data (try (cohort/resolve-lineage! binding)
+                                      nil
+                                      (catch clojure.lang.ExceptionInfo e e))))))))))
 
 (def retained-dispatch-path
   "holes/labs/wm-contract/runs/selection-fixture-migration-2026-09-20/baseline-non-readable-dispatch.edn")

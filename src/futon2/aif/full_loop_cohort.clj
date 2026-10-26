@@ -243,7 +243,7 @@
           :authority-id (:authority-id authority)
           :attempt-id attempt-id}))
 
-(defrecord PinnedPreregistration [value])
+(defrecord PinnedPreregistration [value sha256])
 
 (defn pin-preregistration
   "Capture and validate exact preregistration bytes for one operation."
@@ -264,7 +264,7 @@
                    (= cohort-id (:cohort/id p))
                    (= sha256 (futon2.aif.full-loop-cohort/sha256 raw)))
       (throw (ex-info "Execution cohort pin mismatch" {:reason :execution-cohort-pin-mismatch})))
-    (->PinnedPreregistration p)))
+    (->PinnedPreregistration p sha256)))
 
 (defn- read-preregistration [source]
   (if (instance? PinnedPreregistration source) (:value source) (read-edn source)))
@@ -389,6 +389,10 @@
        (filter #(re-matches #"\d{3}-[a-z-]+\.edn" (.getName %)))
        (sort-by #(.getName %))))
 
+(def ^:dynamic *attempt-history-read-observer*
+  "Test/diagnostic observer invoked with each historical checkpoint file read."
+  (fn [_] nil))
+
 (defn attempt-events [attempt-dir]
   ;; Mutation checks remain strict: never append to a partially read attempt.
   (mapv #(read-edn (.getPath %)) (attempt-files attempt-dir)))
@@ -400,6 +404,7 @@
   a mission. This reader is not used to authorize checkpoint appends."
   [attempt-dir]
   (reduce (fn [result file]
+            (*attempt-history-read-observer* file)
             (let [read-result
                   (try {:event (read-edn file)}
                        (catch Exception e
@@ -805,50 +810,105 @@
      :checkpoints (mapv :checkpoint/type events)
      :history-exclusions exclusions}))
 
+(def ^:private max-lineage-ledger-cache-entries 384)
+
+(defonce ^:private !lineage-ledger-cache
+  (atom {:entries {} :order []}))
+
+(defn reset-lineage-cache!
+  "Clear the bounded memo of lineage ledger snapshots. Intended for tests."
+  []
+  (reset! !lineage-ledger-cache {:entries {} :order []})
+  nil)
+
+(defn- file-fingerprint [^java.io.File file]
+  [(.getName file) (.length file) (.lastModified file)])
+
+(defn- ledger-input-fingerprint [prereg-path p data-root]
+  (let [dir (cohort-dir p data-root)
+        activation (activation-path dir)]
+    {:preregistration-sha256 (if (instance? PinnedPreregistration prereg-path)
+                               (:sha256 prereg-path)
+                               (sha256 (slurp prereg-path)))
+     :attempts (mapv (fn [attempt-dir]
+                       [(.getName ^java.io.File attempt-dir)
+                        (mapv file-fingerprint (attempt-files attempt-dir))])
+                     (attempt-dirs dir))
+     :activation (when (.exists activation)
+                   (file-fingerprint activation))}))
+
+(defn- cache-ledger! [cache-key value]
+  (swap! !lineage-ledger-cache
+         (fn [{:keys [entries order]}]
+           (let [present? (contains? entries cache-key)
+                 order (cond-> order (not present?) (conj cache-key))
+                 entries (assoc entries cache-key value)
+                 overflow (- (count order) max-lineage-ledger-cache-entries)
+                 evicted (if (pos? overflow) (subvec order 0 overflow) [])
+                 order (if (pos? overflow) (subvec order overflow) order)]
+             {:entries (apply dissoc entries evicted) :order order})))
+  value)
+
+(defn- ledger-uncached [p data-root]
+  (let [dir (cohort-dir p data-root)
+        beyond-window-ids (into #{} (comp (filter beyond-window-attempt?)
+                                          (map #(:attempt/id (attempt-summary %))))
+                                (attempt-dirs dir))
+        recorded-attempts (mapv attempt-summary (attempt-dirs dir))
+        cancelled-attempts (filterv #(= :cancelled (:outcome %))
+                                    recorded-attempts)
+        beyond-window-attempts (filterv #(contains? beyond-window-ids
+                                                    (:attempt/id %))
+                                        recorded-attempts)
+        attempts (filterv #(and (not= :cancelled (:outcome %))
+                                (not (contains? beyond-window-ids
+                                                (:attempt/id %))))
+                          recorded-attempts)
+        outcomes (frequencies (keep :outcome attempts))]
+    {:cohort/id (:cohort/id p)
+     :protocol/version (:protocol/version p)
+     :activation (when (.exists (activation-path dir))
+                   (read-edn (activation-path dir)))
+     :target (get-in p [:stopping-rule :target])
+     :attempt-count (count attempts)
+     :remaining (- (get-in p [:stopping-rule :target]) (count attempts))
+     :closed-count (count (filter :closed? attempts))
+     :grounded-change-count (get outcomes :grounded-change 0)
+     :grounded-no-change-count (get outcomes :grounded-no-change 0)
+     :artifact-only-count (get outcomes :artifact-only 0)
+     :outcomes outcomes
+     :attempts attempts
+     :recorded-attempt-count (count recorded-attempts)
+     :recorded-attempts recorded-attempts
+     :history-exclusions (vec (mapcat :history-exclusions recorded-attempts))
+     :semantic-strata
+     [{:stratum/id :post-preregistration/cancelled
+       :reason :outcome-not-in-preregistered-cohort-taxonomy
+       :attempt-count (count cancelled-attempts)
+       :attempts cancelled-attempts}
+      {:stratum/id :post-preregistration/beyond-window
+       :reason :opened-after-the-preregistered-stopping-target-was-met
+       :attempt-count (count beyond-window-attempts)
+       :attempts beyond-window-attempts}]}))
+
 (defn ledger
   ([] (ledger default-preregistration default-data-root))
   ([prereg-path data-root]
    (let [p (read-preregistration prereg-path)
-         dir (cohort-dir p data-root)
-         beyond-window-ids (into #{} (comp (filter beyond-window-attempt?)
-                                           (map #(:attempt/id (attempt-summary %))))
-                                 (attempt-dirs dir))
-         recorded-attempts (mapv attempt-summary (attempt-dirs dir))
-         cancelled-attempts (filterv #(= :cancelled (:outcome %))
-                                     recorded-attempts)
-         beyond-window-attempts (filterv #(contains? beyond-window-ids
-                                                     (:attempt/id %))
-                                         recorded-attempts)
-         attempts (filterv #(and (not= :cancelled (:outcome %))
-                                 (not (contains? beyond-window-ids
-                                                 (:attempt/id %))))
-                           recorded-attempts)
-         outcomes (frequencies (keep :outcome attempts))]
-     {:cohort/id (:cohort/id p)
-      :protocol/version (:protocol/version p)
-      :activation (when (.exists (activation-path dir))
-                    (read-edn (activation-path dir)))
-      :target (get-in p [:stopping-rule :target])
-      :attempt-count (count attempts)
-      :remaining (- (get-in p [:stopping-rule :target]) (count attempts))
-      :closed-count (count (filter :closed? attempts))
-      :grounded-change-count (get outcomes :grounded-change 0)
-      :grounded-no-change-count (get outcomes :grounded-no-change 0)
-      :artifact-only-count (get outcomes :artifact-only 0)
-      :outcomes outcomes
-      :attempts attempts
-      :recorded-attempt-count (count recorded-attempts)
-      :recorded-attempts recorded-attempts
-      :history-exclusions (vec (mapcat :history-exclusions recorded-attempts))
-      :semantic-strata
-      [{:stratum/id :post-preregistration/cancelled
-        :reason :outcome-not-in-preregistered-cohort-taxonomy
-        :attempt-count (count cancelled-attempts)
-        :attempts cancelled-attempts}
-       {:stratum/id :post-preregistration/beyond-window
-        :reason :opened-after-the-preregistered-stopping-target-was-met
-        :attempt-count (count beyond-window-attempts)
-        :attempts beyond-window-attempts}]})))
+         before (ledger-input-fingerprint prereg-path p data-root)
+         cache-key [(if (instance? PinnedPreregistration prereg-path)
+                      [:pinned (:sha256 prereg-path)]
+                      [:path (.getCanonicalPath (io/file prereg-path))])
+                    (.getCanonicalPath (io/file data-root))
+                    before]]
+     (if-some [cached (get-in @!lineage-ledger-cache [:entries cache-key])]
+       cached
+       (let [value (ledger-uncached p data-root)
+             after (ledger-input-fingerprint prereg-path p data-root)]
+         ;; A concurrent mutation must never make a mixed snapshot reusable.
+         (if (= before after)
+           (cache-ledger! cache-key value)
+           value))))))
 
 (defn write-ledger!
   ([out-path] (write-ledger! default-preregistration default-data-root out-path))
