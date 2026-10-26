@@ -245,7 +245,11 @@
                                              excluded)))}
         eligible-set (set (:eligible census))
         ;; one entry per task with a scored row: least G, digest-sorted tie-break
-        row-choice (fn [rows] (first (sort-by (juxt :G :cascade-digest) rows)))
+        row-choice (fn [rows]
+                     (let [inexact (remove #(comparison-key {:G (:G %)} 0) rows)]
+                       (if (seq inexact)
+                         (first (sort-by :cascade-digest inexact))
+                         (first (sort-by (juxt :G :cascade-digest) rows)))))
         entries
         (vec (sort-by :task
                       (for [[t rows] (seq (into (sorted-map)
