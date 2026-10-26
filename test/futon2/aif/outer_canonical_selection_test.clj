@@ -91,9 +91,17 @@
                                         :cascade-digest (:cascade-digest wrong-entry)}
                                :selected {:policy-id (:policy-id wrong-entry)})
         forged (carrier/seal-canonical menu evidence objective f wrong-selection)
-        forged (assoc forged :carrier-pin (carrier/carrier-pin forged))]
+        forged (assoc forged :carrier-pin (carrier/carrier-pin forged))
+        decision (:decision (carrier/decision sealed))
+        selected-key (get-in sealed [:selected-entry :action :policy-key])
+        target (:target-id sealed)]
     (is (nil? (carrier/verify sealed)))
     (is (= :selected (get-in (carrier/decision sealed) [:decision :status])))
+    (is (= [selected-key]
+           (get-in decision [:selection-certificate :policy-stages target :constructed])
+           (get-in decision [:selection-certificate :policy-stages target :scored])))
+    (is (= (get-in sealed [:sealed-menu :menu-pin :sha256])
+           (get-in decision [:selection-certificate :stage-provenance :menu-pin])))
     (is (= :selected-policy-canonical-replay (carrier/verify forged)))))
 
 (deftest select-live-activates-the-canonical-carrier
