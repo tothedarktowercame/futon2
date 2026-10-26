@@ -473,7 +473,25 @@ if ! python3 "$F2/scripts/wm_click_wait_child.py" --base "$BASE" --click-id "$cl
   exit 1
 fi
 
-# The idle boundary makes a recovered running click the only candidate, but
+echo; echo "terminal state:"
+curl -s -m 20 "$BASE/api/alpha/wm/click" | python3 -m json.tool | sed -n '1,24p'
+echo; echo "newest repair finding, if the click opened one:"
+# Avoid ls | head under pipefail: SIGPIPE used to turn a completed click into
+# shell exit 141 when the finding directory outgrew the pipe buffer.
+python3 - "$F2/data/wm-repair-obligations/findings" <<'PY'
+from pathlib import Path
+import subprocess
+import sys
+
+newest = max(Path(sys.argv[1]).glob("*.edn"),
+             key=lambda path: path.stat().st_mtime_ns, default=None)
+if newest is not None:
+    subprocess.run(["ls", "-l", str(newest)], check=True)
+PY
+
+# Ownership check (R19): after a recovered or ordinary click, only retained
+# server evidence establishes that the finished click is ours. It runs after
+# the terminal-state prints so a refusal still shows what the server holds.
 # only retained server evidence establishes ownership. Prefer the run record;
 # a click binding can establish the same pair while the run record is still
 # unavailable. Never run the requirements checker for a mismatched pair.
@@ -513,7 +531,8 @@ if binding.exists():
           f"actual run={actual_run} click={actual_click}")
     raise SystemExit(1)
 
-print(f"ownership evidence absent: run={expected_run} click={expected_click}")
+print(f"ownership evidence absent: run={expected_run} click={expected_click}; "
+      f"no run record {record_path} and no click binding {binding_path}")
 raise SystemExit(1)
 PY
 ); then
@@ -523,22 +542,6 @@ PY
   exit 1
 fi
 echo "click ownership confirmed by $ownership"
-
-echo; echo "terminal state:"
-curl -s -m 20 "$BASE/api/alpha/wm/click" | python3 -m json.tool | sed -n '1,24p'
-echo; echo "newest repair finding, if the click opened one:"
-# Avoid ls | head under pipefail: SIGPIPE used to turn a completed click into
-# shell exit 141 when the finding directory outgrew the pipe buffer.
-python3 - "$F2/data/wm-repair-obligations/findings" <<'PY'
-from pathlib import Path
-import subprocess
-import sys
-
-newest = max(Path(sys.argv[1]).glob("*.edn"),
-             key=lambda path: path.stat().st_mtime_ns, default=None)
-if newest is not None:
-    subprocess.run(["ls", "-l", str(newest)], check=True)
-PY
 
 # A written run is not a successful click until the independently evaluated
 # Q1--Q10 verdict exists.  This is deliberately unconditional: no environment

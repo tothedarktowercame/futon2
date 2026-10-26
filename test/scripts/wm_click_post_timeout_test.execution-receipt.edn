@@ -23,4 +23,13 @@
    :status :passed :by "codex-12"
    :tests 3 :failures 0 :errors 0
    :note "Follow-up confirms the exit-28 recovery guard retains the three reviewed controls."
-   :log "/home/joe/notes/r19-post-timeout/focused-followup.log"}]}
+   :log "/home/joe/notes/r19-post-timeout/focused-followup.log"}
+  {:command "python3 test/scripts/wm_click_post_timeout_test.py"
+   :status :passed :by "claude-9" :date "2026-10-26T10:02Z"
+   :tests 4 :failures 0 :errors 0
+   :note "Review follow-up: ownership block moved after the terminal-state prints; partial-answer test added (fails under the old empty-response guard: no click-id returned; not accepted)."}
+  {:command "python3 -m unittest discover -s test/scripts -p 'wm_click_*_test.py'"
+   :status :passed :by "claude-9" :date "2026-10-26T10:02Z"
+   :tests 38 :failures 0 :errors 0}
+  {:command "bash -n scripts/wm_click.sh"
+   :status :passed :by "claude-9" :date "2026-10-26T10:02Z"}]}

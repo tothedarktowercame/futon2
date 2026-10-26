@@ -68,6 +68,22 @@ class ClickServer:
                 run_id = payload["run-id"]
                 owner.run_id = run_id
                 owner.posted.set()
+                if owner.mode == "partial":
+                    # Headers and half the body leave before the limit; curl
+                    # still exits 28, now with a non-empty, unparseable body.
+                    data = json.dumps({"click-id": CLICK, "status": "queued"}).encode()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Length", str(len(data)))
+                    self.end_headers()
+                    try:
+                        self.wfile.write(data[:8])
+                        self.wfile.flush()
+                        time.sleep(0.35)
+                        self.wfile.write(data[8:])
+                    except BrokenPipeError:
+                        pass
+                    return
                 time.sleep(0.35)
                 self.reply(200, {"click-id": CLICK, "status": "queued"})
 
@@ -86,9 +102,12 @@ class ClickServer:
         safe = CLICK.replace("/", "_")
         binding = self.f3c / "data/wm-click-run-bindings" / f"click-run-binding-{safe}.edn"
         binding.parent.mkdir(parents=True, exist_ok=True)
+        # Shape of a real futon3c click-run binding's observation (projected
+        # to the keys the script reads): {:status :present, :source
+        # :runner-return, :value "<run-id>"}.
         binding.write_text(
-            f'{{:click/id "{CLICK}" :run-id-observation '
-            f'{{:status :present :value "{self.run_id}"}}}}\n')
+            f'{{:click/id "{CLICK}", :run-id-observation '
+            f'{{:status :present, :source :runner-return, :value "{self.run_id}"}}}}\n')
 
     def __enter__(self):
         self.thread.start()
@@ -154,6 +173,13 @@ os.execv({sys.executable!r}, [{sys.executable!r}] + sys.argv[1:])
         self.assertIn(f"recovered admitted click: {CLICK}", result.stdout)
         self.assertIn("click ownership confirmed by run-record", result.stdout)
         self.assertNotIn("no click-id returned; not accepted", result.stdout)
+        self.assertEqual(["alert"], events)
+
+    def test_partial_answer_past_limit_recovers_owned_click(self):
+        result, events = self.run_case("partial")
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("admission answer not received (curl exit 28", result.stdout)
+        self.assertIn(f"recovered admitted click: {CLICK}", result.stdout)
         self.assertEqual(["alert"], events)
 
     def test_mismatched_record_refuses_without_requirements_verdict(self):
