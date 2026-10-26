@@ -201,13 +201,6 @@
            (slurp (io/file lab-root (str stem ".request.json.analysis.json"))) true)
         stored (json/parse-string
                 (slurp (io/file lab-root (str stem ".retractions.json"))) true)
-        seeds (set (for [sentence (:sentences a) fragment (:fragments sentence)
-                         ref (:pattern_refs fragment)] (:id ref)))
-        nodes (set (concat seeds (mapcat :nodes (:retractions stored))))
-        graph {:pattern-ids (vec nodes)
-               :edges (vec (mapcat :edges (:retractions stored)))}
-        reading {:status :current-candidate :target-id target :analysis a
-                 :excerpt-digest (apply str (repeat 64 "1"))}
         computed (map #(hash-map :target target :mission target :kind :retraction
                                  :analysis a
                                  :cascade (retraction-cascade/from-retraction target a %))

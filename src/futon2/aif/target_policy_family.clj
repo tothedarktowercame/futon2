@@ -92,7 +92,8 @@
            {:seen #{} :rows []} policies)))
 
 (defn policy-family
-  "Return reading and retraction policies, preserving every counted failure."
+  "Return canonical reading policies, preserving retraction computation as
+  excluded provenance and preserving every counted failure."
   [{:keys [reading graph retraction occurrence-squares]}]
   (let [target (:target-id reading)]
     (if (= :absent (:status reading))
@@ -122,9 +123,13 @@
                       (retraction/retractions graph (assoc params :seeds usable))
                       {:retractions [] :failures [{:kind :no-usable-retraction-seed
                                                    :seeds (vec (sort seeds))}]})
-            reported (vec (concat (reading-policies target analysis-map
-                                                    (square-registry/squares occurrence-squares))
-                                  (retraction-policies target analysis-map retract)))
+            reported (reading-policies target analysis-map
+                                       (square-registry/squares occurrence-squares))
+            computed-retractions (retraction-policies target analysis-map retract)
+            old-route-policies (deduplicate (vec (concat reported computed-retractions)))
+            excluded-policy-ids (mapv :policy-id
+                                      (filter #(= :retraction (:kind %))
+                                              old-route-policies))
             policies (deduplicate reported)
             failures (vec (concat (for [oid (sort-by pr-str voids)]
                                     {:kind :void-pattern-citation :occurrence-id oid})
@@ -141,4 +146,10 @@
                       :graph-digest (identity/sha256 (.getBytes (pr-str graph) "UTF-8"))
                       :slice (reading-slice analysis-map)
                       :retraction (assoc params :seeds usable
-                                         :all-reading-seeds (vec (sort seeds)))}}))))
+                                         :all-reading-seeds (vec (sort seeds))
+                                         :route :excluded-from-canonical-route
+                                         :reason :occurrence-identity-absent
+                                         :ruling (str "DECISION-SHEET-reading-era-"
+                                                      "2026-10-26.md item 4 (b)")
+                                         :computed-count (count (:retractions retract))
+                                         :excluded-policy-ids excluded-policy-ids)}}))))
