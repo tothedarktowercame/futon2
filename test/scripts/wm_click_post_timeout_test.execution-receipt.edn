@@ -1,0 +1,21 @@
+{:schema :wm/focused-test-execution-v1
+ :date "2026-10-26"
+ :scope ["scripts/wm_click.sh"
+         "test/scripts/wm_click_post_timeout_test.py"]
+ :runs
+ [{:command "python3 test/scripts/wm_click_post_timeout_test.py"
+   :status :passed :by "codex-12"
+   :tests 3 :failures 0 :errors 0
+   :log "/home/joe/notes/r19-post-timeout/focused-final.log"}
+  {:command "python3 -m unittest discover -s test/scripts -p 'wm_click_*_test.py'"
+   :status :passed :by "codex-12"
+   :tests 37 :failures 0 :errors 0
+   :log "/home/joe/notes/r19-post-timeout/all-wm-click-final2.log"}
+  {:command "bash -n scripts/wm_click.sh"
+   :status :passed :by "codex-12"}
+  {:command "python3 -m unittest test.scripts.wm_click_post_timeout_test"
+   :status :not-runnable
+   :reason :test-scripts-is-not-a-python-package
+   :log "/home/joe/notes/r19-post-timeout/focused.log"}
+  {:command "shellcheck scripts/wm_click.sh"
+   :status :not-runnable :reason :shellcheck-unavailable}]}

@@ -36,9 +36,12 @@
 # --author / --reviewer / --repair-reviewer. They must be three DISTINCT seats.
 set -uo pipefail
 
-F2="$HOME/code/futon2"; F3C="$HOME/code/futon3c"
+F2="${F2:-$HOME/code/futon2}"; F3C="${F3C:-$HOME/code/futon3c}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-BASE="http://localhost:7070"
+BASE="${BASE:-http://localhost:7070}"
+POST_TIMEOUT_S="${WM_CLICK_POST_TIMEOUT_S:-60}"
+POST_RECOVERY_MAX_S="${WM_CLICK_POST_RECOVERY_MAX_S:-600}"
+POST_RECOVERY_POLL_S="${WM_CLICK_POST_RECOVERY_POLL_S:-5}"
 # codex-22 was the charter's reviewer and is no longer on the roster, so the
 # default casting failed preflight on every invocation (claude-4, 2026-09-19).
 # wm-author / wm-reviewer / wm-repair-reviewer are Codex seats on one shared
@@ -397,9 +400,43 @@ payload["interpretation-seats"] = sys.argv[7].split(",")
 print(json.dumps(payload))
 PYJSON
 )
-  resp=$(curl -s -m 60 -X POST "$BASE/api/alpha/wm/click" -H 'Content-Type: application/json' \
+  post_left=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  resp=$(curl -s -m "$POST_TIMEOUT_S" -X POST "$BASE/api/alpha/wm/click" -H 'Content-Type: application/json' \
     -d "$payload")
+  post_rc=$?
   echo "$resp"
+  if [ -z "$resp" ]; then
+    echo "admission answer not received (curl exit $post_rc; POST left $post_left)"
+    recovery_started=$(date +%s)
+    while [ -z "$clickid" ]; do
+      recovery_record="$F2/data/wm-runs/tick-run-record-$RUNID.edn"
+      if [ -f "$recovery_record" ]; then
+        clickid=$(python3 - "$recovery_record" <<'PY'
+import re, sys
+text = open(sys.argv[1], encoding="utf-8").read()
+match = re.search(r':click/id\s+"([^"]+)"', text)
+print(match.group(1) if match else "")
+PY
+)
+      fi
+      if [ -z "$clickid" ]; then
+        recovery_status=$(curl -s -m 20 "$BASE/api/alpha/wm/click")
+        recovery_running=$(echo "$recovery_status" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("running?"))' 2>/dev/null)
+        recovery_click=$(echo "$recovery_status" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id") or "")' 2>/dev/null)
+        if [ "$recovery_running" = "True" ] && [ -n "$recovery_click" ]; then
+          clickid="$recovery_click"
+        fi
+      fi
+      [ -n "$clickid" ] && break
+      if [ $(( $(date +%s) - recovery_started )) -ge "$POST_RECOVERY_MAX_S" ]; then
+        echo "ALERT FOR JOE"
+        echo "requirements NOT CHECKED: admission answer absent and click was not recovered"
+        exit 1
+      fi
+      sleep "$POST_RECOVERY_POLL_S"
+    done
+    echo "recovered admitted click: $clickid"
+  fi
   # The server answers {:rejected :already-running :click-id <THE OTHER CLICK>}
   # when another caller started a click between our wait and this POST
   # (runner_service.clj click!). That id is not ours: stop this launch.
@@ -408,7 +445,9 @@ PYJSON
     cannot "launch" "$rejected; no automatic launch after another active click"
     exit 3
   fi
-  clickid=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id",""))' 2>/dev/null)
+  if [ -z "$clickid" ]; then
+    clickid=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id",""))' 2>/dev/null)
+  fi
   [ -n "$clickid" ] || { echo "no click-id returned; not accepted"; exit 1; }
 done
 echo "tracking our click: $clickid"
@@ -434,6 +473,57 @@ if ! python3 "$F2/scripts/wm_click_wait_child.py" --base "$BASE" --click-id "$cl
   exit 1
 fi
 
+# The idle boundary makes a recovered running click the only candidate, but
+# only retained server evidence establishes ownership. Prefer the run record;
+# a click binding can establish the same pair while the run record is still
+# unavailable. Never run the requirements checker for a mismatched pair.
+run_record="$F2/data/wm-runs/tick-run-record-$RUNID.edn"
+binding_id=$(printf '%s' "$clickid" | sed 's/[^A-Za-z0-9._-]/_/g')
+binding_file="$F3C/data/wm-click-run-bindings/click-run-binding-$binding_id.edn"
+if ! ownership=$(python3 - "$run_record" "$binding_file" "$RUNID" "$clickid" <<'PY'
+import pathlib, re, sys
+record_path, binding_path, expected_run, expected_click = sys.argv[1:]
+
+def value(text, key):
+    match = re.search(re.escape(key) + r'\s+"([^"]+)"', text)
+    return match.group(1) if match else None
+
+record = pathlib.Path(record_path)
+if record.exists():
+    text = record.read_text(encoding="utf-8")
+    actual_run = value(text, ":run/id")
+    actual_click = value(text, ":click/id")
+    if (actual_run, actual_click) == (expected_run, expected_click):
+        print("run-record")
+        raise SystemExit(0)
+    print(f"run record ownership mismatch: expected run={expected_run} click={expected_click}; "
+          f"actual run={actual_run} click={actual_click}")
+    raise SystemExit(1)
+
+binding = pathlib.Path(binding_path)
+if binding.exists():
+    text = binding.read_text(encoding="utf-8")
+    actual_click = value(text, ":click/id")
+    observed = re.search(r':run-id-observation\s+\{[^}]*:value\s+"([^"]+)"', text)
+    actual_run = observed.group(1) if observed else value(text, ":run/id")
+    if (actual_run, actual_click) == (expected_run, expected_click):
+        print("click-binding")
+        raise SystemExit(0)
+    print(f"click binding ownership mismatch: expected run={expected_run} click={expected_click}; "
+          f"actual run={actual_run} click={actual_click}")
+    raise SystemExit(1)
+
+print(f"ownership evidence absent: run={expected_run} click={expected_click}")
+raise SystemExit(1)
+PY
+); then
+  echo "ALERT FOR JOE"
+  echo "$ownership"
+  echo "requirements NOT CHECKED: recovered click ownership not established"
+  exit 1
+fi
+echo "click ownership confirmed by $ownership"
+
 echo; echo "terminal state:"
 curl -s -m 20 "$BASE/api/alpha/wm/click" | python3 -m json.tool | sed -n '1,24p'
 echo; echo "newest repair finding, if the click opened one:"
@@ -453,7 +543,6 @@ PY
 # A written run is not a successful click until the independently evaluated
 # Q1--Q10 verdict exists.  This is deliberately unconditional: no environment
 # variable can disable the post-run check.
-run_record="$F2/data/wm-runs/tick-run-record-$RUNID.edn"
 verdict_file="$run_record.requirements.edn"
 if [ ! -f "$run_record" ]; then
   echo "ALERT FOR JOE"
