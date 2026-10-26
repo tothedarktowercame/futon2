@@ -320,7 +320,7 @@
 
 (def ^:private lean-outcomes
   "Close outcomes that are a Requirements.RunOutcome."
-  {:grounded-change :changed :changed :changed
+  {:grounded-change :changed :grounded-progress :changed :changed :changed
    :grounded-no-change :already-satisfied :already-satisfied :already-satisfied
    :question :question
    :guardrail-refusal :refused :refused :refused

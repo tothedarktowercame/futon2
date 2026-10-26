@@ -13,6 +13,26 @@
    :declared-no-work :declared-no-work
    :diagnostic-only :diagnostic-only})
 (def successful-outcomes #{:success :closed :grounded-change :cohort-complete})
+(def close-outcome-image
+  "Transcribes `DarkTower/WarMachine/CloseOutcomeImage.lean` `image`,
+  mathlib4 `229c56aabf`."
+  {:grounded-change :changed
+   :grounded-progress :changed
+   :already-satisfied :already-satisfied
+   :grounded-no-change :already-satisfied
+   :artifact-only :invalid
+   :abstained :invalid
+   :no-selection :invalid
+   :agent-unavailable :invalid
+   :guardrail-refusal :refused
+   :dispatch-failed :invalid
+   :build-failed :invalid
+   :substrate-unavailable :invalid
+   :incomplete :invalid
+   :cancelled :invalid
+   :historical-verification-awaiting-validation :invalid
+   :historical-verification-refused :invalid})
+(def successful-images #{:changed :already-satisfied})
 (def pin-re #"[0-9a-f]{64}")
 (def git-re #"[0-9a-f]{40,64}")
 
@@ -152,7 +172,11 @@
                                     :producer-qualified-already-satisfied)
                                   (get explicit-non-injury-kinds kind)
                                   (when (and (nil? kind)
-                                             (contains? successful-outcomes terminal-outcome))
+                                             (or (contains? successful-images
+                                                            (close-outcome-image
+                                                             terminal-outcome))
+                                                 (contains? successful-outcomes
+                                                            terminal-outcome)))
                                     :successful-task-outcome)
                                   (when (and (nil? kind) (nil? terminal-outcome))
                                     :absent-terminal-failure)))
