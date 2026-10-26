@@ -33,13 +33,22 @@
   (when (resolved-context? value) (.-verifier ^AuthorityResolution value)))
 
 (def required-findings
-  {:classification :producer-qualified-already-satisfied
-   :empty-history :no-injury
-   :attributable-retry :retry-inconclusive
-   :unsupported-refusal :injury
-   :done-at-base :injury
-   :guard-removal :rejected
-   :qualifier-removal :rejected})
+  {:producer-qualified-non-injury
+   {:classification :producer-qualified-already-satisfied
+    :empty-history :no-injury
+    :attributable-retry :retry-inconclusive
+    :unsupported-refusal :injury
+    :done-at-base :injury
+    :guard-removal :rejected
+    :qualifier-removal :rejected}
+   :successful-close-non-injury
+   {:classification :successful-task-outcome
+    :empty-history :no-injury
+    :attributable-retry :discharged
+    :unsupported-refusal :injury
+    :done-at-base :injury
+    :image-removal :injury
+    :failure-present :injury}})
 
 (def ^:private intent-fields
   #{:schema :scope :disposition-kind :injury-id :ordinal :ledger-entry-id
@@ -219,13 +228,15 @@
               authorization (:value authorization-result)
               evaluator (:evaluator intent)
               reviewer (:reviewer intent)
+              expected (get required-findings (:replay intent))
               expected-id (final-operation-id intent-id request evaluation-pin
                                               review-pin authorization-pin)]
           (cond
             (not (and (= evaluation-schema (:schema evaluation))
                       (= intent-id (:intent-digest evaluation))
                       (same-identity? evaluator (:evaluator evaluation))
-                      (= required-findings (:findings evaluation))))
+                      (map? expected)
+                      (= expected (:findings evaluation))))
             {:status :refused :reason :evaluation/not-qualified}
             (not (and (= review-schema (:schema review))
                       (= intent-id (:intent-digest review))
