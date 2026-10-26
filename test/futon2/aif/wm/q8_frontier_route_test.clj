@@ -13,6 +13,7 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as live]
+            [futon2.aif.outer-policy-provider-runtime :as provider-runtime]
             [futon2.aif.outer-target-belief :as outer-belief]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.q8-frontier :as q8]
@@ -86,6 +87,18 @@
    :controller {:missing-channel-cost 1.0 :recent-selection-cost 0.5
                 :continuation-credit 0.7}})
 
+(def provider-state
+  "What full-loop-runtime's default provider reads from the learning
+   authority, owned by the test: the same belief, costs, transform and
+   controller as `outer-learning`, a pinned preference source (the
+   declaration's :preference-authority must be a pin), and the outer-policy
+   gamma the declaration carries."
+  (assoc outer-learning
+         :authority {:outer-policy {:gamma 1.0}}
+         :preference-authority
+         {:kind :operator
+          :source (pin "wm://q8-route-preference-authority" "f")}))
+
 (defn- outer-receipt
   ([] (outer-receipt base-tasks base-map))
   ([priorities on-map]
@@ -101,6 +114,9 @@
                         :focus-classify-fn
                         (fn [_ _ _ target _] {:target target :class :focus})
                         :seed 14
+                        :outer-policy-evidence-provider
+                        (fn [menu]
+                          (provider-runtime/provide provider-state menu []))
                         :policy-field-config
                         {:target-reading-root (.getPath (io/file (:root reading-field)))
                          :pattern-graph-path (.getPath (io/file (:graph reading-field)))
