@@ -1104,6 +1104,13 @@
                          :selection effective-selection
                          :action-of (fn [c] {:type (get action-type (:kind c))
                                              :target (:id c)})})))
+        ;; Decision sheet 2026-10-26 item 2 (a): the chosen task's outer
+        ;; action and the menu row's action pin, recorded side by side.
+        receipt (assoc receipt :q2-outer-action-provenance
+                       (q2/outer-action-provenance
+                        {:outer (:q2-outer-actions receipt)
+                         :selection canonical-policy-selection
+                         :menu-pin (:menu-pin sealed-menu)}))
         certificate (if injury?
                       (learning-certificate outer-learning learning-scores
                                             shadow-selection selection injury?)

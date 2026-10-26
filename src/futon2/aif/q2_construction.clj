@@ -64,6 +64,60 @@
                                   {:task (str (:id c)) :action a :action-id (digest a)})))
          :selection (select-keys selection [:status :selected :reason])}))
 
+;; -- the chosen task's outer action beside the menu row that chose it ---------
+
+(def provenance-schema :wm/q2-outer-action-provenance-v1)
+
+(defn outer-action-provenance
+  "Record only (decision sheet 2026-10-26 item 2, option (a); the R5
+  residual). The chosen task's outer action is recorded beside the action pin
+  of the sealed-menu row the canonical selection chose, so a reader can see
+  which policy row stood behind the task-level action. No constraint and no
+  refusal: a typed absence is the whole answer when there is no canonical
+  selection, and the one comparison made is written down as a fact
+  (:q2-names-the-menu-row?), never acted on.
+
+  OUTER is the receipt's :q2-outer-actions in either form it takes: on the
+  ordinary route `{:status :certified :carrier recomputation}`, whose :q2 is
+  the carrier's task-level outer action (selected-outer-cascade-policy
+  seal-canonical); on the injury route the sealed per-task census from
+  `outer-actions` above. SELECTION is the receipt's
+  :canonical-policy-selection (outer-canonical-selection/evaluate), MENU-PIN
+  the sealed menu's pin."
+  [{:keys [outer selection menu-pin]}]
+  (if-not (= :selected (:status selection))
+    {:schema provenance-schema :status :absent
+     :reason :no-canonical-policy-selection
+     :selection-status (:status selection)
+     :selection-reason (:reason selection)}
+    (let [target (str (get-in selection [:action :target]))
+          menu-row (select-keys (:action selection) [:target :policy-id :cascade-digest])
+          base {:schema provenance-schema :status :recorded :relation :record-only
+                :task target
+                :menu-action-pin {:policy-id (:policy-id menu-row)
+                                  :cascade-digest (:cascade-digest menu-row)
+                                  :action-pin (get-in selection [:selected :action-pin])}
+                :menu-pin menu-pin}]
+      (cond
+        (= :certified (:status outer))
+        (let [q2 (get-in outer [:carrier :q2])]
+          (assoc base :outer-form :certified-carrier
+                 :outer-action q2 :action-id (some-> q2 digest)
+                 :q2-names-the-menu-row? (= q2 menu-row)))
+
+        (and (= outer-schema (:schema outer)) (intact? outer))
+        (if-let [row (first (filter #(= target (:task %)) (:actions outer)))]
+          (assoc base :outer-form :sealed-outer-actions
+                 :outer-action (:action row) :action-id (:action-id row)
+                 :outer-sha256 (:sha256 outer))
+          {:schema provenance-schema :status :absent
+           :reason :chosen-task-not-in-outer-actions :task target})
+
+        :else
+        {:schema provenance-schema :status :absent
+         :reason :outer-actions-absent-or-tampered
+         :outer-status (:status outer)}))))
+
 ;; -- the whole library, pinned at construction ----------------------------------
 
 (defn library-manifest

@@ -218,3 +218,57 @@
         receipt (run-live forged)]
     (is (= :provider-source-pin-mismatch (get-in receipt [:policy :reason])))
     (is (nil? (get-in receipt [:policy :policy-objective])))))
+
+(deftest chosen-outer-action-records-the-menu-rows-action-pin
+  ;; Decision sheet 2026-10-26 item 2 (a), the R5 residual: record only.
+  (let [receipt (run-live (explicit-provider [0.0 1.0] []) {:seed seed})
+        {:keys [menu]} (fixture)
+        provenance (:q2-outer-action-provenance receipt)
+        selection (get-in receipt [:policy :canonical-policy-selection])
+        menu-row (select-keys (:action selection) [:target :policy-id :cascade-digest])
+        menu-digests (set (map #(get-in % [:action :cascade-digest]) (:entries menu)))]
+    (is (= :selected (:status selection)))
+    (is (= :certified (get-in receipt [:q2-outer-actions :status])))
+    (is (= [:recorded :record-only "T-occ" :certified-carrier]
+           ((juxt :status :relation :task :outer-form) provenance)))
+    ;; the carrier's task-level outer action and the menu row it came from
+    (is (= (get-in receipt [:q2-outer-actions :carrier :q2]) (:outer-action provenance)))
+    (is (= menu-row (:outer-action provenance)))
+    (is (true? (:q2-names-the-menu-row? provenance)))
+    (is (string? (:action-id provenance)))
+    (is (= (:cascade-digest menu-row)
+           (get-in provenance [:menu-action-pin :cascade-digest])))
+    (is (= (:policy-id menu-row) (get-in provenance [:menu-action-pin :policy-id])))
+    (is (contains? menu-digests (get-in provenance [:menu-action-pin :cascade-digest])))
+    (is (= (:menu-pin menu) (:menu-pin provenance)))
+    ;; unseeded, the canonical tie draw refuses (R13); the provenance is a
+    ;; typed absence, never a refusal of the receipt
+    (let [refused (run-live (explicit-provider [0.0 1.0] []))]
+      (is (not= :selected (get-in refused [:policy :status])))
+      (is (= [:absent :no-canonical-policy-selection]
+             ((juxt :status :reason) (:q2-outer-action-provenance refused)))))))
+
+(deftest partial-evidence-is-recorded-beside-the-canonical-choice
+  ;; Decision sheet 2026-10-26 item 3 (a), U4: evidence quality is a recorded
+  ;; fact beside the choice. A declaration short one menu policy still yields
+  ;; the canonical selection, and the dropped digest is named in the record.
+  (let [{:keys [menu declaration]} (fixture)
+        dropped (:cascade-digest (second (:entries menu)))
+        incomplete (update declaration :policies dissoc dropped)
+        incomplete (assoc-in incomplete [:pin :sha256]
+                             (identity/sha256
+                              (.getBytes (pr-str (dissoc incomplete :pin)) "UTF-8")))
+        receipt (run-live (constantly (provider/provided incomplete [] {:kind :test}))
+                          {:seed seed})
+        menu-digests (set (map #(get-in % [:action :cascade-digest]) (:entries menu)))]
+    (is (= :partial (get-in receipt [:policy :policy-evidence :status])))
+    (is (= [dropped]
+           (mapv :cascade-digest
+                 (get-in receipt [:policy :policy-evidence :frontier :term-absent :policies]))))
+    (is (= :partial (get-in receipt [:policy :policy-objective :status])))
+    (is (= :selected (get-in receipt [:policy :status])))
+    (is (= :selected (get-in receipt [:policy :canonical-policy-selection :status])))
+    (is (contains? menu-digests (get-in receipt [:action :cascade-digest])))
+    (is (nil? (selected/verify
+               (get-in receipt [:policy :selected-outer-cascade-policy]))))
+    (is (= :recorded (get-in receipt [:q2-outer-action-provenance :status])))))
