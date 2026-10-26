@@ -42,12 +42,19 @@
                    :else {:schema schema :status :refused
                           :reason :outer-policy-evidence-provider-required})]
       (if-let [defect (verify result)]
-        {:schema schema :status :refused :reason defect
-         :missing-policy-digests (mapv :cascade-digest (:entries sealed-menu))
-         :absent-terms [:outcome-vocabulary :dirichlet-prior-alpha
-                        :preference-distribution :preference-authority :gamma
-                        :lnE-resource :lnE-cadence :lnE-continuation
-                        :durable-terminal-records]}
+        (cond-> {:schema schema :status :refused :reason defect
+                 :missing-policy-digests (mapv :cascade-digest (:entries sealed-menu))
+                 :absent-terms [:outcome-vocabulary :dirichlet-prior-alpha
+                                :preference-distribution :preference-authority :gamma
+                                :lnE-resource :lnE-cadence :lnE-continuation
+                                :durable-terminal-records]}
+          ;; R6: when the defect is the producer's own refusal, carry its
+          ;; cause unchanged (SeamRefusal.lean `Carries`); defects this
+          ;; consumer found itself have no producer cause to carry.
+          (and (map? result) (= defect (:reason result)) (contains? result :details))
+          (assoc :details (:details result))
+          (and (map? result) (= defect (:reason result)) (contains? result :belief-status))
+          (assoc :belief-status (:belief-status result)))
         result))
     (catch Throwable t
       {:schema schema :status :refused :reason :outer-policy-evidence-provider-threw

@@ -170,6 +170,39 @@
     (is (= :outer-policy-evidence-provider-required
            (get-in receipt [:q8-frontier :reason])))))
 
+(deftest refused-provider-cause-reaches-the-receipt
+  ;; R6 (DEFECTS-reading-era): m142-002's learning belief refused with a cause,
+  ;; and the receipt's policy entry read `{:status :refused :reason
+  ;; :learning-authority-unavailable :kind :cascade-live-policy-menu-v1}` with
+  ;; the cause gone. The provider map below is what
+  ;; `outer-policy-provider-runtime/provide` returns for that belief since
+  ;; e74d11ebf; the receipt must carry reason and cause unchanged
+  ;; (SeamRefusal.lean `m142_repaired_carried`).
+  (let [details {:path "/home/joe/code/futon2/resources/wm/outer-learning-authority.edn"
+                 :error-class "java.lang.ClassCastException"
+                 :error-message "Default comparator requires nil, Number, or Comparable: #{}"}
+        select (fn [provider]
+                 (select-ordinary {:tasks tasks :fetch-snapshot (constantly snapshot)
+                                   :outer-policy-evidence-provider provider}))
+        m142 (select {:schema :wm/outer-policy-evidence-provider-v1
+                      :status :refused
+                      :reason :learning-authority-unavailable
+                      :details details
+                      :belief-status :refused})
+        schema-invalid (select {:schema :wm/outer-policy-evidence-provider-v1
+                                :status :refused
+                                :reason :learning-authority-schema-invalid
+                                :belief-status :refused})]
+    (is (= :cascade-live-policy-menu-v1 (get-in m142 [:policy :kind])))
+    (is (= :refused (get-in m142 [:policy :status])))
+    (is (= :learning-authority-unavailable (get-in m142 [:policy :reason])))
+    (is (= details (get-in m142 [:policy :details])))
+    (is (nil? (:action m142)))
+    ;; a non-produced reason other than unavailable is not renamed on the way,
+    ;; and no cause is invented where the producer gave none
+    (is (= :learning-authority-schema-invalid (get-in schema-invalid [:policy :reason])))
+    (is (not (contains? (:policy schema-invalid) :details)))))
+
 (deftest learned-outcomes-run-in-shadow-without-changing-live-action
   (let [belief (outer-belief/build
                 {:prior (outer-belief/prior 1 :operator-provisional)

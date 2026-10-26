@@ -974,7 +974,7 @@
         receipt (if injury?
                   (assoc-in receipt [:policy :branch] :verified-machine-injury-algorithm)
                   (cond-> (-> receipt
-                              (assoc :policy {:kind (if activated-carrier
+                              (assoc :policy (cond-> {:kind (if activated-carrier
                                                      :cascade-live-policy-v1
                                                      :cascade-live-policy-menu-v1)
                                       :branch :ordinary-cascade-policy
@@ -1021,7 +1021,14 @@
                                       {:status :retired :consumed false}
                                       :target-candidate-selector
                                       {:status :retired :invoked false
-                                       :configured (boolean candidate-fn)}})
+                                       :configured (boolean candidate-fn)}}
+                                       ;; R6: the refused provider's cause
+                                       ;; reaches the receipt's policy entry
+                                       ;; (SeamRefusal.lean `m142_repaired_carried`).
+                                       (and (not activated-carrier)
+                                            (map? ordinary-result)
+                                            (contains? ordinary-result :details))
+                                       (assoc :details (:details ordinary-result))))
                               (assoc :policy-field policy-field)
                               (assoc :outer-policy-recomputation
                                      (when activated-carrier
