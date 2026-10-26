@@ -3270,19 +3270,31 @@
          artifact-ref (:artifact-ref job)
          exists-fn (or exists-fn commit-exists-in?)]
      (when (= :refuse verdict)
-       (let [already? (already-satisfied-card? job)]
+       (let [card (valid-feature-card job)
+             already? (already-satisfied-card? job)
+             ;; Agency extracts the first ref-like text from an answer, which
+             ;; may be a path mentioned before the card's :proof-ref.  A
+             ;; sha-shaped extracted ref remains authoritative (including when
+             ;; unknown); only a non-sha extracted ref lets the card supply the
+             ;; commit candidate.  This is the repairedClassifier order in
+             ;; AlreadySatisfiedArtifactRefSeam.
+             artifact-sha (when (string? artifact-ref)
+                            (re-find #"\b[0-9a-f]{7,40}\b" artifact-ref))
+             proof-sha (when (string? (:proof-ref card))
+                         (re-find #"\b[0-9a-f]{7,40}\b" (:proof-ref card)))
+             grounded-sha (or artifact-sha proof-sha)]
          (cond
-           (and already? artifact-ref)
+           (and already? grounded-sha)
            (let [found (if repository-required?
-                         (when (and repo (exists-fn repo artifact-ref)) repo)
+                         (when (and repo (exists-fn repo grounded-sha)) repo)
                          (or (when repo
-                               (when (exists-fn repo artifact-ref) repo))
-                             (some (fn [r] (when (exists-fn r artifact-ref) r))
+                               (when (exists-fn repo grounded-sha) repo))
+                             (some (fn [r] (when (exists-fn r grounded-sha) r))
                                    (primary-repos))))]
              (if found
                {:outcome :already-satisfied
                 :grounded-commit {:repo (.getName (io/file (str found)))
-                                  :sha artifact-ref}}
+                                  :sha grounded-sha}}
                ;; a claimed commit that does not exist is not evidence
                {:outcome :invalid-author-refusal}))
 
@@ -3824,7 +3836,7 @@
        "   commit and do NOT present the base HEAD as a new DONE artifact. Begin the\n"
        "   required feature card with :built or :want-coverage saying it is already\n"
        "   satisfied, and put the full existing commit sha in :proof-ref (the Agency\n"
-       "   records that sha as the artifact reference). End exactly with:\n"
+       "   runner reads that sha as the grounded commit). End exactly with:\n"
        "   FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head. This reports only\n"
        "   the selected construction's existing evidence; it does not claim that the\n"
        "   whole mission is complete.\n"

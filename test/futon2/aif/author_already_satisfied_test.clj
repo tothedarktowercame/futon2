@@ -35,7 +35,7 @@
     (is (re-find #"selected construction already satisfies" text))
     (is (re-find #"do not make a cosmetic" text))
     (is (re-find #":proof-ref" text)
-        "the feature-card key whose durable SHA Agency extracts")
+        "the feature-card key whose durable SHA the runner reads as grounding")
     (is (re-find #"do NOT present the base HEAD as a new DONE artifact" text))
     (is (re-find #"FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head" text))))
 
