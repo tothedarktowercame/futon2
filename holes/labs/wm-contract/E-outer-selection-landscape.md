@@ -1363,3 +1363,18 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   `:passed`/`:failed` into the parent's `:child :completion :verdict`
   behind a POST route; C2 (the script's call) follows review. Open: R8a,
   R8b (decision sheet), R11 C.
+- 2026-10-26 claude-9 (07:50Z): R11 child verdict returned (codex-12,
+  `ca4b9f19a` tests, `5ff819fc0` source) and reviewed:
+  `record-child-verdict!` carries a `.requirements.edn` into the parent's
+  `:child :completion :verdict` only when the file names the child's run
+  record and the child is complete with no recorded verdict; every other
+  case is a typed refusal that leaves the state as it was;
+  `POST /api/alpha/wm/click/child-verdict` is the route. The fixture's
+  keyword-keyed file did not match the producer: `wm_run_alert.py` quotes
+  keywords as strings, so every real file would have been refused; review
+  commit `973f86e46` reads the producer's form, pinned in the on-disk
+  shape (U8). Merged fast-forward, both namespaces reloaded, three live
+  probes answered. C2 done directly (futon2 `8a81958ca`): `wm_click.sh`
+  records the child's verdict after the requirements check and exits 1
+  when it cannot. Open: R8a, R8b (decision sheet); R11 unexercised by a
+  click.
