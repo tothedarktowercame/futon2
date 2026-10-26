@@ -235,6 +235,39 @@
         (is (= :certified (:status c)))
         (is (= {:status :pass} (:selection-verdict c)))))))
 
+(deftest mixed-g-rows-of-one-task-are-refused-not-thrown
+  (let [row (fn [pid digest g]
+              {:policy-id pid :target-id "T" :status :scored
+               :G g :cascade-digest digest
+               :action-pin {:cascade-digest digest}})
+        base (fn [rows]
+               {:support [{:id "T"}]
+                :excluded []
+                :policy-field {:families [{:target-id "T" :status :computed}]}
+                :policy {:selected-outer-cascade-policy
+                         {:sealed-menu {:entries [{:policy-id "T/a" :target-id "T"}
+                                                  {:policy-id "T/b" :target-id "T"}]}}
+                         :canonical-g-frontier
+                         {:status :produced :horizon-choice {:horizon 1}
+                          :entries rows}
+                         :canonical-policy-selection
+                         {:status :selected :action {:target "T"}}}})
+        number-row (row "T/a" "aaa" -1.5)
+        string-row (row "T/b" "bbb" "0.5")
+        nil-row (row "T/b" "bbb" nil)
+        result (fn [rows]
+                 ((juxt :status :reason :tasks)
+                  (q8/canonical-outer-frontier (base rows))))]
+    (testing "a string G beside a number is refused, not thrown"
+      (is (= [:not-recomputable :channel-value-not-exact ["T"]]
+             (result [number-row string-row]))))
+    (testing "the order of the rows does not matter"
+      (is (= [:not-recomputable :channel-value-not-exact ["T"]]
+             (result [string-row number-row]))))
+    (testing "control: a nil G beside a number is already refused"
+      (is (= [:not-recomputable :channel-value-not-exact ["T"]]
+             (result [number-row nil-row]))))))
+
 (deftest tampering-with-a-sealed-g-breaks-the-seal
   (let [c (q8/canonical-outer-frontier receipt)
         tampered (assoc-in c [:entries 0 :channels :G] -1.0)]
