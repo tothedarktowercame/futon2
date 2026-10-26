@@ -1,5 +1,6 @@
 (ns futon2.aif.wm.q8-canonical-frontier-test
   (:require [clojure.edn :as edn]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.q8-frontier :as q8]))
 
@@ -14,7 +15,20 @@
 
 (deftest attempt-002-canonical-frontier-is-a-visible-census-failure
   (let [c (q8/canonical-outer-frontier receipt)
-        census (:census c)]
+        census (:census c)
+        menu (get-in receipt [:policy :selected-outer-cascade-policy :sealed-menu])
+        entry-targets (set (map :target-id (:entries menu)))
+        refusal-target (fn [row]
+                         (first (str/split (str (:policy-id row)) #"/" 2)))
+        ranked-kinds (->> (concat (:failures menu) (:refusals menu))
+                          (filter (fn [row]
+                                    (contains? entry-targets
+                                               (or (:target-id row)
+                                                   (refusal-target row)))))
+                          (map :kind)
+                          distinct
+                          sort
+                          vec)]
     (testing "sealed and decided"
       (is (q8/intact? c))
       (is (= :wm/q8-outer-frontier-v1 (:schema c)))
@@ -49,20 +63,21 @@
               :reason :frontier-not-eligible-census
               :ranked 4
               :unranked 105
+              :ranked-kinds ranked-kinds
               :unranked-by-reason {:no-current-target-reading 101
                                    :occurrence-squares-not-authored 1
-                                   :seed-not-in-graph 1
-                                   :isolated-seed 1
-                                   :target-class-unknown 1}}
+                                   :target-class-unknown 3}}
              (:census-verdict c)))
+      (is (= ranked-kinds (get-in c [:census-verdict :ranked-kinds])))
+      (is (not-any? (set ranked-kinds) (map :reason (:unranked c))))
       (is (false? (= (set (map :task (:entries c))) (set (:eligible census)))))
       (is (= 105 (count (:unranked c))))
       (is (= {:task "M-formal-war-machine" :stage :s4
-              :reason :seed-not-in-graph
+              :reason :target-class-unknown
               :reasons [:seed-not-in-graph :target-class-unknown]}
              (first (filter #(= "M-formal-war-machine" (:task %)) (:unranked c)))))
       (is (= {:task "M-digital-nomad-patterns" :stage :s4
-              :reason :isolated-seed
+              :reason :target-class-unknown
               :reasons [:isolated-seed :target-class-unknown]}
              (first (filter #(= "M-digital-nomad-patterns" (:task %)) (:unranked c)))))
       (is (= {:task "M-pattern-posteriors" :stage :s4
@@ -100,6 +115,37 @@
       (is (= :not-recomputable (:status c)))
       (is (= :eligible-task-unaccounted (:reason c)))
       (is (= [orphan] (:tasks c))))))
+
+(deftest shared-ranked-kind-cannot-headline-an-unranked-task
+  (let [row {:policy-id "R/p" :target-id "R" :status :scored
+             :G 0 :cascade-digest "r" :action-pin {:cascade-digest "r"}}
+        base {:support [{:id "R"} {:id "U"}]
+              :excluded []
+              :policy-field {:families [{:target-id "R" :status :computed}
+                                        {:target-id "U" :status :computed}]}
+              :policy {:selected-outer-cascade-policy
+                       {:sealed-menu {:entries [{:policy-id "R/p" :target-id "R"}]
+                                      :failures [{:target-id "R" :kind :k-shared}
+                                                 {:target-id "U" :kind :k-shared}]
+                                      :refusals []}}
+                       :canonical-g-frontier
+                       {:status :produced :horizon-choice {:horizon 1}
+                        :entries [row]}
+                       :canonical-policy-selection
+                       {:status :selected :action {:target "R"}}}}
+        shared (q8/canonical-outer-frontier base)
+        own (q8/canonical-outer-frontier
+             (update-in base
+                        [:policy :selected-outer-cascade-policy :sealed-menu :failures]
+                        conj {:target-id "U" :kind :k-own}))]
+    (is (= {:task "U" :stage :s4
+            :reason :unexplained :reasons [:k-shared]}
+           (first (:unranked shared))))
+    (is (= {:unexplained 1}
+           (get-in shared [:census-verdict :unranked-by-reason])))
+    (is (= {:task "U" :stage :s4
+            :reason :k-own :reasons [:k-own :k-shared]}
+           (first (:unranked own))))))
 
 (defn- focused-receipt
   "The four ranked tasks eligible; everyone else excluded with a

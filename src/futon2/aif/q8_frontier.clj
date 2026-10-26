@@ -225,6 +225,14 @@
                            (filter #(= target (first (str/split
                                                       (str (:policy-id %)) #"/" 2)))
                                    (:refusals menu)))
+        ranked-kinds (set (mapcat (fn [target]
+                                    (concat (map :kind (get menu-failures-by target))
+                                            (map :kind (menu-refusals-by target))))
+                                  menu-entry-targets))
+        headline-reason (fn [kinds]
+                          (or (first (sort (remove ranked-kinds
+                                                   (distinct kinds))))
+                              :unexplained))
         frontier (get-in receipt [:policy :canonical-g-frontier])
         fr-rows-by (group-by :target-id (:entries frontier))
         h (get-in frontier [:horizon-choice :horizon])
@@ -275,21 +283,21 @@
                                   (let [kinds (map :kind (:failures family))]
                                     (when (seq (distinct kinds))
                                       {:task t :stage :s2
-                                       :reason (first (sort (distinct kinds)))
+                                       :reason (headline-reason kinds)
                                        :reasons (vec (sort (distinct kinds)))}))
                                   (and family (not (contains? menu-entry-targets t)))
                                   (let [kinds (concat (map :kind (get menu-failures-by t))
                                                       (map :kind (menu-refusals-by t)))]
                                     (when (seq (distinct kinds))
                                       {:task t :stage :s4
-                                       :reason (first (sort (distinct kinds)))
+                                       :reason (headline-reason kinds)
                                        :reasons (vec (sort (distinct kinds)))}))
                                   (contains? menu-entry-targets t)
                                   (let [reasons (vec (sort (distinct
                                                             (keep :reason (fr-rows-by t)))))]
                                     (when (seq reasons)
                                       {:task t :stage :s5
-                                       :reason (first reasons)
+                                       :reason (headline-reason reasons)
                                        :reasons reasons}))
                                   :else nil)))
                             (sort eligible-set))))
@@ -303,6 +311,7 @@
                           :reason :frontier-not-eligible-census
                           :ranked (count entries)
                           :unranked (count unranked)
+                          :ranked-kinds (vec (sort ranked-kinds))
                           :unranked-by-reason (frequencies (map :reason unranked))})
         base {:schema outer-schema
               :ranking {:law canonical-law :version 1
