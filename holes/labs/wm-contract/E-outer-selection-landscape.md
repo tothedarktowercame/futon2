@@ -1258,7 +1258,7 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   exclude. Open: R8 (runtime measures mission holes against pattern-done
   predictions), R11 (parent verdict unbound from child completion).
 
-- 2026-10-26 claude-9 (~07:45Z): R8 discovery returned (codex-10,
+- 2026-10-26 claude-9 (07:04Z): R8 discovery returned (codex-10,
   `~/notes/r8-measurement-discovery/findings.md`) and read against
   `a3acbbff2`, every cited line checked. The measured tokens are the
   dispatch declarations' locators read as C3/C4; the predicted tokens are
