@@ -393,6 +393,51 @@
     (is (= :end (:transition (last @events))))
     (is (= :abort (:debugger/restart (last @events))))))
 
+(deftest aborting-an-inner-phase-does-not-stop-again-at-its-enclosing-phase
+  (debugger/attach!)
+  (let [run-id "nested-abort"
+        context {:opportunity-id "op" :attempt-id "attempt"}
+        events (atom [])
+        ledger (debugger/new-dwell-ledger run-id)
+        opts (assoc (phase-opts run-id events) :debugger-dwell/state ledger)
+        inner (ex-info "inner" {:failure-kind :inner})
+        wrapper (atom nil)
+        running
+        (future
+          (try
+            (runner/run-phase!
+             opts context :outer
+             #(try
+                (runner/run-phase! opts context :inner (fn [] (throw inner)))
+                (catch Throwable e
+                  (let [outer (ex-info "wrapper" {:failure-kind :outer} e)]
+                    (reset! wrapper outer)
+                    (throw outer)))))
+            (catch Throwable e e)))]
+    (wait-for-stop run-id running)
+    (debugger/continue! run-id :abort :failed)
+    ;; On the pre-R27 path the enclosing phase opens another stop. Abort that
+    ;; stop so the red test terminates and records the duplicate dwell receipt.
+    (let [second-stop
+          (loop [remaining 400]
+            (let [stop (first (filter #(and (= run-id (:run-id %))
+                                            (= :outer (:phase %)))
+                                      (debugger/stopped)))]
+              (cond stop stop
+                    (realized? running) nil
+                    (pos? remaining) (do (Thread/sleep 5) (recur (dec remaining)))
+                    :else ::timeout)))
+          _ (when (map? second-stop)
+              (debugger/continue! run-id :abort :failed))
+          thrown (deref running 2000 ::timeout)]
+      (is (nil? second-stop) "the enclosing phase never opens a second stop")
+      (is (identical? @wrapper thrown) "the wrapper throwable is rethrown unchanged")
+      (is (= :outer (:failure-kind (ex-data thrown))))
+      (is (identical? inner (.getCause ^Throwable thrown)))
+      (is (empty? (debugger/stopped)))
+      (is (= 1 (count (:receipts @ledger)))
+          "one operator decision produces exactly one dwell receipt"))))
+
 (deftest typed-refusal-stops-when-debugger-is-attached
   (debugger/attach!)
   (let [refusal (ex-info "War Machine abstained: cascade decision refused"

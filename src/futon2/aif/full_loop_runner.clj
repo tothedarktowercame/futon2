@@ -493,6 +493,7 @@
                                               [:readiness/wake-attempted
                                                :readiness/wake-result
                                                :readiness/substrate-transient])))
+                   (debugger/discharge! throwable)
                    (throw throwable)))))))))))
 
 (defn capture-selection-world!

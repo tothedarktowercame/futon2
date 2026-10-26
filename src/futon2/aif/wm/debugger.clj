@@ -6,11 +6,15 @@
   operator thread only delivers the choice; the run thread invokes its own
   restart, so Farolero's non-local control transfer never crosses threads."
   (:require [farolero.core :as far :refer [handler-bind restart-case]])
-  (:import [java.time Instant]))
+  (:import [java.time Instant]
+           [java.util Collections WeakHashMap]))
 
 (defonce ^:private !attached? (atom false))
 (defonce ^:private !stops (atom {}))
 (defonce ^:private !breakpoints (atom #{}))
+(defonce ^:private !discharged-throwables
+  (Collections/synchronizedSet
+   (Collections/newSetFromMap (WeakHashMap.))))
 
 (def dwell-schema :wm/debugger-dwell-v1)
 
@@ -47,6 +51,24 @@
   off per wire later — that decision is read off these records."
   #{:fixed :nothing-to-fix :failed :undecided})
 
+(defn discharge!
+  "Record THROWABLE as decided by an operator abort without retaining it."
+  [throwable]
+  (.add !discharged-throwables throwable)
+  throwable)
+
+(defn discharged?
+  "True when THROWABLE or one of its causes has already been discharged."
+  [throwable]
+  (loop [current throwable
+         seen #{}]
+    (cond
+      (nil? current) false
+      (contains? seen current) false
+      (or (.contains !discharged-throwables current)
+          (boolean (:debugger/discharged? (ex-data current)))) true
+      :else (recur (.getCause ^Throwable current) (conj seen current)))))
+
 (defn stoppable-failure?
   "True when THROWABLE is a failure that the runner would close as a failure.
 
@@ -61,7 +83,7 @@
   not bounce back into a second stop when the same throwable propagates
   through run-phase!'s catch (:debugger/discharged? marks it)."
   [throwable]
-  (not (boolean (:debugger/discharged? (ex-data throwable)))))
+  (not (discharged? throwable)))
 
 (defn stopped
   "Public descriptions of run threads currently waiting for a restart."

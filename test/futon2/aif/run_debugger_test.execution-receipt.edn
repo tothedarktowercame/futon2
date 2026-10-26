@@ -1,15 +1,43 @@
 {:schema :test/execution-receipt-v1
- :recorded-at "2026-10-05T06:26:17Z"
+ :recorded-at "2026-10-26T19:24:00Z"
  :command "clojure -X:test :nses '[futon2.aif.run-debugger-test]'"
  :namespaces [futon2.aif.run-debugger-test]
- :tests 17
- :assertions 67
- :failures 0
+ :result :pre-existing-test-timeout
+ :completed? false
+ :observed-failures 5
  :errors 0
- :result :passed
+ :termination
+ {:reason :pre-existing-future-remained-stopped
+  :process "terminated after the namespace could not complete"
+  :first-failing-test
+  futon2.aif.run-debugger-test/terminal-abstention-retry-reruns-only-the-same-selection-phase
+  :main-reproduction
+  {:command "clojure -M:test -n futon2.aif.run-debugger-test -v futon2.aif.run-debugger-test/terminal-abstention-retry-reruns-only-the-same-selection-phase"
+   :tests 1 :assertions 11 :failures 2 :errors 0
+   :note "Unchanged main times out after the retry and leaves its future stopped."}
+  :consequential-failures
+  ["The leaked abstention-retry stop makes the new test's global stopped assertion fail."
+   "The later real-run fixture stops at :runner-source because worktree bytes differ from canonical source."]}
+ :r27-focused
+ {:red
+  {:command "clojure -M:test -n futon2.aif.run-debugger-test -v futon2.aif.run-debugger-test/aborting-an-inner-phase-does-not-stop-again-at-its-enclosing-phase"
+   :tests 1 :assertions 13 :failures 2 :errors 0
+   :observed {:outer-stop? true :dwell-receipts 2}}
+  :green
+  {:command "clojure -M:test -n futon2.aif.run-debugger-test -v futon2.aif.run-debugger-test/aborting-an-inner-phase-does-not-stop-again-at-its-enclosing-phase"
+   :tests 1 :assertions 13 :failures 0 :errors 0
+   :observed {:outer-stop? false :dwell-receipts 1
+              :wrapper-rethrown-identically? true
+              :inner-cause-preserved? true}}}
  :additional-gates
- {:clj-kondo {:errors 0 :warnings 0}
-  :check-parens :ok
-  :full-loop-runner-test
-  {:result :pre-existing-fixture-failures
-   :note "Attempted once; fixtures refuse earlier at :required-loop-node-unexercised and the long namespace was interrupted after establishing the unrelated failure class."}}}
+ {:clj-kondo
+  {:errors 0
+   :warnings 5
+   :baseline-warnings 5
+   :new-warnings 0
+   :note "The same four source warnings and one test warning occur on unchanged main."}
+  :check-parens :ok}
+ :scope
+ {:live-jvm-loaded? false
+  :click-run? false
+  :wrapper-sites-changed? false}}
