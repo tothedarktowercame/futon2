@@ -188,6 +188,13 @@ extra key on a row that `evaluate` never reads.** `evaluate`
   with the same digest, else `{:absent :cascade-not-retained}`. This is a
   reader-side addition in `meta-latest/g-frontier`, not a producer change,
   since the producer already retains the cascade.
+  Correction (2026-10-26, packet premise check before dispatch): the reader
+  is `futon3c.wm.meta-latest/g-frontier` (`futon3c/src/futon3c/wm/meta_latest.clj:168`),
+  not a futon2 namespace; the cascade sits on the q4 rows at
+  `[:outer-policy-recomputation :q4 i :canonical-cascade]`, whose `:digest`
+  equals the row's `:cascade-digest` (checked on attempt-002: 4 rows, 4
+  scored entries, every digest matched). The locator is the index path into
+  the same receipt map.
 
 Not in scope before the run: any dependency or readiness term (that is H4 and
 M-giraffe), any change to reading order or the batch limit of 3, any change to
@@ -432,3 +439,15 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   choices, not field order). Precedence: needs-derived (`containment-order`);
   canonical G sees no other order. C4 (retain `prepare!` result) added to the
   capture list.
+- 2026-10-26 claude-9: C2 reviewed and accepted (futon2 `725a7a70f`, zai-2).
+  Record check: one commit, two files, shas match. Adequacy: the test pins
+  the three parts per scored row, step count = horizon, exact key sets, the
+  stack-geometry row verbatim (`:G` -2.004267726446009, `:total` 5N), sum
+  of step `:g` = `:G`, refused rows without `:terms`, and four-draw
+  invariance of `evaluate` with and without `:terms`. Gap found and fixed in
+  review: the typed-absence path had no test; added
+  `nil-certificate-parts-are-typed-absences` (5 tests, 131 assertions,
+  green). No warrant registered for either run; dirty tree, not a block.
+  C3 dispatched to zai-2 (`invoke-1792975064828-4026-26cfc9b7`, park
+  `park-37949f42-f55f-473d-a525-dd900355184f`), packet at
+  `~/notes/wm-next/C3/C3-cascade-locator-packet.md`; §6 C3 corrected.
