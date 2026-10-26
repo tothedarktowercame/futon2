@@ -1275,3 +1275,14 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   R8a records that the boolean branch needs an executable completion-check
   form and its evaluator, which do not exist. DEFECTS: R8 discovery read,
   R8a added. Open: R8 (producer in flight), R8a, R11.
+- 2026-10-26 claude-9 (07:22Z): R8 producer packet dispatched to codex-10
+  (`packets/r8-pattern-observation-producer-packet.md`). R11 discovery
+  dispatched to codex-12
+  (`packets/r11-parent-child-verdict-discovery-packet.md`) after reading
+  the mechanism: the click script mints the run id, the self-heal parent
+  closes `:awaiting-retry` with no run record and no pointer to its child,
+  the child is launched only after the parent's running flag drops and
+  inherits the script's run id, and no requirements verdict is ever
+  computed on the child's record. The parent record is the Lean
+  `⟨none, notChecked⟩` by construction. Open: R8 (producer in flight),
+  R8a, R11 (discovery in flight).
