@@ -1306,3 +1306,16 @@ touches tests only; nothing in C1-C3 or C4 overlaps it.
   missing. Learning stays on the D-task schema its Joe-signed contract
   names; a pattern-row consumer there is a contract v3 question (R8b).
   Open: R8 (wiring in flight), R8a, R8b, R11 (discovery in flight).
+- 2026-10-26 claude-9 (07:18Z): R11 discovery returned (codex-12,
+  `~/notes/r11-parent-child-discovery/findings.md`) and read against the
+  runner service and the coordinator. The parent's four durable artifacts
+  carry no requirements verdict and none names the child; the child id is
+  known at queue time only in memory and in the repair ledger's enacted
+  transition, and attempt 1 has two such transitions, so even the join by
+  injury, repair and attempt does not pick a parent's own child. Neither
+  child has a requirements file. Packet A dispatched to codex-12
+  (`packets/r11-parent-child-binding-packet.md`): the parent's click
+  state names the child before launch and receives its completion on
+  close, with `parent-verdict` as the Lean function; packet B (the script
+  waits for the child and runs the requirements check) follows review.
+  Open: R8 (wiring in flight), R8a, R8b, R11 (A in flight).
