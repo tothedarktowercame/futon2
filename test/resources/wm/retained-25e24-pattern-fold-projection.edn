@@ -1,0 +1,205 @@
+{:prediction
+ {:schema :wm/token-outcome-prediction-v1,
+  :status :frozen,
+  :target "M-war-machine-wiring",
+  :wanted
+  [{:token
+    ["M-war-machine-wiring"
+     :pattern-done
+     ["gauntlet/world-is-hypergraph" 0]],
+    :predicted 1023/1024}
+   {:token
+    ["M-war-machine-wiring"
+     :pattern-done
+     ["gauntlet/world-is-hypergraph" 19]],
+    :predicted 0}]},
+ :fold-conditions
+ [{:status :unchecked,
+   :witness
+   {:occurrence-id ["gauntlet/world-is-hypergraph" 0],
+    :authored-clause
+    {:completion-check
+     [:title-names-bridge
+      "mission title names 'War Machine Wiring' as the last-mile bridge to M-live-geometric-stack"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["futon-theory/mission-lifecycle" 1],
+    :authored-clause
+    {:completion-check
+     [:status-open-verify-dated
+      "mission status block reads 'OPEN — VERIFY (2026-05-01)' and names Checkpoint 1, the V-1 substrate-2 coverage pre-condition, and the D-7.5 vocabulary refinements"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/handoff-preserves-context" 2],
+    :authored-clause
+    {:completion-check
+     [:owner-field-present "mission carries 'Owner: Joe + Claude'"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["gauntlet/world-is-hypergraph" 3],
+    :authored-clause
+    {:completion-check
+     [:repos-line-with-roles
+      "mission 'Repos:' line assigns each of futon5a, futon3c, futon3, futon2, futon5 a parenthesized role"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 4],
+    :authored-clause
+    {:completion-check
+     [:head-cited-by-path
+      "mission cites futon3c/holes/missions/M-war-machine.md as 'the head: move-selection'"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["war-machine/state-capture" 5],
+    :authored-clause
+    {:completion-check
+     [:head-responsibilities-named
+      "mission names the head's policy, bidding, Tick/Click dispatch and recurring AIF tick"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 6],
+    :authored-clause
+    {:completion-check
+     [:tuning-cited-by-path
+      "mission cites futon3c/holes/missions/M-war-machine-tuning.md as the head's policy"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["war-machine/state-capture" 7],
+    :authored-clause
+    {:completion-check
+     [:tuning-surface-named
+      "mission completes the tuning citation with 'tuning surface'"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["gauntlet/world-is-hypergraph" 8],
+    :authored-clause
+    {:completion-check
+     [:manifold-cited-by-path
+      "mission cites futon3/holes/missions/M-live-geometric-stack.md as 'the manifold'"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["measurement/warrant-travels-with-the-number" 9],
+    :authored-clause
+    {:completion-check
+     [:observables-travel-with-manifold
+      "mission binds the live observables (T, ∇, Δ, drift) to the futon-stack substrate in the manifold citation"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 10],
+    :authored-clause
+    {:completion-check
+     [:diagnostic-cited-by-path
+      "mission cites futon3/holes/missions/M-pattern-application-diagnostic.md"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["hdm/deep-storage-to-active-graph" 11],
+    :authored-clause
+    {:completion-check
+     [:interface-named
+      "mission names substrate-2's pair-mission and its boundary-growth interface"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 12],
+    :authored-clause
+    {:completion-check
+     [:doc-cited-by-path
+      "mission cites futon2/doc/aif-engine.md for AIF mechanics"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 13],
+    :authored-clause
+    {:completion-check
+     [:ants-cited-with-tests
+      "mission cites futon2/src/ants/clj_ants_aif.clj and its tests under futon2/test/ants/"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["war-machine/state-capture" 14],
+    :authored-clause
+    {:completion-check
+     [:ants-role-named
+      "mission names the AIF ants implementation 'the autonomous-foraging reference'"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 15],
+    :authored-clause
+    {:completion-check
+     [:framings-cited-by-path
+      "mission cites futon2/holes/M-aif-head.md and M-aif4iad.md as head-specific AIF framings"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 16],
+    :authored-clause
+    {:completion-check
+     [:framings-word-present
+      "mission completes the framing citation with the word 'framings'"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 17],
+    :authored-clause
+    {:completion-check
+     [:chapter0-cited-as-canonical
+      "mission cites futon5/docs/chapter0-aif-as-wiring-diagram.md as 'the canonical' exposition"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["gauntlet/world-is-hypergraph" 18],
+    :authored-clause
+    {:completion-check
+     [:idiom-described
+      "mission describes the 'AIF as wiring diagram' exposition as the visual idiom an autonomous WM should emit"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["gauntlet/world-is-hypergraph" 19],
+    :authored-clause
+    {:completion-check
+     [:emission-per-mission
+      "mission closes the idiom line with 'WM should emit per mission'"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["hdm/deep-storage-to-active-graph" 20],
+    :authored-clause
+    {:completion-check
+     [:capture-cited-by-path
+      "mission cites futon5/data/missions/futon2-aif-ants.edn as 'existing capture of' AIF-ants mission data"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["hdm/deep-storage-to-active-graph" 21],
+    :authored-clause
+    {:completion-check
+     [:capture-subject-named
+      "mission completes the capture citation with 'AIF-ants mission data'"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 22],
+    :authored-clause
+    {:completion-check
+     [:checkpoint-cited-by-section
+      "mission cites futon5a/holes/missions/M-stack-stereolithography.md § Checkpoint 6"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["war-machine/state-capture" 23],
+    :authored-clause
+    {:completion-check
+     [:piano-roll-described
+      "mission describes the piano roll as the head's post-hoc trace projected onto the substrate"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["measurement/warrant-travels-with-the-number" 24],
+    :authored-clause
+    {:completion-check
+     [:projection-coordinates-named
+      "mission names the projection coordinates as (substrate × time)"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["agent/evidence-over-assertion" 25],
+    :authored-clause
+    {:completion-check
+     [:renderer-and-artifacts-cited
+      "mission cites futon5a/scripts/piano_roll.py and /tmp/piano-roll-v0.{pdf,png} as the prototype trace renderer"]}}}
+  {:status :unchecked,
+   :witness
+   {:occurrence-id ["war-machine/state-capture" 26],
+    :authored-clause
+    {:completion-check
+     [:prototype-named
+      "mission completes the renderer citation with 'prototype trace renderer'"]}}}],
+ :after "547b191f8fa1e818b0edca02560abf0017b96abd"}
