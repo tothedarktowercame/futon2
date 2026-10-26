@@ -6,6 +6,8 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.full-loop-runner-test :as fixture]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.meta-field-observation :as field]
+            [futon2.aif.outer-learning-manifest :as learning-manifest]
             [futon2.report.scan-report-test :as scan-test]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
@@ -16,7 +18,10 @@
 
 (deftest click-retains-the-selected-scan-even-if-renderer-fails
   ;; Canonical checkout required: preserve the source-authority guard.
-  (let [root (.toFile (Files/createTempDirectory "click-scan-" (make-array FileAttribute 0)))]
+  (let [root (.toFile (Files/createTempDirectory "click-scan-" (make-array FileAttribute 0)))
+        production-before (field/sha256
+                           (Files/readAllBytes
+                            (.toPath (io/file learning-manifest/default-path))))]
     (try
       (doseq [[id fail?] [["scan-success" false] ["scan-failure" true]]]
         (let [calls (atom 0) rendered (atom nil)
@@ -47,7 +52,17 @@
                                        :judgement judgement}))]
                        (runtime/run-opportunity! opts))
               record (edn/read-string (slurp (:run-record result)))
-              ref (:scan-report record)]
+              ref (:scan-report record)
+              isolated-manifest (:outer-learning-manifest-path opts)
+              published (learning-manifest/read-manifest isolated-manifest)]
+          (is (= production-before
+                 (field/sha256
+                  (Files/readAllBytes
+                   (.toPath (io/file learning-manifest/default-path))))))
+          (is (= (inc (.indexOf [["scan-success" false] ["scan-failure" true]]
+                                [id fail?]))
+                 (count (:entries published))))
+          (is (every? :projection (:entries published)))
           (is (= 1 @calls) "selection uses one generation")
           (is (= (:decision fixture/judgement)
                  (get-in @rendered [:judgement :decision])

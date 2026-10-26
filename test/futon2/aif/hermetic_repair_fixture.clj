@@ -77,6 +77,7 @@
   []
   (let [root (temp-root "wm-runner-repair-")]
     {:repair-root root
+     :outer-learning-manifest-path (str (io/file root "outer-learning-manifest.edn"))
      :tripwire/report-root (str (io/file root "trips"))
      :tripwire/repair-record-fn (partial repair/record-system-failure! root)
      :repair-system-record-fn (partial repair/record-system-failure! root)

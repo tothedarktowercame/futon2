@@ -1,0 +1,15 @@
+{:schema :test/execution-receipt-v1
+ :recorded-at "2026-10-26T19:50:00Z"
+ :command "clojure -X:test :nses '[futon2.aif.scan-report-runner-test futon2.aif.outer-learning-manifest-test]'"
+ :namespaces [futon2.aif.scan-report-runner-test
+              futon2.aif.outer-learning-manifest-test]
+ :tests 2
+ :assertions 37
+ :failures 3
+ :errors 0
+ :result :pre-existing-scan-selection-assertion-failures
+ :new-boundary {:production-manifest-unchanged :passed
+                :isolated-manifest-projection-publication :passed}
+ :note "The three failures compare a stale full controller-decision fixture against the current expanded selection certificate. They are unrelated to manifest publication and occur after the new isolation assertions pass."
+ :additional-gates {:clj-kondo {:errors 0 :warnings 0}
+                    :check-parens :ok}}
