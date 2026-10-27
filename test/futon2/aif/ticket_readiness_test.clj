@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-pipeline-selector :as pipeline]
             [futon2.aif.ticket-readiness :as readiness]))
 
@@ -19,31 +20,27 @@
                                                            :negative-cases [:done-marker-only]}))
         contract-pin (readiness/file-pin contract-path)
         job-id "job-review-1"
-        job-path (write! dir "job.edn" {:job-id job-id :seat reviewer})
-        result-path (write! dir "result.edn" {:job-id job-id :result result-text
-                                               :contract-pin contract-pin
-                                               :source-pin (:source-pin binding)})
+        job {:job-id job-id :seat reviewer :result result-text
+             :contract-pin contract-pin :source-pin (:source-pin binding)}
         review-path (write! dir "review.edn" {:schema readiness/review-schema
                                                :contract-pin contract-pin
                                                :reviewer reviewer :job-id job-id
                                                :result-sha256 (readiness/value-digest result-text)
                                                :verdict :accepted})]
     (merge binding {:contract-pin contract-pin :review-pin (readiness/file-pin review-path)
-                    :review-job-pin (readiness/file-pin job-path)
-                    :review-result-pin (readiness/file-pin result-path)
-                    :authorized-reviewers #{reviewer}})))
+                    :review-job-id job-id :reviewer-policy reviewer
+                    :review-resolver (fn [_] job)})))
 
 (deftest contract-output-needs-content-and-independent-review
   (let [dir (temp-dir)
         binding {:ticket-id "T-x" :source-pin source-pin :increment-id :prepare-h1}
         opts (reviewed-output dir binding "author" "reviewer" "accepted independently")]
     (is (= :qualified (:status (readiness/validate-preparation-output opts))))
-    (spit (get-in opts [:review-result-pin :path])
-          (str (pr-str {:job-id "job-review-1" :result "changed"}) "\n"))
     (is (= :review-port-binding-mismatch
            (:reason (readiness/validate-preparation-output
-                     (assoc opts :review-result-pin
-                            (readiness/file-pin (get-in opts [:review-result-pin :path])))))))
+                     (assoc opts :review-resolver
+                            (fn [_] {:job-id "job-review-1" :seat "reviewer"
+                                     :result "changed"}))))))
     (let [same (reviewed-output dir binding "same" "same" "self review")]
       (is (= :review-not-independent
              (:reason (readiness/validate-preparation-output same)))))))
@@ -59,29 +56,32 @@
         cp {:path "code" :sha256 (apply str (repeat 64 "c"))}
         tp {:path "test" :sha256 (apply str (repeat 64 "t"))}
         contract-pin {:path "c" :sha256 (apply str (repeat 64 "a"))}
-        registry (write! dir "registry.edn" {:schema readiness/registry-schema
-                                              :status :executed :revision "before"
-                                              :contract-pin contract-pin :code-pin cp :test-pin tp
-                                              :log-pin (readiness/file-pin log)
-                                              :postcheck-pin (readiness/file-pin post)})
+        payload (pr-str {:schema "test-registry/v1" :kind :run :git-head "before"
+                         :contract-pin contract-pin :code-pin cp :test-pin tp
+                         :semantic-failures [{:id :H1-throw-to-value}]
+                         :postcheck {:status :matched}})
+        digest (load-identity/sha256 (.getBytes payload "UTF-8"))
+        entry-id (str "test-registry-" digest)
+        entry {:evidence/body {:payload-edn payload :sha256 digest}}
         base {:expected-revision "before" :contract-pin contract-pin
-              :failure-id :H1-throw-to-value :expected-code-pin cp :expected-test-pin tp}]
+              :failure-id :H1-throw-to-value :expected-code-pin cp :expected-test-pin tp
+              :registry-entry-id entry-id :registry-resolver (fn [_] entry)}]
     (is (= :semantic-negative-not-established
-           (:reason (readiness/semantic-negative base))))
-    (is (= :established (:status (readiness/semantic-negative
-                                  (assoc base :registry-pin (readiness/file-pin registry))))))
+           (:reason (readiness/semantic-negative (dissoc base :registry-resolver)))))
+    (is (= :established (:status (readiness/semantic-negative base))))
     (is (= :before-revision-mismatch
            (:reason (readiness/semantic-negative
-                     (assoc base :expected-revision "other"
-                            :registry-pin (readiness/file-pin registry))))))
-    (spit log (str (pr-str {:schema readiness/semantic-log-schema
-                            :failures [{:id :unrelated}]}) "\n"))
-    (let [record (edn/read-string (slurp registry))
-          registry (write! dir "forged-registry.edn"
-                           (assoc record :log-pin (readiness/file-pin log)))]
+                     (assoc base :expected-revision "other")))))
+    (let [bad-payload (pr-str {:schema "test-registry/v1" :kind :run :git-head "before"
+                               :contract-pin contract-pin :code-pin cp :test-pin tp
+                               :semantic-failures [{:id :unrelated}]
+                               :postcheck {:status :matched}})
+          bad-digest (load-identity/sha256 (.getBytes bad-payload "UTF-8"))
+          bad-entry {:evidence/body {:payload-edn bad-payload :sha256 bad-digest}}]
       (is (= :semantic-negative-not-established
              (:reason (readiness/semantic-negative
-                       (assoc base :registry-pin (readiness/file-pin registry)))))))))
+                       (assoc base :registry-entry-id (str "test-registry-" bad-digest)
+                              :registry-resolver (fn [_] bad-entry)))))))))
 
 (deftest four-state-increment-classification
   (let [common {:source-current? true :operator-allowed? true :owned? false :active? true
@@ -109,13 +109,13 @@
                                :relevant-dependencies-resolved? true)))))
     (is (= {:classification :completed :increment-completed? true
             :ticket-completed? false :next-disposition :assess-remaining-increments}
-           (readiness/classify (assoc common :completion-evidence {:status :validated :revision "after"}
+           (readiness/classify (assoc common :completion-evidence {:status :validated :revision (apply str (repeat 40 "a"))}
                                       :ticket-completed? false
-                                      :expected-after-revision "after"
-                                      :after-revision "after"))))
+                                      :expected-after-revision (apply str (repeat 40 "a"))
+                                      :after-revision (apply str (repeat 40 "a"))))))
     (is (= :after-revision-mismatch
            (:reason (readiness/classify (assoc common :completion-evidence {:status :validated :revision "wrong"}
-                                                :expected-after-revision "after"
+                                                :expected-after-revision (apply str (repeat 40 "a"))
                                                 :after-revision "wrong")))))))
 
 (deftest one-refresh-is-durable-fair-and-enters-membership

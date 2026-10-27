@@ -7,7 +7,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.registry-port :as registry-port])
   (:import [java.nio.file Files StandardCopyOption]
            [java.time Instant]))
 
@@ -39,50 +40,49 @@
 (defn semantic-negative
   "Admit a retained semantic red only when it ran the named contract failure
   at the immutable before revision.  C8=false is deliberately not an input."
-  [{:keys [registry-pin expected-revision contract-pin failure-id
-           expected-code-pin expected-test-pin]}]
+  [{:keys [registry-entry-id registry-resolver expected-revision contract-pin
+           failure-id expected-code-pin expected-test-pin]}]
   (try
-    (if-not (pin-matches? registry-pin)
+    (let [resolve-entry (or registry-resolver #(registry-port/call :entry %))
+          entry (when (string? registry-entry-id) (resolve-entry registry-entry-id))
+          payload-text (get-in entry [:evidence/body :payload-edn])
+          body-sha (get-in entry [:evidence/body :sha256])
+          body-ok? (and (string? payload-text)
+                        (= body-sha (load-identity/sha256 (.getBytes payload-text "UTF-8")))
+                        (= registry-entry-id (str "test-registry-" body-sha)))
+          record (when body-ok? (edn/read-string payload-text))]
+    (if-not (map? record)
       {:status :unknown :reason :semantic-negative-not-established}
-      (let [record (read-edn (:path registry-pin))
-            log (when (pin-matches? (:log-pin record))
-                  (read-edn (get-in record [:log-pin :path])))
-            postcheck (when (pin-matches? (:postcheck-pin record))
-                        (read-edn (get-in record [:postcheck-pin :path])))
-            relevant? (some #(= failure-id (:id %)) (:failures log))]
+      (let [relevant? (some #(= failure-id (:id %)) (:semantic-failures record))]
         (cond
-          (or (not= registry-schema (:schema record))
-              (not= :executed (:status record)))
+          (or (not= "test-registry/v1" (:schema record))
+              (not= :run (:kind record)))
           {:status :unknown :reason :semantic-negative-not-established}
-          (not= expected-revision (:revision record))
+          (not= expected-revision (:git-head record))
           {:status :unknown :reason :before-revision-mismatch}
           (or (not= contract-pin (:contract-pin record))
               (not= expected-code-pin (:code-pin record))
               (not= expected-test-pin (:test-pin record)))
           {:status :unknown :reason :semantic-negative-not-established}
-          (or (not= semantic-log-schema (:schema log)) (not relevant?))
-          {:status :unknown :reason :semantic-negative-not-established}
-          (or (not= postcheck-schema (:schema postcheck))
-              (not= :failed (:status postcheck))
-              (not= expected-revision (:revision postcheck))
-              (not= failure-id (:failure-id postcheck)))
+          (or (not relevant?)
+              (not= :matched (get-in record [:postcheck :status])))
           {:status :unknown :reason :semantic-negative-not-established}
           :else {:status :established :revision expected-revision
                  :failure-id failure-id :contract-pin contract-pin
-                 :code-pin expected-code-pin :test-pin expected-test-pin})))
+                 :code-pin expected-code-pin :test-pin expected-test-pin}))))
     (catch Throwable _
       {:status :unknown :reason :semantic-negative-not-established})))
 
 (defn validate-preparation-output
   "Validate contract contents and a separately bound independent review.
   Existence alone (C3) and a producer's self-asserted reviewer never qualify."
-  [{:keys [contract-pin review-pin review-job-pin review-result-pin
-           authorized-reviewers ticket-id source-pin increment-id]}]
+  [{:keys [contract-pin review-pin review-job-id review-resolver reviewer-policy
+           ticket-id source-pin increment-id]}]
   (try
     (let [contract (when (pin-matches? contract-pin) (read-edn (:path contract-pin)))
           review (when (pin-matches? review-pin) (read-edn (:path review-pin)))
-          job (when (pin-matches? review-job-pin) (read-edn (:path review-job-pin)))
-          result (when (pin-matches? review-result-pin) (read-edn (:path review-result-pin)))
+          job (when (and (fn? review-resolver) (string? review-job-id))
+                (review-resolver review-job-id))
           expected {:ticket-id ticket-id :source-pin source-pin :increment-id increment-id}]
       (cond
         (not (map? contract)) {:status :refused :reason :contract-missing-or-unreadable}
@@ -95,14 +95,14 @@
         (not= review-schema (:schema review)) {:status :refused :reason :review-malformed}
         (not= contract-pin (:contract-pin review)) {:status :refused :reason :review-binding-mismatch}
         (or (str/blank? (:reviewer review)) (= (:reviewer review) (:producer contract))
-            (not (contains? (set authorized-reviewers) (:reviewer review))))
+            (not= reviewer-policy (:reviewer review)))
         {:status :refused :reason :review-not-independent}
-        (or (not= (:job-id review) (:job-id job))
+        (or (not= review-job-id (:job-id review))
+            (not= review-job-id (:job-id job))
             (not= (:reviewer review) (:seat job))
-            (not= (:job-id job) (:job-id result))
-            (not= (:result-sha256 review) (value-digest (:result result)))
-            (not= contract-pin (:contract-pin result))
-            (not= source-pin (:source-pin result)))
+            (not= (:result-sha256 review) (value-digest (:result job)))
+            (not= contract-pin (:contract-pin job))
+            (not= source-pin (:source-pin job)))
         {:status :refused :reason :review-port-binding-mismatch}
         (not= :accepted (:verdict review)) {:status :refused :reason :review-not-accepted}
         :else {:status :qualified :contract-pin contract-pin :review-pin review-pin}))
@@ -119,7 +119,9 @@
            preparation-output-qualified?]}]
   (cond
     (= :validated (:status completion-evidence))
-    (if (or (not= expected-after-revision after-revision)
+    (if (or (not (and (string? expected-after-revision)
+                      (re-matches #"[0-9a-f]{40,64}" expected-after-revision)))
+            (not= expected-after-revision after-revision)
             (not= after-revision (:revision completion-evidence)))
       {:classification :unknown :reason :after-revision-mismatch}
       {:classification :completed :increment-completed? true
