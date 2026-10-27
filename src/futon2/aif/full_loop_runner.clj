@@ -8629,6 +8629,10 @@
                         (:selected-want-outcomes reviewer-falsifier-input)
                         :author-job author-job :review-job review-job
                         :review-gate review-gate})
+                      preparation-increment?
+                      (= :preparation
+                         (get-in construction
+                                 [:selected-action :ticket-readiness :increment]))
                       approved?
                       (and
                        (reviewer-falsifier/approved?
@@ -8636,9 +8640,7 @@
                          :review-verdict (review-verdict review-job)
                          :review-gate review-gate
                          :falsifier-verification reviewer-falsifier-verification})
-                       (or (not= :preparation
-                                 (get-in construction
-                                         [:selected-action :ticket-readiness :increment]))
+                       (or (not preparation-increment?)
                            (= :qualified (:status preparation-qualification))))]
                   (reset! measurement-artifact {:repository repo :commit commit :paths files})
                   ;; PROOF-wm-works ⟨1⟩7 part 2: the attested increment is the
@@ -8654,7 +8656,11 @@
                         ;; the run itself; every failure mode is recorded in
                         ;; the build judgment and supplies no evidence.
                         increment-registration
-                        (when approved?
+                        ;; Preparation approval establishes only that the
+                        ;; bounded contract increment was reviewed.  It is
+                        ;; not implementation evidence and must not enter the
+                        ;; registry/learning effects below.
+                        (when (and approved? (not preparation-increment?))
                           ((or (:warrant-registration-fn opts)
                                increment-attestation/register-warrant-http)
                            opts {:repo repo :author author
@@ -8665,7 +8671,8 @@
                                                    (str (:run-id opts)) attempt-id))
                                       "/test-registry")}))
                         increment-evidence
-                        (when (and approved? (true? (:warrant? increment-registration)))
+                        (when (and approved? (not preparation-increment?)
+                                   (true? (:warrant? increment-registration)))
                           ((or (:increment-evidence-fn opts)
                                increment-attestation/increment-evidence)
                            opts {:author author
