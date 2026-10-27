@@ -1,0 +1,34 @@
+@flexiarg aif/policy-precision-commitment-temperature
+@title Policy Precision as Commitment Temperature
+@sigils [🍲/由]
+@audience fulab agents, aif implementers
+@tone technical
+@style pattern
+@holds-at R14   ;; pegged 2026-08-30 (claude-15): the catalogue paragraph numbered R14 in p4ng/sec-catalog.tex; see PREREG-war-machine §1b
+
+@see-also aif/hierarchical-budget-aware-action-selection
+@see-also aif/expected-free-energy-scorecard
+@why [problems/commitment-temperature-is-instrumented-as-gain problems/r14-commitment-temperature]
+! conclusion: Maintain a commitment temperature that modulates how strongly the policy commits to low-G choices.
+
+  + context: Even with identical scores, the agent sometimes should explore alternatives and other times should commit.
+
+  + IF:
+    You want exploration versus exploitation to depend on operational pressure (deadlines, repeated failures, user impatience, instability), not on randomness alone.
+
+  + HOWEVER:
+    Without an explicit (tau), the agent either thrashes or tunnels with no controllable dial.
+
+  + THEN:
+    Maintain (tau) as a commitment temperature that modulates softmax over (-G/tau), coupled to diagnostic signals (recent regressions, uncertainty in (mu), contradiction rate, time pressure, repeated test failures).
+
+  + BECAUSE:
+    A single commitment dial allows systematic control of stochasticity without changing the scoring model.
+
+  + NEXT-STEPS:
+    - Add :aif/tau-adjustment event type to tatami_schema.clj with keys [:prev-tau :next-tau :trigger :diagnostic-signals].
+    - Implement tau-coupling rules in aif_bridge.clj: increase tau on :test-failure or :uncertainty > 0.7; decrease on :tests-passing streak.
+    - Persist tau history in lab/aif/tau-cache.edn keyed by pattern-id; load on session start.
+    - Add (policy-entropy session) metric to aif_coverage.clj; correlate with outcome stability in session summaries.
+    - DONE (UKRN v3 HO-05, 2026-05-14): abstain? rule implemented at notebooks/ukrn_v3_efe.clj:75-92. Computes G-spread across top-K candidates, divides by τ, abstains if the resulting discriminability is ≤ floor (default 0.5, configurable). Edge case: < 2 candidates returns true (degenerate). Test abstain-fires-only-under-low-discriminability covers well-separated, weakly-separated, threshold, and just-over-threshold regimes. Closes R6 abstain criterion for UKRN v3-runner. Evidence: handoffs/v3_runner/validation_HO-05.md.
+    - Practice (HO-05): abstain semantics are part of R6 in the AIF completeness criteria. An implementation that has softmax without abstain is operationally incomplete — it always picks something, even when statistically indistinguishable candidates would warrant inaction. Make abstain explicit; make the threshold configurable.
