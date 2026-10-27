@@ -1,0 +1,42 @@
+@arg ai4ci/proof-pattern-hierarchy
+@title Proof Patterns as a Hypothesised Mid-Level Hierarchy
+@sigils [🔺/今 🌏/二]
+@audience EPSRC reviewers
+@tone plain-analytic
+
+! conclusion: 
+  Recognise that the project treats proof patterns as a hypothesised mid-level
+  hierarchy, analogous to the hierarchy of mathematical concepts, and uses a
+  small, controlled study to see whether local fragments of this hierarchy can
+  be made visible.
+
+  + context: You are framing proof patterns as a mid-level hierarchy the pilot can sample in a controlled way.
+
+  + IF:
+    Mathematicians rely on recurring tactics—"reduce to a simpler case", "apply
+    a standard theorem", "argue by symmetry"—that function like proof patterns:
+    reusable structures sitting between informal heuristics and fully formal
+    derivations.
+
+  + HOWEVER:
+    This implicit hierarchy of proof patterns has never been systematically
+    mapped, and a six-month pilot cannot construct it in full. Existing texts
+    only show traces of these patterns, mixed with both exploratory and
+    expository language.
+
+  + THEN:
+    Use a gain-of-function style approach: focus on a small, curated set of
+    worked proofs, amplify the strongest informal and expository cues, and see
+    whether any stable, recognisable pattern fragments can be annotated
+    consistently across examples.
+
+  + BECAUSE:
+    If such fragments can be identified and linked to specific objects and
+    steps, they provide the first empirical foothold on an underlying proof-
+    pattern hierarchy, even if only at a local scale. If they cannot, this
+    reveals real limits on what present methods can recover.
+
+  + NEXT-STEPS:
+    next[Treat recurring tactic descriptors that survive annotation as candidate proof-pattern atoms.]
+    next[Report how often they appear, where they fail, and what cues were discarded.]
+    next[Use findings to guide future, larger-scale work on proof-pattern structure.]
