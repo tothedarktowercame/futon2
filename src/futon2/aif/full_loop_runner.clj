@@ -1921,6 +1921,14 @@
    {:ok true :selection {...}}. Both paths share the retry ladder. A success
    after the first attempt carries :readiness/selection-transient."
   [opts request]
+  (when (and (string? (:run-id opts))
+             (not (str/blank? (:run-id opts)))
+             (or (str/blank? (str (:click-id opts)))
+                 (nil? (:registered-run/job-ledger opts))))
+    (throw (ex-info "WM dispatch lacks its run-local job ledger context"
+                    {:failure-kind :wm-job-ledger-unavailable
+                     :run-id (:run-id opts)
+                     :click-id (:click-id opts)})))
   (let [sleep-fn (or (:strategic-selection-sleep-fn opts)
                      #(Thread/sleep %))
         timeout-for (fn [i]
