@@ -1,0 +1,22 @@
+@flexiarg war-machine/state-capture
+@title State Capture
+
+! conclusion: A nomadic practice is captured when it begins reproducing itself rather than following external flows; the test is whether today's work closes an external sorry or only improves the infrastructure for closing sorrys.
+
+  + CONTEXT:
+    Joe HUD signals showed stack work dominating consulting and portfolio work. The system was becoming better at maintaining itself while external sorrys remained the ground truth that justified the stack in the first place.
+
+  + IF:
+    Infrastructure maintenance begins to dominate the work mix and stack activity starts serving more stack activity than external deposition.
+
+  + HOWEVER:
+    Some self-maintenance is necessary, and there is a live philosophical question about which side is the nomad and which is the State. The pattern matters when self-maintenance dominates instead of supporting grounded obligations.
+
+  + THEN:
+    Use pocketwatch-style constraints and explicit external-sorry checks: every stack work item must answer which outside obligation it closes, and stack hours must stay bounded relative to portfolio and consulting hours.
+
+  + BECAUSE:
+    The war machine can be captured by the institution it created. Without an explicit test, the stack quietly redirects nomadic practice toward self-reproduction.
+
+  + NEXT-STEPS:
+    next[Require each stack task to name the external sorry it closes, and treat tasks with no such answer as capture until proven otherwise.]
