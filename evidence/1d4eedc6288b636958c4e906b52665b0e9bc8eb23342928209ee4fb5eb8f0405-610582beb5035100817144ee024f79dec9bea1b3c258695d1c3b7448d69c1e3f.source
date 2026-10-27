@@ -1,0 +1,85 @@
+@flexiarg futon-theory/interface-loop
+@title Interface Loop
+@sigils [🎋/介]
+@keywords interface, boundary, layer, loop, cycle, exotype, adapt, compress
+@audience futon developers, stack architects
+@tone analytic-foundational
+@factor Keen investigation (dhammavicaya)
+@references [futon-theory/baldwin-cycle futon-theory/four-types futon-theory/local-gain-persistence futon-theory/error-hierarchy]
+@governance ["Interface loops are recorded via lab protocol:" "PSR at LOOP_START: Why this interface? What pattern guides exploration?" "PUR at LOOP_END: What worked? What was the gain? Prediction error?" "Session tags: Mark sessions that run interface loops for later analysis" "The loop runner may be human (refactoring session) or automated (search)."]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L6-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: 
+  Each layer interface can host a Baldwin-style loop: the interface serves
+  as both exotype constraint and selection pressure injection point. This
+  enables cumulative functional gain at every boundary.
+
+  + context: In layered futon architecture (L0 → L1 → L2 → ...), each layer
+    boundary is an opportunity for local learning. Instead of one global
+    training phase, Baldwin cycles run at each interface, accumulating
+    improvements incrementally.
+
+  + THEN: Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline.
+    + COMPOSABILITY:
+      Same InterfaceLoop structure works at:
+      - L0↔L1: Storage/identity interface
+      - L1↔L2: Identity/integrity interface
+      - L2↔L3: Integrity/auth interface
+      - Any future layer boundary
+
+    + DOMAIN-INSTANTIATION:
+      See mission docs for concrete interface loop definitions at each boundary.
+
+    + INTERFACE-AS-DOUBLE-ROLE:
+      Each interface Ii between Li and Li+1:
+      1. Exotype: Defines allowed signal shapes, types, protocols, resources
+      2. Selection pressure: What succeeds/fails at this boundary
+
+    + LOOP-STRUCTURE:
+      For interface Ii:
+
+      1. INTERFACE CONSTRAINT (exotype):
+         - Allowed signal shapes, type contracts
+         - Protocol requirements, resource bounds
+         - What must hold for messages to pass
+
+      2. EXPLORATION SPACE (phenotype plasticity):
+         - Parameter adjustments, local rule variants
+         - Strategy switching, micro-refactoring
+         - Optional: adapter phenotypes for runtime learning
+         - Constraint: Must not violate exotype
+
+      3. ASSIMILATION (genotype writeback):
+         - Successful adaptation strategies compiled back
+         - New patterns generated, rule tables updated
+         - Replayable patches with evidence attached
+
+      4. COMPRESSION (invariant strengthening):
+         - "What once required learning" becomes structural
+         - Tests/invariants circle the success region
+         - Exotype tightens, undefined behavior shrinks
+
+    + MINIMUM-EVENT-SEQUENCE:
+      1. LOOP_START (interface, initial exotype hash)
+      2. EXPLORE_ATTEMPT* (variant tried, outcome measured)
+      3. ADAPT_SUCCESS (strategy that worked, evidence)
+      4. ASSIMILATE (genotype change, proof commit)
+      5. CANALIZE (invariant tightened, exotype narrowed)
+      6. LOOP_END (interface, final exotype hash, gain metric)
+
+  + BECAUSE:
+    Global optimization is expensive and opaque. Local optimization at
+    interfaces is tractable and auditable. The interface loop converts
+    every boundary into a learning/accumulation opportunity.
+
+    + EVIDENCE-PACKAGE:
+      Each interface loop produces an evidence package:
+      - Exploration: OBSERVE, PROPOSE_CLAIM events with outcomes
+      - Adaptation: APPLY_CHANGE events with before/after
+      - Fixation: PROOF_COMMIT with success strategy
+      - Compression: Invariant updates, exotype changes
+
+    + GAIN-CALCULATION:
+      Interface gain = (cost_before_canalization - cost_after) / exploration_cost
+      Positive gain: Canalization paid off
+      Negative gain: Exploration wasn't worth it (learn from this)
