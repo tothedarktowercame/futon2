@@ -1,0 +1,29 @@
+@flexiarg stack-coherence/readme-devmap-sync
+@title README ⇄ Devmap Sync
+@sigils [🚞/本 📁/平]
+@keywords readme, documentation, sync, synchronize, mismatch, diverge, drift, diff, compare, align
+@audience futon stewards, stack maintainers
+@tone analytic-neutral
+@factor Keen investigation (dhammavicaya)
+@references [stack-coherence/staleness-scan stack-coherence/evidence-ledger devmap-coherence/devmap-scope-discipline]
+
+! conclusion: 
+  diff README sections vs devmap clauses—names, statuses, evidence—and emit `mismatch[...]` reports so someone refreshes whichever side is lying
+
+  + context: Public-facing READMEs and internal devmaps need to suitably synchronized so that prototype names, statuses, and evidence do not diverge between narrative and planning layers.
+
+  + IF:
+    top-level READMEs tell the stack story
+
+  + HOWEVER:
+    they often drift away from the actual devmaps (missing prototypes, stale statuses)
+
+  + THEN:
+    diff README sections vs devmap clauses—names, statuses, evidence—and emit `mismatch[...]` reports so someone refreshes whichever side is lying
+
+  + BECAUSE:
+    the README is the public proof sketch; if it diverges from the devmap, nobody knows what is actually done or blocked
+
+  + NEXT-STEPS:
+    next[Schedule a README↔devmap diff pass each release cycle and log mismatches.]
+    next[Resolve mismatches by updating the source of truth and noting the change.]
