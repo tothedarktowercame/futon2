@@ -6530,6 +6530,7 @@
         registration-calls (atom 0)
         increment-evidence-calls (atom 0)
         preparation-action? (atom true)
+        ordinary-dispatch-count (atom 0)
         author-commit (atom nil)
         malformed-contract? (atom false)
         contract-path (ticket-readiness/preparation-contract-path
@@ -6638,7 +6639,9 @@
                     :mode :maintain}}))
               dispatch
               (fn [_ agent _ _ _]
-                (if (= agent "zai-5")
+                (if (or (= agent "zai-5")
+                        (and (not @preparation-action?)
+                             (= 1 (swap! ordinary-dispatch-count inc))))
                   (let [contract-file (io/file repo contract-path)
                         contract (cond-> {:schema ticket-readiness/contract-schema
                                   :ticket-id "T-owned" :source-pin source-pin
@@ -6654,12 +6657,19 @@
                                            "-c" "user.email=author@example.invalid"
                                            "commit" "-qm" "synthetic preparation contract")
                     (reset! author-commit (token-fixture/command repo "rev-parse" "HEAD"))
-                    {:job-id "synthetic-author-job"})
+                    {:job-id (if @preparation-action?
+                               "synthetic-author-job"
+                               "synthetic-ordinary-author-job")})
                   {:job-id "synthetic-review-job"}))
               poll (fn [_ job-id]
                      (case job-id
                        "synthetic-author-job"
                        {:job-id job-id :agent-id "zai-5" :seat "zai-5" :state "done"
+                        :artifact-ref @author-commit :execution successful-execution
+                        :result-summary (str "FULL_LOOP_AUTHOR: DONE " @author-commit)
+                        :feature-card feature-card-claim}
+                       "synthetic-ordinary-author-job"
+                       {:job-id job-id :agent-id "zai-2" :seat "zai-2" :state "done"
                         :artifact-ref @author-commit :execution successful-execution
                         :result-summary (str "FULL_LOOP_AUTHOR: DONE " @author-commit)
                         :feature-card feature-card-claim}
