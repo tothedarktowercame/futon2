@@ -6648,7 +6648,9 @@
                                   :increment-id :prepare-contract
                                   :producer "zai-5"
                                   :positive-cases [:incremental-contract-created]
-                                  :negative-cases [:done-marker-only]}
+                                  :negative-cases [:done-marker-only]
+                                  :fixture-run (if @preparation-action? :preparation
+                                                   :ordinary)}
                                    @malformed-contract? (assoc :negative-cases []))]
                     (io/make-parents contract-file)
                     (spit contract-file (str (pr-str contract) "\n"))
