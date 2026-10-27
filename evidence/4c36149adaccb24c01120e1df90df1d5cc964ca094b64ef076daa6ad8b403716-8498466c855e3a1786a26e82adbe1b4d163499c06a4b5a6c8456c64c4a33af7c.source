@@ -1,0 +1,63 @@
+@flexiarg ukrns/diagnose-before-prescribing
+@title Diagnose Before Prescribing
+@verdict revised
+@keywords diagnosis, binding-constraint, delivery, institutional-architecture, direct-indirect-out-of-scope, universal-vs-diagnosed, service-differentiation
+@audience UKRN-S design, programme commissioners, Research England, institutional leads
+@tone analytic-foundational
+@style pattern
+@references [equity/confident-adaptation ukrns/provision-at-network-scale ukrns/measure-where-least-sure]
+@ancestors ["UKRN WP draft-16-april §1 Pattern (intervention-variance figure; D × A derivation; explicit Tension/Composition/Check)" "UKRN WP §3 (Table 1 baseline; worked examples FG2A-P1 delivery-gated, FG3-A multiply-constrained; Table 2 credible intervals)" "Role-codebook analysis: EV_analyse absent 4/4 transcripts; coordination under-provisioned" "equity/confident-adaptation (diagnoses the institutional specification failure this design pattern answers at service scale)" "NPT mode tree: P(multiplied) = D × A; P(absorbed) = D × (1-A); P(mismatch) = 1-D"]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L7-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: A training service should diagnose the main constraint before choosing its response.  In the current paper's terms, the important distinction is whether an institution is mainly constrained by delivery, by institutional architecture, by both, or by a substrate problem the service cannot lift within scope.  A single offer for everyone is easy to run and easy to explain, but it misfits a visible part of the network.  A diagnosed offer states what seems to be binding, says what that implies for the service response, and leaves room for revision when later evidence shows the diagnosis was wrong or incomplete.
+
+  + context: The current working paper separates two main dimensions of the problem.  Delivery asks whether training is actually reaching people and being taken up.  Institutional architecture asks whether the setting around the training can hold and use what is being delivered.  The design also distinguishes what it can affect directly, what it can affect only indirectly, and what sits outside its scope.  Verification then shows that institutions do not all sit in the same place: some are mainly delivery-constrained, some mainly architecture-constrained, some constrained on both, and some blocked by wider substrate conditions that the service alone cannot shift.
+
+  + IF:
+    The pattern operates on the axis: universal offer ↔ diagnosed offer.
+    Irreducible: a service cannot maximise both uniformity and fit at the same time.  The more the offer is standardised, the easier it is to communicate and run.  The more it is diagnosed, the more it can respond to real differences across the network.
+
+  + HOWEVER:
+    Real costs: a universal offer is cheaper, simpler, and easier to explain; a diagnosed offer is harder to run, harder to justify quickly, and more exposed to disagreement about the diagnosis itself.  Both ends of the axis carry real cost.
+    Active dynamic: the right position can change over time.  Early in a service cycle, diagnosis may be rough and the case for a common baseline may be stronger.  Later, once evaluation and comparison are in place, the service has more reason to differentiate.
+
+    + FAILURE-MODES:
+      - One-offer-for-all: every institution receives the same response regardless of what is actually blocking progress
+      - Variance-as-effort: uneven outcomes are explained as trainer quality or local enthusiasm rather than as differences in constraint structure
+      - Boundary-blindness: the service keeps promising lift where the blocking condition is outside its scope
+      - Scope-denial: a substrate problem is treated as if a training-service adjustment can solve it
+      - Frozen diagnosis: the initial judgement is never revised after new evaluation evidence arrives
+      - Hidden diagnosis: the service acts on a diagnosis internally but never states it to the institutions affected by it
+
+  + THEN: Operate an explicit move on the named axis; make the diagnosis inspectable; revise it when evidence warrants.
+    + COMPOSITIONS:
+      (1) Diagnostic-first: use the early wave of delivery and evaluation to establish what is mainly constraining each institution or cluster before differentiating the response.  Gives up speed at the start.
+      (2) Universal baseline plus selective escalation: begin with a common offer, then add differentiated support where evidence shows a stronger delivery or architecture constraint.  Gives up simplicity of message.
+      (3) Mostly universal offer: keep the service largely standardised and accept that some institutions will be served imperfectly.  Gives up fit for reach and ease.
+      These compositions are not ranked.  The point of the pattern is to make the trade visible and to stop the service pretending that one common offer is automatically the right answer everywhere.
+
+    + CHECK:
+      Engaged when: the service can say, for any institution or cluster, what seems to be binding and what evidence supports that judgement; the response follows from that judgement; later evidence can revise it.
+      Failing when: every institution gets the same answer by default; differences in outcome are explained away as effort or enthusiasm; no one can say what the service thinks is actually in the way.
+
+  + BECAUSE:
+    Central finding of the paper: The paper's headline claim is that the institutional setting matters at least as much as the training content itself.  That is exactly why diagnosis matters.  If the main problem is not the same everywhere, the same response will not work everywhere.
+
+    Evidence from the model and verification: The design and verification work distinguish boundary cases, floor cases, and higher-throughput cases rather than treating the whole network as flat.  That difference is what a diagnosed service is trying to respect.  The point is not to claim certainty; it is to stop making undifferentiated promises where the evidence already shows meaningful differences.
+
+    Relationship to direct, indirect, and out-of-scope levers: Diagnosis also disciplines ambition.  If the problem looks directly serviceable, the service can act.  If the problem can only be shifted indirectly, the service should say so.  If the main blockage is outside scope, the honest response is not to overclaim.
+
+    Governance value: A stated diagnosis can be challenged.  An unstated diagnosis cannot.  By naming what it thinks is binding, the service gives institutions something they can contest, refine, or confirm with better evidence.
+
+    Mechanic, in short:
+    Derived from the paper's distinction between delivery and institutional architecture, the verification work's separation of different institution types, and the later distinction between direct, indirect, and out-of-scope effects.
+    Answers equity/confident-adaptation at service scale: just as trainers need to know what is fixed around them, the service needs to know what is actually blocking progress before prescribing a response.
+    Mapped to the learning loop at the diagnose step: upstream of capability placement, evidence gathering, and operational differentiation.
+    Coordination requirement: Moderate.  The service can make an initial diagnosis centrally, but it needs institutions to contest and refine it.
+
+  + NEXT-STEPS:
+    - State, for each participating institution or cluster, whether the main current constraint appears to be delivery, institutional architecture, both, or something outside scope
+    - Tie service choices back to that diagnosis rather than treating them as free-standing preferences
+    - Let institutions challenge the diagnosis with their own evidence
+    - Re-run the diagnosis after the first evaluation wave and again at the Year-2 commitment point
+    - Use this pattern upstream of capability placement and evidence-prioritisation decisions
