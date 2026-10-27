@@ -1,0 +1,31 @@
+@flexiarg devmap-coherence/prototype-alignment-role
+@title Prototype Alignment — Role Reveal & Stewardship
+@sigils [👥/己 👎/引]
+@keywords role, actor, steward, maintainer, capability, limit, care, accountability, declare
+@audience futon stewards, devmap editors
+@tone analytic-neutral
+@factor Keen investigation (dhammavicaya)
+@references [p4ng/role-reveal-agent p4ng/maintainer-care devmap-coherence/prototype-structure-checklist devmap-coherence/prototype-alignment-bridge]
+@why [problems/devmap-self-consistency-standards]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L9-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: 
+  require each prototype to “role-reveal” (name the actor, describe capabilities/limits, point to a maintainer-care loop); emit follow-up obligations when any of these declarations are missing
+
+  + context: Require clear role declarations in your prototypes to enable accountability and proper coordination.
+
+  + IF:
+    a prototype introduces new actors (agents, humans, stewards) responsible for part of the devmap
+
+  + HOWEVER:
+    many clauses never declare the role, limits, or care structures for those actors
+
+  + THEN:
+    require each prototype to “role-reveal” (name the actor, describe capabilities/limits, point to a maintainer-care loop); emit follow-up obligations when any of these declarations are missing
+
+  + BECAUSE:
+    Prototype stories must be legible to pattern-capable agents and maintainers; clear roles enable coordination, care, and accountability
+
+  + NEXT-STEPS:
+    next[Add role, capability, and maintainer-care declarations to any prototype that lacks them.]
+    next[Emit follow-up obligations for prototypes missing role-reveal data.]
