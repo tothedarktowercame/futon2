@@ -219,7 +219,11 @@
     {:increment :preparation
      :increment-id (:increment-id answer)
      :increment-want (:increment-want answer)
-     :increment-locator (:increment-locator answer)
+     ;; Assessment responses name the public check as :check.  The durable
+     ;; selected-action reader uses the established locator vocabulary
+     ;; (:class). Carry both so the proposal remains auditable while C3/C4
+     ;; execute at the immutable before/after revisions.
+     :increment-locator (cond-> locator locator-valid? (assoc :class (:check locator)))
      :proposal-pin (value-digest proposal)
      :contact-provenance (select-keys response [:job-id :seat :result-pin])
      :assessment assessment}))

@@ -28,6 +28,9 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.meta-live-outer-selector :as live-selector]
+            [futon2.aif.meta-pipeline-selector :as pipeline-selector]
+            [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.substrate]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-precision-carry :as precision-carry]
@@ -6475,6 +6478,12 @@
     {:root (.getCanonicalPath base) :required mapped
      :runner (get mapped 'futon2.aif.full-loop-runner)}))
 
+(defn- with-isolated-source-snapshot [f]
+  (let [{:keys [required runner] :as snapshot} (isolated-source-snapshot)]
+    (with-redefs-fn {#'load-identity/required-sources required
+                     #'runner/canonical-runner-path runner}
+      #(f snapshot))))
+
 (deftest isolated-deployment-source-fixture-exercises-the-real-guard
   (let [{:keys [required runner]} (isolated-source-snapshot)
         core-ran (atom 0)
@@ -6512,6 +6521,211 @@
             (is (contains? (:critical-namespaces failure)
                            'futon2.aif.meta-live-outer-selector))
             (is (= 1 @core-ran) "composition drift refuses before another core call")))))))
+
+(deftest ticket-preparation-runs-through-real-runner-and-observation-boundary
+  (let [cohort-binding (retention-cohort "ticket-preparation-owned-runner")
+        manifest (str (io/file (:root cohort-binding) "ticket-readiness.edn"))
+        jobs (atom {})
+        assessment-contact-count (atom 0)
+        author-commit (atom nil)
+        malformed-contract? (atom false)
+        contract-path (ticket-readiness/preparation-contract-path
+                       "T-owned" :prepare-contract)]
+    (token-fixture/with-artifact
+      (fn [before-sha]
+        (let [repo (io/file observation-checks/repo-root "futon2")
+              source-path (.getCanonicalPath
+                           (io/file repo "holes/missions/M-aif-policy-conditioned-eig.md"))
+              source-bytes (Files/readAllBytes (.toPath (io/file source-path)))
+              source-pin {:path source-path :sha256 (load-identity/sha256 source-bytes)}
+              ticket {:id "T-owned" :kind :ticket :status-class :live
+                      :source source-pin :requisition {:absent :no-requisition}}
+              inputs {:source source-pin
+                      :dependency-evidence {:status :unknown :scope :implementation}
+                      :ownership-evidence {:state :unowned :source {:path "owned-agency"}}
+                      :implementation-evidence {:status :unknown}
+                      :operator-evidence {:status-class :live
+                                          :requisition {:absent :no-requisition}}
+                      :root-route :standalone}
+              answer {:schema ticket-readiness/response-schema
+                      :increment :preparation :ticket-id "T-owned"
+                      :source-pin source-pin :increment-id :prepare-contract
+                      :increment-want ["T-owned" :contract-present]
+                      :increment-locator {:check :C3 :repo "futon2"
+                                          :sha before-sha :path contract-path}
+                      :preparation-dependencies :satisfied}
+              refresh {:tickets [ticket] :manifest-path manifest
+                       :input-fn (constantly inputs)
+                       :contact-resolver #(get @jobs %)
+                       :prepare-fn (fn [t] {:target (:id t) :source (:source t)
+                                            :scope :contract-preparation})
+                       :answer-fn
+                       (fn [proposal]
+                         (swap! assessment-contact-count inc)
+                         (let [job-id "synthetic-assessment-contact"
+                               text "Synthetic fixture response: prepare the bounded contract."
+                               response {:job-id job-id :seat "synthetic-interpreter"
+                                         :state "done" :text text
+                                         :answer (assoc answer :proposal-pin
+                                                        (ticket-readiness/value-digest proposal))}
+                               result-pin (ticket-readiness/retain-contact-result!
+                                           manifest response)]
+                           (swap! jobs assoc job-id {:job-id job-id
+                                                     :seat "synthetic-interpreter"
+                                                     :result text})
+                           (assoc response :result-pin result-pin)))
+                       :validate-fn
+                       (fn [t proposal response]
+                         (ticket-readiness/validate-assessment-response
+                          t proposal (assoc response :contact-resolver #(get @jobs %)) inputs))
+                       :now-fn (constantly "2026-10-27T12:00:00Z")}
+              judge
+              (fn [_]
+                (let [section (ticket-readiness/suitable-section
+                               (ticket-readiness/read-manifest manifest)
+                               {"T-owned" inputs} #(get @jobs %))
+                      row (first (:items section))
+                      candidate {:id "T-owned" :kind :ticket
+                                 :support {:automated-feasibility :supported}
+                                 :channels {:fixture-cost {:value 0.0 :freshness :current
+                                                           :source source-pin}}
+                                 :unsupported-channels []}
+                      selected (pipeline-selector/select
+                                {:snapshot {:schema pipeline-selector/snapshot-schema
+                                            :summary-source source-pin :graph-source source-pin
+                                            :summary {:consistent? true
+                                                      :standards {:s1-regenerates true
+                                                                  :s2-evidence true
+                                                                  :s3-reconstitution true
+                                                                  :s4-honest-holes true
+                                                                  :s5-composed true}}
+                                            :graph {:section-status
+                                                    {:lineage {:status :ok}
+                                                     :clusters {:status :ok}
+                                                     :arrows {:status :ok}
+                                                     :held {:status :ok}
+                                                     :patterns {:status :ok}
+                                                     :ticket-readiness {:status :ok}}
+                                                    :lineage [] :clusters [] :arrows [] :held []
+                                                    :patterns {:edges []}
+                                                    :ticket-readiness {:items [{:ticket-id "T-owned"}]}}}
+                                 :candidates [candidate]})
+                      want (:increment-want row)
+                      locator (:increment-locator row)
+                      base-action (:action (token-loop-exercised-decision))
+                      action (assoc base-action :target "T-owned" :want [want]
+                                    :observation-locators {want locator}
+                                    :ticket-readiness row)
+                      comparator (assoc action :cascade-id :test/ticket-comparator
+                                        :id :test/ticket-comparator)]
+                  (is (= "T-owned" (:selected selected)) (pr-str selected))
+                  {:judgement
+                   {:decision (-> (runner-fixture/select-with-prefix-history
+                                   [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)
+                                    (runner-fixture/loop-exercised-ranked-entry comparator -1.0 2)]
+                                   {:beta 2.0})
+                                  with-token-fixture-carry)
+                    :outer-task-selection
+                    (#'live-selector/canonical-receipt
+                     [(assoc ticket :ticket-readiness row)] [] selected)
+                    :belief {} :belief-pre {} :observation {} :free-energy {}
+                    :prediction-errors {} :precision-state {} :micro-step-trace []
+                    :mode :maintain}}))
+              dispatch
+              (fn [_ agent _ _ _]
+                (if (= agent "zai-5")
+                  (let [contract-file (io/file repo contract-path)
+                        contract (cond-> {:schema ticket-readiness/contract-schema
+                                  :ticket-id "T-owned" :source-pin source-pin
+                                  :increment-id :prepare-contract
+                                  :producer "zai-5"
+                                  :positive-cases [:incremental-contract-created]
+                                  :negative-cases [:done-marker-only]}
+                                   @malformed-contract? (assoc :negative-cases []))]
+                    (io/make-parents contract-file)
+                    (spit contract-file (str (pr-str contract) "\n"))
+                    (token-fixture/command repo "add" contract-path)
+                    (token-fixture/command repo "-c" "user.name=Synthetic Author"
+                                           "-c" "user.email=author@example.invalid"
+                                           "commit" "-qm" "synthetic preparation contract")
+                    (reset! author-commit (token-fixture/command repo "rev-parse" "HEAD"))
+                    {:job-id "synthetic-author-job"})
+                  {:job-id "synthetic-review-job"}))
+              poll (fn [_ job-id]
+                     (case job-id
+                       "synthetic-author-job"
+                       {:job-id job-id :agent-id "zai-5" :seat "zai-5" :state "done"
+                        :artifact-ref @author-commit :execution successful-execution
+                        :result-summary (str "FULL_LOOP_AUTHOR: DONE " @author-commit)
+                        :feature-card feature-card-claim}
+                       "synthetic-review-job"
+                       {:job-id job-id :agent-id "codex-7" :seat "codex-7" :state "done"
+                        :execution successful-execution
+                        :result-summary "FULL_LOOP_REVIEW: APPROVE\nSynthetic independent review."}))
+              opts (merge
+                    (isolated-runner-opts)
+                    {:cohort? true :execution-cohort (:binding cohort-binding)
+                    :target-repo-fn (fn [& _] (.getCanonicalPath repo))
+                    :mission-fn (fn [_]
+                                  (#'missions/mission-doc->entry source-path))
+                    :judge-fn judge :ticket-readiness-refresh refresh
+                    :dispatch-fn dispatch :poll-fn poll
+                    :resolve-build-fn (fn [_] {:repo (.getCanonicalPath repo)
+                                               :files [contract-path]})
+                    :repo-head-observation-fn
+                    (fn [_] {:head (token-fixture/command repo "rev-parse" "HEAD")
+                             :observed-at-ms 0})
+                    :author-artifact-observer-fn
+                    (fn [r before job]
+                      (assoc (synthetic-artifact-binding r before job)
+                             :repo r :commit (:artifact-ref job)
+                             :observed-head (:artifact-ref job)))
+                    :repair-open-fn (constantly [])
+                    :warrant-registration-fn (constantly {:warrant? false
+                                                          :reason :fixture-no-learning})
+                     :increment-evidence-fn (constantly nil)})]
+          (with-isolated-source-snapshot
+            (fn [{:keys [root]}]
+              (binding [cascade-sources/*code-roots*
+                        ["test/fixtures/library-pins/r7fc6a050"
+                         "test/fixtures/library-pins/current"]]
+                (let [result (runner/run-opportunity! opts)
+                      selected (get-in result [:checkpoints :construction :judgment
+                                               :cascade :selected-action])
+                      build (get-in result [:checkpoints :build :judgment])]
+                  (is (= 1 @assessment-contact-count))
+                  (is (str/includes? root "/target/b1-isolated-source/"))
+                  (is (= "T-owned" (:target selected)))
+                  (is (= [["T-owned" :contract-present]] (:want selected)))
+                  (is (= contract-path
+                         (get-in selected [:observation-locators
+                                           ["T-owned" :contract-present] :path])))
+                  (is (not= before-sha @author-commit))
+                  (is (= :qualified
+                         (get-in build [:validation :ticket-preparation-qualification :status])))
+                  (is (= :grounded-progress (:outcome result)))
+                  (is (nil? (get-in build [:increment :warrant]))
+                      "preparation qualifies without claiming implementation learning")
+                  (is (= :live (:status-class ticket)))
+                  ;; A second owned attempt starts from a revision where the
+                  ;; path is genuinely absent, then the synthetic author
+                  ;; creates an unreviewable (empty-negative-cases) file.
+                  ;; It reaches the same close boundary but cannot qualify or
+                  ;; earn learning.
+                  (token-fixture/command repo "rm" "-q" contract-path)
+                  (token-fixture/command repo "-c" "user.name=Fixture"
+                                         "-c" "user.email=fixture@example.invalid"
+                                         "commit" "-qm" "remove contract for refusal control")
+                  (reset! malformed-contract? true)
+                  (let [refused (runner/run-opportunity! opts)
+                        refused-build (get-in refused [:checkpoints :build :judgment])]
+                    (is (= :build-failed (:outcome refused)))
+                    (is (= :contract-cases-empty
+                           (get-in refused-build
+                                   [:validation :ticket-preparation-qualification :reason])))
+                    (is (nil? (get-in refused-build [:increment :warrant])))
+                    (is (= 1 @assessment-contact-count)
+                        "the durable current assessment is reused; no second contact")))))))))))
 
 (deftest drifting-runner-refuses-before-consuming-the-attempt
   ;; Round-2 review: detection ran AFTER the core, so the stale runner judged

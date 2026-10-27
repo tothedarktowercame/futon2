@@ -283,7 +283,7 @@
                                                    :result "answer"}))
         admitted (readiness/validate-assessment-response ticket proposal response inputs)]
     (is (= :suitable (get-in admitted [:assessment :classification])))
-    (is (= {:check :C3 :repo "futon2" :sha (apply str (repeat 40 "a"))
+    (is (= {:check :C3 :class :C3 :repo "futon2" :sha (apply str (repeat 40 "a"))
             :path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"}
            (:increment-locator admitted)))
     (is (= :unknown
