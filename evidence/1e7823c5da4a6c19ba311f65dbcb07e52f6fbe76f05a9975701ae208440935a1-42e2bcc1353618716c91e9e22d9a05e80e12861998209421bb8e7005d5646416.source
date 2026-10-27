@@ -1,0 +1,30 @@
+@flexiarg vsatlas/story-emporium
+@title Story Emporium
+@audience experience designers, relational infrastructure planners
+@tone conceptual
+@style design-pattern
+@sigils [🏡/门 🌹/本]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L7-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: 
+  Model the manifold as an emporium—an interior space where sovereign stories gain new meaning through adjacency and optional relations.
+
+  + context: You are framing the 'story manifold' as a shared interior where stories remain sovereign, but gain meaning through proximity and (optional) relationships. This does not apply when stories must be tightly merged into a single authored narrative.
+
+  + IF:
+    Stories remain fixed artifacts with no shared environment.
+
+  + HOWEVER:
+    Vibrant ecosystems emerge when independent narrative units coexist in proximity.
+
+  + THEN:
+    Model the manifold as an emporium—an interior space where sovereign stories gain new meaning through adjacency and optional relations.
+
+  + BECAUSE:
+    Proximity, not centralisation, generates aliveness, cross-pollination, and emergent understanding.
+
+  + NEXT-STEPS:
+    next[Sketch one emporium map that shows how three stories could sit adjacent without merging.]
+    next[Define a minimal “adjacency” link type that preserves sovereignty.]
+    next[Define an evidence signal (e.g., new cross-story references after adjacency) and a falsifier (e.g., no uptake of adjacency links).]
+    next[Consolidate with vsatlas/non-destructive-relational-layers and retire this pattern once merged.]
