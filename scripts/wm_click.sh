@@ -49,7 +49,10 @@ POST_RECOVERY_POLL_S="${WM_CLICK_POST_RECOVERY_POLL_S:-5}"
 # 2026-10-19: "my suggestion would be to use zai runners in wm roles rather
 # than codex". Defaults are now Zai seats (each answered a liveness whistle
 # at 21:11Z). Override with --author / --reviewer / --repair-reviewer.
-AUTHOR="zai-2"; REVIEWER="zai-3"; REPAIR="zai-8"
+# Joe, 2026-10-27: the click must use the reserved role seats, not general
+# zai-N seats, so it never waits behind another job. The wm-* roles are now
+# Zai-backed (futon3c.wm.cast-registry/default-specs).
+AUTHOR="wm-author"; REVIEWER="wm-reviewer"; REPAIR="wm-repair-reviewer"
 ISSUING_CALLER="${WM_ISSUING_CALLER:-caller-unknown}"
 RUN=0; PROBE=0; G_LAW=""; ASK_SEATS=""
 

@@ -31,8 +31,8 @@ REQUIRED_WARRANTS = [
     "futon2.aif.wm.family-selection-test",
     "futon2.aif.wm.reading-family-decision-test",
 ]
-WM_CAST = {"author": "zai-2", "reviewer": "zai-6",
-           "repair-reviewer": "zai-7"}
+WM_CAST = {"author": "wm-author", "reviewer": "wm-reviewer",
+           "repair-reviewer": "wm-repair-reviewer"}
 
 
 def run(argv, cwd=ROOT):
