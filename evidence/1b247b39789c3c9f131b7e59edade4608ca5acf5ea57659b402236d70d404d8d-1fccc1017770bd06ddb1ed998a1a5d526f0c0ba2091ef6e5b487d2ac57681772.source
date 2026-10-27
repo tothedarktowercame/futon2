@@ -1,0 +1,51 @@
+@flexiarg futon-theory/durability-first
+@title Durability First (Invariant 0)
+@sigils [👭/本]
+@keywords persist, save, write, durable, storage, confirm, success
+@audience futon developers, storage layer maintainers
+@tone analytic-foundational
+@factor Keen investigation (dhammavicaya)
+@references [futon-theory/proof-path futon-theory/error-hierarchy]
+@layer-position "0 (lowest, no dependencies)"
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L6-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: I0: What you save is what you get back.
+  Persistence is the zeroth invariant: what you save is what you get back.
+  Writes return success ONLY after durable storage confirms. No fire-and-forget.
+
+  + context: Without reliable persistence, all higher-layer invariants are
+    meaningless. Durability is enforced via invariants (I0), not axioms.
+    The axioms (A1-A5) are operational; durability is structural.
+
+  + IF: The applicability scope of the pattern (see substructure).
+    + REQUIREMENTS:
+      - Writes return success ONLY after durable storage confirms
+      - Reads return ONLY data that is durably stored
+      - No async-without-callback, no fire-and-forget
+      - All failures throw, no silent logging
+
+  + HOWEVER: The structural tension above manifests in the following concrete shapes (see substructure).
+    + FAILURE-MODES:
+      Storage unavailable -> 503 (service layer error)
+      Write timeout -> 503 (service layer error)
+      Corruption detected -> 500 (blocks startup)
+
+    + ANTI-PATTERNS:
+      - "Write succeeded" before confirmation (async leak)
+      - Catching write errors and returning partial success
+      - Optimistic cache writes without durable sync
+
+  + THEN: Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline.
+    + ENFORCEMENT:
+      Layer 0 gates all writes:
+      - Synchronous confirmation before success return
+      - Success returns a durable proof token (e.g., tx-id)
+      - Failure throws with error context, never returns false
+
+    + DOMAIN-INSTANTIATION:
+      See `storage/durability-first` for concrete implementation patterns.
+
+  + BECAUSE:
+    A storage layer that can't reliably store is violating its reason for
+    existence. Layer 0 errors must surface as Layer 0 errors, not masked
+    by higher-layer failures.
