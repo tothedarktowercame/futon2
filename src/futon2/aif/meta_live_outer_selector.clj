@@ -719,7 +719,8 @@
                             (filter #(= :ticket (:kind %)) tasks))
         readiness-section (when (.isFile (io/file readiness-path))
                             (ticket-readiness/suitable-section
-                             (ticket-readiness/read-manifest readiness-path) ticket-inputs))
+                             (ticket-readiness/read-manifest readiness-path) ticket-inputs
+                             (:ticket-readiness-contact-resolver policy-field-config)))
         snapshot (if readiness-section
                    (-> snapshot0
                        (assoc-in [:graph :ticket-readiness] readiness-section)

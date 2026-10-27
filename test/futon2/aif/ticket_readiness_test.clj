@@ -133,20 +133,32 @@
                              :ownership-evidence :unowned
                              :implementation-evidence :absent
                              :operator-evidence :allowed :root-route :standalone})
+        jobs (atom {})
+        resolver #(get @jobs %)
         opts {:tickets tickets :manifest-path manifest :input-fn inputs
+              :contact-resolver resolver
               :prepare-fn (fn [ticket] {:target (:id ticket) :source (:source ticket)})
-              :answer-fn (fn [proposal] (swap! contacts conj (:target proposal))
-                           {:provenance :synthetic-test-reply :increment :preparation})
-              :validate-fn (fn [ticket _ _]
+              :answer-fn (fn [proposal]
+                           (swap! contacts conj (:target proposal))
+                           (let [job-id (str "job-" (:target proposal))
+                                 response {:job-id job-id :seat "test-seat"
+                                           :text (str "answer-" (:target proposal))}]
+                             (swap! jobs assoc job-id
+                                    {:job-id job-id :seat "test-seat" :result (:text response)})
+                             (assoc response :result-pin
+                                    (readiness/retain-contact-result! manifest response))))
+              :validate-fn (fn [ticket _ response]
                              {:increment :preparation
                               :increment-want [(:id ticket) :contract-present]
+                              :contact-provenance (select-keys response [:job-id :seat :result-pin])
                               :assessment {:classification :suitable}})
               :now-fn (constantly "2026-10-27T00:00:00Z")}
         first-result (readiness/refresh-one! opts)
         first-bytes (slurp manifest)
         second-result (readiness/refresh-one! opts)
         loaded (readiness/read-manifest manifest)
-        section (readiness/suitable-section loaded (into {} (map (juxt :id inputs) tickets)))
+        section (readiness/suitable-section loaded (into {} (map (juxt :id inputs) tickets))
+                                              resolver)
         snapshot {:schema pipeline/snapshot-schema
                   :summary-source {:path "s" :sha256 (apply str (repeat 64 "c"))}
                   :graph-source {:path "g" :sha256 (apply str (repeat 64 "d"))}
@@ -160,9 +172,9 @@
     (is (not= first-bytes (slurp manifest)))
     (is (= ["T-a" "T-b"] @contacts))
     (is (= #{"T-a" "T-b"} (:ids (pipeline/pipeline-membership snapshot))))
-    (is (= :synthetic-test-reply
-           (:external-reply-provenance
-            (edn/read-string (slurp (get-in second-result [:record-pin :path]))))))))
+    (is (= "job-T-b"
+           (get-in (edn/read-string (slurp (get-in second-result [:record-pin :path])))
+                   [:contact-provenance :job-id])))))
 
 (deftest admitted-root-is-deduplicated
   (is (= {:classification :not-suitable :reason :admitted-root
@@ -190,13 +202,13 @@
                                  :ownership-evidence :unowned :implementation-evidence :absent
                                  :operator-evidence :allowed :root-route :standalone})}
         manifest {:schema readiness/manifest-schema :entries [entry] :attempts {}}]
-    (is (= ["T-x"] (mapv :ticket-id
-                           (:items (readiness/suitable-section
-                                    manifest {"T-x" {:source source-pin :dependency-evidence [:d1]
-                                                     :ownership-evidence :unowned
-                                                     :implementation-evidence :absent
-                                                     :operator-evidence :allowed
-                                                     :root-route :standalone}})))))
+    (is (empty? (:items (readiness/suitable-section
+                         manifest {"T-x" {:source source-pin :dependency-evidence [:d1]
+                                          :ownership-evidence :unowned
+                                          :implementation-evidence :absent
+                                          :operator-evidence :allowed
+                                          :root-route :standalone}})))
+        "a locally coherent assessment without a resolved Agency contact is excluded")
     (is (empty? (:items (readiness/suitable-section
                          manifest {"T-x" {:source source-pin :dependency-evidence [:changed]
                                           :ownership-evidence :unowned
@@ -247,12 +259,13 @@
     (is (= :complete (:status (pipeline/section-availability snapshot))))))
 
 (deftest bounded-preparation-response-is-source-and-proposal-bound
-  (let [ticket {:id "T-x" :source source-pin :status-class :live}
+  (let [dir (temp-dir)
+        ticket {:id "T-x" :source source-pin :status-class :live}
         proposal {:target "T-x" :source source-pin}
         inputs {:source source-pin :dependency-evidence {:status :unknown}
                 :ownership-evidence {:state :unowned}
                 :implementation-evidence {:status :unknown}
-                :operator-evidence {:status-class :live}
+                :operator-evidence {:status-class :live :requisition {:absent :no-requisition}}
                 :root-route :standalone}
         answer {:schema readiness/response-schema :increment :preparation
                 :ticket-id "T-x" :source-pin source-pin
@@ -263,8 +276,12 @@
                                     :sha (apply str (repeat 40 "a"))
                                     :path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"}
                 :preparation-dependencies :satisfied}
-        admitted (readiness/validate-assessment-response
-                  ticket proposal {:answer answer :provenance :synthetic-test-reply} inputs)]
+        response {:answer answer :job-id "job-assess" :seat "test-seat" :text "answer"}
+        response (assoc response
+                        :result-pin (readiness/retain-contact-result! (.getPath (io/file dir "manifest")) response)
+                        :contact-resolver (fn [_] {:job-id "job-assess" :seat "test-seat"
+                                                   :result "answer"}))
+        admitted (readiness/validate-assessment-response ticket proposal response inputs)]
     (is (= :suitable (get-in admitted [:assessment :classification])))
     (is (= {:check :C3 :repo "futon2" :sha (apply str (repeat 40 "a"))
             :path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"}
@@ -272,10 +289,64 @@
     (is (= :unknown
            (get-in (readiness/validate-assessment-response
                     ticket proposal
-                    {:answer (assoc answer :source-pin (assoc source-pin :sha256 "wrong"))
-                     :provenance :synthetic-test-reply}
+                    (assoc response :answer
+                           (assoc answer :source-pin (assoc source-pin :sha256 "wrong")))
                     inputs)
                    [:assessment :classification])))))
+
+(deftest adapter-keeps-operator-ownership-and-provenance-unknowns-typed
+  (let [ticket {:id "T-x" :source source-pin}
+        proposal {:target "T-x"}
+        answer {:schema readiness/response-schema :increment :preparation
+                :ticket-id "T-x" :source-pin source-pin
+                :proposal-pin (readiness/value-digest proposal)
+                :increment-id :prepare-contract :increment-want ["T-x" :contract]
+                :increment-locator {:check :C3 :repo "futon2"
+                                    :sha (apply str (repeat 40 "a"))
+                                    :path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"}
+                :preparation-dependencies :satisfied}
+        inputs {:source source-pin :dependency-evidence []
+                :implementation-evidence {:status :unknown} :root-route :standalone
+                :ownership-evidence {:state :unowned}
+                :operator-evidence {:status-class :live :requisition {:absent :no-requisition}}}
+        no-port {:answer answer :provenance :synthetic-test-reply}]
+    (is (= :unknown (get-in (readiness/validate-assessment-response ticket proposal no-port inputs)
+                            [:assessment :classification])))
+    (is (= :ownership-unknown
+           (get-in (readiness/validate-assessment-response
+                    ticket proposal no-port (assoc inputs :ownership-evidence {:state :unknown}))
+                   [:assessment :reason])))
+    (is (= :operator-evidence-unknown
+           (get-in (readiness/validate-assessment-response
+                    ticket proposal no-port (assoc-in inputs [:operator-evidence :status-class] nil))
+                   [:assessment :reason])))
+    (is (= :operator-gate
+           (get-in (readiness/validate-assessment-response
+                    ticket proposal no-port
+                    (assoc-in inputs [:operator-evidence :requisition] {:state :in-progress}))
+                   [:assessment :reason])))))
+
+(deftest same-clock-different-assessments-have-immutable-distinct-records
+  (let [dir (temp-dir) manifest (.getPath (io/file dir "manifest.edn"))
+        ticket {:id "T-x" :source source-pin} calls (atom 0)
+        inputs (constantly {:source source-pin :dependency-evidence []
+                            :ownership-evidence :unowned :implementation-evidence :absent
+                            :operator-evidence :allowed :root-route :standalone})
+        opts {:tickets [ticket] :manifest-path manifest :input-fn inputs
+              :prepare-fn identity :answer-fn (constantly {})
+              :validate-fn (fn [_ _ _]
+                             {:increment :preparation :increment-id :prepare-contract
+                              :assessment {:classification :unknown
+                                           :reason (if (= 1 (swap! calls inc)) :first :second)}})
+              :now-fn (constantly "same-clock")}
+        first-result (readiness/refresh-one! opts)
+        first-bytes (slurp (get-in first-result [:record-pin :path]))
+        second-result (readiness/refresh-one! opts)]
+    (is (not= (get-in first-result [:record-pin :path])
+              (get-in second-result [:record-pin :path])))
+    (is (= first-bytes (slurp (get-in first-result [:record-pin :path]))))
+    (is (not= (get-in first-result [:record-pin :sha256])
+              (get-in second-result [:record-pin :sha256])))))
 
 (deftest reviewed-preparation-qualification-reads-the-immutable-commit
   (let [repo (temp-dir) _ (git! repo "init")

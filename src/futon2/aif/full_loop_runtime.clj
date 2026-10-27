@@ -190,14 +190,17 @@
   [opts]
   (let [manifest-path (or (:ticket-readiness-manifest-path opts)
                           default-ticket-readiness-manifest)
-        snapshot (meta-live/fetch-pipeline-snapshot)
-        base-membership (meta-pipeline/pipeline-membership snapshot)
         tickets (->> (:tickets (mission-registry/load-tickets))
                      (filter mission-registry/live-ticket?) vec)
-        input-fn #(meta-live/ticket-readiness-input % snapshot base-membership)
+        input-fn (fn [ticket]
+                   (let [snapshot (meta-live/fetch-pipeline-snapshot)]
+                     (meta-live/ticket-readiness-input
+                      ticket snapshot (meta-pipeline/pipeline-membership snapshot))))
+        contact-resolver #(runner/read-job! opts %)
         contact (designated-agent-answer-fn opts (:author opts)
                                             ticket-readiness-prompt "brief")]
     {:tickets tickets :manifest-path manifest-path :input-fn input-fn
+     :contact-resolver contact-resolver
      :prepare-fn (fn [ticket]
                    (interpretation-request/prepare-proposal!
                     (:id ticket) :ticket mission-registry/default-code-root))
@@ -206,7 +209,8 @@
                         answer (handoff/response-map response)
                         result-pin (ticket-readiness/retain-contact-result!
                                     manifest-path response)]
-                    (assoc response :answer answer :result-pin result-pin)))
+                    (assoc response :answer answer :result-pin result-pin
+                                    :contact-resolver contact-resolver)))
      :validate-fn (fn [ticket proposal response]
                     (ticket-readiness/validate-assessment-response
                      ticket proposal response (input-fn ticket)))}))
@@ -472,13 +476,14 @@
         ;; outer action, not a new outer opportunity. Retain the exact first receipt so query-time
         ;; evidence is requested for, and consumed by, one stable target.
         policy-field-config
-        (select-keys opts
+        (assoc (select-keys opts
                      [:g-law :target-reading-root :pattern-graph-path
                       :occurrence-square-root
                       :occurrence-square-pattern-texts
                       :pattern-library-root
                       :require-occurrence-squares?
                       :target-policy-retraction])
+               :ticket-readiness-contact-resolver #(runner/read-job! opts %))
         pinned-outer-selector
         (retained-outer-selector outer-selector policy-field-config)
         opts (-> opts

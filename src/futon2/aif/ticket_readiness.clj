@@ -135,6 +135,8 @@
       {:classification :completed :increment-completed? true
        :ticket-completed? (boolean ticket-completed?)
        :next-disposition (when-not ticket-completed? :assess-remaining-increments)})
+    (nil? operator-allowed?) {:classification :unknown :reason :operator-evidence-unknown}
+    (nil? owned?) {:classification :unknown :reason :ownership-unknown}
     (false? operator-allowed?) {:classification :not-suitable :reason :operator-gate}
     owned? {:classification :not-suitable :reason :owned}
     (false? active?) {:classification :not-suitable :reason :inactive}
@@ -180,10 +182,12 @@
         ownership (get-in inputs [:ownership-evidence :state])
         requisition (get-in inputs [:operator-evidence :requisition])
         operator-status (get-in inputs [:operator-evidence :status-class])
-        operator-allowed? (and (= :live operator-status)
-                               (not (contains? requisition :malformed))
-                               (not (contains? #{:in-progress :completed}
-                                               (:state requisition))))
+        operator-allowed? (cond
+                            (not= :live operator-status) nil
+                            (or (nil? requisition) (contains? requisition :malformed)) nil
+                            (contains? requisition :absent) true
+                            (contains? #{:in-progress :completed} (:state requisition)) false
+                            :else nil)
         bound? (and (= response-schema (:schema answer))
                     (= :preparation (:increment answer))
                     (= (:id ticket) (:ticket-id answer))
@@ -192,16 +196,19 @@
                     (keyword? (:increment-id answer))
                     (vector? (:increment-want answer))
                     locator-valid?)
-        ;; Production Agency responses carry retained job/result provenance;
-        ;; tests carry the explicit synthetic marker and cannot be confused
-        ;; with a live authority assertion.
-        port-bound? (or (= :synthetic-test-reply (:provenance response))
-                        (and (string? (:job-id response))
-                             (map? (:result-pin response))))
+        resolved-job (when (and (fn? (:contact-resolver response))
+                                (string? (:job-id response)))
+                       ((:contact-resolver response) (:job-id response)))
+        port-bound? (and (string? (:job-id response))
+                         (map? (:result-pin response))
+                         (= (:job-id response) (:job-id resolved-job))
+                         (= (:seat response) (:seat resolved-job))
+                         (= (:text response) (:result resolved-job)))
         assessment (classify
                     {:increment :preparation :source-current? true
                      :operator-allowed? operator-allowed?
-                     :owned? (contains? #{:active :ambiguous} ownership)
+                     :owned? (case ownership :unowned false
+                                      (:active :ambiguous) true nil)
                      :active? (= :live operator-status)
                      :preparation-dependencies-resolved?
                      (case (:preparation-dependencies answer)
@@ -214,7 +221,7 @@
      :increment-want (:increment-want answer)
      :increment-locator (:increment-locator answer)
      :proposal-pin (value-digest proposal)
-     :contact-provenance (select-keys response [:job-id :result-pin :provenance])
+     :contact-provenance (select-keys response [:job-id :seat :result-pin])
      :assessment assessment}))
 
 (defn qualify-preparation-run
@@ -304,7 +311,18 @@
                [:source :dependency-evidence :ownership-evidence
                 :implementation-evidence :operator-evidence :root-route])))
 
-(defn- current-entry? [entry current-inputs]
+(defn- authoritative-contact? [record contact-resolver]
+  (try
+    (let [{:keys [job-id result-pin]} (:contact-provenance record)
+          retained (when (pin-matches? result-pin) (read-edn (:path result-pin)))
+          job (when (and (fn? contact-resolver) (string? job-id))
+                (contact-resolver job-id))]
+      (and (= :wm/ticket-readiness-contact-v1 (:schema retained))
+           (= job-id (:job-id retained)) (= job-id (:job-id job))
+           (= (:seat retained) (:seat job)) (= (:result retained) (:result job))))
+    (catch Throwable _ false)))
+
+(defn- current-entry? [entry current-inputs contact-resolver]
   (when (and (valid-current-inputs? current-inputs)
              (pin-matches? (:assessment-pin entry)))
     (let [record (read-edn (get-in entry [:assessment-pin :path]))]
@@ -317,25 +335,30 @@
            (= (:increment-locator entry) (:increment-locator record))
            (= (:assessment entry) (:assessment record))
            (= (:input-identity entry) (value-digest current-inputs))
-           (= current-inputs (:inputs record))))))
+           (= current-inputs (:inputs record))
+           (authoritative-contact? record contact-resolver)))))
 
-(defn suitable-section [manifest current-inputs]
-  {:items (->> (:entries manifest)
-               (filter #(and (= :suitable (get-in % [:assessment :classification]))
-                             (current-entry? % (get current-inputs (:ticket-id %)))))
-               (mapv (fn [e] {:ticket-id (:ticket-id e)
-                               :source-pin (:source-pin e)
-                               :increment (:increment e)
-                               :increment-id (:increment-id e)
-                               :increment-want (:increment-want e)
-                               :increment-locator (:increment-locator e)
-                               :assessment-pin (:assessment-pin e)})))})
+(defn suitable-section
+  ([manifest current-inputs] (suitable-section manifest current-inputs nil))
+  ([manifest current-inputs contact-resolver]
+   {:items (->> (:entries manifest)
+                (filter #(and (= :suitable (get-in % [:assessment :classification]))
+                              (current-entry? % (get current-inputs (:ticket-id %))
+                                              contact-resolver)))
+                (mapv (fn [e] {:ticket-id (:ticket-id e)
+                                :source-pin (:source-pin e)
+                                :increment (:increment e)
+                                :increment-id (:increment-id e)
+                                :increment-want (:increment-want e)
+                                :increment-locator (:increment-locator e)
+                                :assessment-pin (:assessment-pin e)})))}))
 
 (defn refresh-one!
   "Contact and durably assess at most one canonical ticket.  PREPARE-FN and
   ANSWER-FN are the existing proposal/contact seams supplied by the caller.
   Preview callers must not invoke this function."
-  [{:keys [tickets manifest-path prepare-fn answer-fn validate-fn input-fn now-fn]
+  [{:keys [tickets manifest-path prepare-fn answer-fn validate-fn input-fn now-fn
+           contact-resolver]
     :or {now-fn #(str (Instant/now))}}]
   (let [manifest (read-manifest manifest-path)
         current (into {} (map (juxt :ticket-id identity) (:entries manifest)))
@@ -344,20 +367,26 @@
                                    inputs (input-fn ticket)
                                    classification (get-in entry [:assessment :classification])]
                                (and (#{:suitable :completed} classification)
-                                    (current-entry? entry inputs))))
+                                    (current-entry? entry inputs contact-resolver))))
                            (ordered-population tickets (:attempts manifest)))]
     (if-let [ticket (first candidates)]
-      (let [proposal (prepare-fn ticket)
+      (let [before-inputs (input-fn ticket)
+            proposal (prepare-fn ticket)
             response (answer-fn proposal)
             inputs (input-fn ticket)
             assessed (validate-fn ticket proposal response)
+            assessed (if (= before-inputs inputs)
+                       assessed
+                       (assoc assessed :assessment
+                              {:classification :unknown
+                               :reason :inputs-changed-during-contact}))
             at (now-fn)
             record (assoc assessed :schema schema :ticket-id (:id ticket)
                           :source-pin (:source ticket) :inputs inputs :assessed-at at
                           :external-reply-provenance (:provenance response))
             record-path (str manifest-path ".records/" (:id ticket) "-"
                              (subs (:sha256 (:source ticket)) 0 12) "-"
-                             (subs (value-digest [at inputs]) 0 12) ".edn")
+                             (subs (value-digest record) 0 20) ".edn")
             _ (atomic-spit! record-path record)
             entry (assoc (select-keys record [:ticket-id :source-pin :increment :increment-id :increment-want
                                               :increment-locator :assessment])
