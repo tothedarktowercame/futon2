@@ -65,8 +65,12 @@
             (job :result (str/replace retained-author-reply proof-sha unknown))
             futon5a-root known-proof?)))))
 
-(deftest an-extracted-unknown-sha-does-not-fall-through-to-proof-ref
-  (is (= {:outcome :invalid-author-refusal}
+(deftest an-extracted-unknown-sha-falls-through-to-the-card-proof-ref
+  "Repaired for injury 2aef7e0c: a sha-shaped artifact-ref that names no
+  existing commit is not evidence; the card's :proof-ref is then tried as
+  the grounded commit. The pre-repair expectation (invalid) is the injury."
+  (is (= {:outcome :already-satisfied
+          :grounded-commit {:repo "futon5a" :sha proof-sha}}
          (runner/author-refusal-classification
           (job :artifact-ref "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
           futon5a-root known-proof?))))

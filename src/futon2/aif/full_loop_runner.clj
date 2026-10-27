@@ -3228,18 +3228,32 @@
 (defn- valid-feature-card [job]
   (:card (feature-card-validation job)))
 
+(defn- raw-feature-card
+  "The card map the reply carries, without requiring it to satisfy the
+  full feature-card schema.  The refusal classifier reads only the
+  already-satisfied wording and :proof-ref from the card; a card missing
+  :matches-intent? or :things-to-try still reports truthfully that the
+  want already holds, and pinning the schema here condemned such cards
+  (injury 2aef7e0c: the card named an existing :proof-ref commit and the
+  classifier never read it)."
+  [job]
+  (let [candidate (if (contains? job :feature-card)
+                    {:card (:feature-card job)}
+                    (text-feature-card job))
+        card (:card candidate)]
+    (when (map? card) card)))
+
 (defn- already-satisfied-card?
   "The author's feature card states the want already holds: :want-coverage
   or :built saying it is already true/satisfied/landed (click 14: {:built
   \"none: PSR already landed\" :want-coverage \"already true\"}). The card is
   the reply grammar the author prompt already asks for; no new marker."
-  [job]
-  (when-let [card (valid-feature-card job)]
-    (boolean (some (fn [k]
-                     (let [v (str (get card k))]
-                       (and (not (str/blank? v))
-                            (re-find #"(?i)already\s+(true|satisfied|holds|landed|met|done)" v))))
-                   [:want-coverage :built]))))
+  [card]
+  (boolean (some (fn [k]
+                   (let [v (str (get card k))]
+                     (and (not (str/blank? v))
+                          (re-find #"(?i)already\s+(true|satisfied|holds|landed|met|done)" v))))
+                 [:want-coverage :built])))
 
 (defn- commit-exists-in?
   "True when SHA names an existing commit in REPO (git cat-file)."
@@ -3272,35 +3286,64 @@
          artifact-ref (:artifact-ref job)
          exists-fn (or exists-fn commit-exists-in?)]
      (when (= :refuse verdict)
-       (let [card (valid-feature-card job)
-             already? (already-satisfied-card? job)
-             ;; Agency extracts the first ref-like text from an answer, which
-             ;; may be a path mentioned before the card's :proof-ref.  A
-             ;; sha-shaped extracted ref remains authoritative (including when
-             ;; unknown); only a non-sha extracted ref lets the card supply the
-             ;; commit candidate.  This is the repairedClassifier order in
+       (let [card (raw-feature-card job)
+             already? (and card (already-satisfied-card? card))
+             ;; Agency extracts the first ref-like text from an answer.  A
+             ;; sha-shaped extracted ref is tried first, but a sha that names
+             ;; no existing commit in any primary repository is not evidence
+             ;; (injury 2aef7e0c): the card's :proof-ref sha is then tried as
+             ;; the grounded commit.  Only a candidate that EXISTS grounds.
+             ;; This is the repairedClassifier order in
              ;; AlreadySatisfiedArtifactRefSeam.
              artifact-sha (when (string? artifact-ref)
                             (re-find #"\b[0-9a-f]{7,40}\b" artifact-ref))
-             proof-sha (when (string? (:proof-ref card))
+             proof-sha (when (and card (string? (:proof-ref card)))
                          (re-find #"\b[0-9a-f]{7,40}\b" (:proof-ref card)))
-             grounded-sha (or artifact-sha proof-sha)]
+             candidates (distinct (remove nil? [artifact-sha proof-sha]))
+             ;; The Agency-extracted ref is prose-first text, not the
+             ;; author's typed claim; it grounds only in the repository the
+             ;; author was dispatched to.  The card's :proof-ref is the
+             ;; author's explicit claim and keeps the full search
+             ;; (dispatched repo, then the primary repositories).
+             find-artifact (fn [sha]
+                             (when (and repo (exists-fn repo sha)) repo))
+             find-proof (fn [sha]
+                         (if repository-required?
+                           (when (and repo (exists-fn repo sha)) repo)
+                           (or (when repo
+                                 (when (exists-fn repo sha) repo))
+                               (some (fn [r] (when (exists-fn r sha) r))
+                                     ;; Prefer canonical checkouts over
+                                     ;; linked worktrees: a worktree shares
+                                     ;; the object store, and grounding
+                                     ;; reports the primary repository's
+                                     ;; name, not a scratch worktree's.
+                                     (sort-by (fn [r]
+                                                (if (.isDirectory
+                                                      (io/file (str r) ".git"))
+                                                  0 1))
+                                              (primary-repos))))))
+             find-grounded (fn [sha prefer]
+                             (if (= :artifact prefer)
+                               (find-artifact sha)
+                               (find-proof sha)))
+             grounded-commit (some (fn [sha]
+                                     (when-let [found
+                                                (find-grounded
+                                                  sha
+                                                  (if (and (= sha artifact-sha)
+                                                           (not= sha proof-sha))
+                                                    :artifact
+                                                    :proof))]
+                                       {:repo (.getName (io/file (str found)))
+                                        :sha sha}))
+                                   candidates)]
          (cond
-           (and already? grounded-sha)
-           (let [found (if repository-required?
-                         (when (and repo (exists-fn repo grounded-sha)) repo)
-                         (or (when repo
-                               (when (exists-fn repo grounded-sha) repo))
-                             (some (fn [r] (when (exists-fn r grounded-sha) r))
-                                   (primary-repos))))]
-             (if found
-               {:outcome :already-satisfied
-                :grounded-commit {:repo (.getName (io/file (str found)))
-                                  :sha grounded-sha}}
-               ;; a claimed commit that does not exist is not evidence
-               {:outcome :invalid-author-refusal}))
+           (and already? grounded-commit)
+           {:outcome :already-satisfied :grounded-commit grounded-commit}
 
-           ;; already-true with NO commit named: a claim without evidence
+           ;; already-true with NO existing commit named: a claim without
+           ;; evidence
            already? {:outcome :invalid-author-refusal}
 
            (and (not (str/blank? reason))
