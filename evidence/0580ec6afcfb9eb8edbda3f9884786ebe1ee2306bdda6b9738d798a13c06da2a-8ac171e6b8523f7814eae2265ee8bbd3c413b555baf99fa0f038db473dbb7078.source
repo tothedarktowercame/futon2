@@ -1,0 +1,63 @@
+@flexiarg ukrns/provision-at-network-scale
+@title Provision at Network Scale, Selectively
+@verdict reaffirmed
+@keywords scale-choice, network-scale, local-context, five-roles, cross-institution-learning, evaluator, convener, institutional-leads, selective-provisioning
+@audience UKRN-S design, UKRN leadership, Research England, participating institutions
+@tone analytic-foundational
+@style pattern
+@references [equity/protected-interaction equity/contribution-pathways equity/visible-impact ukrns/diagnose-before-prescribing]
+@ancestors ["UKRN WP draft-16-april §2 Pattern (capability trade-off table; role-codebook reanalysis; EV_analyse absence; explicit Tension/Composition/Check)" "Role codebook: 12 roles, 61 action codes, compression of 4-6 roles into single persons (absorbed-mode signature)" "ORCA precedent: Research-England-funded posts that do not persist; the negative example for post-dependent design" "equity/protected-interaction (breadth overload partly answered by network-scale provisioning)" "equity/contribution-pathways (community infrastructure answered by network-scale stewardship)" "equity/visible-impact (evaluation chain answered primarily by network-scale provisioning)" "Ostrom (1990) subsidiarity principle (evidence-qualified form)"]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L7-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: Put a capability at network scale only when it genuinely pays at network scale.  The current paper's five-role design makes this concrete: evaluator, convener, researcher-advisor, and parts of training management create cross-institution value that a single institution cannot easily recreate for itself, while institutional leads remain local because local uptake, local relationships, and local priorities cannot be centralised without losing the point.  The discipline is not to centralise everything, and not to leave everything local, but to place each capability where its gains are real.
+
+  + context: The paper's design argument depends on cross-institution learning.  That means some capabilities need a home above the level of any one institution: comparing evidence across sites, maintaining a common operational picture, carrying sector relationships, and stewarding the parts of the analytical toolkit that should not be reinvented locally.  At the same time, institutions still need their own people to translate, adapt, and carry the work in context.  The question is therefore not whether UKRN Services should act centrally or locally in general.  It is which roles and functions only pay once they are placed at network scale.
+
+  + IF:
+    The pattern operates on the axis: local fit ↔ network leverage.
+    Irreducible: the more a role is embedded in local context, the less it can serve many institutions at once.  The more a role is built for comparison, shared maintenance, or sector coordination, the more it benefits from being held once above the institutional level.
+
+  + HOWEVER:
+    Real costs: network-scale provision gains comparability, continuity, and one-to-many efficiency, but it can lose local nuance and can become a single point of capacity risk.  Local provision gains trust, context, and institutional fit, but it can duplicate work, compress too many functions into one person, and leave cross-institution learning under-provisioned.
+    Active dynamic: the right placement can change as the service matures.  A function that needs to be central in Year 1 may later support stronger local uptake.  A function that is safely local in a small network may need more central support once the network grows.
+
+    + FAILURE-MODES:
+      - Centralise-everything: UKRN Services absorbs roles whose value depends on local ownership
+      - Leave-everything-local: cross-institution comparison, evaluation, and shared maintenance remain too thin to function
+      - Role-compression return: local actors are expected to carry too many distinct functions at once
+      - Hidden scale choice: a role is placed centrally or locally by habit, not by published reasoning
+      - Context-blind centre: a network role operates without a route for local realities to reshape its work
+      - Post-dependent centre: a central capability disappears with the grant or post that created it
+
+  + THEN: Place each role or capability where its main gain is real, and say why.
+    + COMPOSITIONS:
+      (1) Capability-by-capability placement: keep institutional leads local, hold the evaluator and convener at network scale, keep methodological support above the day-to-day rhythm, and place training management where common coordination genuinely helps.  This is closest to the current paper.  It gives up the simplicity of one blanket rule.
+      (2) Strong centre: place most capabilities in UKRN Services and use local actors mainly as contact points.  Gives up local ownership and some contextual responsiveness.
+      (3) Light centre: use UKRN Services mainly for convening and leave most capabilities local.  Gives up much of the cross-institution learning that justifies the service in the first place.
+      These compositions are not ranked in the abstract.  The pattern exists to force an explicit argument role by role.
+
+    + CHECK:
+      Engaged when: the service can say for each role or capability what is gained by its current placement, what is lost, and why that loss is acceptable; the placement is revisited as the network grows.
+      Failing when: centralisation or localisation is treated as a default ideology; institutions cannot see why a role sits where it does; or the same person is quietly carrying several roles because the scale choice was never really made.
+
+  + BECAUSE:
+    Cross-institution roles only pay at network scale: Evaluation comparison, convening across institutions, and stewardship of shared analytical or operational infrastructure all depend on seeing more than one institution at once.  Those functions lose much of their value if they are fragmented into local copies.
+
+    Context-bearing roles still need local ownership: Institutional uptake does not happen abstractly.  Someone in or near the institution still has to carry the local relationships, timing, and translation work that the centre cannot honestly substitute for.
+
+    The paper's evidence already points to under-provisioned shared capability: One of the design pressures the paper is responding to is that some forms of evaluation and cross-institution learning were simply not happening reliably at local level.  Network scale is justified where the alternative is not a rich local version, but absence.
+
+    Persistence matters: A network-scale capability is only worth building if it can survive the initial bootstrap and the funding cycle that enabled it.  Otherwise the centre briefly carries the role and then drops it, leaving no durable gain behind.
+
+    Mechanic, in short:
+    Derived from the paper's five-role system and its claim that some cross-institution capabilities only pay once they are held above the single-institution level.
+    Answers the service-level question of where shared capability should sit if the aim is real cross-institution learning rather than symbolic central coordination.
+    Mapped to the learning loop at the provision step: once the service knows what needs to happen, it has to decide where that capability lives.
+    Coordination requirement: Medium to high, depending on how many institutions depend on the capability and how much local variation it must absorb.
+
+  + NEXT-STEPS:
+    - Maintain an explicit role-and-capability register stating what sits centrally, what sits locally, and why
+    - Test each central role against a persistence question: would this capability survive beyond the bootstrap year and the post currently carrying it?
+    - Keep a visible route by which institutional leads can reshape the work of central roles
+    - Revisit placement at the Year-2 decision rather than assuming the bootstrap arrangement is permanent
+    - Use this pattern downstream of diagnosis and alongside the evidence-selection pattern, since capability placement determines what the service can actually observe and compare
