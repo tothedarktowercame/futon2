@@ -6455,6 +6455,64 @@
                              (#'runner/runner-source-drift (fn [_] nil))))
             "a missing canonical file stays fail-open")))))
 
+(defn- isolated-source-snapshot []
+  (let [base (io/file "target" "b1-isolated-source" (str (random-uuid)))
+        canonical-prefix "/home/joe/code/futon2/"
+        worktree-prefix (.getCanonicalPath (io/file "."))
+        mapped (into {}
+                     (map (fn [[n path]]
+                            (if (str/starts-with? path canonical-prefix)
+                              (let [relative (subs path (count canonical-prefix))
+                                    source (io/file worktree-prefix relative)
+                                    target (io/file base relative)]
+                                (io/make-parents target)
+                                (Files/copy (.toPath source) (.toPath target)
+                                            (into-array java.nio.file.CopyOption
+                                                        [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+                                [n (.getCanonicalPath target)])
+                              [n path])))
+                     load-identity/required-sources)]
+    {:root (.getCanonicalPath base) :required mapped
+     :runner (get mapped 'futon2.aif.full-loop-runner)}))
+
+(deftest isolated-deployment-source-fixture-exercises-the-real-guard
+  (let [{:keys [required runner]} (isolated-source-snapshot)
+        core-ran (atom 0)
+        fixture {#'load-identity/required-sources required
+                 #'runner/canonical-runner-path runner}]
+    (with-redefs-fn fixture
+      (fn []
+        (let [result (runner/check-runner-source-phase! {})]
+          (is (= :current (:runner/source-check result)))
+          (swap! core-ran inc)
+          (is (= 1 @core-ran))
+          (is (str/includes?
+               (get-in @load-identity/registry
+                       ['futon2.aif.full-loop-runner :source-url])
+               "/b1-ticket-readiness/")))))
+    (spit runner (str (slurp runner) "\n;; isolated runner drift\n"))
+    (with-redefs-fn fixture
+      (fn []
+        (let [failure (try (runner/check-runner-source-phase! {}) nil
+                           (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+          (is (= :stale-runner-source (:failure-kind failure)))
+          (is (= 1 @core-ran) "runner drift refuses before another core call"))))
+    ;; Restore the runner copy, then alter one declared selection dependency.
+    (Files/copy (.toPath (io/file "." "src/futon2/aif/full_loop_runner.clj"))
+                (.toPath (io/file runner))
+                (into-array java.nio.file.CopyOption
+                            [java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+    (let [selector-path (get required 'futon2.aif.meta-live-outer-selector)]
+      (spit selector-path (str (slurp selector-path) "\n;; isolated composition drift\n"))
+      (with-redefs-fn fixture
+        (fn []
+          (let [failure (try (runner/check-runner-source-phase! {}) nil
+                             (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+            (is (= :stale-outer-selection-composition (:failure-kind failure)))
+            (is (contains? (:critical-namespaces failure)
+                           'futon2.aif.meta-live-outer-selector))
+            (is (= 1 @core-ran) "composition drift refuses before another core call")))))))
+
 (deftest drifting-runner-refuses-before-consuming-the-attempt
   ;; Round-2 review: detection ran AFTER the core, so the stale runner judged
   ;; the attempt it should never have judged. Drift must refuse before any
