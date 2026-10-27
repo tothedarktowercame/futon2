@@ -3262,12 +3262,15 @@
   "The author's feature card states the want already holds: :want-coverage
   or :built saying it is already true/satisfied/landed (click 14: {:built
   \"none: PSR already landed\" :want-coverage \"already true\"}). The card is
-  the reply grammar the author prompt already asks for; no new marker."
+  the reply grammar the author prompt already asks for; no new marker.
+  The separator may be a hyphen or underscore: the author prompt's own
+  token is :already-satisfied-at-base-head, and run 2026-10-27-8c8ee35f
+  closed :invalid-author-refusal because only whitespace was accepted."
   [card]
   (boolean (some (fn [k]
                    (let [v (str (get card k))]
                      (and (not (str/blank? v))
-                          (re-find #"(?i)already\s+(true|satisfied|holds|landed|met|done)" v))))
+                          (re-find #"(?i)already[\s_-]+(true|satisfied|holds|landed|met|done)" v))))
                  [:want-coverage :built])))
 
 (defn- commit-exists-in?
