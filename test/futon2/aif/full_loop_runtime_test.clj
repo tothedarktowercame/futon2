@@ -10,6 +10,8 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-field-observation :as meta-field]
+            [futon2.aif.meta-live-outer-selector :as meta-live]
+            [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
@@ -37,7 +39,43 @@
      {:phase (:phase request) :injury-id (:injury-id work-order)
       :repair-id (:repair-id work-order) :attempt (:attempt work-order)
       :predecessor-pin (:predecessor-pin request)
-      :status status :payload payload})))
+     :status status :payload payload})))
+
+(deftest production-default-readiness-unavailable-is-fair-and-preview-free
+  (let [dir (f32-root)
+        manifest (str dir "/readiness.edn")
+        contacts (atom 0)
+        snapshot {:graph {:section-status {}}
+                  :agency-source {:path "fixture://agency" :sha256 (digest :agency)}
+                  :agency {:agents {}}}
+        opts {:ticket-readiness-manifest-path manifest
+              :author "fixture-unavailable"}
+        config (with-redefs [meta-live/fetch-pipeline-snapshot
+                             (constantly snapshot)
+                             runner/agent-roster (constantly {})
+                             flight-runner/agency-answer-fn
+                             (fn [_]
+                               (fn [_]
+                                 (swap! contacts inc)
+                                 {:state :not-contacted}))]
+                 (runtime/ticket-readiness-refresh-config opts))
+        results (mapv (fn [_] (ticket-readiness/refresh-one! config)) (range 3))
+        before (slurp manifest)
+        preview (with-redefs [flight-runner/agency-answer-fn
+                              (fn [_]
+                                (fn [_]
+                                  (swap! contacts inc)
+                                  {:state :not-contacted}))]
+                  ;; Constructing production defaults is the public preview-side
+                  ;; composition boundary: it must not execute refresh-one!.
+                  (runtime/production-defaults opts))]
+    (is (= 0 @contacts) "unavailable designated producer performs no transport")
+    (is (= 3 (count (distinct (map :ticket-id results))))
+        "durable last-attempt ordering advances across three canonical tickets")
+    (is (every? #(= :unknown (get-in % [:assessment :classification])) results))
+    (is (= before (slurp manifest)) "read-only composition does not assess or write")
+    (is (map? (:ticket-readiness-refresh preview)))
+    (is (every? #(re-matches #"T-.+" (:ticket-id %)) results))))
 
 (deftest claimed-injury-carries-intake-bindings-from-its-transaction
   (let [dir (f32-root)
