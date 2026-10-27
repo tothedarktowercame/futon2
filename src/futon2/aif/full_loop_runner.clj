@@ -3265,12 +3265,15 @@
   the reply grammar the author prompt already asks for; no new marker.
   The separator may be a hyphen or underscore: the author prompt's own
   token is :already-satisfied-at-base-head, and run 2026-10-27-8c8ee35f
-  closed :invalid-author-refusal because only whitespace was accepted."
+  closed :invalid-author-refusal because only whitespace was accepted.
+  \"holds\" also accepts \"hold\": click wm-click-1d974b05 closed
+  :invalid-author-refusal on \"checks already hold verbatim\".  Lean:
+  DarkTower.WarMachine.AlreadySatisfiedLabel (mathlib4 b8dcec8fc0)."
   [card]
   (boolean (some (fn [k]
                    (let [v (str (get card k))]
                      (and (not (str/blank? v))
-                          (re-find #"(?i)already[\s_-]+(true|satisfied|holds|landed|met|done)" v))))
+                          (re-find #"(?i)already[\s_-]+(true|satisfied|holds?|landed|met|done)" v))))
                  [:want-coverage :built])))
 
 (defn- commit-exists-in?
