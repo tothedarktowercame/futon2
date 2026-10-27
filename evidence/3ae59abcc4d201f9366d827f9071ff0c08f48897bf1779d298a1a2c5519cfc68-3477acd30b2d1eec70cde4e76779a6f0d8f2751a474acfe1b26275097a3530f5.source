@@ -1,0 +1,29 @@
+@flexiarg vsatlas/proof-through-pilots
+@title Proof Through Pilots
+@audience funders, project stewards, evaluators
+@tone analytic
+@style design-pattern
+@sigils [🌆/亏 💬/上]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L7-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: 
+  Structure development around a small constellation of pilots, each framed as a question (“What can a connected story-world do for X?”) and each yielding stories, participant feedback, and a short interpretive report.
+
+  + context: Pilots can be a primary vehicle for evidence, and can structure development around real, concrete, questions, rather than a finished system.
+
+  + IF:
+    Small grants and limited runway cannot support a full build-out of the three-layer manifold.
+
+  + HOWEVER:
+    Attempting to “finish” the system in one go produces brittle code, shallow uptake, and no reusable evidence of value.
+
+  + THEN:
+    Structure development around a small constellation of pilots, each framed as a question (“What can a connected story-world do for X?”) and each yielding stories, participant feedback, and a short interpretive report.
+
+  + BECAUSE:
+    Proof through pilots turns the business plan into a sequence of situated experiments whose successes—and failures—offer persuasive material for future commissions and follow-on funding.
+
+  + NEXT-STEPS:
+    next[Define the first pilot question and the evidence you will capture.]
+    next[Draft a template for the interpretive report delivered after each pilot.]
+    next[Define what counts as proof (e.g., measurable changes in shared insight or coordination) and a falsifier.]
