@@ -1,0 +1,34 @@
+@flexiarg war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels
+@title WR-16: Operationalised Exploit-Loops Are First-Class Observation Channels
+@sigils [👯/令]
+@audience futon stack operators, agents, mission authors
+@tone foundational
+@style pattern
+@why [war-room/wr-4-inhabit-before-building problems/r2-structured-observation]
+@holds-at R2
+
+! conclusion: Wire operationalised exploit-loops into the stack's status dashboard and the War Machine as direct typed evidence streams and first-class active-inference observation channels.
+
+  + context: War Room decision WR-16 (2026-05-17). Operator: Joe.
+
+  + IF:
+    An exploit-loop emits typed structured state on a cadence independent of Joe's attention.
+
+  + HOWEVER:
+    Treating that state as adjacent reading material leaves existing signals without a surface: a fourteen-day collection lag is invisible as habit failure, and a success-rate drop from ninety-seven percent to eighty-seven percent produces no bulletin-grade alert.
+    + EXAMPLE: Two loops were already emitting typed state on a cadence
+      nobody had to maintain. Batches 7 and 8 sat uncollected for fourteen
+      days — a binary, visible failure of the operator's own half of the
+      loop — and mark2's success rate fell from ninety-seven percent to
+      eighty-seven percent. Neither produced an alert, because the state was
+      being read as adjacent material rather than as an observation channel.
+      The signals existed; the surface for reading them did not.
+
+
+  + THEN:
+    Surface habit-completion telemetry, pipeline-health telemetry, and proxy metrics directly in the stack's status dashboard and the War Machine, and attach the interim-director checkpoint to the stream immediately.
+
+  + BECAUSE:
+    These loops already accumulate observations without fresh primary research; wiring them turns existing cadence and outcome changes into evidence the stack can condition on.
+
+    + evidence: Mark2's Rob-operated arXiv pipeline and the claude-1 plus codex-1 apm-lean daily batch emit the cited structured state. Batches 7–8 had a fourteen-day collection lag, and mark2 success rate moved from ninety-seven percent to eighty-seven percent.
