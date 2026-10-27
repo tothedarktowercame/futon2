@@ -559,13 +559,33 @@ PY
 run_record="$F2/data/wm-runs/tick-run-record-$RUNID.edn"
 binding_id=$(printf '%s' "$clickid" | sed 's/[^A-Za-z0-9._-]/_/g')
 binding_file="$F3C/data/wm-click-run-bindings/click-run-binding-$binding_id.edn"
-if ! ownership=$(python3 - "$run_record" "$binding_file" "$RUNID" "$clickid" <<'PY'
+# On the dedicated-meta-self-heal route our click never writes a run under
+# $RUNID: the server binds a retry child to our click id and the child's run
+# record is the one R11 checks.  Click 5 of run001 (2026-10-27) alerted here
+# for that reason alone.  Ownership is then our binding (same click id, route
+# self-heal) plus the child the server bound to our click id.
+child_record=$(curl -s -m 20 "$BASE/api/alpha/wm/click?click-id=$clickid" | python3 -c '
+import json, sys
+child = (json.load(sys.stdin).get("child") or {})
+completion = child.get("completion") or {}
+if completion.get("status") == "complete" and completion.get("run-record"):
+    print(completion["run-record"])' 2>/dev/null || true)
+if ! ownership=$(python3 - "$run_record" "$binding_file" "$RUNID" "$clickid" "$child_record" <<'PY'
 import pathlib, re, sys
-record_path, binding_path, expected_run, expected_click = sys.argv[1:]
+record_path, binding_path, expected_run, expected_click, child_record = sys.argv[1:]
 
 def value(text, key):
     match = re.search(re.escape(key) + r'\s+"([^"]+)"', text)
     return match.group(1) if match else None
+
+binding = pathlib.Path(binding_path)
+if child_record and binding.exists():
+    text = binding.read_text(encoding="utf-8")
+    if (value(text, ":click/id") == expected_click
+            and re.search(r':route\s+:dedicated-meta-self-heal\b', text)
+            and pathlib.Path(child_record).exists()):
+        print(f"self-heal-child {child_record}")
+        raise SystemExit(0)
 
 record = pathlib.Path(record_path)
 if record.exists():
@@ -603,6 +623,9 @@ PY
   exit 1
 fi
 echo "click ownership confirmed by $ownership"
+case "$ownership" in
+  "self-heal-child "*) run_record="${ownership#self-heal-child }" ;;
+esac
 
 # A written run is not a successful click until the independently evaluated
 # Q1--Q10 verdict exists.  This is deliberately unconditional: no environment
