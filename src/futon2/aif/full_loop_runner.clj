@@ -70,6 +70,7 @@
             [futon2.aif.observation-label-wire :as observation-label-wire]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.mission-observation :as mission-observation]
+            [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
@@ -7228,6 +7229,14 @@
                            :failure-kind :decision-input-freshness-unestablished
                            :failure-stage :preference-refresh
                            :refresh r}))))
+      ;; One durable assessment may be produced before selection.  Preview
+      ;; never executes this runner path.  The production composition owns
+      ;; the canonical population and contact ports; this phase owns only the
+      ;; single-contact/order boundary.
+      (when-let [refresh-opts (:ticket-readiness-refresh opts)]
+        (run-phase! opts @phase-context :ticket-readiness-refresh
+                    #(ticket-readiness/refresh-one! refresh-opts)
+                    (fn [result] {:ticket-readiness result})))
       (let [{:keys [open-stop-lines repair-lifecycle-census]}
             (run-phase! opts @phase-context :stop-line-memory
                         #(let [open-stop-lines
