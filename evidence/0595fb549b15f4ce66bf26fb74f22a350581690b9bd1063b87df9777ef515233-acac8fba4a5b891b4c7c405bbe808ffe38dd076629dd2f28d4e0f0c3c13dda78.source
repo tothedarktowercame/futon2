@@ -1,0 +1,32 @@
+@flexiarg aif/structured-observation-vector
+@title Structured Observation Vector
+@sigils [📎/了]
+@audience fulab agents, aif implementers
+@tone technical
+@style pattern
+@holds-at R2   ;; pegged 2026-08-30 (claude-15): the catalogue paragraph numbered R2 in p4ng/sec-catalog.tex; see PREREG-war-machine §1b
+
+@how aif/predictive-coding-belief-update
+@see-also aif/evidence-precision-registry
+@why [problems/operator-turns-become-inference-observations problems/r2-structured-observation]
+! conclusion: Treat each step as a typed observation vector so scoring and learning can be compared across time.
+
+  + context: A pattern-guided agent must decide based on tool output, trace events, and user feedback.
+
+  + IF:
+    You want the agent's observation to be comparable across steps so scoring and learning do not collapse into prose interpretation.
+
+  + HOWEVER:
+    Tool output and user feedback arrive as heterogeneous artifacts (json, logs, diffs, snippets, natural language) that are hard to compare or weight consistently.
+
+  + THEN:
+    Maintain an explicit (o) as a typed, normalized feature map derived from session state (for example: test status, compile status, diff size, failing spec count, user-stated constraints, time since last anchor, contradiction flags).
+
+  + BECAUSE:
+    A stable observation vector is the prerequisite for meaningful precision control and policy scoring.
+
+  + NEXT-STEPS:
+    - Define :aif/observation-vector schema in tatami_schema.clj with keys [:test-status :compile-status :diff-size :failing-spec-count :user-constraints :time-since-anchor :contradiction-flags].
+    - Add (extract-observation-vector session-state) to aif_bridge.clj that normalizes tool output into the typed map.
+    - Include observation vector in :aif/tick events; require it for PSR context/anchors validation.
+    - Add (observation-delta o1 o2) and log deltas alongside policy changes in learn_or_act/decide.
