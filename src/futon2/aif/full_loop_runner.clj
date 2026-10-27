@@ -70,6 +70,7 @@
             [futon2.aif.observation-label-wire :as observation-label-wire]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.mission-observation :as mission-observation]
+            [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
@@ -7228,6 +7229,14 @@
                            :failure-kind :decision-input-freshness-unestablished
                            :failure-stage :preference-refresh
                            :refresh r}))))
+      ;; One durable assessment may be produced before selection.  Preview
+      ;; never executes this runner path.  The production composition owns
+      ;; the canonical population and contact ports; this phase owns only the
+      ;; single-contact/order boundary.
+      (when-let [refresh-opts (:ticket-readiness-refresh opts)]
+        (run-phase! opts @phase-context :ticket-readiness-refresh
+                    #(ticket-readiness/refresh-one! refresh-opts)
+                    (fn [result] {:ticket-readiness result})))
       (let [{:keys [open-stop-lines repair-lifecycle-census]}
             (run-phase! opts @phase-context :stop-line-memory
                         #(let [open-stop-lines
@@ -8216,6 +8225,15 @@
                          (seq (get-in construction [:selected-action :want]))
                          (not= :repair-machine-failure
                                (get-in construction [:selected-action :type])))
+                    ;; A ticket preparation selected by the canonical outer
+                    ;; policy is also an exact selected-want observation. It
+                    ;; must traverse the durable pre-author baseline and the
+                    ;; same immutable C3/C4 readers; a readiness label alone
+                    ;; never supplies its before state.
+                    (and (= :preparation
+                            (get-in construction
+                                    [:selected-action :ticket-readiness :increment]))
+                         (seq (get-in construction [:selected-action :want])))
                     (and deferred-author-job
                          (contains? deferred-author-context
                                     :mission-observation-baseline)))
@@ -8601,12 +8619,29 @@
                       reviewer-falsifier-verification
                       (reviewer-falsifier/verify reviewer-falsifier-receipt
                                                  reviewer-falsifier-input)
+                      preparation-qualification
+                      (ticket-readiness/qualify-preparation-run
+                       {:selected-action (get-in construction [:selected-action])
+                        :repository repo :after-revision commit
+                        :mission-observation
+                        (:mission-observation reviewer-falsifier-input)
+                        :selected-want-outcomes
+                        (:selected-want-outcomes reviewer-falsifier-input)
+                        :author-job author-job :review-job review-job
+                        :review-gate review-gate})
+                      preparation-increment?
+                      (= :preparation
+                         (get-in construction
+                                 [:selected-action :ticket-readiness :increment]))
                       approved?
-                      (reviewer-falsifier/approved?
-                       {:review-state (:state review-job)
-                        :review-verdict (review-verdict review-job)
-                        :review-gate review-gate
-                        :falsifier-verification reviewer-falsifier-verification})]
+                      (and
+                       (reviewer-falsifier/approved?
+                        {:review-state (:state review-job)
+                         :review-verdict (review-verdict review-job)
+                         :review-gate review-gate
+                         :falsifier-verification reviewer-falsifier-verification})
+                       (or (not preparation-increment?)
+                           (= :qualified (:status preparation-qualification))))]
                   (reset! measurement-artifact {:repository repo :commit commit :paths files})
                   ;; PROOF-wm-works ⟨1⟩7 part 2: the attested increment is the
                   ;; wiring of an already-registered test-registry warrant
@@ -8621,7 +8656,11 @@
                         ;; the run itself; every failure mode is recorded in
                         ;; the build judgment and supplies no evidence.
                         increment-registration
-                        (when approved?
+                        ;; Preparation approval establishes only that the
+                        ;; bounded contract increment was reviewed.  It is
+                        ;; not implementation evidence and must not enter the
+                        ;; registry/learning effects below.
+                        (when (and approved? (not preparation-increment?))
                           ((or (:warrant-registration-fn opts)
                                increment-attestation/register-warrant-http)
                            opts {:repo repo :author author
@@ -8632,7 +8671,8 @@
                                                    (str (:run-id opts)) attempt-id))
                                       "/test-registry")}))
                         increment-evidence
-                        (when (and approved? (true? (:warrant? increment-registration)))
+                        (when (and approved? (not preparation-increment?)
+                                   (true? (:warrant? increment-registration)))
                           ((or (:increment-evidence-fn opts)
                                increment-attestation/increment-evidence)
                            opts {:author author
@@ -8671,6 +8711,8 @@
                                           reviewer-falsifier-receipt
                                           :reviewer-falsifier-verification
                                           reviewer-falsifier-verification
+                                          :ticket-preparation-qualification
+                                          preparation-qualification
                                           :artifact-binding artifact-binding}}
                                          revision
                                          (assoc :revision revision

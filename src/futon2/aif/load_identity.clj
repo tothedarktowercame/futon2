@@ -51,6 +51,7 @@
    'futon2.aif.mission-hole-wants "/home/joe/code/futon2/src/futon2/aif/mission_hole_wants.clj"
    'futon2.report.war-machine "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"
    'futon2.aif.full-loop-runner "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj"
+   'futon2.aif.ticket-readiness "/home/joe/code/futon2/src/futon2/aif/ticket_readiness.clj"
    'futon2.aif.full-loop-runtime "/home/joe/code/futon2/src/futon2/aif/full_loop_runtime.clj"
    'futon2.aif.meta-live-outer-selector "/home/joe/code/futon2/src/futon2/aif/meta_live_outer_selector.clj"
    ;; Reached from meta-live-outer-selector on the selection path.  Keep this
