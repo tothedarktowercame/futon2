@@ -1,5 +1,6 @@
 (ns futon2.aif.full-loop-runtime-test
-  (:require [cheshire.core :as json]
+  (:require [babashka.http-client :as http]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
@@ -74,7 +75,7 @@
         "durable last-attempt ordering advances across three canonical tickets")
     (is (every? #(= :unknown (get-in % [:assessment :classification])) results))
     (is (= before (slurp manifest)) "read-only composition does not assess or write")
-    (is (map? (:ticket-readiness-refresh preview)))
+    (is (fn? (:ticket-readiness-refresh preview)))
     (is (every? #(re-matches #"T-.+" (:ticket-id %)) results))))
 
 (deftest claimed-injury-carries-intake-bindings-from-its-transaction
@@ -416,8 +417,49 @@
                      :meta-repair-transaction-path (str dir "/transaction.edn")
                      :run-id "production-ticket-readiness"
                      :author "wm-author" :reviewer "wm-reviewer"})))))
-    (is (map? (:ticket-readiness-refresh @seen))
+    (is (fn? (:ticket-readiness-refresh @seen))
         "the runner reads readiness refresh from explicit options")))
+
+(deftest readiness-dispatch-uses-the-run-local-job-ledger
+  (let [dir (f32-root)
+        ledger (atom {:order [] :jobs {}})
+        posted (atom nil)
+        resolved-opts (atom nil)
+        failure (atom nil)]
+    (with-redefs [runner/agent-roster
+                  (constantly {"wm-author" {:status :idle :invoke-ready? true}})
+                  http/post (fn [_ request]
+                              (reset! posted (json/parse-string (:body request) true))
+                              {:status 200 :body "{\"job-id\":\"readiness-job\"}"})
+                  runner/poll-job! (fn [_ _] {:state "done" :result "{}"})
+                  runner/read-job! (fn [opts _]
+                                     (reset! resolved-opts opts)
+                                     {:state "done"})
+                  ticket-readiness/refresh-one!
+                  (fn [config]
+                    (try
+                      ((:answer-fn config) {:target "T-readiness"})
+                      (catch clojure.lang.ExceptionInfo e
+                        (reset! failure (ex-data e))))
+                    ((:contact-resolver config) "readiness-job"))
+                  runner/run-opportunity!
+                  (fn [opts]
+                    (let [live-opts (assoc opts :registered-run/job-ledger ledger
+                                               :click-id "readiness-live-click")]
+                      (runner/ticket-readiness-refresh-step live-opts)
+                      {:status :ran}))]
+      (runtime/run-opportunity!
+       {:meta-injury-ledger-path (str dir "/ledger.edn")
+        :meta-repair-transaction-path (str dir "/transaction.edn")
+        :ticket-readiness-manifest-path (str dir "/readiness.edn")
+        :run-id "readiness-live-run" :author "wm-author"}))
+    (is (nil? @failure) (pr-str @failure))
+    (is (= "readiness-live-click" (get-in @posted [:harness :source-ref])))
+    (is (= "readiness-live-run" (get-in @posted [:harness :execution-id])))
+    (is (= ["readiness-job"] (:order @ledger)))
+    (is (= "readiness-live-click" (get-in @ledger [:jobs "readiness-job" :click-id])))
+    (is (identical? ledger (:registered-run/job-ledger @resolved-opts)))
+    (is (= "readiness-live-click" (:click-id @resolved-opts)))))
 
 (deftest selected-target-answer-is-built-with-the-run-local-job-ledger
   (let [ledger (atom {:order [] :jobs {}})

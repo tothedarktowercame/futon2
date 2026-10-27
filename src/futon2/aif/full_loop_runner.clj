@@ -1980,6 +1980,13 @@
                "Reason-bearing strategic selection failed after retries"
                :transient-exhausted))))))))
 
+(defn ticket-readiness-refresh-step
+  "Resolve the readiness port only after run-local dispatch identities exist.
+  Explicit config maps remain supported for callers supplying their own ports."
+  [opts]
+  (let [port (:ticket-readiness-refresh opts)]
+    (ticket-readiness/refresh-one! (if (fn? port) (port opts) port))))
+
 (defn dispatch!
   "Bell one ask to the Agency. OPTS may carry :invoke-mode — \"brief\" for
    answer-only work (an interpretation/reading ask is a reply with no tool
@@ -7276,9 +7283,9 @@
       ;; never executes this runner path.  The production composition owns
       ;; the canonical population and contact ports; this phase owns only the
       ;; single-contact/order boundary.
-      (when-let [refresh-opts (:ticket-readiness-refresh opts)]
+      (when (:ticket-readiness-refresh opts)
         (run-phase! opts @phase-context :ticket-readiness-refresh
-                    #(ticket-readiness/refresh-one! refresh-opts)
+                    #(ticket-readiness-refresh-step opts)
                     (fn [result] {:ticket-readiness result})))
       (let [{:keys [open-stop-lines repair-lifecycle-census]}
             (run-phase! opts @phase-context :stop-line-memory

@@ -6522,6 +6522,18 @@
                            'futon2.aif.meta-live-outer-selector))
             (is (= 1 @core-ran) "composition drift refuses before another core call")))))))
 
+(deftest readiness-phase-resolves-live-options-and-preserves-map-ports
+  (let [config {:tickets [] :manifest-path "unused"}
+        seen (atom nil)
+        opts {:click-id "live-click" :registered-run/job-ledger (atom {})}]
+    (with-redefs [ticket-readiness/refresh-one! identity]
+      (is (= config (runner/ticket-readiness-refresh-step
+                     (assoc opts :ticket-readiness-refresh config))))
+      (let [live-opts (assoc opts :ticket-readiness-refresh
+                            (fn [actual] (reset! seen actual) config))]
+        (is (= config (runner/ticket-readiness-refresh-step live-opts)))
+        (is (identical? live-opts @seen))))))
+
 (deftest ticket-preparation-runs-through-real-runner-and-observation-boundary
   (let [cohort-binding (retention-cohort "ticket-preparation-owned-runner")
         manifest (str (io/file (:root cohort-binding) "ticket-readiness.edn"))

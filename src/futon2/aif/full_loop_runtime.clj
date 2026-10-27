@@ -492,7 +492,8 @@
         selected-judgment (atom nil)]
     {:ticket-readiness-refresh
      (or (:ticket-readiness-refresh opts)
-         (ticket-readiness-refresh-config opts))
+         (fn [runner-opts]
+           (ticket-readiness-refresh-config (merge opts runner-opts))))
      :judge-fn (fn [days]
                  (try
                    (let [generated (selection-judge opts days)
