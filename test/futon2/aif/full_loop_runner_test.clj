@@ -6754,7 +6754,7 @@
                       (is (= 1 @registration-calls))
                       (is (= 1 @increment-evidence-calls))
                       (is (= {:fixture :would-credit}
-                             (get-in ordinary-build [:increment :warrant])))))))))))))
+                             (get-in ordinary-build [:increment :warrant]))))))))))))))
 
 (deftest drifting-runner-refuses-before-consuming-the-attempt
   ;; Round-2 review: detection ran AFTER the core, so the stale runner judged
