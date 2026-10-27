@@ -1,0 +1,28 @@
+@flexiarg stack-coherence/staleness-scan
+@title Staleness Scan
+@sigils [🌄/止 ⌛️/久]
+@keywords stale, outdated, old, refresh, update, timestamp, lag, sync, synchronize, freshness, audit, expired
+@audience futon stewards, stack maintainers
+@tone analytic-neutral
+@factor Keen investigation (dhammavicaya)
+@references [stack-coherence/readme-devmap-sync stack-coherence/commit-intent-alignment devmap-coherence/ifr-state-convergence]
+
+! conclusion: 
+  compare timestamps (git log, last edited dates) to linked clauses; flag anything older than the freshness window and prompt a refresh with pointers to the newest artifacts
+
+  + context: You need to detect when devmaps, READMEs, or status notes lag behind recent work by comparing timestamps, and create timely updates, lest outdated narratives mislead readers.
+
+  + IF:
+    a README, devmap clause, or status note hasn’t been updated in N days while linked clauses/commits mention new work
+
+  + HOWEVER:
+    we rarely notice that those narratives are stale until someone new gets lost
+
+  + THEN:
+    compare timestamps (git log, last edited dates) to linked clauses; flag anything older than the freshness window and prompt a refresh with pointers to the newest artifacts
+
+  + BECAUSE:
+    keeping the prose synchronized with the proof is part of coherence—otherwise the map lies while the territory shifts
+
+  + NEXT-STEPS:
+    next[Use this pattern to drive the audit of drives and linodes for stale or missing artifacts.]
