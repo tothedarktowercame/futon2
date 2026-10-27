@@ -152,6 +152,36 @@
     (is (= locator (get-in receipt [:action :observation-locators want])))
     (is (= row (get-in receipt [:action :ticket-readiness])))))
 
+(deftest readiness-membership-does-not-change-frozen-multi-candidate-scoring
+  (let [ticket {:id "T-x" :kind :ticket :priority 5
+                :automated-feasibility :supported
+                :source (pin "T-x.md" "9")}
+        readiness {:ticket-id "T-x" :increment :preparation
+                   :increment-id :prepare-contract
+                   :increment-want ["T-x" :contract-present]
+                   :increment-locator {:check :C3 :repo "futon2"
+                                       :sha (apply str (repeat 40 "a"))
+                                       :path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"}}
+        compared-tasks (conj tasks ticket)
+        already-member-snapshot
+        (-> snapshot
+            (update-in [:graph :clusters] conj {:mission "T-x"})
+            (update-in [:graph :tickets :items] conj {:stem "T-x" :mtime-ms 150}))
+        before (live/task-state-candidates compared-tasks already-member-snapshot)
+        after (live/task-state-candidates
+               (mapv #(if (= "T-x" (:id %)) (assoc % :ticket-readiness readiness) %) compared-tasks)
+               already-member-snapshot)
+        before-result (selector/select {:snapshot already-member-snapshot
+                                        :candidates before :seed 271828})
+        after-result (selector/select {:snapshot already-member-snapshot
+                                       :candidates after :seed 271828})]
+    (is (= 3 (count before)) "comparison is genuinely multi-candidate")
+    (is (= before after)
+        "readiness action metadata changes neither priorities nor score channels")
+    (is (= before-result after-result)
+        "constraints, scoring law/source pins, draw and selected result are frozen")
+    (is (= (get-in before-result [:selected]) (get-in after-result [:selected])))))
+
 (defn- authorized-snapshot [snapshot]
   (let [agency (or (:agency snapshot) {:agents {}})
         summary-bytes (json/generate-string (:summary snapshot))
