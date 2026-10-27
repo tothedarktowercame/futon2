@@ -6527,6 +6527,8 @@
         manifest (str (io/file (:root cohort-binding) "ticket-readiness.edn"))
         jobs (atom {})
         assessment-contact-count (atom 0)
+        registration-calls (atom 0)
+        increment-evidence-calls (atom 0)
         author-commit (atom nil)
         malformed-contract? (atom false)
         contract-path (ticket-readiness/preparation-contract-path
@@ -6681,9 +6683,14 @@
                              :repo r :commit (:artifact-ref job)
                              :observed-head (:artifact-ref job)))
                     :repair-open-fn (constantly [])
-                    :warrant-registration-fn (constantly {:warrant? false
-                                                          :reason :fixture-no-learning})
-                     :increment-evidence-fn (constantly nil)})]
+                    :warrant-registration-fn
+                    (fn [& _]
+                      (swap! registration-calls inc)
+                      {:warrant? true :record {:fixture :would-register}})
+                    :increment-evidence-fn
+                    (fn [& _]
+                      (swap! increment-evidence-calls inc)
+                      {:warrant {:fixture :would-credit}})})]
           (with-isolated-source-snapshot
             (fn [{:keys [root]}]
               (binding [cascade-sources/*code-roots*
@@ -6704,6 +6711,10 @@
                   (is (= :qualified
                          (get-in build [:validation :ticket-preparation-qualification :status])))
                   (is (= :grounded-progress (:outcome result)))
+                  (is (zero? @registration-calls)
+                      "qualified preparation never enters implementation registration")
+                  (is (zero? @increment-evidence-calls)
+                      "qualified preparation never enters implementation evidence")
                   (is (nil? (get-in build [:increment :warrant]))
                       "preparation qualifies without claiming implementation learning")
                   (is (= :live (:status-class ticket)))
@@ -6724,6 +6735,10 @@
                            (get-in refused-build
                                    [:validation :ticket-preparation-qualification :reason])))
                     (is (nil? (get-in refused-build [:increment :warrant])))
+                    (is (zero? @registration-calls)
+                        "refused preparation never enters implementation registration")
+                    (is (zero? @increment-evidence-calls)
+                        "refused preparation never enters implementation evidence")
                     (is (= 1 @assessment-contact-count)
                         "the durable current assessment is reused; no second contact")))))))))))
 
