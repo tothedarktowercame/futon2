@@ -403,6 +403,22 @@
     (is (true? (:require-occurrence-squares? @seen)))
     (is (fn? (:occurrence-square-authoring-fn @seen)))))
 
+(deftest production-runner-receives-ticket-readiness-refresh-port
+  (let [dir (f32-root)
+        seen (atom nil)]
+    (with-redefs [runner/run-opportunity!
+                  (fn [opts]
+                    (reset! seen opts)
+                    {:status :ran})]
+      (is (= :ran (:status
+                   (runtime/run-opportunity!
+                    {:meta-injury-ledger-path (str dir "/ledger.edn")
+                     :meta-repair-transaction-path (str dir "/transaction.edn")
+                     :run-id "production-ticket-readiness"
+                     :author "wm-author" :reviewer "wm-reviewer"})))))
+    (is (map? (:ticket-readiness-refresh @seen))
+        "the runner reads readiness refresh from explicit options")))
+
 (deftest selected-target-answer-is-built-with-the-run-local-job-ledger
   (let [ledger (atom {:order [] :jobs {}})
         answer-opts (atom nil)]

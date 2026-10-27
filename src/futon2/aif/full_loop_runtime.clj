@@ -610,6 +610,8 @@
         ;; execution boundary before it decides whether selection is
         ;; terminal.
         runner-opts0 (assoc opts
+                           :ticket-readiness-refresh
+                           (:ticket-readiness-refresh defaults)
                            :click-budget (or (:click-budget opts) (atom 0))
                            :selection-counter (or (:selection-counter opts)
                                                   (atom 0))
