@@ -1,0 +1,66 @@
+@flexiarg devmap-coherence/prototype-structure-checklist
+@title Prototype Structure Checklist
+@sigils [📁/工 😄/本]
+@keywords checklist, structure, template, required, field, header, clause, format, linter, audit
+@audience futon stewards, devmap editors
+@tone analytic-neutral
+@factor Keen investigation (dhammavicaya)
+@references [devmap-coherence/prototype-maturity-lifecycle devmap-coherence/prototype-alignment-bridge devmap-coherence/prototype-alignment-tension devmap-coherence/prototype-alignment-role devmap-coherence/next-steps-to-done]
+@status ["status[...] blocked-by[...]"]
+@why [problems/devmap-self-consistency-standards]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L9-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: Prototype N — Title [sigil1 sigil2]
+      :maturity {:stub | :greenfield | :active | :settled}
+      :depends-on [futonN/PM ...]
+      :evidence-for-active [criteria for promotion]
+      :evidence-for-settled [criteria for full stability]
+
+  + context: The futon3a.devmap exemplifies complete prototype structure. Other devmaps should follow this standard.
+
+  + context: Why this prototype exists
+
+  + IF:
+    devmap prototypes are the canonical specification for what each futon layer does and how it evolves
+
+  + IF: The condition or need it addresses
+
+  + HOWEVER:
+    older devmaps have inconsistent structure — some have full clauses, others lack maturity tags, dependencies, success criteria, or audit templates
+
+  + HOWEVER: The obstacle or gap it overcomes
+
+  + THEN:
+    require every devmap prototype to include the full structural template: header with sigils, maturity tag, depends-on, evidence-for-* criteria, complete clauses (context/IF/HOWEVER/THEN/BECAUSE), EVIDENCE section, NEXT-STEPS, success-criteria with pass/fail, and PSR/PUR templates
+
+    + design: Implementation notes
+
+    + OPTIONAL-FIELDS:
+      :effort-estimate {:tokens {...} :hours {...} :confidence ...}
+
+    + REQUIRED-FIELDS:
+
+  + THEN: What it does / how it works
+
+  + BECAUSE:
+    consistent structure makes prototypes machine-parseable, enables compass scoring, and lets pattern-capable agents navigate the stack without special-casing each futon
+
+    + EVIDENCE:
+        evidence[path/to/artifact or observable fact]
+
+  + BECAUSE: Why this approach (the warrant)
+
+  + NEXT-STEPS:
+        next[Concrete action to advance the prototype]
+
+      :success-criteria
+        pass[Observable condition for success]
+        fail[Observable condition for failure]
+
+      :psr-example "Why this prototype was selected"
+      :pur-template "Template for logging use: {{placeholders}}"
+
+  + NEXT-STEPS:
+    next[Create a devmap linter that checks for required fields and emits warnings for gaps.]
+    next[Run structure audit on all futon devmaps; generate gap report.]
+    next[Update patterns-index.tsv with this pattern for compass scoring.]
