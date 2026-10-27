@@ -1,0 +1,63 @@
+@flexiarg ukrns/design-as-function-of-evidence
+@title Treat Design as a Function of Evidence
+@verdict revised
+@keywords responsiveness, stability, quarterly-checks, annual-indicators, stakeholder-walks, year-2-decision, continue-vary-stand-down, thrash, ossification
+@audience UKRN-S design, UKRN leadership, Research England, participating institutions, trainer community
+@tone analytic-foundational
+@style pattern
+@references [equity/contribution-pathways equity/visible-impact ukrns/open-the-triangle ukrns/measure-where-least-sure]
+@ancestors ["UKRN WP draft-16-april §5 Pattern (update-policy trajectories table; counterfactual; FG2A-P2 observation example; explicit Tension/Composition/Check)" "UKRN WP §5 Conclusions (design as function of evidence as the paper's thesis)" "equity/contribution-pathways (the pathway that reaches the design state)" "equity/visible-impact (the chain that must terminate in update)" "UKRN WP own form (notebook that loads evidence, computes model, emits argument — self-application instance)" "Active Inference precision parameter (meta-framing)" "t4r/ REPL discipline (Read-Evaluate-Print-Loop, cited in the paper's self-application claim)"]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L7-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: A learning system should change because evidence says it should, not because habit, enthusiasm, or fashion pushes it around.  But it should not change so often that the institutions inside it cannot plan against a stable offer.  The current paper turns that tension into an operating discipline: quarterly checks, annual indicators, stakeholder walks, and a Year-2 commitment decision in which continue, vary, and stand down are all genuinely live.  A design change should be traceable to evidence; the absence of a design change should also be defensible.
+
+  + context: The current working paper no longer frames this mainly as a model-update problem.  It frames it as an operational commitment.  Year 1 is a real launch, not a symbolic pilot.  The service runs seven quarterly yes/no checks on itself, performs three annual stakeholder walks to see whether the operation can actually be used without the writing team in the room, and then makes a Year-2 decision on the basis of what was learned.  The point of the pattern is to make sure evidence terminates in consequences rather than accumulating harmlessly at the edge of the system.
+
+  + IF:
+    The pattern operates on the axis: responsiveness ↔ stability.
+    Irreducible: a service cannot be maximally responsive to each new signal and maximally stable for the institutions trying to use it.  Every operating model chooses a position on that axis.
+
+  + HOWEVER:
+    Real costs: responsiveness catches problems early and can improve fit quickly, but too much of it turns the service into a moving target.  Stability makes planning easier, but too much of it leaves a weak design in place after evidence has already shown the weakness.  Neither end is free.
+    Active dynamic: the right balance changes over time.  Early in a new service, the case for adjustment is stronger because many uncertainties are still open.  Later, once the operating rhythm and evidence chain are established, stability deserves more weight.
+
+    + FAILURE-MODES:
+      - Evidence-without-change: checks and evaluation happen, but nothing downstream ever moves
+      - Change-without-evidence: the service changes shape, scope, or emphasis without a clear evidential basis
+      - Permanent-pilot: Year 1 produces learning but no real commitment decision ever arrives
+      - Hidden variation: operational changes are made informally and never surfaced as explicit choices
+      - No-stand-down option: continuation is assumed, so verification has no real teeth
+      - Quarterly thrash: every small signal produces operational rework before anyone can tell whether it matters
+
+  + THEN: Choose an explicit position on the axis and make the consequences visible.
+    + COMPOSITIONS:
+      (1) Quarterly adjustment inside an annual frame: run regular checks and allow limited in-year variation, but reserve the largest commitments for the annual decision point.  This is the position closest to the current paper.  It gives up perfect immediacy in exchange for manageability.
+      (2) Annual-batch revision: hold the design largely stable through the year and revise mainly at year-end.  Gives up speed of correction.
+      (3) Continuous operational revision: treat each new signal as a potential live change to the service.  Gives up predictability and makes governance harder.
+      These compositions are not ranked in the abstract.  The point is that the service should be able to say which one it is using and why.
+
+    + CHECK:
+      Engaged when: each material operational change can be tied back to evidence; the seven quarterly checks are actually run; the annual stakeholder walks expose whether the service is usable by the actors who must carry it; the Year-2 decision can continue, vary, or stop.
+      Failing when: learning is gathered but has no consequences; the operation changes for reasons no one can inspect; stand-down is named but never really available.
+
+  + BECAUSE:
+    Evidence only matters if it changes consequences: The paper's live claim is not just that evaluation should happen, but that it should terminate in decisions.  Otherwise the design is not a learning system; it is a reporting system.
+
+    Year-1 launch makes the discipline operational: The quarterly checks, the annual indicators, and the stakeholder walks are the mechanism by which evidence enters the design.  They are not side documentation.  They are the operating discipline that prevents both complacency and panic.
+
+    Stand-down is part of the pattern: A Year-2 choice between continue and vary is not enough if stopping was never a real option.  The stand-down path is what makes the verification posture credible.  If the service cannot fail in principle, it cannot learn honestly in practice.
+
+    Relationship to participation and visible impact: This pattern still answers the same structural concern as the older library language: if people contribute evidence or downstream experience, that contribution should matter.  The service demonstrates that it matters by letting the evidence chain end in visible operational consequence rather than in a dead archive.
+
+    Mechanic, in short:
+    Derived from the paper's Year-1 launch discipline: quarterly checks, annual stakeholder walks, and an explicit Year-2 commitment decision.
+    Answers the general problem of evidence that never changes the system it describes.
+    Mapped to the learning loop at the update step: after diagnosis, provisioning, delivery, and evaluation, something must be allowed to change.
+    Coordination requirement: High.  The service, institutions, and partners all need to know what can change when, and on what basis.
+
+  + NEXT-STEPS:
+    - Publish the seven quarterly checks as part of the operating model, not as an internal afterthought
+    - Record any material in-year variation in the service and the evidence that prompted it
+    - Use the three annual stakeholder walks as decision tests rather than as presentational exercises
+    - Keep continue, vary, and stand down genuinely live at the Year-2 decision point
+    - Use this pattern downstream of measurement and cross-institutional comparison, where evidence is mature enough to justify operational consequence
