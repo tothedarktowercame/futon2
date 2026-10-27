@@ -6529,6 +6529,7 @@
         assessment-contact-count (atom 0)
         registration-calls (atom 0)
         increment-evidence-calls (atom 0)
+        preparation-action? (atom true)
         author-commit (atom nil)
         malformed-contract? (atom false)
         contract-path (ticket-readiness/preparation-contract-path
@@ -6615,9 +6616,11 @@
                       want (:increment-want row)
                       locator (:increment-locator row)
                       base-action (:action (token-loop-exercised-decision))
-                      action (assoc base-action :target "T-owned" :want [want]
-                                    :observation-locators {want locator}
-                                    :ticket-readiness row)
+                      action (if @preparation-action?
+                               (assoc base-action :target "T-owned" :want [want]
+                                      :observation-locators {want locator}
+                                      :ticket-readiness row)
+                               base-action)
                       comparator (assoc action :cascade-id :test/ticket-comparator
                                         :id :test/ticket-comparator)]
                   (is (= "T-owned" (:selected selected)) (pr-str selected))
@@ -6740,7 +6743,18 @@
                     (is (zero? @increment-evidence-calls)
                         "refused preparation never enters implementation evidence")
                     (is (= 1 @assessment-contact-count)
-                        "the durable current assessment is reused; no second contact")))))))))))
+                        "the durable current assessment is reused; no second contact")
+                    ;; The same production call edge remains live for an
+                    ;; ordinary approved action. This distinguishes the
+                    ;; preparation exclusion from disabling registration.
+                    (reset! preparation-action? false)
+                    (let [ordinary (runner/run-opportunity! opts)
+                          ordinary-build (get-in ordinary [:checkpoints :build :judgment])]
+                      (is (= :grounded-progress (:outcome ordinary)))
+                      (is (= 1 @registration-calls))
+                      (is (= 1 @increment-evidence-calls))
+                      (is (= {:fixture :would-credit}
+                             (get-in ordinary-build [:increment :warrant])))))))))))))
 
 (deftest drifting-runner-refuses-before-consuming-the-attempt
   ;; Round-2 review: detection ran AFTER the core, so the stale runner judged
