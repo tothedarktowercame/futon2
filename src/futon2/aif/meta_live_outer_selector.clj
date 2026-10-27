@@ -709,10 +709,6 @@
         selection-draw (if (some? seed)
                          {:status :sealed :seed seed :u selection-u}
                          {:absent :no-seed})
-        algorithm-tasks (filterv #(= :algorithm (:kind %)) tasks)
-        registry-tasks (filterv #(not= :algorithm (:kind %)) tasks)
-        {ordinary-tasks :tasks repair-excluded :excluded}
-        (attach-repair-observations registry-tasks)
         snapshot0 (fetch-snapshot)
         base-membership (meta/pipeline-membership snapshot0)
         readiness-path (or (:ticket-readiness-manifest-path policy-field-config)
@@ -735,6 +731,13 @@
                       (if-let [row (get readiness-by-id (:id task))]
                         (assoc task :ticket-readiness row)
                         task)) tasks)
+        ;; The readiness row is part of the admitted task. Split and decorate
+        ;; repair observations only after attaching it, so standing,
+        ;; membership, scoring and the selected action all see the same task.
+        algorithm-tasks (filterv #(= :algorithm (:kind %)) tasks)
+        registry-tasks (filterv #(not= :algorithm (:kind %)) tasks)
+        {ordinary-tasks :tasks repair-excluded :excluded}
+        (attach-repair-observations registry-tasks)
         snapshot-verification (meta/validate-snapshot snapshot)
         standing (into {} (map (fn [task]
                                  [(:id task)
@@ -1101,7 +1104,11 @@
                                        (:recomputation activated-carrier))))
                     activated-carrier
                     (assoc :chosen selected-task
-                           :action selected-action)
+                           ;; The carrier fixes the canonical choice. The first
+                           ;; receipt projection adds execution fields (notably
+                           ;; the assessed incremental want and locator); do
+                           ;; not discard them when installing the carrier.
+                           :action (merge selected-action (:action receipt)))
                     (not activated-carrier)
                     (assoc :chosen {:absent (or (:reason ordinary-result)
                                                 ordinary-reason

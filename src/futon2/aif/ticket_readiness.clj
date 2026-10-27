@@ -6,6 +6,7 @@
   changed here."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.registry-port :as registry-port])
@@ -22,6 +23,13 @@
 (def semantic-log-schema :wm/ticket-semantic-log-v1)
 (def postcheck-schema :wm/ticket-semantic-postcheck-v1)
 (def response-schema :wm/ticket-readiness-response-v1)
+
+(defn preparation-contract-path [ticket-id increment-id]
+  (when (and (string? ticket-id) (keyword? increment-id)
+             (re-matches #"[A-Za-z0-9._-]+" ticket-id)
+             (re-matches #"[A-Za-z0-9._-]+" (name increment-id)))
+    (str "holes/labs/wm-contract/ticket-readiness/" ticket-id "/"
+         (name increment-id) ".edn")))
 
 (defn- file-bytes [path] (Files/readAllBytes (.toPath (io/file path))))
 (defn file-pin [path]
@@ -162,6 +170,20 @@
   or independently review its own future output."
   [ticket proposal response inputs]
   (let [answer (or (:answer response) response)
+        expected-path (preparation-contract-path (:id ticket) (:increment-id answer))
+        locator (:increment-locator answer)
+        locator-valid? (and (= :C3 (:check locator))
+                            (= expected-path (:path locator))
+                            (string? (:repo locator))
+                            (string? (:sha locator))
+                            (boolean (re-matches #"[0-9a-f]{40,64}" (:sha locator))))
+        ownership (get-in inputs [:ownership-evidence :state])
+        requisition (get-in inputs [:operator-evidence :requisition])
+        operator-status (get-in inputs [:operator-evidence :status-class])
+        operator-allowed? (and (= :live operator-status)
+                               (not (contains? requisition :malformed))
+                               (not (contains? #{:in-progress :completed}
+                                               (:state requisition))))
         bound? (and (= response-schema (:schema answer))
                     (= :preparation (:increment answer))
                     (= (:id ticket) (:ticket-id answer))
@@ -169,24 +191,23 @@
                     (= (:proposal-pin answer) (value-digest proposal))
                     (keyword? (:increment-id answer))
                     (vector? (:increment-want answer))
-                    (map? (:increment-locator answer)))
+                    locator-valid?)
         ;; Production Agency responses carry retained job/result provenance;
         ;; tests carry the explicit synthetic marker and cannot be confused
         ;; with a live authority assertion.
         port-bound? (or (= :synthetic-test-reply (:provenance response))
                         (and (string? (:job-id response))
                              (map? (:result-pin response))))
-        ownership (get-in inputs [:ownership-evidence :state])
-        operator (get-in inputs [:operator-evidence :status-class])
         assessment (classify
                     {:increment :preparation :source-current? true
-                     :operator-allowed? (= :live operator)
+                     :operator-allowed? operator-allowed?
                      :owned? (contains? #{:active :ambiguous} ownership)
-                     :active? (= :live operator)
+                     :active? (= :live operator-status)
                      :preparation-dependencies-resolved?
                      (case (:preparation-dependencies answer)
                        :satisfied true :blocked false nil)
-                     :interpretation-valid? (and bound? port-bound?)
+                     :interpretation-valid? (and bound? port-bound?
+                                                  (= :unowned ownership))
                      :root-route (:root-route inputs)})]
     {:increment :preparation
      :increment-id (:increment-id answer)
@@ -195,6 +216,53 @@
      :proposal-pin (value-digest proposal)
      :contact-provenance (select-keys response [:job-id :result-pin :provenance])
      :assessment assessment}))
+
+(defn qualify-preparation-run
+  "Qualify a selected preparation increment from the reviewed immutable
+  repository state. The C3 observation establishes creation only; this reads
+  and validates the created contract and binds it to the actual author and
+  reviewer jobs retained by the runner."
+  [{:keys [selected-action repository after-revision mission-observation
+           selected-want-outcomes author-job review-job review-gate]}]
+  (let [readiness (:ticket-readiness selected-action)
+        increment-id (:increment-id readiness)
+        expected-path (preparation-contract-path (:target selected-action) increment-id)
+        locator (get (:observation-locators selected-action)
+                     (first (:want selected-action)))
+        shown (when (and (= :preparation (:increment readiness))
+                         (= expected-path (:path locator))
+                         (string? repository) (string? after-revision))
+                (shell/sh "git" "-C" repository "show"
+                          (str after-revision ":" expected-path)))
+        contract (when (zero? (or (:exit shown) 1))
+                   (try (edn/read-string (:out shown)) (catch Throwable _ nil)))
+        expected {:ticket-id (:target selected-action)
+                  :source-pin (:source-pin readiness)
+                  :increment-id increment-id}
+        author-id (or (:seat author-job) (:agent-id author-job) (:author author-job))
+        reviewer-id (or (:seat review-job) (:agent-id review-job) (:author review-job))]
+    (cond
+      (not= :preparation (:increment readiness)) {:status :not-applicable}
+      (not= :admitted (:status mission-observation))
+      {:status :refused :reason :preparation-observation-not-admitted}
+      (not= :verified (:status selected-want-outcomes))
+      {:status :refused :reason :preparation-want-not-accounted}
+      (not (every? #(= :reached (:classification %)) (:outcomes selected-want-outcomes)))
+      {:status :refused :reason :preparation-artifact-not-created}
+      (not (map? contract)) {:status :refused :reason :contract-missing-or-unreadable}
+      (not= contract-schema (:schema contract)) {:status :refused :reason :contract-malformed}
+      (not= expected (select-keys contract (keys expected)))
+      {:status :refused :reason :contract-binding-mismatch}
+      (not (and (seq (:positive-cases contract)) (seq (:negative-cases contract))))
+      {:status :refused :reason :contract-cases-empty}
+      (not (:passed? review-gate)) {:status :refused :reason :review-not-accepted}
+      (or (str/blank? (str author-id)) (str/blank? (str reviewer-id))
+          (= (str author-id) (str reviewer-id)))
+      {:status :refused :reason :review-not-independent}
+      :else {:status :qualified :revision after-revision
+             :contract {:path expected-path :sha256 (value-digest contract)}
+             :author-job (:job-id author-job) :review-job (:job-id review-job)
+             :reviewer (str reviewer-id)})))
 
 (defn ordered-population
   "Fair canonical population: least recently attempted, then ticket id."
@@ -244,6 +312,7 @@
            (= (:ticket-id entry) (:ticket-id record))
            (= (:source-pin entry) (:source-pin record))
            (= (:increment entry) (:increment record))
+           (= (:increment-id entry) (:increment-id record))
            (= (:increment-want entry) (:increment-want record))
            (= (:increment-locator entry) (:increment-locator record))
            (= (:assessment entry) (:assessment record))
@@ -255,7 +324,9 @@
                (filter #(and (= :suitable (get-in % [:assessment :classification]))
                              (current-entry? % (get current-inputs (:ticket-id %)))))
                (mapv (fn [e] {:ticket-id (:ticket-id e)
+                               :source-pin (:source-pin e)
                                :increment (:increment e)
+                               :increment-id (:increment-id e)
                                :increment-want (:increment-want e)
                                :increment-locator (:increment-locator e)
                                :assessment-pin (:assessment-pin e)})))})
@@ -288,7 +359,7 @@
                              (subs (:sha256 (:source ticket)) 0 12) "-"
                              (subs (value-digest [at inputs]) 0 12) ".edn")
             _ (atomic-spit! record-path record)
-            entry (assoc (select-keys record [:ticket-id :source-pin :increment :increment-want
+            entry (assoc (select-keys record [:ticket-id :source-pin :increment :increment-id :increment-want
                                               :increment-locator :assessment])
                          :input-identity (value-digest inputs)
                          :assessment-pin (file-pin record-path))

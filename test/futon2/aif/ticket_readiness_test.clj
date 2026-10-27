@@ -1,10 +1,16 @@
 (ns futon2.aif.ticket-readiness-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is]]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-pipeline-selector :as pipeline]
             [futon2.aif.ticket-readiness :as readiness]))
+
+(defn- git! [dir & args]
+  (let [{:keys [exit out err]} (apply shell/sh "git" "-C" (.getPath dir) args)]
+    (when-not (zero? exit) (throw (ex-info "git failed" {:args args :err err})))
+    (.trim out)))
 
 (defn- temp-dir [] (.toFile (java.nio.file.Files/createTempDirectory "ticket-readiness" (make-array java.nio.file.attribute.FileAttribute 0))))
 (defn- write! [dir name value]
@@ -253,12 +259,16 @@
                 :proposal-pin (readiness/value-digest proposal)
                 :increment-id :prepare-contract
                 :increment-want ["T-x" :contract-present]
-                :increment-locator {:check :C3 :path "contracts/T-x.edn"}
+                :increment-locator {:check :C3 :repo "futon2"
+                                    :sha (apply str (repeat 40 "a"))
+                                    :path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"}
                 :preparation-dependencies :satisfied}
         admitted (readiness/validate-assessment-response
                   ticket proposal {:answer answer :provenance :synthetic-test-reply} inputs)]
     (is (= :suitable (get-in admitted [:assessment :classification])))
-    (is (= {:check :C3 :path "contracts/T-x.edn"} (:increment-locator admitted)))
+    (is (= {:check :C3 :repo "futon2" :sha (apply str (repeat 40 "a"))
+            :path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"}
+           (:increment-locator admitted)))
     (is (= :unknown
            (get-in (readiness/validate-assessment-response
                     ticket proposal
@@ -266,3 +276,43 @@
                      :provenance :synthetic-test-reply}
                     inputs)
                    [:assessment :classification])))))
+
+(deftest reviewed-preparation-qualification-reads-the-immutable-commit
+  (let [repo (temp-dir) _ (git! repo "init")
+        _ (git! repo "config" "user.email" "test@example.invalid")
+        _ (git! repo "config" "user.name" "Test")
+        path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"
+        file (io/file repo path) _ (.mkdirs (.getParentFile file))
+        contract {:schema readiness/contract-schema :ticket-id "T-x"
+                  :source-pin source-pin :increment-id :prepare-contract
+                  :positive-cases [:increment] :negative-cases [:done-only]}
+        _ (spit file (str (pr-str contract) "\n")) _ (git! repo "add" path)
+        _ (git! repo "commit" "-m" "contract") head (git! repo "rev-parse" "HEAD")
+        want ["T-x" :contract-present]
+        action {:target "T-x" :want [want]
+                :observation-locators {want {:check :C3 :repo "futon2" :sha head :path path}}
+                :ticket-readiness {:increment :preparation :increment-id :prepare-contract
+                                   :source-pin source-pin}}
+        base {:selected-action action :repository (.getPath repo) :after-revision head
+              :mission-observation {:status :admitted}
+              :selected-want-outcomes {:status :verified
+                                       :outcomes [{:classification :reached}]}
+              :author-job {:job-id "a" :seat "author"}
+              :review-job {:job-id "r" :seat "reviewer"}
+              :review-gate {:passed? true}}]
+    (is (= :qualified (:status (readiness/qualify-preparation-run base))))
+    (is (= :contract-cases-empty
+           (:reason (do (spit file (str (pr-str (assoc contract :negative-cases [])) "\n"))
+                        (git! repo "add" path) (git! repo "commit" "-m" "empty")
+                        (readiness/qualify-preparation-run
+                         (assoc base :after-revision (git! repo "rev-parse" "HEAD")))))))
+    (is (= :review-not-independent
+           (:reason (readiness/qualify-preparation-run
+                     (assoc base :review-job {:job-id "r" :seat "author"})))))
+    (is (= :preparation-observation-not-admitted
+           (:reason (readiness/qualify-preparation-run
+                     (assoc base :mission-observation {:status :refused})))))
+    (is (= :contract-missing-or-unreadable
+           (:reason (readiness/qualify-preparation-run
+                     (assoc-in base [:selected-action :observation-locators want :path]
+                               "holes/labs/wm-contract/ticket-readiness/T-x/other.edn")))))))

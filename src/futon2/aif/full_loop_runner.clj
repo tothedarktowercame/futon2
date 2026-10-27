@@ -8225,6 +8225,15 @@
                          (seq (get-in construction [:selected-action :want]))
                          (not= :repair-machine-failure
                                (get-in construction [:selected-action :type])))
+                    ;; A ticket preparation selected by the canonical outer
+                    ;; policy is also an exact selected-want observation. It
+                    ;; must traverse the durable pre-author baseline and the
+                    ;; same immutable C3/C4 readers; a readiness label alone
+                    ;; never supplies its before state.
+                    (and (= :preparation
+                            (get-in construction
+                                    [:selected-action :ticket-readiness :increment]))
+                         (seq (get-in construction [:selected-action :want])))
                     (and deferred-author-job
                          (contains? deferred-author-context
                                     :mission-observation-baseline)))
@@ -8610,12 +8619,27 @@
                       reviewer-falsifier-verification
                       (reviewer-falsifier/verify reviewer-falsifier-receipt
                                                  reviewer-falsifier-input)
+                      preparation-qualification
+                      (ticket-readiness/qualify-preparation-run
+                       {:selected-action (get-in construction [:selected-action])
+                        :repository repo :after-revision commit
+                        :mission-observation
+                        (:mission-observation reviewer-falsifier-input)
+                        :selected-want-outcomes
+                        (:selected-want-outcomes reviewer-falsifier-input)
+                        :author-job author-job :review-job review-job
+                        :review-gate review-gate})
                       approved?
-                      (reviewer-falsifier/approved?
-                       {:review-state (:state review-job)
-                        :review-verdict (review-verdict review-job)
-                        :review-gate review-gate
-                        :falsifier-verification reviewer-falsifier-verification})]
+                      (and
+                       (reviewer-falsifier/approved?
+                        {:review-state (:state review-job)
+                         :review-verdict (review-verdict review-job)
+                         :review-gate review-gate
+                         :falsifier-verification reviewer-falsifier-verification})
+                       (or (not= :preparation
+                                 (get-in construction
+                                         [:selected-action :ticket-readiness :increment]))
+                           (= :qualified (:status preparation-qualification))))]
                   (reset! measurement-artifact {:repository repo :commit commit :paths files})
                   ;; PROOF-wm-works ⟨1⟩7 part 2: the attested increment is the
                   ;; wiring of an already-registered test-registry warrant
@@ -8680,6 +8704,8 @@
                                           reviewer-falsifier-receipt
                                           :reviewer-falsifier-verification
                                           reviewer-falsifier-verification
+                                          :ticket-preparation-qualification
+                                          preparation-qualification
                                           :artifact-binding artifact-binding}}
                                          revision
                                          (assoc :revision revision

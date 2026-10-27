@@ -139,6 +139,19 @@
                                    :fetch-snapshot (constantly snapshot)})]
     (is (= selection-as-of (:selection-as-of receipt)))))
 
+(deftest canonical-receipt-projects-preparation-want-and-locator
+  (let [want ["T-x" :contract-present]
+        locator {:check :C3 :repo "futon2" :sha (apply str (repeat 40 "a"))
+                 :path "holes/labs/wm-contract/ticket-readiness/T-x/prepare-contract.edn"}
+        row {:ticket-id "T-x" :increment :preparation :increment-id :prepare-contract
+             :increment-want want :increment-locator locator}
+        receipt (#'live/canonical-receipt
+                 [{:id "T-x" :kind :ticket :ticket-readiness row}]
+                 [] {:status :selected :selected "T-x"})]
+    (is (= [want] (get-in receipt [:action :want])))
+    (is (= locator (get-in receipt [:action :observation-locators want])))
+    (is (= row (get-in receipt [:action :ticket-readiness])))))
+
 (defn- authorized-snapshot [snapshot]
   (let [agency (or (:agency snapshot) {:agents {}})
         summary-bytes (json/generate-string (:summary snapshot))
