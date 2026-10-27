@@ -166,15 +166,18 @@
                               :interpretation-valid? true :root-route :admitted}))))
 
 (deftest forged-membership-and-changed-inputs-are-excluded
-  (let [dir (temp-dir) record (write! dir "assessment.edn"
-                                      {:inputs {:source source-pin :dependency-evidence [:d1]
-                                                :ownership-evidence :unowned
-                                                :implementation-evidence :absent
-                                                :operator-evidence :allowed :root-route :standalone}})
+  (let [dir (temp-dir) assessment {:classification :suitable}
+        inputs {:source source-pin :dependency-evidence [:d1]
+                :ownership-evidence :unowned :implementation-evidence :absent
+                :operator-evidence :allowed :root-route :standalone}
+        record (write! dir "assessment.edn"
+                       {:schema readiness/schema :ticket-id "T-x" :source-pin source-pin
+                        :increment :preparation :increment-want ["T-x" :contract]
+                        :assessment assessment :inputs inputs})
         pin (readiness/file-pin record)
         entry {:ticket-id "T-x" :increment :preparation
                :increment-want ["T-x" :contract]
-               :assessment {:classification :suitable}
+               :source-pin source-pin :assessment assessment
                :assessment-pin pin
                :input-identity (readiness/value-digest
                                 {:source source-pin :dependency-evidence [:d1]
@@ -236,3 +239,30 @@
                                             :held {:status :ok}
                                             :patterns {:status :ok}}}}]
     (is (= :complete (:status (pipeline/section-availability snapshot))))))
+
+(deftest bounded-preparation-response-is-source-and-proposal-bound
+  (let [ticket {:id "T-x" :source source-pin :status-class :live}
+        proposal {:target "T-x" :source source-pin}
+        inputs {:source source-pin :dependency-evidence {:status :unknown}
+                :ownership-evidence {:state :unowned}
+                :implementation-evidence {:status :unknown}
+                :operator-evidence {:status-class :live}
+                :root-route :standalone}
+        answer {:schema readiness/response-schema :increment :preparation
+                :ticket-id "T-x" :source-pin source-pin
+                :proposal-pin (readiness/value-digest proposal)
+                :increment-id :prepare-contract
+                :increment-want ["T-x" :contract-present]
+                :increment-locator {:check :C3 :path "contracts/T-x.edn"}
+                :preparation-dependencies :satisfied}
+        admitted (readiness/validate-assessment-response
+                  ticket proposal {:answer answer :provenance :synthetic-test-reply} inputs)]
+    (is (= :suitable (get-in admitted [:assessment :classification])))
+    (is (= {:check :C3 :path "contracts/T-x.edn"} (:increment-locator admitted)))
+    (is (= :unknown
+           (get-in (readiness/validate-assessment-response
+                    ticket proposal
+                    {:answer (assoc answer :source-pin (assoc source-pin :sha256 "wrong"))
+                     :provenance :synthetic-test-reply}
+                    inputs)
+                   [:assessment :classification])))))

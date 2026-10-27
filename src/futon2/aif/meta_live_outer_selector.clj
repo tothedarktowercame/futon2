@@ -2,12 +2,14 @@
   "Live adapter from the pipeline cascade to canonical outer-task selection."
   (:require [babashka.http-client :as http]
             [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [cheshire.core :as json]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-decision-manifest :as decision-manifest]
             [futon2.aif.meta-pipeline-selector :as meta]
+            [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.outer-task-selection :as outer]
@@ -483,7 +485,7 @@
   (some #(when (and (string? %) (re-matches root-task-id %)) %)
         [(:mission-id agent) (:excursion-id agent) (:ticket-id agent)]))
 
-(defn- ownership-observation [task snapshot]
+(defn ownership-observation [task snapshot]
   (let [source (:agency-source snapshot)
         agents (get-in snapshot [:agency :agents])
         owners (when (and (map? agents) (map? source))
@@ -498,7 +500,25 @@
       (nil? owners) {:state :unknown :reason :agency-evidence-unavailable}
       (empty? owners) {:state :unowned :source source}
       (= 1 (count owners)) {:state :active :owner (first owners) :source source}
-      :else {:state :ambiguous :owners owners :source source})))
+    :else {:state :ambiguous :owners owners :source source})))
+
+(def default-ticket-readiness-manifest
+  "/home/joe/code/futon2/data/wm-ticket-readiness/manifest.edn")
+
+(defn ticket-readiness-input
+  "Current preselection facts from existing canonical readers. Dependency and
+  implementation evidence remain explicitly unknown until their real producer
+  supplies them; preparation does not turn those unknowns into implementation
+  authority."
+  [task snapshot base-membership]
+  {:source (:source task)
+   :dependency-evidence {:status :unknown :scope :implementation}
+   :ownership-evidence (ownership-observation task snapshot)
+   :implementation-evidence {:status :unknown}
+   :operator-evidence {:status-class (:status-class task)
+                       :requisition (:requisition task)}
+   :root-route (if (contains? (:ids base-membership) (:id task))
+                 :admitted :standalone)})
 
 (defn- git-command [dir & args]
   (let [{:keys [exit out err]} (apply shell/sh "git" "-C" dir args)]
@@ -633,7 +653,8 @@
 (defn- canonical-receipt [tasks excluded selection]
   (let [support (mapv outer/task-view tasks)
         selected-id (when (= :selected (:status selection)) (:selected selection))
-        chosen (first (filter #(= selected-id (:id %)) support))]
+        chosen (first (filter #(= selected-id (:id %)) support))
+        chosen-task (first (filter #(= selected-id (:id %)) tasks))]
     (cond-> {:schema outer/schema
              :policy {:kind policy-kind
                       :uses [:pipeline-cascade :pipeline-freshness
@@ -647,8 +668,14 @@
              :draw {:absent :deterministic-meta-policy}
              :chosen (or chosen {:absent (or (:reason selection)
                                              :meta-selection-refused)})}
-      chosen (assoc :action {:type (get action-type (:kind chosen))
-                             :target (:id chosen)})
+      chosen (assoc :action (cond-> {:type (get action-type (:kind chosen))
+                                     :target (:id chosen)}
+                              (:ticket-readiness chosen-task)
+                              (assoc :want [(get-in chosen-task [:ticket-readiness :increment-want])]
+                                     :observation-locators
+                                     {(get-in chosen-task [:ticket-readiness :increment-want])
+                                      (get-in chosen-task [:ticket-readiness :increment-locator])}
+                                     :ticket-readiness (:ticket-readiness chosen-task))))
       (= :algorithm (:kind chosen))
       (assoc :algorithm-admission
              (select-keys (first (filter #(= selected-id (:id %)) tasks))
@@ -686,7 +713,28 @@
         registry-tasks (filterv #(not= :algorithm (:kind %)) tasks)
         {ordinary-tasks :tasks repair-excluded :excluded}
         (attach-repair-observations registry-tasks)
-        snapshot (fetch-snapshot)
+        snapshot0 (fetch-snapshot)
+        base-membership (meta/pipeline-membership snapshot0)
+        readiness-path (or (:ticket-readiness-manifest-path policy-field-config)
+                           default-ticket-readiness-manifest)
+        ticket-inputs (into {}
+                            (map (fn [task]
+                                   [(:id task) (ticket-readiness-input task snapshot0 base-membership)]))
+                            (filter #(= :ticket (:kind %)) tasks))
+        readiness-section (when (.isFile (io/file readiness-path))
+                            (ticket-readiness/suitable-section
+                             (ticket-readiness/read-manifest readiness-path) ticket-inputs))
+        snapshot (if readiness-section
+                   (-> snapshot0
+                       (assoc-in [:graph :ticket-readiness] readiness-section)
+                       (assoc-in [:graph :section-status :ticket-readiness] {:status :ok}))
+                   snapshot0)
+        readiness-by-id (into {} (map (juxt :ticket-id identity)
+                                      (:items readiness-section)))
+        tasks (mapv (fn [task]
+                      (if-let [row (get readiness-by-id (:id task))]
+                        (assoc task :ticket-readiness row)
+                        task)) tasks)
         snapshot-verification (meta/validate-snapshot snapshot)
         standing (into {} (map (fn [task]
                                  [(:id task)

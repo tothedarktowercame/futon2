@@ -20,6 +20,7 @@
 (def registry-schema :wm/ticket-semantic-run-v1)
 (def semantic-log-schema :wm/ticket-semantic-log-v1)
 (def postcheck-schema :wm/ticket-semantic-postcheck-v1)
+(def response-schema :wm/ticket-readiness-response-v1)
 
 (defn- file-bytes [path] (Files/readAllBytes (.toPath (io/file path))))
 (defn file-pin [path]
@@ -134,11 +135,13 @@
     (not source-current?) {:classification :unknown :reason :assessment-stale}
     (not interpretation-valid?) {:classification :unknown :reason :interpretation-invalid}
     (= :preparation increment)
-    (if (true? preparation-dependencies-resolved?)
+    (cond
+      (true? preparation-dependencies-resolved?)
       {:classification :suitable :increment :preparation
        :implementation-admitted false :global-completeness-claimed false}
+      (false? preparation-dependencies-resolved?)
       {:classification :not-suitable :reason :preparation-dependency-blocked}
-      )
+      :else {:classification :unknown :reason :preparation-dependency-unknown})
     (= :implementation increment)
     (cond
       (not preparation-output-qualified?)
@@ -150,6 +153,46 @@
       {:classification :unknown :reason :relevant-dependency-unresolved}
       :else {:classification :suitable :increment :implementation})
     :else {:classification :unknown :reason :increment-unresolved}))
+
+(defn validate-assessment-response
+  "Validate one finite preparation proposal returned through the designated
+  contact port. The response proposes work; it does not certify implementation
+  or independently review its own future output."
+  [ticket proposal response inputs]
+  (let [answer (or (:answer response) response)
+        bound? (and (= response-schema (:schema answer))
+                    (= :preparation (:increment answer))
+                    (= (:id ticket) (:ticket-id answer))
+                    (= (:source ticket) (:source-pin answer))
+                    (= (:proposal-pin answer) (value-digest proposal))
+                    (keyword? (:increment-id answer))
+                    (vector? (:increment-want answer))
+                    (map? (:increment-locator answer)))
+        ;; Production Agency responses carry retained job/result provenance;
+        ;; tests carry the explicit synthetic marker and cannot be confused
+        ;; with a live authority assertion.
+        port-bound? (or (= :synthetic-test-reply (:provenance response))
+                        (and (string? (:job-id response))
+                             (map? (:result-pin response))))
+        ownership (get-in inputs [:ownership-evidence :state])
+        operator (get-in inputs [:operator-evidence :status-class])
+        assessment (classify
+                    {:increment :preparation :source-current? true
+                     :operator-allowed? (= :live operator)
+                     :owned? (contains? #{:active :ambiguous} ownership)
+                     :active? (= :live operator)
+                     :preparation-dependencies-resolved?
+                     (case (:preparation-dependencies answer)
+                       :satisfied true :blocked false nil)
+                     :interpretation-valid? (and bound? port-bound?)
+                     :root-route (:root-route inputs)})]
+    {:increment :preparation
+     :increment-id (:increment-id answer)
+     :increment-want (:increment-want answer)
+     :increment-locator (:increment-locator answer)
+     :proposal-pin (value-digest proposal)
+     :contact-provenance (select-keys response [:job-id :result-pin :provenance])
+     :assessment assessment}))
 
 (defn ordered-population
   "Fair canonical population: least recently attempted, then ticket id."
@@ -165,6 +208,16 @@
                 (into-array StandardCopyOption
                             [StandardCopyOption/ATOMIC_MOVE StandardCopyOption/REPLACE_EXISTING]))
     path))
+
+(defn retain-contact-result!
+  "Retain the actual designated contact result before its claims are decoded."
+  [manifest-path {:keys [job-id seat text] :as response}]
+  (when (and (string? job-id) (string? text))
+    (let [path (str manifest-path ".contacts/" job-id ".edn")
+          value {:schema :wm/ticket-readiness-contact-v1 :job-id job-id
+                 :seat seat :result text :response-state (:state response)}]
+      (atomic-spit! path value)
+      (file-pin path))))
 
 (defn read-manifest [path]
   (let [value (if (.isFile (io/file path)) (read-edn path)
@@ -182,11 +235,18 @@
                 :implementation-evidence :operator-evidence :root-route])))
 
 (defn- current-entry? [entry current-inputs]
-  (and (valid-current-inputs? current-inputs)
-       (pin-matches? (:assessment-pin entry))
-       (= (:input-identity entry) (value-digest current-inputs))
-       (= current-inputs
-          (:inputs (read-edn (get-in entry [:assessment-pin :path]))))))
+  (when (and (valid-current-inputs? current-inputs)
+             (pin-matches? (:assessment-pin entry)))
+    (let [record (read-edn (get-in entry [:assessment-pin :path]))]
+      (and (= schema (:schema record))
+           (= (:ticket-id entry) (:ticket-id record))
+           (= (:source-pin entry) (:source-pin record))
+           (= (:increment entry) (:increment record))
+           (= (:increment-want entry) (:increment-want record))
+           (= (:increment-locator entry) (:increment-locator record))
+           (= (:assessment entry) (:assessment record))
+           (= (:input-identity entry) (value-digest current-inputs))
+           (= current-inputs (:inputs record))))))
 
 (defn suitable-section [manifest current-inputs]
   {:items (->> (:entries manifest)
@@ -195,6 +255,7 @@
                (mapv (fn [e] {:ticket-id (:ticket-id e)
                                :increment (:increment e)
                                :increment-want (:increment-want e)
+                               :increment-locator (:increment-locator e)
                                :assessment-pin (:assessment-pin e)})))})
 
 (defn refresh-one!
@@ -221,9 +282,12 @@
             record (assoc assessed :schema schema :ticket-id (:id ticket)
                           :source-pin (:source ticket) :inputs inputs :assessed-at at
                           :external-reply-provenance (:provenance response))
-            record-path (str manifest-path ".records/" (:id ticket) "-" (subs (:sha256 (:source ticket)) 0 12) ".edn")
+            record-path (str manifest-path ".records/" (:id ticket) "-"
+                             (subs (:sha256 (:source ticket)) 0 12) "-"
+                             (subs (value-digest [at inputs]) 0 12) ".edn")
             _ (atomic-spit! record-path record)
-            entry (assoc (select-keys record [:ticket-id :source-pin :increment :increment-want :assessment])
+            entry (assoc (select-keys record [:ticket-id :source-pin :increment :increment-want
+                                              :increment-locator :assessment])
                          :input-identity (value-digest inputs)
                          :assessment-pin (file-pin record-path))
             entries (conj (vec (remove #(= (:ticket-id %) (:id ticket)) (:entries manifest))) entry)

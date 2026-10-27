@@ -9,6 +9,7 @@
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-live-outer-selector :as meta-live]
+            [futon2.aif.meta-pipeline-selector :as meta-pipeline]
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.meta-injury-store :as injury-store]
             [futon2.aif.meta-medic-authority :as medic-authority]
@@ -25,6 +26,8 @@
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.handoff-contract :as handoff]
+            [futon2.aif.interpretation-request :as interpretation-request]
+            [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.wm.click-ask :as click-ask]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
             [futon2.aif.wm.on-prod-history :as on-prod-history]
@@ -46,6 +49,8 @@
   "/home/joe/code/futon2/data/wm-cascade-continuation-closes")
 (def default-cascade-continuation-failure-root
   "/home/joe/code/futon2/data/wm-cascade-continuation-failures")
+(def default-ticket-readiness-manifest
+  "/home/joe/code/futon2/data/wm-ticket-readiness/manifest.edn")
 
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
 
@@ -169,6 +174,42 @@
 
 (defn- designated-author-answer-fn [opts prompt-fn]
   (designated-agent-answer-fn opts (:author opts) prompt-fn "brief"))
+
+(defn- ticket-readiness-prompt [proposal]
+  (str "Assess exactly one bounded ticket preparation increment. Return one JSON object: "
+       "{schema:'wm/ticket-readiness-response-v1', increment:'preparation', "
+       "ticket-id, source-pin, proposal-pin, increment-id, increment-want, "
+       "increment-locator, "
+       "preparation-dependencies:'satisfied'|'blocked'}. "
+       "Do not claim implementation completion or global dependency coverage. Proposal: "
+       (pr-str proposal)))
+
+(defn ticket-readiness-refresh-config
+  "Production preparation-only composition from existing canonical readers.
+  The Agency response is retained beside the manifest before validation."
+  [opts]
+  (let [manifest-path (or (:ticket-readiness-manifest-path opts)
+                          default-ticket-readiness-manifest)
+        snapshot (meta-live/fetch-pipeline-snapshot)
+        base-membership (meta-pipeline/pipeline-membership snapshot)
+        tickets (->> (:tickets (mission-registry/load-tickets))
+                     (filter mission-registry/live-ticket?) vec)
+        input-fn #(meta-live/ticket-readiness-input % snapshot base-membership)
+        contact (designated-agent-answer-fn opts (:author opts)
+                                            ticket-readiness-prompt "brief")]
+    {:tickets tickets :manifest-path manifest-path :input-fn input-fn
+     :prepare-fn (fn [ticket]
+                   (interpretation-request/prepare-proposal!
+                    (:id ticket) :ticket mission-registry/default-code-root))
+     :answer-fn (fn [proposal]
+                  (let [response (contact proposal)
+                        answer (handoff/response-map response)
+                        result-pin (ticket-readiness/retain-contact-result!
+                                    manifest-path response)]
+                    (assoc response :answer answer :result-pin result-pin)))
+     :validate-fn (fn [ticket proposal response]
+                    (ticket-readiness/validate-assessment-response
+                     ticket proposal response (input-fn ticket)))}))
 
 (defn- open-cascade-author-prompt [req]
   (str "Repair the held executable cascade phase without selecting again. "
@@ -444,7 +485,10 @@
                  (update :outer-task-policy #(or % :meta))
                  (assoc :outer-task-selection-fn pinned-outer-selector))
         selected-judgment (atom nil)]
-    {:judge-fn (fn [days]
+    {:ticket-readiness-refresh
+     (or (:ticket-readiness-refresh opts)
+         (ticket-readiness-refresh-config opts))
+     :judge-fn (fn [days]
                  (try
                    (let [generated (selection-judge opts days)
                          frontier (get-in generated [:judgement :outer-task-selection
