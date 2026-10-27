@@ -1,0 +1,34 @@
+@flexiarg aif/expected-free-energy-scorecard
+@title Expected Free Energy as Multi-Term Scorecard
+@sigils [🐜/专]
+@audience fulab agents, aif implementers
+@tone technical
+@style pattern
+@why [war-room/wr-27-a-loop-is-born-instrumented-for-its-gain problems/g-over-cascade-is-undefined problems/r5-expected-free-energy-core problems/satisfied-rungs-are-counted-and-surfaced problems/catalogue-r5-efe-label-auditability]
+;; claim -- WR-19 did not produce this pattern. See README-flexiarg 5a.
+@holds-at R5   ;; pegged 2026-08-30 (claude-15): the catalogue paragraph numbered R5 in p4ng/sec-catalog.tex; see PREREG-war-machine §1b
+
+! conclusion: Compute expected free energy as named terms with persisted breakdowns, not a single opaque scalar.
+
+  + context: The agent needs a single scalar (G) per candidate pattern, derived from separable considerations.
+
+  + IF:
+    You want pattern selection to balance delivery risk, ambiguity, information value, and cost in a way you can tune and audit.
+
+  + HOWEVER:
+    A single opaque score encourages post-hoc rationalization and makes tuning indistinguishable from storytelling.
+
+  + THEN:
+    Compute G(a) as a weighted sum of named terms (risk, ambiguity, information gain, constraint violation, cost, coordination pressure), and store the term breakdown for each candidate.
+
+  + BECAUSE:
+    A decomposed G makes disagreements concrete (which term dominated) and enables targeted adjustment.
+
+  + NEXT-STEPS:
+    - Define :aif/g-breakdown schema in tatami_schema.clj with term keys [:risk :ambiguity :info-gain :constraint-violation :cost :coordination-pressure].
+    - Extend aif_bridge/extract-evidence to decompose G into named terms instead of scalar g-mean.
+    - DONE: Add :aif/g-terms key to psr-template in pattern_competence.clj. Evidence: src/futon3/fulab/pattern_competence.clj
+    - Store term breakdowns in PSR :forecast section.
+    - Add (flip-analysis psr) that computes which term delta would have changed the chosen pattern.
+    - DONE (UKRN v3 HO-05, 2026-05-14): four-term scorecard scaffold at notebooks/ukrn_v3_efe.clj score-candidate-belief-aware (lines 102-135). Terms: risk-term-v3, ambiguity-term-v3, pattern-efe (placeholder until HO-06), priority-alignment. Smoke output shows {risk 0.167, ambiguity −4.32, pattern-efe −0.1, priority-alignment 0.030, G −4.28}. Term breakdown emitted as a map, not just a scalar. See companion patterns aif/belief-aware-risk-term and aif/predictive-entropy-as-ambiguity for the term-form specifications. Evidence: handoffs/v3_runner/validation_HO-05.md.
+    - Practice refinement (HO-05): when terms have very different natural scales (e.g. linear-space risk ~0.1 vs log-space ambiguity ~−4), the λ weights in `G = λ_p · risk + λ_e · ambiguity + ...` must be calibrated to balance magnitudes. Surface the scale-asymmetry as a calibration concern, not as a bug.
