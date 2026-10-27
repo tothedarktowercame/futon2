@@ -1,0 +1,30 @@
+@flexiarg vsatlas/offer-ladder
+@title Offer Ladder
+@audience funders, programme designers, institutional partners
+@tone analytic
+@style design-pattern
+@sigils [🌞/六 🔹/只]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L7-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: 
+  Define a simple offer ladder (intro workshop → multi-session pilot → annual programme) where each rung has a clear scope, price band, and expected outcome.
+
+  + context: You are translating 'story manifold' capabilities into a small set of concrete (purchasable) offerings that institutions can understand, budget for, and adopt. This does not apply when procurement requires a single bundled offer.
+
+  + IF:
+    A story platform with rich theory but no articulated “offers” risks being seen as a research toy rather than a service.
+
+  + HOWEVER:
+    Communities, NGOs, and universities buy concrete packages—workshops, courses, facilitation, reporting—rather than abstract infrastructures.
+
+  + THEN:
+    Define a simple offer ladder (intro workshop → multi-session pilot → annual programme) where each rung has a clear scope, price band, and expected outcome.
+
+  + BECAUSE:
+    A visible ladder of offers turns VSATLAS from an idea into a portfolio of bookable engagements that can recover costs and demonstrate real-world demand.
+
+  + NEXT-STEPS:
+    next[Draft the three-rung ladder with scope, price band, and outcomes.]
+    next[Test the ladder with one partner and refine based on feedback.]
+    next[Define adoption signals (e.g., partner picks a rung without extra explanation) and revise if absent.]
+    next[Define where interpretation sessions sit in the ladder (e.g., a mid-tier offer).]
