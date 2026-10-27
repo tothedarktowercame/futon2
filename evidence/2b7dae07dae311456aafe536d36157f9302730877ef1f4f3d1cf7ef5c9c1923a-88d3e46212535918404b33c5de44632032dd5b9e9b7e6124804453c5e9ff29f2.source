@@ -1,0 +1,22 @@
+@flexiarg war-machine/spatial-over-tabular
+@title Spatial Over Tabular
+
+! conclusion: A spatial display that shows state as shape and colour earns inhabitation; a tabular display that encodes state as numbers in rows becomes wallpaper.
+
+  + CONTEXT:
+    The ant war visualiser is watched at a glance, while markdown tables require deliberate reading and synthesis. The same information becomes obvious when presented spatially and becomes homework when presented only as rows.
+
+  + IF:
+    Strategic state needs to be grasped quickly and revisited often rather than read line by line on demand.
+
+  + HOWEVER:
+    Tables are still better for precise lookup, and spatial layouts can mislead if they are visually active but semantically arbitrary.
+
+  + THEN:
+    Render the same state spatially - active regions glow, neglected regions dim, imbalances show as asymmetric shape - while keeping the table as a precise drill-down fallback.
+
+  + BECAUSE:
+    Human vision processes colour, size, position, and motion pre-attentively. Strategic overviews need repeated comprehension at low cost, and spatial layout lowers that cost every time.
+
+  + NEXT-STEPS:
+    next[Prefer semantically grounded spatial layouts for strategic overviews, then keep exact counts and dates available as tabular drill-down.]
