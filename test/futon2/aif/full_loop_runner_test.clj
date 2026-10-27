@@ -6639,9 +6639,9 @@
                     :mode :maintain}}))
               dispatch
               (fn [_ agent _ _ _]
-                (if (or (= agent "zai-5")
-                        (and (not @preparation-action?)
-                             (= 1 (swap! ordinary-dispatch-count inc))))
+                (if (if @preparation-action?
+                      (= agent "zai-5")
+                      (= 1 (swap! ordinary-dispatch-count inc)))
                   (let [contract-file (io/file repo contract-path)
                         contract (cond-> {:schema ticket-readiness/contract-schema
                                   :ticket-id "T-owned" :source-pin source-pin
