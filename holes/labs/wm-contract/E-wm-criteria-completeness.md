@@ -2,7 +2,7 @@
 
 **Opened:** 2026-10-27, Joe directly to codex-11.
 **Owner:** codex-11, coordinator and per-run evidence reader.
-**Status:** OPEN — campaign authorized; budget activation and first-run readiness preparation pending. No campaign click issued yet.
+**Status:** OPEN — budget activated (228/177/51 at activation); run001 held by coordinator pending B1 ticket-admission classification. No campaign click issued as of the retained run001 input freeze.
 **Related:** M-wm-outer-selection; E-outer-selection-landscape (Claude-11 selection stream); GRID-wm-criteria-completeness-v1.md; notes/wm-next/outer-selection/DEFECTS-reading-era.md.
 
 ## Operator agreement and authority
@@ -33,7 +33,7 @@ Keep regression evidence and stable criterion IDs. Do not weaken an expectation 
 
 ## Selection interface
 
-Continue with the current selector while Claude-11 improves coverage/prioritization independently. Record candidate field/exclusions, chosen task, viability evidence, expected increment and measured result. Do not claim whole-population coverage from success on one target. Integrate selection changes with explicit before/after evidence rather than silently changing the campaign’s scope.
+Selection work may proceed independently, but the current selector is not grandfathered as adequate. The deficit disposition rule below governs whether a narrower experiment may proceed. Record candidate field/exclusions, chosen task, viability evidence, expected increment and measured result. Do not claim whole-population coverage from success on one target. Integrate selection changes with explicit before/after evidence rather than silently changing the campaign’s scope.
 
 ## Completion / pause
 
@@ -42,3 +42,15 @@ Demonstrate useful task execution and successor consumption without corrective i
 ## Initial evidence
 
 Last verified state from entry49 adoption: generation11/ten scopes,50 ledger entries/raw10/effective0, budget178/177/1, idle. This is historical initialization, not fresh launch clearance. Adoption logging failure and manifest self-reference are preserved in notes/wm-next/offline-repair/authority/49-adoption/coordinator-completion.md. First campaign run has not occurred.
+
+## Deficit disposition rule — 2026-10-27 clarification
+
+This is codex-11's operational response to Joe's methodological challenge, not a quotation of a new operator ruling. Distinguish capability verdict from experiment permission. A useful narrower experiment cannot discharge a missing capability.
+
+Every identified deficit must have a criterion ID, evidence, owner, disposition, next action and evidence required to close it, in criteria-completeness-deficits.tsv. UNKNOWN remains unknown until independently classified; lack of an observed failure is not a pass. Repair first when a deficit invalidates the experiment, makes its observations unreliable, or prevents the capability under exercise.
+
+A bounded experiment with a known deficit requires a written coordinator disposition BEFORE issuance: exact scope and maximum attempts, why the result remains interpretable, the independent/manual evidence source (if any), owner and return condition. No rolling “later” exception; expiry returns the deficit to HOLD. No exception discharges a readiness criterion. No such exception is currently granted for run001.
+
+Run001 HOLD: B1-TICKETS. The captured preview supports 104 missions, five excursions and zero tickets. That proves absence from this field, not absence of viable ticket work. Establish ticket viability independently of the selector's exclusion decision, then trace admission/exclusion against it. One viable excluded ticket proves a defect; a few correctly excluded examples do not prove all exclusions justified. Either repair a demonstrated defect with boundary evidence, or substantiate the complete relevant ticket census/exclusions. Readiness for ticket work remains unproven even if today's census has no viable ticket. Consult Claude-11's selection evidence before duplicating discovery.
+
+T12 and R28 are also entered as open deficits rather than covered-by-silence. Manual coverage is an explicit limited experiment mechanism, not implementation completion. No runtime gate added, budget removed, historical record changed, or click launched by this documentation change.

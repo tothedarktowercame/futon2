@@ -1,0 +1,4 @@
+id	criteria	classification	owner	disposition	evidence	next_action	closure_condition
+B1-TICKETS	B1	UNKNOWN; zero admitted observed	codex-11	HOLD run001	run001/input-freeze.md; meta-preview.raw.json sha8d913c2d	Independent viable-ticket census and exclusion trace; consult Claude-11	Repair demonstrated exclusion defect or substantiate relevant census; no mission-only substitution
+E3-T12	E3	MISSING IMPLEMENTATION	codex-11	OPEN; no automatic-loop completion claim	tripwire.clj wire-registry T12 disabled chartered-stub	Define actual no-progress observation and bounded implementation repair	Live repeated-progress evidence and implemented detector; manual exception must be bounded
+B2-D4-R28	B2,D4	KNOWN REPORTING DEFECT	codex-11	OPEN; no blanket run exception	DEFECTS-reading-era.md R28	Bind reading-start/result retention to failed redecision; preserve actual evidence	Discriminating retained failure replay and correct observer output; no silent not-required fallback
