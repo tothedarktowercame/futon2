@@ -31,3 +31,10 @@ a designated seat or infer Giraffe dependency completeness. Consequently the
 code is not activation-ready and B1 is not closed. Independent review must
 either approve that exact composition or require a follow-up; there is no
 permissive default and no hardcoded H1 route.
+
+Retained evidence is not trusted by filename or caller labels. Contract review
+is joined to an explicitly allowed reviewer, retained job, retained result,
+contract pin and source pin. Semantic-red facts are parsed from pinned registry,
+log and postcheck records and bind the actual code/test inputs. Membership
+reopens every assessment and compares its complete input identity (source,
+dependency, ownership, implementation, operator and root-route evidence).

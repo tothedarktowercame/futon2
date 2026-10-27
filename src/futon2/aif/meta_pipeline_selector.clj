@@ -51,7 +51,7 @@
     :node-ids (fn [graph] (map :mission (:held graph)))}
    {:section :patterns :status-keys [:patterns "mission-scope/pattern"]
     :node-ids (fn [graph] (map :mission (get-in graph [:patterns :edges])))}
-   {:section :ticket-readiness :status-keys [:ticket-readiness]
+   {:section :ticket-readiness :status-keys [:ticket-readiness] :optional? true
     :node-ids (fn [graph] (map :ticket-id (get-in graph [:ticket-readiness :items])))}])
 
 (defn- raw-pipeline-node-ids [graph]
@@ -87,10 +87,13 @@
                            unknown? :section-status-unspecified
                            (= :ok (:status value)) nil
                            :else (or (:error value) :section-not-ok))})
-        structural (mapv (fn [{:keys [section status-keys]}]
+        structural (mapv (fn [{:keys [section status-keys optional?]}]
                            (if-let [value (some #(get statuses %) status-keys)]
                              (entry section value false)
-                             (entry section nil true)))
+                             (if optional?
+                               {:section section :status :absent
+                                :availability :available :reason nil}
+                               (entry section nil true))))
                          structural-sections)
         extras (->> statuses
                     (remove (fn [[section _]] (contains? structural-status-keys section)))

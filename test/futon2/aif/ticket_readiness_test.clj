@@ -11,54 +11,77 @@
 (def source-pin {:path "tickets/T-zai-chat-transient-timeout.md"
                  :sha256 "09e1270000000000000000000000000000000000000000000000000000000000"})
 
-(deftest contract-output-needs-content-and-independent-review
-  (let [dir (temp-dir)
-        binding {:ticket-id "T-x" :source-pin source-pin :increment-id :prepare-h1}
-        contract-path (write! dir "contract.edn" (merge binding
+(defn- reviewed-output [dir binding producer reviewer result-text]
+  (let [contract-path (write! dir "contract.edn" (merge binding
                                                           {:schema readiness/contract-schema
-                                                           :producer "author"
+                                                           :producer producer
                                                            :positive-cases [:transport-timeout]
                                                            :negative-cases [:done-marker-only]}))
         contract-pin (readiness/file-pin contract-path)
+        job-id "job-review-1"
+        job-path (write! dir "job.edn" {:job-id job-id :seat reviewer})
+        result-path (write! dir "result.edn" {:job-id job-id :result result-text
+                                               :contract-pin contract-pin
+                                               :source-pin (:source-pin binding)})
         review-path (write! dir "review.edn" {:schema readiness/review-schema
                                                :contract-pin contract-pin
-                                               :reviewer "reviewer" :verdict :accepted})
-        opts (assoc binding :contract-pin contract-pin :review-pin (readiness/file-pin review-path))]
+                                               :reviewer reviewer :job-id job-id
+                                               :result-sha256 (readiness/value-digest result-text)
+                                               :verdict :accepted})]
+    (merge binding {:contract-pin contract-pin :review-pin (readiness/file-pin review-path)
+                    :review-job-pin (readiness/file-pin job-path)
+                    :review-result-pin (readiness/file-pin result-path)
+                    :authorized-reviewers #{reviewer}})))
+
+(deftest contract-output-needs-content-and-independent-review
+  (let [dir (temp-dir)
+        binding {:ticket-id "T-x" :source-pin source-pin :increment-id :prepare-h1}
+        opts (reviewed-output dir binding "author" "reviewer" "accepted independently")]
     (is (= :qualified (:status (readiness/validate-preparation-output opts))))
-    (spit contract-path "{}\n")
-    (is (= :contract-missing-or-unreadable
-           (:reason (readiness/validate-preparation-output opts))))
-    (let [contract-path (write! dir "contract-2.edn" (merge binding
-                                                             {:schema readiness/contract-schema
-                                                              :producer "same"
-                                                              :positive-cases [:p] :negative-cases [:n]}))
-          contract-pin (readiness/file-pin contract-path)
-          review-path (write! dir "review-2.edn" {:schema readiness/review-schema
-                                                   :contract-pin contract-pin
-                                                   :reviewer "same" :verdict :accepted})]
+    (spit (get-in opts [:review-result-pin :path])
+          (str (pr-str {:job-id "job-review-1" :result "changed"}) "\n"))
+    (is (= :review-port-binding-mismatch
+           (:reason (readiness/validate-preparation-output
+                     (assoc opts :review-result-pin
+                            (readiness/file-pin (get-in opts [:review-result-pin :path])))))))
+    (let [same (reviewed-output dir binding "same" "same" "self review")]
       (is (= :review-not-independent
-             (:reason (readiness/validate-preparation-output
-                       (assoc binding :contract-pin contract-pin
-                              :review-pin (readiness/file-pin review-path)))))))))
+             (:reason (readiness/validate-preparation-output same)))))))
 
 (deftest semantic-red-is-not-generic-c8-false
   (let [dir (temp-dir)
         log (write! dir "red.log" {:failure :H1-throw-to-value})
         post (write! dir "post.edn" {:status :failed})
-        base {:expected-revision "before" :contract-pin {:path "c" :sha256 (apply str (repeat 64 "a"))}
-              :failure-id :H1-throw-to-value}
-        good {:status :executed :revision "before" :contract-pin (:contract-pin base)
-              :failure-id :H1-throw-to-value :log-pin (readiness/file-pin log)
-              :postcheck-pin (readiness/file-pin post)}]
+        _ (spit log (str (pr-str {:schema readiness/semantic-log-schema
+                                  :failures [{:id :H1-throw-to-value}]}) "\n"))
+        _ (spit post (str (pr-str {:schema readiness/postcheck-schema :status :failed
+                                   :revision "before" :failure-id :H1-throw-to-value}) "\n"))
+        cp {:path "code" :sha256 (apply str (repeat 64 "c"))}
+        tp {:path "test" :sha256 (apply str (repeat 64 "t"))}
+        contract-pin {:path "c" :sha256 (apply str (repeat 64 "a"))}
+        registry (write! dir "registry.edn" {:schema readiness/registry-schema
+                                              :status :executed :revision "before"
+                                              :contract-pin contract-pin :code-pin cp :test-pin tp
+                                              :log-pin (readiness/file-pin log)
+                                              :postcheck-pin (readiness/file-pin post)})
+        base {:expected-revision "before" :contract-pin contract-pin
+              :failure-id :H1-throw-to-value :expected-code-pin cp :expected-test-pin tp}]
     (is (= :semantic-negative-not-established
            (:reason (readiness/semantic-negative base))))
-    (is (= :established (:status (readiness/semantic-negative (assoc base :record good)))))
+    (is (= :established (:status (readiness/semantic-negative
+                                  (assoc base :registry-pin (readiness/file-pin registry))))))
     (is (= :before-revision-mismatch
            (:reason (readiness/semantic-negative
-                     (assoc base :record (assoc good :revision "stale"))))))
-    (is (= :semantic-negative-not-established
-           (:reason (readiness/semantic-negative
-                     (assoc base :record (assoc good :failure-id :unrelated))))))))
+                     (assoc base :expected-revision "other"
+                            :registry-pin (readiness/file-pin registry))))))
+    (spit log (str (pr-str {:schema readiness/semantic-log-schema
+                            :failures [{:id :unrelated}]}) "\n"))
+    (let [record (edn/read-string (slurp registry))
+          registry (write! dir "forged-registry.edn"
+                           (assoc record :log-pin (readiness/file-pin log)))]
+      (is (= :semantic-negative-not-established
+             (:reason (readiness/semantic-negative
+                       (assoc base :registry-pin (readiness/file-pin registry)))))))))
 
 (deftest four-state-increment-classification
   (let [common {:source-current? true :operator-allowed? true :owned? false :active? true
@@ -86,12 +109,12 @@
                                :relevant-dependencies-resolved? true)))))
     (is (= {:classification :completed :increment-completed? true
             :ticket-completed? false :next-disposition :assess-remaining-increments}
-           (readiness/classify (assoc common :increment-effect? true
+           (readiness/classify (assoc common :completion-evidence {:status :validated :revision "after"}
                                       :ticket-completed? false
                                       :expected-after-revision "after"
                                       :after-revision "after"))))
     (is (= :after-revision-mismatch
-           (:reason (readiness/classify (assoc common :increment-effect? true
+           (:reason (readiness/classify (assoc common :completion-evidence {:status :validated :revision "wrong"}
                                                 :expected-after-revision "after"
                                                 :after-revision "wrong")))))))
 
@@ -100,7 +123,11 @@
         tickets [{:id "T-b" :source source-pin}
                  {:id "T-a" :source (assoc source-pin :path "T-a" :sha256 (apply str (repeat 64 "b")))}]
         contacts (atom [])
-        opts {:tickets tickets :manifest-path manifest
+        inputs (fn [ticket] {:source (:source ticket) :dependency-evidence []
+                             :ownership-evidence :unowned
+                             :implementation-evidence :absent
+                             :operator-evidence :allowed :root-route :standalone})
+        opts {:tickets tickets :manifest-path manifest :input-fn inputs
               :prepare-fn (fn [ticket] {:target (:id ticket) :source (:source ticket)})
               :answer-fn (fn [proposal] (swap! contacts conj (:target proposal))
                            {:provenance :synthetic-test-reply :increment :preparation})
@@ -113,7 +140,7 @@
         first-bytes (slurp manifest)
         second-result (readiness/refresh-one! opts)
         loaded (readiness/read-manifest manifest)
-        section (readiness/suitable-section loaded)
+        section (readiness/suitable-section loaded (into {} (map (juxt :id inputs) tickets)))
         snapshot {:schema pipeline/snapshot-schema
                   :summary-source {:path "s" :sha256 (apply str (repeat 64 "c"))}
                   :graph-source {:path "g" :sha256 (apply str (repeat 64 "d"))}
@@ -137,3 +164,75 @@
          (readiness/classify {:increment :preparation :source-current? true
                               :operator-allowed? true :owned? false :active? true
                               :interpretation-valid? true :root-route :admitted}))))
+
+(deftest forged-membership-and-changed-inputs-are-excluded
+  (let [dir (temp-dir) record (write! dir "assessment.edn"
+                                      {:inputs {:source source-pin :dependency-evidence [:d1]
+                                                :ownership-evidence :unowned
+                                                :implementation-evidence :absent
+                                                :operator-evidence :allowed :root-route :standalone}})
+        pin (readiness/file-pin record)
+        entry {:ticket-id "T-x" :increment :preparation
+               :increment-want ["T-x" :contract]
+               :assessment {:classification :suitable}
+               :assessment-pin pin
+               :input-identity (readiness/value-digest
+                                {:source source-pin :dependency-evidence [:d1]
+                                 :ownership-evidence :unowned :implementation-evidence :absent
+                                 :operator-evidence :allowed :root-route :standalone})}
+        manifest {:schema readiness/manifest-schema :entries [entry] :attempts {}}]
+    (is (= ["T-x"] (mapv :ticket-id
+                           (:items (readiness/suitable-section
+                                    manifest {"T-x" {:source source-pin :dependency-evidence [:d1]
+                                                     :ownership-evidence :unowned
+                                                     :implementation-evidence :absent
+                                                     :operator-evidence :allowed
+                                                     :root-route :standalone}})))))
+    (is (empty? (:items (readiness/suitable-section
+                         manifest {"T-x" {:source source-pin :dependency-evidence [:changed]
+                                          :ownership-evidence :unowned
+                                          :implementation-evidence :absent
+                                          :operator-evidence :allowed :root-route :standalone}}))))
+    (spit record (str (pr-str {:inputs {:source source-pin :dependency-evidence [:d1]
+                                        :ownership-evidence :owned
+                                        :implementation-evidence :absent
+                                        :operator-evidence :allowed :root-route :standalone}}) "\n"))
+    (is (empty? (:items (readiness/suitable-section
+                         manifest {"T-x" {:source source-pin :dependency-evidence [:d1]
+                                          :ownership-evidence :unowned
+                                          :implementation-evidence :absent
+                                          :operator-evidence :allowed :root-route :standalone}}))))))
+
+(deftest unknown-assessments-retry-fairly-and-input-change-reassesses
+  (let [dir (temp-dir) manifest (.getPath (io/file dir "manifest.edn"))
+        tickets [{:id "T-a" :source (assoc source-pin :path "a")}
+                 {:id "T-b" :source (assoc source-pin :path "b")}]
+        deps (atom {"T-a" [:d1] "T-b" [:d1]})
+        contacted (atom [])
+        tick (atom 0)
+        opts {:tickets tickets :manifest-path manifest
+              :input-fn (fn [t] {:source (:source t)
+                                  :dependency-evidence (get @deps (:id t))
+                                  :ownership-evidence :unowned
+                                  :implementation-evidence :absent
+                                  :operator-evidence :allowed :root-route :standalone})
+              :prepare-fn identity
+              :answer-fn (fn [t] (swap! contacted conj (:id t)) {:provenance :synthetic-test-reply})
+              :validate-fn (fn [_ _ _] {:increment :preparation
+                                         :assessment {:classification :unknown}})
+              :now-fn #(str (swap! tick inc))}]
+    (readiness/refresh-one! opts)
+    (readiness/refresh-one! opts)
+    (readiness/refresh-one! opts)
+    (is (= ["T-a" "T-b" "T-a"] @contacted))
+    (swap! deps assoc "T-b" [:d2])
+    (readiness/refresh-one! opts)
+    (is (= "T-b" (last @contacted)))))
+
+(deftest old-snapshot-without-readiness-remains-complete
+  (let [snapshot {:graph {:section-status {:lineage {:status :ok}
+                                            :clusters {:status :ok}
+                                            :arrows {:status :ok}
+                                            :held {:status :ok}
+                                            :patterns {:status :ok}}}}]
+    (is (= :complete (:status (pipeline/section-availability snapshot))))))
