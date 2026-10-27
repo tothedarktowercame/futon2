@@ -306,3 +306,22 @@ issued clicks as caller `codex-11`, with project evidence under
 `runs/frozen-live-sections-2026-10-22/`. Initial project usage: 0 of 10.
 The serving snapshot before this grant records allocated=148, consumed=147;
 the previously available click belongs to earlier grants, not this project.
+
+## Joe's criteria-completeness grant to codex-11, 2026-10-27 — fifty clicks
+
+Joe directly authorized the criteria-completeness excursion in the codex-11
+operator turn: “authorize say 50 clicks to be run on zaisites”. He required
+each click to be supervised and its logs read before the next; useful progress
+may proceed to another click, an unsuccessful result uses the existing
+self-heal route, and an unsuccessful self-heal permits an external repair,
+including warranted algorithm changes. The complete protocol and exact quotes
+are retained in `E-wm-criteria-completeness.md`.
+
+This authorizes fifty additional ordinary clicks on Zai seats as a ceiling,
+not a target. The previous unspent credit remains separate and no historical
+charge is reset, refunded, or relabelled. Under this document's standing
+mechanism, cumulative `allocated` rises from 178 to **228**. At activation,
+`consumed` remains 177 and availability therefore becomes 51. Each issued
+ordinary click remains charged under the existing authorization identity and
+issue-time accounting; a self-heal that issues an ordinary click is charged in
+the same way. No click is issued by this administrative activation.
