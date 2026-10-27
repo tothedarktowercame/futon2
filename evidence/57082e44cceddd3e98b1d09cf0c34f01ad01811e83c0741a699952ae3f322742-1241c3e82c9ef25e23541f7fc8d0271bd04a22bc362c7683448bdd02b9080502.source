@@ -1,0 +1,22 @@
+@flexiarg war-machine/dynamic-over-static
+@title Dynamic Over Static
+
+! conclusion: A dynamic display that animates state changes over time reveals patterns that a static snapshot hides - trends, rhythms, decay, and momentum become visible as motion.
+
+  + CONTEXT:
+    The futon2 ant war visualiser makes colony momentum obvious within seconds, whereas a single screenshot only shows positions. The same applies to strategic state: a static report can show counts but not whether those counts are growing, shrinking, or stalled.
+
+  + IF:
+    The operator needs to distinguish growth from decay, acceleration from stagnation, or winning motion from a dead-even snapshot.
+
+  + HOWEVER:
+    Static reports show position but not momentum. Animation also adds complexity and can be distracting if motion overwhelms semantically important but quieter regions.
+
+  + THEN:
+    Animate the strategic state over time, with replay controls and a spatial layout that makes both position and trajectory visible at once, while keeping the table as a drill-down renderer for exact values.
+
+  + BECAUSE:
+    Temporal patterns are perceptible in animation but invisible in snapshots. For strategic awareness, the trajectory matters more than the position; you need the movie, not just the frame.
+
+  + NEXT-STEPS:
+    next[Replay recent strategic history as a controllable animation and check whether the motion reveals distinctions the static report concealed.]
