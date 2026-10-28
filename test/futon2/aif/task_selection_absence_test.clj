@@ -7,16 +7,17 @@
 
 (use-fixtures :each route/with-empty-learning-ledger)
 
-(deftest no-task-does-not-select-or-enter-the-runner
+(deftest no-verified-giraffe-run-does-not-enter-the-runner
   (let [calls (atom 0)
         touched (fn [& _] (swap! calls inc) {:status :ready})
         ordinary #'runtime/run-ordinary-opportunity!]
     ;; Keep the mutation check hermetic even if the no-task guard is deleted.
-    (with-redefs-fn {#'runtime/production-defaults touched
+    (with-redefs-fn {#'runtime/find-giraffe-run (constantly nil)
+                     #'runtime/production-defaults touched
                      #'runner/run-opportunity! touched}
       (fn []
-        (is (= {:absent :no-task-selection-policy} (ordinary {})))
-        (is (= {:absent :no-task-selection-policy}
+        (is (= {:absent :no-verified-giraffe-run} (ordinary {})))
+        (is (= {:absent :no-verified-giraffe-run}
                (ordinary {:outer-task-selection-fn touched})))
         (is (zero? @calls))))))
 

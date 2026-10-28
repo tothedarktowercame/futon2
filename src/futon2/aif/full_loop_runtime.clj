@@ -7,6 +7,7 @@
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.flight-runner :as flight-runner]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-pipeline-selector :as meta-pipeline]
             [futon2.aif.meta-field-observation :as meta-field]
@@ -14,6 +15,9 @@
             [futon2.aif.meta-medic-authority :as medic-authority]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
+            [futon2.aif.outer-observation :as outer-observation]
+            [futon2.aif.outer-select :as outer-select]
+            [futon2.aif.outer-state :as outer-state]
             [futon2.aif.reading-policy-precision :as reading-precision]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
@@ -48,6 +52,7 @@
   "/home/joe/code/futon2/data/wm-cascade-continuation-failures")
 (def default-ticket-readiness-manifest
   "/home/joe/code/futon2/data/wm-ticket-readiness/manifest.edn")
+(def default-giraffe-root "/home/joe/code/storage/giraffe")
 
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
 
@@ -501,15 +506,77 @@
 
 (declare run-ordinary-opportunity-with-task!)
 
+(defn- missions-giraffe-manifest? [manifest]
+  (let [edge-path (get-in manifest [:sources :edges :path])]
+    (and (string? edge-path)
+         (boolean (re-find #"(^|/)holes/missions/" edge-path))
+         (not (contains? (:sources manifest) :tickets-index)))))
+
+(defn- verified-giraffe-run? [dir]
+  (try
+    (let [manifest-file (io/file dir "manifest.edn")
+          manifest (when (.isFile manifest-file)
+                     (edn/read-string (slurp manifest-file)))
+          verify-run (requiring-resolve 'futon3c.giraffe.run/verify-run)]
+      (and (missions-giraffe-manifest? manifest)
+           (:ok? (verify-run dir))))
+    (catch Exception _ false)))
+
+(defn- find-giraffe-run [opts]
+  (if-let [explicit (:outer/giraffe-run-dir opts)]
+    (when (verified-giraffe-run? (io/file explicit)) (io/file explicit))
+    (let [root (io/file (or (:outer/giraffe-root opts) default-giraffe-root))]
+      (when (.isDirectory root)
+        (->> (.listFiles root)
+             (filter #(.isDirectory ^java.io.File %))
+             (sort-by #(.getName ^java.io.File %) #(compare %2 %1))
+             (some #(when (verified-giraffe-run? %) %)))))))
+
+(defn- outer-selection-refusal [e]
+  {:absent :outer-selection-refused
+   :reason (or (:kind (ex-data e)) :outer-selection-failed)
+   :details (dissoc (ex-data e) :kind)})
+
 (defn- run-ordinary-opportunity!
   "Run one production opportunity with the report-backed defaults installed.
-  There is no task-selection policy: without a caller-supplied task the
-  ordinary path is typed absent.  META injuries are arbitrated before this,
-  so repair still runs when no task is supplied."
+  A caller-supplied task enters the existing task path unchanged.  Otherwise
+  the R20 outer loop selects from the newest verified missions Giraffe run.
+  META injuries are arbitrated before this function."
   [opts]
-  (if-not (get-in opts [:task :id])
-    {:absent :no-task-selection-policy}
-    (run-ordinary-opportunity-with-task! opts)))
+  (if (get-in opts [:task :id])
+    (run-ordinary-opportunity-with-task! opts)
+    (if-let [giraffe-dir (find-giraffe-run opts)]
+      (try
+        (let [makeup (outer-state/load-makeup
+                      (or (:outer/makeup-path opts) outer-state/default-makeup-path))
+              state (outer-state/read-state
+                     makeup (or (:outer/state-path opts) outer-state/default-state-path))
+              focus-inputs (focus-receipt/read-inputs)
+              observation (outer-observation/outer-observation
+                           {:run-dir giraffe-dir
+                            :makeup makeup
+                            :focus-inputs focus-inputs
+                            :decision-as-of (or (:decision-as-of opts) (str (Instant/now)))
+                            :previous-focus (:previous-focus opts)
+                            :relation-context
+                            (focus-receipt/relation-context
+                             (or (:code-root opts) "/home/joe/code"))})
+              selection (outer-select/select makeup state observation)
+              retained-selection (-> selection
+                                     (update :selection #(some-> % (dissoc :candidates)))
+                                     (assoc :giraffe/run-id (:giraffe/run-id observation)
+                                            :giraffe/manifest-sha256
+                                            (:giraffe/manifest-sha256 observation)
+                                            :makeup/sha256 (:makeup/sha256 makeup)))]
+          (if-let [target (get-in selection [:selection :selected :target])]
+            (run-ordinary-opportunity-with-task!
+             (assoc opts :task {:id target} :outer/selection retained-selection))
+            {:absent :no-task-selected :outer/selection retained-selection}))
+        (catch clojure.lang.ExceptionInfo e
+          (outer-selection-refusal e))
+        (catch Exception e
+          (outer-selection-refusal e)))
+      {:absent :no-verified-giraffe-run})))
 
 (defn- run-ordinary-opportunity-with-task!
   [opts]
