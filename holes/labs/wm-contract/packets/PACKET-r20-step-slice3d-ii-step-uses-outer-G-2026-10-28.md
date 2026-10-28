@@ -29,6 +29,16 @@ Recompute each selection example under `outerScore` and state the new values:
   statement or change the example's inputs to rescue it without saying so.
 - 3c (K3.2 picks P12): should be unaffected (readiness gate).
 
+Plus one new example (review finding on 3d-i): in `outer_ambiguity_matters`
+the risk term alone already prefers the reach-1 task (risk ≈ 2.015 vs
+≈ 2.146 under the uniform C and even state counts), so it does not show
+ambiguity changing a choice. Add an example, through `step`, where the
+risk term alone would pick cascade X but `outerScore` picks cascade Y because
+of ambiguity: e.g. a reach-1/2 task in a more preferred class against a
+reach-1 task in a less preferred class, with C chosen so the risks favour
+the first and risk + ambiguity favours the second. State both orderings
+strictly (risk term and full score), using `CascadeEFE.risk` for the former.
+
 ## Gates
 
 - `lake build DarkTower.WarMachine.R20Step`; no `sorry`, no new `axiom`.
