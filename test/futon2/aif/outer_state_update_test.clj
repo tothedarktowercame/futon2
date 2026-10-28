@@ -72,10 +72,12 @@
                                            [:stop-the-line :none])
           landing (state/advance-state-counts 1 1 before model
                                               [:related :one])]
-      (is (> (get-in stop [:ready :blocked])
-             (get-in stop [:ready :doable])))
-      (is (> (get-in landing [:ready :doable])
-             (get-in landing [:ready :blocked])))))
+      ;; Lean compares the normalised share before and after, strictly.
+      (letfn [(share [counts s] (/ (get-in counts [:ready s])
+                                   (+ (get-in counts [:ready :doable])
+                                      (get-in counts [:ready :blocked]))))]
+        (is (> (share stop :blocked) (share before :blocked)))
+        (is (> (share landing :doable) (share before :doable))))))
   (testing "an impossible observation has zero posterior evidence"
     (let [before (:state-kit makeup)
           model (outer-score/outer-model
