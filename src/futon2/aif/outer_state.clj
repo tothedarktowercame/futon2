@@ -79,6 +79,18 @@
   (when-not (and (number? (:default-reach makeup))
                  (<= 0 (:default-reach makeup) 1))
     (refuse! :invalid-makeup {:path path :reason :invalid-default-reach}))
+  (when (contains? makeup :cascades)
+    (when-not (and (vector? (:cascades makeup))
+                   (seq (:cascades makeup))
+                   (every? #(and (keyword? (:id %))
+                                 (vector? (:patterns %))
+                                 (seq (:patterns %))
+                                 (every? string? (:patterns %))
+                                 (vector? (:steps %)))
+                           (:cascades makeup))
+                   (= (count (:cascades makeup))
+                      (count (distinct (map :id (:cascades makeup))))))
+      (refuse! :invalid-makeup {:path path :reason :invalid-cascades})))
   makeup)
 
 (defn load-makeup

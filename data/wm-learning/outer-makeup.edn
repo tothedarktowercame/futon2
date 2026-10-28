@@ -23,4 +23,17 @@
  ;; Forgetting rate ω for ready-gain counts (Smith, Friston & Whyte 2022 §4 Eqs. 34, 37). 9/10 is our starter choice, not from the paper (their example uses ω = 1 and 0.1, l.4228-4229).
  :omega-gain 9/10
  ;; Runtime task reach is absent; this explicit starter value records that current modelling limit.
- :default-reach 1/2}
+ :default-reach 1/2
+ :cascades
+ [;; futon3/library/task-selection/only-what-can-start-now.flexiarg and what-others-wait-on-first.flexiarg.
+  {:id :what-others-wait-on-first
+   :patterns ["only-what-can-start-now" "what-others-wait-on-first"]
+   :steps [:ready-gate :by-cone :by-unblocks]}
+  ;; futon3/library/task-selection/only-what-can-start-now.flexiarg.
+  {:id :only-what-can-start-now
+   :patterns ["only-what-can-start-now"]
+   :steps [:ready-gate]}
+  ;; futon3/library/task-selection/find-out-before-building.flexiarg.
+  {:id :find-out-before-building
+   :patterns ["find-out-before-building"]
+   :steps [{:gate-status :undetermined} :by-cone]}]}

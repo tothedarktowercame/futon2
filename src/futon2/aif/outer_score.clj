@@ -32,6 +32,10 @@
     (= :ready-gate step)
     (filterv #(= :ready (:status (value-of facts (:target %)))) field)
 
+    (and (map? step) (contains? step :gate-status))
+    (filterv #(= (:gate-status step)
+                 (:status (value-of facts (:target %)))) field)
+
     (= :by-unblocks step)
     (stable-sort-by #(get (value-of facts (:target %)) :unblocks 0) - field)
 
