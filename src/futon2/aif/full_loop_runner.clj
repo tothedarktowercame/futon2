@@ -5916,6 +5916,16 @@
      {:requires [:grounded-production-shaped-successor]})
    :artifact-shape :code-commit))
 
+(defn- record-held-resume-stop-line!
+  "Persist the held cascade's open stop line through the ordinary repair-store
+  producer. The caller does this before publishing the opportunity-end event,
+  because T3 rereads the store at that event."
+  [opts finding publish-end!]
+  (let [retained ((or (:repair-system-record-fn opts)
+                      repair/record-system-failure!) finding)]
+    (publish-end!)
+    retained))
+
 (defn- deferred-completion-job-id [obligation]
   (or (get-in obligation [:failure-data :job-id])
       (get-in obligation [:backtrace :job-id])
@@ -9014,23 +9024,47 @@
             ;; Injury 94091: the cascade-resume handler returned a typed
             ;; :error.  This is a held, repairable, resumable phase of the
             ;; selected cascade, not a system failure and not the tick's
-            ;; abstention: no repair obligation is recorded, the attempt is
-            ;; not closed, and the selection checkpoint -- already carrying
+            ;; abstention: an open, incomplete-recoverable stop line is recorded,
+            ;; the attempt is not closed, and the selection checkpoint -- carrying
             ;; the typed condition on its sorry cell -- survives to the run
             ;; record for the next resume.
-            (do
-              (emit-phase! opts @phase-context
-                           {:phase :opportunity :transition :end
+            (let [failure-data (ex-data e)
+                  finding (record-held-resume-stop-line!
+                           opts
+                           {:attempt-id external-attempt-id
+                            :observation (observation-for :held-open-cascade-resume)
+                            :repair-class :incomplete-recoverable
+                            :machine-repo (:repo code-state)
+                            :target (get-in @checkpoints
+                                            [:selection :judgment :selected-mission])
+                            :failure-stage :cascade-resume
                             :outcome :incomplete
-                            :duration-ms (- (System/currentTimeMillis) started)
-                            :held-phase (:held-phase (ex-data e))})
+                            :failure-kind (or (:failure-kind failure-data)
+                                              :open-cascade-resume-held)
+                            :error (.getMessage e)
+                            :failure-data failure-data
+                            :opened-at (get-in time-cell
+                                               [:judgment :machine-state :started-at])
+                            :backtrace {:phase-events @phase-events
+                                        :checkpoints @checkpoints
+                                        :code-state (get-in time-cell
+                                                            [:judgment :code-state])}
+                            :discharge-contract
+                            (discharge-contract :incomplete-recoverable)}
+                           #(emit-phase!
+                             opts @phase-context
+                             {:phase :opportunity :transition :end
+                              :outcome :incomplete
+                              :duration-ms (- (System/currentTimeMillis) started)
+                              :held-phase (:held-phase failure-data)}))]
               {:attempt-id attempt-id
                :opportunity-id opportunity-id
                :outcome :incomplete
                :checkpoints @checkpoints
                :data {:outcome :incomplete
-                      :held-phase (:held-phase (ex-data e))
-                      :downstream-refusal (:downstream-refusal (ex-data e))}})
+                      :held-phase (:held-phase failure-data)
+                      :downstream-refusal (:downstream-refusal failure-data)
+                      :repair-obligation finding}})
             (if (identical? historical-verification-completion-token
                           (:historical-verification-completion-token (ex-data e)))
             (let [completion (ex-data e)]
