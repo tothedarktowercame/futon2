@@ -104,3 +104,21 @@
               3 {:status :not-ready :unblocks 0 :cone 0}}
           cascade [:ready-gate :by-cone :by-unblocks]]
       (is (= {:target 1 :reach 1} (score/cascade-pick cascade fs field))))))
+
+(deftest novelty-decides-outer-choice
+  (testing "Lean slice 3f-iii (novelty decides): equal q, class, reach and gain;
+            only the status's total counts differ, so the less-known pick scores lower"
+    (let [field [{:target 1 :reach 1/2} {:target 2 :reach 1/2}]
+          fs (facts {1 {:status :ready :unblocks 0 :cone 0}
+                     2 {:status :undetermined :unblocks 0 :cone 0}})
+          counts {:ready {:doable 10 :blocked 10}
+                  :not-ready {:doable 1 :blocked 1}
+                  :undetermined {:doable 1 :blocked 1}}
+          in (fn [cascade] (assoc (input field fs relation-focus uniform-ending uniform-gain cascade)
+                                  :state-counts counts))
+          known (in [(gate-target 1)])
+          unknown (in [(gate-target 2)])]
+      (is (= (:q (score/outer-model known)) (:q (score/outer-model unknown))))
+      (is (< (score/outer-novelty (score/outer-model known))
+             (score/outer-novelty (score/outer-model unknown))))
+      (is (< (score/outer-score unknown) (score/outer-score known))))))
