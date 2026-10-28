@@ -481,6 +481,17 @@
                 :error "Serving runner source drifts from the canonical checkout"}
        :evidence-pin (child-acceptance-pin click-id)})))
 
+(defn- attribution-refused-status-fn [refused-click]
+  (fn [click-id]
+    (when (= refused-click click-id)
+      {:status :completed
+       :refusal :retry-attribution-refused
+       :result {:outcome :unknown
+                :runtime-disposition
+                {:status :refused
+                 :reason :meta-self-heal/retry-attribution-refused}}
+       :evidence-pin (child-acceptance-pin click-id)})))
+
 (defn- observation-count
   ([history]
    (count (filter #(= :retry-inconclusive (:observation-kind %))
@@ -535,6 +546,40 @@
                first :record-pin)))
     (is (= 1 (-> result :ledger :entries last :requeues)))
     (is (= :retry-requeue-1 (-> @calls first :phase)))))
+
+(deftest attribution-refused-requeue-is-replaced-before-old-id-dispatch
+  (let [initial (awaiting-retry (opened-ledger))
+        observed (inconclusive (:ledger initial) "2-first" "click-retry-repair-1")
+        malformed-id (str "wm-requeue-1-1-repair/example-patch-" sha-b)
+        malformed (ledger/append-requeue observed
+                                         "injury/2026-10-19/reload"
+                                         malformed-id)
+        _ (is (= :appended (:status malformed)))
+        dispatched (atom [])
+        ps (requeue-ports
+            {:retry-click-id
+             (fn [repair-id attempt ordinal patch-sha]
+               (str "wm-requeue-" ordinal "-" attempt "-" repair-id
+                    "-patch-" patch-sha))
+             :retry (fn [r]
+                      (when (= malformed-id (:retry-click r))
+                        (throw (ex-info "malformed retry was redispatched" {})))
+                      (swap! dispatched conj (:retry-click r))
+                      (receipt r :queued {:retry-click (:retry-click r)}))
+             :retry-click-status-fn
+             (attribution-refused-status-fn malformed-id)})
+        result (coordinator/coordinate (durable (:ledger malformed))
+                                       (:transaction initial) ps)
+        replacement (:retry-click result)]
+    (is (= :awaiting-retry (:status result)))
+    (is (not= malformed-id replacement))
+    (is (.endsWith replacement (str "-patch-" sha-a))
+        "the replacement identity comes from the injury's authored patch")
+    (is (= [replacement] @dispatched)
+        "the malformed id is observed and replaced before the retry port runs")
+    (is (= 2 (-> result :ledger :entries last :requeues)))
+    (is (= 1 (observation-count (:ledger result)
+                                (child-acceptance-pin malformed-id))))))
 
 (deftest failed-child-observation-is-not-duplicated
   ;; Crash repair between the observation append and the requeue append, plus

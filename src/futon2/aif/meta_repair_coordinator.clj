@@ -263,24 +263,32 @@
   (keyword (str "retry-requeue-" n)))
 
 (defn- failed-child-observation
-  "Read the durable service-side status of one meta-retry child click through
-  the read-only :retry-click-status-fn port. Returns the evidence map only
-  for a durably recorded service failure whose evidence pin seals the bytes
-  the observation will cite; a running, queued, completed or unknown child is
-  not a failure and returns nil. A recorded failure without a valid evidence
-  pin refuses typedly rather than observing an unsourced failure."
+  "Read the durable service-side non-success of one meta-retry child through
+   the read-only :retry-click-status-fn port. Returns the evidence map only
+   for a durably recorded service failure or completed
+   :meta-self-heal/retry-attribution-refused result whose evidence pin seals
+   the bytes the observation will cite; other states return nil. A recorded
+   non-success without a valid evidence pin refuses typedly rather than
+   observing unsourced evidence."
   [ports retry-click]
   (when-let [status-fn (:retry-click-status-fn ports)]
     (let [observed (try (status-fn retry-click) (catch Throwable _ nil))]
       (when (map? observed)
-        (cond
-          (not= :failed (:status observed)) nil
-          (not= :service-failed (get-in observed [:result :outcome])) nil
+        (let [service-failed? (and (= :failed (:status observed))
+                                   (= :service-failed
+                                      (get-in observed [:result :outcome])))
+              attribution-refused?
+              (and (= :completed (:status observed))
+                   (= :retry-attribution-refused (:refusal observed))
+                   (= :meta-self-heal/retry-attribution-refused
+                      (get-in observed [:result :runtime-disposition :reason])))]
+          (cond
+          (not (or service-failed? attribution-refused?)) nil
           (not (pin? (:evidence-pin observed)))
           (refusal :coordinator/failed-child-evidence-refused
                    {:retry-click retry-click
                     :result (select-keys (:result observed) [:outcome :error])})
-          :else observed)))))
+          :else observed))))))
 
 (defn- observe-failed-child!
   "Append the :retry-inconclusive observation terminal ingestion would have
@@ -314,9 +322,20 @@
   [history transaction ports injury-id repair-id attempt authority-verifier]
   (loop [history history
          transaction transaction]
-    (let [latest (latest-transition history injury-id)
+    (let [latest-before-observation (latest-transition history injury-id)
+          pending-before-observation?
+          (ledger/pending-requeue history injury-id authority-verifier)
+          observed-history
+          (when-not pending-before-observation?
+            (observe-failed-child! history ports injury-id
+                                   (:retry-click latest-before-observation)
+                                   authority-verifier))
+          history (or observed-history history)
+          latest (latest-transition history injury-id)
           n (or (ledger/requeue-ordinal history injury-id) 0)
-          queued (when (pos? n)
+          pending-requeue? (ledger/pending-requeue history injury-id
+                                                   authority-verifier)
+          queued (when (and (pos? n) (not pending-requeue?))
                    (accepted!
                     (invoke-once transaction (requeue-phase n)
                                  (last-receipt-pin transaction) (:retry ports)
@@ -362,15 +381,11 @@
                               (get-in retry-receipt [:payload :retry-click])))))
         (stop! (refusal :coordinator/retry-attribution-refused
                         {:ledger history :transaction transaction})))
-      (if-not (ledger/pending-requeue history injury-id authority-verifier)
-        (if-let [observed-history (observe-failed-child! history ports injury-id
-                                                         (:retry-click latest)
-                                                         authority-verifier)]
-          (recur observed-history transaction)
-          {:status :awaiting-retry
-           :ledger history
-           :transaction transaction
-           :retry-click (:retry-click latest)})
+      (if-not pending-requeue?
+        {:status :awaiting-retry
+         :ledger history
+         :transaction transaction
+         :retry-click (:retry-click latest)}
         (let [next-n (inc n)
               retry-click-id (:retry-click-id ports)
               _ (when-not (fn? retry-click-id)
