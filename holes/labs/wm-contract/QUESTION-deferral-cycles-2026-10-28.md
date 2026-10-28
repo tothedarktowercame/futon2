@@ -78,3 +78,22 @@ The alternative is a fixed tie-break rule (for example, the older deferral resum
 which keeps the machine moving without a disposition. Codex-1 and I lean towards the held
 result, because step 7 rules out guessing when the semantics are undecided. Either way, we
 need your call on which one.
+
+---
+
+## 2026-10-28, after codex-1's reply (job invoke-1793155407323-5704-464666b3)
+
+codex-1 agreed that a failure after a verified exercise of the retried operation cannot be its cause, but not that "passed the phase" means healed. It pointed out that `RetryClickOutcome.closing` in `DarkTower/WarMachine/SelfHealRoute.lean:1463` discharges only `successfulTaskOutcome` (`closing_dischargesOnlyOnSuccess`), and `otherInjury` stays inconclusive. Injury-local success needs a deliberate refinement of that outcome model.
+
+What the receipts show for c560's retry `8c8ee35f` (started 16:38:29):
+- `:ticket-readiness-refresh` did dispatch: Agency job `invoke-1793119192416-5620-354be23f` (16:39:52), harness execution-id = the run id, source-ref = the click id. `dispatch!` (`full_loop_runner.clj:2010`) throws `:wm-job-ledger-unavailable` before the POST when the ledger is absent, so the ledger context was present. The operation c560 failed on was exercised and got through.
+- c560's repair (`6f1f8543c`) did not cause that. It adds the same refusal earlier, in `strategic-selection!`; it supplies no ledger. In `8c8ee35f` the ledger was simply there. Why it was absent in `1586bf55` is still unexplained, so c560 is not shown healed.
+- The dispatched readiness contact itself failed: provider refused, 1261 "Prompt exceeds max length" (27k tokens, seat wm-author). The phase still returned `:ok`, and the record says `:unknown :inputs-changed-during-contact`. The same refusal hit both other readiness contacts on 2026-10-27 (14:26, 22:46). Readiness refresh has not produced an assessment in any of them, and the reason is recorded wrongly.
+
+### 2026-10-28 — Joe's framing for item 3, and dispatch of item 1
+
+Joe approved the three-item plan with this remark on the cycle: "Either its preferences don't care about the difference, or it doesn't expect to learn anything different from one versus the other. So the fix is to give it richer preferences or a sharper observation model, not a tie-breaker."
+
+Applied to item 3: the outcome model currently maps "earlier failure blocked the retry", "injury's own operation shown working, then a later failure" and "not enough evidence" to the same observation (inconclusive), so the selector predicts the same result from re-queueing as from moving on, and it cycles. The fix is to make those observations distinct (sharper observation model), and to state which one the selector prefers to reach (richer preferences), not to add an ordering rule that picks one of the tied options.
+
+Item 1 (why click 1586bf55 had no job ledger in its opts at readiness) dispatched to codex-1 as job invoke-1793155900660-5711-fbb5669e, park park-68c928b0-d0ea-44ad-9f3c-cf03e0e71948. Packet: ~/notes/packets/c560-ledger-discovery-2026-10-28.md. Discovery only.
