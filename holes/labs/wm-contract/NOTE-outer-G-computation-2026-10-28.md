@@ -33,7 +33,10 @@ risk-only" applies to task selection in this sense only.
 - **Observation kernel, a**: if `doable`, (class from k's relation to the
   focus, unblocks k) with probability reach r, else (stopTheLine, 0); if
   `blocked`, (stopTheLine, 0). r is the candidate's `reach` (supplied from
-  outside for now).
+  outside for now). First real field: Giraffe missions run
+  `~/code/storage/giraffe/20261028T154151.285Z-b916cd4e` (147 open, 140
+  ready; ready missions differ in unblocks and cone; the cycle's two members
+  are `:undetermined`, not `:not-ready`).
 - **Preferences, C**: over the observation pair. Joe: C includes items made
   ready. The ending-class part is the learned C of slice 1b; the
   items-made-ready part is a second learned count vector with its own starter
@@ -63,8 +66,21 @@ Two parts, at two levels:
    learned counts per kind of task, never by planning the task's inner work
    (that would be the regress). Not part of Cτ's classes.
 
-Open: whether pattern/cascade/capability changes are attributed per task in
-today's records; if not, a small producer, not a data project.
+Attribution (checked 2026-10-28, quick look only): the graph store has no
+task→pattern/capability links (`capability/produces`, `capability/ascent`,
+`code/v05/pattern-origin` all count 0). It does hold, per session, the
+patterns retrieved and the mission the agent is clocked in on (Joe). New
+patterns are not recorded as such. So the yield producer is small and
+forward-only: at click close, list commits whose `Agency-Job` trailer is one
+of the click's jobs (trailers on every agent commit since 2026-09-30; 17 of
+41 futon3 `library/` commits since 10-01 carry one) and count what they added
+or changed under `futon3/library/`. Joe: the War Animals interactive-loop
+work may already record pattern additions and could be reused here.
+
+Scope (Joe, 2026-10-28): this need not be complete. Scoring cascades as
+learning against the giant connected component of patterns (Giraffe + the
+REPL learning loop that maintains it) is a later upgrade; the requirement now
+is a working, AIF-compliant learning loop with stated limits.
 
 ## What each term then means
 
