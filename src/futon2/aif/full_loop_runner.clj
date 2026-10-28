@@ -103,7 +103,7 @@
             [futon2.aif.trace :as trace]
             [futon2.aif.tripwire :as tripwire]
             [futon2.report.cascade-lane :as cascade])
-  (:import [java.nio.file Files]
+  (:import [java.nio.file Files StandardCopyOption]
            [java.security MessageDigest]
            [java.time Instant]
            [java.util UUID]
@@ -670,6 +670,44 @@
   [^bytes b]
   (let [d (.digest (MessageDigest/getInstance "SHA-256") b)]
     (apply str (map #(format "%02x" (bit-and 0xff %)) d))))
+
+(defn- selected-target-reading-failure-data
+  "Durably retain RECORD beside the run record before a selected-target
+  reading failure escapes. The returned ex-data carries only the stable file
+  reference, so the bounded terminal projection can retain it."
+  [opts record error-data]
+  (if (or (nil? record)
+          (contains? error-data :selected-target-reading/failure-record))
+    error-data
+    (let [dir (io/file (or (:run-record-dir opts) default-run-record-dir))
+          target (io/file dir (str (:run-id opts)
+                                   "-selected-target-reading-failure.edn"))
+          tmp (io/file dir (str "." (.getName target) "."
+                                (UUID/randomUUID) ".tmp"))
+          bytes (.getBytes (str (pr-str record) "\n") "UTF-8")]
+      (try
+        (io/make-parents target)
+        (spit tmp (String. bytes "UTF-8"))
+        (Files/move (.toPath tmp) (.toPath target)
+                    (into-array StandardCopyOption
+                                [StandardCopyOption/ATOMIC_MOVE
+                                 StandardCopyOption/REPLACE_EXISTING]))
+        (assoc error-data :selected-target-reading/failure-record
+               {:path (.getCanonicalPath target)
+                :sha256 (sha256-bytes bytes)})
+        (catch Throwable write-error
+          (assoc error-data :selected-target-reading/failure-record-write-error
+                 {:class (.getName (class write-error))
+                  :message (ex-message write-error)}))
+        (finally
+          (when (.isFile tmp) (.delete tmp)))))))
+
+(defn- rethrow-with-selected-target-reading-failure!
+  [opts record throwable]
+  (throw (ex-info (or (ex-message throwable) "Selected-target reading failed")
+                  (selected-target-reading-failure-data
+                   opts record (or (ex-data throwable) {}))
+                  throwable)))
 
 (defn- canonical-runner-bytes
   []
@@ -2377,11 +2415,14 @@
                          :kind :selected-target-reading-repair-threw
                          :published false :message (ex-message e)}))]
       (if (:published record)
-        {:judgement (-> (redecide record)
-                        (assoc :selected-target-reading-request record)
-                        (assoc-in [:decision :selection-certificate
-                                   :selected-target-reading-request] record))
-         :record record}
+        (try
+          {:judgement (-> (redecide record)
+                          (assoc :selected-target-reading-request record)
+                          (assoc-in [:decision :selection-certificate
+                                     :selected-target-reading-request] record))
+           :record record}
+          (catch Throwable e
+            (rethrow-with-selected-target-reading-failure! opts record e)))
         {:judgement (-> judgement
                         (assoc :selected-target-reading-request record)
                         (assoc-in [:decision :selection-certificate
@@ -7425,14 +7466,17 @@
                       :selected-target-reading-redecision %
                       {:selected-target-reading record})))
                  (catch Throwable e
-                   (throw
-                    (ex-info "Selected-target reading was published but inner construction failed"
-                             {:outcome :incomplete
-                              :failure-kind :selected-target-reading-redecision-failed
-                              :failure-stage :selected-target-reading-redecision
-                              :target (:target record)
-                              :selected-target-reading record}
-                             e)))))))
+                   (let [failure-data
+                         (selected-target-reading-failure-data
+                          opts record
+                          {:outcome :incomplete
+                           :failure-kind :selected-target-reading-redecision-failed
+                           :failure-stage :selected-target-reading-redecision
+                           :target (:target record)
+                           :selected-target-reading record})]
+                     (throw
+                      (ex-info "Selected-target reading was published but inner construction failed"
+                               failure-data e))))))))
              (fn [result]
                {:reading-status (get-in result [:record :status])}))
             {judgement0-squares :judgement
