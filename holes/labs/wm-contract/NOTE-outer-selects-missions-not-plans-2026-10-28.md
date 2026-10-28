@@ -130,4 +130,38 @@ supports packet 1. Its qualifications, which amend the plan above:
    standing view is that a tie is an inference defect, which argues for
    finding the discriminating mission evidence rather than accepting the tie.
 
-Status: agreed in principle; nothing built yet.
+## Joe's ruling on the tie (2026-10-28)
+
+Joe: "The outer loop is a policy, so it needs its own generative model. It
+needs preferences over outcomes like fun, profit or difficulty, beliefs about
+what working on each task will lead to, and G computed over task choices at
+that level. The inner policies can feed into it, for example as evidence about
+how hard a task is likely to be, but they're inputs to the outer model, not a
+stand-in for it. ... if every inner policy is 'throw it in the bin', the outer
+loop's beliefs about difficulty are flat, so of course everything ties. So the
+ties and the backwardness turn out to be the same bug."
+
+Consequences for the plan:
+
+1. **Point 5 is settled.** The 10-26 pair tied because the outer level had no
+   beliefs of its own, only cascade structure. Packet 2 passes only if the
+   pair is ordered by the outer model (its doability 0.8 vs 0.5 and value
+   0.335 vs 0.354 are evidence that model must read). A tie there is a failing
+   test, not an accepted result.
+2. **Preferences are over task outcomes.** C is declared over an outer outcome
+   vocabulary that includes at least fun, profit and difficulty (how hard the
+   work turned out to be); Q(o|m) is the outer model's belief about what
+   working on m leads to.
+3. **Inner policies are evidence, through a declared channel.** codex-1's
+   invariance theorem ("an arbitrary change to an unselected inner family
+   cannot change the ranking") still holds for families that were never
+   built. But evidence derived from inner policies (past attempts on m, how
+   hard its last plan was to execute, a cheap difficulty estimate) is allowed
+   and wanted. It enters as a named field of the mission observations, so
+   changing that field can change the ranking (sensitivity), while changing
+   the family object behind it, with the field held fixed, cannot
+   (invariance). Packet 1 is reviewed against this; if its world type has no
+   such field, the reviewer adds it.
+
+Status: packet 1 (Lean) running on codex-1, job
+invoke-1793157541599-5742-8688a721.
