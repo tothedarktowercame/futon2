@@ -85,3 +85,15 @@
                                     (fn [_ _] (throw (ex-info "injected write failure" {})))]
                             (state/write-state! path after))))
     (is (= (assoc before :source :durable) (state/read-state makeup path)))))
+
+(deftest default-store-paths-ignore-process-working-directory
+  (testing "both defaults stay in the canonical repo from unrelated process roots"
+    (doseq [cwd ["/home/joe/code/futon3c" "/tmp"]
+            [path expected] [[state/default-makeup-path
+                              "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn"]
+                             [state/default-state-path
+                              "/home/joe/code/futon2/data/wm-learning/outer-state.edn"]]]
+      (let [base (java.nio.file.Paths/get cwd (make-array String 0))
+            target (java.nio.file.Paths/get path (make-array String 0))]
+        (is (.isAbsolute target))
+        (is (= expected (str (.normalize (.resolve base target)))))))))

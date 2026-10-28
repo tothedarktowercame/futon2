@@ -12,8 +12,9 @@
 
 (def makeup-schema :wm/outer-makeup-v1)
 (def state-schema :wm/outer-state-v1)
-(def default-makeup-path "data/wm-learning/outer-makeup.edn")
-(def default-state-path "data/wm-learning/outer-state.edn")
+;; The serving JVM runs from futon3c; live stores belong to canonical futon2.
+(def default-makeup-path "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn")
+(def default-state-path "/home/joe/code/futon2/data/wm-learning/outer-state.edn")
 
 (def ^:dynamic *before-state-move*
   "Fault-injection observer called after the temp file is complete, before rename."
