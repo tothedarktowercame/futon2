@@ -78,6 +78,20 @@ introduction step and its record are new work, specified with the Lean and
 then built in Clojure. Until it exists, every click observes yield `none`,
 and the yield preference has no effect: a stated limit.
 
+Assimilation (Joe, 2026-10-28 ~17:10Z): yield must not credit raw
+additions, or the machine learns to call everything a design pattern. An
+introduction counts only once it is assimilated. A candidate rule from the
+sources already in `refs/`: accept a new component only when Bayesian model
+reduction / comparison says the model with it has lower free energy
+(friston2018bmr); otherwise it stays a proposal and earns nothing. Not built
+now; selection comes first.
+
+Hidden layers (Joe): what patterns a task will need, like which inner
+policies are best, does not exist until the task is selected and worked
+against the existing patterns. Those are hidden states the outer level
+cannot read, only predict; a later upgrade can learn them from previously
+selected and computed cascades.
+
 Scope (Joe, 2026-10-28): this need not be complete. Scoring cascades as
 learning against the giant connected component of patterns (Giraffe + the
 REPL learning loop that maintains it) is a later upgrade; the requirement now
