@@ -63,7 +63,7 @@ Later upgrade, not in this rebuild: hierarchical C, where a higher level
 sets the lower level's preferences (the "hierarchical contextualisation" of
 [4]; it is a conceptual account, not a learning scheme for C), or Bayesian
 model reduction of `c` [5] (pattern `aif/structure-learning-by-model-reduction`). `Makeup` keeps room for this:
-the update rule is one named function.
+the update rule is one named function. Written out in `holes/E-hierarchical-preferences.md`.
 
 ### References for C
 
