@@ -146,7 +146,9 @@
                              (/ (* (- ad ab) (- ad ab)) prediction)))]
         (* 0.5 variance fisher)))))
 
-(defn- push [{:keys [q kernel]}]
+(defn push
+  "Lean `push q a`: marginalize an outer model's state prior through its kernel."
+  [{:keys [q kernel]}]
   (into {} (for [outcome outcomes]
              [outcome (reduce + 0.0
                               (for [state states]

@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-observation :as outer-observation]
+            [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.outer-state :as outer-state]))
 
@@ -38,7 +39,22 @@
     (let [makeup {:cascades [{:id :none :patterns ["test"]
                               :steps [{:gate-status :not-ready}]}]}
           result (outer-select/select makeup base-state base-observation)]
-      (is (nil? (:selection result))))))
+      (is (nil? (:selection result)))
+      (is (nil? (:prediction result))))))
+
+(deftest chosen-prediction-is-the-chosen-model-push
+  (let [result (outer-select/select base-makeup base-state base-observation)
+        chosen (nth (:cascades base-makeup) (:cascade-index result))
+        model (outer-score/outer-model
+               (merge (select-keys base-observation [:focus :relation :facts :field])
+                      {:state-counts (:state-counts base-state)
+                       :cascade (:steps chosen)}))
+        prediction (:prediction result)]
+    (is (= (outer-score/push model) (:outcomes prediction)))
+    (is (= (select-keys model [:q :status :landing])
+           (select-keys prediction [:q :status :landing])))
+    (is (< (Math/abs (- 1.0 (reduce + (vals (:outcomes prediction)))))
+           1.0e-12))))
 
 (deftest tie-means-distinct-tied-picks
   (testing "two cascades with the same minimum and the same pick are not a tie"

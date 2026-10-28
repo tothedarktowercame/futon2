@@ -31,14 +31,19 @@
       (let [minimum (reduce min scores)
             index (.indexOf scores minimum)
             chosen (nth menu index)
-            picked (outer-score/cascade-pick (:steps chosen)
-                                             (:facts observation)
-                                             (:field observation))]
+            model (outer-score/outer-model
+                   (assoc score-input :cascade (:steps chosen)))
+            picked (:pick model)]
         {:cascade-index index
          :cascade-id (:id chosen)
          :cascade-scores scores
          :selection (when picked {:candidates (:field observation)
                                   :selected picked})
+         :prediction (when picked
+                       {:outcomes (outer-score/push model)
+                        :q (:q model)
+                        :status (:status model)
+                        :landing (:landing model)})
          ;; Cascades that share the minimum but pick the same task are not a
          ;; tie in the choice; only distinct tied picks are the defect.
          :tied-cascades (vec (keep-indexed #(when (= minimum %2) (:id (nth menu %1)))
