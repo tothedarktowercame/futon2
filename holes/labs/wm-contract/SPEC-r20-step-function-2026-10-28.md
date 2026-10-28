@@ -44,16 +44,43 @@ related, unrelated, stopTheLine; `notYetEvaluated` is not a terminal outcome,
 so it gets no count and the waiting-step preference is unchanged).
 
 - Prior: `c₀ = κ · (55, 35, 5, 5)/100`, κ > 0 in `Makeup`.
-- Update, as in Smith, Friston & Whyte 2022 (tutorial, preference learning):
-  each click adds one count for its observed ending class.
+- Update: each click adds one count for its observed ending class. This is
+  the Dirichlet count update `c ← ω·c + η·o` with η = ω = 1 (no learning
+  rate below 1, no forgetting). Sources, checked 2026-10-28 [1–3]:
+  [1] gives the rule for d (Eq. 34) and a (Eq. 37) and says only that
+  "analogous update rules apply to the other model parameters (B, C, E)";
+  [2] learns outcome preferences by accumulating Dirichlet parameters (flat
+  prior, 1 per option); [3] §4.1 writes the C update out as `d + α·s` with
+  α a learning rate. Our kit prior κ·(55,35,5,5)/100 replaces their flat one.
 - C at the click is `c / Σ c`, and it takes the place of `terminalPreference`
   in `classPreference`.
 - Theorem: at click n, `c = c₀ + (counts of ending classes in obs₀ … obs_{n-1})`.
 
-Later upgrade, not in this rebuild: hierarchical C (Pezzulo, Rigoli &
-Friston 2015) or Bayesian model reduction of `c` (pattern
-`aif/structure-learning-by-model-reduction`). `Makeup` keeps room for this:
+Later upgrade, not in this rebuild: hierarchical C, where a higher level
+sets the lower level's preferences (the "hierarchical contextualisation" of
+[4]; it is a conceptual account, not a learning scheme for C), or Bayesian
+model reduction of `c` [5] (pattern `aif/structure-learning-by-model-reduction`). `Makeup` keeps room for this:
 the update rule is one named function.
+
+### References for C
+
+1. Smith, R., Friston, K. J. & Whyte, C. J. (2022). A step-by-step tutorial
+   on active inference and its application to empirical data. *Journal of
+   Mathematical Psychology* 107, 102632. doi:10.1016/j.jmp.2021.102632
+   (§4, "Modeling learning", Eqs. 32–37).
+2. Sajid, N., Ball, P. J., Parr, T. & Friston, K. J. (2021). Active
+   inference: demystified and compared. *Neural Computation* 33(3), 674–712.
+   doi:10.1162/neco_a_01357. arXiv:1909.10863.
+3. Sajid, N., Tigas, P., Zakharov, A., Fountas, Z. & Friston, K. (2021).
+   Exploration and preference satisfaction trade-off in reward-free
+   learning. arXiv:2106.04316 (§4.1).
+4. Pezzulo, G., Rigoli, F. & Friston, K. J. (2015). Active Inference,
+   homeostatic regulation and adaptive behavioural control. *Progress in
+   Neurobiology* 134, 17–35. doi:10.1016/j.pneurobio.2015.09.001.
+5. Friston, K., Parr, T. & Zeidman, P. (2018). Bayesian model reduction.
+   arXiv:1805.07092.
+
+Local copies: `~/notes/papers/` (not committed).
 
 ## Slices (one handoff each, reviewed between)
 
