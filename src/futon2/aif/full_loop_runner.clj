@@ -3276,6 +3276,19 @@
                           (re-find #"(?i)already[\s_-]+(true|satisfied|holds?|landed|met|done)" v))))
                  [:want-coverage :built])))
 
+(defn- already-satisfied-report?
+  "The REFUSE detail itself reports the want already holds (injury
+  2aef7e0c, run 2026-10-27-39eb74f5: \\\"all twelve reviewed completion
+  checks are already satisfied ... at base head 09a7cb8d\\\").  The report
+  is not required to live in a feature card; the card is one carrier of
+  the already-satisfied wording, and the REFUSE marker line is another.
+  Same wording tokens as already-satisfied-card?."
+  [refuse-detail]
+  (and (string? refuse-detail)
+       (not (str/blank? refuse-detail))
+       (boolean (re-find #"(?i)already[\s_-]+(true|satisfied|holds?|landed|met|done)"
+                         refuse-detail))))
+
 (defn- commit-exists-in?
   "True when SHA names an existing commit in REPO (git cat-file)."
   [repo sha]
@@ -3308,7 +3321,8 @@
          exists-fn (or exists-fn commit-exists-in?)]
      (when (= :refuse verdict)
        (let [card (raw-feature-card job)
-             already? (and card (already-satisfied-card? card))
+             already? (or (and card (already-satisfied-card? card))
+                          (already-satisfied-report? reason))
              ;; Agency extracts the first ref-like text from an answer.  A
              ;; sha-shaped extracted ref is tried first, but a sha that names
              ;; no existing commit in any primary repository is not evidence
@@ -3352,7 +3366,8 @@
                                      (when-let [found
                                                 (find-grounded
                                                   sha
-                                                  (if (and (= sha artifact-sha)
+                                                  (if (and card
+                                                           (= sha artifact-sha)
                                                            (not= sha proof-sha))
                                                     :artifact
                                                     :proof))]
