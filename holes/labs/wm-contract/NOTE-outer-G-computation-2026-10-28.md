@@ -66,16 +66,17 @@ Two parts, at two levels:
    learned counts per kind of task, never by planning the task's inner work
    (that would be the regress). Not part of Cτ's classes.
 
-Attribution (checked 2026-10-28, quick look only): the graph store has no
-task→pattern/capability links (`capability/produces`, `capability/ascent`,
-`code/v05/pattern-origin` all count 0). It does hold, per session, the
-patterns retrieved and the mission the agent is clocked in on (Joe). New
-patterns are not recorded as such. So the yield producer is small and
-forward-only: at click close, list commits whose `Agency-Job` trailer is one
-of the click's jobs (trailers on every agent commit since 2026-09-30; 17 of
-41 futon3 `library/` commits since 10-01 carry one) and count what they added
-or changed under `futon3/library/`. Joe: the War Animals interactive-loop
-work may already record pattern additions and could be reused here.
+Attribution (Joe, 2026-10-28 ~17:00Z): learning yield is not scanned or
+attributed after the fact (not commit trailers, not the interactive loop's
+象/狗/馬 readings). The War Machine introduces new patterns and cascades
+formally: introduction is a typed step of the click, written to the click's
+record (pattern or cascade id, library pin, the task it was introduced under).
+Learning yield is the count of those introductions in the click. The quick
+look found no such links in the graph store today (`capability/produces`,
+`capability/ascent`, `code/v05/pattern-origin` all count 0), so the
+introduction step and its record are new work, specified with the Lean and
+then built in Clojure. Until it exists, every click observes yield `none`,
+and the yield preference has no effect: a stated limit.
 
 Scope (Joe, 2026-10-28): this need not be complete. Scoring cascades as
 learning against the giant connected component of patterns (Giraffe + the
