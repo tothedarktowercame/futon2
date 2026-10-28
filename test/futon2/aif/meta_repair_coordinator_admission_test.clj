@@ -28,6 +28,22 @@
                         :retry-click "click-retry-repair-1"
                         :admission-marker marker})))
 
+(defn- phase-admission [history state]
+  (last (filter #(= state (:state %)) (:entries history))))
+
+(defn- without-phase-pin [history state]
+  (update history :entries
+          (fn [entries]
+            (mapv #(if (= state (:state %))
+                     (dissoc % :port-receipt-pin)
+                     %)
+                  entries))))
+
+(defn- admission-refusal [history receipt phase]
+  (let [order (:work-order (:transaction (start)))]
+    (#'coordinator/unadmitted-phase-receipt
+     history receipt (:injury-id order) (:repair-id order) (:attempt order) phase)))
+
 (deftest review-receipt-must-be-the-ledger-admitted-receipt
   (let [{:keys [history transaction]} (start)
         authored (pause history transaction :author {})
@@ -75,3 +91,41 @@
            (get-in enacted [:ledger :entries 3 :port-receipt-pin])))
     (is (= (:receipt-pin (nth (get-in enacted [:transaction :receipts]) 2))
            (get-in enacted [:ledger :entries 4 :port-receipt-pin])))))
+
+(deftest missing-phase-transition-is-unadmitted
+  (let [{:keys [history transaction]} (start)
+        authored (pause history transaction :author {})
+        review-receipt (second (get-in (pause (:ledger authored)
+                                              (:transaction authored)
+                                              :review {})
+                                       [:transaction :receipts]))
+        refusal (admission-refusal (:ledger authored) review-receipt :review)]
+    (is (= :coordinator/unadmitted-review-receipt (:reason refusal)))
+    (is (nil? (:admitted-receipt-pin refusal)))
+    (is (= (:receipt-pin review-receipt) (:received-receipt-pin refusal)))))
+
+(deftest legacy-review-admission-compares-reviewer-sha
+  (let [{:keys [history transaction]} (start)
+        reviewed (pause history transaction :review {})
+        legacy (without-phase-pin (:ledger reviewed) :reviewed)
+        admitted (second (get-in reviewed [:transaction :receipts]))
+        mismatch (assoc-in admitted [:payload :reviewer-sha] fixture/sha-a)]
+    (is (nil? (admission-refusal legacy admitted :review)))
+    (is (= :coordinator/unadmitted-review-receipt
+           (:reason (admission-refusal legacy mismatch :review))))
+    (is (= {:reviewer-sha fixture/sha-b}
+           (select-keys (phase-admission legacy :reviewed) [:reviewer-sha])))))
+
+(deftest legacy-enact-admission-compares-recorded-integration-and-retry
+  (let [{:keys [history transaction]} (start)
+        enacted (pause history transaction :enact {})
+        legacy (without-phase-pin (:ledger enacted) :enacted)
+        admitted (nth (get-in enacted [:transaction :receipts]) 2)
+        bad-integration (assoc-in admitted [:payload :integration-commit]
+                                  fixture/sha-b)
+        bad-retry (assoc-in admitted [:payload :retry-click] "other-retry")]
+    (is (nil? (admission-refusal legacy admitted :enact)))
+    (is (= :coordinator/unadmitted-enact-receipt
+           (:reason (admission-refusal legacy bad-integration :enact))))
+    (is (= :coordinator/unadmitted-enact-receipt
+           (:reason (admission-refusal legacy bad-retry :enact))))))

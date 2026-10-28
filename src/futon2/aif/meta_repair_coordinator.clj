@@ -157,7 +157,7 @@
                     (seq admitted-fallback)
                     (= admitted-fallback received-fallback)
                     :else false)]
-    (when (and admitted (not admitted?))
+    (when-not admitted?
       (refusal reason
                {:phase phase :injury-id injury-id :repair-id repair-id
                 :attempt attempt :admitted-receipt-pin admitted-pin
