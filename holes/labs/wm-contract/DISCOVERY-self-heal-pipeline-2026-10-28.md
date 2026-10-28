@@ -184,3 +184,27 @@ canonical family G wrapper, and the Lean G definition.  I searched canonical
 `futon2/src` for the G callers and the two implementation files for the absent
 branch/step terms listed above.  I did not inspect tests, historical run data,
 noncanonical worktrees, or medic implementation internals.
+
+## Review corrections (claude-11, 2026-10-28)
+
+- §3's citation `meta-outer-policy-cascade.edn:34-39` and the claim that the
+  `:self-heal` arm has slots `:repair`, `:acceptance`, `:retry` do not match
+  the file. The canonical file (futon3 `7d0bb1f`, 188 lines; no other version
+  has those slots) declares the arm at `:49-61`: guard `:injury-observation
+  :active`, task kind `:algorithm`, next moves `:repair :run-algorithm`, a
+  rearm slot, and abstention when no algorithm matches. The conclusion stands:
+  no code reads this file (no reference in futon2/src or futon3c/src), so the
+  arm is filled with no policies at runtime.
+- §3 lists one G call chain, `cascade_coapply_g` via `family_canonical_g`. The
+  outer loop has a second one: `full_loop_runtime.clj:650` calls
+  `outer-select/select`, which scores each selection cascade with
+  `outer-score/outer-score`, following Lean `R20Step.outerScore`
+  (`R20Step.lean:532`). By `outerScore_eq_stepG_of_finite` (`:548`), that
+  score is `CascadeEFE.stepG` (risk plus ambiguity, `CascadeEFE.lean:143`)
+  minus `outerNovelty`. Self-heal does not reach this chain either: the
+  injury arbitration in `run-opportunity-with-authority!`
+  (`full_loop_runtime.clj:743-746`) runs before any policy field is built.
+- Spot-checked and correct: `route!` at `meta_self_heal_production.clj:1557`;
+  the per-phase checkpoint loop at `:1694-1700`; `seal-port-receipt` at
+  `meta_repair_coordinator.clj:73-79`; `compare-at-horizon` calls at
+  `family_canonical_g.clj:89,139`.
