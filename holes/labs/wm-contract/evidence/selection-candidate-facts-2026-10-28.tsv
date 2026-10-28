@@ -1,0 +1,116 @@
+event	candidate	fact-kind	value	source-lines
+K1.2	codex-1	other:usage-limit	"*(codex-1 failed: OpenAI usage limit until 2026-07-18; re-routed.)*"	futon2/holes/M-evaluate-policies.md:1407-1408
+K1.2	claude-11	other:seat-idle	"claude-1/2/8/10/11 idle" at dispatch (roster line)	futon2/holes/M-evaluate-policies.md:1404-1405
+K1.4	sample run	value-or-leverage	"The shape of the real ratchet solution depends on what we observe"	futon0/holes/missions/M-apm-capability-ratchet.md:393-395
+K1.4	design of packet schema	other:depends-on-unobserved	"if the natural self-talk is rich enough, the distillation path is extraction; if it is not, the prompt and cycle structure need adjustment first"	futon0/holes/missions/M-apm-capability-ratchet.md:395-397
+K1.4	design of evaluation harness	other:depends-on-unobserved	"The first DERIVE step is not to design the packet schema or the evaluation harness"	futon0/holes/missions/M-apm-capability-ratchet.md:393-394
+K1.6	Kimi seats	other:usage-left	"prefer Kimi and Zai seats to Codex for my dispatches whenever those systems have usage left"	futon0/../.claude/projects/-home-joe-code/memory/prefer-kimi-zai-over-codex.md:10-12
+K1.6	Zai seats	other:usage-left	"prefer Kimi and Zai seats … whenever those systems have usage left"	futon0/../.claude/projects/-home-joe-code/memory/prefer-kimi-zai-over-codex.md:10-12
+K1.6	Codex seats	other:usage-contended	"Joe is running three intensive Codex projects of his own in parallel, so Codex usage and seats are contended. Codex goes last"	futon0/../.claude/projects/-home-joe-code/memory/prefer-kimi-zai-over-codex.md:12-14
+K2.2	INSTANTIATE the coupled G	NONE-RECORDED	(its recorded facts are the two named blockers, recorded as need edges in selection-candidate-edges-2026-10-28.json)	futon2/holes/M-G-over-cascades.md:755-763
+K2.2	retrospective dk/dt spike	value-or-leverage	"The two blockers are one … one spike clears both ⛔ retrospectively"	futon2/holes/M-G-over-cascades.md:766-769
+K3.2	core system P12 working end to end	NONE-RECORDED	(no fact about P12 itself at the choice moment beyond being the re-arm condition, recorded as an edge)	futon3c/holes/missions/M-象-2000.md:557
+K3.2	edge cases: provisional withdrawal	other:parked-by-joe	"'we can wait until we see the core system working to deal with edge cases around provisional withdrawal and countersigned voids' … the questions are not repeated in reports"	futon3c/holes/missions/M-象-2000.md:557
+K3.2	countersigned voids	other:parked-by-joe	"parked: no grant, no countersign build … reopened once P12 works end to end"	futon3c/holes/missions/M-象-2000.md:557
+K3.6	Phase 1	NONE-RECORDED	(its recorded fact is the threshold, recorded as a need edge)	~/notes/selection-patterns/witnesses-2026-10-28.md:74
+K3.6	Phase 3a	NONE-RECORDED	(installation requirement recorded as a need edge)	~/notes/selection-patterns/witnesses-2026-10-28.md:74
+K3.6	Phase 4	NONE-RECORDED	(GPU-access requirement recorded as a need edge)	~/notes/selection-patterns/witnesses-2026-10-28.md:74
+K4.1	step (b)	value-or-leverage	"makes step (b) the hard predecessor for THREE additional items beyond M-interim-director"	futon4/holes/missions/M-interest-network-coupling.md:545-546
+K4.1	piece #2	other:plan-order	"Original codex-7 plan: piece #2 → step (b)"	futon4/holes/missions/M-interest-network-coupling.md:544-545
+K4.1	step (c)	other:parallel	"the reshuffle was: step (b) FIRST, then piece #2 in parallel with step (c)"	futon4/holes/missions/M-interest-network-coupling.md:546-548
+K4.3	M-xor-coupling-probe	NONE-RECORDED	(its recorded fact is being named on the consumer's Blocked-by header, recorded as a need edge)	futon5/holes/missions/M-coupling-as-constraint.md:5
+K4.3	M-tpg-coupling-evolution	NONE-RECORDED	(same: recorded as a need edge)	futon5/holes/missions/M-coupling-as-constraint.md:5
+K4.3	M-coupling-as-constraint	NONE-RECORDED	(its recorded fact is the Blocked-by header, recorded as need edges)	futon5/holes/missions/M-coupling-as-constraint.md:5
+K4.4	M-P7-rational-reconstruction	nearly-done	"M-P7-rational-reconstruction (complete — method validated on branching proofs)"	futon6/holes/missions/M-P8-rational-reconstruction.md:6-7
+K4.4	M-P8-rational-reconstruction	value-or-leverage	"Enables: Validation of math-strategy patterns on symplectic geometry, hypothesis-category-check pattern (new), input to M-distributed-frontiermath"	futon6/holes/missions/M-P8-rational-reconstruction.md:8-9
+K4.5	sample run	value-or-leverage	"This is why the sample run is a DERIVE prerequisite, not an INSTANTIATE step"	futon0/holes/missions/M-apm-capability-ratchet.md:398-399
+K4.5	design of packet schema	other:depends-on-unobserved	"if the natural self-talk is rich enough, the distillation path is extraction; if it is not, the prompt and cycle structure need adjustment first"	futon0/holes/missions/M-apm-capability-ratchet.md:395-397
+K4.5	design of evaluation harness	other:depends-on-unobserved	"The first DERIVE step is not to design the packet schema or the evaluation harness"	futon0/holes/missions/M-apm-capability-ratchet.md:393-394
+K4.6	accurate durable usage telemetry (Claude, Codex, Zai)	NONE-RECORDED	(its recorded fact is blocking the mission, recorded as a need edge from M-usage-hacking)	futon0/holes/missions/M-usage-hacking.md:6
+K4.7	WM-02 (belief→state distribution)	other:joe-ruling	"Their carrier choices are Joe's rulings, so prepare concrete options for him"	futon0/../.claude/projects/-home-joe-code/memory/wm-closure-strategy-zai-owners.md:29
+K4.7	WM-03 (controlled transition B)	other:joe-ruling	"Their carrier choices are Joe's rulings, so prepare concrete options for him"	futon0/../.claude/projects/-home-joe-code/memory/wm-closure-strategy-zai-owners.md:29
+K4.7	WM-06 (preference C)	other:joe-ruling	"Their carrier choices are Joe's rulings, so prepare concrete options for him"	futon0/../.claude/projects/-home-joe-code/memory/wm-closure-strategy-zai-owners.md:29
+K5.2	Claim-ledger	cost	"~8 subsection entries × one-line each = ~8 sentences. Low cost, high yield"	futon4/holes/missions/M-writing-ethics.md:262-263
+K5.2	Claim-ledger	value-or-leverage	"Unblocks ~5–8 items"	futon4/holes/missions/M-writing-ethics.md:263
+K5.2	Audience register	cost	"~3-line note at paper-top. Very low cost"	futon4/holes/missions/M-writing-ethics.md:264
+K5.2	Audience register	value-or-leverage	"Unblocks 2–3 items"	futon4/holes/missions/M-writing-ethics.md:264
+K5.2	Thesis statement	cost	"1 sentence, ratified from C2's suggested move. Trivial cost"	futon4/holes/missions/M-writing-ethics.md:265
+K5.2	Thesis statement	value-or-leverage	"Unblocks C2 + W3"	futon4/holes/missions/M-writing-ethics.md:265
+K5.2	Argument-trajectory map	cost	"~6 nodes + ~8 edges. Medium cost"	futon4/holes/missions/M-writing-ethics.md:266
+K5.2	Argument-trajectory map	value-or-leverage	"unblocks 2 items but is reusable for future drafts"	futon4/holes/missions/M-writing-ethics.md:266
+K5.2	Tacit-decision ledger	other:emerges	"this is what Joe will produce as he ratifies. Emerges during DERIVE, not beforehand"	futon4/holes/missions/M-writing-ethics.md:267
+K5.3	handoff shape 1 (futon5a ingest)	value-or-leverage	"picks up stack-annotations.edn, extends ingest to remaining 14 leaves, runs operator-triage on the 33 region-unassigned atomics. Output: ingestion complete"	futon7/holes/M-descriptive-essay-of-the-stack.md:63-66
+K5.3	handoff shape 2 (ukrn port / F1-F10)	value-or-leverage	"ports ukrn_v3_*.clj patterns … satisfying F1-F10 operationally. This is the deepest engineering work"	futon7/holes/M-descriptive-essay-of-the-stack.md:67-69
+K5.3	handoff shape 2 (ukrn port / F1-F10)	value-or-leverage	"it's the highest-leverage, the most distant from today's groundwork, and the bar that #1 and #3 rest on … Without #2 the other two have nothing to align with"	futon7/holes/M-descriptive-essay-of-the-stack.md:70
+K5.3	handoff shape 3 (resume claude-3)	value-or-leverage	"picks up the alignment work for exit criterion #3, since M-INC's event-vocabulary apparatus is what propagates updates between essay and code"	futon7/holes/M-descriptive-essay-of-the-stack.md:68-69
+K5.4	(i) slot-aware retrieval	cost	"Cost: nontrivial. Requires reworking notions_search.py to use slot-aware projections, and either re-embedding slots separately or post-hoc reweighting"	futon3/holes/missions/M-pattern-ingest.md:261-263
+K5.4	(i) slot-aware retrieval	chance-of-success	"Risk: the existing 0.64 cosine is already strong; the marginal improvement may not be dramatic"	futon3/holes/missions/M-pattern-ingest.md:264-266
+K5.4	(i) slot-aware retrieval	value-or-leverage	"(i) is the highest-impact retrieval-quality move"	futon3/holes/missions/M-pattern-ingest.md:313-314
+K5.4	(ii) RELATED-graph enrichment	cost	"Cost: low. Edge type already fits the v0 schema; the parsing is a regex over the RELATED block; rendering hooks into existing WebArxana machinery"	futon3/holes/missions/M-pattern-ingest.md:279-281
+K5.4	(ii) RELATED-graph enrichment	value-or-leverage	"the cheapest concrete win, has the most visible artefact (a rendered cross-pattern graph), and doesn't couple to other in-flight missions"	futon3/holes/missions/M-pattern-ingest.md:312-314
+K5.4	(ii) RELATED-graph enrichment	chance-of-success	"Risk: the RELATED slot is a new orchestration-namespace convention; legacy patterns don't have it, so the pilot graph is sparse outside orchestration"	futon3/holes/missions/M-pattern-ingest.md:282-286
+K5.4	(iii) clause-shape-overlap diagnostics	cost	"Cost: highest. Touches the pattern-application diagnostic machinery, which is itself mid-flight"	futon3/holes/missions/M-pattern-ingest.md:297-299
+K5.4	(iii) clause-shape-overlap diagnostics	value-or-leverage	"(iii) is the highest-leverage cross-mission move"	futon3/holes/missions/M-pattern-ingest.md:315-316
+K6.1	exposure of existing tools	cost	"the cheapest first win is exposure, not construction … Nearly mechanical: one boot_context backend fn plus tool-spec entries … No new retrieval infrastructure"	futon2/holes/M-custom-harness.md:144-145,258-262
+K6.1	construction of new tools	cost	"Two real gaps, named so they don't masquerade as small"	futon2/holes/M-custom-harness.md:146-147
+K6.3	futon3a	cost	"74 non-merge commits; order 1 of 11 — smallest first to de-risk"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon1a	cost	"95 commits; order 2 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon5a	cost	"132 commits; order 3 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon7	cost	"143 commits; order 4 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon1	cost	"158 commits; order 5 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon0	cost	"220 commits; order 6 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon2	cost	"237 commits; order 7 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon5	cost	"291 commits; order 8 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon7a	cost	"367 commits; order 9 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon4	cost	"453 commits; order 10 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.3	futon3	cost	"919 commits; order 11 of 11"	futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md:84-95
+K6.5	wm-ui-hud-mode-rationale-hardcode	cost	"Scale :hour | Cost LOW"	futon3c/holes/missions/M-action-cost-modelling.md:204-206
+K6.5	wm-ui-hud-mode-rationale-hardcode	value-or-leverage	"Benefit LOW — small drift surface closed; canonical \"low-hanging fruit\""	futon3c/holes/missions/M-action-cost-modelling.md:204-206
+K6.5	r3a-likelihood-coupling-density	cost	"Scale :multi-session | Cost HIGH"	futon3c/holes/missions/M-action-cost-modelling.md:207
+K6.5	r3a-likelihood-coupling-density	value-or-leverage	"Benefit MEDIUM — same shape as today's support-coverage; pattern proven; +1 R3 channel"	futon3c/holes/missions/M-action-cost-modelling.md:207
+K6.5	r3a-likelihood-ticks-firing-ratio	cost	"Scale :multi-session | Cost HIGH"	futon3c/holes/missions/M-action-cost-modelling.md:208
+K6.5	r3a-likelihood-ticks-firing-ratio	value-or-leverage	"Benefit MEDIUM — same as coupling-density (tick-entity-typing analogous to edge-entity classification)"	futon3c/holes/missions/M-action-cost-modelling.md:208
+K6.5	stub-lifts-pending-aif-edn	cost	"Scale :multi-session | Cost MEDIUM"	futon3c/holes/missions/M-action-cost-modelling.md:209
+K6.5	stub-lifts-pending-aif-edn	value-or-leverage	"Benefit MEDIUM — substrate completion; not R-criteria leverage"	futon3c/holes/missions/M-action-cost-modelling.md:209
+K6.5	r3d-per-entity-attribution	cost	"Scale :campaign | Cost VERY HIGH"	futon3c/holes/missions/M-action-cost-modelling.md:210
+K6.5	r3d-per-entity-attribution	value-or-leverage	"Benefit VERY HIGH — leverage \"huge once unblocked,\" but unblocking is itself a Campaign-scale piece of work"	futon3c/holes/missions/M-action-cost-modelling.md:210
+K7.1	LC1 v1 (hand-grep + TF-IDF + recency)	cost	"the simplest thing that resolves the felt need today"	futon7/holes/M-self-documenting-stack.md:48-49
+K7.1	LC1 v1 (hand-grep + TF-IDF + recency)	value-or-leverage	"operators get the affordance immediately AND we learn what ranking signals matter from observed usage, which informs v2's design"	futon7/holes/M-self-documenting-stack.md:52
+K7.1	LC1 v2 (hyperedge-store query + WebArxana render)	other:commits-early	"building v2 first means committing to the M-live-geometric-stack ingestion shape + WebArxana wiring before knowing whether the ranking semantics matter"	futon7/holes/M-self-documenting-stack.md:49-51
+K7.1	LC1 v2 (hyperedge-store query + WebArxana render)	other:closure-bar	"Joe \"sharpened 2026-05-20: *'BOTH as closure bar'*\" - the halfway house was not allowed to close the mission"	futon7/holes/M-self-documenting-stack.md:148
+K7.4	stage 1	NONE-RECORDED	(its recorded facts are build order and stage checks, not gate/order facts of the allowed kinds)	futon3c/holes/missions/M-giraffe.md:300-302
+K7.4	stage 2	NONE-RECORDED	(same)	futon3c/holes/missions/M-giraffe.md:300-302
+K7.4	stage 3	NONE-RECORDED	(WM dependence recorded as a need edge)	futon3c/holes/missions/M-giraffe.md:300-302
+K7.4	stage 4	NONE-RECORDED	(WM dependence recorded as a need edge)	futon3c/holes/missions/M-giraffe.md:300-302
+K7.6	harness + end-to-end demo before frame-1	chance-of-success	"find a worked artifact to run on | **do not look for one — there isn't one, and that is correct**"	futon3c/holes/missions/M-apm-demonstration.md:5838-5839
+K7.6	harness + stage tests + refusal tests	other:corrected-deliverable	"the deliverable changed shape as a result of I.19, and the packet says so explicitly rather than quietly re-sending the old ask … no end-to-end claim"	futon3c/holes/missions/M-apm-demonstration.md:5835-5839
+K8.1	ONE complex mission	value-or-leverage	"the facets are interdependent (can't type edges without the form; can't schedule without the edges) … that interdependence is exactly why this is not a cheap win"	futon0/holes/missions/M-capability-star-map.md:214-217
+K8.1	a family of cheap missions	chance-of-success	"the IDENTIFY must guard against the inverse over-collapse (cram five gaps, declare done when one lands)"	futon0/holes/missions/M-capability-star-map.md:216-217
+K8.3	LC1 v1	value-or-leverage	"we learn what ranking signals matter from observed usage, which informs v2's design"	futon7/holes/M-self-documenting-stack.md:52
+K8.3	LC1 v2	value-or-leverage	"the natural follow-on if v1 demonstrates value" (learning justified the ordering)	futon7/holes/M-self-documenting-stack.md:49-50
+K8.4	handoff shape 1	value-or-leverage	"ingestion complete; substrate ready for essay-prose projection"	futon7/holes/M-descriptive-essay-of-the-stack.md:63-66
+K8.4	handoff shape 2	value-or-leverage	"the deepest engineering work … the bar that #1 and #3 rest on"	futon7/holes/M-descriptive-essay-of-the-stack.md:67-70
+K8.4	handoff shape 3	value-or-leverage	"picks up the alignment work for exit criterion #3"	futon7/holes/M-descriptive-essay-of-the-stack.md:68-69
+K9.2	INSTANTIATE the coupled G	NONE-RECORDED	(its recorded facts are the blockers, recorded as need edges)	futon2/holes/M-G-over-cascades.md:758-763
+K9.2	retrospective dk/dt spike	value-or-leverage	"The two blockers are one … one spike clears both ⛔"	futon2/holes/M-G-over-cascades.md:766-769
+K9.5	full xtdb 2.x rewrite	value-or-leverage	"the rewrite is the natural place to build the A3 query-IR for free, and 2.x's first-class bitemporal SQL would clean up commit_ingest's valid-time stamping"	futon2/holes/M-custom-harness.md:322-324
+K9.5	full xtdb 2.x rewrite	chance-of-success	"Not de-risked: the code-graph HEAD-mirror defect (E-substrate-2-timetravel) is a data-model choice, not an engine limitation, so 2.x does not fix it for free"	futon2/holes/M-custom-harness.md:325-326
+K9.5	first spike (translate one :hx/endpoints query to XTQL)	cost	"translate one :hx/endpoints membership query to XTQL — the most Datalog-idiomatic pattern in the store — and confirm it reads cleanly"	futon2/holes/M-custom-harness.md:324-325
+K9.5	first spike (translate one :hx/endpoints query to XTQL)	value-or-leverage	"First spike to settle the question"	futon2/holes/M-custom-harness.md:324
+K10.5	M-interim-director (capped ~2 weeks)	operator-asked	"So, I'd see the M-interim-director as being related to building the business model, designing the experiments, etc."	futon7/holes/M-interim-director.md:53
+K10.5	M-interim-director (capped ~2 weeks)	cost	"I'd cap it at about 2 weeks maximum … it is more like 10 days maximum"	futon7/holes/M-interim-director.md:53
+K10.5	feature development in parallel	other:not-mission-related	"While in principle I could still do feature development in parallel during this time, that would *not* be related to the mission"	futon7/holes/M-interim-director.md:53
+K12.4	assurance work	operator-asked	"Joe's workshop workup (abstract + session plan + logistics checklist), pasted 2026-07-04 … This excursion is the *assurance* work"	futon3c/holes/E-futon-workshop-demo.md:7-9
+K12.4	Matrix bridge build	relation-to-focus	"NOT in scope: Matrix bridge build (see Decisions)"	futon3c/holes/E-futon-workshop-demo.md:11-12
+K12.4	new agent-engine integrations	relation-to-focus	"NOT in scope: … new agent-engine integrations beyond re-pointing a bridge nick"	futon3c/holes/E-futon-workshop-demo.md:12
+K12.4	Agency feature work unrelated to the demo	relation-to-focus	"NOT in scope: … Agency feature work unrelated to the demo"	futon3c/holes/E-futon-workshop-demo.md:12-13
+K13.4	UI polish	relation-to-focus	"this mission isn't just about UI polish"	futon4/holes/missions/M-web-arxana-ui-improvements.md:79
+K13.4	Missions/REPL-turns XTDB integration	value-or-leverage	"the main proof-point will be in the integration … proving out *how* that integration can be done"	futon4/holes/missions/M-web-arxana-ui-improvements.md:79-82
+K13.4	Missions/REPL-turns XTDB integration	other:groundwork-laid	"We have laid the groundwork for importing Missions and REPL turns into XTDB, but we haven't integrated them yet"	futon4/holes/missions/M-web-arxana-ui-improvements.md:79
+K14.3	keep M-interim-director open	other:exit-criterion	"M-interim-director closes when this list is well-described enough that the work *could be run by someone else*"	futon7/holes/M-interim-director.md:171-173
+K14.3	spin overflow into follow-up missions	other:overflow	"the §2.A.2.* sequence inside M-interim-director-proxy-metric-inventory.md (42 entries) staged work that exceeds the parent mission's 10-day net design window"	futon7/holes/M-interim-director.md:171-172
+K15.4	D5a sim spike	NONE-RECORDED	(its recorded fact is 'fully unblocked' — readiness, computed by the pass from edges)	futon2/holes/M-evaluate-policies.md:1202
+K15.4	E6 shadow comparison	NONE-RECORDED	(same)	futon2/holes/M-evaluate-policies.md:1202
+K19.4	assemble-only scan (timebox 1 day)	cost	"Proof-of-work bound: assemble-only, timebox 1 day"	futon7/holes/M-demonstration-foundry.md:1161
+K19.4	assemble-only scan (timebox 1 day)	value-or-leverage	"A PR is explicitly NOT the outcome shape here; design evidence is"	futon7/holes/M-demonstration-foundry.md:1158-1159
+K19.4	stretch: XTDB data-model sketch (separately gated)	other:separately-gated	"Stretch (optional, separately gated): a sketch translating our sidecar's query surface into a candidate XTDB data-model shape"	futon7/holes/M-demonstration-foundry.md:1162-1163

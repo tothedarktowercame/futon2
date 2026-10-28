@@ -1,0 +1,217 @@
+{
+ "note": "Giraffe need edges + candidate state groups for the 32 candidate-recorded events of selection-testset-2026-10-28.tsv. Read 2026-10-28 by zai-3 from the sources cited per edge/item, following M-giraffe §INSTANTIATE stage-1 rules (a candidate's own internal steps are not dependencies; need kinds follow §Overlap point 2: artifact / status / ruling / dangling / practice). to_kind 'item' means the need is another candidate in this event. Readiness is NOT recorded here; futon3c.giraffe.pass computes it. State groups are at the moment of choice as the source states them. Quoted lines verified read-only; no pass was run.",
+ "events": {
+  "K1.2": {"items": [
+    {"id": "codex-1", "state_group": "cancelled", "file": "futon2/holes/M-evaluate-policies.md", "line": 1407},
+    {"id": "claude-11", "state_group": "unstarted", "file": "futon2/holes/M-evaluate-policies.md", "line": 1407}],
+   "edges": [], "rejected": ["the usage-limit re-route is a seat-quota fact (spend-what-the-seats-have), not a need edge between items"]},
+  "K1.4": {"items": [
+    {"id": "sample run", "state_group": "unstarted", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 393},
+    {"id": "design of packet schema", "state_group": "unstarted", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 393},
+    {"id": "design of evaluation harness", "state_group": "unstarted", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 393}],
+   "edges": [
+    {"from": "design of packet schema", "to": "sample run", "to_kind": "item", "kind": "needs", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 395, "quote": "The shape of the real ratchet solution depends on what we observe: if the natural self-talk is rich enough, the distillation path is extraction; if it is not, the prompt and cycle structure need adjustment first.", "note": "The schema design depends on what the sample run observes, so it could not be done before it.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "design of evaluation harness", "to": "sample run", "to_kind": "item", "kind": "needs", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 393, "quote": "The first DERIVE step is not to design the packet schema or the evaluation harness. It is to run one APM problem through the evidence-capturing invoke path and inspect what the Evidence Landscape actually contains.", "note": "Harness design is explicitly placed after the sample run.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["'Zai is usage-gated above 50% quota; the sample run waits for quota headroom' (:400-401) is seat quota, not a dependency edge"]},
+  "K1.6": {"items": [
+    {"id": "Kimi seats", "state_group": "unstarted", "file": "futon0/../.claude/projects/-home-joe-code/memory/prefer-kimi-zai-over-codex.md", "line": 10},
+    {"id": "Zai seats", "state_group": "unstarted", "file": "futon0/../.claude/projects/-home-joe-code/memory/prefer-kimi-zai-over-codex.md", "line": 10},
+    {"id": "Codex seats", "state_group": "unstarted", "file": "futon0/../.claude/projects/-home-joe-code/memory/prefer-kimi-zai-over-codex.md", "line": 10}],
+   "edges": [], "rejected": ["candidates are seat classes, not work items; no dependency edges apply; states are placeholders for pass-input shape"]},
+  "K2.2": {"items": [
+    {"id": "INSTANTIATE the coupled G", "state_group": "unstarted", "file": "futon2/holes/M-G-over-cascades.md", "line": 762},
+    {"id": "retrospective dk/dt spike", "state_group": "started", "file": "futon2/holes/M-G-over-cascades.md", "line": 766}],
+   "edges": [
+    {"from": "INSTANTIATE the coupled G", "to": "temporal kappa (open [open] Poly↔curvature seam, wired OR to live substrate)", "to_kind": "artifact", "kind": "needs", "file": "futon2/holes/M-G-over-cascades.md", "line": 757, "quote": "Tension-DISCHARGE (∂κ/∂t) — the actual claim — needs *temporal* κ: the `[open]` Poly↔curvature seam, deferred to INSTANTIATE.", "note": "Named blocker (i) of the stop-the-line ruling.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "INSTANTIATE the coupled G", "to": "Axis-2 usefulness ground truth signal", "to_kind": "artifact", "kind": "needs", "file": "futon2/holes/M-G-over-cascades.md", "line": 760, "quote": "Coupled-`G` beats single-axis needs an **Axis-2 usefulness ground truth** (the recognized gap — the alive label is Axis-1 only).", "note": "Named blocker (ii) of the stop-the-line ruling.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "INSTANTIATE the coupled G", "to": "retrospective dk/dt spike", "to_kind": "item", "kind": "needs", "file": "futon2/holes/M-G-over-cascades.md", "line": 766, "quote": "VERIFY follow-up — retrospective ∂κ spike (dispatched 2026-06-23, claude-1) — **The two blockers are one.** … So one spike clears both ⛔", "note": "Measuring ∂κ/∂t over time is by design the Axis-2 ground truth, so INSTANTIATE needs the spike first.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["the live wiring ('OR wired to the live substrate') stays INSTANTIATE work, not a prior need — internal step, not a dependency"]},
+  "K3.2": {"items": [
+    {"id": "core system P12 working end to end", "state_group": "started", "file": "futon3c/holes/missions/M-象-2000.md", "line": 557},
+    {"id": "edge cases: provisional withdrawal", "state_group": "backlog", "file": "futon3c/holes/missions/M-象-2000.md", "line": 557},
+    {"id": "countersigned voids", "state_group": "backlog", "file": "futon3c/holes/missions/M-象-2000.md", "line": 557}],
+   "edges": [
+    {"from": "edge cases: provisional withdrawal", "to": "core system P12 working end to end", "to_kind": "item", "kind": "needs", "file": "futon3c/holes/missions/M-象-2000.md", "line": 557, "quote": "\"we can wait until we see the core system working to deal with edge cases around provisional withdrawal and countersigned voids\" … They are reopened once P12 works end to end.", "note": "Re-arm condition: parked until P12 works end to end.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "countersigned voids", "to": "core system P12 working end to end", "to_kind": "item", "kind": "needs", "file": "futon3c/holes/missions/M-象-2000.md", "line": 557, "quote": "They are reopened once P12 works end to end.", "note": "Same re-arm condition as the provisional-withdrawal edge case.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["items 2-3's own amendment drafting (:554-556) is internal work, not a dependency"]},
+  "K3.6": {"items": [
+    {"id": "Phase 1", "state_group": "backlog", "file": "~/notes/selection-patterns/witnesses-2026-10-28.md", "line": 74},
+    {"id": "Phase 3a", "state_group": "backlog", "file": "~/notes/selection-patterns/witnesses-2026-10-28.md", "line": 74},
+    {"id": "Phase 4", "state_group": "backlog", "file": "~/notes/selection-patterns/witnesses-2026-10-28.md", "line": 74}],
+   "edges": [
+    {"from": "Phase 1", "to": "Pass 1 >= 200 problems", "to_kind": "artifact", "kind": "needs", "file": "~/notes/selection-patterns/witnesses-2026-10-28.md", "line": 74, "quote": "Phase 1 requires Pass 1 ≥200 problems (currently ~76)", "note": "Measurable threshold; source is the Cascade Live .held[] entry (as-of-ms 1793161620094), not re-queried.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "Phase 3a", "to": "LeanDojo-v2 installation", "to_kind": "artifact", "kind": "needs", "file": "~/notes/selection-patterns/witnesses-2026-10-28.md", "line": 74, "quote": "Phase 3a requires LeanDojo-v2 installation (check with Rob)", "note": "External resource; the check is with Rob.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "Phase 4", "to": "superpod GPU access", "to_kind": "artifact", "kind": "needs", "file": "~/notes/selection-patterns/witnesses-2026-10-28.md", "line": 74, "quote": "Phase 4 requires superpod GPU access (non-blocking)", "note": "External resource, marked non-blocking by the record itself.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["the phases are gated by thresholds/resources, not by each other; no inter-phase edges read"]},
+  "K4.1": {"items": [
+    {"id": "step (b)", "state_group": "completed", "file": "futon4/holes/missions/M-interest-network-coupling.md", "line": 550},
+    {"id": "piece #2", "state_group": "unstarted", "file": "futon4/holes/missions/M-interest-network-coupling.md", "line": 544},
+    {"id": "step (c)", "state_group": "unstarted", "file": "futon4/holes/missions/M-interest-network-coupling.md", "line": 547}],
+   "edges": [
+    {"from": "piece #2", "to": "step (b)", "to_kind": "item", "kind": "needs", "file": "futon4/holes/missions/M-interest-network-coupling.md", "line": 544, "quote": "Original codex-7 plan: `piece #2 → step (b)`. The M-action-cost-modelling downstream finding … makes step (b) the hard predecessor for THREE additional items beyond M-interim-director, so the reshuffle was: step (b) FIRST, then piece #2 in parallel with step (c).", "note": "The reshuffle reverses the original order: piece #2 needs step (b) landed first.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["step (c) runs in parallel, no edge; 'pending Joe formal confirmation' means the reshuffle itself awaited a ruling, which is a fact about the plan, not a dependency"]},
+  "K4.3": {"items": [
+    {"id": "M-xor-coupling-probe", "state_group": "started", "file": "futon5/holes/missions/M-xor-coupling-probe.md", "line": 4},
+    {"id": "M-tpg-coupling-evolution", "state_group": "started", "file": "futon5/holes/missions/M-tpg-coupling-evolution.md", "line": 4},
+    {"id": "M-coupling-as-constraint", "state_group": "unstarted", "file": "futon5/holes/missions/M-coupling-as-constraint.md", "line": 4}],
+   "edges": [
+    {"from": "M-coupling-as-constraint", "to": "M-xor-coupling-probe", "to_kind": "item", "kind": "needs", "file": "futon5/holes/missions/M-coupling-as-constraint.md", "line": 5, "quote": "**Blocked by:** M-xor-coupling-probe, M-tpg-coupling-evolution", "note": "Named on the consumer's Blocked-by header.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "M-coupling-as-constraint", "to": "M-tpg-coupling-evolution", "to_kind": "item", "kind": "needs", "file": "futon5/holes/missions/M-coupling-as-constraint.md", "line": 5, "quote": "**Blocked by:** M-xor-coupling-probe, M-tpg-coupling-evolution", "note": "Second probe on the same header.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["probe states read from their status lines as of 2026-10-28 (both OPEN), not as of the 2026-02-18 choice moment; the record does not date their transitions"]},
+  "K4.4": {"items": [
+    {"id": "M-P7-rational-reconstruction", "state_group": "completed", "file": "futon6/holes/missions/M-P8-rational-reconstruction.md", "line": 7},
+    {"id": "M-P8-rational-reconstruction", "state_group": "unstarted", "file": "futon6/holes/missions/M-P8-rational-reconstruction.md", "line": 6}],
+   "edges": [
+    {"from": "M-P8-rational-reconstruction", "to": "M-P7-rational-reconstruction", "to_kind": "item", "kind": "needs", "file": "futon6/holes/missions/M-P8-rational-reconstruction.md", "line": 6, "quote": "Depends on: First-proof P8 material (complete), M-P7-rational-reconstruction (complete — method validated on branching proofs)", "note": "P7's validated method is the prerequisite; its completion is what made P8 ready.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["'First-proof P8 material' is P8's own input, internal to the mission, not a dependency between these candidates"]},
+  "K4.5": {"items": [
+    {"id": "sample run", "state_group": "unstarted", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 398},
+    {"id": "design of packet schema", "state_group": "unstarted", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 393},
+    {"id": "design of evaluation harness", "state_group": "unstarted", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 393}],
+   "edges": [
+    {"from": "design of packet schema", "to": "sample run", "to_kind": "item", "kind": "needs", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 395, "quote": "The shape of the real ratchet solution depends on what we observe: if the natural self-talk is rich enough, the distillation path is extraction; if it is not, the prompt and cycle structure need adjustment first.", "note": "Same reading as K1.4; the design depends on the unobserved evidence landscape.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "design of evaluation harness", "to": "sample run", "to_kind": "item", "kind": "needs", "file": "futon0/holes/missions/M-apm-capability-ratchet.md", "line": 393, "quote": "The first DERIVE step is not to design the packet schema or the evaluation harness. It is to run one APM problem through the evidence-capturing invoke path", "note": "Harness design placed after the sample run.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["quota gate is seat usage, not an edge (see K1.4)"]},
+  "K4.6": {"items": [
+    {"id": "accurate durable usage telemetry (Claude, Codex, Zai)", "state_group": "unstarted", "file": "futon0/holes/missions/M-usage-hacking.md", "line": 6}],
+   "edges": [
+    {"from": "M-usage-hacking", "to": "accurate durable usage telemetry (Claude, Codex, Zai)", "to_kind": "item", "kind": "needs", "file": "futon0/holes/missions/M-usage-hacking.md", "line": 6, "quote": "**Blocked by:** Accurate, durable usage telemetry for Claude, Codex, and Zai", "note": "The mission (not a candidate in this event) needs the telemetry; the edge records the candidate as the thing waited on.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["the cross-refs at :8-10 (usage-report.el, stack-hud.el, cron script) are existing instruments, not candidates or dependencies of the telemetry work itself"]},
+  "K4.7": {"items": [
+    {"id": "WM-02 (belief→state distribution)", "state_group": "unstarted", "file": "futon0/../.claude/projects/-home-joe-code/memory/wm-closure-strategy-zai-owners.md", "line": 29},
+    {"id": "WM-03 (controlled transition B)", "state_group": "unstarted", "file": "futon0/../.claude/projects/-home-joe-code/memory/wm-closure-strategy-zai-owners.md", "line": 29},
+    {"id": "WM-06 (preference C)", "state_group": "unstarted", "file": "futon0/../.claude/projects/-home-joe-code/memory/wm-closure-strategy-zai-owners.md", "line": 29}],
+   "edges": [], "rejected": ["'The roots with no prerequisites are belief→state distribution (WM-02), controlled transition B (WM-03) and preference C (WM-06)' — the record states there are no edges into these; the FUNDAMENTALS.edn prerequisite graph itself was not re-read here"]},
+  "K5.2": {"items": [
+    {"id": "Claim-ledger", "state_group": "unstarted", "file": "futon4/holes/missions/M-writing-ethics.md", "line": 262},
+    {"id": "Audience register", "state_group": "unstarted", "file": "futon4/holes/missions/M-writing-ethics.md", "line": 264},
+    {"id": "Thesis statement", "state_group": "unstarted", "file": "futon4/holes/missions/M-writing-ethics.md", "line": 265},
+    {"id": "Argument-trajectory map", "state_group": "unstarted", "file": "futon4/holes/missions/M-writing-ethics.md", "line": 266},
+    {"id": "Tacit-decision ledger", "state_group": "unstarted", "file": "futon4/holes/missions/M-writing-ethics.md", "line": 267}],
+   "edges": [], "rejected": ["the 'Unblocks:' lines at :327, :338, :358, :382 name paper-internal items (C1-C6, W3, C2), not selectable work items; kept as value facts in the facts TSV rather than edges"]},
+  "K5.3": {"items": [
+    {"id": "handoff shape 1 (futon5a ingest)", "state_group": "unstarted", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 63},
+    {"id": "handoff shape 2 (ukrn port / F1-F10)", "state_group": "unstarted", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 67},
+    {"id": "handoff shape 3 (resume claude-3)", "state_group": "unstarted", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 68}],
+   "edges": [
+    {"from": "handoff shape 1 (futon5a ingest)", "to": "handoff shape 2 (ukrn port / F1-F10)", "to_kind": "item", "kind": "needs", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 70, "quote": "My recommendation if Joe is choosing one: **(2) first** — it's the highest-leverage, the most distant from today's groundwork, and the bar that #1 and #3 rest on (essay describes simulation; alignment couples them). Without #2 the other two have nothing to align with.", "note": "#1 rests on #2: the essay describes the simulation that #2 ports.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "handoff shape 3 (resume claude-3)", "to": "handoff shape 2 (ukrn port / F1-F10)", "to_kind": "item", "kind": "needs", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 70, "quote": "the bar that #1 and #3 rest on … Without #2 the other two have nothing to align with.", "note": "#3's alignment work has nothing to align with until #2 exists.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["'resume claude-3' names a seat, not a dependency between the work shapes"]},
+  "K5.4": {"items": [
+    {"id": "(i) slot-aware retrieval", "state_group": "unstarted", "file": "futon3/holes/missions/M-pattern-ingest.md", "line": 250},
+    {"id": "(ii) RELATED-graph enrichment", "state_group": "unstarted", "file": "futon3/holes/missions/M-pattern-ingest.md", "line": 268},
+    {"id": "(iii) clause-shape-overlap diagnostics", "state_group": "unstarted", "file": "futon3/holes/missions/M-pattern-ingest.md", "line": 291}],
+   "edges": [
+    {"from": "(iii) clause-shape-overlap diagnostics", "to": "M-pattern-application-diagnostic slot-overlap contract", "to_kind": "status", "kind": "needs", "file": "futon3/holes/missions/M-pattern-ingest.md", "line": 300, "quote": "if `M-pattern-application-diagnostic` hasn't settled its own slot-overlap shape, this pilot is built on shifting sand. Better to wait for the consumer mission's contract.", "note": "Need kind 'status': another item's settled contract; '(iii) is the highest-leverage cross-mission move but should wait'.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["(i) and (ii) record no dependencies; 'doesn't couple to other in-flight missions' is stated as (ii)'s advantage"]},
+  "K6.1": {"items": [
+    {"id": "exposure of existing tools", "state_group": "unstarted", "file": "futon2/holes/M-custom-harness.md", "line": 258},
+    {"id": "construction of new tools", "state_group": "unstarted", "file": "futon2/holes/M-custom-harness.md", "line": 146}],
+   "edges": [
+    {"from": "slice 4 graph condition (c)", "to": "exposure of existing tools", "to_kind": "item", "kind": "needs", "file": "futon2/holes/M-custom-harness.md", "line": 261, "quote": "It would be the cheapest first win and unblocks slice 4's graph condition (c).", "note": "Reverse ('enables') direction recorded as a needs edge from the waited-on item; slice 4's graph condition (c) is not itself a candidate in this event.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["the 'two real gaps' (no free-text query, etc.) are exposure's own remaining work, internal, not dependencies"]},
+  "K6.3": {"items": [
+    {"id": "futon3a", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 85},
+    {"id": "futon1a", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 86},
+    {"id": "futon5a", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 87},
+    {"id": "futon7", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 88},
+    {"id": "futon1", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 89},
+    {"id": "futon0", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 90},
+    {"id": "futon2", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 91},
+    {"id": "futon5", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 92},
+    {"id": "futon7a", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 93},
+    {"id": "futon4", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 94},
+    {"id": "futon3", "state_group": "unstarted", "file": "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md", "line": 95}],
+   "edges": [], "rejected": ["'do them in THIS order — smallest first to de-risk' is a cost-based order, not a dependency; futon3b ('DONE, skip') and futon6 ('structurally skipped (fast)') are excluded from the candidate list, not edges"]},
+  "K6.5": {"items": [
+    {"id": "wm-ui-hud-mode-rationale-hardcode", "state_group": "unstarted", "file": "futon3c/holes/missions/M-action-cost-modelling.md", "line": 205},
+    {"id": "r3a-likelihood-coupling-density", "state_group": "unstarted", "file": "futon3c/holes/missions/M-action-cost-modelling.md", "line": 206},
+    {"id": "r3a-likelihood-ticks-firing-ratio", "state_group": "unstarted", "file": "futon3c/holes/missions/M-action-cost-modelling.md", "line": 207},
+    {"id": "stub-lifts-pending-aif-edn", "state_group": "unstarted", "file": "futon3c/holes/missions/M-action-cost-modelling.md", "line": 208},
+    {"id": "r3d-per-entity-attribution", "state_group": "unstarted", "file": "futon3c/holes/missions/M-action-cost-modelling.md", "line": 209}],
+   "edges": [
+    {"from": "r3d-per-entity-attribution", "to": "M-INC step (b)", "to_kind": "status", "kind": "needs", "file": "futon3c/holes/missions/M-action-cost-modelling.md", "line": 210, "quote": "UNCERTAIN — blocked on M-INC step (b); leverage is \"huge once unblocked,\" but unblocking is itself a Campaign-scale piece of work", "note": "Recorded blocker on the ranked-sorry table.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["the other four sorries record no dependencies; ranks 1-5 are cost/benefit, recorded in the facts TSV"]},
+  "K7.1": {"items": [
+    {"id": "LC1 v1 (hand-grep + TF-IDF + recency)", "state_group": "unstarted", "file": "futon7/holes/M-self-documenting-stack.md", "line": 48},
+    {"id": "LC1 v2 (hyperedge-store query + WebArxana render)", "state_group": "backlog", "file": "futon7/holes/M-self-documenting-stack.md", "line": 49}],
+   "edges": [
+    {"from": "LC1 v2 (hyperedge-store query + WebArxana render)", "to": "LC1 v1 (hand-grep + TF-IDF + recency)", "to_kind": "item", "kind": "needs", "file": "futon7/holes/M-self-documenting-stack.md", "line": 49, "quote": "**LC1 v2** — the natural follow-on if v1 demonstrates value — replaces the grep with a hyperedge-store query … **v2 is NOT in this POC's scope** but is named as the structural successor.", "note": "v2 is the follow-on if v1 demonstrates value; v1's observed usage informs v2's design (:52).", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["'BOTH as closure bar' (:148) is a closure rule, not a dependency"]},
+  "K7.4": {"items": [
+    {"id": "stage 1", "state_group": "unstarted", "file": "futon3c/holes/missions/M-giraffe.md", "line": 295},
+    {"id": "stage 2", "state_group": "unstarted", "file": "futon3c/holes/missions/M-giraffe.md", "line": 296},
+    {"id": "stage 3", "state_group": "backlog", "file": "futon3c/holes/missions/M-giraffe.md", "line": 302},
+    {"id": "stage 4", "state_group": "backlog", "file": "futon3c/holes/missions/M-giraffe.md", "line": 302}],
+   "edges": [
+    {"from": "stage 3", "to": "the War Machine (a package stays *imagined* until a click scores it)", "to_kind": "status", "kind": "needs", "file": "futon3c/holes/missions/M-giraffe.md", "line": 302, "quote": "Stage 3 as written depends on the War Machine (a package stays *imagined* until a click scores it), and so does stage 4.", "note": "Need kind 'status': another item's (the WM's) capability state; the fallback route (馬 helper pre-ranking) is named.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "stage 4", "to": "the War Machine (a package stays *imagined* until a click scores it)", "to_kind": "status", "kind": "needs", "file": "futon3c/holes/missions/M-giraffe.md", "line": 302, "quote": "… and so does stage 4.", "note": "Same dependence, same sentence.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "stage 3", "to": "stage 1", "to_kind": "item", "kind": "needs", "file": "futon3c/holes/missions/M-giraffe.md", "line": 303, "quote": "Each stage is checked before the next starts: stage 1 by the cone-against-history test in DERIVE's §First test, stage 2 by whether the cluster graph agrees with the themed groups", "note": "Stages are sequential by build order; each is checked before the next starts.", "read_by": "zai-3, 2026-10-28"},
+    {"from": "stage 2", "to": "stage 1", "to_kind": "item", "kind": "needs", "file": "futon3c/holes/missions/M-giraffe.md", "line": 303, "quote": "Each stage is checked before the next starts", "note": "Sequential build order, same sentence.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["'If it can score packages by clicks, stages 3 and 4 go ahead' — the WM check is a decision point after stage 2, recorded once via the status edge above rather than duplicated"]},
+  "K7.6": {"items": [
+    {"id": "harness + end-to-end demo before frame-1", "state_group": "cancelled", "file": "futon3c/holes/missions/M-apm-demonstration.md", "line": 5837},
+    {"id": "harness + stage tests + refusal tests", "state_group": "started", "file": "futon3c/holes/missions/M-apm-demonstration.md", "line": 5833}],
+   "edges": [
+    {"from": "harness + end-to-end demo before frame-1", "to": "a worked artifact to run on", "to_kind": "dangling", "kind": "needs", "file": "futon3c/holes/missions/M-apm-demonstration.md", "line": 5838, "quote": "find a worked artifact to run on | **do not look for one — there isn't one, and that is correct**", "note": "Need kind 'dangling': the needed artifact is recorded as non-existent; this is why the demo variant was cancelled as deliverable.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["the six schemas + derivation map were 'specified at I.19' — already-existing spec, not an unmet need"]},
+  "K8.1": {"items": [
+    {"id": "ONE complex mission", "state_group": "started", "file": "futon0/holes/missions/M-capability-star-map.md", "line": 206},
+    {"id": "a family of cheap missions", "state_group": "backlog", "file": "futon0/holes/missions/M-capability-star-map.md", "line": 206}],
+   "edges": [], "rejected": ["the In/Out list at :207-213 is scope inside the one mission (internal steps), not dependencies between the two candidate shapes"]},
+  "K8.3": {"items": [
+    {"id": "LC1 v1", "state_group": "unstarted", "file": "futon7/holes/M-self-documenting-stack.md", "line": 52},
+    {"id": "LC1 v2", "state_group": "backlog", "file": "futon7/holes/M-self-documenting-stack.md", "line": 49}],
+   "edges": [
+    {"from": "LC1 v2", "to": "LC1 v1", "to_kind": "item", "kind": "needs", "file": "futon7/holes/M-self-documenting-stack.md", "line": 52, "quote": "Building v1 first means operators get the affordance immediately AND we learn what ranking signals matter from observed usage, which informs v2's design.", "note": "v2's design is informed by v1's observed usage — same ordering fact as K7.1, read at the learning line.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": []},
+  "K8.4": {"items": [
+    {"id": "handoff shape 1", "state_group": "unstarted", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 63},
+    {"id": "handoff shape 2", "state_group": "unstarted", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 67},
+    {"id": "handoff shape 3", "state_group": "unstarted", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 68}],
+   "edges": [
+    {"from": "handoff shape 1", "to": "handoff shape 2", "to_kind": "item", "kind": "needs", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 70, "quote": "the bar that #1 and #3 rest on", "note": "Same resting-on reading as K5.3, kept for this event too (both events cite the same choice).", "read_by": "zai-3, 2026-10-28"},
+    {"from": "handoff shape 3", "to": "handoff shape 2", "to_kind": "item", "kind": "needs", "file": "futon7/holes/M-descriptive-essay-of-the-stack.md", "line": 70, "quote": "Without #2 the other two have nothing to align with.", "note": "Same.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": []},
+  "K9.2": {"items": [
+    {"id": "INSTANTIATE the coupled G", "state_group": "unstarted", "file": "futon2/holes/M-G-over-cascades.md", "line": 762},
+    {"id": "retrospective dk/dt spike", "state_group": "started", "file": "futon2/holes/M-G-over-cascades.md", "line": 766}],
+   "edges": [
+    {"from": "INSTANTIATE the coupled G", "to": "retrospective dk/dt spike", "to_kind": "item", "kind": "needs", "file": "futon2/holes/M-G-over-cascades.md", "line": 766, "quote": "**The two blockers are one.** … So one spike clears both ⛔ — *retrospectively* (the live wiring stays INSTANTIATE).", "note": "Same edge as K2.2, the reading this event cites.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["the two named external blockers (temporal κ; Axis-2 signal) are recorded under K2.2; here the record's own emphasis is that one spike clears both"]},
+  "K9.5": {"items": [
+    {"id": "full xtdb 2.x rewrite", "state_group": "unstarted", "file": "futon2/holes/M-custom-harness.md", "line": 322},
+    {"id": "first spike (translate one :hx/endpoints query to XTQL)", "state_group": "unstarted", "file": "futon2/holes/M-custom-harness.md", "line": 324}],
+   "edges": [
+    {"from": "full xtdb 2.x rewrite", "to": "first spike (translate one :hx/endpoints query to XTQL)", "to_kind": "item", "kind": "needs", "file": "futon2/holes/M-custom-harness.md", "line": 324, "quote": "*First spike to settle the question:* translate one `:hx/endpoints` membership query to XTQL — the most Datalog-idiomatic pattern in the store — and confirm it reads cleanly.", "note": "The spike settles whether the migration reads cleanly before the rewrite is committed to.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": ["the HEAD-mirror defect (E-substrate-2-timetravel) is recorded as NOT fixed by 2.x — a reason the rewrite is uncertain, kept as a chance-of-success fact, not a need"]},
+  "K10.5": {"items": [
+    {"id": "M-interim-director (capped ~2 weeks)", "state_group": "started", "file": "futon7/holes/M-interim-director.md", "line": 53},
+    {"id": "feature development in parallel", "state_group": "unstarted", "file": "futon7/holes/M-interim-director.md", "line": 53}],
+   "edges": [], "rejected": ["'feature development in parallel … would *not* be related to the mission' is a scope exclusion, not a dependency"]},
+  "K12.4": {"items": [
+    {"id": "assurance work", "state_group": "started", "file": "futon3c/holes/E-futon-workshop-demo.md", "line": 15},
+    {"id": "Matrix bridge build", "state_group": "backlog", "file": "futon3c/holes/E-futon-workshop-demo.md", "line": 11},
+    {"id": "new agent-engine integrations", "state_group": "backlog", "file": "futon3c/holes/E-futon-workshop-demo.md", "line": 12},
+    {"id": "Agency feature work unrelated to the demo", "state_group": "backlog", "file": "futon3c/holes/E-futon-workshop-demo.md", "line": 12}],
+   "edges": [], "rejected": ["the NOT-in-scope list is scope bounding by the demo, recorded as relation-to-focus facts, not dependencies"]},
+  "K13.4": {"items": [
+    {"id": "UI polish", "state_group": "unstarted", "file": "futon4/holes/missions/M-web-arxana-ui-improvements.md", "line": 79},
+    {"id": "Missions/REPL-turns XTDB integration", "state_group": "unstarted", "file": "futon4/holes/missions/M-web-arxana-ui-improvements.md", "line": 79}],
+   "edges": [], "rejected": ["'we have laid the groundwork … but haven't integrated them yet' describes prior work inside this mission's scope, not a dependency on another item"]},
+  "K14.3": {"items": [
+    {"id": "keep M-interim-director open", "state_group": "started", "file": "futon7/holes/M-interim-director.md", "line": 171},
+    {"id": "spin overflow into follow-up missions", "state_group": "unstarted", "file": "futon7/holes/M-interim-director.md", "line": 171}],
+   "edges": [
+    {"from": "keep M-interim-director open", "to": "spin overflow into follow-up missions", "to_kind": "item", "kind": "needs", "file": "futon7/holes/M-interim-director.md", "line": 171, "quote": "M-interim-director closes when this list is well-described enough that the work *could be run by someone else*.", "note": "The parent's close-out needs the follow-up list to be well-described; the overflow missions carry the plan of work forward.", "read_by": "zai-3, 2026-10-28"}],
+   "rejected": []},
+  "K15.4": {"items": [
+    {"id": "D5a sim spike", "state_group": "unstarted", "file": "futon2/holes/M-evaluate-policies.md", "line": 1202},
+    {"id": "E6 shadow comparison", "state_group": "unstarted", "file": "futon2/holes/M-evaluate-policies.md", "line": 1202}],
+   "edges": [], "rejected": ["'fully unblocked — boundary agreed, contract ratified': previously blocked on the boundary/contract, now met; no current need edges recorded, so the pass should read both as ready"]},
+  "K19.4": {"items": [
+    {"id": "assemble-only scan (timebox 1 day)", "state_group": "unstarted", "file": "futon7/holes/M-demonstration-foundry.md", "line": 1161},
+    {"id": "stretch: XTDB data-model sketch (separately gated)", "state_group": "backlog", "file": "futon7/holes/M-demonstration-foundry.md", "line": 1162}],
+   "edges": [], "rejected": ["the stretch is 'optional, separately gated' but the gate is not named in the record, so no edge can be read; the backing of JUXT outreach is context, not a need"]}
+ }
+}
