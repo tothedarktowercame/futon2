@@ -82,3 +82,19 @@ For other mixed namespaces, retain functions used by a retained inner-path
 caller and remove functions whose callers are all being deleted. A conflict
 between this rule and deletion of the outer machinery must be reported before
 changing the contract.
+
+Q10 moved from keep to delete: its helpers have no independent inner caller;
+its certificate and route fixtures depend on the deleted outer Q2/Q8 receipts.
+
+Implementation boundary notes:
+- Retain only Q2's `construction-census` and its helpers: cascade-decision
+  still records the selected task's inner construction. The outer certificate,
+  record verifier and outer-actions producer are deleted.
+- Ticket readiness still needs field inputs. Its observation-only helpers move
+  from the deleted selector to `ticket-readiness-inputs`; they do not select.
+- Delete `target-reading-preparation`: after removing the pre-choice batch in
+  runtime it has no retained production caller. Keep selected-target reading
+  repair for the supplied task.
+- Historical receipt readers used by retained learning/terminal consumers stay;
+  they neither construct a menu nor select a task. The two futon3c browser
+  entrypoints return the typed no-task-selection-policy absence.

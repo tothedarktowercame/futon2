@@ -1,8 +1,8 @@
 (ns futon2.aif.meta-author-refusal-acceptance-test
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.full-loop-runner :as runner]
-            [futon2.aif.meta-live-outer-selector :as live]
             [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
             [futon2.aif.wm.terminal-receipt :as terminal-receipt]))
 
@@ -24,7 +24,7 @@
 (def base-head-sha "09a7cb8d3468031ed3fa2beb6db21c602617a572")
 
 (defn- sha256 [path]
-  (let [bytes (with-open [in (clojure.java.io/input-stream path)]
+  (let [bytes (with-open [in (io/input-stream path)]
                 (let [buf (java.io.ByteArrayOutputStream.)]
                   (loop [b (.read in)]
                     (when (>= b 0)
@@ -33,29 +33,6 @@
                   (.toByteArray buf)))
         digest (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)]
     (apply str (map #(format "%02x" %) digest))))
-
-(defn- pin [path ch] {:path path :sha256 (apply str (repeat 64 ch))})
-
-(def snapshot
-  ;; Structural pipeline-cascade snapshot of the shape the live adapter's
-  ;; validator accepts; the pinned run's own outer-task-selection was sealed
-  ;; against the same schema.  Injected per select-live's documented replay
-  ;; seam, exactly as futon2.aif.meta-live-outer-selector-test does.
-  {:schema :wm/pipeline-cascade-snapshot-v1
-   :summary-source (pin "summary" "a") :graph-source (pin "graph" "b")
-   :summary {:consistent? true
-             :standards {:s1-regenerates true :s2-evidence true
-                         :s3-reconstitution true :s4-honest-holes true
-                         :s5-composed true}}
-   :graph {:section-status {:lineage {:status :ok}
-                            :clusters {:status :ok}
-                            :arrows {:status :ok}
-                            :held {:status :ok}
-                            :patterns {:status :ok}
-                            :ticket-readiness {:status :ok}}
-           :lineage [] :clusters [] :arrows [] :held []
-           :tickets {:items []}
-           :patterns {:edges []}}})
 
 (deftest injury-2aef7e0c-author-wait-already-satisfied-report-closes-already-satisfied
   (testing "the pinned run record is the authority"
@@ -66,13 +43,6 @@
         (is (map? replayed))
         (is (= (get-in record [:loop-node-exercise :status])
                (:status replayed)))))
-    (testing "the selection entrypoint runs on the record's selection clock"
-      (let [receipt (live/select-live
-                     {:tasks []
-                      :selection-as-of "2026-10-27T13:44:27Z"
-                      :fetch-snapshot (constantly snapshot)})]
-        (is (= "2026-10-27T13:44:27Z" (:selection-as-of receipt)))
-        (is (nil? (:action receipt)))))
     (testing "the author-wait refusal is classified from the report it carried"
       (let [retained (get-in record [:failure :detail :author-job])
             _ (is (some? retained) "the pinned record retains the author job")

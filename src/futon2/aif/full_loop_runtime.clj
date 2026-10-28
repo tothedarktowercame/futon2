@@ -8,26 +8,23 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.meta-live-outer-selector :as meta-live]
             [futon2.aif.meta-pipeline-selector :as meta-pipeline]
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.meta-injury-store :as injury-store]
             [futon2.aif.meta-medic-authority :as medic-authority]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
-            [futon2.aif.outer-policy-evidence-provider :as policy-evidence-provider]
-            [futon2.aif.outer-policy-provider-runtime :as policy-provider-runtime]
             [futon2.aif.reading-policy-precision :as reading-precision]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.selected-target-reading :as selected-target-reading]
-            [futon2.aif.target-reading-preparation :as reading-preparation]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.interpretation-request :as interpretation-request]
             [futon2.aif.ticket-readiness :as ticket-readiness]
+            [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
             [futon2.aif.wm.click-ask :as click-ask]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
             [futon2.aif.wm.on-prod-history :as on-prod-history]
@@ -193,8 +190,8 @@
         tickets (->> (:tickets (mission-registry/load-tickets))
                      (filter mission-registry/live-ticket?) vec)
         input-fn (fn [ticket]
-                   (let [snapshot (meta-live/fetch-pipeline-snapshot)]
-                     (meta-live/ticket-readiness-input
+                   (let [snapshot (readiness-inputs/fetch-pipeline-snapshot)]
+                     (readiness-inputs/ticket-readiness-input
                       ticket snapshot (meta-pipeline/pipeline-membership snapshot))))
         contact-resolver #(runner/read-job! opts %)
         contact (designated-agent-answer-fn opts (:author opts)
@@ -407,7 +404,7 @@
                              :loaded-code-identity :cascade-habit-path
                              :cascade-feedback-path :cascade-feedback-metadata
                              :observation-labels-path :flight :trace-dir
-                             :outer-task-policy :outer-task-selection-fn
+                             :task
                              :selection-timing/state :nano-time-fn
                              ;; the decision forms every target's policy
                              ;; family against this pinned graph
@@ -419,27 +416,6 @@
           (select-keys opts [:meta-field-observation :meta-field-source-pin])
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true})))
-
-(defn retained-outer-selector
-  "Retain a chosen outer receipt across reconstruction, never an incomplete
-  reading-menu refusal. Preparation changes that menu before any choice exists;
-  a sealed selected-policy carrier, however, must never be rebuilt."
-  [outer-selector policy-field-config]
-  (let [retained (atom ::unselected)]
-    (fn [input]
-      (let [receipt @retained]
-        (if (not= ::unselected receipt)
-          receipt
-          (let [selected (outer-selector
-                          (assoc input :policy-field-config policy-field-config))]
-            (when-not (and (contains? #{:incomplete-policy-menu-coverage
-                                       :no-canonically-bound-policy}
-                                     (get-in selected [:policy :reason]))
-                           (nil? (get-in selected [:chosen :id]))
-                           (nil? (get-in selected
-                                         [:policy :selected-outer-cascade-policy])))
-              (reset! retained selected))
-            selected))))))
 
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
@@ -460,35 +436,6 @@
                meta-observation
                (assoc :meta-field-observation meta-observation
                       :meta-field-source-pin (:source-pin meta-observation)))
-        outer-selector (or (:outer-task-selection-fn opts) meta-live/selector)
-        evidence-provider (or (:outer-policy-evidence-provider opts)
-                              (when-let [path (:outer-policy-evidence-provider-path opts)]
-                                (policy-evidence-provider/load-static path))
-                              policy-provider-runtime/production-provider)
-        outer-selector (fn [input]
-                         (outer-selector
-                          (assoc input :outer-policy-evidence-provider
-                                 evidence-provider)))
-        ;; A click may invoke the report judge twice when an interpretation ask
-        ;; publishes missing construction input.  Outer state can change while
-        ;; that ask runs (including the graph and learning manifest), but the
-        ;; second pass is inner cascade reconstruction for the same chosen
-        ;; outer action, not a new outer opportunity. Retain the exact first receipt so query-time
-        ;; evidence is requested for, and consumed by, one stable target.
-        policy-field-config
-        (assoc (select-keys opts
-                     [:g-law :target-reading-root :pattern-graph-path
-                      :occurrence-square-root
-                      :occurrence-square-pattern-texts
-                      :pattern-library-root
-                      :require-occurrence-squares?
-                      :target-policy-retraction])
-               :ticket-readiness-contact-resolver #(runner/read-job! opts %))
-        pinned-outer-selector
-        (retained-outer-selector outer-selector policy-field-config)
-        opts (-> opts
-                 (update :outer-task-policy #(or % :meta))
-                 (assoc :outer-task-selection-fn pinned-outer-selector))
         selected-judgment (atom nil)]
     {:ticket-readiness-refresh
      (or (:ticket-readiness-refresh opts)
@@ -496,13 +443,7 @@
            (ticket-readiness-refresh-config (merge opts runner-opts))))
      :judge-fn (fn [days]
                  (try
-                   (let [generated (selection-judge opts days)
-                         frontier (get-in generated [:judgement :outer-task-selection
-                                                     :policy :frontier])
-                         generated (cond-> generated
-                                     frontier
-                                     (assoc-in [:judgement :decision :selection-certificate
-                                                :reading-frontier] frontier))]
+                   (let [generated (selection-judge opts days)]
                      (reset! selected-judgment (:judgement generated))
                      generated)
                    (catch Throwable e
@@ -532,30 +473,10 @@
              answer-fn (or (:selected-target-reading-answer-fn live-opts)
                            (designated-author-answer-fn
                             live-opts selected-target-reading/prompt))
-             field (get-in judgement [:outer-task-selection :policy-field])
-             needs (selected-target-reading/preparation-needs judgement)
              chosen-need (selected-target-reading/selected-need judgement)]
-         (if (seq needs)
-           (let [first-target (:target (first needs))
-                   ;; prepare! plans from family order. Move only the requested
-                   ;; first target, preserving the relative order of all others.
-                   families (:families field)
-                   field (assoc field :families
-                                (vec (concat
-                                      (filter #(= first-target (:target-id %)) families)
-                                      (remove #(= first-target (:target-id %)) families))))
-                 result (reading-preparation/prepare!
-                         (assoc live-opts :answer-fn answer-fn) field
-                         {:deadline-ms (+ (System/currentTimeMillis) 1800000)
-                          :limit (min 3 (max 1 (count needs)))})]
-               ;; The existing runner redecides once after any publication.
-               ;; A retained outer choice stays retained while its inner
-               ;; construction and the bounded reading batch are rebuilt.
-               (assoc result :published (boolean (some :published (:records result)))))
-             (when (and (nil? field) chosen-need)
-               (selected-target-reading/repair!
-                (assoc live-opts :answer-fn answer-fn)
-                 judgement)))))
+         (when chosen-need
+           (selected-target-reading/repair!
+            (assoc live-opts :answer-fn answer-fn) judgement))))
      :occurrence-square-authoring-fn
      (fn [runner-opts judgement]
        (let [live-opts (merge opts runner-opts)
@@ -718,11 +639,13 @@
   "Resolve medic authority before any diagnosis, readiness, ledger, or
   selection work, then arbitrate the opportunity."
   [opts]
-  (let [authority (resolve-medic-authority opts)]
+  (if-not (get-in opts [:task :id])
+    {:absent :no-task-selection-policy}
+    (let [authority (resolve-medic-authority opts)]
     (if (= :refused (:status authority))
       {:status :refused :reason (:reason authority)
        :route :dedicated-meta-self-heal :ordinary-selection-called? false}
-      (run-opportunity-with-authority! opts authority))))
+      (run-opportunity-with-authority! opts authority)))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.

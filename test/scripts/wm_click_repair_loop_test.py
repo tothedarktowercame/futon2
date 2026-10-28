@@ -72,31 +72,6 @@ class RepairLoopCastTest(unittest.TestCase):
         launch.assert_not_called()
         self.assertEqual("click-in-flight", record.call_args.args[0]["reason"])
 
-    def test_missing_provider_prevents_seat_reset_and_click_launch(self):
-        loop = load_loop()
-        with mock.patch.object(loop, "jvm_eval", return_value={
-                "rc": 0, "out": "{:value :wm/provider-required}", "err": ""}), \
-             mock.patch.object(loop, "record"), \
-             mock.patch.object(loop, "reset_cast_sessions") as reset, \
-             mock.patch.object(loop.subprocess, "Popen") as launch:
-            result = loop.fire(1, None, 123)
-        self.assertFalse(result["spent"])
-        self.assertEqual("outer-policy-evidence-provider-required", result["last-result"]["reason"])
-        reset.assert_not_called()
-        launch.assert_not_called()
-
-    def test_provider_preflight_handles_present_and_unavailable_configuration(self):
-        loop = load_loop()
-        for response, expected in [
-            ({"rc": 0, "out": "{:value :wm/provider-configured}"}, None),
-            ({"rc": 1, "out": ""}, "outer-policy-preflight-unavailable"),
-            ({"rc": 0, "out": "{:error true}"}, "outer-policy-preflight-unavailable"),
-        ]:
-            with mock.patch.object(loop, "jvm_eval", return_value=response):
-                self.assertEqual(expected, loop.outer_policy_preflight())
-        with mock.patch.object(loop, "jvm_eval", side_effect=subprocess.TimeoutExpired("eval", 30)):
-            self.assertEqual("outer-policy-preflight-unavailable", loop.outer_policy_preflight())
-
     def test_cast_has_no_stale_or_implicit_identity(self):
         loop = load_loop()
         with contextlib.redirect_stderr(io.StringIO()):

@@ -2,7 +2,6 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.load-identity :as identity]
-            [futon2.aif.selected-outer-cascade-policy :as selected]
             [futon2.aif.token-outcome :as outcome]))
 
 (def fixture-path "test/resources/m2w/pattern-prediction-90ca.edn")
@@ -10,13 +9,8 @@
 (defn entry [] (edn/read-string (slurp fixture-path)))
 
 (defn sealed-input [e]
-  ;; Exercise the real pre-seal producer, not an authored input carrier. The
-  ;; fixture is a projection, so this is not a replay of objective verification.
-  (:pattern-prediction-input
-   (selected/seal {:entries [e]} {}
-                  {:status :selected
-                   :action {:target (:target-id e) :policy-id (:policy-id e)
-                            :cascade-digest (:cascade-digest e)}})))
+  ;; The retained token model is independent of the removed outer selector.
+  (outcome/pattern-prediction-input e))
 
 (defn decision [e]
   {:action (:action e)

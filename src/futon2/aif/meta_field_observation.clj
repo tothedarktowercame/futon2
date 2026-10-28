@@ -2,14 +2,13 @@
   "Pure/replayable META field observation over an authoritative registry read.
 
   M/E/T lifecycle decisions remain owned by mission-registry and
-  outer-task-selection.  This namespace preserves their rows and reasons; it
+  requisition state. This namespace preserves their rows and reasons; it
   does not parse status prose or infer completion.  Algorithm rows require a
   separately pinned, explicit approval catalog."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.meta-injury-observation :as injury]
-            [futon2.aif.mission-registry :as registry]
-            [futon2.aif.outer-task-selection :as outer])
+            [futon2.aif.mission-registry :as registry])
   (:import [java.security MessageDigest]))
 
 (def schema :wm/meta-field-observation-v1)
@@ -60,12 +59,22 @@
                             :ticket (registry/live-ticket? row)
                             false))
         lifecycle-live (filterv lifecycle-live? all)
-        outer-receipt (outer/select-task {:tasks lifecycle-live :seed 0})
-        proposed-support (mapv #(task-row (:kind %) %) (:support outer-receipt))
+        requisition-ineligible? #(contains? #{:in-progress :completed}
+                                            (get-in % [:requisition :state]))
+        supported? #(and (string? (:id %)) (seq (:id %)))
+        eligible? #(and (supported? %) (not (requisition-ineligible? %)))
+        proposed-support (mapv #(task-row (:kind %) %)
+                               (filter eligible? lifecycle-live))
         requisition-exclusions
-        (mapv #(merge (task-row (:kind %) %)
-                      (select-keys % [:ineligible-reason :ineligibility-evidence]))
-              (:excluded outer-receipt))
+        (mapv (fn [row]
+                (if-not (supported? row)
+                  (assoc (task-row (:kind row) row)
+                         :ineligible-reason :unsupported-task-shape)
+                  (assoc (task-row (:kind row) row)
+                         :ineligible-reason (keyword "requisition" (name (get-in row [:requisition :state])))
+                         :ineligibility-evidence
+                         {:requisition (:requisition row) :source (:source row)})))
+              (remove eligible? lifecycle-live))
         lifecycle-exclusions
         (->> all
              (remove lifecycle-live?)

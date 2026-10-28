@@ -232,8 +232,6 @@
 ;; live C as a scored preference (live C is observation only; its
 ;; projection laws above still hold for the live-C module itself).
 
-(def ^:private p-ab ["p/a" "p/b"])
-
 (defn- refusal-kinds [r]
   (mapv (juxt :kind :failure-kind) (get-in r [:decision :refusals])))
 
@@ -250,25 +248,13 @@
 
 (deftest h5a-no-problems-is-a-gated-abstention
   ;; no target has a current reading: no family, the gated abstention
-  (let [fld (route/field {"M-a" nil "M-b" nil})
-        r (route/decide-field fld {"M-a" 1 "M-b" 1} {})]
+  (let [fld (route/field {"M-a" nil})
+        r (route/decide-field fld {"M-a" 1} {:task {:id "M-a"}})]
     (is (= :abstained (get-in r [:decision :status])))
     (is (= 0 (:selector-calls r)))
-    (is (= [[:no-policy-family :no-current-target-reading]
-            [:no-policy-family :no-current-target-reading]]
+    (is (= [[:no-policy-family :no-current-target-reading]]
            (refusal-kinds r))
         "each target's refusal is typed; the decision passed emit! by construction")))
-
-(deftest missing-slice-refuses-the-whole-field
-  ;; the reading-route counterpart of a missing slice is a missing reading
-  (let [fld (route/field {"M-a" p-ab "M-unread" nil})
-        r (route/decide-field fld {"M-a" 1 "M-unread" 1} {})
-        refusals (get-in r [:decision :refusals])]
-    (is (= 0 (:selector-calls r)))
-    (is (= :abstained (get-in r [:decision :status])))
-    (is (nil? (get-in r [:decision :action])))
-    (is (some #(and (= "M-unread" (:target %))
-                    (= :no-policy-family (:kind %))) refusals))))
 
 (deftest h5a-tick-1-decision
   ;; retired: locators on the action, interpretation receipts on candidates,
@@ -284,16 +270,6 @@
     (is (= [] (:lanes r)) "no diagnostic lane runs")
     (is (= :unavailable (get-in decision [:selection-certificate :retired-diagnostics
                                           :token-rate-lanes :status])))))
-
-(deftest h5a-joint-selection-across-targets
-  (let [fld (route/field {"M-a" p-ab "M-b" ["p/b" "p/c"]})
-        r (route/decide-field fld {"M-a" 1 "M-b" 1} {})
-        posterior (posterior-of r)]
-    (is (= 1 (:selector-calls r)) "ONE selector call for both targets")
-    (is (= #{"M-a" "M-b"} (set (map :target (keys posterior))))
-        "one posterior spans both targets' policies")
-    (is (< 0.999999999 (reduce + (vals posterior)) 1.000000001)
-        "the joint posterior's masses sum to 1")))
 
 (deftest h5a-unmatched-receipt-drops-the-candidate
   ;; retired: construction-receipt matching. Preserved: a policy that cannot
@@ -313,41 +289,6 @@
         "it never reaches the posterior")
     (is (= 1 (:selector-calls r)))
     (is (some? (get-in r [:decision :action])) "the remaining family still selects")))
-
-(deftest h5a-incommensurable-family-refuses
-  ;; differing declared temperatures refuse, typed, with the values, and
-  ;; the selector is not called (the reading route abstains rather than throws)
-  (let [fld (route/field {"M-a" p-ab "M-b" ["p/b" "p/c"]})
-        r (route/decide-field fld {"M-a" 1 "M-b" 2} {})
-        refusal (first (get-in r [:decision :refusals]))]
-    (is (= 0 (:selector-calls r)))
-    (is (= :abstained (get-in r [:decision :status])))
-    (is (= :incommensurable-family (:kind refusal)))
-    (is (= #{1 2} (set (:beta refusal))))))
-
-(deftest h5a-targets-stay-apart
-  ;; two targets reading the SAME patterns: their policies stay distinct
-  ;; (identity is target-scoped), the marginal is per policy, and the action
-  ;; carries its target. Retired: target-token qualification of the old
-  ;; operator tokens.
-  (let [fld (route/field {"M-a" p-ab "M-b" p-ab})
-        r (route/decide-field fld {"M-a" 1 "M-b" 1} {})
-        posterior (posterior-of r)
-        keys* (map prefix-admission/candidate-key (keys posterior))
-        per-target (group-by :target (keys posterior))]
-    (is (= 1 (:selector-calls r)))
-    (is (= #{"M-a" "M-b"} (set (keys per-target))))
-    (is (= (count (get per-target "M-a")) (count (get per-target "M-b"))))
-    (is (= (count posterior) (count (distinct keys*)))
-        "same patterns on distinct targets remain distinct policies")
-    (is (every? (fn [[t cs]] (every? #(clojure.string/starts-with? (:id %) (str t "/policy-")) cs))
-                per-target))
-    (is (contains? #{"M-a" "M-b"} (get-in r [:decision :action :target]))
-        "the decision's action carries its :target")
-    (is (< (Math/abs (- (double (get-in r [:decision :chosen-action-mass]))
-                        (double (get posterior (get-in r [:decision :action])))))
-           1e-9)
-        "the chosen mass is that one policy's posterior mass, not a sum across targets")))
 
 (deftest wire-3-stale-live-c-refuses-the-decision-typed
   ;; retired: live C is no longer a scored preference (codex-68 ruling:
@@ -409,7 +350,7 @@
 (deftest all-declined-family-is-a-recorded-abstention
   (let [fx (route/fixture)]
     (doseq [[label r]
-            [[:no-reading (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {})]
+            [[:no-reading (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {:task {:id "M-a"}})]
              [:every-policy-unscorable
               (with-redefs [shape-g/score-policy (refusing-policies (constantly true))]
                 (route/decide fx))]]]
@@ -420,64 +361,6 @@
       (is (every? #(and (:target %) (= :no-policy-family (:kind %)) (seq (:failures %)))
                   (get-in r [:decision :refusals]))
           (str label)))))
-
-(deftest class-unknown-target-is-declined-not-a-decision-refusal
-  ;; retired: the class scorer's :class-unknown-no-scalar-g. Preserved: a
-  ;; target none of whose policies can be scored is declined and counted
-  ;; while selection proceeds over the scorable target; alone, it abstains.
-  (let [fld (route/field {"M-a" p-ab "M-u" ["p/b" "p/c"]})
-        unscorable #(clojure.string/starts-with? (str %) "M-u/")
-        r (with-redefs [shape-g/score-policy (refusing-policies unscorable)]
-            (route/decide-field fld {"M-a" 1 "M-u" 1} {}))
-        alone (with-redefs [shape-g/score-policy (refusing-policies unscorable)]
-                (route/decide-field (route/field {"M-u" ["p/b" "p/c"]}) {"M-u" 1} {}))]
-    (is (= "M-a" (get-in r [:decision :action :target])))
-    (is (= 1 (:selector-calls r)))
-    (is (= #{"M-a"} (set (map :target (keys (posterior-of r))))))
-    (is (some #(and (= "M-u" (:target-id %)) (= :fixture-unscorable (:reason %)))
-              (get-in r [:decision :selection-certificate :family-failures])))
-    (is (= :abstained (get-in alone [:decision :status])))
-    (is (= 0 (:selector-calls alone)))))
-
-(deftest all-declined-family-with-admission-refusals-abstains
-  ;; one target has no reading, the other no scorable policy: abstain with
-  ;; both refusals in field order, never throw
-  (let [fld (route/field {"M-a" nil "M-u" ["p/b" "p/c"]})
-        r (with-redefs [shape-g/score-policy (refusing-policies (constantly true))]
-            (route/decide-field fld {"M-a" 1 "M-u" 1} {}))]
-    (is (= :abstained (get-in r [:decision :status])))
-    (is (= ["M-a" "M-u"] (mapv :target (get-in r [:decision :refusals]))))
-    (is (= [[:no-policy-family :no-current-target-reading]
-            [:no-policy-family :policy-scoring-refused]]
-           (refusal-kinds r)))
-    (is (= :fixture-unscorable (get-in r [:decision :refusals 1 :failures 0 :reason])))))
-
-(deftest every-accounted-target-lands-in-the-field
-  ;; production repair (Q5 report packet): a target the assembly accounted
-  ;; for but with no source row is a counted failure, not silently absent;
-  ;; a field with no target at all abstains typed (keeping a field-level
-  ;; outer refusal) instead of failing the gate on an empty refusal list
-  (let [fx (route/fixture)
-        base (route/assembled fx 1)
-        with-rowless (update base :refusals conj {:target "M-rowless" :kind :no-admitted-interpretation})
-        r (wm-cd/cascade-decision with-rowless (route/opts fx {}))
-        ;; the shape cascade-decision itself builds for an outer refusal:
-        ;; the selector's reason rides as :failure-kind, not :reason
-        outer {:target {:absent :outer-task-not-selected} :kind :outer-task-selection-refused
-               :failure-kind :outer-policy-evidence-provider-required}
-        empty-field (wm-cd/cascade-decision {:problems [] :refusals [outer] :target-sources []}
-                                            (route/opts fx {}))
-        bare (wm-cd/cascade-decision {:problems [] :refusals [] :target-sources []}
-                                     (route/opts fx {}))]
-    (is (= :abstained (get-in r [:decision :status])))
-    (is (nil? (get-in r [:decision :action])))
-    (is (some #(and (= "M-rowless" (:target %))
-                    (= :no-policy-family (:kind %)))
-              (get-in r [:decision :refusals])))
-    (is (= :outer-policy-evidence-provider-required (get-in empty-field [:decision :reason])))
-    (is (= [outer] (mapv #(select-keys % [:target :kind :failure-kind]) (get-in empty-field [:decision :refusals])))
-        "the outer selector's refusal is the empty field's abstention")
-    (is (= [[:no-policy-family :no-enumerated-target]] (refusal-kinds bare)))))
 
 (deftest selection-refusal-is-the-decisions-typed-refusal
   ;; production repair (Q5 proposal/refusal packet): the selection law's

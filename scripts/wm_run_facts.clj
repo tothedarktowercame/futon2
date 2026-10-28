@@ -13,16 +13,13 @@
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
-            [futon2.aif.q2-construction :as q2]
             [futon2.aif.q4-preference :as q4]
-            [futon2.aif.q8-frontier :as q8]
-            [futon2.aif.q9-factorization :as q9]
-            [futon2.aif.q10-arrangement-census :as q10]))
+            ))
 
 (def run-fact-fields
   ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
-   "outerActions" "targetConstruction" "constructorPatternCount" "constructedCascades"
+   "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "policyPreferences"
    ;; one run-wide horizon: no longer a Requirements field (Q4 is stated
    ;; per compared policy), kept for the history table and alert text
@@ -33,10 +30,7 @@
    "previousOutcome" "previousInputDigest" "currentChoice"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
-   "factorizedPreference" "calibrationAuthorizations"
-   "factorizationAuthorizations"
-   "frontierCensus" "frontierRefresh" "frontierSelection" "selectedCascade"
-   "differentArrangementPairs" "arrangementPairsDistinguishedByG"])
+])
 
 (defn not-recomputable [s] {"not-recomputable" s})
 (defn- sorted-ids [xs] (vec (sort (map str xs))))
@@ -88,84 +82,6 @@
             "policiesWithRiskTerm" (get-in c [:counts :risk])
             "policiesWithAmbiguityTerm" (get-in c [:counts :ambiguity])
             "policiesWithInformationTerm" (get-in c [:counts :information-gain])}))))))
-
-(defn q2-facts
-  "Requirements Q2 for a reading-family record, from the run's own :q2
-  carrier only, and only when it is intact and equal to the carrier
-  recomputed from this record (q2-construction/verify-record): the outer
-  actions, the selected task's construction, its pool count and the size of
-  the library pinned at construction. nil for a record of another route,
-  which keeps the historical reader."
-  [record]
-  (when (= :wm/reading-policy-family-v1
-           (get-in record [:decision :selection-certificate :selection-route]))
-    (let [v (q2/verify-record record)]
-      (if-not (= :verified (:status v))
-        (zipmap ["outerActions" "targetConstruction" "constructorPatternCount"
-                 "libraryPatternCount"]
-                (repeat (not-recomputable (str "Q2 carrier " (name (:reason v))))))
-        (let [c (:carrier v)]
-          {"outerActions" (mapv (fn [a] {"task" (:task a) "action" (:action-id a)})
-                                (:outer-actions c))
-           "targetConstruction"
-           (mapv (fn [e]
-                   {"targets" [(:task e)]
-                    "action" (:action-id e)
-                    "reading" (:reading-id e)
-                    "library" (:library-id e)
-                    "graph" (:graph-id e)
-                    "kernel" (:kernel-id e)
-                    "slice" (:slice e)
-                    "pool" (:pool e)
-                    "sliceFromWholeLibrary" (:slice-from-whole-library e)
-                    "policyCount" (:policy-count e)
-                    ;; the Q8 and Q4 exporters' identity of a policy key
-                    "policies" (vec (sort (map pr-str (:policies e))))})
-                 (:entries c))
-           "constructorPatternCount" (count (set (mapcat :pool (:entries c))))
-           "libraryPatternCount" (get-in c [:library :count])})))))
-
-(defn- lean-entry [e]
-  (into {} (map (fn [[k v]] [(name k) (if (keyword? v) (str v) v)])) e))
-
-(defn q8-facts
-  "Requirements Q8 from the run's own :q8 carrier only, and only when it is
-  intact and equal to the carrier recomputed from this record
-  (q8-frontier/verify-record). Anything else is not recomputable."
-  [record]
-  (let [v (q8/verify-record record)]
-    (if-not (= :verified (:status v))
-      (let [why (not-recomputable (str "Q8 carrier " (name (:reason v))))]
-        {"frontierCensus" why "frontierRefresh" why
-         "frontierSelection" why "selectedCascade" why})
-      (let [{:keys [census] r :refresh s :selection c :cascade} (:carrier v)
-            ids (fn [xs] (vec (sort (map pr-str xs))))]
-        {"frontierCensus" {"eligible" (vec (:eligible census))
-                           "excluded" (mapv (fn [x] {"task" (:task x)
-                                                     "reason" (some-> (:reason x) str)})
-                                            (:excluded census))}
-         "frontierRefresh" {"prior" (mapv lean-entry (:prior r))
-                            "current" (mapv lean-entry (:current r))
-                            "retained" (mapv lean-entry (:retained r))
-                            "invalidated" (mapv lean-entry (:invalidated r))
-                            "recomputed" (mapv lean-entry (:recomputed r))
-                            "removed" (vec (:removed r))
-                            "delta" {"changed-observations" (get-in r [:delta :changed-observations])
-                                     "added-tasks" (get-in r [:delta :added-tasks])
-                                     "removed-tasks" (get-in r [:delta :removed-tasks])}
-                            "current-open-tasks" (vec (:current-open-tasks r))}
-         "frontierSelection" (cond-> {"selected" (lean-entry (:selected s))
-                                       "current-epoch" (:current-epoch s)}
-                                (:selection-verdict (:carrier v))
-                                (assoc "verdict"
-                                       (update-keys (:selection-verdict (:carrier v)) name)))
-         "selectedCascade" {"selected-task" (:selected-task c)
-                            "available-admissible" (ids (:available-admissible c))
-                            "constructed" (ids (:constructed c))
-                            "admitted" (ids (:admitted c))
-                            "scored" (ids (:scored c))
-                            "requirement-excluded" (ids (:requirement-excluded c))
-                            "posterior" (ids (:posterior c))}}))))
 
 (defn read-edn [path]
   (edn/read-string {:default tagged-literal} (slurp path)))
@@ -398,56 +314,6 @@
              "policyCount" policy-count})
           (:target-construction certificate))))
 
-(defn q9-facts
-  "Requirements Q9 for a record. On the reading-family route, from the
-  run's own :q9 carrier only, and only when it is intact and equal to the
-  carrier recomputed from this record (q9-factorization/verify-record): the
-  carrier is negative, so a verified one exports factorizedPreference :=
-  none with the empty registries production loads. On any other route Q9 is
-  not recomputable. A record's unsealed :wm/factorized-preference-v1
-  carrier is refused: nothing writes one (the controlled SUT returns its
-  carrier and persists none), so in a record it can only be self-asserted."
-  [record]
-  (let [fields ["factorizedPreference" "calibrationAuthorizations"
-                "factorizationAuthorizations"]
-        nr-all #(zipmap fields (repeat (not-recomputable %)))]
-    (cond
-      (= :wm/reading-policy-family-v1
-         (get-in record [:decision :selection-certificate :selection-route]))
-      (let [v (q9/verify-record record)]
-        (if (= :verified (:status v))
-          {"factorizedPreference" nil
-           "calibrationAuthorizations" []
-           "factorizationAuthorizations" []}
-          (nr-all (str "Q9 carrier " (name (:reason v))))))
-      (some? (get-in record [:decision :factorized-preference]))
-      (nr-all "unsealed factorized preference carrier refused: no producer persists one")
-      :else
-      (nr-all "authorized factorized preference absent: no sealed Q9 carrier on this route"))))
-
-;; Requirements Q10's fields, in the order Lean reads them
-(def ^:private q10-fields ["differentArrangementPairs" "arrangementPairsDistinguishedByG"])
-
-(defn q10-facts
-  "Requirements Q10 for a record. On the reading-family route, from the
-  run's own :q10 census only, and only when it is intact and equal to the
-  census recomputed from this record (q10-arrangement-census/verify-record):
-  the number of compared same-pattern pairs in different arrangements, and
-  of those each with its own numeric G. On any other route Q10 is not
-  recomputable."
-  [record]
-  (let [nr-all #(zipmap q10-fields (repeat (not-recomputable %)))]
-    (if (= :wm/reading-policy-family-v1
-           (get-in record [:decision :selection-certificate :selection-route]))
-      (let [v (q10/verify-record record)]
-        (if (= :verified (:status v))
-          (let [{:keys [different-arrangement-pairs distinguished-by-g]}
-                (get-in v [:carrier :counts])]
-            {"differentArrangementPairs" different-arrangement-pairs
-             "arrangementPairsDistinguishedByG" distinguished-by-g})
-          (nr-all (str "Q10 carrier " (name (:reason v))))))
-      (nr-all "same-pattern arrangement census: no sealed Q10 carrier on this route"))))
-
 (defn interpretation-order
   "Q5 from the recorded selection-world instants. Instants are compared as
   instants, not as strings (an ISO string drops trailing zeros, so a later
@@ -615,11 +481,7 @@
                                   (get-in record [:participants :reviewer])
                                   (get-in record [:interpretation-ask :seat])]))
         nr (fn [s] (not-recomputable s))
-        q9 (q9-facts record)
-        q10 (q10-facts record)
-        q8 (q8-facts record)
         q4 (q4-facts record)
-        q2 (q2-facts record)
         facts {"openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
@@ -633,7 +495,6 @@
                "targetsWithG" (if (some? with-g) (sorted-ids with-g)
                                   (nr "selection certificate candidates absent"))
                "libraryPatternCount" (count (:patterns snap))
-               "outerActions" (nr "outer action coverage is certified on the reading-family route only")
                "targetConstruction" (or construction
                                           (nr "selection certificate target construction absent"))
                "constructorPatternCount" (if (some? constructor-pool)
@@ -696,18 +557,12 @@
                                (nr "participant seat ids absent"))
                "completionPreferencePairs" (nr "reachable completion-preference pairs absent")
                "completionPairsStrictlyPreferred" (nr "strict completion-preference comparisons absent")
-               "frontierCensus" (q8 "frontierCensus")
-               "frontierRefresh" (q8 "frontierRefresh")
-               "frontierSelection" (q8 "frontierSelection")
-               "selectedCascade" (q8 "selectedCascade")}
+               }
         ;; a reading-family record's Q4 comes from its carrier alone
-        facts (merge facts q4 q2 q9 q10)
+        facts (merge facts q4)
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond
-                                 (contains? q2 field) (str record-path " [:q2]")
-                                 (contains? q9 field) (str record-path " [:q9]")
-                                 (contains? q10 field) (str record-path " [:q10]")
                                  (#{"openMissions" "openExcursions" "openTickets"
                                     "libraryPatternCount" "seatsAvailable"} field) (:pins snap)
                                  (#{"previousChoice" "previousOutcome" "previousInputDigest"

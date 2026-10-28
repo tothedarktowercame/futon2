@@ -22,7 +22,6 @@
   :wm-judgement-only {:main-opts ["-m" "wm-scheduled-run"]}
   :wm-preflight {:main-opts ["-m" "wm-preflight"]}
   :fold-author {:main-opts ["-m" "fold-author"]}
-  :wm-outer-loop {:main-opts ["-m" "wm-outer-loop"]}
   :manual-overnight-flights {:main-opts ["scripts/manual_overnight_flights.clj"]}
   ;; :run/:run-m/:bench/:viz moved to ../futon2a with the ants simulation (2026-09-18)
   :build {:deps {io.github.clojure/tools.build

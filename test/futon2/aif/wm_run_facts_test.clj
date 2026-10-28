@@ -1,7 +1,6 @@
 (ns futon2.aif.wm-run-facts-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is]]
             [wm-run-facts :as facts]
-            [wm-check-run-facts :as checker]
             [futon2.aif.policy :as policy]
             [futon2.aif.full-loop-runner]))
 
@@ -16,175 +15,6 @@
                :policies [{:id :pi1}]}}
    :participants {:author "author"}
    :terminal-receipt {:outcome :changed}})
-
-(def factorized-carrier
-  {:schema :wm/factorized-preference-v1
-   :certificate
-   {:calibration {:identity 101 :version 1 :authority 102
-                  :registration-token 103
-                  :focused-cost 0 :related-cost 1 :unrelated-cost 2}
-    :selector-authority 108
-    :factorization-identity 106 :factorization-version 1
-    :factorization-authority 107
-    :calibration-authorization 104 :factorization-authorization 105}
-   :calibration-authorizations
-   [{:receipt 104
-     :calibration {:identity 101 :version 1 :authority 102
-                   :registration-token 103
-                   :focused-cost 0 :related-cost 1 :unrelated-cost 2}
-     :authorized-by 102}]
-   :factorization-authorizations
-   [{:receipt 105 :identity 106 :version 1 :authority 107
-     :law :completion-then-conditional-relevance}]})
-
-(def q8-entry
-  {:task "M-x" :observation "obs-x" :evidence "evidence-x"
-   :ranking-law "outer-law" :ranking-version 1
-   :dependencies #{"obs-x"} :comparison-key 7 :freshness-epoch 3})
-
-(def q8-carrier
-  {:schema :wm/q8-frontier-certificate-v1
-   :frontier-refresh
-   {:prior [q8-entry] :current [q8-entry] :retained [q8-entry]
-    :invalidated [] :recomputed [] :removed #{}
-    :delta {:changed-observations #{} :added-tasks #{} :removed-tasks #{}}
-    :current-open-tasks #{"M-x"}}
-   :frontier-selection {:selected q8-entry :current-epoch 3}
-   :selected-cascade
-   {:selected-task "M-x" :available-admissible #{"cascade-x"}
-    :constructed #{"cascade-x"} :admitted #{"cascade-x"}
-    :scored #{"cascade-x"} :posterior #{"cascade-x"}}})
-
-(defn q8-export [carrier]
-  (:facts (facts/facts-for-record
-           (cond-> record carrier (assoc-in [:certificates :q8] carrier))
-           "r" snap)))
-
-(deftest q8-absent-carrier-is-not-recomputable
-  (doseq [carrier [nil (update-in q8-carrier [:frontier-selection :selected]
-                                  dissoc :evidence)]]
-    (let [export (q8-export carrier)]
-      (doseq [field ["frontierRefresh" "frontierSelection" "selectedCascade"]]
-        (is (contains? (export field) "not-recomputable") field))
-      (is (.contains (checker/lean-source {"facts" export} "q8Absent")
-                     "q8 := .nr")))))
-
-(deftest q8-unbound-carriers-are-not-accepted
-  ;; Rulings 1a/2b/3 (codex-68, 2026-10-15): the exporter accepts only the
-  ;; run's own :q8 carrier, intact and equal to the carrier recomputed from
-  ;; the record. A well-shaped carrier anywhere else, or one not bound to
-  ;; the record, is not recomputable (positive cases:
-  ;; wm.q8-frontier-route-test).
-  (doseq [[label r] {:certificates (assoc-in record [:certificates :q8] q8-carrier)
-                     :controlled-sut (assoc-in record [:controlled-sut :certificates :q8] q8-carrier)
-                     :unbound-q8 (assoc record :q8 q8-carrier)}]
-    (testing (name label)
-      (let [export (:facts (facts/facts-for-record r "r" snap))]
-        (doseq [field ["frontierCensus" "frontierRefresh" "frontierSelection" "selectedCascade"]]
-          (is (contains? (export field) "not-recomputable") field))
-        (is (.contains (checker/lean-source {"facts" export} "q8Unbound") "q8 := .nr"))))))
-
-(defn q9-export [r]
-  (:facts (facts/facts-for-record r "r" snap)))
-
-(deftest q9-absent-and-flat-preference-carriers-remain-not-recomputable
-  (doseq [r [record
-             (assoc-in record [:decision :selection-certificate :scoring 0
-                               :observation-model :class-preference]
-                       {1 {:focused 0.55 :related 0.35 :unrelated 0.05
-                           :stop-the-line 0.05}})]]
-    (let [export (q9-export r)]
-      (doseq [field ["factorizedPreference" "calibrationAuthorizations"
-                     "factorizationAuthorizations"]]
-        (is (contains? (export field) "not-recomputable") field)))))
-
-(def historical-q9-record
-  "The 2026-10-05 click record (5.3 MB, not committed: data/* is
-  gitignored)."
-  "wm-runs/tick-run-record-2026-10-05-c9d25d6a-f2bb-42bf-a162-2c4a000e804f.edn")
-
-(defn historical-data-roots
-  "Where a run record is looked for, in order: the declared data root
-  ($FUTON2_DATA_ROOT), this checkout's data/, the shared canonical
-  checkout's."
-  []
-  (vec (distinct (keep identity [(System/getenv "FUTON2_DATA_ROOT")
-                                 "data"
-                                 "/home/joe/code/futon2/data"]))))
-
-(defn resolve-historical
-  "The record at REL under the first data root holding it, or a typed skip
-  naming every root searched."
-  [rel]
-  (let [roots (historical-data-roots)]
-    (if-let [f (first (filter #(.isFile ^java.io.File %)
-                              (map #(java.io.File. ^String % ^String rel) roots)))]
-      {:status :found :path (.getPath ^java.io.File f)}
-      {:status :skipped :reason :historical-record-absent :record rel :searched roots})))
-
-(deftest q9-historical-click-record-has-no-authorized-factorization
-  (let [r (resolve-historical historical-q9-record)]
-    (if (= :skipped (:status r))
-      (do (println "SKIP q9-historical-click-record:" (pr-str r))
-          (is (= :historical-record-absent (:reason r)))
-          (is (seq (:searched r))))
-      (let [export (q9-export (facts/read-edn (:path r)))]
-        (doseq [field ["factorizedPreference" "calibrationAuthorizations"
-                       "factorizationAuthorizations"]]
-          (is (contains? (export field) "not-recomputable") field))))))
-
-(deftest a-missing-historical-record-is-a-typed-skip
-  (is (= {:status :skipped :reason :historical-record-absent
-          :record "wm-runs/no-such-record.edn" :searched (historical-data-roots)}
-         (resolve-historical "wm-runs/no-such-record.edn"))))
-
-(deftest q9-unsealed-factorized-carriers-are-refused
-  ;; Nothing persists a :wm/factorized-preference-v1 carrier in a record
-  ;; (the controlled SUT returns one and writes none), so one found in a
-  ;; record is self-asserted, however well joined.
-  (doseq [carrier [factorized-carrier
-                   (assoc-in factorized-carrier [:certificate :factorization-identity] 999)
-                   (assoc-in factorized-carrier [:certificate :factorization-version] 2)
-                   (assoc factorized-carrier :factorization-authorizations [])]]
-    (let [export (q9-export (assoc-in record [:decision :factorized-preference] carrier))]
-      (doseq [field ["factorizedPreference" "calibrationAuthorizations"
-                     "factorizationAuthorizations"]]
-        (is (contains? (export field) "not-recomputable") field))
-      (is (.contains (checker/lean-source {"facts" export} "q9Unsealed") "q9 := .nr")))))
-
-(defn- positive-facts
-  "Q9 facts as an exporter would state a joined certificate, for the Lean
-  term emitter alone."
-  [carrier]
-  {"factorizedPreference" (:certificate carrier)
-   "calibrationAuthorizations" (:calibration-authorizations carrier)
-   "factorizationAuthorizations" (:factorization-authorizations carrier)})
-
-(deftest q9-lean-emitter-states-a-joined-certificate
-  (let [source (checker/lean-source {"facts" (positive-facts factorized-carrier)} "q9Joined")]
-    (is (.contains source "factorizedPreference := some"))
-    (is (.contains source "factorizationIdentity := 106"))))
-
-(deftest q9-lean-emitter-states-none
-  (let [source (checker/lean-source {"facts" {"factorizedPreference" nil
-                                              "calibrationAuthorizations" []
-                                              "factorizationAuthorizations" []}}
-                                    "q9None")]
-    (is (.contains source "q9 := .known { Requirements.click20 with factorizedPreference := none, calibrationAuthorizations := [], factorizationAuthorizations := [] }"))))
-
-(deftest q9-lean-emitter-preserves-each-calibration-registry-entry
-  (let [second-calibration {:identity 201 :version 2 :authority 202
-                            :registration-token 203
-                            :focused-cost 3 :related-cost 4 :unrelated-cost 5}
-        second-authorization {:receipt 204 :calibration second-calibration
-                              :authorized-by 202}
-        carrier (update factorized-carrier :calibration-authorizations
-                        conj second-authorization)
-        source (checker/lean-source {"facts" (positive-facts carrier)} "q9TwoCalibrations")]
-    (is (.contains source
-                   "identity := 101, version := 1, authority := 102, registrationToken := 103, focusedCost := 0, relatedCost := 1, unrelatedCost := 2"))
-    (is (.contains source
-                   "receipt := 204, calibration := {identity := 201, version := 2, authority := 202, registrationToken := 203, focusedCost := 3, relatedCost := 4, unrelatedCost := 5}, authorizedBy := 202"))))
 
 (deftest typed-not-supplied-increments-absence-count
   (let [base (facts/facts-for-record record "r" snap)
@@ -220,6 +50,7 @@
         exported (:facts (facts/facts-for-record carried "r" snap))]
     (is (contains? (exported "targetConstruction") "not-recomputable"))
     (is (contains? (exported "constructorPatternCount") "not-recomputable"))))
+
 
 (deftest runfacts-field-set-is-exact
   (let [exported (:facts (facts/facts-for-record record "r" snap))]
@@ -572,16 +403,3 @@
                       {:candidates (repeat 100 {:status :absent})
                        :scoring {0 {:diagnostic {:kind :typed-refusal}}}}}}]
     (is (empty? (facts/absence-paths r)))))
-
-(deftest q8-uses-global-action-identities-not-reused-local-labels
-  (let [a {:id :C1 :target "M-a" :precedence [:p]}
-        b {:id :C1 :target "M-b" :precedence [:p]}
-        r (-> record
-              (assoc-in [:decision :selection-certificate :candidates]
-                        [{:id a :g 1.0} {:id b :g 2.0}])
-              (assoc-in [:decision :selection-law :posterior]
-                        {a 0.25 b 0.75}))
-        f (:facts (facts/facts-for-record r "r" snap))]
-    (is (= 2 (count (f "constructedCascades"))))
-    (is (= 2 (count (f "comparedPolicies"))))
-    (is (= #{"M-a" "M-b"} (set (f "targetsWithG"))))))

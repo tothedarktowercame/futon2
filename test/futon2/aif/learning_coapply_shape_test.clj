@@ -5,7 +5,6 @@
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.learning-trial :as trial]
             [futon2.aif.load-identity :as identity]
-            [futon2.aif.selected-outer-cascade-policy :as selected]
             [futon2.aif.token-outcome :as outcome]))
 
 (def fixture-path "test/resources/m2w/pattern-prediction-90ca.edn")
@@ -14,17 +13,11 @@
 (defn- entry [] (edn/read-string (slurp fixture-path)))
 
 (defn- prediction [e]
-  (let [sealed (selected/seal
-                {:entries [e]} {}
-                {:status :selected
-                 :action {:target (:target-id e)
-                          :policy-id (:policy-id e)
-                          :cascade-digest (:cascade-digest e)}})]
-    (outcome/freeze-prediction
-     {:action (:action e)
-      :selection-certificate
-      {:selection-route :wm/selected-outer-cascade-policy-v1
-       :pattern-prediction-input (:pattern-prediction-input sealed)}})))
+  (outcome/freeze-prediction
+   {:action (:action e)
+    :selection-certificate
+    {:selection-route :wm/selected-outer-cascade-policy-v1
+     :pattern-prediction-input (outcome/pattern-prediction-input e)}}))
 
 (defn- occurrence [action]
   {:schema :wm/action-transition-occurrence-v2

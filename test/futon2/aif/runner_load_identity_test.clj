@@ -11,7 +11,7 @@
 (def critical-selection-namespaces
   ['futon2.aif.full-loop-runtime
    'futon2.report.war-machine
-   'futon2.aif.meta-live-outer-selector
+   'futon2.aif.wm.family-selection
    'futon2.aif.meta-pipeline-selector])
 
 (deftest runner-must-compare-the-captured-digest

@@ -3,8 +3,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.meta-outcome-dataset :as dataset]
             [futon2.aif.meta-field-observation :as field]
-            [futon2.aif.outer-target-belief :as belief]
-            [futon2.aif.outer-policy-provider-runtime]))
+            ))
 
 (defn- utf8 [x] (.getBytes (pr-str x) "UTF-8"))
 
@@ -250,19 +249,6 @@
              :sha256 (field/sha256 (utf8 (records "/runs/one.edn")))})
            (:verified-record (first (:rows result)))))))
 
-(deftest provider-terminal-projection-uses-the-verified-record-not-the-path
-  (let [row {:source {:path "/tmp/click-scan-missing/record.edn"
-                      :sha256 (apply str (repeat 64 "0"))}
-             :verified-record (records "/runs/one.edn")
-             :terminal-outcome {:class :closure}
-             :terminal-cause {:class :task-outcome}}
-        terminal-record (ns-resolve 'futon2.aif.outer-policy-provider-runtime
-                                    'terminal-record)
-        result (terminal-record row)]
-    (is (= "run-1" (:run/id result)))
-    (is (= :closure (:observed-outcome result)))
-    (is (nil? (:selected-cascade-digest result)))))
-
 (deftest learning-projections-are-equivalent-and-record-bound
   (let [paths ["/runs/one.edn" "/runs/two.edn"]
         whole (dataset/manifest paths read-bytes)
@@ -357,36 +343,3 @@
            (:class (dataset/terminal-cause
                     (assoc selected :terminal-receipt {:outcome :guardrail-refusal}
                            :failure {:kind :task-failure :stage :enactment})))))))
-
-(deftest same-coarse-incomplete-is-task-evidence-only-with-a-retained-task-cause
-  (let [selected (records "/runs/one.edn")
-        ;; These are temporary producer fixtures, not claims about a retained L2
-        ;; record.  The repository has no canonical L2 terminal record available
-        ;; to this test; the field below exercises the supported apparatus kind.
-        rows {"/runs/task.edn"
-              (-> selected
-                  (assoc :run/id "task" :click/id "task-click"
-                         :startedAt "2026-09-20T01:00:00Z"
-                         :terminal-receipt {:outcome :incomplete}
-                         :failure {:kind :task-failure :stage :enactment}))
-              "/runs/l2.edn"
-              (-> selected
-                  (assoc :run/id "l2" :click/id "l2-click"
-                         :startedAt "2026-09-20T01:00:01Z"
-                         :terminal-receipt {:outcome :incomplete}
-                         :failure {:kind :phase-failure :stage :loop-node}))}
-        reader #(utf8 (rows %))
-        manifest (dataset/manifest (keys rows) reader)
-        produced (dataset/produce {:manifest manifest
-                                   :expected-manifest-pin (:source-pin manifest)
-                                   :read-bytes reader})
-        posterior (belief/build {:dataset produced :prior (belief/prior 1)})]
-    (is (= [:abstention-or-failure :abstention-or-failure]
-           (mapv #(get-in % [:terminal-outcome :class]) (:rows produced))))
-    (is (= [:task-outcome :apparatus-failure]
-           (mapv #(get-in % [:terminal-cause :class]) (:rows produced))))
-    (is (= 2 (get-in posterior [:targets "M-one" :alpha :typed-blocker]))
-        "only the retained :task-failure advances the same target's alpha")
-    (is (= {:count 1 :identities [["l2" "l2-click"]]
-            :reasons {:apparatus-failure-not-task-evidence 1}}
-           (get-in posterior [:non-task-observations :apparatus])))))

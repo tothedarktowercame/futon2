@@ -81,10 +81,6 @@
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.affective-level :as affective-level]
-            [futon2.aif.q2-construction :as q2-construction]
-            [futon2.aif.q8-frontier :as q8-frontier]
-            [futon2.aif.q9-factorization :as q9-factorization]
-            [futon2.aif.q10-arrangement-census :as q10-arrangement-census]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
@@ -94,7 +90,6 @@
             [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
-            [futon2.aif.outer-selection-trace :as outer-selection-trace]
             [futon2.aif.reading-preparation-outcome :as reading-preparation-outcome]
             [futon2.aif.terminal-publication-receipt :as terminal-publication]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
@@ -1145,9 +1140,7 @@
   ([selection-cell selected? receipt]
    (let [arm (if selected? :judgment :sorry)]
      (-> selection-cell
-         (assoc-in [arm :outer-task-selection] receipt)
-         (assoc-in [arm :outer-selection-trace]
-                   (outer-selection-trace/trace receipt)))))
+         (assoc-in [arm :outer-task-selection] receipt))))
   ([selection-cell selected? receipt reading-preparation-outcome]
    (let [arm (if selected? :judgment :sorry)]
      (-> (retain-outer-task-selection selection-cell selected? receipt)
@@ -1294,15 +1287,6 @@
                           :downstream (:downstream-refusal selection-sorry)
                           :focus (get-in outer-task-selection [:policy :focus-receipt])
                           :valence-carry valence-carry})
-            ;; Requirements Q8: certified from the outer receipt this run
-            ;; retained, its predecessor and its decision; recomputable from
-            ;; the record alone (q8-frontier/verify-record)
-            q8-carrier (q8-frontier/certificate
-                        {:outer (:q8-frontier outer-task-selection)
-                         :predecessor (:q6/predecessor raw-opts)
-                         :decision (or decision (:decision selection-sorry))
-                         :chosen-target (get-in retained-decision [:action :target])
-                         :run-id run-id})
             world-at-selection (or (get-in result
                                             [:checkpoints :selection :judgment
                                              :world-at-selection])
@@ -1419,7 +1403,6 @@
                     :q6 {:predecessor (:q6/predecessor raw-opts)
                          :terminal q6-terminal}
                     :valence-carry valence-carry
-                    :q8 q8-carrier
                     :route route
                     :failure (run-record-failure
                               result
@@ -1488,28 +1471,11 @@
                      ;; and throws on a record that is both or neither.
                      grounded-commit
                      (assoc :grounded-commit grounded-commit)
-                     ;; Requirements Q2: outer actions and the selected task's
-                     ;; construction, computed from this record exactly as
-                     ;; q2-construction/verify-record recomputes them
-                     true
-                     (as-> r (assoc r :q2 (q2-construction/certificate
-                                           (q2-construction/record-inputs r))))
-                     ;; Requirements Q9, negative only: the C the selector
-                     ;; compared, recomputed, and what it lacks for a
-                     ;; factorized preference (q9-factorization/verify-record)
-                     true
-                     (as-> r (assoc r :q9 (q9-factorization/certificate
-                                           (q9-factorization/record-inputs r))))
-                     ;; Requirements Q10: the census of same-pattern
-                     ;; arrangement controls over Q2's construction, from
-                     ;; this record (q10-arrangement-census/verify-record)
-                     true
-                     (as-> r (assoc r :q10 (q10-arrangement-census/certificate r)))
                      true
                      (terminal-receipt/attach (:outcome result)))
             written (run-record-io/write-run-record-stream! dir run-id record)]
         ;; this run's close in the Q6 run stream, beside the record it names
-        (previous-run/close! dir q6-terminal written (:frontier q8-carrier))
+        (previous-run/close! dir q6-terminal written nil)
         {:run-record-status :present
          :run-record written})
       ;; terminal-fallback-route is total for wrapper results. Retain the guard
@@ -2505,20 +2471,6 @@
            ;; grow a key (its value is digested into the occurrence identity,
            ;; the trial configuration and the dedup key).
            :enacted-steps (get-in decision [:selection-law :enacted-steps])}))
-      (and (= :wm/selected-outer-cascade-policy-v1
-              (get-in decision [:selection-certificate :selection-route]))
-           (= :selected (:status decision))
-           (map? (:action decision)))
-      (let [certificate (:selection-certificate decision)
-            sealed-entry (get-in certificate
-                                 [:selected-outer-cascade-policy :selected-entry])]
-        {:action (:action decision)
-         :reading-pin (:reading-pin sealed-entry)
-         :canonical-cascade (or (:selected-canonical-cascade certificate)
-                                (:canonical-cascade sealed-entry))
-         :rank (:rank sealed-entry)
-         :G-efe (:G-efe sealed-entry)
-         :controller-score (:controller-score sealed-entry)})
       :else nil)))
 
 (defn no-selection-reason
@@ -2583,25 +2535,8 @@
   ([phase judgement]
    (selection-terminal-condition phase judgement nil))
   ([phase judgement context]
-   (let [entry (selected-entry judgement)
-         learning (get-in judgement [:outer-task-selection :outer-learning])]
+   (let [entry (selected-entry judgement)]
      (cond
-       (and entry (= :refused (:status learning)))
-       (ex-info "War Machine outer learning was not consumed"
-                {:kind :wm/outer-learning-not-consumed
-                 :failure-stage phase :outcome :incomplete
-                 :outer-learning learning :judgement judgement
-                 :selection-context context})
-
-       (and entry (debugger/breakpoint-armed? :outer-selection-complete))
-       (let [outer (:outer-task-selection judgement)]
-         (ex-info "War Machine outer selection completed"
-                  {:kind :wm/outer-selection-complete
-                   :failure-stage phase :outcome :breakpoint
-                   :selected (get-in outer [:chosen :id])
-                   :outer-task-selection outer :judgement judgement
-                   :selection-context context}))
-
        (nil? entry)
        (let [decision (:decision judgement)
              refusals (vec (or (:refusals decision) []))

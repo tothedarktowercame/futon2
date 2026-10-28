@@ -1,6 +1,5 @@
 (ns futon2.aif.meta-pipeline-selector-test
   (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.meta-live-outer-selector :as live]
             [futon2.aif.meta-pipeline-selector :as selector]))
 
 (defn pin [path ch] {:path path :sha256 (apply str (repeat 64 ch))})
@@ -31,23 +30,6 @@
    :channels {:current-priority-cost
               {:value cost :freshness :current
                :source (pin (str id ".edn") "c")}}})
-
-(defn- complete-field [rows _]
-  {:schema :wm/pre-choice-policy-field-v1
-   :source-pin (pin "wm://p20-field" "d")
-   :coverage {:targets (count rows) :current (count rows)}
-   :families (mapv (fn [{:keys [id]}]
-                     {:target-id id :status :computed
-                      :policies [{:policy-id (str id "/policy-1")}]
-                      :failures []}) rows)})
-
-(defn- sealed-menu [field _]
-  {:schema :wm/sealed-outer-policy-menu-v1
-   :status :sealed
-   :field-source-pin (:source-pin field)
-   :menu-pin (pin "wm://p20-menu" "e")
-   :entries [{:policy-id "fixture/policy"
-              :cascade-digest (apply str (repeat 64 "1"))}]})
 
 (deftest selects-a-unique-pipeline-node-with-zero-information-gain
   (let [receipt (selector/select {:snapshot snapshot
@@ -107,41 +89,6 @@
            (get-in receipt [:details :candidate-errors "M-a"])))
     (is (nil? (:selected receipt)))))
 
-(deftest live-adapter-forms-fields-from-available-sections-only
-  (let [tasks [{:id "M-a" :kind :mission :priority 2 :source (pin "M-a.md" "c")}
-               {:id "M-b" :kind :mission :priority 8 :source (pin "M-b.md" "d")}]
-        field-calls (atom 0)
-        unavailable (live/select-live
-                     {:tasks tasks :policy-field-config {:authority :fixture}
-                      :policy-field-fn (fn [& _] (swap! field-calls inc))
-                      :fetch-snapshot #(assoc-in snapshot
-                                                 [:graph :section-status :clusters :status]
-                                                 :failed)})]
-    (is (= :pipeline-target-data-unavailable
-           (get-in unavailable [:policy :meta-selection :reason])))
-    (is (zero? @field-calls))
-    (is (= #{"M-a" "M-b"}
-           (set (map :id (:unknown-targets unavailable)))))
-    (is (nil? (:action unavailable)))
-    (let [field-input (atom nil)
-          receipt (live/select-live
-                   {:tasks tasks :policy-field-config {:authority :fixture}
-                    :policy-field-fn (fn [rows config]
-                                       (reset! field-input (mapv :id rows))
-                                       (complete-field rows config))
-                    :policy-menu-fn sealed-menu
-                    :fetch-snapshot #(assoc-in snapshot
-                                               [:graph :section-status :agency]
-                                               {:status :failed :error :timeout})})]
-      (is (= ["M-a" "M-b"] @field-input))
-      (is (= :partial
-             (get-in receipt [:policy :pipeline-section-availability :status])))
-      (is (= :agency
-             (get-in receipt [:policy :pipeline-section-availability
-                              :unavailable-sections 0 :section])))
-      (is (= :outer-policy-evidence-provider-required
-             (get-in receipt [:policy :meta-selection :reason])))
-      (is (nil? (:action receipt))))))
 
 (deftest complete-union-comparison-makes-missingness-explicit
   (let [a (candidate "M-a" 0.2)

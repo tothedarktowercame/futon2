@@ -14,7 +14,7 @@
   (.toFile (Files/createTempDirectory prefix (make-array FileAttribute 0))))
 
 (defn- judgement [target source excerpt]
-  {:outer-task-selection {:chosen {:id target :source {:path source}}}
+  {:task {:id target :source {:path source}}
    :cascade-problems {:target-sources [{:target-id target :source-path source}]}
    :decision {:status :abstained
               :selection-certificate
@@ -84,7 +84,7 @@
               (fn [_]
                 (reset! consumed
                         (registry/current-reading (str readings) "M-selected" excerpt))
-                {:outer-task-selection {:chosen {:id "M-selected"}}
+                {:task {:id "M-selected"}
                  :decision {:status :selected :action {:target "M-selected"}}}))
         result (:record step)]
     (is (= :published (:status result)))
@@ -126,11 +126,11 @@
     (testing "the selected target alone supplies the need"
       (is (= "M-selected" (:target (sut/selected-need j))))
       (is (= "M-selected"
-             (:target (sut/selected-need (dissoc j :outer-task-selection))))
+             (:target (sut/selected-need (dissoc j :task))))
           "the sole target-local family remains usable before checkpoint retention")
       (is (nil? (sut/selected-need
                  (-> j
-                     (dissoc :outer-task-selection)
+                     (dissoc :task)
                      (update-in [:decision :selection-certificate
                                  :target-policy-field :families]
                                 conj
@@ -305,17 +305,17 @@
         (runner/selected-target-reading-step
          {:author "wm-author"} j
          (fn [_ observed]
-           (swap! repairs conj (get-in observed [:outer-task-selection :chosen :id]))
+           (swap! repairs conj (get-in observed [:task :id]))
            {:schema :wm/selected-target-reading-request-v1
             :status :published :published true :target target
             :author "wm-author"})
          (fn [record]
            (swap! redecisions inc)
-           {:outer-task-selection (:outer-task-selection j)
+           {:task (:task j)
             :decision {:status :selected :action {:target (:target record)}}}))]
     (is (= [target] @repairs))
     (is (= 1 @redecisions))
-    (is (= target (get-in result [:judgement :outer-task-selection :chosen :id])))
+    (is (= target (get-in result [:judgement :task :id])))
     (is (= target (get-in result [:judgement :decision :action :target])))
     (is (= "wm-author"
            (get-in result [:judgement :selected-target-reading-request :author])))
@@ -423,7 +423,7 @@
         step (runner/selected-target-reading-step
               opts (judgement "M-selected" (.getPath source) excerpt)
               sut/repair!
-              (fn [_] {:outer-task-selection {:chosen {:id "M-selected"}}
+              (fn [_] {:task {:id "M-selected"}
                        :decision {:status :selected
                                   :action {:target "M-selected"}}}))
         result (:record step)]

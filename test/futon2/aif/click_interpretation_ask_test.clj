@@ -86,7 +86,7 @@
 (def ^:private critical-source-namespaces
   ['futon2.aif.full-loop-runtime
    'futon2.report.war-machine
-   'futon2.aif.meta-live-outer-selector
+   'futon2.aif.wm.family-selection
    'futon2.aif.meta-pipeline-selector])
 
 (deftest production-composition-sources-are-loaded-canonically
