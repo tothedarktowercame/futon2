@@ -21,7 +21,9 @@ The rebuild makes the run something we compute:
     run  : Makeup → List Observation → List Click     -- fold of step from init m
 
 - **Makeup**: fixed for the whole run, declared once (the affective level
-  `L`, the target relation, the likelihood `A`, the prior strengths, κ).
+  `L`, the target relation, the likelihood `A`, the prior strengths, κ, and
+  a learning rate η and forgetting rate ω for each learned count; see
+  "Learning and forgetting rates").
 - **State**: everything one click passes to the next: `d` counts, valence
   belief, habit slow state, θ slow state, preference counts `c`, previous
   focus, run id, and later the selection record and the previous verdict.
@@ -44,9 +46,9 @@ related, unrelated, stopTheLine; `notYetEvaluated` is not a terminal outcome,
 so it gets no count and the waiting-step preference is unchanged).
 
 - Prior: `c₀ = κ · (55, 35, 5, 5)/100`, κ > 0 in `Makeup`.
-- Update: each click adds one count for its observed ending class. This is
-  the Dirichlet count update `c ← ω·c + η·o` with η = ω = 1 (no learning
-  rate below 1, no forgetting). Sources, checked 2026-10-28 [1–3]:
+- Update: `c ← ω_c·c + η_c·o`, where `o` is the one-hot ending class of
+  the click and η_c, ω_c are in `Makeup` (see "Learning and forgetting
+  rates" below). Sources, checked 2026-10-28 [1–3]:
   [1] gives the rule for d (Eq. 34) and a (Eq. 37) and says only that
   "analogous update rules apply to the other model parameters (B, C, E)";
   [2] learns outcome preferences by accumulating Dirichlet parameters (flat
@@ -54,7 +56,8 @@ so it gets no count and the waiting-step preference is unchanged).
   α a learning rate. Our kit prior κ·(55,35,5,5)/100 replaces their flat one.
 - C at the click is `c / Σ c`, and it takes the place of `terminalPreference`
   in `classPreference`.
-- Theorem: at click n, `c = c₀ + (counts of ending classes in obs₀ … obs_{n-1})`.
+- Theorem: at click n, `c = ω_c^n·c₀ + η_c·Σ_{k<n} ω_c^(n-1-k)·o_k`.
+  With η_c = ω_c = 1 this is `c₀ +` the counts of ending classes so far.
 
 Later upgrade, not in this rebuild: hierarchical C, where a higher level
 sets the lower level's preferences (the "hierarchical contextualisation" of
@@ -82,6 +85,38 @@ the update rule is one named function.
 
 Local copies: `~/notes/papers/` (not committed).
 
+## Learning and forgetting rates (Joe 2026-10-28)
+
+Joe: "we don't just set things to one". Every count the run learns has the
+same two parameters in the literature, and fixing them at 1 is a choice
+about the agent, not a property of the method. So each is a field of
+`Makeup`, constrained `0 < η` and `0 < ω ≤ 1`, and no update rule in `step`
+contains a literal rate:
+
+| count | update | rates in `Makeup` |
+|---|---|---|
+| `d` (hidden-state prior) | `d ← ω_d·d + η_d·posterior` | η_d, ω_d |
+| `c` (preferences C) | `c ← ω_c·c + η_c·onehot(ending)` | η_c, ω_c |
+| habit Beta counts | `(α,β) ← ω_h·(α,β) + η_h·(success, failure)` | η_h, ω_h |
+| θ Beta counts | same form, witnessed outcomes only | η_θ, ω_θ |
+
+- η scales how much one click's evidence moves the counts; ω < 1 decays old
+  counts each click, so the effective memory is about 1/(1−ω) clicks and the
+  agent can track a preference or context that drifts. Source: [1] §4,
+  Eqs. 34 and 37 (η learning rate, ω forgetting rate, both fitted per
+  subject there); [3] §4.1 (α for the C update).
+- The values are properties of the agent and are to be estimated from the
+  run history, the way [1] fits them to behaviour. Until a fit exists the
+  makeup must still name a value for each; that choice is recorded in the
+  makeup with its reason, not hidden in the update. (1 is SPM's default for
+  both, which is where the "η = ω = 1" in the first draft came from.)
+- Fitting η and ω from run histories is a later slice; the spec does not
+  claim values for them.
+- `R15TemporalHierarchy.advance` and `PatternTheta.advanceWitnessed` add 1
+  per outcome. `step` does not call them unchanged: slice 1b adds rate-
+  parameterised versions and proves that at η = ω = 1 they equal the
+  existing functions, so earlier results still apply as that special case.
+
 ## Slices (one handoff each, reviewed between)
 
 1. **`R20Step.lean`, carried counts.** New module beside `R20Run.lean`, which
@@ -95,6 +130,11 @@ Local copies: `~/notes/papers/` (not committed).
    evidence row of every click conforms; run ids increase; each click's
    `previousFocus` is the previous click's focus.
    Precision and valence are slice 2; the module says so.
+   (Slice 1 was dispatched before the rates section and adds rates of 1.)
+1b. **Rates in `Makeup`.** Add η, ω for `d`, `c`, habit and θ; replace the
+   literal 1s in `step`; restate slice 1's closed forms in the geometric form
+   above; prove the η = ω = 1 case equals slice 1 and the existing
+   `advance`/`advanceWitnessed`.
 2. **Precision and valence inside `step`.** β prior from `descend L valence`;
    β̄ computed inside `step` from E, G, F (`PrecisionFromObservation`);
    valence update by `valenceUpdate`/`predict`. Port `run_betaPrior_step`,
