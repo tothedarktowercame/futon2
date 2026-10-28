@@ -62,3 +62,23 @@ The full loop has no outer selector. A click that needs one must refuse with a
 typed absence (`{:absent :no-task-selection-policy}`), not fall back to anything.
 The task to work on is supplied by the caller until the Cascade Live selection
 pattern exists.
+
+## Narrowed 2026-10-28
+
+claude-11 narrowed the deletion scope after reviewing retained inner callers:
+
+1. Keep `futon2.aif.wm.family-selection` and its inner-path tests. Keep
+   `select-over-families`, `full-eligible-target-field` and `field-census`
+   where used for the selected task's reading families. After removing the
+   outer consumers, delete only functions with no retained caller in futon2
+   `src`/`scripts` or futon3c `src`; verify the candidate dead-function list
+   by searching rather than assuming it.
+2. Keep `q10-arrangement-census` and its route test: they check the selected
+   task's constructed policies.
+3. Keep `scripts/wm_run_facts.clj`. Remove only outer-selector/outer-receipt
+   sections; retain Q4, Q6, interpretation-order and absence diagnostics.
+
+For other mixed namespaces, retain functions used by a retained inner-path
+caller and remove functions whose callers are all being deleted. A conflict
+between this rule and deletion of the outer machinery must be reported before
+changing the contract.
