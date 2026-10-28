@@ -86,3 +86,48 @@ called with one target.
 3. Clojure: inner plan selection for the chosen target only (one packet).
 4. Remove the all-targets field construction from `select-live` and retire
    `:advance-cascade-live-policy` as an outer action type.
+
+## codex-1's reply (2026-10-28, job invoke-1793157422530-5738-1862d9d6)
+
+codex-1 agrees with separating mission choice from plan construction and
+supports packet 1. Its qualifications, which amend the plan above:
+
+1. **Where it came in.** `ea69853cdd` introduced the objective; `fcf9b6ad27`
+   added the Q2 conjuncts equating the outer cascade menu with
+   `comparedPolicies`, while Q2 still restricts compared policies to the
+   selected task's construction. Keep what those commits were for
+   (recomputable scores; selection corresponds to execution); drop the
+   requirement that outer menu items carry cascade identities. codex-1 calls
+   the defect *premature all-target construction*, not a demonstrated infinite
+   regress: the code is finite, but choosing a mission depends on building
+   every alternative's inner plans.
+2. **The mission outcome model must be specified, not borrowed.**
+   `outer_target_score.clj` is not the mathematical authority: it uses
+   target-history Dirichlet means, normalised predictive entropy as
+   "ambiguity" (predictive entropy is not expected conditional-likelihood
+   entropy) and zero information gain. Packet 1 must name the latent state,
+   likelihood, horizon and information-gain variable before those terms are
+   used, and give cost one declared interpretation (no double counting).
+   A need/enable edge is evidence about readiness, not automatically a
+   probability or an exclusion. A missing inner construction after choice is
+   a recorded outcome, never a fallback to all-target planning.
+3. **Non-vacuous Lean statements.** Replace "the score is a function of
+   mission observations" (true by construction if the function simply has no
+   inner-family argument) with:
+   - equal mission observations, parameters, preferences, eligibility and
+     selection inputs give equal outer scores and frontiers, for any inner
+     families;
+   - with the same recorded tie draw, the same mission is selected;
+   - a concrete change in relevant mission evidence can change the prediction
+     and the ranking; an arbitrary change to an unselected inner family cannot;
+   - only the selected mission receives an inner construction.
+4. **Q4/Q8** reference the same cascade carrier and need matching updates.
+   The algebraic frontier lemmas in `OuterSelectionCanonicalG.lean` stay; the
+   cascade-score correspondence theorem cannot be relabelled as a
+   mission-model theorem.
+5. **The 10-26 pair.** codex-1 would not require the pair to become unequal
+   unless a justified model predicts the difference. Open with Joe: his
+   standing view is that a tie is an inference defect, which argues for
+   finding the discriminating mission evidence rather than accepting the tie.
+
+Status: agreed in principle; nothing built yet.
