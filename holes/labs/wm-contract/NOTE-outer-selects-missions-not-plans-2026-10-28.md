@@ -1,3 +1,10 @@
+**Superseded in part (2026-10-28, Joe).** "The defect" below stands: the
+live selector builds every mission's plans before choosing a mission. "The
+replacement", its order of work and packet 1 are withdrawn. They built a second,
+outer-only active-inference model (`Mission`, `Observations`, its own `G`) when
+the outer loop is the same machine applied to a different cascade. See
+"Withdrawn" at the end.
+
 **This proposes changing the specification** (Requirements.lean Q2 and the
 outer policy objective). Joe asked for it on 2026-10-28: "chase it out ... and
 replace it with something that makes sense".
@@ -226,3 +233,36 @@ Gaps (recorded, not fixed here):
 - The observation fields are schematic: value, doability and ownership from
   point 5 are not named; `offer` stands in for value.
 - The 10-26 pair is not touched, as instructed; that question is still with Joe.
+
+## Withdrawn (Joe, 2026-10-28)
+
+Joe: "G is canonical ... the whole machine is canonical. The outer loop has
+all the features of the inner loop, it's just applied in a different way."
+The mistake was to build the machine twice instead of applying it twice with
+the code already written.
+
+The design was already in the library and this note did not cite it:
+`futon3/library/meta/meta-outer-policy-cascade.edn`
+(`:meta/reason-bearing-meta-selection`). An outer policy is a filled instance
+of that cascade (task-kind, target, next-move, resource envelope, evidence
+channel, stopping rule), the injury arm admits only self-heal algorithms, and
+`:meta/minimise-g-over-filled-meta-policies` is G over the filled policies with
+one outcome vocabulary. Tactical construction runs after
+`:selected-meta-policy`, which answers "the defect" without a separate model.
+Its own rule excludes packet 1's shape: "Comparing task labels or opaque scalar
+priorities is not G over policies."
+
+Actions:
+- mathlib4 `a0ca1b00fd` (`OuterMissionModel.lean`) reverted in `fe1965d5c0`.
+  The packet 1 review above is kept as history; it checked the file's
+  theorems, not whether it reused the machine.
+- Points 1 to 6 under codex-1's reply and Joe's rulings that ask for a
+  mission-level outcome model with its own `G` are void. Joe's Emacs point
+  (inner policies exist only given a selected outer policy) still holds; the
+  META cascade already has it.
+- Next: a discovery packet to codex-1 on whether `GOverCascades` /
+  `CascadeEFEPolicies` take the META cascade's slots as they stand, and what
+  `OuterCascadePolicyObjective.lean` (2026-10-19) already does. Then one Lean
+  file: a filled META policy scored by the existing G definitions, with a
+  two-policy example (one target, two next-moves) whose ranking flips on an
+  evidence-channel observation.
