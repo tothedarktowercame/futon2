@@ -9,19 +9,26 @@
 
 (deftest no-task-does-not-select-or-enter-the-runner
   (let [calls (atom 0)
-        touched (fn [& _] (swap! calls inc) {:status :ready})]
+        touched (fn [& _] (swap! calls inc) {:status :ready})
+        ordinary #'runtime/run-ordinary-opportunity!]
     ;; Keep the mutation check hermetic even if the no-task guard is deleted.
     (with-redefs-fn {#'runtime/production-defaults touched
-                     #'runner/run-opportunity! touched
-                     #'runtime/resolve-medic-authority touched
-                     #'runtime/run-opportunity-with-authority! touched}
+                     #'runner/run-opportunity! touched}
       (fn []
+        (is (= {:absent :no-task-selection-policy} (ordinary {})))
         (is (= {:absent :no-task-selection-policy}
-               (runtime/run-opportunity! {})))
-        (is (= {:absent :no-task-selection-policy}
-               (runtime/run-opportunity!
-                {:outer-task-selection-fn touched})))
+               (ordinary {:outer-task-selection-fn touched})))
         (is (zero? @calls))))))
+
+(deftest no-task-still-reaches-meta-injury-arbitration
+  ;; Repair goes first: a missing task must not skip the self-heal route.
+  (let [arbitrated (atom 0)]
+    (with-redefs-fn {#'runtime/resolve-medic-authority (fn [_] {:status :ready})
+                     #'runtime/run-opportunity-with-authority!
+                     (fn [_ _] (swap! arbitrated inc) {:route :dedicated-meta-self-heal})}
+      (fn []
+        (is (= {:route :dedicated-meta-self-heal} (runtime/run-opportunity! {})))
+        (is (= 1 @arbitrated))))))
 
 (deftest removed-outer-handoff-does-not-select
   (is (= {:absent :no-task-selection-policy}

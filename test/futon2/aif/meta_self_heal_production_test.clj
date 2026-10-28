@@ -45,8 +45,8 @@
   ;; Real futon2 vars, one per role the click wm-click-fca1c921 author seat
   ;; listed as missing (F11).
   [{:role :selection-entrypoint
-    :var "futon2.aif.meta-live-outer-selector/select-live"
-    :file "src/futon2/aif/meta_live_outer_selector.clj"}
+    :var "futon2.aif.full-loop-runner/strategic-selection!"
+    :file "src/futon2/aif/full_loop_runner.clj"}
    {:role :required-loop-node-evaluator
     :var "futon2.aif.wm.loop-node-exercise/receipt"
     :file "src/futon2/aif/wm/loop_node_exercise.clj"}

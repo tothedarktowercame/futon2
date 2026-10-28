@@ -499,8 +499,19 @@
      :effective-run-configuration-fn wm/effective-run-configuration
      :mode-flags-fn wm/arena-mode-flags}))
 
+(declare run-ordinary-opportunity-with-task!)
+
 (defn- run-ordinary-opportunity!
-  "Run one production opportunity with the report-backed defaults installed."
+  "Run one production opportunity with the report-backed defaults installed.
+  There is no task-selection policy: without a caller-supplied task the
+  ordinary path is typed absent.  META injuries are arbitrated before this,
+  so repair still runs when no task is supplied."
+  [opts]
+  (if-not (get-in opts [:task :id])
+    {:absent :no-task-selection-policy}
+    (run-ordinary-opportunity-with-task! opts)))
+
+(defn- run-ordinary-opportunity-with-task!
   [opts]
   ;; Mint before building the composition root.  The runner historically
   ;; minted later, after `production-defaults` had closed over OPTS; the judge
@@ -639,13 +650,11 @@
   "Resolve medic authority before any diagnosis, readiness, ledger, or
   selection work, then arbitrate the opportunity."
   [opts]
-  (if-not (get-in opts [:task :id])
-    {:absent :no-task-selection-policy}
-    (let [authority (resolve-medic-authority opts)]
+  (let [authority (resolve-medic-authority opts)]
     (if (= :refused (:status authority))
       {:status :refused :reason (:reason authority)
        :route :dedicated-meta-self-heal :ordinary-selection-called? false}
-      (run-opportunity-with-authority! opts authority)))))
+      (run-opportunity-with-authority! opts authority))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.
