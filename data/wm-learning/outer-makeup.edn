@@ -1,0 +1,26 @@
+{:schema :wm/outer-makeup-v1
+ ;; Joe's 55/35/5/5 terminal ending-class starter kit; not-yet-evaluated is not terminal.
+ :c-kit {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100
+         :not-yet-evaluated 0}
+ ;; Starter concentration chosen so κ·c-kit begins at counts 55/35/5/5.
+ :kappa 100
+ ;; Starter beliefs to be learned: ready leans doable, not-ready leans blocked, undetermined is even.
+ :state-kit {:ready {:doable 3 :blocked 1}
+             :not-ready {:doable 1 :blocked 3}
+             :undetermined {:doable 1 :blocked 1}}
+ ;; Starter gain preference to be learned; larger values favour more items made ready.
+ :gain-kit {:none 1 :one 2 :several 3}
+ ;; Smith, Friston & Whyte 2022 §4 Eq. 34 example unit learning rate for ending preferences.
+ :eta-c 1
+ ;; Smith, Friston & Whyte 2022 §4 Eq. 37 example 9/10 retention for ending preferences.
+ :omega-c 9/10
+ ;; Smith, Friston & Whyte 2022 §4 Eq. 34 example unit learning rate for readiness-state counts.
+ :eta-state 1
+ ;; Smith, Friston & Whyte 2022 §4 Eq. 37 example 9/10 retention for readiness-state counts.
+ :omega-state 9/10
+ ;; Smith, Friston & Whyte 2022 §4 Eq. 34 example unit learning rate for ready-gain counts.
+ :eta-gain 1
+ ;; Smith, Friston & Whyte 2022 §4 Eq. 37 example 9/10 retention for ready-gain counts.
+ :omega-gain 9/10
+ ;; Runtime task reach is absent; this explicit starter value records that current modelling limit.
+ :default-reach 1/2}

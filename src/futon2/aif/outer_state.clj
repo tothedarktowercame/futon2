@@ -1,0 +1,163 @@
+(ns futon2.aif.outer-state
+  "Durable carrier for the learned fields of `R20Step.State`.
+
+  This is deliberately separate from outer-learning-manifest, which pins
+  completed run publications rather than mutable state between clicks."
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io])
+  (:import [java.nio.file Files StandardCopyOption]
+           [java.security MessageDigest]
+           [java.util UUID]))
+
+(def makeup-schema :wm/outer-makeup-v1)
+(def state-schema :wm/outer-state-v1)
+(def default-makeup-path "data/wm-learning/outer-makeup.edn")
+(def default-state-path "data/wm-learning/outer-state.edn")
+
+(def ^:dynamic *before-state-move*
+  "Fault-injection observer called after the temp file is complete, before rename."
+  (fn [_temp _target] nil))
+
+(defn- refuse! [kind data]
+  (throw (ex-info "Outer state refused" (assoc data :kind kind))))
+
+(defn- sha256 [^bytes bytes]
+  (let [digest (.digest (doto (MessageDigest/getInstance "SHA-256")
+                          (.update bytes)))]
+    (apply str (map #(format "%02x" (bit-and 255 %)) digest))))
+
+(defn- read-one [bytes kind path]
+  (try
+    (let [value (edn/read-string {:eof ::eof} (String. ^bytes bytes "UTF-8"))]
+      (when (= ::eof value) (refuse! kind {:path path :reason :empty}))
+      value)
+    (catch clojure.lang.ExceptionInfo e (throw e))
+    (catch Exception e
+      (refuse! kind {:path path :reason :malformed :message (.getMessage e)}))))
+
+(defn- positive-number? [x]
+  (and (number? x) (pos? x)))
+
+(defn- valid-rate? [x]
+  (positive-number? x))
+
+(defn- valid-retention? [x]
+  (and (positive-number? x) (<= x 1)))
+
+(defn- require-keys! [m expected-keys path]
+  (when-not (= (set expected-keys) (set (keys m)))
+    (refuse! :invalid-makeup {:path path :reason :wrong-keys
+                              :expected (set expected-keys) :actual (set (keys m))})))
+
+(defn- validate-makeup! [makeup path]
+  (when-not (= makeup-schema (:schema makeup))
+    (refuse! :invalid-makeup {:path path :reason :schema :value (:schema makeup)}))
+  (require-keys! (:c-kit makeup)
+                 [:focused :related :unrelated :stop-the-line :not-yet-evaluated]
+                 [:c-kit])
+  (when-not (and (every? positive-number?
+                         (map (:c-kit makeup) [:focused :related :unrelated :stop-the-line]))
+                 (number? (get-in makeup [:c-kit :not-yet-evaluated]))
+                 (not (neg? (get-in makeup [:c-kit :not-yet-evaluated]))))
+    (refuse! :invalid-makeup {:path path :reason :invalid-c-kit}))
+  (when-not (positive-number? (:kappa makeup))
+    (refuse! :invalid-makeup {:path path :reason :invalid-kappa}))
+  (require-keys! (:state-kit makeup) [:ready :not-ready :undetermined] [:state-kit])
+  (doseq [[status row] (:state-kit makeup)]
+    (require-keys! row [:doable :blocked] [:state-kit status])
+    (when-not (every? positive-number? (vals row))
+      (refuse! :invalid-makeup {:path path :reason :invalid-state-kit :status status})))
+  (require-keys! (:gain-kit makeup) [:none :one :several] [:gain-kit])
+  (when-not (every? positive-number? (vals (:gain-kit makeup)))
+    (refuse! :invalid-makeup {:path path :reason :invalid-gain-kit}))
+  (doseq [rate [:eta-c :eta-state :eta-gain]]
+    (when-not (valid-rate? (rate makeup))
+      (refuse! :invalid-makeup {:path path :reason :invalid-learning-rate :rate rate})))
+  (doseq [rate [:omega-c :omega-state :omega-gain]]
+    (when-not (valid-retention? (rate makeup))
+      (refuse! :invalid-makeup {:path path :reason :invalid-forgetting-rate :rate rate})))
+  (when-not (and (number? (:default-reach makeup))
+                 (<= 0 (:default-reach makeup) 1))
+    (refuse! :invalid-makeup {:path path :reason :invalid-default-reach}))
+  makeup)
+
+(defn load-makeup
+  "Load and validate Lean `R20Step.Makeup` kits and η/ω bounds.
+
+  Returns the decoded makeup plus `:makeup/sha256`, the hash of its exact
+  source bytes."
+  ([] (load-makeup default-makeup-path))
+  ([path]
+   (let [file (io/file path)]
+     (when-not (.isFile file)
+       (refuse! :makeup-unavailable {:path (str path)}))
+     (let [bytes (Files/readAllBytes (.toPath file))
+           makeup (validate-makeup! (read-one bytes :invalid-makeup (str path)) (str path))]
+       (assoc makeup :makeup/sha256 (sha256 bytes) :makeup/path (.getCanonicalPath file))))))
+
+(defn init-state
+  "Lean `R20Step.init`: initialize c to κ·kit and copy state/gain kits."
+  [makeup]
+  {:schema state-schema
+   :makeup/sha256 (:makeup/sha256 makeup)
+   :click-count 0
+   :c (update-vals (:c-kit makeup) #(* (:kappa makeup) %))
+   :state-counts (:state-kit makeup)
+   :gain-counts (:gain-kit makeup)})
+
+(defn- valid-state? [state]
+  (and (= state-schema (:schema state))
+       (string? (:makeup/sha256 state))
+       (boolean (re-matches #"[0-9a-f]{64}" (:makeup/sha256 state)))
+       (int? (:click-count state))
+       (not (neg? (:click-count state)))
+       (= #{:focused :related :unrelated :stop-the-line :not-yet-evaluated}
+          (set (keys (:c state))))
+       (every? #(and (number? %) (not (neg? %))) (vals (:c state)))
+       (= #{:ready :not-ready :undetermined} (set (keys (:state-counts state))))
+       (every? #(and (= #{:doable :blocked} (set (keys %)))
+                     (every? positive-number? (vals %)))
+               (vals (:state-counts state)))
+       (= #{:none :one :several} (set (keys (:gain-counts state))))
+       (every? positive-number? (vals (:gain-counts state)))))
+
+(defn read-state
+  "Read the durable `R20Step.State` carrier, or return init marked `:source :init`.
+
+  A durable state pinned to different makeup bytes refuses `:makeup-changed`."
+  ([makeup] (read-state makeup default-state-path))
+  ([makeup path]
+   (let [file (io/file path)]
+     (if-not (.isFile file)
+       (assoc (init-state makeup) :source :init)
+       (let [bytes (Files/readAllBytes (.toPath file))
+             state (read-one bytes :invalid-state (str path))]
+         (when-not (valid-state? state)
+           (refuse! :invalid-state {:path (str path)}))
+         (when-not (= (:makeup/sha256 makeup) (:makeup/sha256 state))
+           (refuse! :makeup-changed {:path (str path)
+                                     :expected (:makeup/sha256 makeup)
+                                     :actual (:makeup/sha256 state)}))
+         (assoc state :source :durable))))))
+
+(defn write-state!
+  "Atomically replace the durable `R20Step.State` carrier in one directory."
+  ([state] (write-state! default-state-path state))
+  ([path state]
+   (when-not (valid-state? state)
+     (refuse! :invalid-state {:path (str path)}))
+   (let [target (io/file path)
+         parent (.getParentFile target)
+         _ (io/make-parents target)
+         temp (io/file parent (str "." (.getName target) "." (UUID/randomUUID) ".tmp"))]
+     (try
+       (spit temp (str (pr-str (dissoc state :source)) "\n"))
+       (*before-state-move* temp target)
+       (Files/move (.toPath temp) (.toPath target)
+                   (into-array StandardCopyOption
+                               [StandardCopyOption/ATOMIC_MOVE
+                                StandardCopyOption/REPLACE_EXISTING]))
+       {:status :written :path (.getCanonicalPath target)
+        :click-count (:click-count state) :makeup/sha256 (:makeup/sha256 state)}
+       (finally
+         (when (.exists temp) (Files/deleteIfExists (.toPath temp))))))))
