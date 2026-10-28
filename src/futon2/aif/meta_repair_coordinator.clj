@@ -122,6 +122,48 @@
                       (= repair-id (:repair-id %))
                       (= attempt (:attempt %)))
                 (:entries history))))
+(defn- phase-transition [history injury-id repair-id attempt state]
+  (let [matches (filter #(and (= state (:state %))
+                              (= injury-id (:injury-id %))
+                              (= repair-id (:repair-id %))
+                              (= attempt (:attempt %)))
+                        (:entries history))]
+    ;; Requeues are also :enacted transitions, but they do not admit a new
+    ;; enact-port receipt. Prefer the phase transition carrying its receipt;
+    ;; for legacy histories without pins, the first transition is the phase
+    ;; admission and later enacted transitions are requeues.
+    (or (last (filter :port-receipt-pin matches))
+        (first matches))))
+(defn- unadmitted-phase-receipt
+  "Refuse a transaction receipt when the ledger has already advanced past its
+  phase without admitting that exact receipt. Older review entries fall back
+  to reviewer SHA; older enact entries fall back to integration commit and
+  retry identity when no receipt pin was recorded."
+  [history receipt injury-id repair-id attempt phase]
+  (let [[state fallback-keys reason]
+        (case phase
+          :review [:reviewed [:reviewer-sha]
+                   :coordinator/unadmitted-review-receipt]
+          :enact [:enacted [:integration-commit :retry-click]
+                  :coordinator/unadmitted-enact-receipt])
+        admitted (phase-transition history injury-id repair-id attempt state)
+        admitted-pin (:port-receipt-pin admitted)
+        received-pin (:receipt-pin receipt)
+        recorded-keys (filterv #(contains? admitted %) fallback-keys)
+        admitted-fallback (select-keys admitted recorded-keys)
+        received-fallback (select-keys (:payload receipt) recorded-keys)
+        admitted? (cond
+                    admitted-pin (= admitted-pin received-pin)
+                    (seq admitted-fallback)
+                    (= admitted-fallback received-fallback)
+                    :else false)]
+    (when (and admitted (not admitted?))
+      (refusal reason
+               {:phase phase :injury-id injury-id :repair-id repair-id
+                :attempt attempt :admitted-receipt-pin admitted-pin
+                :received-receipt-pin received-pin
+                :admitted-values admitted-fallback
+                :received-values received-fallback}))))
 (defn- resume-identity-refusal
   "The Lean law MetaRepairResumeIdentity.resumeIdentityOK: after :claimed,
   the transaction's retained author receipt is the ledger-admitted receipt."
@@ -500,6 +542,11 @@
           (when-not (= patch-sha (get-in review-receipt [:payload :patch-sha]))
             (stop! (refusal :coordinator/review-patch-substitution
                             {:ledger history2 :transaction tx2})))
+          (when (not= :authored (:state (latest-transition history2 injury-id)))
+            (when-let [refusal (unadmitted-phase-receipt
+                                history2 review-receipt injury-id repair-id
+                                attempt :review)]
+              (stop! refusal)))
           (let [reviewed (if (= :authored (:state (latest-transition history2 injury-id)))
                            (accepted!
                             (append-transition!
@@ -527,6 +574,11 @@
                              (nonblank? retry-click))
                 (stop! (refusal :coordinator/enact-payload-refused
                                 {:ledger history3 :transaction tx3})))
+              (when (not= :reviewed (:state (latest-transition history3 injury-id)))
+                (when-let [refusal (unadmitted-phase-receipt
+                                    history3 enact-receipt injury-id repair-id
+                                    attempt :enact)]
+                  (stop! refusal)))
               (let [enacted (if (= :reviewed
                                     (:state (latest-transition history3 injury-id)))
                               (accepted!
