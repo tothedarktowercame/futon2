@@ -181,6 +181,18 @@
        (= previous-state :abandoned)
        (= :port-refusal-corrected (:reason entry))))
 
+(defn- unadmitted-transaction-recovery?
+  [state previous-state entry]
+  (and (= :unadmitted-transaction-receipt (:reason entry))
+       (or (and (= :abandoned state) (= :enacted previous-state))
+           (and (= :reopened state) (= :abandoned previous-state)))
+       (pin? (:ledger-port-receipt-pin entry))
+       (pin? (:transaction-port-receipt-pin entry))
+       (string? (:transaction-sha256 entry))
+       (boolean (re-matches pin-re (:transaction-sha256 entry)))
+       (not= (:ledger-port-receipt-pin entry)
+             (:transaction-port-receipt-pin entry))))
+
 (defn- covered-medic-operation [ledger transition]
   (when transition
     (let [occurrence [(:injury-id transition) (str (:ordinal transition))]]
@@ -235,6 +247,8 @@
                                               (:record-pin requeue-cause)))
         author-failed-reopen? (author-failed-reopen? state previous-state entry)
         corrected-reopen? (corrected-reopen? state previous-state entry)
+        unadmitted-recovery? (unadmitted-transaction-recovery?
+                              state previous-state entry)
         covered-operation (covered-medic-operation ledger previous)
         ordinary-attributable-retry? (and (#{:reopened :abandoned} state)
                                           (= :enacted previous-state)
@@ -244,7 +258,8 @@
         medic-origin? (and covered-operation
                            (#{:open :enacted} previous-state)
                            (#{:reopened :abandoned} state)
-                           (not ordinary-attributable-retry?))
+                           (not ordinary-attributable-retry?)
+                           (not unadmitted-recovery?))
         medic-bindings? (and medic-origin?
                              (= (:operation-id covered-operation)
                                 (:recurs-after-medic-operation-id entry))
@@ -333,6 +348,7 @@
       (and (#{:discharged :reopened} state)
            (not author-failed-reopen?)
            (not corrected-reopen?)
+           (not unadmitted-recovery?)
            (not medic-origin?)
            (or (not (nonblank? (:retry-click entry)))
                (not= (:patch-sha entry) (:patch-sha patch))
@@ -348,11 +364,12 @@
            (= :author-failed (:reason entry)))
       (conj :reopen/reason-unexpected)
       (and (= state :reopened) (= previous-state :abandoned)
-           (or (not corrected-reopen?)
-               (not (sha? (:correction-commit entry)))
-               (not (and (vector? (:corrected-port-receipt-pins entry))
-                         (seq (:corrected-port-receipt-pins entry))
-                         (every? pin? (:corrected-port-receipt-pins entry))))))
+           (or (not (or corrected-reopen? unadmitted-recovery?))
+               (and corrected-reopen?
+                    (or (not (sha? (:correction-commit entry)))
+                        (not (and (vector? (:corrected-port-receipt-pins entry))
+                                  (seq (:corrected-port-receipt-pins entry))
+                                  (every? pin? (:corrected-port-receipt-pins entry))))))))
       (conj :reopen/correction-evidence)
       (and corrected-reopen?
            (let [pins (:corrected-port-receipt-pins entry)
@@ -370,6 +387,7 @@
       (and (= state :reopened)
            (not author-failed-reopen?)
            (not corrected-reopen?)
+           (not unadmitted-recovery?)
            (not medic-origin?)
            (or (not (pin? (:new-cause-pin entry))) (> attempt limit)))
       (conj :reopen/evidence-or-limit)
@@ -379,6 +397,7 @@
              :retry-budget-spent
              (or (not= (:requeues entry) retry-limit)
                  (> attempt limit))
+             :unadmitted-transaction-receipt (not unadmitted-recovery?)
              true))
       (conj :abandonment/not-exhausted))))
 
@@ -771,7 +790,31 @@
               previous (latest ledger injury-id)
               next-attempt (inc (or (:attempt previous) 0))
               limit (effective-attempt-limit ledger injury-id)]
-          (if (> next-attempt limit)
+          (cond
+            (and (= :unadmitted-transaction-receipt (:reason proposed))
+                 (> next-attempt limit))
+            (refusal :retry-result/attempt-limit-exhausted
+                     {:injury-id injury-id :attempt (:attempt previous)
+                      :attempt-limit limit})
+
+            (= :unadmitted-transaction-receipt (:reason proposed))
+            (let [abandoned (append-transition
+                             ledger
+                             (assoc proposed :state :abandoned
+                                             :attempt (:attempt previous))
+                             authority-verifier)]
+              (if-not (= :appended (:status abandoned))
+                abandoned
+                (let [reopened (append-transition
+                                (:ledger abandoned)
+                                (assoc proposed :state :reopened
+                                                :attempt next-attempt)
+                                authority-verifier)]
+                  (cond-> reopened
+                    (= :appended (:status reopened))
+                    (assoc :abandoned-entry (:entry abandoned))))))
+
+            (> next-attempt limit)
             (append-transition ledger
                                (-> proposed
                                    (assoc :state :abandoned
@@ -781,8 +824,9 @@
                                    ;; discriminant from medic exhaustion.
                                    (dissoc :new-cause-pin :patch-sha))
                                authority-verifier)
+            :else
             (append-transition ledger (assoc proposed :state :reopened
-                                             :attempt next-attempt)
+                                              :attempt next-attempt)
                                authority-verifier)))))
     (catch Throwable t
       (refusal :retry-result/malformed {:detail (ex-message t)})))))

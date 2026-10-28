@@ -1162,6 +1162,99 @@
         (refusal :meta-self-heal/transaction-retire-failed
                  {:path path :attempt attempt})))))
 
+(defn recover-unadmitted-transaction!
+  "Medic-authorized recovery for one same-attempt ledger/transaction author
+  divergence. The ledger remains authoritative: the unadmitted transaction is
+  archived byte-for-byte, and the existing retry-result path abandons the old
+  attempt and reopens the next one. No historical :authored entry is created."
+  [{:keys [ledger-path transaction-path injury-id repair-id attempt
+           medic-authority authority-verifier]}]
+  (try
+    (let [authority-pin (:authority-receipt-pin medic-authority)
+          durable (when (and (fn? authority-verifier) (map? medic-authority))
+                    (store/load-durable-ledger ledger-path authority-verifier))
+          history (:ledger durable)
+          snapshot (transaction-snapshot transaction-path)
+          transaction (:transaction snapshot)
+          order (:work-order transaction)
+          latest (last (filter #(and (= ledger/transition-schema (:schema %))
+                                     (= injury-id (:injury-id %)))
+                               (:entries history)))
+          ledger-author (last (filter #(and (= :authored (:state %))
+                                            (= injury-id (:injury-id %))
+                                            (= repair-id (:repair-id %))
+                                            (= attempt (:attempt %)))
+                                      (:entries history)))
+          transaction-author (some #(when (= :author (:phase %)) %)
+                                   (:receipts transaction))
+          evidence {:injury-id injury-id :repair-id repair-id :attempt attempt
+                    :ledger-port-receipt-pin (:port-receipt-pin ledger-author)
+                    :transaction-port-receipt-pin (:receipt-pin transaction-author)
+                    :transaction-sha256 (:transaction-sha256 snapshot)}
+          authority-context {:operation medic-authority :current latest
+                             :candidate evidence :evidence evidence}]
+      (cond
+        (not (and (fn? authority-verifier) (map? medic-authority)
+                  (map? authority-pin) (string? (:path authority-pin))
+                  (boolean (re-matches #"[0-9a-f]{64}" (str (:sha256 authority-pin))))))
+        (refusal :meta-self-heal/recovery-medic-authority-required)
+
+        (not= :loaded (:status durable))
+        (refusal :meta-self-heal/recovery-ledger-unavailable
+                 {:ledger-status (:status durable) :ledger-reason (:reason durable)})
+
+        (nil? snapshot)
+        (refusal :meta-self-heal/recovery-transaction-unavailable)
+
+        (not= [injury-id repair-id attempt]
+              [(:injury-id order) (:repair-id order) (:attempt order)])
+        (refusal :meta-self-heal/recovery-identity-mismatch)
+
+        (not (true? (authority-verifier authority-context)))
+        (refusal :meta-self-heal/recovery-medic-authority-refused)
+
+        (>= attempt (ledger/effective-attempt-limit history injury-id))
+        (refusal :meta-self-heal/recovery-attempt-limit-exhausted
+                 {:attempt attempt
+                  :attempt-limit (ledger/effective-attempt-limit history injury-id)})
+
+        :else
+        (let [identity-check (coordinator/coordinate durable transaction {}
+                                                     authority-verifier)]
+          (if-not (= :coordinator/resume-identity-refused (:reason identity-check))
+            (refusal :meta-self-heal/recovery-divergence-not-confirmed)
+            (let [appended (ledger/append-retry-result
+                            history
+                            (assoc evidence :reason :unadmitted-transaction-receipt)
+                            authority-verifier)]
+              (if-not (= :appended (:status appended))
+                appended
+                (let [persisted (store/persist-ledger! ledger-path (:ledger appended)
+                                                       authority-verifier)]
+                  (if-not (= :persisted (:status persisted))
+                    persisted
+                    (let [archive-path (str transaction-path ".attempt-" attempt
+                                            ".unadmitted-"
+                                            (:transaction-sha256 snapshot)
+                                            ".retired.edn")]
+                      (try
+                        (Files/move (.toPath (io/file transaction-path))
+                                    (.toPath (io/file archive-path))
+                                    (into-array StandardCopyOption
+                                                [StandardCopyOption/ATOMIC_MOVE]))
+                        {:status :reopened
+                         :ledger (:ledger appended)
+                         :abandoned-entry (:abandoned-entry appended)
+                         :entry (:entry appended)
+                         :archive-pin {:path archive-path
+                                       :sha256 (:transaction-sha256 snapshot)}}
+                        (catch Throwable t
+                          (refusal :meta-self-heal/transaction-retire-failed
+                                   {:path transaction-path :attempt attempt
+                                    :detail (ex-message t)}))))))))))))
+    (catch Throwable t
+      (refusal :meta-self-heal/recovery-failed {:detail (ex-message t)}))))
+
 (defn agency-port
   "ROLE is :author or :reviewer. The seat invoked is the one the sealed work
   order names for that role (click wm-click-36b47627, 2026-10-19: the seat
