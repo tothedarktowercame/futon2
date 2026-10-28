@@ -152,16 +152,36 @@ Consequences for the plan:
    vocabulary that includes at least fun, profit and difficulty (how hard the
    work turned out to be); Q(o|m) is the outer model's belief about what
    working on m leads to.
-3. **Inner policies are evidence, through a declared channel.** codex-1's
-   invariance theorem ("an arbitrary change to an unselected inner family
-   cannot change the ranking") still holds for families that were never
-   built. But evidence derived from inner policies (past attempts on m, how
-   hard its last plan was to execute, a cheap difficulty estimate) is allowed
-   and wanted. It enters as a named field of the mission observations, so
-   changing that field can change the ranking (sensitivity), while changing
-   the family object behind it, with the field held fixed, cannot
-   (invariance). Packet 1 is reviewed against this; if its world type has no
-   such field, the reviewer adds it.
+3. **(Withdrawn, see below.)** An earlier version of this point let evidence
+   derived from inner policies (how hard m's last plan was to execute) enter
+   the outer observations. Joe's Emacs example rules that out.
+
+## Joe's Emacs example (2026-10-28)
+
+Joe: "you don't select Emacs based on the key commands you are planning to
+enter, you select Emacs based on what the job is you intend to do: do you want
+to edit a file or do you want to browse a web page? And your policy about how
+to edit the file only makes sense inside Emacs; it's not going to be the same
+policy if you edit the file in VS Code. ... you could split hairs and say I
+prefer VS Code because I don't like the keyboard commands, but that's not the
+level at which this is operating."
+
+Consequences:
+
+4. **An inner policy is defined only given a selected mission.** Its type is
+   indexed by the mission (keystrokes are Emacs keystrokes). There is nothing
+   to compare across unselected missions, so the outer ranking must not take
+   inner families as an argument at all. codex-1's invariance theorem becomes
+   true by the type: the outer G has no inner-family parameter.
+5. **The outer observations are about the job.** What m is for and what
+   working on it leads to: value, doability, readiness, ownership, and the
+   outcomes (fun, profit, difficulty) recorded after earlier work on m. Those
+   recorded outcomes update Q(o|m). They are outcomes at the outer level
+   ("that took all day"), not the content of the plan that produced them.
+   No field carries plan structure, plan cost or cascade shape upward.
+6. Packet 1 is reviewed against 4 and 5: if its world type passes an inner
+   family, or a plan-derived field, into the outer ranking, the reviewer
+   removes it.
 
 Status: packet 1 (Lean) running on codex-1, job
 invoke-1793157541599-5742-8688a721.
