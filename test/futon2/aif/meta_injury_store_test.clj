@@ -3,7 +3,6 @@
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-injury-observation :as injury]
             [futon2.aif.meta-injury-store :as store]
-            [futon2.aif.meta-live-outer-selector :as selector]
             [futon2.aif.meta-terminal-injury :as terminal]))
 
 (def pin {:path "fixtures/terminal.edn"
@@ -40,15 +39,12 @@
                                           :excursions {:excursions []}}
                       :catalog-path field/default-algorithm-catalog
                       :click-availability (click-authority)
-                      :injury-authority authority})
-        selected (selector/selector {:tasks [] :meta-field-observation observation
-                                     :meta-field-source-pin (:source-pin observation)})]
+                      :injury-authority authority})]
     (testing "legacy pins remain valid"
       (is (= :active (:status (:observation deposit))))
       (is (= :verified (:status (injury/verify (:observation deposit) authority)))))
     (is (= ["A-self-heal"]
-           (mapv :id (filter #(= :algorithm (:kind %)) (:rows observation)))))
-    (is (= {:type :run-algorithm :target "A-self-heal"} (:action selected)))))
+           (mapv :id (filter #(= :algorithm (:kind %)) (:rows observation)))))))
 
 (deftest legacy-run-record-drift-still-refuses
   (let [tmp (.toFile (java.nio.file.Files/createTempDirectory

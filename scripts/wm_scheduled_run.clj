@@ -19,8 +19,7 @@
    doesn't break the schedule. Failure modes print to stderr with a
    non-zero exit code so cron can surface them via its standard
    error-mail mechanism."
-  (:require [clojure.pprint :as pp]
-            [futon2.aif.evidence-emit :as evidence-emit]
+  (:require [futon2.aif.evidence-emit :as evidence-emit]
             [futon2.aif.trace :as trace]
             [futon2.run-tick-once :as tick]
             [futon2.aif.c-vector :as cv]
@@ -68,16 +67,9 @@
   ([v] (when (and (string? v) (seq (.trim ^String v))) (.trim ^String v))))
 
 (defn flight-plan!
-  "The flight path of the loop entry: `futon2.aif.outer-loop/plan-from-field!`,
-  resolved HERE and not required by the ns, so the default tick loads no flight
-  code. Only \"plan\" exists: running a flight is not wired (no flight before the
-  spike is belled). OPTS: :trigger, and from the environment :seed
-  (FUTON_WM_FLIGHT_SEED, an integer) and :seat (FUTON_WM_FLIGHT_SEAT)."
-  [mode opts]
-  (when-not (= "plan" mode)
-    (throw (ex-info (str "FUTON_WM_FLIGHT=" mode ": only \"plan\" is wired") {:mode mode})))
-  (let [plan-from-field! (requiring-resolve 'futon2.aif.outer-loop/plan-from-field!)]
-    (pp/pprint (plan-from-field! opts))))
+  "No task-selection policy is installed."
+  [_mode _opts]
+  {:absent :no-task-selection-policy})
 
 (defn run-judgement-only!
   "Generate and publish one judgement without enacting it. Enactment is owned

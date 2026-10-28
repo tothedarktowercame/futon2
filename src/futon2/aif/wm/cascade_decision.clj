@@ -20,7 +20,6 @@
             [futon2.aif.q2-construction :as q2-construction]
             [futon2.aif.q4-preference :as q4-preference]
             [futon2.aif.selected-reading :as selected-reading]
-            [futon2.aif.selected-outer-cascade-policy :as selected-outer-policy]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
@@ -1008,13 +1007,14 @@
   (if-not (contains? assembled :target-sources)
     {:status :absent :reason :target-sources-not-supplied}
     (let [reading-root (or (:target-reading-root opts) reading-registry/default-root)
-          declared (:target-sources assembled)
+          target (get-in opts [:task :id])
+          declared (filterv #(= target (:target-id %)) (:target-sources assembled))
           ;; every target the assembly accounted for lands in the field: one
           ;; with no source row is a counted failure, never silently absent
           rowless (remove (set (map :target-id declared))
                           ;; a field-level refusal (the outer selector's) names
                           ;; no target; it is not a target without a row
-                          (distinct (filter #(or (string? %) (keyword? %))
+                          (distinct (filter #(= target %)
                                             (map :target (concat (:problems assembled)
                                                                  (:refusals assembled))))))
           rows (into (vec declared)
@@ -1347,24 +1347,8 @@
   with every family failure."
   [assembled opts]
   (cond
-    (:selected-outer-cascade-policy opts)
-    (let [projected (selected-outer-policy/decision
-                     (:selected-outer-cascade-policy opts))]
-      (if (= :selected (:status projected))
-        (dissoc projected :status)
-        {:decision
-         (cond-> (abstain [{:target (get-in opts [:selected-outer-cascade-policy :target-id])
-                            :stage :outer-policy-handoff
-                            :kind :outer-task-selection-refused
-                            :failure-kind (:reason projected)}])
-           (:q6 projected)
-           (assoc-in [:selection-certificate :q6] (:q6 projected)))}))
-
-    (:outer-policy-selection-claimed? opts)
-    {:decision
-     (abstain [{:target nil :stage :outer-policy-handoff
-                :kind :outer-task-selection-refused
-                :failure-kind :claimed-policy-selection-without-carrier}])}
+    (nil? (get-in opts [:task :id]))
+    {:absent :no-task-selection-policy}
 
     :else
     (let [policy-field (target-policy-field assembled opts)

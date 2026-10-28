@@ -11,7 +11,7 @@
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-field-observation :as meta-field]
-            [futon2.aif.meta-live-outer-selector :as meta-live]
+            [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
             [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
@@ -21,6 +21,9 @@
             [futon2.aif.wm.cascade-decision :as cascade-decision]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
             [futon2.report.war-machine :as wm]))
+
+(defn- run-supplied-task! [opts]
+  (runtime/run-opportunity! (merge {:task {:id "M-production"}} opts)))
 
 (defn- digest [x] (evidence/value-digest x))
 
@@ -51,7 +54,7 @@
                   :agency {:agents {}}}
         opts {:ticket-readiness-manifest-path manifest
               :author "fixture-unavailable"}
-        config (with-redefs [meta-live/fetch-pipeline-snapshot
+        config (with-redefs [readiness-inputs/fetch-pipeline-snapshot
                              (constantly snapshot)
                              runner/agent-roster (constantly {})
                              flight-runner/agency-answer-fn
@@ -98,7 +101,7 @@
                :retry #(f32-seal % :failed {:reason :unused})}
         _ (spit ledger-path (str (pr-str history) "\n"))
         _ (spit transaction-path (str (pr-str transaction) "\n"))
-        result (runtime/run-opportunity!
+        result (run-supplied-task!
                 {:meta-injury-ledger-path ledger-path
                  :meta-repair-transaction-path transaction-path
                  :meta-diagnosis-fn (never :diagnosis)
@@ -127,7 +130,7 @@
         ledger-path (str dir "/ledger.edn")
         calls (atom 0)
         _ (spit ledger-path (str (pr-str (f32-fixture "ledger")) "\n"))
-        result (runtime/run-opportunity!
+        result (run-supplied-task!
                 {:meta-injury-ledger-path ledger-path
                  :meta-repair-transaction-path (str dir "/missing.edn")
                  :meta-diagnosis-fn (fn [& _]
@@ -194,7 +197,7 @@
                     ((:open-cascade-resume-fn opts) error))]
       (is (= :resumed
              (:status
-              (runtime/run-opportunity!
+              (run-supplied-task!
                {:run-id "resume-production"
                 :meta-injury-ledger-path (str dir "/ledger.edn")
                 :meta-repair-transaction-path (str dir "/transaction.edn")
@@ -263,7 +266,6 @@
               :run-id "runtime-test"
               :flight {:target "T"}
               :cascade-feedback-path "/tmp/runtime-test-feedback.edn"
-              :outer-task-policy :meta
               :trace? false
               :include-advisory-lanes? false
               :defer-render? true}
@@ -281,52 +283,7 @@
         (is (= :external-snapshot-authority-invalid
                (:reason (meta-field/verify observation
                                            {:expected-snapshot-pin nil})))))
-      (is (ifn? (:outer-task-selection-fn (second @seen)))))))
-
-(deftest production-pins-one-outer-selection-across-redecision
-  (let [calls (atom [])
-        invocations (atom 0)
-        evidence-provider {:schema :wm/outer-policy-evidence-provider-v1
-                           :status :refused :reason :test-authority}
-        selector (fn [input]
-                   (swap! calls conj input)
-                   {:chosen {:id (str "M-choice-" (count @calls))}})
-        defaults
-        (with-redefs [wm/accumulation-config (constantly {})
-                      wm/generate-war-machine
-                      (fn [_ opts]
-                        (let [n (swap! invocations inc)
-                              receipt ((:outer-task-selection-fn opts)
-                                       {:tasks [(str "population-" n)]})]
-                          {:judgement {:outer-task-selection receipt}}))]
-          (let [defaults (runtime/production-defaults
-                          {:run-id "same-click"
-                           :outer-task-selection-fn selector
-                           :target-reading-root "/readings"
-                           :pattern-graph-path "/graph"
-                           :occurrence-square-root "/squares"
-                           :pattern-library-root "/patterns"
-                           :require-occurrence-squares? true
-                           :outer-policy-evidence-provider evidence-provider
-                           :target-policy-retraction {:k 3}})]
-            ((:judge-fn defaults) 1)
-            ((:judge-fn defaults) 1)
-            defaults))]
-    (is (= 1 (count @calls)))
-    (is (= {:tasks ["population-1"]}
-           (dissoc (first @calls) :policy-field-config
-                   :outer-policy-evidence-provider)))
-    (is (identical? evidence-provider
-                    (:outer-policy-evidence-provider (first @calls))))
-    (is (= {:target-reading-root "/readings"
-            :pattern-graph-path "/graph"
-            :occurrence-square-root "/squares"
-            :pattern-library-root "/patterns"
-            :require-occurrence-squares? true
-            :target-policy-retraction {:k 3}}
-           (:policy-field-config (first @calls))))
-    (is (= 2 @invocations))
-    (is (fn? (:judge-fn defaults)))))
+      (is (nil? (:outer-task-selection-fn (second @seen)))))))
 
 (deftest selected-target-reading-contacts-only-the-designated-author
   (let [captured (atom nil)]
@@ -369,7 +326,7 @@
                     repair-result)]
       (is (= :ran
              (:status
-              (runtime/run-opportunity!
+              (run-supplied-task!
                (assoc isolated
                       :run-id "production-selected-reading"
                       :author "wm-author"
@@ -397,7 +354,7 @@
                                              (is (fn? (:answer-fn opts)))
                                              {:status :probe})]
       (is (= :ran (:status
-                   (runtime/run-opportunity!
+                   (run-supplied-task!
                     (assoc isolated
                            :run-id "production-square-authoring"
                            :author "wm-author" :reviewer "wm-reviewer"))))))
@@ -412,7 +369,7 @@
                     (reset! seen opts)
                     {:status :ran})]
       (is (= :ran (:status
-                   (runtime/run-opportunity!
+                   (run-supplied-task!
                     {:meta-injury-ledger-path (str dir "/ledger.edn")
                      :meta-repair-transaction-path (str dir "/transaction.edn")
                      :run-id "production-ticket-readiness"
@@ -448,7 +405,7 @@
                                                :click-id "readiness-live-click")]
                       (runner/ticket-readiness-refresh-step live-opts)
                       {:status :ran}))]
-      (runtime/run-opportunity!
+      (run-supplied-task!
        {:meta-injury-ledger-path (str dir "/ledger.edn")
         :meta-repair-transaction-path (str dir "/transaction.edn")
         :ticket-readiness-manifest-path (str dir "/readiness.edn")
@@ -526,7 +483,7 @@
                   (fn [opts]
                     (reset! seen opts)
                     {:status :ran})]
-      (is (= :ran (:status (runtime/run-opportunity!
+      (is (= :ran (:status (run-supplied-task!
                             (assoc isolated :run-id "feedback-default")))))
       (is (= cascade-feedback/default-path
              (:cascade-feedback-path @seen)))
@@ -549,7 +506,7 @@
                   (fn [_ opts]
                     (reset! judge-opts opts)
                     {:judgement {}})]
-      (is (= :ran (:status (runtime/run-opportunity!
+      (is (= :ran (:status (run-supplied-task!
                             (assoc isolated :run-id "timing-state")))))
       (is (instance? clojure.lang.IAtom
                      (:selection-timing/state @runner-opts)))
@@ -571,7 +528,7 @@
                   (fn [_ opts]
                     (reset! judge-opts opts)
                     {:judgement {}})]
-      (is (= :ran (:status (runtime/run-opportunity! isolated))))
+      (is (= :ran (:status (run-supplied-task! isolated))))
       (is (string? (:run-id @runner-opts)))
       (is (= (:run-id @runner-opts) (:run-id @judge-opts))
           "accumulation and the durable run record must receive one identity"))))

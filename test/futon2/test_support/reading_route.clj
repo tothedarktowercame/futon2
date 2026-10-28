@@ -130,7 +130,8 @@
 (defn opts
   "The production decision options for FX, merged with EXTRA."
   [fx extra]
-  (merge {:pattern-graph-path (str (:graph fx))
+  (merge {:task {:id target}
+          :pattern-graph-path (str (:graph fx))
           :pattern-library-root (str (:library fx))
           :target-reading-root (str (:root fx))
           :conditioning-steps (ledger-steps fx)

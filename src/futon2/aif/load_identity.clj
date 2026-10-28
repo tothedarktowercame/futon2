@@ -8,10 +8,10 @@
 (defonce registry (atom {}))
 
 (def source-composition
-  "Declared outer-selection composition, shared by launch and runtime checks.
+  "Declared click composition, shared by launch and runtime checks.
    Verification never loads these namespaces or manufactures registration."
   ['futon2.aif.full-loop-runtime 'futon2.report.war-machine
-   'futon2.aif.meta-live-outer-selector 'futon2.aif.meta-pipeline-selector
+   'futon2.aif.meta-pipeline-selector
    'futon2.aif.wm.family-selection 'futon2.aif.wm.family-canonical-g])
 
 (def required-sources
@@ -53,10 +53,6 @@
    'futon2.aif.full-loop-runner "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj"
    'futon2.aif.ticket-readiness "/home/joe/code/futon2/src/futon2/aif/ticket_readiness.clj"
    'futon2.aif.full-loop-runtime "/home/joe/code/futon2/src/futon2/aif/full_loop_runtime.clj"
-   'futon2.aif.meta-live-outer-selector "/home/joe/code/futon2/src/futon2/aif/meta_live_outer_selector.clj"
-   ;; Reached from meta-live-outer-selector on the selection path.  Keep this
-   ;; explicit so the runner's source-identity report and idle reload planning
-   ;; can name a landed family-selection change even when the runner is unchanged.
    'futon2.aif.wm.family-selection "/home/joe/code/futon2/src/futon2/aif/wm/family_selection.clj"
    'futon2.aif.wm.family-canonical-g "/home/joe/code/futon2/src/futon2/aif/wm/family_canonical_g.clj"
    'futon2.aif.meta-pipeline-selector "/home/joe/code/futon2/src/futon2/aif/meta_pipeline_selector.clj"

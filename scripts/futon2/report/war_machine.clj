@@ -62,7 +62,6 @@
             [futon2.aif.mission-gauges :as mission-gauges]
             [futon2.aif.mission-hole-wants :as mission-hole-wants]
             [futon2.aif.mission-registry :as mission-registry]
-            [futon2.aif.outer-task-selection :as outer-task-selection]
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
             [futon2.aif.scan-bins :as scan-bins]
@@ -1537,71 +1536,18 @@
   (cond-> result
     *clock-focus?* (assoc :active-mission active-mission)))
 
-(defn select-outer-task
-  "Invoke the configured outer policy at the task-before-cascade boundary.
-
-  Production META supplies `:outer-task-selection-fn`; the seeded selector is
-  available only when the caller explicitly requests `:seeded-baseline`.
-  Both implementations must return the canonical outer-selection receipt so
-  the runner and historical dataset retain one stable boundary contract."
-  [judge-opts tasks seed]
-  (let [policy (or (:outer-task-policy judge-opts) :seeded-baseline)
-        selector (:outer-task-selection-fn judge-opts)
-        receipt (cond
-                  selector (selector {:tasks tasks :seed seed
-                                      :selection-as-of (:selection-as-of judge-opts)
-                                      :meta-field-observation
-                                      (:meta-field-observation judge-opts)
-                                      :meta-field-source-pin
-                                      (:meta-field-source-pin judge-opts)})
-                  (= :seeded-baseline policy)
-                  (outer-task-selection/select-task {:tasks tasks :seed seed})
-                  :else
-                  (throw (ex-info "META outer selector is not configured"
-                                  {:kind :meta-outer-selector-unavailable
-                                   :policy policy})))
-        chosen (get-in receipt [:chosen :id])]
-    (when-not (= outer-task-selection/schema (:schema receipt))
-      (throw (ex-info "Outer selector returned the wrong receipt schema"
-                      {:kind :meta-outer-receipt-invalid
-                       :observed-schema (:schema receipt)})))
-    (when (and chosen
-               (not= chosen (get-in receipt [:action :target])))
-      (throw (ex-info "Outer selector choice/action identity mismatch"
-                      {:kind :meta-outer-receipt-invalid
-                       :chosen chosen :action-target (get-in receipt [:action :target])})))
-    receipt))
-
-(defn- outer-task-refusal
-  "Preserve a canonical META refusal when no outer task was selected.
-
-  The outer selector runs before target-local cascade construction, so this is
-  necessarily a field-level refusal rather than a refusal attributed to one
-  task.  Its typed absent target is deliberate: copying an arbitrary task id
-  here would turn failure to choose into a claim that one target failed inner
-  admission."
-  [receipt]
-  (when-not (get-in receipt [:chosen :id])
-    (let [selection (get-in receipt [:policy :meta-selection])]
-      {:target {:absent :outer-task-not-selected}
-       :kind :outer-task-selection-refused
-       :missing :outer-task-selection
-       :selection (select-keys selection [:schema :status :reason :details])})))
-
 (defn meta-algorithm-result
   "Project an admitted META Algorithm choice into the report decision shape.
   This projection deliberately contains no Cascade Live candidate: algorithms
   repair the selector/runtime and are executed by the runner's distinct
   construction contract."
-  [outer-selection cascade-assembled]
+  [task cascade-assembled]
   {:decision
-   {:action (:action outer-selection)
-    :controller-score
-    (get-in outer-selection [:policy :meta-selection :selected :score])
+   {:action (:action task)
     :selection-law
     {:applied :meta-algorithm-selection
-     :source :outer-task-selection
-     :algorithm-id (get-in outer-selection [:chosen :id])}}
+     :source :caller-supplied-task
+     :algorithm-id (:id task)}}
    :cascade-problems cascade-assembled
    :lanes []})
 
@@ -6627,34 +6573,11 @@
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)
                                       :meta-field-ranking)
-        ;; The outer loop selects a task identity from current M/E/T state.
-        ;; It is deliberately completed before any cascade source is loaded or
-        ;; any interpretation is constructed.  The inner loop below receives
-        ;; exactly the chosen target.
-        outer-task-population
-        (vec (concat
-              (map #(assoc % :kind :mission)
-                   (mission-registry/open-missions loaded-missions))
-              (map #(assoc % :kind :excursion)
-                   (filter mission-registry/live-excursion?
-                           (:excursions loaded-excursions)))
-              (map #(assoc % :kind :ticket)
-                   (filter mission-registry/live-ticket?
-                           (:tickets loaded-tickets)))))
-        outer-task-population
-        (if-let [flight-target (get-in judge-opts [:flight :target])]
-          (filterv #(= flight-target (:id %)) outer-task-population)
-          outer-task-population)
-        outer-task-seed
-        (long (or (:outer-task-seed judge-opts)
-                  ;; Production supplies :run-id. Standalone report calls use
-                  ;; this report's already-recorded timestamp; either way the
-                  ;; actual seed is retained in the selection receipt.
-                  (hash (str (or (:run-id judge-opts) wm-as-of)))))
-        outer-task-selection
-        (select-outer-task (assoc judge-opts :selection-as-of wm-as-of)
-                           outer-task-population outer-task-seed)
-        selected-task-id (get-in outer-task-selection [:chosen :id])
+        supplied-task (:task judge-opts)
+        _ (when-not (:id supplied-task)
+            (throw (ex-info "No task selection policy"
+                            {:absent :no-task-selection-policy})))
+        selected-task-id (:id supplied-task)
         _outer-task-selected
         (selection-timing/checkpoint! (:selection-timing/state judge-opts)
                                       (:nano-time-fn judge-opts)
@@ -6756,17 +6679,6 @@
          ;; machine ignored work it had been given because a registry did not
          ;; list it.
          cascade-assembly-input)
-        ;; The META policy can truthfully refuse to choose from a nonempty
-        ;; field (for example because its pinned graph sections are incomplete
-        ;; or no unique minimum exists).  That refusal used to disappear when
-        ;; `selected-task-id` was nil: inner assembly received zero targets and
-        ;; decision-gate correctly rejected the resulting empty refusal list.
-        ;; Retain the outer refusal as such; do not mislabel it as a target's
-        ;; inner-construction failure and do not weaken the empty-list gate.
-        raw-cascade-assembled
-        (if-let [refusal (outer-task-refusal outer-task-selection)]
-          (update raw-cascade-assembled :refusals (fnil conj []) refusal)
-          raw-cascade-assembled)
         ;; The tick-level horizon, common to the compared family, recorded
         ;; on the judgement (selection and abstention) with its authority.
         cascade-horizon (:cascade-horizon raw-cascade-assembled)
@@ -6779,7 +6691,7 @@
                                       (:nano-time-fn judge-opts)
                                       :g-admission)
         meta-algorithm-action? (= :run-algorithm
-                                  (get-in outer-task-selection [:action :type]))
+                                  (get-in supplied-task [:action :type]))
         cascade-result (if meta-algorithm-action?
                          ;; META algorithms repair the machine that constructs
                          ;; and selects Cascade Live policies.  Routing one
@@ -6789,25 +6701,11 @@
                          ;; first-class selected action; the runner owns its
                          ;; execution and evidence, outside the ordinary
                          ;; target-reading/cascade path.
-                         (meta-algorithm-result outer-task-selection
+                         (meta-algorithm-result supplied-task
                                                 cascade-assembled)
                          (cd/select-and-record-cascade!
                           cascade-assembled
                           (assoc judge-opts
-                               ;; A strict outer policy selection is a sealed
-                               ;; executable-cascade choice, not permission to
-                               ;; run the legacy inner selector again.
-                               :selected-outer-cascade-policy
-                               (get-in outer-task-selection
-                                       [:policy :selected-outer-cascade-policy])
-                               :outer-policy-selection-claimed?
-                               (or (some? (get-in outer-task-selection
-                                                  [:policy
-                                                   :selected-outer-cascade-policy]))
-                                   (and (= :cascade-live-policy-v1
-                                           (get-in outer-task-selection [:policy :kind]))
-                                        (= :selected
-                                           (get-in outer-task-selection [:policy :status]))))
                                :constructor-scored-with
                                (if (contains? cascade-sources :construction)
                                  :caller-supplied-evaluator :same-observation-labels-snapshot)
@@ -6995,7 +6893,7 @@
                   ;; (or the gated abstention); the flat ranked/advisory
                   ;; fields are gone with the flat path.
                   :decision wm-decision
-                  :outer-task-selection outer-task-selection
+                  :task supplied-task
                   :cascade-problems (:cascade-problems cascade-result)
                   :cascade-lanes (:lanes cascade-result)
                   :cascade-horizon cascade-horizon

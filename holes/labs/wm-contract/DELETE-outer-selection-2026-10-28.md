@@ -62,3 +62,39 @@ The full loop has no outer selector. A click that needs one must refuse with a
 typed absence (`{:absent :no-task-selection-policy}`), not fall back to anything.
 The task to work on is supplied by the caller until the Cascade Live selection
 pattern exists.
+
+## Narrowed 2026-10-28
+
+claude-11 narrowed the deletion scope after reviewing retained inner callers:
+
+1. Keep `futon2.aif.wm.family-selection` and its inner-path tests. Keep
+   `select-over-families`, `full-eligible-target-field` and `field-census`
+   where used for the selected task's reading families. After removing the
+   outer consumers, delete only functions with no retained caller in futon2
+   `src`/`scripts` or futon3c `src`; verify the candidate dead-function list
+   by searching rather than assuming it.
+2. Keep `q10-arrangement-census` and its route test: they check the selected
+   task's constructed policies.
+3. Keep `scripts/wm_run_facts.clj`. Remove only outer-selector/outer-receipt
+   sections; retain Q4, Q6, interpretation-order and absence diagnostics.
+
+For other mixed namespaces, retain functions used by a retained inner-path
+caller and remove functions whose callers are all being deleted. A conflict
+between this rule and deletion of the outer machinery must be reported before
+changing the contract.
+
+Q10 moved from keep to delete: its helpers have no independent inner caller;
+its certificate and route fixtures depend on the deleted outer Q2/Q8 receipts.
+
+Implementation boundary notes:
+- Retain only Q2's `construction-census` and its helpers: cascade-decision
+  still records the selected task's inner construction. The outer certificate,
+  record verifier and outer-actions producer are deleted.
+- Ticket readiness still needs field inputs. Its observation-only helpers move
+  from the deleted selector to `ticket-readiness-inputs`; they do not select.
+- Delete `target-reading-preparation`: after removing the pre-choice batch in
+  runtime it has no retained production caller. Keep selected-target reading
+  repair for the supplied task.
+- Historical receipt readers used by retained learning/terminal consumers stay;
+  they neither construct a menu nor select a task. The two futon3c browser
+  entrypoints return the typed no-task-selection-policy absence.

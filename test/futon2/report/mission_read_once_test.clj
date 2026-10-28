@@ -1,19 +1,8 @@
 (ns futon2.report.mission-read-once-test
-  "WM-MISSION-READ-ONCE-I: one selection reads the mission registry once.
-  judge read it for the declared sources and again, through
-  cascade-problems/substrate-targets, for the cascade's targets: two reads of
-  the same registry, one substrate read apart, in one let. The loaded doc is
-  now bound once and passed to both. judge is stopped right after the
-  targets are computed (assemble-cascade-problems-with-published captures
-  them and throws), with every store it reads before that pointed at an
-  empty temp dir. The pre-fix judge is materialised from git (e3bdcfdb)
-  under a renamed namespace, never loaded over the real one."
-  (:require [clojure.java.shell :as sh]
-            [clojure.string :as str]
-            [clojure.test :refer [deftest is]]
+  "A supplied task reads the mission registry once; standalone target reads remain supported."
+  (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.mission-registry :as mr]
-            [futon2.aif.outer-task-selection :as outer-task-selection]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.report.war-machine :as wm]))
 
@@ -39,7 +28,8 @@
                      (fn [_ input & _]
                        (reset! targets (:targets input))
                        (throw (ex-info "stop: targets computed" {::stop true})))}
-      #(try ((ns-resolve ns 'judge) {} (merge {:cascade-sources-dir tmp
+      #(try ((ns-resolve ns 'judge) {} (merge {:task {:id "M-live" :kind :mission}
+                                                :cascade-sources-dir tmp
                                                 :cascade-proposals-dir tmp
                                                 :repair-obligations-root tmp
                                                 :machine-interpretations-dir tmp
@@ -48,18 +38,6 @@
             (catch clojure.lang.ExceptionInfo e
               (when-not (::stop (ex-data e)) (throw e)))))
     {:reads @reads :targets @targets})))
-
-(def pre-fix-ns
-  (delay
-    (let [{:keys [exit out err]} (sh/sh "git" "show" "e3bdcfdb:scripts/futon2/report/war_machine.clj")
-          renamed 'futon2.report.war-machine-at-e3bdcfdb]
-      (when-not (zero? exit) (throw (ex-info "git show failed" {:err err})))
-      ;; Compiler/load with a source path: the file registers its load
-      ;; identity from *file*, which load-string leaves nil
-      (clojure.lang.Compiler/load
-       (java.io.StringReader. (str/replace-first out "(ns futon2.report.war-machine" (str "(ns " renamed)))
-       "futon2/report/war_machine_at_e3bdcfdb.clj" "war_machine_at_e3bdcfdb.clj")
-      (the-ns renamed))))
 
 (deftest one-selection-reads-the-registry-once
   (let [{:keys [reads targets]} (one-selection (:ns (meta #'wm/judge)) {})]
@@ -72,115 +50,6 @@
                                                {:cascade-sources {}})]
     (is (= ["M-live"] targets))
     (is (= 1 reads))))
-
-(deftest outer-task-is-selected-before-and-independently-of-cascade-material
-  (let [mission-doc {:missions [{:id "M-a" :status-class :active}
-                                {:id "M-b" :status-class :active}]}
-        seed 17
-        expected (get-in (outer-task-selection/select-task
-                          {:tasks [{:id "M-a" :kind :mission :status-class :active}
-                                   {:id "M-b" :kind :mission :status-class :active}]
-                           :seed seed})
-                         [:chosen :id])
-        rich-a {:universes {"M-a" {:x false}}
-                :interpretations {"M-a" {:patterns {:p/a {:produces #{:x}}}}}
-                :candidates {"M-a" [{:precedence [:p/a]
-                                      :construction-receipt {:kind :fixture}}]}}
-        rich-b {:universes {"M-b" {:y false}}
-                :interpretations {"M-b" {:patterns {:p/b {:produces #{:y}}}}}
-                :candidates {"M-b" [{:precedence [:p/b]
-                                      :construction-receipt {:kind :fixture}}]}}
-        first-run (one-selection (:ns (meta #'wm/judge))
-                                 {:outer-task-seed seed :cascade-sources rich-a}
-                                 mission-doc)
-        second-run (one-selection (:ns (meta #'wm/judge))
-                                  {:outer-task-seed seed :cascade-sources rich-b}
-                                  mission-doc)]
-    (is (= [expected] (:targets first-run)))
-    (is (= [expected] (:targets second-run))
-        "moving all prepared cascade material to the other task cannot move outer selection")
-    (is (= 1 (count (:targets first-run)))
-        "inner assembly receives exactly the already-selected task")))
-
-(deftest configured-meta-outer-selector-controls-the-only-inner-target
-  (let [mission-doc {:missions [{:id "M-a" :status-class :active}
-                                {:id "M-b" :status-class :active}]}
-        calls (atom [])
-        meta-selector
-        (fn [{:keys [tasks seed]}]
-          (swap! calls conj {:ids (mapv :id tasks) :seed seed})
-          {:schema :wm/outer-task-selection-v1
-           :policy {:kind :meta-pipeline-task-state}
-           :support (mapv outer-task-selection/task-view tasks)
-           :excluded []
-           :draw {:absent :meta-policy-does-not-draw}
-           :chosen (outer-task-selection/task-view
-                    (first (filter #(= "M-b" (:id %)) tasks)))
-           :action {:type :advance-mission :target "M-b"}})
-        rich-a {:universes {"M-a" {:x false}}
-                :interpretations {"M-a" {:patterns {:p/a {:produces #{:x}}}}}}
-        run (one-selection (:ns (meta #'wm/judge))
-                           {:outer-task-selection-fn meta-selector
-                            :cascade-sources rich-a}
-                           mission-doc)]
-    (is (= ["M-b"] (:targets run))
-        "the META-selected identity, not the prepared inner material, is targeted")
-    (is (= 1 (count @calls)))
-    (is (= #{"M-a" "M-b"} (set (:ids (first @calls)))))))
-
-(deftest selection-as-of-is-forwarded-to-the-production-selector
-  ;; The selector is the production boundary's injected port.  Its receipt
-  ;; reflects only the value supplied by select-outer-task; a fresh clock at
-  ;; any later frame cannot satisfy this assertion.
-  (let [selection-as-of "2026-10-22T12:34:56Z"
-        seen (atom nil)
-        receipt (wm/select-outer-task
-                 {:outer-task-policy :meta
-                  :selection-as-of selection-as-of
-                  :outer-task-selection-fn
-                  (fn [input]
-                    (reset! seen input)
-                    {:schema :wm/outer-task-selection-v1
-                     :policy {:kind :cascade-live-policy-menu-v1}
-                     :support [] :excluded []
-                     :draw {:absent :deterministic-meta-policy}
-                     :chosen {:absent :no-canonically-bound-policy}
-                     :selection-as-of (:selection-as-of input)})}
-                 [{:id "M-a" :kind :mission}] 17)]
-    (is (= selection-as-of (:selection-as-of @seen)))
-    (is (= selection-as-of (:selection-as-of receipt)))))
-
-(deftest meta-is-fail-closed-and-seeded-baseline-is-explicit
-  (is (thrown-with-msg?
-       clojure.lang.ExceptionInfo #"META outer selector is not configured"
-       (wm/select-outer-task {:outer-task-policy :meta}
-                             [{:id "M-a" :kind :mission}] 1)))
-  (is (= "M-a"
-         (get-in (wm/select-outer-task
-                  {:outer-task-policy :seeded-baseline}
-                  [{:id "M-a" :kind :mission}] 1)
-                 [:chosen :id]))))
-
-(deftest refused-meta-selection-is-preserved-as-an-outer-refusal
-  (let [receipt {:schema :wm/outer-task-selection-v1
-                 :policy {:kind :meta-pipeline-task-state
-                          :meta-selection {:schema :wm/meta-pipeline-selection-v1
-                                           :status :refused
-                                           :reason :pipeline-snapshot-invalid
-                                           :details {:errors [:cascade-section-incomplete]}}}
-                 :support [] :excluded []
-                 :chosen {:absent :pipeline-snapshot-invalid}}
-        refusal (#'wm/outer-task-refusal receipt)]
-    (is (= :outer-task-selection-refused (:kind refusal)))
-    (is (= {:absent :outer-task-not-selected} (:target refusal)))
-    (is (= :outer-task-selection (:missing refusal)))
-    (is (= (get-in receipt [:policy :meta-selection]) (:selection refusal)))))
-
-(deftest the-pre-fix-selection-read-twice
-  ;; the bad case: judge at e3bdcfdb, no pass-through
-  (let [{:keys [reads targets]} (one-selection @pre-fix-ns {})]
-    (is (= 2 reads))
-    (is (= ["M-live"] targets) "the same targets: only the count tells them apart")))
 
 (deftest the-zero-arity-still-reads-for-itself
   ;; work_target_predictor_input.clj's caller is unchanged

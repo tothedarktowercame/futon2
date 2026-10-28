@@ -1,6 +1,5 @@
 (ns futon2.aif.selected-target-reading
-  "Same-click repair for an outer-selected target whose current HEAD has no
-  validated reading.  The outer receipt is input, never recomputed here."
+  "Same-click repair for a supplied task whose current HEAD has no validated reading."
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
@@ -8,7 +7,6 @@
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.analysis-cascade :as analysis-cascade]
             [futon2.aif.load-identity :as identity]
-            [futon2.aif.selected-outer-cascade-policy :as selected-outer-policy]
             [futon2.aif.target-reading-registry :as registry]))
 
 (def default-request-root
@@ -198,45 +196,15 @@
            fragments)))
       (:sentences analysis)))))
 
-(defn prechoice-field
-  "The unresolved pre-choice field, never a replacement for a chosen target."
-  [judgement]
-  (let [outer (:outer-task-selection judgement)]
-    (when (and (contains? #{:incomplete-policy-menu-coverage :no-canonically-bound-policy}
-                         (get-in outer [:policy :reason]))
-               (nil? (get-in outer [:chosen :id]))
-               (nil? (get-in outer [:policy :selected-outer-cascade-policy])))
-      (:policy-field outer))))
-
-(defn prechoice-needs [field]
-  (let [sources (into {} (map (juxt :target-id identity) (:target-sources field)))]
-    (vec
-     (for [family (:families field)
-           failure (:failures family)
-           :when (contains? #{:no-current-target-reading :stale-target-reading}
-                            (:kind failure))]
-       {:target (:target-id family)
-        :source-path (:source-path (get sources (:target-id family)))
-        :excerpt-digest (:expected-digest failure)
-        :failure (:kind failure)}))))
-
 (defn selected-need
-  "Return the exact outer-selected target/source/current-digest need, or nil.
+  "Return the exact caller-selected target/source/current-digest need, or nil.
   A failure belonging to another target is never eligible."
   [judgement]
-  (let [carrier (get-in judgement [:outer-task-selection :policy
-                                   :selected-outer-cascade-policy])
-        carrier-target (when (and carrier
-                                  (nil? (selected-outer-policy/verify carrier)))
-                         (:target-id carrier))
-        outer-target (or carrier-target
-                         (get-in judgement [:outer-task-selection :chosen :id]))
+  (let [outer-target (get-in judgement [:task :id])
         families (get-in judgement [:decision :selection-certificate
                                     :target-policy-field :families])
-        ;; The live judge can expose the target-local family before its outer
-        ;; receipt is retained on the runner checkpoint.  In that interval a
-        ;; single family is still an immutable target identity: production
-        ;; constructs the inner field for exactly one outer-selected target.
+        ;; A single target-local family also records the caller-selected identity
+        ;; before the task is retained on the runner checkpoint.
         ;; Never infer from the first of several families.
         sole-family-target (when (= 1 (count families))
                              (:target-id (first families)))
@@ -248,42 +216,24 @@
                                (:failures family)))
         row (first (filter #(= target (:target-id %))
                            (get-in judgement [:cascade-problems :target-sources])))
-        outer-source (get-in judgement [:outer-task-selection :chosen :source])
+        outer-source (get-in judgement [:task :source])
         outer-path (or (:path outer-source) (:source-path outer-source))
         row-path (:source-path row)]
-    (or (when failure
+    (when failure
       {:target target
-       ;; The retained outer receipt is authoritative.  The cascade source row
+       ;; The supplied task's source is authoritative. The cascade source row
        ;; is a compatibility fallback for older judge fixtures, never a reason
        ;; to select a different target.
        :source-path (or outer-path row-path)
        :source-pin-conflict? (boolean (and outer-path row-path
                                            (not= outer-path row-path)))
        :excerpt-digest (:expected-digest failure)
-       :failure (:kind failure)})
-        (first (prechoice-needs (prechoice-field judgement))))))
-
-(defn preparation-needs
-  "Return every unmet need in the retained outer policy field.
-  When the chosen target itself has a selected need, put that need first and
-  omit its policy-field duplicate."
-  [judgement]
-  (if-let [field (get-in judgement [:outer-task-selection :policy-field])]
-    (let [chosen-target (get-in judgement [:outer-task-selection :chosen :id])
-          chosen-need (selected-need judgement)
-          chosen-need (when (= chosen-target (:target chosen-need)) chosen-need)
-          field-needs (prechoice-needs field)]
-      (if chosen-need
-        (into [chosen-need]
-              (remove #(= (:target chosen-need) (:target %)) field-needs))
-        field-needs))
-    []))
+       :failure (:kind failure)})))
 
 (defn preparation-needed?
-  "True when either an exact selected need or any retained field need exists."
+  "True when the supplied task has an unmet reading need."
   [judgement]
-  (boolean (or (selected-need judgement)
-               (seq (preparation-needs judgement)))))
+  (boolean (selected-need judgement)))
 
 (defn prompt
   "Prompt for the designated author.  The reply is analysis JSON only; the

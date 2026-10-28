@@ -430,13 +430,6 @@ def handle_held_stop(args, stop: dict, in_flight_repairs: list,
 
 
 def fire(n: int, args, since_epoch: int) -> dict:
-    preflight = outer_policy_preflight()
-    if preflight is not None:
-        record({"event": "preflight-refused", "reason": preflight})
-        return {"n": n, "rc": 4, "click-id": None, "spent": False,
-                "outcome": "preflight-refused", "run-id": None,
-                "carried": False, "last-result": {"reason": preflight},
-                "log": None, "since-epoch": since_epoch, "in-flight-repairs": []}
     reset_cast_sessions(args)
     out = STATE / f"click-{n:03d}-{int(time.time())}.log"
     before = budget_lines()
@@ -487,35 +480,6 @@ def fire(n: int, args, since_epoch: int) -> dict:
 
 
 # ---------------------------------------------------------------- debugger
-
-# configured-runner-opts runs full-loop-runner/config, which took 44 s on the
-# serving JVM on 2026-10-19 (the Drawbridge probe at 30 s timed out every
-# time, so the preflight reported "unavailable" and refused every click).
-PREFLIGHT_TIMEOUT_S = 180
-
-
-def outer_policy_preflight() -> str | None:
-    """Check the serving configuration before resets, dispatch or ration spend.
-
-    This only checks presence; selection still validates the provider's evidence.
-    """
-    try:
-        result = jvm_eval(
-            "(let [opts (#'futon3c.wm.runner-service/configured-runner-opts {})] "
-            "(if (or (:outer-policy-evidence-provider opts) "
-            "(not (clojure.string/blank? (:outer-policy-evidence-provider-path opts))) "
-            "(when-let [v (resolve 'futon2.aif.outer-policy-provider-runtime/production-provider)] "
-            "(fn? @v))) "
-            ":wm/provider-configured :wm/provider-required))", timeout=PREFLIGHT_TIMEOUT_S)
-    except (OSError, subprocess.TimeoutExpired):
-        return "outer-policy-preflight-unavailable"
-    if result["rc"] != 0:
-        return "outer-policy-preflight-unavailable"
-    if re.search(r":value\s+:wm/provider-configured(?:\s|})", result["out"]):
-        return None
-    if re.search(r":value\s+:wm/provider-required(?:\s|})", result["out"]):
-        return "outer-policy-evidence-provider-required"
-    return "outer-policy-preflight-unavailable"
 
 UNIVERSES = "universe-not-admitted/universes"
 
