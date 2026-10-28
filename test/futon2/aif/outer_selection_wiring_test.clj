@@ -1,10 +1,17 @@
 (ns futon2.aif.outer-selection-wiring-test
-  (:require [clojure.java.io :as io]
-            [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
-            [futon2.aif.outer-state :as outer-state]))
+            [futon2.aif.outer-state :as outer-state]
+            [futon2.test-support.runner-fixture :as runner-fixture]))
+
+(use-fixtures :once hermetic/with-hermetic-stores
+              runner-fixture/with-hermetic-traces)
 
 (defonce ^:private giraffe-loader
   (doto (clojure.lang.DynamicClassLoader.
@@ -114,3 +121,48 @@
     (is (= :no-task-selected (:absent result)))
     (is (= :none (get-in result [:outer/selection :cascade-id])))
     (is (false? @called?))))
+
+(defn- record-files [dir]
+  (filter #(and (.isFile %)
+                (.startsWith (.getName %) "tick-run-record-")
+                (not (.endsWith (.getName %) ".learning.edn")))
+          (file-seq dir)))
+
+(deftest runner-persists-only-supplied-outer-selection
+  (let [root (temp-dir)
+        record-dir (io/file root "records")
+        selection {:cascade-id :ready
+                   :cascade-scores [{:cascade-id :ready :g 17/10}]
+                   :tie? false
+                   :tied-cascades [:ready]
+                   :giraffe/run-id "fixture-run"
+                   :giraffe/manifest-sha256 (apply str (repeat 64 "b"))
+                   :makeup/sha256 (apply str (repeat 64 "a"))
+                   :prediction {:ending-class {:grounded-change 3/4}
+                                :gain {:several 2/3}}}
+        base-opts (merge (hermetic/runner-repair-options)
+                         {:run-record-dir (.getPath record-dir)
+                          :scan-render-fn (fn [& _] nil)
+                          :meta-injury-root (.getPath (io/file root "injuries"))
+                          :meta-injury-ledger-path (.getPath (io/file root "injuries/ledger.edn"))})]
+    (is (empty? (record-files record-dir)))
+    (with-redefs [runner/run-opportunity-core!
+                  (fn [_]
+                    {:attempt-id "outer-selection-persistence"
+                     :outcome :grounded-change
+                     :wm/route [{:node :R20 :via "fixture"
+                                 :at "2026-10-28T00:00:00Z"}]})]
+      (let [with-selection (runner/run-opportunity!
+                            (assoc base-opts
+                                   :run-id "outer-selection-present"
+                                   :click-id "outer-selection-present"
+                                   :outer/selection selection))
+            present-record (edn/read-string (slurp (:run-record with-selection)))
+            without-selection (runner/run-opportunity!
+                               (assoc base-opts
+                                      :run-id "outer-selection-absent"
+                                      :click-id "outer-selection-absent"))
+            absent-record (edn/read-string (slurp (:run-record without-selection)))]
+        (is (= selection (:outer/selection present-record)))
+        (is (not (contains? absent-record :outer/selection)))
+        (is (= 2 (count (record-files record-dir))))))))

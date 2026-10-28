@@ -1428,6 +1428,8 @@
                      ;; seven independent certificates from the record.
                      (:controlled-sut result)
                      (assoc :controlled-sut (:controlled-sut result))
+                     (contains? raw-opts :outer/selection)
+                     (assoc :outer/selection (:outer/selection raw-opts))
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
                      (assoc :open-stop-lines
                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
