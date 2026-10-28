@@ -4,7 +4,7 @@
 cascade, which should presumably include a pattern-based
 intake/analysis/extension for any new findings").
 **Owner:** claude-11 (criteria, review). Implementation by codex-N packets.
-**Status:** OPEN. Criteria stated; nothing built. Proposed as row
+**Status:** OPEN. Criteria stated; S1 amended 2026-10-28 (drafts stand; practice corrects them); S2 next; nothing built. Proposed as row
 E4-SELF-HEAL-CASCADE of `criteria-completeness-deficits.tsv` (codex-11's file).
 **Related:** `futon3/library/cascades/heal-by-repair-cascades.flexiarg`
 (`751d7c4`); `futon3/library/self-heal/` (`8376f57`, drafts awaiting Joe);
@@ -36,9 +36,12 @@ that G sees, not a tail appended to every repair by code.
 
 ## Criteria
 
-- **S1 (patterns accepted).** Joe has read and corrected the
-  `library/self-heal/` drafts. Observed by: a futon3 commit recording his
-  corrections, or his word that they stand.
+- **S1 (patterns stand as drafted; practice corrects them).** Joe,
+  2026-10-28: corrections to the drafts "should come from practice not a
+  priori fallible human judgement". The fourteen drafts at `8376f57` are
+  used as they are. A pattern changes only on a finding recorded by a run
+  (S5, S6), citing that run's receipts. Observed by: no edit to
+  `library/self-heal/` without such a citation.
 - **S2 (reading checked).** A discovery checks the README's reading of the
   present pipeline against the code, line by line. Observed by: a
   `DISCOVERY-self-heal-pipeline-*.md` with citations, reviewed.
@@ -53,11 +56,17 @@ that G sees, not a tail appended to every repair by code.
   with the same function it uses for ordinary-work policies. Observed by:
   a test that the two calls resolve to one function, and the Lean
   definition → runtime function → call site trace.
-- **S5 (steps are the patterns' steps).** Each executed step is a pattern of
-  the selected cascade, and after each step its `@effect` is compared with
-  the state (`a-step-that-did-nothing-is-an-observation`). Observed by: the
-  repair receipt naming the cascade, each step's pattern and each
-  before/after check.
+- **S5 (a defect in the self-repair process can be pinpointed).** Joe,
+  2026-10-28: "make it so we can pinpoint any need to repair or improve the
+  self-repair process when it runs". Each executed step is a pattern of the
+  selected cascade. Before the step, its `@predicts` for this injury is
+  recorded. After it, the observation and the comparison of its `@effect`
+  with the state are recorded (`a-step-that-did-nothing-is-an-observation`).
+  So when a repair fails or surprises, the record names the cascade, the step,
+  the pattern, and which of guard, effect or prediction did not hold. Observed
+  by: the live repair receipt carrying one row per executed step (cascade,
+  pattern, prediction, observation, effect check), proved against the Lean
+  definition of the row, not against an invented failing run.
 - **S6 (closing patterns run inside the machine).** When the selected
   cascade contains intake, analysis or extension, the machine records the
   findings, matches them against the library and, where warranted, writes
@@ -67,12 +76,12 @@ that G sees, not a tail appended to every repair by code.
   and the selection with its per-cascade G is retained in the click record.
   Observed by: the click record and the effective ledger.
 
-Closes when S1–S7 are observed. S3–S7 wait for S1 and S2.
+Closes when S1–S7 are observed. S3–S7 wait for S2.
 
 ## Order and constraints
 
 - Lean first, then Clojure aligned to it (codex-N writes, claude-11 reviews).
 - One packet per criterion; discovery separate from implementation.
-- Until S1 and S2, no self-heal work proceeds except what row B5 needs to
-  release run001 (the 2aef recovery authority and the live recovery steps).
+- Until S2, no self-heal work proceeds except what row B5 needs to release
+  run001 (the 2aef recovery authority and the live recovery steps).
 - No hard-coded rates; preferences learned as in the ordinary loop.
