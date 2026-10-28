@@ -275,6 +275,37 @@
     (is (= :coordinator/port-receipt-refused (:reason substitute)))
     (is (= :author (:phase substitute)))))
 
+(deftest resumed-transaction-must-bind-the-ledger-authored-receipt
+  ;; Lean: MetaRepairResumeIdentity.matching_enacted_resume_allowed and
+  ;; empty_enacted_resume_refused.  The first transaction reaches :enacted;
+  ;; a fresh empty transaction for that same attempt must not mint another
+  ;; author receipt which the ledger will later skip appending.
+  (let [history (opened-ledger)
+        started (prepared history (options))
+        paused (coordinator/coordinate
+                (durable history) (:transaction started)
+                (assoc (ports) :stop-after :enact))
+        enacted-history (:ledger paused)
+        ;; This is the transaction prepared before the first process stopped;
+        ;; it has the same sealed work order but no retained port receipts.
+        empty-resume (:transaction started)
+        author-calls (atom 0)
+        refusal (coordinator/coordinate
+                 (durable enacted-history) empty-resume
+                 (ports {:author (fn [request]
+                                   (swap! author-calls inc)
+                                   (receipt request :succeeded
+                                            {:patch-sha sha-b :worktree "/tmp/substituted"}))}))
+        matching (coordinator/coordinate (durable enacted-history)
+                                         (:transaction paused) (ports))]
+    (is (= :checkpoint (:status paused)))
+    (is (= :enacted (-> enacted-history :entries last :state)))
+    (is (= :refused (:status refusal)))
+    (is (= :coordinator/resume-identity-refused (:reason refusal)))
+    (is (zero? @author-calls))
+    (is (= enacted-history (:ledger refusal)))
+    (is (= :discharged (:status matching)))))
+
 (deftest retry-failure-reopens-and-unattributed-success-cannot-discharge
   (let [history (opened-ledger)
         tx (:transaction (prepared history (options)))

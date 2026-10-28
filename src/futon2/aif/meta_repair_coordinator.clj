@@ -116,6 +116,33 @@
 (defn- latest-transition [history injury-id]
   (last (filter #(and (= ledger/transition-schema (:schema %))
                       (= injury-id (:injury-id %))) (:entries history))))
+(defn- authored-transition [history injury-id repair-id attempt]
+  (last (filter #(and (= :authored (:state %))
+                      (= injury-id (:injury-id %))
+                      (= repair-id (:repair-id %))
+                      (= attempt (:attempt %)))
+                (:entries history))))
+(defn- resume-identity-refusal
+  "The Lean law MetaRepairResumeIdentity.resumeIdentityOK: after :claimed,
+  the transaction's retained author receipt is the ledger-admitted receipt."
+  [history transaction injury-id repair-id attempt state]
+  (when (#{:authored :reviewed :enacted} state)
+    (let [ledger-author (authored-transition history injury-id repair-id attempt)
+          transaction-author (some #(when (= :author (:phase %)) %)
+                                   (:receipts transaction))
+          ledger-patch-sha (:patch-sha ledger-author)
+          transaction-patch-sha (get-in transaction-author [:payload :patch-sha])]
+      (when-not (and ledger-author
+                     transaction-author
+                     (= (:port-receipt-pin ledger-author)
+                        (:receipt-pin transaction-author))
+                     (= ledger-patch-sha transaction-patch-sha))
+        (refusal :coordinator/resume-identity-refused
+                 {:state state
+                  :ledger-patch-sha ledger-patch-sha
+                  :transaction-patch-sha transaction-patch-sha
+                  :ledger history
+                  :transaction transaction})))))
 (defn- active-entry [durable injury-id authority-verifier]
   (get-in (ledger/effective-active-injuries (:ledger durable) authority-verifier)
           [:injuries injury-id]))
@@ -381,6 +408,11 @@
                                    (:state claim-entry))
                 (stop! (refusal :coordinator/resume-state-refused
                                 {:state (:state claim-entry)})))
+
+            _ (when-let [refusal (resume-identity-refusal
+                                  history1 transaction injury-id repair-id attempt
+                                  (:state claim-entry))]
+                (stop! refusal))
 
             _ (checkpoint! ports :claim history1 transaction)
 
