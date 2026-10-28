@@ -1,9 +1,9 @@
-K1.4	order=[["sample run" :not-ready 2] ["design of packet schema" :not-ready 0] ["design of evaluation harness" :not-ready 0]]	closed=[] 	chosen= wait
+K1.4	order=[["sample run" :ready 2] ["design of packet schema" :not-ready 0] ["design of evaluation harness" :not-ready 0]]	closed=[] 	chosen= wait
 K14.3	order=[["spin overflow into follow-up missions" :ready 1] ["keep M-interim-director open" :not-ready 0]]	closed=[] 	chosen= overflow spun into follow-up missions so the parent could close
 K2.2	order=[["retrospective dk/dt spike" :ready 0] ["INSTANTIATE the coupled G" :not-ready 0]]	closed=[] 	chosen= spike to clear a blocker (retrospective dk/dt, claude-1) before INSTANTIATE
 K3.2	order=[["core system P12 working end to end" :ready 2] ["edge cases: provisional withdrawal" :not-ready 0] ["countersigned voids" :not-ready 0]]	closed=[] 	chosen= park items 2-3 with explicit re-arm condition (reopen once P12 works end to end); "the questions are not repeated in reports"
 K4.3	order=[["M-xor-coupling-probe" :ready 0] ["M-tpg-coupling-evolution" :ready 0] ["M-coupling-as-constraint" :not-ready 0]]	closed=[] 	chosen= probes scheduled before the constraint mission that consumes them
-K4.5	order=[["sample run" :not-ready 2] ["design of packet schema" :not-ready 0] ["design of evaluation harness" :not-ready 0]]	closed=[] 	chosen= observation (the sample run) moved ahead of design
+K4.5	order=[["sample run" :ready 2] ["design of packet schema" :not-ready 0] ["design of evaluation harness" :not-ready 0]]	closed=[] 	chosen= observation (the sample run) moved ahead of design
 K5.3	order=[["handoff shape 2 (ukrn port / F1-F10)" :ready 2] ["handoff shape 1 (futon5a ingest)" :not-ready 0] ["handoff shape 3 (resume claude-3)" :not-ready 0]]	closed=[] 	chosen= agent recommends "(2) first", the highest-leverage exit criterion the others rest on
 K7.1	order=[["LC1 v1 (hand-grep + TF-IDF + recency)" :ready 0] ["LC1 v2 (hyperedge-store query + WebArxana render)" :not-ready 0]]	closed=[] 	chosen= LC1 v1 minimum now; v2 named as structural successor; "BOTH as closure bar" per Joe :148
 K7.4	order=[["stage 1" :ready 1] ["stage 2" :not-ready 0] ["stage 3" :not-ready 0] ["stage 4" :not-ready 0]]	closed=[] 	chosen= build stages 1 and 2, then decide; fallback pre-ranking (馬 helper) for 3 if WM not ready
