@@ -14,6 +14,7 @@
 (def mismatched-pin {:path "receipts/mismatched-deferred-author.edn"
                      :sha256 (apply str (repeat 64 "9"))})
 (def unadmitted-patch (apply str (repeat 40 "b")))
+(def missing-repair-id "repair/no-authored-transition")
 
 (defn- fixture [name]
   (edn/read-string (slurp (str fixture-root name ".edn"))))
@@ -25,6 +26,13 @@
                                           :receipt-pin receipt-pin
                                           :payload (assoc (:payload author)
                                                           :patch-sha patch-sha))]))))
+
+(defn- transaction-for-repair [transaction repair-id receipts]
+  (#'coordinator/seal-transaction
+   (assoc transaction
+          :work-order (coordinator/seal-work-order
+                       (assoc (:work-order transaction) :repair-id repair-id))
+          :receipts receipts)))
 
 (defn- temp-case [label deferred-transaction]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
@@ -113,3 +121,20 @@
     (is (= :meta-self-heal/recovery-medic-authority-required (:reason result)))
     (is (= ledger-before (slurp (:ledger-path case))))
     (is (= transaction-before (slurp (:transaction-path case))))))
+
+(deftest recovery-requires-an-evidenced-ledger-author
+  (let [admitted (fixture "transaction")
+        canonical (transaction-for-repair admitted missing-repair-id
+                                          (:receipts admitted))
+        deferred (transaction-for-repair admitted missing-repair-id [])
+        case (assoc (temp-case "missing-ledger-author" deferred)
+                    :repair-id missing-repair-id)
+        _ (spit (:transaction-path case) (str (pr-str canonical) "\n"))
+        ledger-before (slurp (:ledger-path case))
+        transaction-before (slurp (:transaction-path case))
+        deferred-before (slurp (:deferred-path case))
+        result (production/recover-unadmitted-transaction! (recovery-opts case))]
+    (is (= :meta-self-heal/recovery-ledger-author-missing (:reason result)))
+    (is (= ledger-before (slurp (:ledger-path case))))
+    (is (= transaction-before (slurp (:transaction-path case))))
+    (is (= deferred-before (slurp (:deferred-path case))))))

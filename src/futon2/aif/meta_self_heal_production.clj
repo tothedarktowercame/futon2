@@ -1186,34 +1186,42 @@
                                             (= repair-id (:repair-id %))
                                             (= attempt (:attempt %)))
                                       (:entries history)))
+          ledger-author-evidenced?
+          (and (map? (:port-receipt-pin ledger-author))
+               (string? (get-in ledger-author [:port-receipt-pin :path]))
+               (boolean (re-matches #"[0-9a-f]{64}"
+                                    (str (get-in ledger-author
+                                                 [:port-receipt-pin :sha256]))))
+               (string? (:patch-sha ledger-author))
+               (boolean (re-matches #"[0-9a-f]{40}" (:patch-sha ledger-author))))
           transaction-author (some #(when (= :author (:phase %)) %)
                                    (:receipts transaction))
           transaction-file (io/file transaction-path)
           deferred-prefix (str (.getName transaction-file) ".deferred-")
-          deferred-snapshots
-          (when-let [files (.listFiles (.getAbsoluteFile
-                                        (or (.getParentFile transaction-file)
-                                            (io/file "."))))]
-            (->> files
-                 (filter #(and (str/starts-with? (.getName %) deferred-prefix)
-                               (str/ends-with? (.getName %) ".edn")))
-                 (keep #(transaction-snapshot (.getPath %)))
-                 (sort-by :transaction-path)))
           admitted-deferred
-          (some (fn [{deferred-transaction :transaction :as deferred}]
-                  (let [deferred-order (:work-order deferred-transaction)
-                        deferred-author (some #(when (= :author (:phase %)) %)
-                                              (:receipts deferred-transaction))]
-                    (when (and (= [injury-id repair-id attempt]
-                                  [(:injury-id deferred-order)
-                                   (:repair-id deferred-order)
-                                   (:attempt deferred-order)])
-                               (= (:port-receipt-pin ledger-author)
-                                  (:receipt-pin deferred-author))
-                               (= (:patch-sha ledger-author)
-                                  (get-in deferred-author [:payload :patch-sha])))
-                      deferred)))
-                deferred-snapshots)
+          (when ledger-author-evidenced?
+            (when-let [files (.listFiles (.getAbsoluteFile
+                                          (or (.getParentFile transaction-file)
+                                              (io/file "."))))]
+              (some (fn [file]
+                      (when (and (str/starts-with? (.getName file) deferred-prefix)
+                                 (str/ends-with? (.getName file) ".edn"))
+                        (when-let [{deferred-transaction :transaction :as deferred}
+                                   (transaction-snapshot (.getPath file))]
+                          (let [deferred-order (:work-order deferred-transaction)
+                                deferred-author (some #(when (= :author (:phase %)) %)
+                                                      (:receipts deferred-transaction))]
+                            (when (and (= [injury-id repair-id attempt]
+                                          [(:injury-id deferred-order)
+                                           (:repair-id deferred-order)
+                                           (:attempt deferred-order)])
+                                       (= (:port-receipt-pin ledger-author)
+                                          (:receipt-pin deferred-author))
+                                       (= (:patch-sha ledger-author)
+                                          (get-in deferred-author
+                                                  [:payload :patch-sha])))
+                              deferred)))))
+                    (sort-by #(.getName %) files))))
           evidence {:injury-id injury-id :repair-id repair-id :attempt attempt
                     :ledger-port-receipt-pin (:port-receipt-pin ledger-author)
                     :transaction-port-receipt-pin (:receipt-pin transaction-author)
@@ -1240,6 +1248,9 @@
 
         (not (true? (authority-verifier authority-context)))
         (refusal :meta-self-heal/recovery-medic-authority-refused)
+
+        (not ledger-author-evidenced?)
+        (refusal :meta-self-heal/recovery-ledger-author-missing)
 
         (nil? admitted-deferred)
         (refusal :meta-self-heal/recovery-no-admitted-transaction)
