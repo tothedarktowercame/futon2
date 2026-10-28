@@ -1164,9 +1164,10 @@
 
 (defn recover-unadmitted-transaction!
   "Medic-authorized recovery for one same-attempt ledger/transaction author
-  divergence. The ledger remains authoritative: the unadmitted transaction is
-  archived byte-for-byte, and the existing retry-result path abandons the old
-  attempt and reopens the next one. No historical :authored entry is created."
+  divergence. A ledger-admitted deferred transaction must already exist. The
+  unadmitted canonical transaction is archived byte-for-byte, leaving the
+  existing injury-selection restore path to reinstate the admitted transaction.
+  The ledger is never changed."
   [{:keys [ledger-path transaction-path injury-id repair-id attempt
            medic-authority authority-verifier]}]
   (try
@@ -1187,10 +1188,37 @@
                                       (:entries history)))
           transaction-author (some #(when (= :author (:phase %)) %)
                                    (:receipts transaction))
+          transaction-file (io/file transaction-path)
+          deferred-prefix (str (.getName transaction-file) ".deferred-")
+          deferred-snapshots
+          (when-let [files (.listFiles (.getAbsoluteFile
+                                        (or (.getParentFile transaction-file)
+                                            (io/file "."))))]
+            (->> files
+                 (filter #(and (str/starts-with? (.getName %) deferred-prefix)
+                               (str/ends-with? (.getName %) ".edn")))
+                 (keep #(transaction-snapshot (.getPath %)))
+                 (sort-by :transaction-path)))
+          admitted-deferred
+          (some (fn [{deferred-transaction :transaction :as deferred}]
+                  (let [deferred-order (:work-order deferred-transaction)
+                        deferred-author (some #(when (= :author (:phase %)) %)
+                                              (:receipts deferred-transaction))]
+                    (when (and (= [injury-id repair-id attempt]
+                                  [(:injury-id deferred-order)
+                                   (:repair-id deferred-order)
+                                   (:attempt deferred-order)])
+                               (= (:port-receipt-pin ledger-author)
+                                  (:receipt-pin deferred-author))
+                               (= (:patch-sha ledger-author)
+                                  (get-in deferred-author [:payload :patch-sha])))
+                      deferred)))
+                deferred-snapshots)
           evidence {:injury-id injury-id :repair-id repair-id :attempt attempt
                     :ledger-port-receipt-pin (:port-receipt-pin ledger-author)
                     :transaction-port-receipt-pin (:receipt-pin transaction-author)
-                    :transaction-sha256 (:transaction-sha256 snapshot)}
+                    :transaction-sha256 (:transaction-sha256 snapshot)
+                    :deferred-transaction-path (:transaction-path admitted-deferred)}
           authority-context {:operation medic-authority :current latest
                              :candidate evidence :evidence evidence}]
       (cond
@@ -1213,45 +1241,43 @@
         (not (true? (authority-verifier authority-context)))
         (refusal :meta-self-heal/recovery-medic-authority-refused)
 
-        (>= attempt (ledger/effective-attempt-limit history injury-id))
-        (refusal :meta-self-heal/recovery-attempt-limit-exhausted
-                 {:attempt attempt
-                  :attempt-limit (ledger/effective-attempt-limit history injury-id)})
+        (nil? admitted-deferred)
+        (refusal :meta-self-heal/recovery-no-admitted-transaction)
 
         :else
         (let [identity-check (coordinator/coordinate durable transaction {}
                                                      authority-verifier)]
           (if-not (= :coordinator/resume-identity-refused (:reason identity-check))
             (refusal :meta-self-heal/recovery-divergence-not-confirmed)
-            (let [appended (ledger/append-retry-result
-                            history
-                            (assoc evidence :reason :unadmitted-transaction-receipt)
-                            authority-verifier)]
-              (if-not (= :appended (:status appended))
-                appended
-                (let [persisted (store/persist-ledger! ledger-path (:ledger appended)
-                                                       authority-verifier)]
-                  (if-not (= :persisted (:status persisted))
-                    persisted
-                    (let [archive-path (str transaction-path ".attempt-" attempt
-                                            ".unadmitted-"
-                                            (:transaction-sha256 snapshot)
-                                            ".retired.edn")]
-                      (try
-                        (Files/move (.toPath (io/file transaction-path))
-                                    (.toPath (io/file archive-path))
-                                    (into-array StandardCopyOption
-                                                [StandardCopyOption/ATOMIC_MOVE]))
-                        {:status :reopened
-                         :ledger (:ledger appended)
-                         :abandoned-entry (:abandoned-entry appended)
-                         :entry (:entry appended)
-                         :archive-pin {:path archive-path
-                                       :sha256 (:transaction-sha256 snapshot)}}
-                        (catch Throwable t
-                          (refusal :meta-self-heal/transaction-retire-failed
-                                   {:path transaction-path :attempt attempt
-                                    :detail (ex-message t)}))))))))))))
+            (let [archive-path (str transaction-path ".attempt-" attempt
+                                    ".unadmitted-"
+                                    (:transaction-sha256 snapshot)
+                                    ".retired.edn")]
+              (try
+                (cond
+                  (not= (:transaction-sha256 snapshot)
+                        (load-identity/sha256
+                         (Files/readAllBytes (.toPath transaction-file))))
+                  (refusal :meta-self-heal/recovery-transaction-changed)
+
+                  (.exists (io/file archive-path))
+                  (refusal :meta-self-heal/recovery-archive-conflict
+                           {:path archive-path})
+
+                  :else
+                  (do
+                    (Files/move (.toPath transaction-file)
+                                (.toPath (io/file archive-path))
+                                (into-array StandardCopyOption
+                                            [StandardCopyOption/ATOMIC_MOVE]))
+                    {:status :archived
+                     :archive-pin {:path archive-path
+                                   :sha256 (:transaction-sha256 snapshot)}
+                     :deferred-path (:transaction-path admitted-deferred)}))
+                (catch Throwable t
+                  (refusal :meta-self-heal/transaction-retire-failed
+                           {:path transaction-path :attempt attempt
+                            :detail (ex-message t)}))))))))
     (catch Throwable t
       (refusal :meta-self-heal/recovery-failed {:detail (ex-message t)}))))
 
