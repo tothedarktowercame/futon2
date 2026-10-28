@@ -323,7 +323,39 @@
                                  {:retry-click (:retry-click latest)
                                   :requeue-ordinal n})))
           retry-receipt (:receipt queued)
-          transaction (or (:transaction queued) transaction)]
+          transaction (or (:transaction queued) transaction)
+          authored (authored-transition history injury-id repair-id attempt)
+          patch-sha (:patch-sha authored)
+          enacted (latest-transition history injury-id)
+          enacted-patch (:patch-sha enacted)
+          integration-commit (:integration-commit enacted)
+          _ (when-not authored
+              (stop! (refusal :coordinator/retry-authored-transition-unavailable
+                              {:injury-id injury-id :repair-id repair-id
+                               :attempt attempt})))
+          _ (when-not (and (string? patch-sha)
+                           (re-matches #"[0-9a-fA-F]{40}" patch-sha))
+              (stop! (refusal :coordinator/retry-authored-patch-invalid
+                              {:injury-id injury-id :repair-id repair-id
+                               :attempt attempt :patch-sha patch-sha})))
+          disagreement (cond
+                         (and (some? enacted-patch)
+                              (not= patch-sha enacted-patch))
+                         [:patch-sha enacted-patch]
+
+                         (and (some? integration-commit)
+                              (not= patch-sha integration-commit))
+                         [:integration-commit integration-commit]
+
+                         (and (nil? enacted-patch)
+                              (nil? integration-commit))
+                         [:integration-commit nil])
+          _ (when disagreement
+              (stop! (refusal :coordinator/retry-enacted-patch-disagrees
+                              {:injury-id injury-id :repair-id repair-id
+                               :attempt attempt :field (first disagreement)
+                               :expected patch-sha
+                               :actual (second disagreement)})))]
       (when (and retry-receipt
                  (not (and (= :queued (:status retry-receipt))
                            (= (:retry-click latest)
@@ -343,12 +375,6 @@
               retry-click-id (:retry-click-id ports)
               _ (when-not (fn? retry-click-id)
                   (stop! (refusal :coordinator/retry-click-id-unavailable
-                                  {:ledger history :transaction transaction})))
-              ;; The author receipt supplies the patch used by enact and retry.
-              patch-sha (get-in (receipt-for transaction :author) [:payload :patch-sha])
-              _ (when-not (and (string? patch-sha)
-                               (re-matches #"[0-9a-fA-F]{40}" patch-sha))
-                  (stop! (refusal :coordinator/retry-patch-unavailable
                                   {:ledger history :transaction transaction})))
               new-id (retry-click-id repair-id attempt next-n patch-sha)
               requeued (accepted! (ledger/append-requeue history injury-id new-id
