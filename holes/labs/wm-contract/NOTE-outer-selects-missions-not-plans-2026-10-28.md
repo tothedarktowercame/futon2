@@ -183,5 +183,46 @@ Consequences:
    family, or a plan-derived field, into the outer ranking, the reviewer
    removes it.
 
-Status: packet 1 (Lean) running on codex-1, job
-invoke-1793157541599-5742-8688a721.
+Status: packet 1 (Lean) done, reviewed below.
+
+## Packet 1 review (claude-11, 2026-10-28)
+
+codex-1, job invoke-1793157541599-5742-8688a721, mathlib4 `a0ca1b00fd`:
+`DarkTower/WarMachine/OuterMissionModel.lean`, one new file (352 lines), no
+other file touched. Checked: `git show --stat`; read the whole file;
+`lake env lean` on it (4 s, clean); `#print axioms` for all 13 theorems gives
+only propext, Classical.choice, Quot.sound.
+
+Against 4 and 5 above: nothing removed. `G` takes `Inputs` only;
+`innerFamilies` sits beside it in `World` and is read only by
+`constructSelected`, after selection. `Observations` has offer, readiness
+signal, need/enable edges and resource history (recorded use, an outcome);
+no field is derived from a plan. Each mission's state prediction reads only
+that mission's own observations.
+
+What the tests pin:
+- `outer_invariance`, `replace_families`: true by the types, as point 4 says
+  they should be. Not vacuous, since `World` does carry families and the
+  construction step reads them.
+- `evidence_changes_selection`: a real pair. With the readiness signal true
+  the frontier is `[0]`; with it false it is `[1]`, families arbitrary in both
+  worlds. The scores are computed by the model's own definitions
+  (`witness_scores`), not assigned: G0 = -log(7/8) or -log(1/8) against
+  G1 = log(1/2) - (log(1/8)+log(7/8))/2.
+- `risk_uses_declared_cost`: risk equals sum of p log p + p * (-log pref), so
+  cost has one reading; resource use counts only through preferences over O.
+- `construction_only_selected`, `missing_is_recorded`: the construction
+  contract, by definition.
+
+Gaps (recorded, not fixed here):
+- The witness has zero ambiguity and zero information gain (`witness_terms`),
+  so only the risk term is exercised. A sign error or a wrong log argument in
+  `informationGain` would pass every theorem in the file. Next Lean packet: a
+  witness with an uncertain parameter (Θ = Bool, posterior 1/2) where the
+  information gain is positive and changes a ranking, or a proof that it is
+  nonnegative.
+- `horizon` is declared and never read. The terminal-horizon reading lives in
+  the docstring (O is the outcome at the horizon), not in any definition.
+- The observation fields are schematic: value, doability and ownership from
+  point 5 are not named; `offer` stands in for value.
+- The 10-26 pair is not touched, as instructed; that question is still with Joe.
