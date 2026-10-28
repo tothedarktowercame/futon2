@@ -1,3 +1,25 @@
+**Question withdrawn (2026-10-28, after Joe's reply).** Joe: the question was about protocol, not AIF; a tie means the machine is not discriminating enough. The finding below the line bears that out. The evidence the machine already holds orders the two injuries, so neither a held result nor a tie-break rule is needed. The original text is kept below the line.
+
+## What the run records show
+
+The two cause claims come from different retry clicks:
+
+- **2aef → c560 (ordinal 58).** 2aef's retry click `1586bf55` stopped at `:ticket-readiness-refresh` with `:wm-job-ledger-unavailable`, and that stop opened c560 (ordinal 56). 2aef's own stage, `:author-wait`, comes after that and was never reached. So c560 really did stop 2aef's retry before 2aef's repair could be tested.
+- **c560 → 2aef (ordinal 67).** c560's retry click `8c8ee35f` passed `:ticket-readiness-refresh`, which is c560's own failure stage. It took 106 s with no debugger stop: the only stop was in `:selection`. The click then went on through cascade-resume and author-dispatch and failed at `:author-wait` with `:invalid-author-refusal`, which is 2aef's failure. So c560's repair was tested and its failure did not recur. The ledger nonetheless recorded the retry as inconclusive, with 2aef as the cause.
+
+## Where the machine fails to tell them apart
+
+`other-open-injury` (`meta_injury_ledger.clj:142`) counts another injury as the cause if it was opened, or seen as a repeated active injury, anywhere in the same run record. That records co-occurrence and treats it as a direction. It never asks whether the click reached the retried injury's own failure stage before the other failure stopped it. With that check:
+
+- 2aef's deferral to c560 stands, because the click stopped before `:author-wait`.
+- c560's claim against 2aef does not, because the click passed `:ticket-readiness-refresh`. That retry is evidence about c560's repair, and the ledger should treat it as such, not requeue it on 2aef.
+
+So the cycle is a product of the cause test and not a real tie. A cycle check in the router would only hide it. The fix belongs in the cause attribution: phase order in the run record, compared against the retried injury's `:failure-stage`.
+
+Whether "passed its own stage" should close c560 or only lift the requeue cause is the remaining design point. That is for codex-1, the Codex owner, to decide.
+
+---
+
 **This proposes adding to the specification** (no current rule covers deferral cycles). It goes to Joe and is not to be implemented until he rules.
 
 # Question for Joe: what happens when two injuries each defer to the other (2026-10-28)
