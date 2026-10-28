@@ -3,6 +3,7 @@
   (:require [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.full-loop-runner :as runner]
@@ -537,10 +538,93 @@
    :reason (or (:kind (ex-data e)) :outer-selection-failed)
    :details (dissoc (ex-data e) :kind)})
 
+(def ^:private terminal-ending-classes
+  #{:focused :related :unrelated :stop-the-line})
+
+(defn- pending-run-ending [opts run-id]
+  ;; full_loop_runner.clj:6853-6890 retains this record-only classification
+  ;; in both the returned result and the durable tick run record.
+  (let [dir (io/file (or (:run-record-dir opts) runner/default-run-record-dir))
+        file (io/file dir (str "tick-run-record-" run-id ".edn"))]
+    (if-not (.isFile file)
+      {:status :deferred :reason :run-record-absent :path (.getAbsolutePath file)}
+      (try
+        (let [record (edn/read-string (slurp file))
+              recorded-run-id (or (:run/id record) (:run-id record))
+              ending (get-in record [:run-ending-classification :class])]
+          (cond
+            (and recorded-run-id (not= run-id recorded-run-id))
+            {:status :deferred :reason :run-record-identity-mismatch}
+
+            (not (contains? terminal-ending-classes ending))
+            {:status :deferred :reason :terminal-ending-class-absent
+             :recorded-class ending}
+
+            :else {:status :ready :ending-class ending}))
+        (catch Exception e
+          {:status :deferred :reason :run-record-unreadable
+           :message (.getMessage e)})))))
+
+(defn- previous-giraffe-observation [current-dir makeup pending]
+  (let [run-id (:giraffe/run-id pending)
+        previous-dir (when run-id (io/file (.getParentFile (io/file current-dir)) run-id))]
+    (when (and previous-dir (.isDirectory previous-dir))
+      (let [observation (outer-observation/giraffe-field previous-dir makeup)]
+        (when (= run-id (:giraffe/run-id observation)) observation)))))
+
+(defn- ready-targets [observation]
+  (into #{} (comp (filter #(= :ready (get-in observation [:facts (:target %) :status])))
+                   (map :target))
+        (:field observation)))
+
+(defn- ready-gain [before current selected-target]
+  ;; Joe, 2026-10-28: gain is observed only after the selected item closes in
+  ;; a later Giraffe run.  While it remains open the observation is :none.
+  (if (some #(= selected-target (:target %)) (:field current))
+    :none
+    (case (count (set/difference (ready-targets current)
+                                 (ready-targets before)))
+      0 :none
+      1 :one
+      :several)))
+
+(defn- learning-observation [pending previous]
+  (let [selection (:selection pending)
+        selected-target (get-in selection [:selection :selected :target])
+        selected-relation (:selected-relation selection)]
+    (assoc previous
+           :focus (:focus selection)
+           :relation (fn [_ target]
+                       (when (= selected-target target) selected-relation)))))
+
+(defn- resolve-pending-learning [opts makeup state current-dir current-observation]
+  (if-let [pending (:pending state)]
+    (let [ending (pending-run-ending opts (:run-id pending))]
+      (if-not (= :ready (:status ending))
+        {:status :deferred :state state :reason (:reason ending)}
+        (if-let [previous (previous-giraffe-observation current-dir makeup pending)]
+          (let [selected-target (get-in pending [:selection :selection :selected :target])
+                gain (ready-gain previous current-observation selected-target)
+                advanced (outer-state/next-state
+                          makeup state (:selection pending)
+                          (learning-observation pending previous)
+                          {:ending-class (:ending-class ending)
+                           :observed-gain gain})]
+            {:status :applied :state (dissoc advanced :pending)
+             :ending-class (:ending-class ending) :observed-gain gain})
+          {:status :deferred :state state :reason :previous-giraffe-run-absent})))
+    {:status :none :state state}))
+
+(defn- new-run-id []
+  (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
+
 (defn- run-ordinary-opportunity!
   "Run one production opportunity with the report-backed defaults installed.
   A caller-supplied task enters the existing task path unchanged.  Otherwise
   the R20 outer loop selects from the newest verified missions Giraffe run.
+  Learning from click n is applied at selection n+1, when its terminal class
+  and a later Giraffe pass exist.  Items made ready are counted only after the
+  chosen task has closed; while it remains open observed gain is `:none`.
   META injuries are arbitrated before this function."
   [opts]
   (if (get-in opts [:task :id])
@@ -561,17 +645,43 @@
                             :relation-context
                             (focus-receipt/relation-context
                              (or (:code-root opts) "/home/joe/code"))})
+              learning (resolve-pending-learning opts makeup state giraffe-dir observation)
+              state (:state learning)
               selection (outer-select/select makeup state observation)
               retained-selection (-> selection
                                      (update :selection #(some-> % (dissoc :candidates)))
                                      (assoc :giraffe/run-id (:giraffe/run-id observation)
                                             :giraffe/manifest-sha256
                                             (:giraffe/manifest-sha256 observation)
-                                            :makeup/sha256 (:makeup/sha256 makeup)))]
+                                            :makeup/sha256 (:makeup/sha256 makeup)
+                                            :focus (:focus observation)
+                                            :selected-relation
+                                            (when-let [target (get-in selection
+                                                                      [:selection :selected :target])]
+                                              ((:relation observation)
+                                               (:focus observation) target)))
+                                     (cond-> (not= :none (:status learning))
+                                       (assoc :outer/learning
+                                              (select-keys learning
+                                                           [:status :reason :ending-class
+                                                            :observed-gain]))))
+              state-path (or (:outer/state-path opts) outer-state/default-state-path)]
           (if-let [target (get-in selection [:selection :selected :target])]
-            (run-ordinary-opportunity-with-task!
-             (assoc opts :task {:id target} :outer/selection retained-selection))
-            {:absent :no-task-selected :outer/selection retained-selection}))
+            (let [run-id (or (:run-id opts) (new-run-id))]
+              (when-not (= :deferred (:status learning))
+                (outer-state/write-state!
+                 state-path
+                 (assoc state :pending
+                        {:selection retained-selection
+                         :run-id run-id
+                         :giraffe/run-id (:giraffe/run-id observation)})))
+              (run-ordinary-opportunity-with-task!
+               (assoc opts :run-id run-id :task {:id target}
+                      :outer/selection retained-selection)))
+            (do
+              (when (= :applied (:status learning))
+                (outer-state/write-state! state-path state))
+              {:absent :no-task-selected :outer/selection retained-selection})))
         (catch clojure.lang.ExceptionInfo e
           (outer-selection-refusal e))
         (catch Exception e

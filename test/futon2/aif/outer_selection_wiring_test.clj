@@ -61,7 +61,8 @@
     (with-redefs-fn
       (merge {#'runtime/find-giraffe-run (fn [_] (fixture-run!))
               #'outer-state/load-makeup (fn [_] makeup)
-              #'outer-state/read-state (fn [m _] (outer-state/init-state m))}
+              #'outer-state/read-state (fn [m _] (outer-state/init-state m))
+              #'outer-state/write-state! (fn [& _] {:status :written})}
              redefs)
       (fn [] (#'runtime/run-ordinary-opportunity! opts)))))
 
