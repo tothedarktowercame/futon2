@@ -40,6 +40,22 @@
           result (outer-select/select makeup base-state base-observation)]
       (is (nil? (:selection result))))))
 
+(deftest tie-means-distinct-tied-picks
+  (testing "two cascades with the same minimum and the same pick are not a tie"
+    (let [makeup {:cascades [{:id :a :patterns ["test"] :steps [{:gate-status :ready}]}
+                             {:id :b :patterns ["test"] :steps [:ready-gate]}]}
+          result (outer-select/select makeup base-state base-observation)]
+      (is (= [:a :b] (:tied-cascades result)))
+      (is (false? (:tie? result)))))
+  (testing "equal scores with different picks are a tie, and it is recorded"
+    (let [observation (assoc base-observation
+                             :relation (fn [_ _] :focus)
+                             :facts {"M-ready" {:status :ready :unblocks 0 :cone 0}
+                                     "M-unknown" {:status :ready :unblocks 0 :cone 0}})
+          makeup {:cascades [{:id :a :patterns ["test"] :steps [{:gate #(= "M-ready" (:target %))}]}
+                             {:id :b :patterns ["test"] :steps [{:gate #(= "M-unknown" (:target %))}]}]}]
+      (is (true? (:tie? (outer-select/select makeup base-state observation)))))))
+
 (defonce ^:private giraffe-loader
   (doto (clojure.lang.DynamicClassLoader.
          (.getContextClassLoader (Thread/currentThread)))

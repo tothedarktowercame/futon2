@@ -39,4 +39,15 @@
          :cascade-scores scores
          :selection (when picked {:candidates (:field observation)
                                   :selected picked})
-         :tie? (< 1 (count (filter #(= minimum %) scores)))}))))
+         ;; Cascades that share the minimum but pick the same task are not a
+         ;; tie in the choice; only distinct tied picks are the defect.
+         :tied-cascades (vec (keep-indexed #(when (= minimum %2) (:id (nth menu %1)))
+                                           scores))
+         :tie? (< 1 (count (distinct
+                            (keep-indexed
+                             #(when (= minimum %2)
+                                (:target (outer-score/cascade-pick
+                                          (:steps (nth menu %1))
+                                          (:facts observation)
+                                          (:field observation))))
+                             scores))))}))))
