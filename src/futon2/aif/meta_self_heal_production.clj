@@ -1194,8 +1194,6 @@
                                                  [:port-receipt-pin :sha256]))))
                (string? (:patch-sha ledger-author))
                (boolean (re-matches #"[0-9a-f]{40}" (:patch-sha ledger-author))))
-          transaction-author (some #(when (= :author (:phase %)) %)
-                                   (:receipts transaction))
           transaction-file (io/file transaction-path)
           deferred-prefix (str (.getName transaction-file) ".deferred-")
           admitted-deferred
@@ -1223,12 +1221,17 @@
                               deferred)))))
                     (sort-by #(.getName %) files))))
           evidence {:injury-id injury-id :repair-id repair-id :attempt attempt
-                    :ledger-port-receipt-pin (:port-receipt-pin ledger-author)
-                    :transaction-port-receipt-pin (:receipt-pin transaction-author)
-                    :transaction-sha256 (:transaction-sha256 snapshot)
-                    :deferred-transaction-path (:transaction-path admitted-deferred)}
+                    :ledger-entry-id (:entry-id latest)
+                    :ledger-entry-pin (:entry-pin latest)
+                    :canonical-transaction-path (str transaction-path)
+                    :canonical-transaction-sha256 (:transaction-sha256 snapshot)
+                    :deferred-transaction-path (:transaction-path admitted-deferred)
+                    :deferred-transaction-sha256
+                    (:transaction-sha256 admitted-deferred)
+                    :ledger-author-receipt-pin (:port-receipt-pin ledger-author)
+                    :ledger-author-patch (:patch-sha ledger-author)}
           authority-context {:operation medic-authority :current latest
-                             :candidate evidence :evidence evidence}]
+                             :ledger history :candidate evidence :evidence evidence}]
       (cond
         (not (and (fn? authority-verifier) (map? medic-authority)
                   (map? authority-pin) (string? (:path authority-pin))
