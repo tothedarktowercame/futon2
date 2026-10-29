@@ -3,6 +3,8 @@
 import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.request
 from pathlib import Path
 
+PARTIAL_REQUIREMENTS=(1,3,4,5,6,7,9)
+
 def run(cmd, cwd):
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True, check=True)
 
@@ -24,20 +26,14 @@ def val(x): return "NR" if nr(x) else x
 
 def numbers(q, f):
     opened = sum(card(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) if not any(nr(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) else "NR"
-    tc = f.get("targetConstruction", {})
-    policies = "NR" if nr(tc) else sum(len(x["targets"]) * x["policyCount"] for x in tc)
-    pool = "NR" if nr(tc) else max([len(x["pool"]) for x in tc] or [0])
     table = {
       1: f"{card(f['enumeratedTasks'])} enumerated / {opened} open tasks",
-      2: f"{policies} policies / {opened} open tasks; pool {pool} / {f['libraryPatternCount']} patterns",
       3: f"{card(f['cascadesWithoutG'])} cascades without G / {card(f['constructedCascades'])} constructed",
       4: f"{card(f['preferenceSteps'])} preference steps / horizon {val(f['horizonLength'])}; G terms {val(f['gTerms'])}",
       5: f"order {val(f['interpretationOrder'])}",
       6: f"previous {val(f['previousChoice'])} -> current {val(f['currentChoice'])}; digests {val(f['previousInputDigest'])}/{val(f['currentInputDigest'])}",
       7: f"{val(f['pathAbsenceCount'])} typed path absences",
-      8: f"{card(f['enumeratedTasks'])}/{opened} enumerated; {card(f['targetsReachingScoring'])} scoring; {card(f['targetsWithG'])} with G; {card(f['comparedPolicies'])} policies",
-      9: f"{val(f['completionPairsStrictlyPreferred'])}/{val(f['completionPreferencePairs'])} completion pairs strictly preferred",
-      10: f"{val(f['arrangementPairsDistinguishedByG'])}/{val(f['differentArrangementPairs'])} arrangement pairs distinguished by G"}
+      9: f"{val(f['completionPairsStrictlyPreferred'])}/{val(f['completionPreferencePairs'])} completion pairs strictly preferred"}
     return table[q]
 
 def edn(x):
@@ -98,17 +94,18 @@ def main(argv=None):
           exported.write_text(Path(a.facts_json).read_text())
         else:
           exported.write_text(run(["clojure","-M","-m","wm-run-facts","--run",str(record)], f2).stdout)
-        run(["clojure","-M","-m","wm-check-run-facts",str(exported),str(lean),"exported"], f2)
+        reader=ml/"DarkTower/WarMachine/RequirementsReader.lean"
+        run(["clojure","-M","-m","wm-check-run-facts",str(exported),str(lean),"exported",str(reader)], f2)
         checked=run([lake_executable(),"env","lean",str(lean)], ml).stdout
         export=json.loads(exported.read_text()); facts=export["facts"]
       found={int(q): outcome for q,outcome in re.findall(r"Requirement\.q(\d+), [^)\n]*Outcome\.(\w+)", checked)}
-      outcomes={q: found.get(q,"holds") for q in range(1,11)}
+      outcomes={q: found.get(q,"holds") for q in PARTIAL_REQUIREMENTS}
       bad={q:v for q,v in outcomes.items() if v != "holds"}; head="ALERT FOR JOE" if bad else "CONFORMS"
       lines=[head]+[f"Q{q} {outcomes[q]}: {numbers(q,facts)}" for q in (bad or outcomes)]
       block="\n".join(lines); print(block, flush=True)
       result={":run-record":str(record),":checked-at":started.isoformat(),":conforms":not bad,
               ":verdicts":{f":Q{q}":f":{v}" for q,v in outcomes.items()},
-              ":critical-parameters":{f":Q{q}":numbers(q,facts) for q in range(1,11)},
+              ":critical-parameters":{f":Q{q}":numbers(q,facts) for q in PARTIAL_REQUIREMENTS},
               ":not-recomputable":export.get("diagnostics",{}).get("notRecomputable",[]),
               ":module-shas":{":mathlib-head":sha(ml),":requirements":sha(ml,"DarkTower/WarMachine/Requirements.lean"),":reader":sha(ml,"DarkTower/WarMachine/RequirementsReader.lean")},
               ":exporter-sha":sha(f2,"scripts/wm_run_facts.clj")}

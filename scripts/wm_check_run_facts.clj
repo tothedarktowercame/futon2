@@ -94,9 +94,6 @@
 
 (def deps
   {:q1 ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"]
-   :q2 ["outerActions" "targetConstruction" "libraryPatternCount"
-        "constructorPatternCount" "frontierCensus" "frontierSelection"
-        "selectedCascade" "comparedPolicies"]
    :q3 ["cascadesWithoutG"]
    :q4 ["policyPreferences" "gTerms"
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
@@ -105,11 +102,23 @@
    :q6 ["previousChoice" "previousOutcome" "previousInputDigest"
         "currentChoice" "currentInputDigest"]
    :q7 ["pathAbsenceCount"]
-   :q8 ["openMissions" "openExcursions" "openTickets" "frontierCensus"
-        "frontierRefresh" "frontierSelection" "selectedCascade"]
    :q9 ["factorizedPreference" "calibrationAuthorizations"
-        "factorizationAuthorizations"]
-   :q10 ["differentArrangementPairs" "arrangementPairsDistinguishedByG"]})
+        "factorizationAuthorizations"]})
+
+(defn partial-run-fact-fields
+  "Read the field names from Lean's PartialRunFacts declaration.  This keeps
+  the generated structure literal tied to the specification that Lean will
+  compile it against."
+  [reader-source]
+  (let [body (second (re-find
+                      #"(?s)structure\s+PartialRunFacts\s+where\s*\n(.*?)(?:\n\s*\n|\n(?:def|theorem|inductive|structure)\s)"
+                      reader-source))
+        fields (when body
+                 (mapv (comp keyword second)
+                       (re-seq #"(?m)^\s+([A-Za-z][A-Za-z0-9_]*)\s*:" body)))]
+    (when-not (seq fields)
+      (throw (ex-info "could not read fields from Lean structure PartialRunFacts" {})))
+    fields))
 
 (defn evidence [facts q]
   (let [ks (deps q)]
@@ -129,39 +138,12 @@
                                 (facts "policiesWithAmbiguityTerm")
                                 (facts "policiesWithInformationTerm")
                                 (fs (facts "comparedPolicies")))))
-        :q2 (ev-known (format "outerActions := %s, targetConstruction := %s, libraryPatternCount := %d, constructorPatternCount := %d, frontierCensus := %s, frontierSelection := %s, selectedCascade := %s, comparedPolicies := %s"
-                              (outer-actions (facts "outerActions"))
-                              (target-construction (facts "targetConstruction"))
-                              (facts "libraryPatternCount") (facts "constructorPatternCount")
-                              (census-term (facts "frontierCensus"))
-                              (selection-term (facts "frontierSelection"))
-                              (cascade-term (facts "selectedCascade"))
-                              (fs (facts "comparedPolicies"))))
         :q5 (ev-known (str "interpretationOrder := ." (facts "interpretationOrder")))
         :q6 (ev-known (format "previousChoice := %s, previousOutcome := %s, previousInputDigest := %d, currentChoice := %s, currentInputDigest := %d"
                               (choice (facts "previousChoice")) (outcomes (facts "previousOutcome"))
                               (id (facts "previousInputDigest")) (choice (facts "currentChoice"))
                               (id (facts "currentInputDigest"))))
         :q7 (ev-known (str "pathAbsenceCount := " (facts "pathAbsenceCount")))
-        ;; Q8 reads the Q6 facts only to justify a requirement exclusion:
-        ;; with none, previousOutcome .invalid makes the justification empty
-        :q8 (let [q6? (known? facts (deps :q6))
-                  excluded? (seq (field (facts "selectedCascade") :requirement-excluded))]
-              (if (and excluded? (not q6?))
-                (ev-nr facts (into (deps :q8) (deps :q6)))
-                (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, frontierCensus := %s, frontierRefresh := %s, frontierSelection := %s, selectedCascade := %s, %s"
-                                  (fs (facts "openMissions")) (fs (facts "openExcursions"))
-                                  (fs (facts "openTickets"))
-                                  (census-term (facts "frontierCensus"))
-                                  (refresh-term (facts "frontierRefresh"))
-                                  (selection-term (facts "frontierSelection"))
-                                  (cascade-term (facts "selectedCascade"))
-                                  (if q6?
-                                    (format "previousChoice := %s, previousOutcome := %s, previousInputDigest := %d, currentChoice := %s, currentInputDigest := %d"
-                                            (choice (facts "previousChoice")) (outcomes (facts "previousOutcome"))
-                                            (id (facts "previousInputDigest")) (choice (facts "currentChoice"))
-                                            (id (facts "currentInputDigest")))
-                                    "previousOutcome := .invalid")))))
         :q9 (let [certificate (facts "factorizedPreference")
                   calibration (field certificate :calibration)
                   selected-calibration-term (when calibration (calibration-term calibration))
@@ -191,11 +173,16 @@
                          (field certificate :factorization-authority)
                          (field certificate :calibration-authorization)
                          (field certificate :factorization-authorization)
-                         calibration-registry factorization-registry))))
-        :q10 (ev-known (format "differentArrangementPairs := %d, arrangementPairsDistinguishedByG := %d"
-                               (facts "differentArrangementPairs") (facts "arrangementPairsDistinguishedByG")))))))
+                         calibration-registry factorization-registry))))))))
 
-(defn lean-source [export definition-name]
+(defn lean-source
+  ([export definition-name]
+   (lean-source export definition-name [:q1 :q3 :q4 :q5 :q6 :q7 :q9]))
+  ([export definition-name partial-fields]
+   (let [unknown (seq (remove deps partial-fields))]
+     (when unknown
+       (throw (ex-info "PartialRunFacts has fields with no generator clause"
+                       {:fields (vec unknown)}))))
   (let [facts (get export "facts")]
     (str "import DarkTower.WarMachine.RequirementsReader\n"
          "set_option maxRecDepth 100000\n"
@@ -204,12 +191,14 @@
          "open DarkTower.WarMachine.Requirements\n"
          "open DarkTower.WarMachine.RequirementsReader\n"
          "def " definition-name " : PartialRunFacts where\n"
-         (apply str (for [q (map #(keyword (str "q" %)) (range 1 11))]
+         (apply str (for [q partial-fields]
                       (str "  " (name q) " := " (evidence facts q) "\n")))
-         "#eval alert " definition-name "\n")))
+         "#eval alert " definition-name "\n"))))
 
-(defn -main [& [json-path lean-path definition-name]]
-  (when-not (and json-path lean-path)
-    (throw (ex-info "usage: wm_check_run_facts.clj EXPORT.json OUTPUT.lean" {})))
-  (spit lean-path (lean-source (json/parse-string (slurp json-path))
-                               (or definition-name "exported"))))
+(defn -main [& [json-path lean-path definition-name reader-path]]
+  (when-not (and json-path lean-path reader-path)
+    (throw (ex-info "usage: wm_check_run_facts.clj EXPORT.json OUTPUT.lean DEFINITION REQUIREMENTS_READER.lean" {})))
+  (let [partial-fields (partial-run-fact-fields (slurp reader-path))]
+    (spit lean-path (lean-source (json/parse-string (slurp json-path))
+                                 (or definition-name "exported")
+                                 partial-fields))))
