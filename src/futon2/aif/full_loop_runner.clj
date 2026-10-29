@@ -118,6 +118,8 @@
 
 (def default-agency-base "http://127.0.0.1:7070")
 (def default-substrate-base "http://127.0.0.1:7073")
+(def default-phase-replay-input-root
+  "/home/joe/code/futon2/data/wm-phase-replay-inputs")
 
 (def ^:dynamic *runtime-defaults*
   "Production functions supplied by futon2.aif.full-loop-runtime. Tests and
@@ -1937,11 +1939,97 @@
       (get-in selection [:calibration :status])
       (update-in [:calibration :status] keyword))))
 
+(def ^:private credential-key-pattern
+  #"(?i)^(authorization|cookie|credentials?|password|secret|access[-_]?token|refresh[-_]?token|api[-_]?key)$")
+
+(defn- phase-replay-safe-value
+  "Retain phase data recursively, replacing credentials and live capabilities
+  with authority references. The credential value itself is never serialized."
+  [value]
+  (cond
+    (map? value)
+    (into (empty value)
+          (map (fn [[k v]]
+                 [k (if (re-find credential-key-pattern
+                                 (if (or (keyword? k) (symbol? k) (string? k))
+                                   (name k) (str k)))
+                      {:authority-reference k}
+                      (phase-replay-safe-value v))]))
+          value)
+    (vector? value) (mapv phase-replay-safe-value value)
+    (set? value) (set (map phase-replay-safe-value value))
+    (sequential? value) (mapv phase-replay-safe-value value)
+    (or (nil? value) (string? value) (keyword? value) (symbol? value)
+        (number? value) (boolean? value)) value
+    :else {:authority-reference (str (.getName (class value)))}))
+
+(defn- persist-phase-replay-input!
+  [opts record]
+  (let [root (io/file (or (:phase-replay-input-root opts)
+                          default-phase-replay-input-root))
+        bytes (.getBytes (str (pr-str record) "\n") "UTF-8")
+        digest (sha256-bytes bytes)
+        target (io/file root (str digest ".edn"))
+        temporary (io/file root (str "." digest "." (UUID/randomUUID) ".tmp"))]
+    (io/make-parents target)
+    (when-not (.isFile target)
+      (spit temporary (String. bytes "UTF-8"))
+      (try
+        (Files/move (.toPath temporary) (.toPath target)
+                    (into-array StandardCopyOption
+                                [StandardCopyOption/ATOMIC_MOVE
+                                 StandardCopyOption/REPLACE_EXISTING]))
+        (finally
+          (when (.isFile temporary) (.delete temporary)))))
+    {:path (.getCanonicalPath target) :sha256 digest}))
+
 (defn- strategic-selection-attempt
-  [invoke-fn request]
-  (try
-    {:value (selection-response->selection (invoke-fn request))}
-    (catch Throwable e {:error e})))
+  [opts attempt-number invoke-fn request]
+  (let [safe-request (phase-replay-safe-value request)
+        request-pin (persist-phase-replay-input!
+                     opts {:schema :wm/phase-replay-request-v1
+                           :phase-id :strategic-selection
+                           :attempt attempt-number
+                           :request safe-request})
+        started (System/nanoTime)]
+    (try
+      (let [response (invoke-fn request)
+            elapsed (- (System/nanoTime) started)
+            safe-response (phase-replay-safe-value response)
+            response-record (merge {:status :returned :timing-nanos elapsed
+                                    :body safe-response}
+                                   safe-response)
+            pin (persist-phase-replay-input!
+                 opts {:schema :wm/phase-replay-input-v1
+                       :phase-id :strategic-selection
+                       :attempt attempt-number
+                       :request-pin request-pin
+                       :request safe-request
+                       :response response-record})]
+        (try
+          {:value (selection-response->selection response)
+           :phase-replay-input-pin pin}
+          (catch Throwable e
+            {:error e :phase-replay-input-pin pin})))
+      (catch Throwable e
+        (let [elapsed (- (System/nanoTime) started)
+              data (ex-data e)
+              safe-response (when (map? (:response data))
+                              (phase-replay-safe-value (:response data)))
+              response-record
+              (merge {:status (or (:status data) :threw)
+                      :timing-nanos elapsed
+                      :error (ex-message e)
+                      :body safe-response}
+                     safe-response)
+              pin (persist-phase-replay-input!
+                   opts {:schema :wm/phase-replay-input-v1
+                         :phase-id :strategic-selection
+                         :attempt attempt-number
+                         :request-pin request-pin
+                         :request safe-request
+                         :response response-record})]
+          {:error e :phase-replay-input-pin pin})))))
 
 (defn- selection-failure-class
   "Classify a strategic-selection failure for retry eligibility. HTTP 5xx and
@@ -2026,15 +2114,17 @@
                          #(strategic-selection-http-invoke!
                            attempt-opts %))))
         attempt (fn [i]
-                  (strategic-selection-attempt (invoke-for i) request))]
+                  (strategic-selection-attempt opts (inc i) (invoke-for i) request))]
     (loop [i 0
-           attempt-failures []]
+           attempt-failures []
+           input-pins []]
       (let [result (attempt i)]
         (if-not (:error result)
           (cond-> (:value result)
             (pos? i)
             (assoc :readiness/selection-transient true))
           (let [cause (:error result)
+                input-pins (conj input-pins (:phase-replay-input-pin result))
                 failures (conj attempt-failures
                                (selection-attempt-summary i (timeout-for i)
                                                           cause))
@@ -2049,7 +2139,9 @@
                                     :failure-stage :selection
                                     :failure-detail failure-detail
                                     :attempts (inc i)
-                                    :attempt-failures failures})
+                                    :attempt-failures failures
+                                    :phase-replay-input-pin (peek input-pins)
+                                    :phase-replay-input-pins input-pins})
                             cause)))]
             (cond
               (= :deterministic (selection-failure-class cause))
@@ -2060,7 +2152,7 @@
               (< i (dec (count strategic-selection-retry-timeouts-ms)))
               (do
                 (sleep-fn strategic-selection-retry-delay-ms)
-                (recur (inc i) failures))
+                (recur (inc i) failures input-pins))
 
               :else
               (typed-throw
