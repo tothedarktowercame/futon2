@@ -1,4 +1,5 @@
 # E-kimi-task-31 — M-the-perfect-crime: resume operator-turn block005 (skip published)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): All 100 block005 operator-turn records have published .analysis.json files beside them in the storage batch directory. Evidence: /home/joe/code/storage/operator-turns/batches/2026-08-22_2026-09-21_block005/MANIFEST.json.
 
 **Requisition:** completed — 2026-09-25T14:14:37Z, job invoke-1790343970153-24202-1d3f86e1, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-28 — C8 observes a gate run by command
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The C8 observation check now accepts a :command locator resolved by :command-lookup, as specified; present in futon2 observation_checks.clj and its tests. Evidence: /home/joe/code/futon2/src/futon2/aif/observation_checks.clj, /home/joe/code/futon2/test/futon2/aif/observation_checks_test.clj.
 
 **Requisition:** completed — 2026-09-25T03:31:36Z, job invoke-1790306627787-24146-c6123f3a, state done
 

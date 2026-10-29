@@ -1,4 +1,5 @@
 # E-kimi-task-29 — H-C E6 served-by by artefact: implement the finished design
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The served-by-by-shared-named-artefact design was implemented: coupling-artefacts data and :basis :shared-named-artefact rows exist in the futon2 outcomes extractor namespace and its live-pinned tests. Evidence: /home/joe/code/futon2/scripts/futon2/wm/extract_outcomes.clj, /home/joe/code/futon2/test/futon2/wm/extract_outcomes_test.clj.
 
 **Requisition:** completed — 2026-09-25T03:48:42Z, job invoke-1790307213275-24150-49c7035d, state done
 

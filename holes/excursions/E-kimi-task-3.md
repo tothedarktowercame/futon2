@@ -1,4 +1,5 @@
 # E-kimi-task-3 — construction receipts refuse to compare G values over different universes (W6, X6 falsifier)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Construction receipts carry :universe on scored G values and comparisons across mismatched universes record :incommensurable; both are present throughout futon2 construction.clj. Evidence: /home/joe/code/futon2/src/futon2/aif/construction.clj.
 
 **Requisition:** completed — 2026-09-25T01:00:54Z, job invoke-1790296991497-24061-d3fedc53, state done
 

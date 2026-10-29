@@ -1,4 +1,5 @@
 # E-kimi-task-30 — registry ledger fill-forward: registrations after the build reach the live lookup
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Ledger fill-forward from the store before answering live lookups (with :namespace-ledger-filled markers and since-bounded reads) is implemented in futon3c test_registry.clj. Evidence: /home/joe/code/futon3c/src/futon3c/test_registry.clj.
 
 **Requisition:** completed — 2026-09-25T04:00:39Z, job invoke-1790307641092-24153-30caa172, state done
 
