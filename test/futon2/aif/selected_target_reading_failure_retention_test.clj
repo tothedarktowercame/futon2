@@ -29,18 +29,37 @@
              {:target "M-b" :status :refused}]
    :pending [{:target "M-c" :reason :awaiting-author}]})
 
-(defn- run-record-for-failure [dir run-id error-data]
-  (#'runner/persist-run-record!
-   {:run-record-dir (.getPath dir)
-    :scan-render-fn (fn [& _] nil)}
-   run-id "2026-10-28T00:00:00Z"
-   {:outcome :incomplete
-    :wm/route [{:fromNode "RUNNER" :toNode "FULL_LOOP_CLOSE"
-                :via :incomplete}]
-    :data {:failure-kind :selected-target-reading-redecision-failed
-           :failure-stage :selected-target-reading-redecision
-           :error "redecision failed"
-           :error-data error-data}}))
+(defn- run-record-for-failure
+  ([dir run-id error-data]
+   (run-record-for-failure dir run-id error-data nil))
+  ([dir run-id error-data reading-state]
+   (#'runner/persist-run-record!
+    (cond-> {:run-record-dir (.getPath dir)
+             :scan-render-fn (fn [& _] nil)}
+      reading-state (assoc :selected-target-reading/state reading-state))
+    run-id "2026-10-28T00:00:00Z"
+    {:outcome :incomplete
+     :wm/route [{:fromNode "RUNNER" :toNode "FULL_LOOP_CLOSE"
+                 :via :incomplete}]
+     :data {:failure-kind :selected-target-reading-redecision-failed
+            :failure-stage :selected-target-reading-redecision
+            :error "redecision failed"
+            :error-data error-data}})))
+
+(def retained-r28-observation
+  ;; Copied from the retained production record below.  The record is live
+  ;; evidence and intentionally untracked, so the regression keeps its exact
+  ;; discriminating projection rather than depending on the operator checkout.
+  ;; data/wm-runs/tick-run-record-2026-10-26-46f8cac7-1541-4f1f-83f5-aa8f6bac2a2a.edn
+  {:selected-target-reading
+   {:status :not-applicable
+    :reason :selected-target-reading-not-required}
+   :reading-frontiers
+   {:selection-frontier
+    {:status :unavailable :reason :target-policy-field-not-retained}
+    :preparation-backlog
+    {:status :not-applicable
+     :reason :selected-target-reading-not-required}}})
 
 (deftest reading-phase-failure-retains-complete-record-and-terminal-reference
   (let [dir (temp-dir)
@@ -124,3 +143,44 @@
     (is (map? (:selected-target-reading/failure-record-write-error
                (ex-data failure))))
     (is (nil? (:selected-target-reading/failure-record (ex-data failure))))))
+
+(deftest failed-redecision-observes-the-reading-that-actually-ran
+  (let [state (atom {:status :not-started})
+        dir (temp-dir)
+        failure (with-redefs [selected-target-reading/preparation-needed? (constantly true)]
+                  (try
+                    (runner/selected-target-reading-step
+                     {:run-id "r28-replay"
+                      :run-record-dir (.getPath dir)
+                      :selected-target-reading/state state}
+                     {:decision {}}
+                     (fn [_ _] reading-record)
+                     (fn [_] (throw (ex-info "retained R28 redecision failure" {}))))
+                    (catch clojure.lang.ExceptionInfo e e)))
+        persisted (run-record-for-failure dir "r28-observer"
+                                          (ex-data failure) state)
+        observed (edn/read-string (slurp (:run-record persisted)))]
+    (is (= {:status :not-applicable
+            :reason :selected-target-reading-not-required}
+           (:selected-target-reading retained-r28-observation))
+        "the retained R28 record is the discriminating red witness")
+    (is (= {:status :completed :record reading-record} @state))
+    (is (= reading-record (:selected-target-reading observed)))
+    (is (= (:records reading-record)
+           (get-in observed [:reading-frontiers :preparation-backlog :records])))
+    (is (= (:pending reading-record)
+           (get-in observed [:reading-frontiers :preparation-backlog :pending])))))
+
+(deftest reading-observer-distinguishes-not-started-from-missing-result
+  (let [no-checkpoint {:checkpoints {}}]
+    (is (= {:status :not-applicable
+            :reason :selected-target-reading-not-required}
+           (#'runner/retained-selected-target-reading
+            (atom {:status :not-started}) no-checkpoint)))
+    (is (= {:status :absent
+            :reason :selected-target-reading-started-without-result}
+           (#'runner/retained-selected-target-reading
+            (atom {:status :started}) no-checkpoint)))
+    (is (= {:status :absent
+            :reason :selection-checkpoint-without-request}
+           (#'runner/retained-selected-target-reading nil no-checkpoint)))))
