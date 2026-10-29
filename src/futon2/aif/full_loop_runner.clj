@@ -1887,10 +1887,15 @@
                     :body (json/generate-string request)
                     :timeout strategic-selection-timeout-ms
                     :throw false})
+        raw-body (str (:body response))
         body
         (try
-          (json/parse-string (str (:body response)) true)
-          (catch Throwable _ {}))]
+          (json/parse-string raw-body true)
+          ;; A non-JSON body (the ad038c48 injury: 'futon1b busy (HTTP
+          ;; 503): the read was not served' wrapped in an Agency 500) is
+          ;; downstream evidence, not garbage. Retain it verbatim as :raw so
+          ;; classification and the attempt summaries keep the busy cause.
+          (catch Throwable _ {:raw raw-body}))]
     (when-not (<= 200 (long (or (:status response) 0)) 299)
       (throw
        (ex-info "Reason-bearing strategic selection endpoint failed"
@@ -1949,7 +1954,8 @@
              :error (ex-message error)}
       status (assoc :status status)
       (:err response) (assoc :err (:err response))
-      (:message response) (assoc :message (:message response)))))
+      (:message response) (assoc :message (:message response))
+      (:raw response) (assoc :raw (:raw response)))))
 
 (defn- bounded-selection-invoke!
   [invoke-fn request timeout-ms]
