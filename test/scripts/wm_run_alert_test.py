@@ -140,6 +140,16 @@ class AlertTest(unittest.TestCase):
     self.assertNotIn("EVIDENCE PUBLICATION FAILED",p.stdout)
     self.assertIn('":published"',Path(str(rec)+".requirements.edn").read_text())
 
+  def test_evidence_publication_carries_futon1b_penholder(self):
+    module,root,record,facts=self.mocked_evaluation(); log=root/"alerts.log"
+    response=mock.MagicMock(); response.status=201
+    response.__enter__.return_value=response
+    with mock.patch.object(module.urllib.request,"urlopen",return_value=response) as urlopen:
+      status=module.main(["--run-record",str(record),"--facts-json",str(facts),"--alerts-log",str(log)])
+    self.assertEqual(0,status)
+    request=urlopen.call_args.args[0]
+    self.assertEqual("api",request.get_header("X-penholder"))
+
   def test_click_script_requires_checker_and_verdict(self):
     text=(ROOT/"scripts/wm_click.sh").read_text()
     self.assertIn('python3 "$F2/scripts/wm_run_alert.py"',text)

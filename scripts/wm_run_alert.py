@@ -128,7 +128,8 @@ def main(argv=None):
           "evidence/claim-type":"observation","evidence/at":started.isoformat(),"evidence/author":"wm-run-alert",
           "evidence/body":{"event":"wm-requirements","conforms":not bad,"verdict-file":str(verdict),"block":block},
           "evidence/tags":["war-machine","requirements","alert"]}
-      req=urllib.request.Request(a.evidence_url,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json"},method="POST")
+      req=urllib.request.Request(a.evidence_url,data=json.dumps(payload).encode(),
+          headers={"Content-Type":"application/json","X-Penholder":"api"},method="POST")
       try:
         with urllib.request.urlopen(req,timeout=10) as response:
           if response.status >= 300: raise RuntimeError(f"evidence HTTP {response.status}")
