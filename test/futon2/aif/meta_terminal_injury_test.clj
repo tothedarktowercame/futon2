@@ -33,13 +33,18 @@
     (is (= [:non-injury :successful-task-outcome]
            ((juxt :classification :non-injury-reason)
             (classify click-1-terminal pin-a)))))
-  (testing "the other two successful images are non-injuries"
-    (doseq [outcome [:already-satisfied :grounded-no-change]]
-      (is (= [:non-injury :successful-task-outcome]
-             ((juxt :classification :non-injury-reason)
-              (classify (assoc-in click-1-terminal
-                                  [:terminal-receipt :outcome] outcome)
-                        pin-a))))))
+  (testing "grounded-no-change remains a successful image"
+    (is (= [:non-injury :successful-task-outcome]
+           ((juxt :classification :non-injury-reason)
+            (classify (assoc-in click-1-terminal
+                                [:terminal-receipt :outcome] :grounded-no-change)
+                      pin-a)))))
+  (testing "bare already-satisfied is not producer-qualified"
+    (is (= :injury
+           (:classification
+            (classify (assoc-in click-1-terminal
+                                [:terminal-receipt :outcome] :already-satisfied)
+                      pin-a)))))
   (testing "an invalid-image close remains an injury"
     ;; CloseOutcomeImage.lean does not decide this contradictory no-failure
     ;; record; this packet deliberately preserves the classifier's behavior.
