@@ -17,7 +17,9 @@
 ;; record is ignored and archived in place under data/, with an ARCHIVED.md
 ;; pointing here). All live meta-injury defaults (deposit root, ledger,
 ;; transaction, diagnosis, acceptance) resolve under this single definition.
-(def default-root "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22")
+(def default-root
+  (or (System/getenv "FUTON_WM_META_INJURY_ROOT")
+      "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22"))
 
 (def eof-token (Object.))
 (defn- refusal [reason & [details]]

@@ -16,7 +16,9 @@
 
 (load-identity/register! *ns* *file*)
 
-(def default-root "/home/joe/code/futon2/data/wm-morning-brief")
+(def default-root
+  (or (System/getenv "FUTON_WM_MORNING_BRIEF_ROOT")
+      "/home/joe/code/futon2/data/wm-morning-brief"))
 (def lifecycle-schema :wm/morning-brief-lifecycle-v1)
 
 (defn- sha256 [^bytes bytes]
