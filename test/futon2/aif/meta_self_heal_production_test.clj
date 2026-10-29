@@ -429,6 +429,15 @@
 (defn- diagnosis-fixture [class]
   {:class class :production-functions production-functions})
 
+(defn- scoped-diagnosis-fixture [class source-pin]
+  (assoc (diagnosis-fixture class) :cause-entry
+         {:var "futon2.aif.wm.terminal-receipt/terminal-receipt"
+          :file "src/futon2/aif/wm/terminal_receipt.clj"
+          :failure-kind :fold-output-invalid :failure-stage :construction
+          :input {:record-pin source-pin :path []}
+          :healthy-predicate {:op :result-path-equals :path [:kind]
+                              :value :action-receipt}}))
+
 (defn- diagnosis-fixture-with-entry [index changes]
   {:class :configuration
    :production-functions (update production-functions index merge changes)})
@@ -1592,8 +1601,11 @@
                       production/route! route]
           (runtime/run-opportunity!
            {:meta-diagnosis-root (str dir "/diagnoses")
-            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
-                                 {:status :succeeded :diagnosis (diagnosis-fixture :configuration)})}))
+            :meta-diagnosis-fn (fn [request] (swap! diagnosis-calls inc)
+                                 {:status :succeeded
+                                  :diagnosis (scoped-diagnosis-fixture
+                                              :configuration
+                                              (:source-record-pin request))})}))
         failed
         (with-redefs [production/diagnosis-context (constantly context)
                       production/production-readiness readiness
@@ -1739,6 +1751,7 @@
         readiness-opts (atom [])
         diagnosis-calls (atom 0)
         acceptance-calls (atom 0)
+        scope-seen (atom nil)
         refused-readiness (fn [opts _]
                             (swap! readiness-opts conj opts)
                             {:status :refused :reason :original-readiness})
@@ -1748,17 +1761,43 @@
           (runtime/run-opportunity!
            {:meta-diagnosis-root (str dir "/diagnoses")
             :meta-acceptance-root (str dir "/acceptances")
-            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
-                                 {:status :succeeded :diagnosis (diagnosis-fixture :configuration)})
-            :meta-acceptance-fn (fn [_] (swap! acceptance-calls inc)
-                                  {:status :proposed
-                                   :acceptance-test
-                                   (acceptance-case "P17-runtime")})
+            :meta-diagnosis-fn (fn [request] (swap! diagnosis-calls inc)
+                                 {:status :succeeded
+                                  :diagnosis (scoped-diagnosis-fixture
+                                              :configuration
+                                              (:source-record-pin request))})
+            :meta-acceptance-fn (fn [request] (swap! acceptance-calls inc)
+                                  (let [scope (:cause-scope request)
+                                        ns "futon2.aif.meta-selection-contract-acceptance-test"]
+                                    (reset! scope-seen scope)
+                                    {:status :proposed
+                                     :acceptance-test
+                                     {:id "P17-runtime"
+                                      :command ["clojure" "-M:test" "-n" ns]
+                                      :expected :configuration
+                                      :source {:namespace ns
+                                               :path "test/futon2/aif/meta_selection_contract_acceptance_test.clj"
+                                               :text (str "(ns " ns " (:require [clojure.test :refer [deftest]] [futon2.aif.cause-scope]))\n"
+                                                          "(deftest cause (futon2.aif.cause-scope/assert-repair "
+                                                          (pr-str scope) "))")}}}))
             :meta-acceptance-run-fn
-            (constantly {:status :ran :outcome :failed :exit 1
-                         :summary "runtime reproduced injury"
-                         :run-pin {:path "fixture://runtime-acceptance"
-                                   :sha256 (apply str (repeat 64 "f"))}})
+            (fn [_acceptance]
+              (let [scope @scope-seen
+                    receipt {:schema :wm/cause-scope-receipt-v1 :scope scope
+                             :observed-entry (:cause-entry scope) :invoked true
+                             :predicate-observed-result true :healthy? false
+                             :failures 1 :errors 0}
+                    receipt-path (str dir "/runtime-cause-scope.edn")
+                    receipt-bytes (.getBytes (pr-str receipt) "UTF-8")
+                    _ (spit receipt-path (String. receipt-bytes "UTF-8"))]
+                {:status :ran :outcome :failed :exit 1
+                 :summary "runtime reproduced injury"
+                 :run-pin {:path "fixture://runtime-acceptance"
+                           :sha256 (apply str (repeat 64 "f"))}
+                 :cause-scope-receipt receipt
+                 :cause-scope-receipt-pin
+                 {:path receipt-path
+                  :sha256 (load-identity/sha256 receipt-bytes)}}))
             :meta-acceptance-review-fn
             (fn [request]
               (assoc (select-keys request [:injury-id :source-record-pin
@@ -1782,8 +1821,11 @@
                       production/production-readiness refused-readiness]
           (runtime/run-opportunity!
            {:meta-diagnosis-root (str dir "/diagnoses-failed")
-            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
-                                 {:status :succeeded :diagnosis (diagnosis-fixture :configuration)})
+            :meta-diagnosis-fn (fn [request] (swap! diagnosis-calls inc)
+                                 {:status :succeeded
+                                  :diagnosis (scoped-diagnosis-fixture
+                                              :configuration
+                                              (:source-record-pin request))})
             :meta-acceptance-fn (fn [_] (swap! acceptance-calls inc)
                                   {:status :failed :reason :offline})}))
         ordinary-calls (atom 0)

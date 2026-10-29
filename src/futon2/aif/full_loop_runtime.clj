@@ -80,7 +80,8 @@
           config (when resource (edn/read-string (slurp resource)))]
       (if (and (= :wm/self-heal-runtime-v1 (:schema config))
                (nat-int? (:acceptance-static-correction-limit config))
-               (nat-int? (:acceptance-return-limit config)))
+               (nat-int? (:acceptance-return-limit config))
+               (boolean? (:cause-scope-required? config)))
         config
         {}))
     (catch Throwable _ {})))
@@ -96,7 +97,9 @@
              (:acceptance-static-correction-limit config))
       (contains? config :acceptance-return-limit)
       (assoc :meta-acceptance-return-limit
-             (:acceptance-return-limit config)))))
+             (:acceptance-return-limit config))
+      (contains? config :cause-scope-required?)
+      (assoc :meta-cause-scope-required? (:cause-scope-required? config)))))
 
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
 

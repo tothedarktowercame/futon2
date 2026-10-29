@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
+            [futon2.aif.cause-scope :as cause-scope]
             [futon2.aif.out-of-band-fix :as out-of-band]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
@@ -178,6 +179,21 @@
         (seq unresolvable) (assoc :unresolvable-vars unresolvable)
         (seq missing-files) (assoc :missing-files missing-files)))))
 
+(defn cause-entry-defect [root diagnosis source-record-pin]
+  (let [entry (:cause-entry diagnosis)]
+    (cond
+      (not (map? entry)) :cause-scope/cause-entry-required
+      (not (and (string? (:var entry)) (resolvable-var? (:var entry))))
+      :cause-scope/cause-entry-unresolvable
+      (not (and (string? (:file entry)) (repository-file? root (:file entry))))
+      :cause-scope/cause-entry-file-invalid
+      (not= source-record-pin (get-in entry [:input :record-pin]))
+      :cause-scope/input-pin-not-source-record
+      (not (vector? (get-in entry [:input :path]))) :cause-scope-unretained
+      (not (cause-scope/predicate? (:healthy-predicate entry)))
+      :cause-scope/predicate-not-result-derived
+      :else nil)))
+
 (def diagnosis-request-budget-bytes
   "128 KiB for the serialized request, leaving substantial room below the
   adapter's 128k-token carried-context floor for history, tools and output."
@@ -309,6 +325,16 @@
                                 {:injury-id injury-id :request request
                                  ::diagnosis (:diagnosis response)
                                  :repair-claimed? false}))
+
+                (and (:meta-cause-scope-required? opts)
+                     (cause-entry-defect
+                 (or (:meta-repository-root opts) default-repository-root)
+                 (:diagnosis response) source-pin))
+                (refusal (cause-entry-defect
+                          (or (:meta-repository-root opts) default-repository-root)
+                          (:diagnosis response) source-pin)
+                         {:injury-id injury-id :request request
+                          :repair-claimed? false})
 
                 :else
                 (let [receipt {:schema :wm/meta-diagnosis-receipt-v1
@@ -728,15 +754,25 @@
 
         :else
         (let [diagnosis-map (:diagnosis (:receipt diagnosis-read))
+              scope (when (:meta-cause-scope-required? opts)
+                      (try (cause-scope/seal (:cause-entry diagnosis-map))
+                           (catch clojure.lang.ExceptionInfo e
+                             {:scope-error (or (:kind (ex-data e))
+                                               :cause-scope-unretained)})))
               enrichment (request-enrichment opts diagnosis-map
                                              (:source-record-pin diagnosis))]
-          (if (:unresolvable enrichment)
+          (if (:scope-error scope)
+            (refusal (:scope-error scope)
+                     {:injury-id (:injury-id diagnosis) :repair-claimed? false})
+            (if (:unresolvable enrichment)
             (refusal :meta-self-heal/acceptance-request-function-unresolvable
                      {:injury-id (:injury-id diagnosis)
                       :unresolvable (:unresolvable enrichment)
                       :repair-claimed? false})
             (produce-acceptance-from-request! opts diagnosis diagnosis-map
-                                              enrichment accept)))))))
+                                              (cond-> enrichment scope
+                                                (assoc :cause-scope scope))
+                                              accept))))))))
 
 (defn- read-acceptance-proposal [proposal]
   (let [pin (:acceptance-evidence-pin proposal)]
@@ -852,10 +888,17 @@
   [opts proposal]
   (let [proposal-read (read-acceptance-proposal proposal)
         run-acceptance (:meta-acceptance-run-fn opts)
-        review (:meta-acceptance-review-fn opts)]
+        review (:meta-acceptance-review-fn opts)
+        scope (get-in proposal-read [:receipt :request-enrichment :cause-scope])
+        source (get-in proposal-read [:receipt :acceptance-test :source :text])
+        scope-defect (when (and scope (= :available (:status proposal-read)))
+                       (cause-scope/designated-test-defect source scope))]
     (cond
       (not= :available (:status proposal-read))
       (assoc proposal-read :repair-claimed? false)
+      scope-defect
+      (refusal scope-defect {:injury-id (:injury-id proposal)
+                             :repair-claimed? false})
       (not (ifn? run-acceptance))
       (refusal :meta-self-heal/acceptance-run-port-unavailable
                {:injury-id (:injury-id proposal) :repair-claimed? false})
@@ -874,7 +917,11 @@
                                        (:outcome run-result))
                             (integer? (:exit run-result))
                             (string? (:summary run-result))
-                            (pin? (:run-pin run-result)))
+                            (pin? (:run-pin run-result))
+                            (or (nil? scope)
+                                (cause-scope/red-receipt?
+                                 scope (:cause-scope-receipt run-result)
+                                 (:cause-scope-receipt-pin run-result))))
             request (cond-> {:schema :wm/meta-acceptance-review-request-v1
                              :injury-id (:injury-id proposal)
                              :source-record-pin (:source-record-pin proposal)
