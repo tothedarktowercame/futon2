@@ -138,7 +138,14 @@
              :abstention-status (when (abstained? record) status)}
       ;; A click that selected and then failed names what it failed on.
       (selected-target record) (assoc :target (selected-target record)
-                                      :target-kind (target-kind (selected-target record))))))
+                                      :target-kind (target-kind (selected-target record)))
+      ;; A held machine condition (e.g. a repairable :wm/open-cascade-
+      ;; execution-error) surfaces the phase it held at, so a held
+      ;; open-cascade condition is distinguishable from an abstention at
+      ;; this routing seam — the record's own :detail :held-phase, never
+      ;; re-derived here.
+      (get-in record [:failure :detail :held-phase])
+      (assoc :held-phase (get-in record [:failure :detail :held-phase])))))
 
 (defn validate-receipt
   "RECEIPT as passed through, or throw {:failure-kind
