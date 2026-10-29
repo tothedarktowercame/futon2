@@ -1,6 +1,7 @@
 (ns futon2.aif.full-loop-runtime
   "Production composition root for the full-loop runner."
   (:require [cheshire.core :as json]
+            [futon2.aif.wm.cascade-patch-delivery :as patch-delivery]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -357,9 +358,12 @@
 
 (defn- open-cascade-author-prompt [req]
   (str "Repair the held executable cascade phase without selecting again. "
-       "Implement resolutions for exactly the listed holes, commit the source, "
-       "and reply with one JSON object containing requisition-id, cascade-digest, "
-       "by, decisions, and patch {namespace,var,source-digest}. The patch var "
+       "Implement resolutions for exactly the listed holes. Commit the source in "
+       "/home/joe/code/futon2, the canonical absolute repository on the serving "
+       "classpath. A sibling worktree is not delivery. Return the full commit SHA "
+       "in patch.commit; its source must be reachable from canonical HEAD. "
+       "Reply with one JSON object containing requisition-id, cascade-digest, "
+       "by, decisions, and patch {namespace,var,source-digest,commit}. The patch var "
        "must name a function (defn) of one context map {:cascade-digest :phase} "
        "that returns the decision map keyed by hole id; a bare data var (a def'd "
        "map, set or keyword) is refused at hot-load as "
@@ -512,7 +516,8 @@
           (or req ctx)
           (let [author-response (author-contact req)
                 author-answer (handoff/response-map author-response)
-                reviewer-response (when author-answer
+                delivery (when author-answer (patch-delivery/check-delivery author-answer))
+                reviewer-response (when (= :delivered (:status delivery))
                                     (reviewer-contact {:requisition req
                                                        :author-answer author-answer}))
                 reviewed (when reviewer-response
@@ -534,6 +539,9 @@
                :kind :open-cascade-author-answer-invalid
                :author author
                :author-job (contact-job author-response)}
+
+              (not= :delivered (:status delivery))
+              (assoc delivery :author-job (contact-job author-response))
 
               (nil? reviewed)
               {:status :error
