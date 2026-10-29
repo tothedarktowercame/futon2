@@ -5,35 +5,35 @@
   aab759a850cbf03fdda5c253c1ccb7c0bd71df81c29ac946cb74c3a2d78747de).
 
   Resolutions for the three :operational-clause-owed holes owned by
-  :wm/enactment-compiler.  Each decision is an operational clause: the
-  operation names what the compiler enacts for that hole, completion-check
+  :wm/enactment-compiler.  Each decision is an operational clause routed
+  through the single routable capability :wm/pattern-apply; the operation
+  names the pattern application that repairs the hole, completion-check
   names the observable condition, and :consumes/:produces describe the
-  transition where it is well-defined.  No claim is made about holes outside
-  this requisition."
+  transition.  No claim is made about holes outside this requisition."
   (:require [futon2.aif.load-identity :as load-identity]))
 
 (load-identity/register! *ns* *file*)
 
 (def clauses
   {["agent/evidence-over-assertion" 0]
-   {:operation :bind-clause-to-observed-evidence
-    :capability :wm/enactment-compile
+   {:operation :apply-evidence-over-assertion-to-compiled-clause
+    :capability :wm/pattern-apply
     :consumes :retrieved-source-pins
     :produces :evidence-anchored-clause
     :completion-check
     [:decision-cites-pinned-source
      "every compiled decision for this hole names a full-value source pin it was derived from, rather than an unanchored assertion"]}
    ["agent/escalation-cost-vs-risk" 1]
-   {:operation :scale-commitment-to-assessed-risk
-    :capability :wm/enactment-compile
+   {:operation :apply-escalation-cost-vs-risk-to-compiled-clause
+    :capability :wm/pattern-apply
     :consumes :hole-risk-assessment
     :produces :cost-matched-escalation-clause
     :completion-check
     [:escalation-cost-recorded-against-risk
      "the compiled clause records the coordination cost paid and the risk it bounds, so the pair can be compared at review"]}
    ["agent/handoff-preserves-context" 2]
-   {:operation :carry-requisition-context-into-patch
-    :capability :wm/enactment-compile
+   {:operation :apply-handoff-preserves-context-to-patch-delivery
+    :capability :wm/pattern-apply
     :consumes :requisition-context
     :produces :self-identifying-patch
     :completion-check
