@@ -15,9 +15,18 @@
 
 (defn- stable-sort-by [keyfn direction xs]
   (->> xs
-       (map-indexed vector)
-       (sort-by (fn [[index x]] [(direction (keyfn x)) index]))
-       (mapv second)))
+       (map-indexed (fn [index x] [(direction (keyfn x)) index x]))
+       (sort-by #(subvec % 0 2))
+       (mapv #(nth % 2))))
+
+(defn- graph-term [facts target term]
+  (let [fact (value-of facts target) value (get fact term)]
+    (when-not (nat-int? value)
+      (throw (ex-info "Numeric ranking requires a known graph term"
+                      {:kind :outer-score/graph-term-unavailable :target target :term term
+                       :graph-terms (:graph-terms fact)
+                       :producer (or (get-in fact [:graph-terms :producer]) :dependency-reader-reviewer)})))
+    value))
 
 (defn apply-selection-step
   "Lean `applySelectionStep`: apply one gate or stable ordering using Giraffe facts."
@@ -37,10 +46,10 @@
                  (:status (value-of facts (:target %)))) field)
 
     (= :by-unblocks step)
-    (stable-sort-by #(get (value-of facts (:target %)) :unblocks 0) - field)
+    (stable-sort-by #(graph-term facts (:target %) :unblocks) - field)
 
     (= :by-cone step)
-    (stable-sort-by #(get (value-of facts (:target %)) :cone 0) - field)
+    (stable-sort-by #(graph-term facts (:target %) :cone) - field)
 
     :else
     (throw (ex-info "Unknown outer selection step"
@@ -100,7 +109,7 @@
     (let [fact (value-of facts (:target candidate))
           status (:status fact)
           ending (ending-class relation focus (:target candidate))
-          landing (if ending [ending (ready-gain (:unblocks fact))]
+          landing (if ending [ending (ready-gain (graph-term facts (:target candidate) :unblocks))]
                       [:stop-the-line :none])]
       {:pick candidate
        :status status
