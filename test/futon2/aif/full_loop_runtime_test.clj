@@ -135,7 +135,8 @@
         "the prompt contains the exact source-pin the validator requires")))
 
 (deftest over-budget-readiness-refuses-before-provider-contact
-  (let [contacts (atom 0)
+  (let [dir (f32-root)
+        contacts (atom 0)
         proposal (readiness-proposal-with-sources 1)
         config (with-redefs [flight-runner/agency-answer-fn
                              (fn [_]
@@ -144,6 +145,7 @@
                                  {:state :completed :text "unexpected"}))]
                  (runtime/ticket-readiness-refresh-config
                   {:author "wm-author"
+                   :ticket-readiness-manifest-path (str dir "/manifest.edn")
                    :ticket-readiness-prompt-budget-chars 1
                    :ticket-readiness-source-summary-limit 1}))
         result ((:answer-fn config) proposal)]
@@ -151,7 +153,33 @@
     (is (= :refused (:status result)))
     (is (= :readiness/prompt-over-budget (:reason result)))
     (is (pos? (:prompt-chars result)))
-    (is (= 1 (:prompt-budget-chars result)))))
+    (is (= 1 (:prompt-budget-chars result)))
+    (is (= (select-keys result [:prompt-chars :prompt-budget-chars :proposal-pin])
+           (select-keys (edn/read-string (slurp (get-in result [:result-pin :path])))
+                        [:prompt-chars :prompt-budget-chars :proposal-pin])))))
+
+(deftest contacted-readiness-retains-bounded-prompt-measurement
+  (let [dir (f32-root)
+        proposal (readiness-proposal-with-sources 1)
+        config (with-redefs [runner/agent-roster
+                             (constantly {"wm-author" {:status :idle
+                                                        :invoke-ready? true}})
+                             flight-runner/agency-answer-fn
+                             (fn [_]
+                               (fn [_]
+                                 {:job-id "job-readiness-bounded"
+                                  :seat "wm-author" :state :completed
+                                  :text "{}"}))]
+                 (runtime/ticket-readiness-refresh-config
+                  {:author "wm-author"
+                   :ticket-readiness-manifest-path (str dir "/manifest.edn")}))
+        result ((:answer-fn config) proposal)
+        retained (edn/read-string (slurp (get-in result [:result-pin :path])))]
+    (is (= "job-readiness-bounded" (:job-id retained)))
+    (is (= (select-keys result [:prompt-chars :prompt-budget-chars :proposal-pin])
+           (select-keys retained [:prompt-chars :prompt-budget-chars :proposal-pin])))
+    (is (pos? (:prompt-chars retained)))
+    (is (< (:prompt-chars retained) (:prompt-budget-chars retained)))))
 
 (deftest claimed-injury-carries-intake-bindings-from-its-transaction
   (let [dir (f32-root)

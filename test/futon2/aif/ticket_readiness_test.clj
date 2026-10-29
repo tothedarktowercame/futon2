@@ -294,6 +294,33 @@
                     inputs)
                    [:assessment :classification])))))
 
+(deftest readiness-contact-retains-prompt-measurement-and-proposal-pin
+  (let [dir (temp-dir)
+        manifest (.getPath (io/file dir "manifest.edn"))
+        proposal-pin (apply str (repeat 64 "a"))
+        contact {:job-id "job-bounded-readiness" :seat "wm-author"
+                 :text "bounded answer" :state :completed
+                 :prompt-chars 8192 :prompt-budget-chars 128000
+                 :proposal-pin proposal-pin}
+        refusal {:state :not-contacted :status :refused
+                 :reason :readiness/prompt-over-budget
+                 :prompt-chars 128001 :prompt-budget-chars 128000
+                 :proposal-pin proposal-pin}
+        contact-pin (readiness/retain-contact-result! manifest contact)
+        refusal-pin (readiness/retain-contact-result! manifest refusal)
+        retained-contact (edn/read-string (slurp (:path contact-pin)))
+        retained-refusal (edn/read-string (slurp (:path refusal-pin)))]
+    (is (= {:prompt-chars 8192 :prompt-budget-chars 128000
+            :proposal-pin proposal-pin}
+           (select-keys retained-contact
+                        [:prompt-chars :prompt-budget-chars :proposal-pin])))
+    (is (= {:prompt-chars 128001 :prompt-budget-chars 128000
+            :proposal-pin proposal-pin}
+           (select-keys retained-refusal
+                        [:prompt-chars :prompt-budget-chars :proposal-pin])))
+    (is (= :not-contacted (:response-state retained-refusal)))
+    (is (re-find (re-pattern proposal-pin) (:path refusal-pin)))))
+
 (deftest adapter-keeps-operator-ownership-and-provenance-unknowns-typed
   (let [ticket {:id "T-x" :source source-pin}
         proposal {:target "T-x"}

@@ -292,13 +292,23 @@
 
 (defn retain-contact-result!
   "Retain the actual designated contact result before its claims are decoded."
-  [manifest-path {:keys [job-id seat text] :as response}]
-  (when (and (string? job-id) (string? text))
-    (let [path (str manifest-path ".contacts/" job-id ".edn")
+  [manifest-path {:keys [job-id seat text proposal-pin] :as response}]
+  (let [contact-key (cond
+                      (and (string? job-id) (string? text)) job-id
+                      (and (= :not-contacted (:state response))
+                           (string? proposal-pin)
+                           (re-matches #"[0-9a-f]{64}" proposal-pin))
+                      (str "proposal-" proposal-pin))]
+    (when contact-key
+      (let [path (str manifest-path ".contacts/" contact-key ".edn")
           value {:schema :wm/ticket-readiness-contact-v1 :job-id job-id
-                 :seat seat :result text :response-state (:state response)}]
-      (atomic-spit! path value)
-      (file-pin path))))
+                 :seat seat :result text :response-state (:state response)
+                 :reason (:reason response)
+                 :prompt-chars (:prompt-chars response)
+                 :prompt-budget-chars (:prompt-budget-chars response)
+                 :proposal-pin proposal-pin}]
+        (atomic-spit! path value)
+        (file-pin path)))))
 
 (defn read-manifest [path]
   (let [value (if (.isFile (io/file path)) (read-edn path)
