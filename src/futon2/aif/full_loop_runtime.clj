@@ -4,6 +4,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
+            [clojure.string :as str]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.full-loop-runner :as runner]
@@ -59,6 +60,10 @@
   ;; A character bound at that same floor is stricter for ordinary prose.
   128000)
 (def default-ticket-readiness-source-summary-limit 16)
+(def default-ticket-readiness-citation-limit 4)
+(def default-ticket-readiness-citation-chars 4096)
+(def default-ticket-readiness-candidate-limit 16)
+(def default-ticket-readiness-candidate-chars 1024)
 (def default-giraffe-root "/home/joe/code/storage/giraffe")
 
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
@@ -189,10 +194,36 @@
     (select-keys source [:id :path :sha256 :revision])
     {:id (str source)}))
 
+(defn- bounded-prefix [value limit]
+  (let [value (str value)]
+    (subs value 0 (min (count value) limit))))
+
+(defn- candidate-library-pin [library-pins pattern]
+  (let [suffix (str "/" pattern ".flexiarg")]
+    (some (fn [pin]
+            (when (str/ends-with? (:path pin) suffix)
+              (readiness-source-pin pin)))
+          library-pins)))
+
+(defn- target-source-pin [proposal sources]
+  (let [source-id (get-in proposal [:target :source])]
+    (some (fn [source]
+            (when (= source-id (:id source))
+              (select-keys source [:path :sha256])))
+          sources)))
+
 (defn- ticket-readiness-prompt [opts proposal]
   (let [budget (:ticket-readiness-prompt-budget-chars opts)
         source-limit (:ticket-readiness-source-summary-limit opts)
         sources (vec (:sources proposal))
+        citations (vec (get-in proposal [:retrieval :citations]))
+        candidates (vec (get-in proposal [:retrieval :slice :candidates]))
+        library-pins (get-in proposal [:retrieval :slice :library-pins])
+        citation-limit (:ticket-readiness-citation-limit opts)
+        citation-chars (:ticket-readiness-citation-chars opts)
+        candidate-limit (:ticket-readiness-candidate-limit opts)
+        candidate-chars (:ticket-readiness-candidate-chars opts)
+        ticket-source-pin (target-source-pin proposal sources)
         summary {:schema (:schema proposal)
                  :status (:status proposal)
                  :origin (:origin proposal)
@@ -201,6 +232,25 @@
                            (select-keys (:target proposal)
                                         [:id :path :sha256 :revision])
                            {:id (str (:target proposal))})
+                 :ticket-source-pin ticket-source-pin
+                 :citations
+                 (mapv (fn [citation]
+                         (-> (select-keys citation [:source :lines])
+                             (assoc :quote-prefix
+                                    (bounded-prefix (:quote citation) citation-chars))))
+                       (take citation-limit citations))
+                 :citations-truncated? (> (count citations) citation-limit)
+                 :candidates
+                 (mapv (fn [candidate]
+                         {:pattern (:pattern candidate)
+                          :rank (:rank candidate)
+                          :retriever (:retriever candidate)
+                          :source-pin (candidate-library-pin library-pins
+                                                            (:pattern candidate))
+                          :summary-prefix (bounded-prefix (pr-str candidate)
+                                                          candidate-chars)})
+                       (take candidate-limit candidates))
+                 :candidates-truncated? (> (count candidates) candidate-limit)
                  :source-count (count sources)
                  :source-pins (mapv readiness-source-pin
                                     (take source-limit sources))
@@ -230,7 +280,15 @@
   (let [opts (merge {:ticket-readiness-prompt-budget-chars
                      default-ticket-readiness-prompt-budget-chars
                      :ticket-readiness-source-summary-limit
-                     default-ticket-readiness-source-summary-limit}
+                     default-ticket-readiness-source-summary-limit
+                     :ticket-readiness-citation-limit
+                     default-ticket-readiness-citation-limit
+                     :ticket-readiness-citation-chars
+                     default-ticket-readiness-citation-chars
+                     :ticket-readiness-candidate-limit
+                     default-ticket-readiness-candidate-limit
+                     :ticket-readiness-candidate-chars
+                     default-ticket-readiness-candidate-chars}
                     opts)
         manifest-path (or (:ticket-readiness-manifest-path opts)
                           default-ticket-readiness-manifest)
