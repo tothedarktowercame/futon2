@@ -36,6 +36,7 @@
   answers, unknown senders, retries — is preserved in the ledger,
   append-only."
   (:require [cheshire.core :as json]
+            [futon2.aif.wm.cascade-capability-dispatch :as capability-dispatch]
             [clojure.edn :as edn]
             [futon2.aif.interpretation-evidence :as evidence]))
 
@@ -216,18 +217,11 @@
     (into {} (map (fn [[k v]] [(decoded-hole-id k) v]))
           (:decisions answer))))
 
-(defn validate-answer
-  "Validate a returned authoring answer against the shared handoff
-  contracts before loading: it names THIS requisition id and cascade digest,
-  carries a claim attributed to the
-  requisition's author and accepted by its reviewer (author and reviewer
-  distinct), and provides a loadable patch.  Unknown or malformed answers
-  are typed errors with everything preserved. Hole coverage is checked on
-  the verified function output, never on the JSON claim."
+(defn validate-author-binding
+  "Validate the unreviewed author identity and descriptor before product inspection.
+  This does not supply or imply reviewer acceptance."
   [requisition answer]
-  (let [bad (fn [kind repair]
-              {:status :error :kind kind :repair repair})
-        decisions (normalized-decisions answer)]
+  (let [bad (fn [kind repair] {:status :error :kind kind :repair repair})]
     (cond
       (not (map? answer))
       (bad :answer-malformed {:answer-type (type answer)})
@@ -246,19 +240,37 @@
       (bad :answer-author-mismatch {:expected (:author requisition)
                                     :by (:by answer)})
 
-      (not= (:reviewer requisition) (:accepted-by answer))
-      (bad :answer-reviewer-mismatch {:expected (:reviewer requisition)
-                                      :accepted-by (:accepted-by answer)})
-
-      (= (:by answer) (:accepted-by answer))
-      (bad :answer-author-equals-reviewer {:who (:by answer)})
-
       (not (and (map? (:patch answer))
                 (string? (get-in answer [:patch :namespace]))
                 (string? (get-in answer [:patch :var]))
                 (hex64? (get-in answer [:patch :source-digest]))))
       (bad :answer-patch-missing
            {:hint "a sealed namespace/var/source-digest descriptor is required"})
+
+      :else {:status :bound})))
+
+(defn validate-answer
+  "Validate a returned authoring answer against the shared handoff
+  contracts before loading: it names THIS requisition id and cascade digest,
+  carries a claim attributed to the
+  requisition's author and accepted by its reviewer (author and reviewer
+  distinct), and provides a loadable patch.  Unknown or malformed answers
+  are typed errors with everything preserved. Hole coverage is checked on
+  the verified function output, never on the JSON claim."
+  [requisition answer]
+  (let [bad (fn [kind repair]
+              {:status :error :kind kind :repair repair})
+        decisions (normalized-decisions answer)
+        binding (validate-author-binding requisition answer)]
+    (cond
+      (not= :bound (:status binding)) binding
+
+      (not= (:reviewer requisition) (:accepted-by answer))
+      (bad :answer-reviewer-mismatch {:expected (:reviewer requisition)
+                                      :accepted-by (:accepted-by answer)})
+
+      (= (:by answer) (:accepted-by answer))
+      (bad :answer-author-equals-reviewer {:who (:by answer)})
 
       :else
       {:status :accepted
@@ -280,7 +292,9 @@
 (defn validate-product
   "Check answers from the reviewed function. JSON decisions are only a claim;
   a malformed or differing claim remains a typed defect even if code answers."
-  [requisition accepted product]
+  ([requisition accepted product]
+   (validate-product requisition accepted product {}))
+  ([requisition accepted product opts]
   (let [decisions (normalized-decisions {:decisions product})
         required (set (map (comp decoded-hole-id :hole-id) (:holes requisition)))
         answered (set (keys decisions))
@@ -292,6 +306,11 @@
                                                           [:operation :capability
                                                            :completion-check])]
                                       (when (seq fields) [id fields]))) required))
+        unroutable (into {} (keep (fn [[id clause]]
+                                    (when (and (:capability clause)
+                                               (nil? (get (capability-dispatch/routes opts)
+                                                          (:capability clause))))
+                                      [id (:capability clause)])) decisions))
         claim (:decisions accepted)
         claim-matches? (json-claim-matches? claim decisions)
         claim-operational? (and (= required (set (keys claim)))
@@ -313,15 +332,23 @@
                                    :author-response/decisions-mismatch
                                    :author-response/decisions-not-operational)
                            :claimed-decisions claim}))}]
-    (if (and (map? product) (empty? missing) (empty? foreign) (empty? incomplete))
+    (cond
+      (seq unroutable)
+      {:status :error :kind :answer-capability-unroutable
+       :clauses unroutable :answer-delivery delivery
+       :routable-capabilities (vec (sort (keys (capability-dispatch/routes opts))))}
+
+      (and (map? product) (empty? missing) (empty? foreign) (empty? incomplete))
       {:status :accepted :decisions decisions :answer-delivery delivery}
+
+      :else
       {:status :error :kind :answer-holes-unresolved
        :answer-delivery delivery
        :repair {:missing-ids (vec (sort-by pr-str missing))
                 :foreign-ids (vec (sort-by pr-str foreign))
                 :missing-fields incomplete
                 :requisitioned (vec (sort-by pr-str required))
-                :answered (vec (sort-by pr-str answered))}})))
+                :answered (vec (sort-by pr-str answered))}}))))
 
 (defn submit-answer!
   "Submit an answer for a dispatched requisition.  Validated answers are
@@ -461,6 +488,9 @@
          (record! ledger :retries (assoc attempt :outcome :retried))
          ;; the runner boundary must prove the click and selection counts
          ;; are untouched by the retry
+         (if (= :cascade-evidence-error (:status result))
+           (do (record! ledger :attempts (assoc attempt :outcome :refused :result result))
+               result)
          (if (every? true? (vals checks))
            (if (= :cascade-ready (:status result))
              {:status :resumed
@@ -507,7 +537,7 @@
                 :repair {:clicks [(:clicks before)
                                   (some-> click-budget deref)]
                          :selections [(:selections before)
-                                      (some-> selection-counter deref)]}})))
+                                      (some-> selection-counter deref)]}}))))
        (catch Throwable t
          (record! ledger :retries
                   (assoc attempt :outcome :failed :error (ex-message t)))
@@ -527,7 +557,7 @@
   surfaces it — nothing here ever abstains or refuses."
   [ledger error author reviewer answer & [{:keys [click-budget
                                                  selection-counter
-                                                 patch-loader]}]]
+                                                 patch-loader] :as opts}]]
   (let [recognized (recognize error)]
     (if (not= :held (:status recognized))
       recognized
@@ -542,7 +572,7 @@
                                           patch-loader)]
                     (if (= :error (:status loaded))
                       loaded
-                      (let [delivery (validate-product requisition accepted (:product loaded))]
+                      (let [delivery (validate-product requisition accepted (:product loaded) opts)]
                         (if (= :error (:status delivery))
                           delivery
                           (let [resumed (resume! ledger

@@ -7945,6 +7945,7 @@
                 (case (:status handled)
                   :resumed (:result handled)
                   :error handled
+                  :cascade-evidence-error handled
                   cascade-execution0))
               cascade-execution0)
             persisted-cascade-execution
