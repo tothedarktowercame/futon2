@@ -1330,6 +1330,9 @@
             retained-decision (or decision
                                   (when (map? (get-in selection-sorry [:decision :action]))
                                     (:decision selection-sorry)))
+            answer-delivery (or (get-in result [:checkpoints :selection :judgment
+                                                :answer-delivery])
+                                (get-in selection-sorry [:downstream-refusal :answer-delivery]))
             abstention (abstention-carrier (or decision (:decision selection-sorry))
                                            (:dropped-candidates selection-sorry)
                                            (:judge-refusal selection-sorry))
@@ -1480,6 +1483,7 @@
                     (or (some-> (:effective-run-comparison/state raw-opts) deref)
                         {:schema :wm/effective-run-comparison-v1 :status :not-reached})
                     :outer-task-selection outer-task-selection
+                    :answer-delivery answer-delivery
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
                          :terminal q6-terminal}
@@ -7995,6 +7999,9 @@
                                             :run4/enacted-action (:action entry))))
                                (selected-cascade entry)
                                (assoc-in [:judgment :selected-cascade] (selected-cascade entry))
+                               (:answer-delivery persisted-cascade-execution)
+                               (assoc-in [:judgment :answer-delivery]
+                                         (:answer-delivery persisted-cascade-execution))
                                (:readiness/selection-transient judgement0)
                                (assoc-in [:judgment
                                           :readiness/selection-transient]
