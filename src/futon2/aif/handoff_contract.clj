@@ -119,6 +119,22 @@
     (some response-json-object [(:result answer) (:text answer)])
     :else nil))
 
+(defn response-parse-error
+  "Diagnostic for an undecodable response; never accepts a wider grammar."
+  [answer]
+  (let [raw (response-payload answer)]
+    (if-not (string? raw)
+      "Expected a JSON object response"
+      (let [fences (re-seq #"(?s)```[^\n]*\n(.*?)```" raw)
+            spans (when-not (seq fences) (balanced-object-spans raw))
+            candidate (cond (= 1 (count fences)) (second (first fences))
+                            (= 1 (count spans)) (first spans)
+                            :else raw)]
+        (try
+          (json/parse-string candidate true)
+          "Expected exactly one JSON object (one fence or one balanced object)"
+          (catch Exception e (ex-message e)))))))
+
 (defn exchange
   "Run one external handoff through the common contact boundary.
 

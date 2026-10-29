@@ -6634,7 +6634,8 @@
                        (when-not (stop-line/no-finding-required?
                                   {:outcome outcome
                                    :grounded-commit (:grounded-commit data)
-                                   :reviewed-claim-refused? (:reviewed-claim-refused? data)})
+                                   :reviewed-claim-refused? (:reviewed-claim-refused? data)
+                                 :failure-kind (:failure-kind data)})
                          (or existing-finding
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
@@ -7334,6 +7335,7 @@
                                  ;; outcome label.
                                  :grounded-commit (:grounded-commit data)
                                  :reviewed-claim-refused? (:reviewed-claim-refused? data)
+                                 :failure-kind (:failure-kind data)
                                  :duration-ms (- (System/currentTimeMillis) started)
                                  :tripwire/snapshot
                                  {:grounded-commit
@@ -8163,6 +8165,13 @@
                                  judgement selected-target-reading-record)))]
           (reset! pending-selection selection-cell)
           (swap! checkpoints assoc :selection selection-cell))
+        (when (= :author-response-unparseable (:kind persisted-cascade-execution))
+          (throw (ex-info "Author response remained unparseable after one format correction"
+                          {:outcome :guardrail-refusal
+                           :failure-kind :author-response-unparseable
+                           :failure-stage :cascade-resume
+                           :author-job (:author-job persisted-cascade-execution)
+                           :failure-detail persisted-cascade-execution})))
         (when-not entry
           ;; Injury 94091: a typed :error from the cascade-resume handler
           ;; (or any typed :error cascade condition without an :open-cascade

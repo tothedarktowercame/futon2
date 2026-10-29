@@ -367,7 +367,13 @@
        "classpath. A sibling worktree is not delivery. Return the full commit SHA "
        "in patch.commit; its source must be reachable from canonical HEAD. "
        "Reply with one JSON object containing requisition-id, cascade-digest, "
-       "by, decisions, and patch {namespace,var,source-digest,commit}. The patch var "
+       "by, decisions, and patch {namespace,var,source-digest,commit}. "
+       "Encode decisions as a JSON array of objects, each with hole: [pattern-id, index] "
+       "and operation, capability, completion-check (plus optional consumes/produces). "
+       "Example: {\"hole\":[\"pattern/id\",0],\"operation\":\"apply\","
+       "\"capability\":\"wm/pattern-apply\",\"completion-check\":[\"checked\"]}. "
+       "Never use vectors as JSON object keys. JSON decisions are only a claim compared "
+       "against the verified function's output; the function supplies the answers. The patch var "
        "must name a function (defn) of one context map {:cascade-digest :phase} "
        "that returns the decision map keyed by hole id; a bare data var (a def'd "
        "map, set or keyword) is refused at hot-load as "
@@ -381,6 +387,11 @@
        "futon2.aif.load-identity and call (load-identity/register! *ns* *file*) "
        "at top level; the trusted loader refuses an unregistered namespace as "
        ":patch-namespace-not-registered.\n\n"
+       (when-let [correction (:format-correction req)]
+         (str "FORMAT CORRECTION (one round only): the previous response did not parse: "
+              (:parser-error correction)
+              ". Return one valid JSON object with decisions encoded as the array above. "
+              "Keep this requisition and committed patch; no new selection.\n"))
        (pr-str req)))
 
 (defn- open-cascade-review-prompt [{:keys [requisition author-answer]}]
@@ -522,8 +533,18 @@
                          (vec (sort (keys (capability-dispatch/routes opts))))))]
         (if-not (= :dispatched (:status req))
           (or req ctx)
-          (let [author-response (author-contact req)
-                author-answer (handoff/response-map author-response)
+          (let [first-response (author-contact req)
+                first-answer (handoff/response-map first-response)
+                correction (when (and (nil? first-answer)
+                                      (= "done" (:state first-response)))
+                             {:round 1 :limit 1
+                              :author-job (contact-job first-response)
+                              :parser-error (handoff/response-parse-error first-response)})
+                author-response (if correction
+                                  (author-contact (assoc req :format-correction correction))
+                                  first-response)
+                author-answer (if correction (handoff/response-map author-response)
+                                  first-answer)
                 author-binding (open-resume/validate-author-binding req author-answer)
                 delivery (when (= :bound (:status author-binding))
                            (patch-delivery/check-delivery author-answer))
@@ -551,12 +572,16 @@
                          (= (get-in author-answer [:patch :source-digest])
                             (get-in reviewed [:patch :source-digest])))
                   (assoc author-answer :accepted-by (:accepted-by reviewed))
-                  reviewed)]
-            (cond
+                  reviewed)
+                result (cond
               (nil? author-answer)
               {:status :error
-               :kind :open-cascade-author-answer-invalid
+               :kind (if (and correction (= "done" (:state author-response)))
+                       :author-response-unparseable
+                       :open-cascade-author-answer-invalid)
                :author author
+               :format-correction correction
+               :parser-error (handoff/response-parse-error author-response)
                :author-job (contact-job author-response)}
 
               (not= :bound (:status author-binding))
@@ -581,7 +606,13 @@
                 :click-budget (:click-budget opts)
                 :selection-counter (:selection-counter opts)
                 :patch-loader (or (:open-cascade-patch-loader opts)
-                                  patch-loader)}))))))))
+                                  patch-loader)}))]
+              (cond-> result
+                correction (assoc :author-format-correction correction)
+                (and correction (:answer-delivery result))
+                (assoc-in [:answer-delivery :format-correction] correction)
+                (and correction (get-in result [:result :answer-delivery]))
+                (assoc-in [:result :answer-delivery :format-correction] correction))))))))
 
 (defn- selection-judge
   [opts days]

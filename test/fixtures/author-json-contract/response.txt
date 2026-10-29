@@ -1,0 +1,26 @@
+Committed on canonical HEAD (`bb1846638…` in `/home/joe/code/futon2`; the untracked `evidence/*.source` files are pre-existing session artifacts, not mine). clj-kondo clean, parens checked, and the var hot-loads: `decisions` returns 5 clauses for the matching digest/phase and a typed `:patch-cascade-context-mismatch` otherwise.
+
+```json
+{
+  "rquisition-id": "cfdb1f621bb56b7b80cb3f09c11d41ea7ecfa410bab59116fe8c3dacbd1c94bf",
+  "requisition-id": "cfdb1f621bb56b7b80cb3f09c11d41ea7ecfa410bab59116fe8c3dacbd1c94bf",
+  "cascade-digest": "309421670ca97dd1b1c73447bca9d818b93e2334d5d98d3c0208dd419b9336cb",
+  "by": "wm-author",
+  "decisions": {
+    "note": "keyed by hole id; each value is the operational clause",
+    ["futon-theory/progress-signal" 1]: {"operation": ":apply-progress-signal-to-phase-declaration", "capability": ":wm/pattern-apply", "consumes": ":mission-phase-declaration", "produces": ":evidence-anchored-phase-reading", "completion-check": "[:phase-claim-backed-by-evidence-ladder \"the MAP-phase declaration is scored against the evidence ladder so the phase reading cites at least one typed evidence item\"]"},
+    ["futon-theory/single-source-of-truth" 2]: {"operation": ":apply-single-source-of-truth-to-substrate-naming", "capability": ":wm/pattern-apply", "consumes": ":named-substrate-reference", "produces": ":single-authority-substrate-binding", "completion-check": "[:substrate-resolves-to-exactly-one-authority \"the MiniLM-cosine substrate is bound to exactly one pinned source of record; a second candidate mapping is rejected\"]"},
+    ["futon-theory/honest-map-over-flattering-counter" 3]: {"operation": ":apply-honest-map-over-flattering-counter-to-pipeline-verdict", "capability": ":wm/pattern-apply", "consumes": ":substrate-output-artifact", "produces": ":raised-hole-count-verdict", "completion-check": "[:artifact-verdict-raises-not-hides-the-count \"the 'artifact, not signal' verdict is recorded as a visible hole (count raised), not absorbed as a flattering pass\"]"},
+    ["futon-theory/progress-signal" 5]: {"operation": ":apply-progress-signal-to-refocus-declaration", "capability": ":wm/pattern-apply", "consumes": ":refocus-declaration", "produces": ":recorded-decision-evidence", "completion-check": "[:refocus-recorded-as-decision-made \"the centre-of-gravity shift is recorded as a DECISION-MADE evidence item so momentum tracks the new focus and the counter-ratchet flags evidence decrease\"]"},
+    ["futon-theory/single-source-of-truth" 7]: {"operation": ":apply-single-source-of-truth-to-goal-state-specification", "capability": ":wm/pattern-apply", "consumes": ":goal-state-specification", "produces": ":committed-replacement-goal-state", "completion-check": "[:goal-state-committed-as-single-authority \"the specify-and-replace goal-state is the one committed target; patching the old substrate is no longer a live authority and ambiguity between the two is refused\"]"}
+  },
+  "patch": {
+    "namespace": "futon2.aif.wm.authored.req-cfdb1f62",
+    "var": "decisions",
+    "source-digest": "fe48324bdc0e11039484a434484c2ce1a12fa430e9b61fef8cd3c3ab32f2f894",
+    "commit": "bb1846638820488b1bd5494fbd714aa0213bfa66"
+  }
+}
+```
+
+The full clause text lives in the committed source at `src/futon2/aif/wm/authored/req_cfdb1f62.clj`; the JSON above is its faithful summary (note the `decisions` object is a string summary, not the literal map — the map itself is in the patch var).

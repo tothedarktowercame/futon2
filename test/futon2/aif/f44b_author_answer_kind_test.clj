@@ -28,7 +28,8 @@
                     {:state "done" :result "must not be called"})})
         result (handler held-error)]
     (is (= :error (:status result)))
-    (is (= :open-cascade-author-answer-invalid (:kind result)))
+    ;; Two completed malformed responses exhaust the single format correction.
+    (is (= :author-response-unparseable (:kind result)))
     (is (= "wm-author" (:author result)))
     (is (= "author-job-f44b" (:author-job result)))
     (is (false? @reviewer-called?))))
