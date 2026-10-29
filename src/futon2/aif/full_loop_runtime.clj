@@ -755,6 +755,8 @@
               state (:state learning)
               selection (outer-select/select makeup state observation)
               retained-selection (-> selection
+                                     (assoc :outer-field/admitted
+                                            (mapv :target (:field observation)))
                                      (update :selection #(some-> % (dissoc :candidates)))
                                      (assoc :giraffe/run-id (:giraffe/run-id observation)
                                             :giraffe/manifest-sha256
