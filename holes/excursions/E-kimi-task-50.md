@@ -1,4 +1,5 @@
 # E-kimi-task-50 — Sidecar P2: serve type+endpoint hyperedge reads from the index, re-checked (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar packet P2 (indexed type+end hyperedge reads re-checked against XTDB) was built and landed as futon1b commit 07256fa. Evidence: 07256fa.
 
 **Requisition:** completed — 2026-09-26T10:52:12Z, job invoke-1790419324046-24772-7bf72361, state done
 

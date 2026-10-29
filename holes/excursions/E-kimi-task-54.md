@@ -1,4 +1,5 @@
 # E-kimi-task-54 — Fix futon6 publish-efe-field.sh: pattern-density report times out at 90 s (futon6)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): futon6 publish-efe-field.sh was fixed to stop failing on the slow pattern-density report, landed as futon6 commit 8af636c. Evidence: 8af636c.
 
 **Requisition:** completed — 2026-09-26T13:03:33Z, job invoke-1790426510196-24829-6e6800cd, state done
 

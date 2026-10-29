@@ -1,4 +1,5 @@
 # E-kimi-task-59 — Sidecar P5: scope index built from a run directory's expo files (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar packet P5 (scope sidecar indexed from run-dir expo files, futon1b-scopeindex) landed as futon1b commit ad7468b. Evidence: ad7468b.
 
 **Requisition:** completed — 2026-09-26T14:10:42Z, job invoke-1790430722360-24858-285044b6, state done
 

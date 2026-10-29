@@ -1,4 +1,5 @@
 # E-kimi-task-52 — Sidecar P3: type-only hyperedge reads (cursor + include-total) from the index (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar packet P3 (type-only hyperedge reads with cursor and include-total from the sidecar) landed as futon1b commit 295ebc0. Evidence: 295ebc0.
 
 **Requisition:** completed — 2026-09-26T11:44:12Z, job invoke-1790422413705-24786-3acb4fc2, state done
 

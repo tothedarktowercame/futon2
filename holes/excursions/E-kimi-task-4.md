@@ -1,4 +1,5 @@
 # E-kimi-task-4 — measure the observation class checks C3-C8 against their own bad cases (A-CLASS)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The PROOF-2 A-CLASS measurement packet was delivered with per-class tables and Jeffreys intervals. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/A-CLASS.md.
 
 **Requisition:** completed — 2026-09-25T01:26:34Z, job invoke-1790297082370-24063-192c974f, state done
 

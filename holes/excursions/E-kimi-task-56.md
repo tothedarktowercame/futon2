@@ -1,4 +1,5 @@
 # E-kimi-task-56 — Sidecar P3e: stop hx write hooks failing with SQLITE_BUSY (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar packet P3e (stop hx write hooks failing with SQLITE_BUSY) landed as futon1b commit 406aaa6. Evidence: 406aaa6.
 
 **Requisition:** completed — 2026-09-26T13:24:42Z, job invoke-1790427847786-24838-5e7c54fb, state done
 

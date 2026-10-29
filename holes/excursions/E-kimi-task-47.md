@@ -1,4 +1,5 @@
 # E-kimi-task-47 — Neo4j sidecar prototype: same data and queries as the SQLite design, measured
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The throwaway Neo4j sidecar prototype note with the six timed comparison queries was delivered. Evidence: /home/joe/code/futon1b/holes/PROTO-neo4j-sidecar-2026-09-26.md.
 
 **Requisition:** completed — 2026-09-26T09:46:46Z, job invoke-1790415400765-24749-00f5fa24, state done
 

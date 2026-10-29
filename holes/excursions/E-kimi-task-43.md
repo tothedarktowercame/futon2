@@ -1,4 +1,5 @@
 # E-kimi-task-43 — Tornhill packet 1a: mission_activity.py emits each mission's file list (futon6)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Tornhill packet 1a landed: mission_activity.py emits code.files (futon6 0a98504), recorded by E-kimi-task-44; the requisition was later cancelled only after the work landed. Evidence: 0a98504, /home/joe/code/futon6/tests/test_mission_activity_files.py.
 
 **Requisition:** completed — 2026-09-26T02:49:26Z, job invoke-1790387079827-24611-d415a1ad, state cancelled
 

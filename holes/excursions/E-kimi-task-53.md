@@ -1,4 +1,5 @@
 # E-kimi-task-53 — Sidecar P3c: exact type census from the index incl. zero-endpoint hyperedges (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar packet P3c (exact type census from the sidecar including zero-endpoint hyperedges) landed as futon1b commit c9ede34. Evidence: c9ede34.
 
 **Requisition:** completed — 2026-09-26T13:02:57Z, job invoke-1790426229308-24823-96c809d6, state done
 

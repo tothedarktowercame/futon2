@@ -1,4 +1,5 @@
 # E-kimi-task-46 — Design the futon1b hyperedge + superpod-scope sidecar (design note + prototype measurements)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The SQLite hyperedge + superpod-scope sidecar design note with prototype measurements was delivered, no server changes. Evidence: /home/joe/code/futon1b/holes/DESIGN-hyperedge-scope-sidecar-2026-09-26.md.
 
 **Requisition:** completed — 2026-09-26T09:41:32Z, job invoke-1790415298714-24746-cc2f6684, state done
 

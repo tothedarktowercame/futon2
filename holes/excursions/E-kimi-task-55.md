@@ -1,4 +1,5 @@
 # E-kimi-task-55 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for the read-step block of the matrix (5 wires), calibration lane
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): First-layer wire tests for the five r2 read-step wires of the PROOF-2a matrix landed as futon3c commit 5fcd79cbf. Evidence: 5fcd79cbf.
 
 **Requisition:** completed — 2026-09-26T13:27:34Z, job invoke-1790426650678-24830-22e4fc80, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-49 — Sidecar P1: hyperedge tables, write hook, system-time catch-up (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar P1 landed: futon1b_hxindex.clj adds hyperedge tables, post-write hooks and system-time catch-up, filling but not serving the index. Evidence: /home/joe/code/futon1b/futon1b_hxindex.clj.
 
 **Requisition:** completed — 2026-09-26T10:27:48Z, job invoke-1790417759279-24762-207b53c9, state done
 

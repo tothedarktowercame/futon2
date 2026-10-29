@@ -1,4 +1,5 @@
 # E-kimi-task-45 — EFE carpet global controls: band floor, status filter, layer toggles (futon6)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The EFE carpet control panel (band floor, status filter, layer toggles) was built and landed as futon6 2ade473 with follow-ups. Evidence: 2ade473, /home/joe/code/futon6/scripts/efe_carpet_controls.py.
 
 **Requisition:** completed — 2026-09-26T03:37:29Z, job invoke-1790393400027-24673-cc380f3a, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-57 — Sidecar P3d: endpoint-prefix hyperedge reads (Q3) from the index (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar packet P3d (endpoint-prefix hyperedge reads from the index) landed as futon1b commit 2e75986. Evidence: 2e75986.
 
 **Requisition:** completed — 2026-09-26T13:37:47Z, job invoke-1790429236453-24847-5e471bbd, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-48 — Sidecar P0: measure XTDB2 system-time catch-up for hyperedges (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar P0 measurement (XTDB2 system-time catch-up for hyperedges) was appended as a 'P0 measurements' section to the design note. Evidence: /home/joe/code/futon1b/holes/DESIGN-hyperedge-scope-sidecar-2026-09-26.md.
 
 **Requisition:** completed — 2026-09-26T10:15:01Z, job invoke-1790416711561-24757-22af32e3, state done
 

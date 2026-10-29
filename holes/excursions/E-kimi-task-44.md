@@ -1,4 +1,5 @@
 # E-kimi-task-44 — Tornhill packet 1b: EFE code ring reads the Tornhill report (futon6)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Tornhill packet 1b landed: the EFE code ring reads the file-level Tornhill report via code.files (futon6 c49a151). Evidence: c49a151, /home/joe/code/futon6/scripts/efe_tornhill_ring.py.
 
 **Requisition:** completed — 2026-09-26T03:09:09Z, job invoke-1790391593644-24660-21624235, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-5 — two sentences claim a passing test is observed exactly; only C8's token is (wording fix)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The two wording fixes (PLAN-WM-04-unblock line 31 and the TokenObservation.lean docstring) landed as mathlib4 5fe0371169 and p4ng c93df958. Evidence: 5fe0371169, c93df958.
 
 **Requisition:** completed — 2026-09-25T00:50:10Z, job invoke-1790297084137-24064-8a2e02f4, state done
 

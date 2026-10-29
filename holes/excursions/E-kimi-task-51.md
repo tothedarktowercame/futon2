@@ -1,4 +1,5 @@
 # E-kimi-task-51 — Sidecar P2b: narrow re-check + fields projection on indexed type+end reads (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Sidecar packet P2b (narrow re-check + fields projection on the indexed type+end read path) landed as futon1b commit dc646fb. Evidence: dc646fb.
 
 **Requisition:** completed — 2026-09-26T11:31:33Z, job invoke-1790421263183-24779-01c2b3e5, state done
 
