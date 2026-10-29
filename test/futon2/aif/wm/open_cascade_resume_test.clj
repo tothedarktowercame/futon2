@@ -2,8 +2,11 @@
   "Packet D4 focused tests: the same-click resume protocol over a
   documented fixture/port.  Every planted control names the defect it must
   catch."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.wm.authored.req-f0ba279a :as correct]
+            [futon2.aif.wm.cascade-enactment-compiler :as compiler]
             [futon2.aif.wm.open-cascade-resume :as r]))
 
 (def cascade-digest (evidence/value-digest [:packet-d4 :cascade]))
@@ -24,14 +27,16 @@
   "D3's typed open-cascade execution error against the documented port.
   The ONE adapter field D3 supplies is :resume-port {:retry fn}."
   [& [{:keys [retry]
-       :or {retry (fn [_] {:cascade-digest cascade-digest
+       :or {retry (fn [_] {:status :cascade-ready
+                           :cascade-digest cascade-digest
                            :outcome :phase-redone})}}]]
   {:kind :wm/open-cascade-execution-error
    :cascade-digest cascade-digest
    :holes holes
    :phase :enact
    :attempts [{:attempt 1 :error "first try"}]
-   :resume-port {:retry (or retry (fn [_] {:cascade-digest cascade-digest
+   :resume-port {:retry (or retry (fn [_] {:status :cascade-ready
+                                           :cascade-digest cascade-digest
                                            :outcome :phase-redone}))}})
 
 (defn- answer-for
@@ -135,7 +140,8 @@
         selection-counter (atom 1)
         retry-ctx (atom nil)
         error (held-error {:retry (fn [ctx] (reset! retry-ctx ctx)
-                                    {:cascade-digest cascade-digest
+                                    {:status :cascade-ready
+                                     :cascade-digest cascade-digest
                                      :outcome :phase-redone})})
         ctx (r/recognize error)
         req (r/authoring-requisition ctx "claude-2" "codex-68")
@@ -164,7 +170,8 @@
         click-budget (atom 1)
         selection-counter (atom 1)
         error (held-error {:retry (fn [_] (swap! selection-counter inc)
-                                    {:cascade-digest cascade-digest
+                                    {:status :cascade-ready
+                                     :cascade-digest cascade-digest
                                      :outcome :done})})
         ctx (r/recognize error)]
     (is (= :resume-protocol-violation
@@ -226,7 +233,8 @@
         loaded-product {:occurrence/verified {:operation :apply}}
         error (held-error {:retry (fn [ctx]
                                     (reset! retry-ctx ctx)
-                                    {:cascade-digest cascade-digest
+                                    {:status :cascade-ready
+                                     :cascade-digest cascade-digest
                                      :outcome :phase-redone})})
         ctx (r/recognize error)
         req (r/authoring-requisition ctx "claude-2" "codex-68")
@@ -254,10 +262,13 @@
 
 (deftest retry-result-must-be-bound-to-the-held-cascade
   (let [ledger (r/new-ledger "click-1")
-        unbound (r/recognize (held-error {:retry (constantly {:outcome :done})}))
+        unbound (r/recognize (held-error {:retry (constantly
+                                                  {:status :cascade-ready
+                                                   :outcome :done})}))
         foreign (r/recognize
                  (held-error {:retry (constantly
-                                      {:cascade-digest
+                                      {:status :cascade-ready
+                                       :cascade-digest
                                        (evidence/value-digest [:foreign])})}))]
     (let [unbound-result (r/resume! ledger unbound)
           foreign-result (r/resume! ledger foreign)]
@@ -287,6 +298,92 @@
     (is (= :resumed (:status result)))
     (is (= selected (get-in result [:result :cascade-digest])))
     (is (= after (get-in result [:result :compiled-digest])))))
+
+(def retained-cascade-digest
+  "af6294ee687ca69fac2cb0ddd7e75c92cccf38e716a5082f3a3333d41e218f91")
+
+(def retained-cascade-path
+  "/home/joe/code/futon2/data/wm-executable-cascades/af6294ee687ca69fac2cb0ddd7e75c92cccf38e716a5082f3a3333d41e218f91.edn")
+
+(def retained-patch-path
+  "/home/joe/code/futon3c/src/futon3c/wm/enactment_clauses.clj")
+
+(defn- compile-product [structural clauses]
+  (let [compiled (compiler/compile-executable
+                  structural
+                  {:attribution {:author :wm-author
+                                 :reviewer :wm-reviewer
+                                 :authority :wm/reviewed-resume}
+                   :application-order []
+                   :clauses clauses})]
+    (if (or (:refusal compiled)
+            (seq (get-in compiled [:executable-inputs :holes])))
+      {:status :cascade-enactment-open
+       :cascade-digest retained-cascade-digest
+       :holes (mapv (fn [hole-id] {:hole-id hole-id})
+                    (keys (get-in compiled [:executable-inputs :holes])))
+       :compiler-result compiled}
+      {:status :cascade-ready
+       :cascade-digest retained-cascade-digest
+       :compiled-digest (:digest compiled)
+       :compiler-result compiled})))
+
+(deftest retained-descriptive-patch-stays-held-with-exact-missing-fields
+  ;; Injury e43a348c's real retained cascade and the real d09b50767 patch
+  ;; output: the compiler must catch the exact bad case this guard names.
+  (load-file retained-patch-path)
+  (let [retained (edn/read-string (slurp retained-cascade-path))
+        structural (:structural retained)
+        patch-fn (ns-resolve 'futon3c.wm.enactment-clauses 'enact-clauses)
+        product (patch-fn {:cascade-digest retained-cascade-digest
+                           :phase :compile})
+        compiled (compile-product structural product)
+        hole-ids (mapv #(hash-map :hole-id %) (keys product))
+        error {:kind :wm/open-cascade-execution-error
+               :cascade-digest retained-cascade-digest
+               :holes hole-ids
+               :phase :compile
+               :attempts []
+               :resume-port {:retry (constantly compiled)}}
+        ctx (assoc (r/recognize error) :authoring-product product)
+        result (r/resume! (r/new-ledger "retained-d09b50767") ctx)]
+    (is (= :error (:status result)))
+    (is (= :resume-incomplete (:kind result)))
+    (is (:open-cascade result))
+    (is (= (set (keys product)) (set (map :hole-id (:missing-fields result)))))
+    (is (every? #(= #{:operation :capability :completion-check}
+                     (set (:missing %)))
+                (:missing-fields result)))))
+
+(deftest retained-cascade-resumes-only-for-correct-operational-clauses
+  (let [retained (edn/read-string (slurp retained-cascade-path))
+        compiled (compile-product (:structural retained) correct/clauses)
+        error {:kind :wm/open-cascade-execution-error
+               :cascade-digest retained-cascade-digest
+               :holes (mapv #(hash-map :hole-id %) (keys correct/clauses))
+               :phase :compile
+               :attempts []
+               :resume-port {:retry (constantly compiled)}}
+        ctx (assoc (r/recognize error) :authoring-product correct/clauses)
+        result (r/resume! (r/new-ledger "retained-correct-shape") ctx)]
+    (is (= :cascade-ready (:status compiled)))
+    (is (= :resumed (:status result)))
+    (is (= :cascade-ready (get-in result [:result :status])))))
+
+(deftest fresh-requisition-carries-prior-resume-incomplete-cause
+  (let [missing [{:hole-id ["pattern/a" 0]
+                  :missing [:operation :capability :completion-check]}]
+        error (assoc (held-error)
+                     :kind :resume-incomplete
+                     :missing-fields missing)
+        req (r/authoring-requisition (r/recognize error)
+                                     "claude-2" "codex-68")]
+    (is (= :resume-incomplete
+           (get-in req [:prior-resume-cause :kind])))
+    (is (= missing
+           (get-in req [:prior-resume-cause :missing-fields])))
+    (is (= [:operation :capability :completion-check]
+           (get-in req [:operational-clause-schema :required])))))
 
 (deftest ledger-chain-detects-mutation
   (let [ledger (r/new-ledger "click-1")

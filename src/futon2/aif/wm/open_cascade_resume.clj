@@ -41,6 +41,10 @@
 (def resume-schema :wm/open-cascade-resume-v1)
 
 (def error-class :wm/open-cascade-execution-error)
+(def incomplete-class :resume-incomplete)
+
+(def required-operational-clause-fields
+  [:operation :capability :completion-check])
 (def held-phases #{:materialise :validate :compile :enact :evidence})
 
 (def ^:private hex64? #(and (string? %) (re-matches #"[0-9a-f]{64}" %)))
@@ -104,7 +108,7 @@
       (not (map? error))
       (bad :resume-error-malformed {:error-type (type error)})
 
-      (not= error-class (:kind error))
+      (not (contains? #{error-class incomplete-class} (:kind error)))
       (bad :resume-error-unknown-class {:kind (:kind error)})
 
       (not (hex64? (:cascade-digest error)))
@@ -132,6 +136,8 @@
        :holes (vec (:holes error))
        :phase (:phase error)
        :prior-attempts (vec (:attempts error))
+       :prior-resume-cause (when (= incomplete-class (:kind error))
+                             (select-keys error [:kind :holes :missing-fields]))
        :retry (get-in error [:resume-port :retry])})))
 
 ;; ---------------------------------------------------------------------------
@@ -169,6 +175,10 @@
        :cascade-digest (:cascade-digest ctx)
        :phase (:phase ctx)
        :holes (:holes ctx)
+       :operational-clause-schema
+       {:required required-operational-clause-fields
+        :optional [:consumes :produces]}
+       :prior-resume-cause (:prior-resume-cause ctx)
        :author author
        :reviewer reviewer})))
 
@@ -352,8 +362,10 @@
   fixture-visible controls the runner boundary supplies: the protocol
   asserts their values are unchanged across the retry (the retry entrypoint
   receives the resume context, never a fresh selection).  Returns
-  {:status :resumed :result …} on success or a typed error; terminal
-  failures are :error, never abstention/refusal."
+  {:status :resumed :result {:status :cascade-ready …}} only when the retry
+  produced a ready cascade. A still-open product returns :resume-incomplete
+  with its per-hole missing fields. Terminal failures are :error, never
+  abstention/refusal."
   ([ledger ctx] (resume! ledger ctx {}))
   ([ledger ctx {:keys [click-budget selection-counter]}]
    (let [before {:clicks (some-> click-budget deref)
@@ -388,12 +400,37 @@
          ;; the runner boundary must prove the click and selection counts
          ;; are untouched by the retry
          (if (every? true? (vals checks))
-           {:status :resumed
-            :cascade-digest (:cascade-digest ctx)
-            :phase (:phase ctx)
-            :result result
-            :clicks-spent 0
-            :selections-run 0}
+           (if (= :cascade-ready (:status result))
+             {:status :resumed
+              :cascade-digest (:cascade-digest ctx)
+              :phase (:phase ctx)
+              :result result
+              :clicks-spent 0
+              :selections-run 0}
+             (let [product (:authoring-product ctx)
+                   hole-ids (mapv #(if (map? %) (:hole-id %) %)
+                                  (or (:holes result) (:holes ctx)))
+                   missing-fields
+                   (mapv (fn [hole-id]
+                           {:hole-id hole-id
+                            :missing
+                            (vec (remove #(some? (get (get product hole-id) %))
+                                         required-operational-clause-fields))})
+                         hole-ids)]
+               {:status :error
+                :kind incomplete-class
+                :open-cascade true
+                :repairable true
+                :cascade-digest (:cascade-digest ctx)
+                :selected-cascade-digest (:selected-cascade-digest ctx)
+                :phase (:phase ctx)
+                :holes (:holes ctx)
+                :missing-fields missing-fields
+                :compiler-result (dissoc result :resume-port)
+                :attempts (conj (:prior-attempts ctx)
+                                {:kind incomplete-class
+                                 :missing-fields missing-fields})
+                :resume-port {:retry (:retry ctx)}}))
            (do (record! ledger :retries
                         (assoc attempt :outcome :protocol-violation
                                :returned-digest (:cascade-digest result)
