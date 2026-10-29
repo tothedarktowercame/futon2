@@ -1564,6 +1564,9 @@
           ;; :coordinator/retry-click-id-unavailable only at the requeue.
           (fn? (:retry-click-id-fn opts))
           (assoc :retry-click-id (:retry-click-id-fn opts))
+          (fn? (:repair-integration-equivalent-fn opts))
+          (assoc :integration-equivalent?
+                 (:repair-integration-equivalent-fn opts))
           ;; One-click frontier (2026-10-22): the coordinator reads this
           ;; read-only port to observe a meta-retry child that failed
           ;; service-side before any run record existed. Absence is not a

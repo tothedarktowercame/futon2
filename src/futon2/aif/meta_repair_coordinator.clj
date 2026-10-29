@@ -528,6 +528,41 @@
             :else {:status :checked :receipt response
                    :transaction (append-receipt transaction response)}))))))
 
+(defn- enacted-integration-refusal
+  [history transaction ports injury-id repair-id attempt]
+  (let [authored (authored-transition history injury-id repair-id attempt)
+        patch-sha (:patch-sha authored)
+        enacted (latest-transition history injury-id)
+        enact-receipt (current-receipt-for transaction :enact)
+        enacted-patch (or (:patch-sha enacted)
+                          (get-in enact-receipt [:payload :patch-sha]))
+        integration-commit (or (:integration-commit enacted)
+                               (get-in enact-receipt [:payload :integration-commit]))]
+    (cond
+      (nil? authored)
+      (refusal :coordinator/retry-authored-transition-unavailable
+               {:injury-id injury-id :repair-id repair-id :attempt attempt})
+
+      (not (and (string? patch-sha) (re-matches #"[0-9a-fA-F]{40}" patch-sha)))
+      (refusal :coordinator/retry-authored-patch-invalid
+               {:injury-id injury-id :repair-id repair-id
+                :attempt attempt :patch-sha patch-sha})
+
+      (and (some? enacted-patch) (not= patch-sha enacted-patch))
+      (refusal :coordinator/retry-enacted-patch-disagrees
+               {:injury-id injury-id :repair-id repair-id :attempt attempt
+                :field :patch-sha :expected patch-sha :actual enacted-patch})
+
+      (not (or (= patch-sha integration-commit)
+               (and (fn? (:integration-equivalent? ports))
+                    (true? ((:integration-equivalent? ports)
+                            (:work-order transaction) patch-sha
+                            integration-commit)))))
+      (refusal :coordinator/retry-enacted-patch-disagrees
+               {:injury-id injury-id :repair-id repair-id :attempt attempt
+                :field :integration-commit :expected patch-sha
+                :actual integration-commit}))))
+
 (defn- coordinate-queued-retry
   [history transaction ports injury-id repair-id attempt authority-verifier]
   (loop [history history
@@ -545,6 +580,12 @@
           n (or (ledger/requeue-ordinal history injury-id) 0)
           pending-requeue? (ledger/pending-requeue history injury-id
                                                    authority-verifier)
+          authored (authored-transition history injury-id repair-id attempt)
+          patch-sha (:patch-sha authored)
+          _ (when-let [identity-refusal
+                       (enacted-integration-refusal history transaction ports
+                                                   injury-id repair-id attempt)]
+              (stop! identity-refusal))
           queued (when (and (pos? n) (not pending-requeue?))
                    (accepted!
                     (invoke-once transaction (requeue-phase n)
@@ -552,39 +593,7 @@
                                  {:retry-click (:retry-click latest)
                                   :requeue-ordinal n})))
           retry-receipt (:receipt queued)
-          transaction (or (:transaction queued) transaction)
-          authored (authored-transition history injury-id repair-id attempt)
-          patch-sha (:patch-sha authored)
-          enacted (latest-transition history injury-id)
-          enacted-patch (:patch-sha enacted)
-          integration-commit (:integration-commit enacted)
-          _ (when-not authored
-              (stop! (refusal :coordinator/retry-authored-transition-unavailable
-                              {:injury-id injury-id :repair-id repair-id
-                               :attempt attempt})))
-          _ (when-not (and (string? patch-sha)
-                           (re-matches #"[0-9a-fA-F]{40}" patch-sha))
-              (stop! (refusal :coordinator/retry-authored-patch-invalid
-                              {:injury-id injury-id :repair-id repair-id
-                               :attempt attempt :patch-sha patch-sha})))
-          disagreement (cond
-                         (and (some? enacted-patch)
-                              (not= patch-sha enacted-patch))
-                         [:patch-sha enacted-patch]
-
-                         (and (some? integration-commit)
-                              (not= patch-sha integration-commit))
-                         [:integration-commit integration-commit]
-
-                         (and (nil? enacted-patch)
-                              (nil? integration-commit))
-                         [:integration-commit nil])
-          _ (when disagreement
-              (stop! (refusal :coordinator/retry-enacted-patch-disagrees
-                              {:injury-id injury-id :repair-id repair-id
-                               :attempt attempt :field (first disagreement)
-                               :expected patch-sha
-                               :actual (second disagreement)})))]
+          transaction (or (:transaction queued) transaction)]
       (when (and retry-receipt
                  (not (and (= :queued (:status retry-receipt))
                            (= (:retry-click latest)
@@ -780,7 +789,7 @@
                                            :port-receipt-pin
                                            (:receipt-pin enact-receipt)}
                                           (select-keys enact-payload
-                                                       [:reload-receipt
+                                                       [:patch-sha :reload-receipt
                                                         :integration-commit]))
                                 authority-verifier))
                               {:ledger history3})
@@ -791,6 +800,11 @@
                                    (:acceptance-replay ports))
                     _ (when (= :refused (:status replay-result))
                         (stop! replay-result))
+                    _ (when (not= :checked (:status replay-result))
+                        (when-let [identity-refusal
+                                   (enacted-integration-refusal
+                                    history4 tx3 ports injury-id repair-id attempt)]
+                          (stop! identity-refusal)))
                     retry-result (if (= :checked (:status replay-result))
                                    replay-result
                                    (accepted!
