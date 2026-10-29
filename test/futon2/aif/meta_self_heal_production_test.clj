@@ -1182,6 +1182,8 @@
                     :run-pin {:path "test://acceptance-before-repair"
                               :sha256 (apply str (repeat 64 "b"))}}
         seen-review (atom nil)
+        satisfiability {:can-pass-after-correct-repair? true
+                        :reason "set equality can hold after decoding both sides"}
         run-calls (atom [])
         run-once (fn [acceptance-test]
                    (swap! run-calls conj acceptance-test)
@@ -1191,7 +1193,7 @@
                  (assoc (select-keys request [:injury-id :source-record-pin
                                               :diagnosis-evidence-pin
                                               :proposal-evidence-pin :acceptance-test])
-                        :status :accepted))
+                        :status :accepted :satisfiability satisfiability))
         admitted (production/admit-acceptance!
                   {:meta-acceptance-root (str dir "/acceptances")
                    :meta-acceptance-run-fn run-once
@@ -1231,6 +1233,9 @@
     (is (= :ran-before-repair (:result-status @seen-review)))
     (is (= run-result (:result @seen-review)))
     (is (= run-result (:result admitted)))
+    (is (= satisfiability
+           (:satisfiability
+            (edn/read-string (slurp (get-in admitted [:acceptance-admission-pin :path]))))))
     (is (= (get-in proposal [:acceptance-test :source])
            (get-in @seen-review [:acceptance-test :source])))
     (is (= [(get proposal :acceptance-test)] @run-calls))
@@ -2119,6 +2124,37 @@
     (is (= "some-other-proposal" (get-in result [:expected :acceptance-test :id])))
     (is (= (:id (:acceptance-test order)) (get-in result [:actual :acceptance-test :id])))
     (is (zero? @calls))))
+
+(deftest iteration-23-claim-authorizes-recorded-acceptance-supersession
+  (let [root "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-23"
+        transaction (edn/read-string (slurp (str root "/transaction-after.edn")))
+        admission (edn/read-string (slurp (str root "/acceptance-admission-pin.edn")))
+        ledger (edn/read-string (slurp (str root "/ledger-after.edn")))
+        new-pin {:path (str root "/acceptance-admission-pin.edn")
+                 :sha256 (load-identity/sha256
+                          (java.nio.file.Files/readAllBytes
+                           (.toPath (java.io.File. root "acceptance-admission-pin.edn"))))}
+        observation {:status :accepted
+                     :injury-id (:injury-id admission)
+                     :source-record-pin (:source-record-pin admission)
+                     :diagnosis-evidence-pin (:diagnosis-evidence-pin admission)
+                     :acceptance-test (:acceptance-test admission)
+                     :acceptance-admission-pin new-pin}
+        opts {:meta-acceptance-observation observation
+              :meta-diagnosis-context {:durable-ledger {:ledger ledger}}}
+        rebound (#'production/acceptance-transaction-binding opts transaction)
+        refused (#'production/acceptance-transaction-binding
+                 (assoc-in opts [:meta-diagnosis-context :durable-ledger :ledger :entries]
+                           (vec (remove #(= :acceptance-unsatisfiable-claimed
+                                            (:observation-kind %))
+                                        (:entries ledger))))
+                 transaction)]
+    (is (= :claim-authorized-supersession (:source rebound)))
+    (is (= "meta-acceptance-injury-9c6220388033cbd1-r3"
+           (get-in rebound [:transaction :work-order :acceptance-test :id])))
+    (is (= new-pin (get-in rebound [:transaction :acceptance-supersession
+                                    :current-admission-pin])))
+    (is (= :meta-self-heal/acceptance-transaction-mismatch (:reason refused)))))
 
 (deftest effect-ports-carry-the-adapter-click-minting-function
   "M10b-3 (2026-10-20): the futon3c adapter exposes :retry-click-id-fn and the
