@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.outer-refusal-index :as index]
             [futon2.aif.outer-refusal-history :as history]))
 
 (def retained-refusal
@@ -16,15 +17,16 @@
   (.toFile (java.nio.file.Files/createTempDirectory
             "outer-refusal-history" (make-array java.nio.file.attribute.FileAttribute 0))))
 
-(defn- copy-record! [dir source]
-  (let [target (io/file dir (.getName (io/file source)))]
-    (spit target (slurp source))
-    target))
+(defn- index-record! [dir source]
+  (let [record (edn/read-string (slurp source))]
+    (index/append-entry!
+     (io/file dir history/index-name)
+     (history/index-entry record source (index/sha256-file source)))))
 
 (deftest retained-repick-has-changed-inputs
   (testing "the real recommendation-bindings re-pick is not stopped"
     (let [dir (temp-dir)
-          _ (copy-record! dir retained-refusal)
+          _ (index-record! dir retained-refusal)
           current (history/record-inputs (edn/read-string (slurp retained-repick)))
           comparison (history/compare-history dir current)]
       (is (= "M-recommendation-bindings" (:target current)))
@@ -37,7 +39,7 @@
   (testing "changing only run id cannot authorize unchanged refused inputs"
     (let [dir (temp-dir)
           source (edn/read-string (slurp retained-refusal))
-          _ (copy-record! dir retained-refusal)
+          _ (index-record! dir retained-refusal)
           cloned (assoc source :run/id "2026-10-29-cloned-inputs")
           comparison (history/compare-history dir (history/record-inputs cloned))
           refusal (try

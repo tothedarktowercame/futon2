@@ -1,14 +1,14 @@
 (ns futon2.aif.outer-refusal-history
   "Read-only cross-run prevention for unchanged repeats of refused tasks.
 
-  Terminal run records are the authority.  Missing identity fields are not
-  invented; a prior refusal is comparable only on the identities it actually
-  retained."
+  The compact terminal-record index is the click-path authority. Missing
+  identity fields are not invented; a prior refusal is comparable only on
+  the identities it actually retained. This namespace never opens a terminal
+  run record."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
-(def ^:private terminal-record-name
-  #"^tick-run-record-\d{4}-\d{2}-\d{2}-.+\.edn$")
+(def index-name "outer-refusal-index.ednl")
 
 (def ^:private outer-identity-keys
   [:cascade-id :cascade-index :giraffe/run-id :giraffe/manifest-sha256
@@ -43,34 +43,54 @@
   (and (map? (:failure record))
        (keyword? (get-in record [:failure :kind]))))
 
-(defn prior-refusals
-  "Read terminal records in DIR and return prior refusals for TARGET.
+(defn index-entry
+  "Project one already-read terminal RECORD into its compact index row."
+  [record record-path record-sha256]
+  {:schema :wm/outer-refusal-index-entry-v1
+   :status :indexed
+   :run-id (:run/id record)
+   :record-path record-path
+   :record-sha256 record-sha256
+   :target (record-target record)
+   :failure (select-keys (:failure record) [:kind :stage])
+   :inputs (record-inputs record)})
 
-  Malformed terminal EDN is a typed refusal: silently omitting history would
-  turn corrupt evidence into permission to dispatch."
+(defn read-index
+  "Read the compact index under DIR. A malformed index is a typed refusal;
+  terminal records are never opened here."
+  [dir]
+  (let [file (io/file dir index-name)]
+    (if-not (.isFile file)
+      []
+      (with-open [reader (io/reader file)]
+        (->> (line-seq reader)
+             (map-indexed
+              (fn [line-number line]
+                (try
+                  (edn/read-string line)
+                  (catch Exception e
+                    (throw (ex-info "Terminal refusal index is unreadable"
+                                    {:kind :outer/refusal-index-unreadable
+                                     :path (.getPath file)
+                                     :line (inc line-number)} e))))))
+             doall
+             vec)))))
+
+(defn prior-refusals
+  "Read only the compact index in DIR and return prior refusals for TARGET.
+  Legacy unreadable rows remain visible in the index but cannot authorize a
+  refusal because they carry no target or inputs."
   [dir target]
-  (let [root (io/file dir)
-        files (if (.isDirectory root)
-                (->> (.listFiles root)
-                     (filter #(.isFile ^java.io.File %))
-                     (filter #(re-matches terminal-record-name (.getName ^java.io.File %)))
-                     (sort-by #(.getName ^java.io.File %)))
-                [])]
-    (->> files
-         (keep (fn [file]
-                 (let [record (try
-                                (edn/read-string (slurp file))
-                                (catch Exception e
-                                  (throw (ex-info "Terminal refusal history is unreadable"
-                                                  {:kind :outer/refusal-history-unreadable
-                                                   :path (.getPath file)} e))))]
-                   (when (and (refused-record? record)
-                              (= target (record-target record)))
-                     {:path (.getPath file)
-                      :run-id (:run/id record)
-                      :failure (select-keys (:failure record) [:kind :stage])
-                      :inputs (record-inputs record)}))))
-         vec)))
+  (->> (read-index dir)
+       (filter #(and (= :indexed (:status %))
+                     (keyword? (get-in % [:failure :kind]))
+                     (= target (:target %))))
+       (mapv (fn [row]
+               {:path (:record-path row)
+                :record-sha256 (:record-sha256 row)
+                :run-id (:run-id row)
+                :failure (:failure row)
+                :inputs (:inputs row)}))))
 
 (defn compare-refusals
   "Compare CURRENT inputs with prior refusals.

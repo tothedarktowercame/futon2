@@ -75,6 +75,7 @@
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.open-cascade-refinement :as open-cascade-refinement]
+            [futon2.aif.outer-refusal-index :as outer-refusal-index]
             [futon2.aif.outer-refusal-history :as outer-refusal-history]
             [futon2.aif.revision-pattern-use :as revision-pattern-use]
             [futon2.aif.action-identity :as identity]
@@ -1543,6 +1544,7 @@
                      true
                      (terminal-receipt/attach (:outcome result)))
             written (run-record-io/write-run-record-stream! dir run-id record)]
+        (outer-refusal-index/append-run-record! dir written record)
         ;; this run's close in the Q6 run stream, beside the record it names
         (previous-run/close! dir q6-terminal written nil)
         {:run-record-status :present
