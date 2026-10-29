@@ -52,7 +52,86 @@
     :file "src/futon2/aif/wm/loop_node_exercise.clj"}
    {:role :terminal-routing-entrypoint
     :var "futon2.aif.full-loop-runner/persist-run-record!"
-    :file "src/futon2/aif/full_loop_runner.clj"}])
+   :file "src/futon2/aif/full_loop_runner.clj"}])
+
+(deftest acceptance-replay-port-reads-retained-red-admission
+  (let [dir (root)
+        test (acceptance-case "retained-admission-replay")
+        run-pin {:path (str dir "/admission-run.log")
+                 :sha256 (apply str (repeat 64 "1"))}
+        admission {:schema :wm/meta-acceptance-admission-v1
+                   :status :accepted :acceptance-test test
+                   :result {:status :ran :outcome :failed :exit 1
+                            :summary "red" :run-pin run-pin}}
+        admission-path (str dir "/admission.edn")
+        bytes (.getBytes (str (pr-str admission) "\n") "UTF-8")
+        _ (spit admission-path (String. bytes "UTF-8"))
+        admission-pin {:path admission-path :sha256 (load-identity/sha256 bytes)}
+        current-path (str dir "/current-run.log")
+        current-log (str "Testing " (get-in test [:source :namespace]) "\n\n"
+                         "Ran 1 tests containing 1 assertions.\n"
+                         "0 failures, 0 errors.\n")
+        current-bytes (.getBytes current-log "UTF-8")
+        _ (spit current-path current-log)
+        current-pin {:path current-path
+                     :sha256 (load-identity/sha256 current-bytes)}
+        port (production/acceptance-replay-port
+              (constantly {:status :ran :outcome :passed :exit 0
+                           :summary "green" :run-pin current-pin}))
+        order {:injury-id "injury/retained" :repair-id "repair/retained"
+               :attempt 1 :acceptance-test test
+               :acceptance-admission-pin admission-pin}
+        transaction {:receipts [{:phase :author :payload {:patch-sha (apply str (repeat 40 "a"))}}
+                                {:phase :enact :payload {:retry-click "click/retry"}}]}
+        response (port {:work-order order :transaction transaction :phase :retry
+                        :predecessor-pin admission-pin})
+        replay (get-in response [:payload :phase-replay-receipt])]
+    (is (= :succeeded (:status response)))
+    (is (= :repaired (:outcome replay)))
+    (is (= admission-pin (:admission-pin replay)))
+    (is (= run-pin (:admission-run-pin replay)))
+    (is (= current-pin (:current-run-pin replay)))
+    (is (= (:admission-source-identity replay)
+           (:current-source-identity replay)))))
+
+(deftest acceptance-replay-rejects-vacuous-or-wrong-path-witness
+  (let [dir (root)
+        test (acceptance-case "retained-admission-path-witness")
+        admission-run-pin {:path (str dir "/red.log")
+                           :sha256 (apply str (repeat 64 "3"))}
+        admission {:schema :wm/meta-acceptance-admission-v1 :status :accepted
+                   :acceptance-test test
+                   :result {:status :ran :outcome :failed :exit 1
+                            :summary "red" :run-pin admission-run-pin}}
+        admission-path (str dir "/admission.edn")
+        admission-bytes (.getBytes (str (pr-str admission) "\n") "UTF-8")
+        _ (spit admission-path (String. admission-bytes "UTF-8"))
+        admission-pin {:path admission-path
+                       :sha256 (load-identity/sha256 admission-bytes)}
+        order {:injury-id "injury/path" :repair-id "repair/path" :attempt 1
+               :acceptance-test test :acceptance-admission-pin admission-pin}
+        transaction {:receipts [{:phase :author :payload {:patch-sha (apply str (repeat 40 "a"))}}
+                                {:phase :enact :payload {:retry-click "click/path"}}]}
+        run (fn [filename log]
+              (let [path (str dir "/" filename)
+                    bytes (.getBytes log "UTF-8")
+                    _ (spit path log)
+                    pin {:path path :sha256 (load-identity/sha256 bytes)}
+                    port (production/acceptance-replay-port
+                          (constantly {:status :ran :outcome :passed :exit 0
+                                       :summary "exit zero" :run-pin pin}))]
+                (get-in (port {:work-order order :transaction transaction
+                               :phase :retry :predecessor-pin admission-pin})
+                        [:payload :phase-replay-receipt])))
+        zero (run "zero.log"
+                  (str "Testing " (get-in test [:source :namespace]) "\n\n"
+                       "Ran 0 tests containing 0 assertions.\n0 failures, 0 errors.\n"))
+        wrong (run "wrong.log"
+                   "Testing another.namespace\n\nRan 2 tests containing 2 assertions.\n0 failures, 0 errors.\n")]
+    (is (= :phase-mismatch (:outcome zero)))
+    (is (nil? (:path-witness zero)))
+    (is (= :phase-mismatch (:outcome wrong)))
+    (is (nil? (:path-witness wrong)))))
 
 (defn- diagnosis-fixture [class]
   {:class class :production-functions production-functions})

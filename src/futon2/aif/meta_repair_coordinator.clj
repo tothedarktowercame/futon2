@@ -66,6 +66,9 @@
                     (not (pin? (:cause-record-pin order))) (conj :cause-pin)
                     (not (pin? (:diagnosis-evidence-pin order)))
                     (conj :diagnosis-evidence)
+                    (and (contains? order :acceptance-admission-pin)
+                         (not (pin? (:acceptance-admission-pin order))))
+                    (conj :acceptance-admission-pin)
                     (not (and (map? (:acceptance-test order))
                               (nonblank? (get-in order [:acceptance-test :id]))
                               (vector? (get-in order [:acceptance-test :command]))
@@ -230,6 +233,7 @@
           order (seal-work-order
                  (merge (select-keys options
                                      [:diagnosis-evidence-pin :acceptance-test
+                                      :acceptance-admission-pin
                                       :author :reviewer :repair-reviewer
                                       :author-session :reviewer-session
                                       :repair-reviewer-session
@@ -426,6 +430,36 @@
 
 (defn- last-receipt-pin [transaction]
   (:receipt-pin (last (:receipts transaction))))
+
+(defn- acceptance-replay-result
+  "Run the enacted repair's admitted acceptance test before considering a
+  whole-child retry.  `:input-unavailable` is the sole fallback: a checked
+  pass discharges and a checked failure reopens."
+  [transaction predecessor-pin port]
+  (when (fn? port)
+    (let [order (:work-order transaction)
+          response (try
+                     (port {:work-order order :transaction transaction
+                            :phase :retry :predecessor-pin predecessor-pin})
+                     (catch Throwable t
+                       (refusal :coordinator/acceptance-replay-threw
+                                {:detail (ex-message t)})))]
+      (if (= :refused (:status response))
+        response
+        (let [checked (verify-port-receipt response
+                                           (expected order :retry predecessor-pin))
+              outcome (get-in response [:payload :phase-replay-receipt :outcome])]
+          (cond
+            (not= :valid (:status checked))
+            (refusal :coordinator/acceptance-replay-receipt-refused
+                     {:receipt-defects (:defects checked)})
+            (contains? #{:input-unavailable :phase-mismatch} outcome)
+            {:status :input-unavailable}
+            (not (contains? #{:repaired :same-failure} outcome))
+            (refusal :coordinator/acceptance-replay-outcome-refused
+                     {:outcome outcome})
+            :else {:status :checked :receipt response
+                   :transaction (append-receipt transaction response)}))))))
 
 (defn- coordinate-queued-retry
   [history transaction ports injury-id repair-id attempt authority-verifier]
@@ -685,9 +719,16 @@
                               {:ledger history3})
                     history4 (:ledger enacted)
                     _ (checkpoint! ports :enact history4 tx3)
-                    retry-result (accepted!
-                                  (invoke-once tx3 :retry (:receipt-pin enact-receipt)
-                                               (:retry ports)))
+                    replay-result (acceptance-replay-result
+                                   tx3 (:receipt-pin enact-receipt)
+                                   (:acceptance-replay ports))
+                    _ (when (= :refused (:status replay-result))
+                        (stop! replay-result))
+                    retry-result (if (= :checked (:status replay-result))
+                                   replay-result
+                                   (accepted!
+                                    (invoke-once tx3 :retry (:receipt-pin enact-receipt)
+                                                 (:retry ports))))
                     retry-receipt (:receipt retry-result)
                     tx4 (:transaction retry-result)
                     retry-payload (:payload retry-receipt)]
@@ -701,7 +742,9 @@
                   (coordinate-queued-retry history4 tx4 ports injury-id repair-id
                                            attempt authority-verifier)
 
-                  (= :succeeded (:status retry-receipt))
+                  (or (= :succeeded (:status retry-receipt))
+                      (= :repaired (get-in retry-payload
+                                           [:phase-replay-receipt :outcome])))
                   (let [closed (accepted!
                                 (append-transition!
                                  history4 {:injury-id injury-id :state :discharged
@@ -709,6 +752,9 @@
                                            :patch-sha patch-sha
                                            :retry-click retry-click
                                            :outcome (or (:outcome retry-payload) :success)
+                                           :phase-replay-receipt-pin
+                                           (when (get retry-payload :phase-replay-receipt)
+                                             (:receipt-pin retry-receipt))
                                            :port-receipt-pin
                                            (:receipt-pin retry-receipt)}
                                  authority-verifier))]
@@ -720,7 +766,11 @@
                                    history4 {:injury-id injury-id :repair-id repair-id
                                              :patch-sha patch-sha
                                              :retry-click retry-click
-                                             :new-cause-pin (:new-cause-pin retry-payload)
+                                             :new-cause-pin
+                                             (or (:new-cause-pin retry-payload)
+                                                 (get-in retry-payload
+                                                         [:phase-replay-receipt
+                                                          :current-run-pin]))
                                              :port-receipt-pin
                                              (:receipt-pin retry-receipt)}
                                    authority-verifier))]

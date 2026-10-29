@@ -1425,6 +1425,113 @@
         :repair-id (:repair-id work-order) :attempt (:attempt work-order)
         :predecessor-pin predecessor-pin :status (:status response)
         :payload (assoc (:payload response) :adapter adapter)}))))
+
+(defn- read-pinned-edn [pin]
+  (try
+    (when (pin? pin)
+      (let [bytes (Files/readAllBytes (.toPath (io/file (:path pin))))]
+        (when (= (:sha256 pin) (load-identity/sha256 bytes))
+          (edn/read-string (String. bytes "UTF-8")))))
+    (catch Throwable _ nil)))
+
+(defn- acceptance-source-identity [acceptance-test]
+  (when-let [source (get-in acceptance-test [:source :text])]
+    (load-identity/sha256 (.getBytes source "UTF-8"))))
+
+(defn- read-pinned-text [pin]
+  (try
+    (when (pin? pin)
+      (let [bytes (Files/readAllBytes (.toPath (io/file (:path pin))))]
+        (when (= (:sha256 pin) (load-identity/sha256 bytes))
+          (String. bytes "UTF-8"))))
+    (catch Throwable _ nil)))
+
+(defn- acceptance-run-report [run-pin expected-namespace]
+  (when-let [log (read-pinned-text run-pin)]
+    (let [namespaces (mapv second (re-seq #"(?m)^Testing\s+(\S+)\s*$" log))
+          summary (re-find #"(?m)^Ran\s+(\d+)\s+tests?\s+containing\s+\d+\s+assertions?\.\s*$[\r\n]+^(\d+)\s+failures?,\s+(\d+)\s+errors?\.\s*$"
+                           log)]
+      (when summary
+        {:namespace-witness (when (= [expected-namespace] namespaces)
+                              expected-namespace)
+         :testing-namespaces namespaces
+         :tests (Long/parseLong (nth summary 1))
+         :failures (Long/parseLong (nth summary 2))
+         :errors (Long/parseLong (nth summary 3))}))))
+
+(defn acceptance-replay-port
+  "Build the tooling-process port that compares a retained red admission run
+  with one current run of the identical admitted acceptance source. Missing or
+  mismatched pins are reported as input-unavailable so the coordinator can use
+  its existing whole-child retry."
+  [run-acceptance]
+  (fn [{:keys [work-order transaction phase predecessor-pin]}]
+    (let [admission-pin (:acceptance-admission-pin work-order)
+          admission (read-pinned-edn admission-pin)
+          acceptance-test (:acceptance-test work-order)
+          admitted-test (:acceptance-test admission)
+          admitted-source (acceptance-source-identity admitted-test)
+          current-source (acceptance-source-identity acceptance-test)
+          admitted-run (:result admission)
+          available? (and (= :wm/meta-acceptance-admission-v1 (:schema admission))
+                          (= :accepted (:status admission))
+                          (contains? #{:failed :errored} (:outcome admitted-run))
+                          (pin? (:run-pin admitted-run))
+                          (some? admitted-source)
+                          (= admitted-source current-source))
+          current-run (when available?
+                        (try (run-acceptance acceptance-test)
+                             (catch Throwable t
+                               {:status :failed :outcome :errored :exit 1
+                                :summary (ex-message t)})))
+          checked? (and (= :ran (:status current-run))
+                        (contains? #{:passed :failed :errored} (:outcome current-run))
+                        (pin? (:run-pin current-run)))
+          entry-var (get-in admitted-test [:source :namespace])
+          report (when checked?
+                   (acceptance-run-report (:run-pin current-run) entry-var))
+          path-witness (when (and (= entry-var (:namespace-witness report))
+                                  (pos? (:tests report 0)))
+                         entry-var)
+          outcome (cond
+                    (not available?) :input-unavailable
+                    (not checked?) :input-unavailable
+                    (nil? path-witness) :phase-mismatch
+                    (and (zero? (:failures report)) (zero? (:errors report))) :repaired
+                    :else :same-failure)
+          author (some #(when (= :author (:phase %)) %) (:receipts transaction))
+          enact (some #(when (= :enact (:phase %)) %) (:receipts transaction))
+          replay {:schema :wm/pinned-admission-phase-replay-receipt-v1
+                  :injury-id (:injury-id work-order)
+                  :repair-id (:repair-id work-order)
+                  :patch-sha (get-in author [:payload :patch-sha])
+                  :phase-id :admitted-acceptance
+                  :entry-var entry-var
+                  :path-witness path-witness
+                  :admission-pin admission-pin
+                  :admission-run-pin (:run-pin admitted-run)
+                  :current-run-pin (:run-pin current-run)
+                  :admission-source-identity admitted-source
+                  :current-source-identity current-source
+                  :before-predicate (when available? :failing)
+                  :after-predicate (when path-witness
+                                     (if (and (zero? (:failures report))
+                                              (zero? (:errors report)))
+                                       :passing :failing))
+                  :run-report report
+                  :input-available (boolean (and available? checked?))
+                  :outcome outcome}]
+      (coordinator/seal-port-receipt
+       {:phase phase :injury-id (:injury-id work-order)
+        :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+        :predecessor-pin predecessor-pin
+        :status (if (= :repaired outcome) :succeeded :failed)
+        :payload {:repair-id (:repair-id work-order)
+                  :patch-sha (get-in author [:payload :patch-sha])
+                  :retry-click (get-in enact [:payload :retry-click])
+                  :phase-replay-receipt replay
+                  :adapter "wm-acceptance-replay"}}))))
+
 (defn- effect-ports [opts]
   (or (:meta-repair-ports opts)
       (when (and (:agency-invoke-fn opts) (:repair-enact-fn opts)
@@ -1433,7 +1540,9 @@
                                      (:repair-worktree-fn opts))
                  :review (agency-port (:agency-invoke-fn opts) :reviewer)
                  :enact (endpoint-port (:repair-enact-fn opts) "wm-repair-reviewer")
-                 :retry (endpoint-port (:repair-retry-fn opts) "wm-retry")}
+                 :retry (endpoint-port (:repair-retry-fn opts) "wm-retry")
+                 :acceptance-replay
+                 (acceptance-replay-port (:meta-acceptance-run-fn opts))}
           ;; M10b-3 (2026-10-20): the futon3c adapter exposes its pure click
           ;; minting function as :retry-click-id-fn; the coordinator reads it
           ;; as :retry-click-id when it re-queues an inconclusive retry. Its
@@ -1463,11 +1572,16 @@
         (get-in (some #(when (= :enact (:phase %)) %) receipts)
                 [:payload :retry-click]))))
 (defn- work-order-options [opts]
-  (assoc (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
-                            :repair-reviewer :author-session :reviewer-session
-                            :repair-reviewer-session :target-repository :target-worktree
-                            :target-worktree-root :canonical-base-sha])
-         :acceptance-return-limit (:meta-acceptance-return-limit opts)))
+  (cond-> (assoc (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
+                                    :repair-reviewer :author-session :reviewer-session
+                                    :repair-reviewer-session :target-repository :target-worktree
+                                    :target-worktree-root :canonical-base-sha])
+                 :acceptance-return-limit (:meta-acceptance-return-limit opts))
+    (or (:acceptance-admission-pin opts)
+        (get-in opts [:meta-acceptance-observation :acceptance-admission-pin]))
+    (assoc :acceptance-admission-pin
+           (or (:acceptance-admission-pin opts)
+               (get-in opts [:meta-acceptance-observation :acceptance-admission-pin])))))
 
 (defn- continued-work-order-options
   "A continued author attempt needs new port-session identities even though its
