@@ -49,6 +49,29 @@
                        (= key (:policy-key action))))
           key)))))
 
+(defn seal-reading-policy-key [candidate]
+  (if-let [key (reading-policy-key candidate)]
+    (assoc candidate :policy-key key
+           :policy-key-carrier {:status :canonical :policy-key key})
+    (assoc candidate :policy-key-carrier
+           {:status :policy-key-noncanonical
+            :reason (cond
+                      (not (string? (:id candidate))) :policy-id-not-string
+                      (not (str/starts-with? (:id candidate)
+                                             (str (:target candidate) "/policy-")))
+                      :policy-id-not-canonical-for-target
+                      :else :reading-policy-structure-noncanonical)})))
+
+(defn validate-sealed-reading-policy-key! [{:keys [policy-key policy-key-carrier] :as candidate}]
+  (when-not (or (and (= :canonical (:status policy-key-carrier))
+                     (= policy-key (:policy-key policy-key-carrier)))
+                (and (= :policy-key-noncanonical (:status policy-key-carrier))
+                     (nil? policy-key) (keyword? (:reason policy-key-carrier))))
+    (throw (ex-info "Reading-policy key was not sealed before scoring"
+                    {:kind :invalid-sealed-reading-policy-key
+                     :candidate-id (:id candidate) :carrier policy-key-carrier})))
+  candidate)
+
 (defn candidate-key
   "The candidate's policy history key. A reading policy's is its
   reading-policy-key; an interpreted cascade's is the cascade-prior key

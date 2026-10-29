@@ -23,6 +23,8 @@
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.matched-observation-evidence :as matched]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.aif.reading-policy-class-free-energy :as class-f]
             [futon2.aif.retraction-cascade :as retraction-cascade]))
 
 (def class-universe
@@ -199,9 +201,10 @@
               order)
         pattern-map (into {} (map (juxt :id identity)) patterns)
         descent (mapv (juxt :from :to) (remove #(= :overlap (:kind %)) edges))]
-    {:kind :cascade-candidate :id id :target target
-     :precedence {:co-apply {:units order :descent descent :patterns pattern-map}}
-     :arrangement {:nodes nodes :edges edges :precedence order}}))
+    (prefix-admission/seal-reading-policy-key
+     {:kind :cascade-candidate :id id :target target
+      :precedence {:co-apply {:units order :descent descent :patterns pattern-map}}
+      :arrangement {:nodes nodes :edges edges :precedence order}})))
 
 (defn- candidate-patterns [candidate]
   (let [{:keys [units patterns]} (get-in candidate [:precedence :co-apply])]
@@ -341,7 +344,13 @@
                         :observation-model class-model
                         :parameter-information-mode :none
                         :g-normalization :per-step-capacity-and-pattern
-                        :prediction-context {:occurrence-id (str id) :tau horizon}
+                        :prediction-context {:occurrence-id (str id) :tau horizon
+                                             :class-free-energy
+                                             (merge (or (:class-free-energy class-context)
+                                                        (when (:policy-key candidate)
+                                                          (class-f/history-context)))
+                                                    {:policy-key (:policy-key candidate)
+                                                     :policy-key-carrier (:policy-key-carrier candidate)})}
                         :observation observation
                         :cascade-spec {:want acceptance :evidence #{} :zeroed #{}
                                        :c {:source :terminal-class-preference}

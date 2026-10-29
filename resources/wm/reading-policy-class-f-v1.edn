@@ -1,0 +1,3 @@
+{:schema :wm/reading-policy-class-f-declaration-v1
+ :history-window 32
+ :run-record-directory "data/wm-runs"}

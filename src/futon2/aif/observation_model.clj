@@ -22,6 +22,7 @@
    when calibrated rates exist (programme point 5) it WIDENS to require a
    calibration record. It is never dropped."
   (:require [clojure.set :as set]
+            [futon2.aif.reading-policy-class-free-energy :as class-f]
             [clojure.string :as str]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.matched-observation-evidence :as evidence]))
@@ -320,11 +321,16 @@
       (do (when-not (and (map? belief) (seq belief) (m/normalized-exact? belief)
                          (every? set? (keys belief)))
             (refuse! :invalid-state-belief {:belief belief}))
-          ;; No observation to condition on at selection time: the class
-          ;; model explains nothing yet, F is explicitly neutral and the
-          ;; belief is carried unchanged.
-          {:posterior belief :f {:value 0.0 :status :not-supplied
-                                 :reason :class-model-unconditioned-at-selection}})
+          (let [{:keys [policy-key policy-key-carrier window sources]} (:class-free-energy context)
+                noncanonical? (= :policy-key-noncanonical (:status policy-key-carrier))
+                _ (when-not (or noncanonical?
+                                (and policy-key (some? window) (vector? sources)))
+                    (refuse! :class-free-energy-history-not-supplied
+                             {:required [:policy-key :window :sources]}))
+                prediction (class-predictive model belief (:horizon model) target)
+                result (class-f/evaluate policy-key window sources prediction)]
+            {:posterior belief :status (if noncanonical? :computed (:status result))
+             :f result}))
       (refuse! :unsupported-observation-query {:op op}))
     (= :progress-count (:kind model))
     (case op
