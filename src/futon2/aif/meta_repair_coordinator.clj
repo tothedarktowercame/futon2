@@ -299,6 +299,15 @@
 (defn- held! [reason phase history transaction receipt]
   (stop! {:status :held :reason reason :phase phase :ledger history
           :transaction transaction :receipt receipt}))
+(defn- acceptance-unsatisfiable-evidence [receipt]
+  (let [payload (:payload receipt)
+        evidence (:evidence payload)]
+    (when (and (= :rejected (:status receipt))
+               (= :acceptance-test-unsatisfiable (:reason payload))
+               (map? evidence)
+               (nonblank? (:assertion evidence))
+               (nonblank? (:reason evidence)))
+      evidence)))
 (defn- checkpoint! [ports phase history transaction]
   (when (= phase (:stop-after ports))
     (stop! {:status :checkpoint :phase phase :ledger history
@@ -545,17 +554,21 @@
             author-receipt (:receipt author-result)
             tx1 (:transaction author-result)]
         (when-not (= :succeeded (:status author-receipt))
-          ;; A failed sealed author answer is evidence for a fresh attempt,
-          ;; not a terminal hold.  append-retry-result supplies the existing
-          ;; attempt-limit behavior and validates the claim predecessor.
-          (let [reopened (accepted!
-                          (ledger/append-retry-result
-                           history1 {:injury-id injury-id :repair-id repair-id
-                                     :reason :author-failed
-                                     :port-receipt-pin
-                                     (:receipt-pin author-receipt)}
-                           authority-verifier))]
-            (held! :author-failed :author (:ledger reopened) tx1 author-receipt)))
+          (if-let [evidence (acceptance-unsatisfiable-evidence author-receipt)]
+            (stop! {:status :held :reason :acceptance-test-unsatisfiable
+                    :phase :author :ledger history1 :transaction tx1
+                    :receipt author-receipt
+                    :acceptance-unsatisfiable-evidence evidence})
+            ;; Ordinary author failures still advance through the existing
+            ;; retry/attempt-limit grammar.
+            (let [reopened (accepted!
+                            (ledger/append-retry-result
+                             history1 {:injury-id injury-id :repair-id repair-id
+                                       :reason :author-failed
+                                       :port-receipt-pin
+                                       (:receipt-pin author-receipt)}
+                             authority-verifier))]
+              (held! :author-failed :author (:ledger reopened) tx1 author-receipt))))
         (let [patch-sha (get-in author-receipt [:payload :patch-sha])
               worktree (get-in author-receipt [:payload :worktree])
               _ (when-not (and (sha? patch-sha) (nonblank? worktree))

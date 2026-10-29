@@ -631,7 +631,9 @@
                        (when-let [correction (:meta-acceptance-review-correction opts)]
                          {:review-correction correction})
                        (when-let [correction (:meta-acceptance-static-correction opts)]
-                         {:static-correction correction}))
+                         {:static-correction correction})
+                       (when-let [claim (:meta-acceptance-unsatisfiable-claim opts)]
+                         {:author-unsatisfiable-claim claim}))
         response (try (accept request)
                       (catch Throwable _
                         {:status :failed
@@ -1797,6 +1799,20 @@
                     (loop [attempt-durable durable attempt-transaction transaction
                            continued []]
                       (let [result (run-attempt attempt-durable attempt-transaction)
+                            reconsidered (when (= :acceptance-test-unsatisfiable
+                                                  (:reason result))
+                                           (prepare-acceptance
+                                            (-> opts
+                                                (dissoc :acceptance-test)
+                                                (assoc :meta-acceptance-unsatisfiable-claim
+                                                       {:attempt (:attempt result)
+                                                        :acceptance-test
+                                                        (get-in result [:transaction :work-order
+                                                                        :acceptance-test])
+                                                        :author-evidence
+                                                        (get-in result [:transaction :receipts 0
+                                                                        :payload :evidence])}))
+                                            (:meta-diagnosis-observation opts)))
                             next-durable (when (and (= :held (:status result))
                                                     (= :author-failed (:reason result))
                                                     (= :persisted (get-in result [:ledger-write :status]))
@@ -1806,6 +1822,10 @@
                             reopened (get-in (effective-active
                                               (:ledger next-durable) authority-verifier)
                                              [:injuries injury-id])]
+                        (if reconsidered
+                          (assoc result :status :acceptance-reconsidered
+                                 :acceptance-observation reconsidered
+                                 :attempt-unchanged true)
                         (if (and (= :loaded (:status next-durable))
                                  (= :reopened (:state reopened)))
                           ;; F32 wake fix (claude-5, 2026-10-20): the record of
@@ -1874,4 +1894,4 @@
                                       :entry (->> (get-in next-durable [:ledger :entries])
                                                   (filter #(= injury-id (:injury-id %)))
                                                   last
-                                                  (#(select-keys % [:state :attempt :reason])))}))))))))))))))))))
+                                                  (#(select-keys % [:state :attempt :reason])))})))))))))))))))))))

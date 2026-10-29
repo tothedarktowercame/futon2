@@ -110,6 +110,36 @@
     (is (= "click-retry-repair-1"
            (get-in result [:ledger :entries 5 :retry-click])))))
 
+(deftest unsatisfiable-acceptance-claim-returns-to-acceptance-without-spending-attempt
+  (let [history (opened-ledger)
+        start (prepared history (options))
+        evidence {:assertion "(= decoded-hole-ids (sort-by pr-str keys))"
+                  :reason "the pinned literal order differs from its required sort order"}
+        result (coordinator/coordinate
+                (durable history) (:transaction start)
+                (ports {:author (fn [request]
+                                  (receipt request :rejected
+                                           {:reason :acceptance-test-unsatisfiable
+                                            :evidence evidence}))}))]
+    (is (= :held (:status result)))
+    (is (= :acceptance-test-unsatisfiable (:reason result)))
+    (is (= evidence (:acceptance-unsatisfiable-evidence result)))
+    (is (= 1 (get-in result [:transaction :work-order :attempt])))
+    (is (= 1 (:attempt (last (filter :state (get-in result [:ledger :entries]))))))
+    (is (= [:open :claimed]
+           (->> (get-in result [:ledger :entries]) (keep :state) vec)))))
+
+(deftest ordinary-author-failure-still-consumes-an-attempt
+  (let [history (opened-ledger)
+        start (prepared history (options))
+        result (coordinator/coordinate
+                (durable history) (:transaction start)
+                (ports {:author (fn [request]
+                                  (receipt request :failed {:reason :tests-failed}))}))]
+    (is (= :held (:status result)))
+    (is (= :author-failed (:reason result)))
+    (is (= 2 (:attempt (last (filter :state (get-in result [:ledger :entries]))))))))
+
 (defn- awaiting-retry
   ([history] (awaiting-retry history {}))
   ([history overrides]
