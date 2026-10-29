@@ -43,13 +43,28 @@
        (string? (:sha256 x)) (boolean (re-matches pin-re (:sha256 x)))))
 (defn- refusal [reason & [details]]
   (merge {:status :refused :reason reason} details))
+(defn- retained-q6-failure
+  "The typed terminal condition retained by Q6 when the close map failed to
+  populate :failure.  Q6 is part of the pinned run record, and this projection
+  is deliberately limited to the one producer whose stage is unambiguous."
+  [record]
+  (let [terminal (get-in record [:q6 :terminal])
+        observed (:outcome terminal)]
+    (when (and (= :wm/q6-terminal-v1 (:schema terminal))
+               (= (or (:run/id record) (:run-id record)) (:run/id terminal))
+               (= :present (:status observed))
+               (= :hot-load-failed (:kind observed)))
+      {:kind :hot-load-failed :stage :cascade-resume})))
+
 (defn- failure-kind [record]
   (or (get-in record [:failure :kind])
       (get-in record [:failure :detail :failure-kind])
-      (get-in record [:terminal-receipt :failure-kind])))
+      (get-in record [:terminal-receipt :failure-kind])
+      (:kind (retained-q6-failure record))))
 (defn- failure-stage [record]
   (or (get-in record [:failure :stage])
       (get-in record [:failure :detail :failure-stage])
+      (:stage (retained-q6-failure record))
       :unknown-stage))
 (defn- run-id [record] (or (:run/id record) (:run-id record)))
 (defn- click-id [record] (or (:click/id record) (:click-id record)))

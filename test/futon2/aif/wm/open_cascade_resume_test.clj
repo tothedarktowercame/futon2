@@ -199,6 +199,10 @@
                               (fn [_] (throw (ex-info "patch boom" {})))))]
     (is (= :hot-load-failed (:kind loaded)))
     (is (= :error (:status loaded)))
+    (is (= "clojure.lang.ExceptionInfo"
+           (get-in loaded [:throwable :throwable-class])))
+    (is (= "patch boom" (get-in loaded [:throwable :message])))
+    (is (<= 1 (count (get-in loaded [:throwable :stack])) 24))
     (is (= :failed (:outcome (first (:attempts @ledger))))))
   ;; nothing anywhere is :abstained/:refused/:no-selection
   (let [ledger (r/new-ledger "click-1")

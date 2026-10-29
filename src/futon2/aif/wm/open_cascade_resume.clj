@@ -357,6 +357,16 @@
                           (number? v) (boolean? v))))
             (select-keys data hot-load-cause-keys)))))
 
+(def ^:private retained-stack-limit 24)
+
+(defn- throwable-diagnostic
+  "Serializable diagnostic evidence for a failed hot-load.  Stack frames are
+  bounded so the durable run record cannot grow with an arbitrary throwable."
+  [^Throwable t]
+  {:throwable-class (.getName (class t))
+   :message (ex-message t)
+   :stack (mapv str (take retained-stack-limit (.getStackTrace t)))})
+
 (defn hot-load!
   "Hot-load an accepted answer's patch: the patch is applied under the
   requisition's binding (same cascade digest, same phase).  The loader must
@@ -397,12 +407,15 @@
                                   :phase (:phase requisition)))]
         (record! ledger :attempts (assoc attempt :outcome :loaded :product product)))
       (catch Throwable t
-        (let [cause (bounded-cause t)]
+        (let [cause (bounded-cause t)
+              diagnostic (throwable-diagnostic t)]
           (record! ledger :attempts
-                   (cond-> (assoc attempt :outcome :failed :error (ex-message t))
+                   (cond-> (assoc attempt :outcome :failed :error (ex-message t)
+                                  :throwable diagnostic)
                      cause (assoc :cause cause)))
           (cond-> {:status :error :kind :hot-load-failed
-                   :error (ex-message t)}
+                   :error (ex-message t)
+                   :throwable diagnostic}
             cause (assoc :cause cause)))))))
 
 (defn resume!

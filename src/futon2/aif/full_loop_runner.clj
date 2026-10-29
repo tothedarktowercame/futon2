@@ -9380,6 +9380,15 @@
                :outcome :incomplete
                :checkpoints @checkpoints
                :data {:outcome :incomplete
+                      :failure-kind (or (:failure-kind failure-data)
+                                        :open-cascade-resume-held)
+                      :failure-stage :cascade-resume
+                      :error (or (get-in failure-data
+                                         [:downstream-refusal :error])
+                                 (.getMessage e))
+                      :cause (select-keys
+                              (:downstream-refusal failure-data)
+                              [:kind :cause :throwable])
                       :held-phase (:held-phase failure-data)
                       :downstream-refusal (:downstream-refusal failure-data)
                       :repair-obligation finding}})
