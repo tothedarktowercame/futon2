@@ -281,7 +281,7 @@
   (when (and grounded-commit
              (or cohort? (:tripwire/force? observation)))
     (let [prompt (reviewer-prompt reviewer-job)]
-      (when-not (exact-sha-in-text? prompt grounded-commit)
+      (when-not (exact-sha-in-text? prompt (if (map? grounded-commit) (:sha grounded-commit) grounded-commit))
         [{:kind :review-grounding-commit-mismatch
           :grounded-commit grounded-commit
           :review-job-id (:job-id reviewer-job)

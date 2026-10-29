@@ -1,0 +1,124 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "wm-full-loop",
+    "session-id": "zai-0f4d75df-249e-44e8-a0b5-b00bb39f2288",
+    "execution": {
+      "executed": true,
+      "tool-events": 1,
+      "command-events": 0
+    },
+    "job-id": "invoke-1793299467216-7517-a9dacba7",
+    "agent-id": "wm-author",
+    "artifact-ref": "cfb1408629826c6d825e2ddc06aad84ee5ac6108",
+    "harness": {
+      "kind": "war-machine",
+      "basis": "producer-context",
+      "execution-id": "2026-10-29-347b9b51-637d-4291-9448-f2dcecedd748",
+      "source-ref": "wm-click-04a84de2-a9b8-4e6e-9af7-851f20f97d73"
+    },
+    "started-at": "2026-10-29T18:44:27.447297352Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-10-29T18:44:27.217375586Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-10-29T18:44:27.447301259Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-10-29T18:44:27.527747483Z",
+        "text": "D_TASK_DISPATCH_SHA256: 36a0fed0b65586e8b5491efea590527377fc1b3412b26cb3226c0e9705cdd23d\nwm-author: FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; wm-reviewer is the independent reviewer.\n\nImplement the enacted step of the selected War Machine action. This is NOT a request for a fold-turn deposit, wiring diagram, report-only artifact, or prose claiming that work could be done. Change the actual mission/code world. A declared produced token is a closure claim, not an aspiration: mark it true only when its stated locator is mechanically satisfied. If a bounded parcel can make real progress but cannot close the enacted step, leave the token false and state that limitation; the run will record grounded progress rather than closure.\n\nSELECTED TARGET: \"M-futonzero-prelim-practice\"\nTARGET REPOSITORY: \"/home/joe/code/futon0\"\nTARGET REPOSITORY BASE HEAD: \"cfb1408629826c6d825e2ddc06aad84ee5ac6108\"\nACCEPTANCE CRITERIA (the tests your work will be measured against):\nThese are the reviewed completion checks of the compiled cascade (selected digest a6a43ccbf4497b2bf3cf800bbfd39843765593d94c7a73b0a89e32aa113eb5f5, compiled digest 3e782aac558c39354fcba08ae3a0ebea856912ade433c4fcbc62e0ad69d9a909), verbatim.\n  [\"cascade-construction/read-what-exists-first\" 0] (:record-mission-identity-read) \u2014 [:mission-title-names-file \"mission header names M-futonzero-prelim-practice as the file being read\"]\n  [\"apparatus/the-system-stops-on-schedule\" 1] (:pin-open-head-lifecycle-stage) \u2014 [:status- \u2026[trimmed]"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-10-29T18:44:37.740438081Z",
+        "text": "The acceptance criteria are all about the mission header content \u2014 reading/recording facts about the mission file. The mission record's open holes include 4 unchecked tasks (lines 500-503) plus 2 pending-lifecycle. The completion checks are all textual facts about the mission file. Do they already exist in the mission file? Let me read the mission file header and the relevant lines."
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-10-29T18:44:37.744814061Z",
+        "tools": [
+          "run_readonly"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon0 && git rev-parse HEAD && sed -n '1,20p' holes/missions/M-futonzero-prelim-practice.md && echo -"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"cfb1408629826c6d825e2ddc06aad84ee5ac6108\\n# M-futonzero-prelim-practice\\n\\n**Status:** OPEN \u2014 HEAD \u2014 operator shape captured 2026-08-15; second operator session\\n2026-09-28 (appended below, with a design sketch the operator asked to develop\\nhere *as design*, not build). Not yet IDENTIFY.\\n**Phase discipline:** per `futon4/holes/mission-lifecycle.md`, HEAD preserves the\\noperator's voice and carries tensions forward. It is not design. Nothing below\\nspecifies a curriculum.\\n\\n---\\n\\n## Operator-voice anchor\\n\\nJoe, 2026-08-15:\\n\\n> \\\"Rather than deferring it, maybe we should take a prelim problem or two and see\\n> if we can adapt the python-practice routines to prelim-practice. [\u2026] What we\\n> don't have immediately is the 'why', which is maybe a good question to be\\n> asking *myself* after 25 years or so! [\u2026] Maybe it's interesting to think about\\n> a 'joe-class' version of what we have planned for Zai, even before we get\\n----\\nabove proceed in stride meanwhile. IDENTIFY, once MAP has answered: **which ledger is authoritative, and how large\\nis the genuinely-unseen set?** Everything else waits on those two numbers.\\n\\n## Acceptance checklist (2026-09-30)\\n\\n- [ ] The mission names the authoritative prelim-practice ledger and reports the size of the genuinely unseen problem set.\\n- [ ] A concept-graph extraction over the closed registered topology proofs produces a reviewer-legible graph of named concepts.\\n- [ ] Two or three treatments in the t96J01 form exist for problems sharing a pattern and expose their cross-links.\\n- [ ] One masked operator attempt records a stuck point without exposing the hidden solution before the attempt.\\ne1b01eb3e0c1cef716174978e63a6b9ac100e968032bb59adbdf31929d805cf0  holes/missions/M-futonzero-prelim-practice.md\\n\",\"err\":\"\"}}"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "text",
+        "at": "2026-10-29T18:44:51.478821722Z",
+        "text": "FULL_LOOP_FEATURE_CARD: {:built \"already satisfied: all 9 completion checks are literal facts of the mission header\" :want-coverage \"full (header text matches each check verbatim)\" :matches-intent? true :things-to-try [\"sed -n 1,8p /home/joe/code/futon0/holes/missions/M-futonzero-prelim-practice.md -> title, 'OPEN \u2014 HEAD', 2026-08-15/2026-09-28 dates, 'as design, not build', 'Not yet IDENTIFY', lifecycle citation, 'It is not design', 'Nothing below specifies a curriculum' all present\"] :proof-ref \"cfb1408629826c6d825e2ddc06aad84ee5ac6108\"} \n\nInspection result: the nine acceptance criteria of the selected compiled cascade are all satisfied by the mission file at the base HEAD, verified line by line with `sed`:\n\n- `# M-futonzero-prelim-practice` \u2014 title names the file being read (line 1).\n- `**Status:** OPEN \u2014 HEAD \u2014 operator shape captured 2026-08-15; second operator session 2026-09-28` \u2014 banner and both dated session anchors (lines 3\u20134).\n- `here *as design*, not build` (line 5) and `Not yet IDENTIFY.` (line 5).\n- `per \\`futon4/holes/mission-lifecycle.md\\`` \u2014 lifecycle authority cited by path (line 6).\n- `It is not design.` (line 8) and `Nothing below specifies a curriculum.` (line 8).\n- `Nothing below` scoping phrase present (line 8).\n\nThe file's sha256 `e1b01eb3\u2026` matches the mission record's source pin exactly, and `git rev-parse HEAD` in `/home/joe/code/futon0` is `cfb1408629826c6d825e2ddc06aad84ee5ac6108`, equal to the stated base head \u2014 so this evidence is at the base commit, not at some dirty working-tree state. Per requirement 7 I therefore make no commit and do not present the base HEAD as a new DONE artifact. No deposit was made (nothing was repaired; a receipt would assert a discharge that did not occur). Note this reports only the selected construction's criteria; the mission's four unchecked checklist tasks (lines 500\u2013503) remain genuinely open.\n\nPatterns enacted by the existing evidence: cascade-construction/read-what-exists-first, agent/evidence-over-a \u2026[trimmed]"
+      },
+      {
+        "seq": 7,
+        "type": "done",
+        "at": "2026-10-29T18:44:51.632610331Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 8,
+        "type": "delivery-recorded",
+        "at": "2026-10-29T18:44:51.964030957Z",
+        "status": "delivered",
+        "surface": "inbox",
+        "destination": "/home/joe/.claude/agency-inbox/wm-full-loop/auto-bellback-invoke-1793299467216-7517-a9dacba7.json",
+        "recorded-at": "2026-10-29T18:44:51.963241602Z",
+        "note": "bell-job-ready-inbox"
+      }
+    ],
+    "mode": "work",
+    "delivery": {
+      "status": "delivered",
+      "surface": "inbox",
+      "destination": "/home/joe/.claude/agency-inbox/wm-full-loop/auto-bellback-invoke-1793299467216-7517-a9dacba7.json",
+      "recorded-at": "2026-10-29T18:44:51.963241602Z",
+      "note": "bell-job-ready-inbox"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1793299467216-7517-a9dacba7",
+      "delivery-status": "delivered",
+      "inbox-file-created?": true,
+      "registered-push-performed?": false,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "total-cost-usd": null,
+    "usage": {
+      "cost/input-tokens": 66366,
+      "cost/output-tokens": 981,
+      "cost/total-tokens": 67347,
+      "cost/cached-input-tokens": 59584,
+      "cost/reasoning-tokens": 263,
+      "cost/source": "zai",
+      "cost/calls": 2,
+      "cost/model": "glm-5.3"
+    },
+    "result-summary": "FULL_LOOP_FEATURE_CARD: {:built \"already satisfied: all 9 completion checks are literal facts of the mission header\" :want-coverage \"full (header text matches each check verbatim)\" :matches-intent? true :things-to-try...",
+    "result": "FULL_LOOP_FEATURE_CARD: {:built \"already satisfied: all 9 completion checks are literal facts of the mission header\" :want-coverage \"full (header text matches each check verbatim)\" :matches-intent? true :things-to-try [\"sed -n 1,8p /home/joe/code/futon0/holes/missions/M-futonzero-prelim-practice.md -> title, 'OPEN \u2014 HEAD', 2026-08-15/2026-09-28 dates, 'as design, not build', 'Not yet IDENTIFY', lifecycle citation, 'It is not design', 'Nothing below specifies a curriculum' all present\"] :proof-ref \"cfb1408629826c6d825e2ddc06aad84ee5ac6108\"} \n\nInspection result: the nine acceptance criteria of the selected compiled cascade are all satisfied by the mission file at the base HEAD, verified line by line with `sed`:\n\n- `# M-futonzero-prelim-practice` \u2014 title names the file being read (line 1).\n- `**Status:** OPEN \u2014 HEAD \u2014 operator shape captured 2026-08-15; second operator session 2026-09-28` \u2014 banner and both dated session anchors (lines 3\u20134).\n- `here *as design*, not build` (line 5) and `Not yet IDENTIFY.` (line 5).\n- `per \\`futon4/holes/mission-lifecycle.md\\`` \u2014 lifecycle authority cited by path (line 6).\n- `It is not design.` (line 8) and `Nothing below specifies a curriculum.` (line 8).\n- `Nothing below` scoping phrase present (line 8).\n\nThe file's sha256 `e1b01eb3\u2026` matches the mission record's source pin exactly, and `git rev-parse HEAD` in `/home/joe/code/futon0` is `cfb1408629826c6d825e2ddc06aad84ee5ac6108`, equal to the stated base head \u2014 so this evidence is at the base commit, not at some dirty working-tree state. Per requirement 7 I therefore make no commit and do not present the base HEAD as a new DONE artifact. No deposit was made (nothing was repaired; a receipt would assert a discharge that did not occur). Note this reports only the selected construction's criteria; the mission's four unchecked checklist tasks (lines 500\u2013503) remain genuinely open.\n\nPatterns enacted by the existing evidence: cascade-construction/read-what-exists-first, agent/evidence-over-assertion, apparatus/the-system-stops-on-schedule, problems/process-conduct-is-unassured, problems/r10-scheduled-entrypoint, inbox-zero/promote-at-turn-end \u2014 as reading records pinned in the compiled cascade, already materially present at base HEAD.\n\nFULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1793299467216-7517-a9dacba7",
+      "at": "2026-10-29T18:44:51.632595433Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-10-29T18:44:51.632595433Z",
+    "created-at": "2026-10-29T18:44:27.216651763Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

@@ -28,8 +28,9 @@
   "Whether OUTCOME is a completed opportunity that requires no stop-line
   finding.  `:already-satisfied` is successful only when the runner-retained
   validated existing-commit qualification is present."
-  [{:keys [outcome grounded-commit]}]
-  (or (contains? #{:grounded-change
+  [{:keys [outcome grounded-commit reviewed-claim-refused?]}]
+  (or (and (= :guardrail-refusal outcome) (true? reviewed-claim-refused?))
+      (contains? #{:grounded-change
                    :grounded-progress
                    :historical-verification-awaiting-validation}
                  outcome)

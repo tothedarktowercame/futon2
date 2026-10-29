@@ -4843,6 +4843,63 @@
     (resolve-fn commit)
     (resolve-build commit target-repo)))
 
+(defn review-already-satisfied-claim!
+  "Review an existing-artifact claim through the ordinary dispatch/poll ports.
+  Existence qualifies the claim for review; it does not supply the verdict."
+  [opts phase-context prompt-opts target mission construction author-job classification charge!]
+  (let [grounded (:grounded-commit classification)
+        commit (:sha grounded)
+        repository (some (fn [r] (when (and (= (:repo grounded) (.getName (io/file r)))
+                                            (.isDirectory (io/file r ".git"))) r))
+                         (primary-repos))
+        build (resolve-target-build opts repository commit)
+        repo (:repo build)
+        files (:files build)
+        _ (when-not (and repo (vector? files))
+            (throw (ex-info "Already-satisfied artifact cannot be resolved"
+                            {:outcome :build-failed :failure-kind :artifact-binding-mismatch})))
+        source (:source mission)
+        _ (when-not (and (string? (:path source)) (string? (:sha256 source)))
+            (throw (ex-info "Selected completion definition has no source pin"
+                            {:outcome :build-failed :failure-kind :review-completion-source-unavailable})))
+        source-file (io/file (:path source))
+        source-bytes (Files/readAllBytes (.toPath source-file))
+        _ (when-not (= (:sha256 source) (sha256-bytes source-bytes))
+            (throw (ex-info "Selected completion definition changed before review"
+                            {:outcome :build-failed :failure-kind :review-completion-source-mismatch})))
+        completion-text (String. source-bytes "UTF-8")
+        prompt (str (reviewer-prompt prompt-opts target construction repo commit author-job [])
+                    "\nALREADY-SATISFIED CLAIM: no new implementation is claimed. Judge whether "
+                    "this exact existing commit satisfies the selected task, not merely whether it exists.\n"
+                    "SELECTED TASK COMPLETION DEFINITION / RETAINED MISSION:\n" (pr-str mission) "\n" completion-text
+                    "\nA task-satisfaction refusal is ordinary; if the apparatus itself is defective, "
+                    "also return FULL_LOOP_APPARATUS_DEFECT: <specific reason>.\n")
+        response (run-phase! opts phase-context :reviewer-dispatch
+                   #(do (charge!)
+                        ((or (:dispatch-fn opts) dispatch!) opts (:reviewer prompt-opts)
+                         "wm-full-loop" target prompt)))
+        job (run-phase! opts phase-context :reviewer-wait
+              #((or (:poll-fn opts) poll-job!) opts (:job-id response)))
+        _ (when-not (and (= "done" (:state job)) (= (:job-id response) (:job-id job)))
+            (throw (ex-info "Claim reviewer did not complete the dispatched job"
+                            {:outcome :build-failed :failure-kind :review-job-binding-mismatch
+                             :review-job job})))
+        job (assoc job :prompt prompt)
+        verdict (review-verdict job)
+        gate (review-execution-gate files job)
+        apparatus (second (re-find #"(?m)^FULL_LOOP_APPARATUS_DEFECT:\s*(.+)$" (job-text job)))
+        accepted? (and (= :approve verdict) (:passed? gate) (:executed? gate)
+                       (pos? (or (:tool-events gate) 0)))
+        refused? (and (#{:reject :request-changes} verdict) (not apparatus))
+        outcome (cond accepted? :already-satisfied refused? :guardrail-refusal :else :build-failed)
+        kind (cond accepted? :already-satisfied refused? :reviewed-claim-refused
+                   apparatus :reviewer-apparatus-defect :else :review-execution-evidence-missing)]
+    {:outcome outcome :failure-kind kind :failure-stage :author-wait
+     :target target :commit commit :grounded-commit grounded
+     :author-job author-job :review-job job :review-verdict verdict :review-gate gate
+     :refusal-reason (when-not accepted? (or apparatus (job-text job)))
+     :reviewed-claim-refused? (boolean refused?)}))
+
 (defn- reviewed-mission-entry
   "Advance a selected mission's source pin only when its current bytes are
   exactly the bytes in the reviewed commit. Selection intentionally pins the
@@ -6575,7 +6632,8 @@
                        finding
                        (when-not (stop-line/no-finding-required?
                                   {:outcome outcome
-                                   :grounded-commit (:grounded-commit data)})
+                                   :grounded-commit (:grounded-commit data)
+                                   :reviewed-claim-refused? (:reviewed-claim-refused? data)})
                          (or existing-finding
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
@@ -7274,6 +7332,7 @@
                                  ;; finding producer instead of seeing only the
                                  ;; outcome label.
                                  :grounded-commit (:grounded-commit data)
+                                 :reviewed-claim-refused? (:reviewed-claim-refused? data)
                                  :duration-ms (- (System/currentTimeMillis) started)
                                  :tripwire/snapshot
                                  {:grounded-commit
@@ -8722,6 +8781,18 @@
                                          :author-job author-job}
                                   (seq author-retries)
                                   (assoc :author-retries author-retries)))))
+              (when-let [classification
+                         (let [correction-repo (get-in author-job [:author-response-corrections 0 :binding :repository])]
+                           (author-refusal-classification author-job
+                             (or correction-repo (get-in author-job [:artifact-binding :repo]) author-repo)
+                             nil (some? correction-repo)))]
+                (when (= :already-satisfied (:outcome classification))
+                  (let [reviewed (review-already-satisfied-claim!
+                                   opts @phase-context (assoc prompt-opts :reviewer reviewer)
+                                   target mission construction author-job classification
+                                   #(swap! dispatched-turns inc))]
+                    ;; The existing close handler retains the reviewed artifact and job.
+                    (throw (ex-info "Existing-artifact claim independently reviewed" reviewed)))))
               (throw-if-author-refused! author-job target :author-wait)
               (let [bound-author? (or fresh-author? (some? deferred-author-context))
                     retained-artifact-binding
@@ -9323,7 +9394,8 @@
             (let [failure (ex-data e)
                 review-job (:review-job failure)
                 verdict (some-> review-job review-verdict)
-                review-finding (when (and (nil? (:repair-obligation failure))
+                review-finding (when (and (not (:reviewed-claim-refused? failure))
+                                   (nil? (:repair-obligation failure))
                                    (:commit failure)
                                    (#{:request-changes :reject} verdict))
                           ((or (:repair-record-fn opts)
@@ -9360,6 +9432,8 @@
                         :witness (:witness failure)
                         :author-job (:author-job failure)
                         :review-job review-job
+                        :reviewed-claim-refused? (:reviewed-claim-refused? failure)
+                        :refusal-reason (:refusal-reason failure)
                         :repair-obligation finding
                         :repair/occurrence
                         (or (:repair/occurrence failure)
