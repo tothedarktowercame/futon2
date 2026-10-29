@@ -7709,7 +7709,8 @@
                                 @phase-context
                                 (:decision judgement0) roster
                                 (or selected-reading-record interpretation-ask-record)
-                                (:outer-task-selection judgement0))
+                                (or (:outer/selection opts)
+                                    (:outer-task-selection judgement0)))
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
             ;; Capture the exact production value before cascade execution can

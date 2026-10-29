@@ -104,16 +104,27 @@
     (distinct (concat legacy live))))
 
 (defn- outer-task-population
-  "Return the exact task field retained by the outer selector.  Support and
-  exclusions are both members of the enumerated field: exclusion is a typed
-  selection result, not evidence that the task was never seen."
+  "Return the exact task field retained by either outer-selector generation.
+  Support/admitted tasks and exclusions are all members of the enumerated
+  field: exclusion is a typed selection result, not evidence that the task was
+  never seen."
   [outer-selection]
   (when outer-selection
-    (when-not (= :wm/outer-task-selection-v1 (:schema outer-selection))
-      (throw (ex-info "Outer task selection has the wrong schema"
-                      {:schema (:schema outer-selection)})))
-    (let [rows (vec (concat (:support outer-selection)
-                            (:excluded outer-selection)))
+    (let [kind-for (fn [id]
+                     (case (first (str id))
+                       \M :mission \E :excursion \T :ticket nil))
+          live-selection? (contains? outer-selection :outer-field/admitted)
+          _ (when-not (or (= :wm/outer-task-selection-v1 (:schema outer-selection))
+                          live-selection?)
+              (throw (ex-info "Outer task selection has the wrong schema"
+                              {:schema (:schema outer-selection)})))
+          rows (if live-selection?
+                 (mapv (fn [id] {:id (str id) :kind (kind-for id)})
+                       (concat (:outer-field/admitted outer-selection)
+                               (map #(or (:id %) (:target %))
+                                    (:outer-field/excluded outer-selection))))
+                 (vec (concat (:support outer-selection)
+                              (:excluded outer-selection))))
           invalid (filterv #(or (not (some? (:id %)))
                                 (not (contains? #{:mission :excursion :ticket}
                                                 (:kind %))))
@@ -182,7 +193,9 @@
                                               :mission-hole-coverage])
                 :outer-task-population
                 (when retained-outer-population?
-                  (select-keys outer-selection [:schema :support :excluded]))}]
+                  (select-keys outer-selection
+                               [:schema :support :excluded
+                                :outer-field/admitted :outer-field/excluded]))}]
     {:schema :wm/world-at-selection-v1
      :open-tasks task-carrier
      :enumerator {:source enumerator-source

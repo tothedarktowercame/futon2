@@ -1,6 +1,7 @@
 (ns futon2.aif.selection-world-test
   (:require [clojure.test :refer [deftest is]]
-            [futon2.aif.selection-world :as world]))
+            [futon2.aif.selection-world :as world]
+            [wm-run-facts :as facts]))
 
 (def tasks {:missions ["M-a"] :excursions ["E-a"] :tickets ["T-a"]})
 (def decision {:controller-ranking
@@ -60,6 +61,31 @@
     (is (= ["T-off-map"] (get-in x [:open-tasks :tickets :ids])))
     (is (= (set (get-in x [:enumerated-tasks :ids]))
            (set (mapcat :ids (vals (:open-tasks x))))))))
+
+(deftest live-outer-selection-carries-the-whole-enumerated-population
+  (let [excluded (mapv (fn [n] {:target (str "E-held-" n)
+                                :reason :inactive})
+                       (range 26))
+        outer {:cascade-scores [1.0 2.0 3.0]
+               :outer-field/admitted ["M-live" "T-ready"]
+               :outer-field/excluded excluded
+               :selection {:selected {:target "M-live"}}}
+        snapshot (world/capture {:selection-certificate
+                                 {:candidates [{:target "M-live"}]}}
+                                {} nil outer opts)
+        exported (:facts (facts/facts-for-record
+                          {:world-at-selection snapshot}
+                          "fixture.edn"
+                          {:patterns #{} :seats #{}}))]
+    (is (= 3 (count (:cascade-scores outer))))
+    (is (= 26 (count (:outer-field/excluded outer))))
+    (is (= (set (concat (:outer-field/admitted outer)
+                        (map :target excluded)))
+           (set (get-in snapshot [:enumerated-tasks :ids]))))
+    (is (= (set (exported "enumeratedTasks"))
+           (set (concat (exported "openMissions")
+                        (exported "openExcursions")
+                        (exported "openTickets")))))))
 
 (deftest malformed-outer-population-is-retained-as-a-failure
   (let [x (world/capture decision {} nil
