@@ -890,6 +890,39 @@
     (binding [runner/*runtime-defaults* defaults]
       (runner/run-opportunity! runner-opts))))
 
+(defn self-heal-acceptance-intake
+  "Suppress a stale admitted acceptance only when the durable ledger records an
+  unsatisfiable-acceptance claim for the carried transaction. The pinned prior
+  diagnosis becomes available input to a fresh proposal; ordinary resumes keep
+  both carried bindings and the normal :present diagnosis observation."
+  [opts carried-bindings diagnosis-context]
+  (let [reconsideration (:acceptance-unsatisfiable-claim carried-bindings)
+        opts (if (= :carried-transaction (:source carried-bindings))
+               (reduce (fn [options key]
+                         (if (contains? options key)
+                           options
+                           (assoc options key (get carried-bindings key))))
+                       opts
+                       (if reconsideration
+                         [:diagnosis-evidence-pin]
+                         [:diagnosis-evidence-pin :acceptance-test]))
+               opts)
+        opts (cond-> opts
+               reconsideration (dissoc :acceptance-test)
+               reconsideration (assoc :meta-acceptance-unsatisfiable-claim
+                                      reconsideration))
+        diagnosis-observation
+        (if reconsideration
+          {:status :available
+           :injury-id (:injury-id carried-bindings)
+           :source-record-pin (:source-record-pin carried-bindings)
+           :diagnosis-evidence-pin (:diagnosis-evidence-pin carried-bindings)
+           :repair-claimed? false
+           :source :acceptance-reconsideration}
+          (meta-self-heal/prepare-diagnosis opts diagnosis-context))]
+    {:opts opts :diagnosis-observation diagnosis-observation
+     :acceptance-reconsideration reconsideration}))
+
 (defn- run-opportunity-with-authority!
   "Arbitrate durable META injuries before constructing any ordinary policy
   field. An active injury consumes the opportunity without fallback."
@@ -914,16 +947,12 @@
                            {:status :absent :reason :retry}
                            (meta-self-heal/carried-bindings-observation
                             opts diagnosis-context))
-        opts (if (= :carried-transaction (:source carried-bindings))
-               (reduce (fn [options key]
-                         (if (contains? options key)
-                           options
-                           (assoc options key (get carried-bindings key))))
-                       opts
-                       [:diagnosis-evidence-pin :acceptance-test])
-               opts)
-        diagnosis-observation (when (and (not retry) (not= :refused (:status authority)))
-                                (meta-self-heal/prepare-diagnosis opts diagnosis-context))
+        intake (when (and (not retry) (not= :refused (:status authority)))
+                 (self-heal-acceptance-intake opts carried-bindings diagnosis-context))
+        opts (or (:opts intake) opts)
+        diagnosis-observation
+        (when (and (not retry) (not= :refused (:status authority)))
+          (:diagnosis-observation intake))
         acceptance-observation (if (= :refused (:status authority))
                                  {:status :not-required
                                   :reason :meta-self-heal/medic-authority-unavailable}

@@ -10,6 +10,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.meta-repair-coordinator :as coordinator]
+            [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
             [futon2.aif.ticket-readiness :as ticket-readiness]
@@ -250,6 +251,64 @@
     (is (= :dedicated-meta-self-heal (:route result)))
     (is (= 2 (:attempt result)))
     (is (= 1 (get-in result [:continued-from 0 :attempt])))))
+
+(def ^:private iteration-21-root
+  "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-21")
+
+(defn- iteration-21-context [ledger-name]
+  (let [ledger (edn/read-string (slurp (str iteration-21-root "/" ledger-name)))
+        transaction-path (str iteration-21-root "/transaction-after.edn")
+        transaction (edn/read-string (slurp transaction-path))
+        injury-id (get-in transaction [:work-order :injury-id])
+        latest (last (filter #(and (= :wm/meta-injury-transition-v1 (:schema %))
+                                   (= injury-id (:injury-id %)))
+                             (:entries ledger)))]
+    {:opts {:meta-repair-transaction-path transaction-path}
+     :context {:durable-ledger {:ledger ledger}
+               :active-injuries {:status :computed :injuries {injury-id latest}}
+               :injury-selection {:transaction-path transaction-path}}}))
+
+(deftest iteration-21-claim-forces-a-fresh-acceptance-proposal
+  (let [{:keys [opts context]} (iteration-21-context "ledger-after.edn")
+        carried (meta-self-heal/carried-bindings-observation opts context)
+        intake (runtime/self-heal-acceptance-intake opts carried context)
+        request (atom nil)
+        proposal (meta-self-heal/produce-acceptance!
+                  (assoc (:opts intake)
+                         :meta-repository-root (System/getProperty "user.dir")
+                         :meta-acceptance-root (str (f32-root) "/acceptances")
+                         :meta-acceptance-fn
+                         (fn [r]
+                           (reset! request r)
+                           {:status :proposed
+                            :acceptance-test
+                            {:id "iteration-21-fresh"
+                             :command ["clojure" "-M:test" "-n"
+                                       "futon2.aif.iteration-21-fresh-test"]
+                             :expected {:exit 0}
+                             :source
+                             {:namespace "futon2.aif.iteration-21-fresh-test"
+                              :path "test/futon2/aif/iteration_21_fresh_test.clj"
+                              :text (str "(ns futon2.aif.iteration-21-fresh-test "
+                                         "(:require [clojure.test :refer [deftest is]]))\n"
+                                         "(deftest fresh (is true))\n")}}}))
+                  (:diagnosis-observation intake))
+        claims (filter #(= :acceptance-unsatisfiable-claimed (:observation-kind %))
+                       (get-in context [:durable-ledger :ledger :entries]))]
+    (is (= :available (get-in intake [:diagnosis-observation :status])))
+    (is (nil? (get-in intake [:opts :acceptance-test])))
+    (is (= :proposed (:status proposal)))
+    (is (= (get-in carried [:acceptance-unsatisfiable-claim :author-evidence])
+           (get-in @request [:author-unsatisfiable-claim :author-evidence])))
+    (is (= 1 (count claims)) "preparation does not spend another return")))
+
+(deftest iteration-21-ordinary-resume-keeps-the-admitted-acceptance
+  (let [{:keys [opts context]} (iteration-21-context "ledger-before.edn")
+        carried (meta-self-heal/carried-bindings-observation opts context)
+        intake (runtime/self-heal-acceptance-intake opts carried context)]
+    (is (nil? (:acceptance-unsatisfiable-claim carried)))
+    (is (= (:acceptance-test carried) (get-in intake [:opts :acceptance-test])))
+    (is (= :present (get-in intake [:diagnosis-observation :status])))))
 
 (deftest missing-transaction-preserves-diagnosis-production
   (let [dir (f32-root)
