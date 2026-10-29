@@ -1,6 +1,8 @@
 (ns futon2.aif.meta-self-heal-production
   "Fail-closed serving arbitration for durable dedicated META repair."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
@@ -627,7 +629,9 @@
                        (when-let [correction (:meta-acceptance-correction opts)]
                          {:correction correction})
                        (when-let [correction (:meta-acceptance-review-correction opts)]
-                         {:review-correction correction}))
+                         {:review-correction correction})
+                       (when-let [correction (:meta-acceptance-static-correction opts)]
+                         {:static-correction correction}))
         response (try (accept request)
                       (catch Throwable _
                         {:status :failed
@@ -758,6 +762,51 @@
                 :else {:status :available :pin pin :receipt receipt}))))
         (catch Throwable _
           (refusal :meta-self-heal/acceptance-proposal-unreadable))))))
+
+(def ^:private static-finding-types
+  #{:unresolved-symbol :unresolved-namespace :syntax})
+
+(defn- acceptance-static-check [opts source]
+  (let [repository (or (:meta-repository-root opts) default-repository-root)
+        result (shell/sh "clj-kondo" "--lint" "-" "--config"
+                         "{:output {:format :edn}}"
+                         :dir repository :in source)
+        report (try (edn/read-string (:out result))
+                    (catch Throwable t
+                      {:findings [{:type :tooling-output :message (ex-message t)}]}))
+        findings (->> (:findings report)
+                      (filter #(contains? static-finding-types (:type %))) vec)]
+    (if (seq findings)
+      {:status :failed :diagnostics findings :source source}
+      (if (zero? (:exit result))
+        {:status :clean}
+        {:status :failed
+         :diagnostics [{:type :tooling-failure
+                        :message (str/trim (or (:err result) (:out result)))}]
+         :source source}))))
+
+(defn- statically-prepare-proposal [opts diagnosis-observation proposal]
+  (loop [proposal proposal
+         remaining (get opts :meta-acceptance-static-correction-limit 1)]
+    (if-not (= :proposed (:status proposal))
+      proposal
+      (let [source (get-in proposal [:acceptance-test :source :text])
+            check ((or (:meta-acceptance-static-check-fn opts)
+                       #(acceptance-static-check opts %)) source)]
+        (if (= :clean (:status check))
+          proposal
+          (if-not (pos? remaining)
+            (refusal :meta-self-heal/acceptance-static-correction-exhausted
+                     {:injury-id (:injury-id diagnosis-observation)
+                      :static-diagnostics (:diagnostics check)
+                      :proposed-source source :repair-claimed? false})
+            (recur (produce-acceptance!
+                    (assoc opts :meta-acceptance-static-correction
+                           {:diagnostics (:diagnostics check) :source source
+                            :instruction (str "Correct only the reported static errors; "
+                                              "preserve the test intent and assertions.")})
+                    diagnosis-observation)
+                   (dec remaining))))))))
 
 (declare admit-acceptance*)
 
@@ -907,7 +956,9 @@
     {:status :present :acceptance-test (:acceptance-test opts) :source :supplied}
 
     (= :available (:status diagnosis-observation))
-    (let [proposal (produce-acceptance! opts diagnosis-observation)
+    (let [proposal (statically-prepare-proposal
+                    opts diagnosis-observation
+                    (produce-acceptance! opts diagnosis-observation))
           first-result (if (= :proposed (:status proposal))
                          (admit-acceptance! opts proposal)
                          proposal)]

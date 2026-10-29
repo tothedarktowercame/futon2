@@ -47,6 +47,7 @@
         result (p/prepare-acceptance
                 {:meta-acceptance-root (str dir "/acceptances")
                  :meta-repository-root (System/getProperty "user.dir")
+                 :meta-acceptance-static-check-fn (constantly {:status :clean})
                  :meta-acceptance-fn
                  (fn [request]
                    (swap! requests conj request)
@@ -69,6 +70,7 @@
         requests (atom []) reviews (atom []) executed (atom [])
         options {:meta-acceptance-root (str dir "/acceptances")
                  :meta-repository-root (System/getProperty "user.dir")
+                 :meta-acceptance-static-check-fn (constantly {:status :clean})
                  :meta-acceptance-fn
                  (fn [r]
                    (swap! requests conj r)
@@ -94,7 +96,7 @@
     (is (= 2 (count executed)))
     (is (= 1 (count reviews)))
     (is (= ordinary-run (:result (first reviews))))
-    (is (= :accepted (:status result)))
+    (is (= :accepted (:status result)) (pr-str result))
     (is (not (contains? (first requests) :correction)))
     (is (= diagnostic (:compile-diagnostic correction)))
     (is (= (:run-pin compile-run) (:first-run-pin correction)))
@@ -139,6 +141,61 @@
 (deftest ordinary-failure-needs-no-correction
   (let [{:keys [result requests reviews]} (exercise [ordinary-run])]
     (is (= 1 (count requests) (count reviews)))
-    (is (= :accepted (:status result)))
+    (is (= :accepted (:status result)) (pr-str result))
     (is (not (contains? (first requests) :correction)))
     (is (not (contains? result :acceptance-compile-correction)))))
+
+(deftest static-failure-reasks-without-spending-a-run
+  (let [dir (str "/home/joe/notes/M2f-2-fixtures/" (java.util.UUID/randomUUID))
+        _ (.mkdirs (io/file dir))
+        diagnosis (#'fixtures/produced-diagnosis! dir)
+        requests (atom []) runs (atom 0)
+        bad (update-in (#'fixtures/acceptance-case "static-bad" :injury)
+                       [:source :text] str "finally\n")
+        good (#'fixtures/acceptance-case "static-good" :injury)
+        result (p/prepare-acceptance
+                {:meta-acceptance-root (str dir "/acceptances")
+                 :meta-repository-root (System/getProperty "user.dir")
+                 :meta-acceptance-static-correction-limit 1
+                 :meta-acceptance-static-check-fn
+                 (fn [source] (if (= source (get-in bad [:source :text]))
+                                {:status :failed
+                                 :diagnostics [{:type :unresolved-symbol
+                                                :message "Unresolved symbol: finally"}]}
+                                {:status :clean}))
+                 :meta-acceptance-fn
+                 (fn [request]
+                   (swap! requests conj request)
+                   {:status :proposed
+                    :acceptance-test (if (= 1 (count @requests)) bad good)})
+                 :meta-acceptance-run-fn
+                 (fn [_] (swap! runs inc) ordinary-run)
+                 :meta-acceptance-review-fn #(assoc % :status :accepted)}
+                diagnosis)]
+    (is (= :accepted (:status result)) (pr-str result))
+    (is (= 2 (count @requests)))
+    (is (= 1 @runs))
+    (is (= (get-in bad [:source :text])
+           (get-in (second @requests) [:static-correction :source])))
+    (is (= "Unresolved symbol: finally"
+           (get-in (second @requests) [:static-correction :diagnostics 0 :message])))))
+
+(deftest static-correction-exhaustion-is-distinct-and-never-runs
+  (let [dir (str "/home/joe/notes/M2f-2-fixtures/" (java.util.UUID/randomUUID))
+        _ (.mkdirs (io/file dir))
+        diagnosis (#'fixtures/produced-diagnosis! dir)
+        runs (atom 0)
+        test (#'fixtures/acceptance-case "static-exhausted" :injury)
+        result (p/prepare-acceptance
+                {:meta-acceptance-root (str dir "/acceptances")
+                 :meta-repository-root (System/getProperty "user.dir")
+                 :meta-acceptance-static-correction-limit 0
+                 :meta-acceptance-static-check-fn
+                 (constantly {:status :failed
+                              :diagnostics [{:type :syntax :message "EOF while reading"}]})
+                 :meta-acceptance-fn (constantly {:status :proposed :acceptance-test test})
+                 :meta-acceptance-run-fn (fn [_] (swap! runs inc))}
+                diagnosis)]
+    (is (= :meta-self-heal/acceptance-static-correction-exhausted (:reason result)))
+    (is (= 0 @runs))
+    (is (= (get-in test [:source :text]) (:proposed-source result)))))
