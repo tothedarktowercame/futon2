@@ -1136,18 +1136,36 @@
   binds a later move to the file read here. No file is moved during intake."
   [path durable active]
   (let [injuries (:injuries active)
+        file (when path (io/file path))
+        prefix (when file (str (.getName file) ".deferred-"))
         select-snapshot (fn [snapshot]
                           (assoc (dissoc snapshot :transaction)
                                  :injury-id (get-in snapshot [:transaction :work-order :injury-id])))
         defer? (fn [injury-id]
                  (let [blocker (recorded-blocker durable injury-id)]
-                   (when (contains? injuries blocker) blocker)))]
+                   (when (contains? injuries blocker) blocker)))
+        restorable (fn []
+                     (when file
+                       (->> (.listFiles (.getAbsoluteFile
+                                         (or (.getParentFile file) (io/file "."))))
+                            (filter #(and (str/starts-with? (.getName %) prefix)
+                                          (str/ends-with? (.getName %) ".edn")))
+                            (keep #(transaction-snapshot (.getPath %)))
+                            (map select-snapshot)
+                            (filter #(let [id (:injury-id %)
+                                           blocker (recorded-blocker durable id)]
+                                       (and (contains? injuries id) blocker
+                                            (not (contains? injuries blocker)))))
+                            (sort-by (juxt :injury-id :transaction-path)) first)))]
     (if-let [snapshot (transaction-snapshot path)]
       (let [selection (select-snapshot snapshot) injury-id (:injury-id selection)]
         (cond
           (not (contains? injuries injury-id))
-          {:mode :fresh :injury-id (first (sort (keys injuries)))
-           :stale-transaction selection}
+          (if-let [deferred (restorable)]
+            (assoc deferred :mode :restore :restore-to path
+                   :stale-transaction selection)
+            {:mode :fresh :injury-id (first (sort (keys injuries)))
+             :stale-transaction selection})
 
           (defer? injury-id)
           (let [blocker (defer? injury-id)]
@@ -1157,21 +1175,9 @@
                                        (str/replace injury-id #"[^A-Za-z0-9._-]" "_") ".edn")))
 
           :else (assoc selection :mode :resume)))
-      (let [file (when path (io/file path))
-            prefix (when file (str (.getName file) ".deferred-"))
-            restorable (when (and file (not (.exists file)))
-                         (->> (.listFiles (.getAbsoluteFile (or (.getParentFile file) (io/file "."))))
-                              (filter #(and (str/starts-with? (.getName %) prefix)
-                                            (str/ends-with? (.getName %) ".edn")))
-                              (keep #(transaction-snapshot (.getPath %)))
-                              (map select-snapshot)
-                              (filter #(let [id (:injury-id %)
-                                             blocker (recorded-blocker durable id)]
-                                         (and (contains? injuries id) blocker
-                                              (not (contains? injuries blocker)))))
-                              (sort-by (juxt :injury-id :transaction-path)) first))]
-        (if restorable
-          (assoc restorable :mode :restore :restore-to path)
+      (let [deferred (restorable)]
+        (if deferred
+          (assoc deferred :mode :restore :restore-to path)
           ;; A deferred injury whose blocker is still active yields to the
           ;; blocker here too, e.g. when the blocker's prepare refused after
           ;; the defer moved the old transaction aside.
