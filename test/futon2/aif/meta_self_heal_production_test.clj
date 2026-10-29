@@ -2180,6 +2180,9 @@
            (:status (coordinator/verify-transaction (:transaction rebound)))))
     (is (= :accepted (:status dispatched)))
     (is (= 1 @author-calls) "old rejection is retained but not reused")
+    (is (= "fresh" (get-in (coordinator/current-receipt-for
+                             (:transaction dispatched) :author)
+                            [:payload :patch-sha])))
     (is (= :recorded (:status ordinary)) "same-version resume still reuses")
     (is (= 1 (count (get-in rebound [:transaction :acceptance-supersession
                                      :retained-receipt-pins]))))

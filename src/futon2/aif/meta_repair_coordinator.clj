@@ -211,14 +211,15 @@
                 :received-receipt-pin received-pin
                 :admitted-values admitted-fallback
                 :received-values received-fallback}))))
+(declare current-receipt-for)
+
 (defn- resume-identity-refusal
   "The Lean law MetaRepairResumeIdentity.resumeIdentityOK: after :claimed,
   the transaction's retained author receipt is the ledger-admitted receipt."
   [history transaction injury-id repair-id attempt state]
   (when (#{:authored :reviewed :enacted} state)
     (let [ledger-author (authored-transition history injury-id repair-id attempt)
-          transaction-author (some #(when (= :author (:phase %)) %)
-                                   (:receipts transaction))
+          transaction-author (current-receipt-for transaction :author)
           ledger-patch-sha (:patch-sha ledger-author)
           transaction-patch-sha (get-in transaction-author [:payload :patch-sha])]
       (when-not (and ledger-author
@@ -304,15 +305,19 @@
     (catch Throwable t
       (refusal :coordinator/preparation-malformed {:detail (ex-message t)})))))
 
-(defn- receipt-for [transaction phase]
+(defn current-receipts
+  "Receipts sealed for the transaction's current work-order version. Legacy
+  transactions without explicit bindings retain their complete receipt view."
+  [transaction]
   (let [bindings (:receipt-work-order-bindings transaction)
         current-pin (get-in transaction [:work-order :work-order-pin])]
-    (some #(when (and (= phase (:phase %))
-                      (or (nil? bindings)
-                          (= current-pin
-                             (get bindings (get-in % [:receipt-pin :sha256])))))
-             %)
-          (:receipts transaction))))
+    (filterv #(or (not (seq bindings))
+                  (= current-pin
+                     (get bindings (get-in % [:receipt-pin :sha256]))))
+             (:receipts transaction))))
+
+(defn current-receipt-for [transaction phase]
+  (some #(when (= phase (:phase %)) %) (current-receipts transaction)))
 (defn- append-receipt [transaction receipt]
   (seal-transaction
    (-> transaction
@@ -327,7 +332,7 @@
   ([transaction phase predecessor-pin port]
    (invoke-once transaction phase predecessor-pin port {}))
   ([transaction phase predecessor-pin port extra]
-   (if-let [existing (receipt-for transaction phase)]
+   (if-let [existing (current-receipt-for transaction phase)]
      {:status :recorded :receipt existing :transaction transaction}
      (try
        (let [response (port (merge {:work-order (:work-order transaction)
@@ -476,7 +481,7 @@
                                :retry-click retry-click})))))))))
 
 (defn- last-receipt-pin [transaction]
-  (:receipt-pin (last (:receipts transaction))))
+  (:receipt-pin (last (current-receipts transaction))))
 
 (defn- acceptance-replay-result
   "Run the enacted repair's admitted acceptance test before considering a

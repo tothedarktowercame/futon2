@@ -1315,8 +1315,8 @@
                         (when-let [{deferred-transaction :transaction :as deferred}
                                    (transaction-snapshot (.getPath file))]
                           (let [deferred-order (:work-order deferred-transaction)
-                                deferred-author (some #(when (= :author (:phase %)) %)
-                                                      (:receipts deferred-transaction))]
+                                deferred-author (coordinator/current-receipt-for
+                                                 deferred-transaction :author)]
                             (when (and (= [injury-id repair-id attempt]
                                           [(:injury-id deferred-order)
                                            (:repair-id deferred-order)
@@ -1513,8 +1513,8 @@
                     (nil? path-witness) :phase-mismatch
                     (and (zero? (:failures report)) (zero? (:errors report))) :repaired
                     :else :same-failure)
-          author (some #(when (= :author (:phase %)) %) (:receipts transaction))
-          enact (some #(when (= :enact (:phase %)) %) (:receipts transaction))
+          author (coordinator/current-receipt-for transaction :author)
+          enact (coordinator/current-receipt-for transaction :enact)
           replay {:schema :wm/pinned-admission-phase-replay-receipt-v1
                   :injury-id (:injury-id work-order)
                   :repair-id (:repair-id work-order)
@@ -1578,12 +1578,12 @@
    stale on the first requeue. Read the last retry-family receipt's click,
    else the enact receipt's, else nil."
   [transaction]
-  (let [receipts (:receipts transaction)
+  (let [receipts (coordinator/current-receipts transaction)
         phase-name #(when (keyword? (:phase %)) (name (:phase %)))
         retry? #(let [n (phase-name %)]
                   (and n (or (= "retry" n) (str/starts-with? n "retry-requeue-"))))]
     (or (get-in (last (filter retry? receipts)) [:payload :retry-click])
-        (get-in (some #(when (= :enact (:phase %)) %) receipts)
+        (get-in (coordinator/current-receipt-for transaction :enact)
                 [:payload :retry-click]))))
 (defn- work-order-options [opts]
   (cond-> (assoc (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
@@ -1941,7 +1941,9 @@
                                        :injury-id (get-in result [:transaction :work-order :injury-id])
                                        :repair-id (get-in result [:transaction :work-order :repair-id])
                                        :attempt (get-in result [:transaction :work-order :attempt])
-                                       :patch-sha (get-in result [:transaction :receipts 0 :payload :patch-sha])
+                                       :patch-sha (get-in (coordinator/current-receipt-for
+                                                           (:transaction result) :author)
+                                                          [:payload :patch-sha])
                                        :retry-click (latest-retry-click (:transaction result))
                                        :checkpoint-receipts receipts}
                                 (string? (:detail result))
@@ -2003,8 +2005,9 @@
                                                         (get-in result [:transaction :work-order
                                                                         :acceptance-test])
                                                         :author-evidence
-                                                        (get-in result [:transaction :receipts 0
-                                                                        :payload :evidence])}))
+                                                        (get-in (coordinator/current-receipt-for
+                                                                 (:transaction result) :author)
+                                                                [:payload :evidence])}))
                                             (:meta-diagnosis-observation opts)))
                             next-durable (when (and (= :held (:status result))
                                                     (= :author-failed (:reason result))
