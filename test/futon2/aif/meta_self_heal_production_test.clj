@@ -150,36 +150,69 @@
     (is (= :phase-mismatch (:outcome wrong)))
     (is (nil? (:path-witness wrong)))))
 
-(def retained-live-root
-  "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22")
+(defn- persist-acceptance-fixture! [acceptance-root admission]
+  (let [bytes (.getBytes (str (pr-str admission) "\n") "UTF-8")
+        sha (load-identity/sha256 bytes)
+        path (str acceptance-root "/acceptance-" sha ".edn")]
+    (.mkdirs (java.io.File. acceptance-root))
+    (spit path (String. bytes "UTF-8"))
+    {:path path :sha256 sha}))
 
 (deftest legacy-admission-lookup-resolves-retained-enacted-work-orders
-  (let [acceptance-root (str retained-live-root "/acceptances")
-        cases [{:transaction "transaction.edn.deferred-injury_2aef7e0c0f48a851a781b41642bf30e52e3fa246.edn"
-                :admission "6bc0bd69fb04d1d5ee946dbff09e7e4f428d9fd14fd1f33cd5a23bcfe144014e"
-                :run "b7a762df15846ec0e421ebd19be812f93ada0347bda05729bc5f96b1d9c46683"}
-               {:transaction "transaction.edn.attempt-1.retired.edn"
-                :admission "79e288600a675336ef5b56c74b533d8ab52b64ba1cada44ebb1b2434e04d9b56"
-                :run "7a7326eb8ab9bc76ca9fd019633bbeb3b32a53fdd6f1b4c0ce27322cc70c87a9"}]]
-    (doseq [{:keys [transaction admission run]} cases]
-      (let [retained (edn/read-string (slurp (str retained-live-root "/" transaction)))
-            resolved (production/resolve-acceptance-admission
-                      acceptance-root (:work-order retained))]
-        (is (= admission (get-in resolved [:pin :sha256])) transaction)
-        (is (= run (get-in resolved [:admission :result :run-pin :sha256]))
-            transaction)))))
+  ;; Property retained from the enacted legacy records: a work order without
+  ;; an admission pin resolves the one content-addressed admission with the
+  ;; same injury and exact test identity, including its pinned red run.
+  (let [dir (root)
+        acceptance-root (str dir "/acceptances")
+        cases (mapv (fn [n]
+                      (let [injury-id (str "injury/legacy-" n)
+                            test (acceptance-case (str "legacy-test-" n))
+                            run-pin {:path (str dir "/red-" n ".log")
+                                     :sha256 (apply str (repeat 64 (str n)))}
+                            admission {:schema :wm/meta-acceptance-admission-v1
+                                       :status :accepted :injury-id injury-id
+                                       :acceptance-test test
+                                       :result {:status :ran :outcome :failed
+                                                :run-pin run-pin}}
+                            pin (persist-acceptance-fixture! acceptance-root admission)]
+                        {:work-order {:injury-id injury-id :acceptance-test test}
+                         :admission-pin pin :run-pin run-pin}))
+                    [1 2])]
+    (doseq [{:keys [work-order admission-pin run-pin]} cases]
+      (let [resolved (production/resolve-acceptance-admission
+                      acceptance-root work-order)]
+        (is (= (:sha256 admission-pin) (get-in resolved [:pin :sha256])))
+        (is (= (:sha256 run-pin)
+               (get-in resolved [:admission :result :run-pin :sha256])))))))
 
 (deftest current-ad038-deferred-order-uniquely-resolves-superseding-admission
-  (let [transaction (edn/read-string
-                     (slurp (str retained-live-root "/transaction.edn")))
+  ;; Property retained from ad038's supersession: lookup chooses the admission
+  ;; whose complete test identity matches the current work order, not an older
+  ;; admission for the same injury with a different test source.
+  (let [dir (root)
+        acceptance-root (str dir "/acceptances")
+        injury-id "injury/superseded-admission"
+        old-test (acceptance-case "acceptance/old")
+        current-test (acceptance-case "acceptance/current")
+        red-pin {:path (str dir "/current-red.log")
+                 :sha256 (apply str (repeat 64 "8"))}
+        old-admission {:schema :wm/meta-acceptance-admission-v1 :status :accepted
+                       :injury-id injury-id :acceptance-test old-test
+                       :result {:status :ran :outcome :failed
+                                :run-pin {:path (str dir "/old-red.log")
+                                          :sha256 (apply str (repeat 64 "7"))}}}
+        current-admission {:schema :wm/meta-acceptance-admission-v1 :status :accepted
+                           :injury-id injury-id :acceptance-test current-test
+                           :result {:status :ran :outcome :failed :run-pin red-pin}}
+        _ (persist-acceptance-fixture! acceptance-root old-admission)
+        current-pin (persist-acceptance-fixture! acceptance-root current-admission)
         resolved (production/resolve-acceptance-admission
-                  (str retained-live-root "/acceptances")
-                  (:work-order transaction))]
-    (is (= "137d98610839b01e9df519f1d202d5808c84929a61580518f30c734f09c16ae0"
-           (get-in resolved [:pin :sha256])))
-    (is (= "acceptance/injury-ad038c4804-downstream-busy-cause-retention"
+                  acceptance-root
+                  {:injury-id injury-id :acceptance-test current-test})]
+    (is (= (:sha256 current-pin) (get-in resolved [:pin :sha256])))
+    (is (= "acceptance/current"
            (get-in resolved [:admission :acceptance-test :id])))
-    (is (= "8b32cca6d85c6e616c58381801a7c4d1619473dfc03310bb7645b71891fa07ba"
+    (is (= (:sha256 red-pin)
            (get-in resolved [:admission :result :run-pin :sha256])))))
 
 (deftest legacy-admission-lookup-is-unique-and-recorded-in-replay

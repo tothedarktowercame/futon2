@@ -198,16 +198,27 @@
     (is (= blocker (get-in context [:injury-selection :injury-id])))))
 
 (deftest discharged-canonical-restores-retained-2aef-transaction
-  (let [root "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22"
-        path (str root "/transaction.edn")
-        deferred (str path ".deferred-injury_2aef7e0c0f48a851a781b41642bf30e52e3fa246.edn")
-        injury-id "injury/2aef7e0c0f48a851a781b41642bf30e52e3fa246"
-        history (edn/read-string (slurp (str root "/ledger.edn")))
+  ;; Property retained from the discharged-9c/active-2aef state: when the
+  ;; canonical slot belongs to an inactive injury, select the deferred active
+  ;; injury whose recorded blocker is now inactive, before selecting :fresh.
+  (let [history (inactive-blocker)
+        opts (env history)
+        path (:meta-repair-transaction-path opts)
+        deferred (defer-copy! opts)
+        injury-id old-id
+        stale-id "injury/discharged-canonical"
+        stale-order (coordinator/seal-work-order
+                     (-> (:work-order (fixture "transaction"))
+                         (assoc :injury-id stale-id)
+                         (dissoc :work-order-pin)))
+        stale (#'coordinator/seal-transaction
+               {:status :active :work-order stale-order :receipts []})
+        _ (spit path (str (pr-str stale) "\n"))
         selection (p/injury-selection path {:ledger history}
                                       {:injuries {injury-id {:state :enacted}}})]
-    (is (= "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0"
+    (is (= stale-id
            (get-in selection [:stale-transaction :injury-id]))
-        "the retained canonical slot is the discharged iteration-25 repair")
+        "the canonical slot belongs to an inactive repair")
     (is (= :restore (:mode selection)) (pr-str selection))
     (is (= injury-id (:injury-id selection)))
     (is (= deferred (:transaction-path selection)))
