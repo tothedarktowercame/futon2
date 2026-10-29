@@ -31,7 +31,9 @@
   interpretation it owes, both bound to its identity."
   [policy score]
   (let [action (:candidate score)
-        action (assoc action :policy-key (prefix-admission/reading-policy-key action))]
+        action (cond-> (assoc action :policy-key (prefix-admission/reading-policy-key action))
+                 (:authoring-resolution policy)
+                 (assoc :authoring-resolution (:authoring-resolution policy)))]
     (assoc action :interpretation-debt
            (debt/debt action (:fit score) (:reading-pin policy)))))
 

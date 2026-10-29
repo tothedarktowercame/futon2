@@ -56,7 +56,7 @@
   (or (get-in record [:terminal-receipt :outcome])
       (get-in record [:failure :detail :outcome])
       (:outcome record)))
-(defn- producer-qualified-already-satisfied? [record]
+(defn producer-qualified-already-satisfied? [record]
   ;; PROOF-2b's author-refusal producer establishes commit existence before
   ;; throwing this typed close. Classification trusts only the mutually
   ;; agreeing retained producer fields; it does not infer from author prose or

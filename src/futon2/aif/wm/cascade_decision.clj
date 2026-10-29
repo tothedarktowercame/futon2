@@ -16,6 +16,7 @@
             [futon2.aif.observation-labels :as observation-labels]
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.aif.parameter-novelty :as novelty]
+            [futon2.aif.policy-satisfaction :as policy-satisfaction]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.q2-construction :as q2-construction]
             [futon2.aif.q4-preference :as q4-preference]
@@ -1021,10 +1022,19 @@
                      (map (fn [t] {:target-id t :source-path nil
                                    :source-absent :target-source-row-absent}))
                      rowless)
-          field (family-selection/full-eligible-target-field
+          field0 (family-selection/full-eligible-target-field
                  [] (assoc opts
                            :target-source-declarations rows
-                           :target-reading-root reading-root))]
+                           :target-reading-root reading-root))
+          mission-shas (into {}
+                             (keep (fn [{:keys [target-id source-path]}]
+                                     (when (and source-path (.isFile (io/file source-path)))
+                                       [target-id (interpretation-evidence/sha256
+                                                   (java.nio.file.Files/readAllBytes
+                                                    (.toPath (io/file source-path))))])))
+                             rows)
+          field (policy-satisfaction/exclude-satisfied
+                 field0 (:policy-satisfaction-root opts) mission-shas)]
       (assoc field
              :status :formed
              :reading-root reading-root
