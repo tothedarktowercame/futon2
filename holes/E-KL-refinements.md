@@ -1,4 +1,5 @@
 # E-KL-refinements
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Closed by Joe 2026-07-03 at the §15 :kl production flip with all five refinement items resolved. Evidence: 0f8d5c6, 22b0024, eb06565.
 
 **Date:** 2026-07-03 · **Status:** ✅ **CLOSED** (Joe, 2026-07-03 — "if the work is
 done the excursion can close"; closed at the §15 `:kl` production flip. Exit criteria

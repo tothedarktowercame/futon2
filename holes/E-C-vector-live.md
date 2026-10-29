@@ -1,4 +1,5 @@
 # Excursion: a LIVE C-vector — the WM's preferences, kept current (E-C-vector-live)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Live C-vector delivered through §12 with atom-backed state, freshness guard, and EFE goal-outcome term. Evidence: /home/joe/code/futon2/src/futon2/aif/c_vector.clj, /home/joe/code/futon2/test/futon2/aif/c_vector_test.clj.
 
 **Date:** 2026-06-25 · **Status:** DELIVERED through §12 (live C §9 · predictive risk §10 · durable-join steps 1–4 + reconcile §11–12); full PROOF-store promotion stays D4-gated.
 **Authored by:** claude-2 (scoping only — not the driver).

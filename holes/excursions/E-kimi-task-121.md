@@ -1,4 +1,5 @@
 # E-kimi-task-121 — Producer groups 48 49 50: producer tests and their wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Producer groups 48, 49 and 50 were converted, with producer records committed in futon3c and per-group reports deposited. Evidence: b128e2ab, 7b8b1214, a801fce4, /home/joe/code/storage/test-registry/producer-48/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T19:56:22Z, job invoke-1790624328407-26182-130a1fa0, state done
 
