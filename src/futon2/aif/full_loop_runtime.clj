@@ -16,6 +16,7 @@
             [futon2.aif.meta-injury-store :as injury-store]
             [futon2.aif.meta-medic-authority :as medic-authority]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
+            [futon2.aif.out-of-band-fix :as out-of-band]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
@@ -102,20 +103,29 @@
     (contains? opts :meta-medic-authority-resolution)
     (let [resolution (:meta-medic-authority-resolution opts)]
       (if (medic-authority/resolved-context? resolution)
-        {:status :ready
-         :identity (medic-authority/resolution-identity resolution)
-         :verifier (medic-authority/resolution-verifier resolution)}
+        (let [external (medic-authority/resolution-verifier resolution)]
+          {:status :ready
+           :identity (medic-authority/resolution-identity resolution)
+           :verifier (fn [observation]
+                       (or (external observation)
+                           (out-of-band/retained-checked-medic-authority
+                            observation)))})
         {:status :refused :reason :meta-self-heal/medic-authority-unavailable}))
 
     (contains? opts :meta-medic-authority-context)
     (let [resolved (medic-authority/resolve-context
                     (:meta-medic-authority-context opts))]
       (if (= :ready (:status resolved))
-        {:status :ready :identity (:identity resolved)
-         :verifier (medic-authority/resolution-verifier (:resolution resolved))}
+        (let [external (medic-authority/resolution-verifier (:resolution resolved))]
+          {:status :ready :identity (:identity resolved)
+           :verifier (fn [observation]
+                       (or (external observation)
+                           (out-of-band/retained-checked-medic-authority
+                            observation)))})
         resolved))
 
-    :else {:status :absent :verifier (constantly false)}))
+    :else {:status :absent
+           :verifier out-of-band/retained-checked-medic-authority}))
 
 (defn- valid-click-availability? [availability]
   (and (= :wm/ordinary-click-availability-v1 (:schema availability))
@@ -931,7 +941,8 @@
         ;; Never honor a caller-supplied derived verifier. Only a validated
         ;; explicit context may create this process-local function.
         opts (cond-> (dissoc opts :meta-medic-authority-verifier)
-               (= :ready (:status authority))
+               (and (not= :refused (:status authority))
+                    (ifn? (:verifier authority)))
                (assoc :meta-medic-authority-verifier (:verifier authority)))
         opts (assoc opts
                     :meta-injury-ledger-path
@@ -943,17 +954,25 @@
         retry (:meta-repair-retry opts)
         diagnosis-context (when (and (not retry) (not= :refused (:status authority)))
                             (meta-self-heal/diagnosis-context opts))
-        carried-bindings (if (or retry (= :refused (:status authority)))
+        open-out-of-band (when (and diagnosis-context (not retry))
+                           (meta-self-heal/open-out-of-band-route!
+                            opts diagnosis-context))
+        carried-bindings (if (or open-out-of-band retry
+                                 (= :refused (:status authority)))
                            {:status :absent :reason :retry}
                            (meta-self-heal/carried-bindings-observation
                             opts diagnosis-context))
-        intake (when (and (not retry) (not= :refused (:status authority)))
+        intake (when (and (not open-out-of-band) (not retry)
+                          (not= :refused (:status authority)))
                  (self-heal-acceptance-intake opts carried-bindings diagnosis-context))
         opts (or (:opts intake) opts)
         diagnosis-observation
         (when (and (not retry) (not= :refused (:status authority)))
           (:diagnosis-observation intake))
-        acceptance-observation (if (= :refused (:status authority))
+        acceptance-observation (if open-out-of-band
+                                 {:status :not-required
+                                  :reason :meta-self-heal/open-out-of-band-routed}
+                                 (if (= :refused (:status authority))
                                  {:status :not-required
                                   :reason :meta-self-heal/medic-authority-unavailable}
                                  (if (= :meta-self-heal/diagnosis-active-set-unavailable
@@ -963,7 +982,7 @@
                                 (if retry
                                 {:status :not-required
                                  :reason :meta-self-heal/acceptance-retry-not-prepared}
-                                (meta-self-heal/prepare-acceptance opts diagnosis-observation))))
+                                (meta-self-heal/prepare-acceptance opts diagnosis-observation)))))
         effective-opts (cond-> opts
                          diagnosis-context (assoc :meta-diagnosis-context diagnosis-context)
                          diagnosis-observation
@@ -982,6 +1001,7 @@
                     (meta-self-heal/attributable-retry-readiness effective-opts retry)
                     (meta-self-heal/production-readiness effective-opts diagnosis-context)))]
     (cond
+      open-out-of-band open-out-of-band
       (= :meta-self-heal/diagnosis-active-set-unavailable (:reason diagnosis-observation))
       {:status :refused :reason :meta-self-heal/active-set-unavailable
        :route :dedicated-meta-self-heal :ordinary-selection-called? false

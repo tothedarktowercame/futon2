@@ -1708,6 +1708,56 @@
      :injury-selection (injury-selection (:meta-repair-transaction-path opts)
                                         durable active)}))
 
+(defn open-out-of-band-route!
+  "Before diagnosis, certify and apply one retained direct fix to the selected
+  open occurrence through the existing append-only medic disposition. No
+  artifact means no decision; a presented artifact never falls through."
+  [opts {:keys [durable-ledger active-injuries injury-selection]}]
+  (try
+    (let [injury-id (or (:injury-id injury-selection)
+                        (first (sort (keys (:injuries active-injuries)))))
+          entry (some-> (get-in active-injuries [:injuries injury-id])
+                        (assoc :injury-id injury-id))
+          root (or (:meta-acceptance-root opts) default-acceptance-root)]
+      (when (and (= :loaded (:status durable-ledger)) (= :open (:state entry)))
+        (when-let [{:keys [pin]} (out-of-band/artifact-for root injury-id)]
+          (let [subject {:injury-id injury-id
+                         :cause-record-pin (:cause-record-pin entry)
+                         :target-repository (:target-repository opts)}
+                run-acceptance (:meta-acceptance-run-fn opts)
+                evidence (if (ifn? run-acceptance)
+                           (out-of-band/compute! root subject run-acceptance)
+                           {:status :refused
+                            :reason :out-of-band/acceptance-run-unavailable})
+                receipt-pin (out-of-band/retain! root "out-of-band-results" evidence)]
+            (if-not (= :checked (:status evidence))
+              {:status :held :reason (:reason evidence)
+               :phase :open-out-of-band :out-of-band-receipt-pin receipt-pin
+               :ordinary-selection-called? false}
+              (let [{:keys [operation attribution]}
+                    (out-of-band/checked-medic-operation
+                     (:ledger durable-ledger) entry pin receipt-pin evidence)
+                    authority (out-of-band/checked-medic-authority
+                               operation receipt-pin evidence)
+                    written (store/transact-medic-disposition!
+                             (:meta-injury-ledger-path opts)
+                             receipt-pin operation attribution authority)]
+                (if (= :appended (:status written))
+                  {:status :discharged :route :open-out-of-band-medic
+                   :injury-id injury-id :fixed-by (:fixed-by evidence)
+                   :out-of-band-receipt-pin receipt-pin
+                   :medic-stamp (:medic-stamp attribution)
+                   :ledger-write (select-keys written [:status :durability :entry])
+                   :ordinary-selection-called? false}
+                  {:status :held :reason (:reason written)
+                   :phase :open-out-of-band :medic-write written
+                   :out-of-band-receipt-pin receipt-pin
+                   :ordinary-selection-called? false})))))))
+    (catch Throwable t
+      {:status :held :reason :out-of-band/artifact-unavailable
+       :phase :open-out-of-band :detail (ex-message t)
+       :ordinary-selection-called? false})))
+
 (defn prepare-diagnosis
   "Prepare exactly the injury route that coordinator/prepare will select.  A
   supplied pin is intentionally not re-produced; no active injury is an
