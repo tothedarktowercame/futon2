@@ -298,12 +298,34 @@
                                     [:injury-id :repair-id :retry-click]))
       (assoc observed :classification classification))))
 
+(defn- protocol-violation-family? [kind]
+  (and (keyword? kind)
+       (str/includes? (name kind) "protocol-violation")))
+
+(defn- append-checked-medic-recurrence
+  [history classification coverage authority-verifier signature-verifier]
+  (if-not (protocol-violation-family? (:failure-kind classification))
+    (ledger/append-medic-recurrence history (:injury-id classification)
+                                    (:record-pin classification) authority-verifier)
+    (case (try (signature-verifier {:classification classification
+                                    :covered-operation (:operation coverage)
+                                    :covered-entry (:entry coverage)})
+               (catch Throwable _ :missing))
+      :match (ledger/append-medic-recurrence
+              history (:injury-id classification) (:record-pin classification)
+              authority-verifier)
+      :mismatch (refusal :medic-recurrence/cause-mismatch)
+      (refusal :medic-recurrence/signature-required))))
+
 (defn integrate
   "Pure deterministic ingestion. Non-injuries append inert observations.
   First injury occurrence opens; an enacted repair's attributable retry may
   reopen. Any other active occurrence is retained as an inert repeat audit."
-  ([history classification] (integrate history classification (constantly false)))
+  ([history classification]
+   (integrate history classification (constantly false) (constantly :missing)))
   ([history classification authority-verifier]
+   (integrate history classification authority-verifier (constantly :missing)))
+  ([history classification authority-verifier signature-verifier]
   (try
     (cond
       (not= :valid (:status (ledger/validate-ledger history authority-verifier)))
@@ -360,7 +382,7 @@
             other-injury-retry? (and enacted
                                      (not= (:injury-id enacted)
                                            (:injury-id classification)))
-            supported-origin? (#{:open :enacted} (:state previous))
+            supported-origin? (#{:open :enacted :reopened} (:state previous))
             coverage (when supported-origin?
                        (ledger/medic-covered-latest
                         history (:injury-id classification) authority-verifier))
@@ -401,9 +423,9 @@
               (assoc appended :classification classification :transition
                      (get-in appended [:entry :state])))
             (if medic-covered?
-              (let [appended (ledger/append-medic-recurrence
-                              history (:injury-id classification)
-                              (:record-pin classification) authority-verifier)]
+              (let [appended (append-checked-medic-recurrence
+                              history classification coverage authority-verifier
+                              signature-verifier)]
                 (assoc appended :classification classification :transition
                        (get-in appended [:entry :state])))
               (refusal :injury/retry-click-mismatch
@@ -411,15 +433,22 @@
                         :actual (:click-id classification)})))
 
           (and (= :open (:state previous)) medic-covered?)
-          (let [appended (ledger/append-medic-recurrence
-                          history (:injury-id classification)
-                          (:record-pin classification) authority-verifier)]
+          (let [appended (append-checked-medic-recurrence
+                          history classification coverage authority-verifier
+                          signature-verifier)]
             (if other-injury-retry?
               (append-other-injury-retry-observation
                appended classification enacted (get-in appended [:entry :state])
                authority-verifier)
               (assoc appended :classification classification :transition
                      (get-in appended [:entry :state]))))
+
+          (and medic-covered? (= :reopened (:state previous)))
+          (let [appended (append-checked-medic-recurrence
+                          history classification coverage authority-verifier
+                          signature-verifier)]
+            (assoc appended :classification classification :transition
+                   (get-in appended [:entry :state])))
 
           (contains? ledger/active-states (:state previous))
           (let [appended (ledger/append-observation

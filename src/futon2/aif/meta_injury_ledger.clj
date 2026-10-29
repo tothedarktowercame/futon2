@@ -94,7 +94,9 @@
 
 (defn authoritative-snapshot
   "Construct the one recurrence snapshot for INJURY-ID from a valid ledger.
-  Only the formally modelled :open and :enacted origins are supported."
+  Only the formally modelled :open, :enacted, and medic-corrected :reopened
+  origins are supported. The recurrence append separately requires exact
+  medic coverage of that latest occurrence."
   ([ledger injury-id]
    (authoritative-snapshot ledger injury-id deny-medic-authority))
   ([ledger injury-id authority-verifier]
@@ -104,7 +106,7 @@
       (not= :valid (:status checked))
       (refusal :ledger/tampered {:ledger-defects (:defects checked)})
       (nil? entry) (refusal :snapshot/latest-missing)
-      (not (#{:open :enacted} (:state entry)))
+      (not (#{:open :enacted :reopened} (:state entry)))
       (refusal :snapshot/unsupported-origin {:origin (:state entry)})
       :else
       {:status :computed
@@ -242,7 +244,7 @@
                                           (= (:retry-click entry)
                                              (:retry-click previous)))
         medic-origin? (and covered-operation
-                           (#{:open :enacted} previous-state)
+                           (#{:open :enacted :reopened} previous-state)
                            (#{:reopened :abandoned} state)
                            (not ordinary-attributable-retry?))
         medic-bindings? (and medic-origin?
@@ -439,7 +441,7 @@
                           (= (:retry-click entry) (:retry-click previous-transition)))
         ordinary-reopen? (and (= :reopened (:state entry)) exact-retry?)
         medic-recurrence? (and covered?
-                               (#{:open :enacted} (:state previous-transition))
+                               (#{:open :enacted :reopened} (:state previous-transition))
                                (#{:reopened :abandoned} (:state entry))
                                (not exact-retry?)
                                (:recurs-after-medic-operation-id entry)
@@ -646,6 +648,48 @@
                          {:ledger-defects (:defects result-check)})))))))
     (catch Throwable t
       (refusal :medic/malformed {:detail (ex-message t)})))))
+
+(defn append-cause-reattribution
+  "Atomically construct the two-entry result of one checked cause
+  reattribution: the medic observation masks the exact misattributed latest
+  occurrence and the same retained record opens its checked replacement
+  injury.  Callers persist only the returned final ledger."
+  [ledger record-pin operation authority-verifier]
+  (try
+    (let [candidate (get-in operation [:request :candidate])
+          evidence (get-in operation [:request :evidence])]
+      (cond
+        (not= :cause-reattribution (:kind candidate))
+        (refusal :medic-reattribution/wrong-kind)
+        (not= candidate evidence)
+        (refusal :medic-reattribution/evidence-mismatch)
+        (not= record-pin {:path (:original-record-id candidate)
+                          :sha256 (:original-pin candidate)})
+        (refusal :medic-reattribution/record-pin-mismatch)
+        :else
+        (let [corrected (append-medic-repaired ledger record-pin operation
+                                                authority-verifier)]
+          (if-not (= :appended (:status corrected))
+            corrected
+            (let [opened (append-transition
+                          (:ledger corrected)
+                          {:injury-id (:replacement-injury-id candidate)
+                           :state :open :attempt 1
+                           :cause-id (:replacement-cause-id candidate)
+                           :cause-record-pin record-pin
+                           :failure-stage (:failure-stage candidate)
+                           :failure-kind (:failure-kind candidate)
+                           :detected-click (str "medic-reattribution/"
+                                                (:operation-id operation))}
+                          authority-verifier)]
+              (if (= :appended (:status opened))
+                {:status :appended :ledger (:ledger opened)
+                 :correction-entry (:entry corrected)
+                 :replacement-entry (:entry opened)}
+                (refusal :medic-reattribution/replacement-refused
+                         {:replacement-result opened})))))))
+    (catch Throwable t
+      (refusal :medic-reattribution/malformed {:detail (ex-message t)}))))
 
 (defn validate-ledger
   "Total validation of seals, global append chain and every injury transition."

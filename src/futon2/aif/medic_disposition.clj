@@ -11,7 +11,8 @@
   (:require [clojure.string :as str]))
 
 (def schema :wm/medic-disposition-v1)
-(def correction-kinds #{:historical-misclassification :genuine-repair})
+(def correction-kinds #{:historical-misclassification :genuine-repair
+                        :cause-reattribution})
 (def replay-results #{:producer-qualified-non-injury
                       :unsupported-author-refusal :done-at-base-revision :injury
                       :successful-close-non-injury})
@@ -30,6 +31,10 @@
                        :pre-replay-receipt :post-replay-receipt
                        :negative-control-receipt :source-revision
                        :original-acceptance-repaired?]))
+(def ^:private reattribution-fields
+  (into common-fields [:original-record-id :original-pin :rejected-cause-id
+                       :replacement-injury-id :replacement-cause-id
+                       :failure-kind :failure-stage]))
 
 (defn occurrence [x] [(:injury-id x) (:entry-id x)])
 
@@ -87,6 +92,7 @@
   (case kind
     :historical-misclassification historical-fields
     :genuine-repair genuine-fields
+    :cause-reattribution reattribution-fields
     nil))
 
 (defn payload-valid?
@@ -96,11 +102,17 @@
         fields (payload-fields kind)]
     (and (map? payload) fields (exact-keys? payload fields)
          (present-scalars? payload (disj fields :kind :predecessor-entry-id
-                                          :original-acceptance-repaired? :replay))
+                                          :original-acceptance-repaired? :replay
+                                          :failure-kind :failure-stage))
          (not= (:reviewer payload) (:evaluator payload))
          (case kind
            :historical-misclassification (contains? replay-results (:replay payload))
            :genuine-repair (boolean? (:original-acceptance-repaired? payload))
+           :cause-reattribution
+           (and (keyword? (:failure-kind payload))
+                (keyword? (:failure-stage payload))
+                (not= (:injury-id payload) (:replacement-injury-id payload))
+                (not= (:rejected-cause-id payload) (:replacement-cause-id payload)))
            false))))
 
 (defn- local-binding? [current candidate evidence]
@@ -117,6 +129,11 @@
          (and (= (:cause-record-id current) (:cause-record-id candidate))
               (= (:cause-pin current) (:cause-pin candidate))
               (true? (:original-acceptance-repaired? candidate)))
+         :cause-reattribution
+         (and (= (:cause-record-id current) (:original-record-id candidate))
+              (= (:cause-pin current) (:original-pin candidate))
+              (not= (:injury-id current) (:replacement-injury-id candidate))
+              (not= (:rejected-cause-id candidate) (:replacement-cause-id candidate)))
          false)))
 
 (defn qualify
