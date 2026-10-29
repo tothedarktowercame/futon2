@@ -1,4 +1,5 @@
 # E-kimi-task-116 — PRODUCER-15: one producer test and its wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): PRODUCER-15 conversion of the construction-family group (2 readers) was completed on 2026-09-28 and its commit and report exist. Evidence: 6b8fc638, /home/joe/code/storage/test-registry/producer-15/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T18:58:23Z, job invoke-1790621394068-26119-9ef75afe, state done
 

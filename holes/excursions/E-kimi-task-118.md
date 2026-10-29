@@ -1,4 +1,5 @@
 # E-kimi-task-118 — PRODUCER-20: one producer test and its wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): PRODUCER-20 conversion of the single-reader efe/rank-cascade-actions group was completed on 2026-09-28 and its commit and report exist. Evidence: fee81eb0, /home/joe/code/storage/test-registry/producer-20/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T19:09:40Z, job invoke-1790622074121-26129-d501f675, state done
 

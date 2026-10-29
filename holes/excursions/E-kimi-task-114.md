@@ -1,4 +1,5 @@
 # E-kimi-task-114 — PRODUCER-9: one producer test and its wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): PRODUCER-9 conversion of the temporal-courier-publication-paths group (4 readers) was completed on 2026-09-28 and its commit and report exist. Evidence: b8a52aa0, /home/joe/code/storage/test-registry/producer-9/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T18:49:39Z, job invoke-1790620700283-26110-e1b70ab0, state done
 

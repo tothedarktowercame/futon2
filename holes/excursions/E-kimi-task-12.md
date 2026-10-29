@@ -1,4 +1,5 @@
 # E-kimi-task-12 — register-warrant.sh works from any canonical futon repo
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): register-warrant.sh was fixed to derive the repo from the cwd git toplevel, completed 2026-09-25; the commit and the modified script exist. Evidence: 962270bc9, /home/joe/code/futon2/scripts/wm/register-warrant.sh.
 
 **Requisition:** completed — 2026-09-25T01:14:54Z, job invoke-1790298615836-24091-b61d65ef, state done
 

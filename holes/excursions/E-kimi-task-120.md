@@ -1,4 +1,5 @@
 # E-kimi-task-120 — Producer groups 31 32 33: producer tests and their wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Producer groups 31, 32 and 33 (three single-reader packets) were completed on 2026-09-28; the three futon3c commits and three reports exist. Evidence: 405c4add9, f4f0c768d, 85742cec2, /home/joe/code/storage/test-registry/producer-31/REPORT.md, /home/joe/code/storage/test-registry/producer-33/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T19:38:27Z, job invoke-1790622887436-26153-378e4a88, state done
 

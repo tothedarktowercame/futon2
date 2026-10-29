@@ -1,4 +1,5 @@
 # E-kimi-task-117 — PRODUCER-18: one producer test and its wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): PRODUCER-18 conversion of the rates-observe group (2 readers) was completed on 2026-09-28 and its commit and report exist. Evidence: 6cbd87dc, /home/joe/code/storage/test-registry/producer-18/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T19:14:30Z, job invoke-1790621917200-26124-8d1197de, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-115 — PRODUCER-12: one producer test and its wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): PRODUCER-12 conversion of the measured-tick-observe group (3 readers) was completed on 2026-09-28; the report records the work landed via commit cdcf204f and the report file exists. Evidence: cdcf204f, /home/joe/code/storage/test-registry/producer-12/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T19:00:56Z, job invoke-1790620959422-26114-9bac1461, state done
 

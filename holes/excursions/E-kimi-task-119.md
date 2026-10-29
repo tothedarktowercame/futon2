@@ -1,4 +1,5 @@
 # E-kimi-task-119 — Producer groups 26 27 28: producer tests and their wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Producer groups 26, 27 and 28 (three single-reader packets) were completed on 2026-09-28; all three commits and all three reports exist. Evidence: b9f82df5, e8365196, a1212bb8, /home/joe/code/storage/test-registry/producer-26/REPORT.md, /home/joe/code/storage/test-registry/producer-28/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T19:47:11Z, job invoke-1790622705450-26151-06050abb, state done
 
