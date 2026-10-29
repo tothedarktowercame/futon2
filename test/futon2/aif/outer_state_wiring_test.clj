@@ -1,10 +1,12 @@
 (ns futon2.aif.outer-state-wiring-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.outer-observation :as outer-observation]
-            [futon2.aif.outer-state :as outer-state]))
+            [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.run-ending-classification :as run-ending]))
 
 (def makeup
   {:schema :wm/outer-makeup-v1
@@ -142,3 +144,55 @@
                {:task {:id "M-caller"} :outer/state-path (.getPath state-file)}))))
     (is (= "sentinel\n" (slurp state-file)))
     (is (= {:id "M-caller"} (:task @received)))))
+
+(deftest retained-qualified-already-satisfied-advances-c
+  (let [attempt-root "/home/joe/code/futon2/data/wm-full-loop-machinery-156/wm-contract-machinery-156-v1/attempt-002"
+        retained-run "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-b1a049d7-d4f8-4f63-be69-6872d86e8827.edn"
+        close (edn/read-string {:default tagged-literal}
+                               (slurp (str attempt-root "/007-closed.edn")))
+        route (edn/read-string
+               (slurp (str attempt-root "/retained/route-attestation.edn")))
+        run-record (edn/read-string {:default tagged-literal} (slurp retained-run))
+        grounded (get-in run-record [:failure :detail :grounded-commit])
+        classification (run-ending/classify
+                        {:close (assoc-in close [:payload :judgment :grounded-commit] grounded)
+                         :route-attestation route
+                         :outer-selection (:outer/selection run-record)})
+        unqualified (run-ending/classify
+                     {:close close
+                      :route-attestation route
+                      :outer-selection (:outer/selection run-record)})
+        root (temp-dir)
+        records (doto (io/file root "records") .mkdirs)
+        current-dir (doto (io/file root "current-run") .mkdirs)
+        run-id "retained-already-satisfied"
+        selected {:cascade-index 0 :cascade-id :ready
+                  :selection {:selected candidate}
+                  :focus "WM" :selected-relation :associated}
+        state (assoc (outer-state/init-state makeup)
+                     :pending {:run-id run-id :giraffe/run-id "old-run"
+                               :selection selected})]
+    (spit (io/file records (str "tick-run-record-" run-id ".edn"))
+          (pr-str {:run/id run-id :run-ending-classification classification}))
+    (let [learned (with-redefs-fn
+                    {#'runtime/previous-giraffe-observation
+                     (fn [_ _ _] old-observation)}
+                    #(#'runtime/resolve-pending-learning
+                      {:run-record-dir (.getPath records)} makeup state current-dir
+                      current-observation))]
+      (is (= :related (:class classification)) (pr-str classification))
+      (is (= :applied (:status learned)) (pr-str learned))
+      (is (= 263/200 (get-in learned [:state :c :related])))
+      (is (not= (:c state) (get-in learned [:state :c]))))
+    (spit (io/file records (str "tick-run-record-" run-id ".edn"))
+          (pr-str {:run/id run-id :run-ending-classification unqualified}))
+    (let [deferred (with-redefs-fn
+                     {#'runtime/previous-giraffe-observation
+                      (fn [_ _ _] old-observation)}
+                     #(#'runtime/resolve-pending-learning
+                       {:run-record-dir (.getPath records)} makeup state current-dir
+                       current-observation))]
+      (is (= :known-typed-failure (:class unqualified)))
+      (is (= :deferred (:status deferred)))
+      (is (= :terminal-ending-class-absent (:reason deferred)))
+      (is (= state (:state deferred))))))

@@ -4,7 +4,8 @@
   non-injuries. No failure-stage allowlist exists here."
   (:require [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.meta-injury-ledger :as ledger]))
+            [futon2.aif.meta-injury-ledger :as ledger]
+            [futon2.aif.stop-line :as stop-line]))
 
 (def classification-schema :wm/meta-terminal-classification-v1)
 (def explicit-non-injury-kinds
@@ -34,7 +35,6 @@
    :historical-verification-refused :invalid})
 (def successful-images #{:changed :already-satisfied})
 (def pin-re #"[0-9a-f]{64}")
-(def git-re #"[0-9a-f]{40,64}")
 
 (defn- nonblank? [x] (and (string? x) (not (str/blank? x))))
 (defn- pin? [x]
@@ -70,9 +70,10 @@
          (= :author-wait (:failure-stage detail))
          (= :already-satisfied (:outcome detail))
          (= :already-satisfied (get-in record [:run-output :outcome]))
-         (nonblank? (:repo grounded))
-         (string? (:sha grounded))
-         (boolean (re-matches git-re (:sha grounded))))))
+         (stop-line/producer-qualified-already-satisfied?
+          {:outcome (:outcome detail)
+           :failure-kind (:failure-kind detail)
+           :grounded-commit grounded}))))
 (defn- target [record]
   (let [candidate (or (get-in record [:failure :target])
                       (get-in record [:failure :detail :target]))]
