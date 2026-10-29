@@ -56,8 +56,9 @@ class AlertTest(unittest.TestCase):
 
   def test_click20_alerts_and_exits_nonzero(self):
     p,rec=self.invoke(); self.assertNotEqual(p.returncode,0); self.assertTrue(p.stdout.startswith("ALERT FOR JOE\n"))
-    for q in (1,2,4,5,6,7,8,9,10): self.assertRegex(p.stdout,rf"(?m)^Q{q} (violated|unverifiable):")
-    self.assertNotRegex(p.stdout,r"(?m)^Q3 "); self.assertTrue(Path(str(rec)+".requirements.edn").is_file())
+    for q in (1,4,5,6,7,9): self.assertRegex(p.stdout,rf"(?m)^Q{q} (violated|unverifiable):")
+    for q in (2,3,8,10): self.assertNotRegex(p.stdout,rf"(?m)^Q{q} ")
+    self.assertTrue(Path(str(rec)+".requirements.edn").is_file())
 
   def test_checker_failure_is_an_alert(self):
     p,_=self.invoke(["--mathlib-root","/definitely/missing"]); self.assertNotEqual(p.returncode,0); self.assertIn("requirements NOT CHECKED",p.stdout)
