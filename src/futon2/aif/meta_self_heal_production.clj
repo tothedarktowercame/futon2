@@ -1374,23 +1374,29 @@
   order names for that role (click wm-click-36b47627, 2026-10-19: the seat
   names were fixed here as wm-author / wm-reviewer, so a click cast on other
   seats would still have dispatched its repair phases to the defaults)."
-  [invoke role]
+  ([invoke role] (agency-port invoke role nil))
+  ([invoke role prepare-worktree]
   (fn [{:keys [work-order phase predecessor-pin transaction] :as request}]
-    (let [seat (get work-order role)
+    (let [workspace (when (and (= role :author) prepare-worktree)
+                      (prepare-worktree work-order))
+          seat (get work-order role)
           session-key ({:author :author-session
                         :reviewer :reviewer-session} role)
           ;; Enact/review adapters receive the sealed transaction too, so a
           ;; concrete serving boundary can bind its effect to the exact prior
           ;; author/reviewer evidence rather than reconstructing it.
-          response (invoke {:seat seat :session-id (get work-order session-key)
-                            :transaction transaction :request request})]
+          response (if (and workspace (= :refused (:status workspace)))
+                     {:status :failed :payload {:reason (:reason workspace)}}
+                     (invoke {:seat seat :session-id (get work-order session-key)
+                              :transaction transaction :request request}))]
       (coordinator/seal-port-receipt
        {:phase phase :injury-id (:injury-id work-order)
         :repair-id (:repair-id work-order) :attempt (:attempt work-order)
         :predecessor-pin predecessor-pin :status (:status response)
-        :payload (assoc (:payload response) :agency-job-id (:job-id response)
+        :payload (assoc (:payload response) :worktree-provision workspace
+                        :agency-job-id (:job-id response)
                         :agency-session-id (:session-id response)
-                        :agency-seat seat)}))))
+                        :agency-seat seat)})))))
 (defn endpoint-port [invoke adapter]
   (fn [{:keys [work-order phase predecessor-pin] :as request}]
     (let [response (invoke request)]
@@ -1403,7 +1409,8 @@
   (or (:meta-repair-ports opts)
       (when (and (:agency-invoke-fn opts) (:repair-enact-fn opts)
                  (:repair-retry-fn opts))
-        (cond-> {:author (agency-port (:agency-invoke-fn opts) :author)
+        (cond-> {:author (agency-port (:agency-invoke-fn opts) :author
+                                     (:repair-worktree-fn opts))
                  :review (agency-port (:agency-invoke-fn opts) :reviewer)
                  :enact (endpoint-port (:repair-enact-fn opts) "wm-repair-reviewer")
                  :retry (endpoint-port (:repair-retry-fn opts) "wm-retry")}
@@ -1438,7 +1445,8 @@
 (defn- work-order-options [opts]
   (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
                      :repair-reviewer :author-session :reviewer-session
-                     :repair-reviewer-session :target-repository :target-worktree]))
+                     :repair-reviewer-session :target-repository :target-worktree
+                     :target-worktree-root :canonical-base-sha]))
 
 (defn- continued-work-order-options
   "A continued author attempt needs new port-session identities even though its

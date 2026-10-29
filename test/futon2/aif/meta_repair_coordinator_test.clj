@@ -52,6 +52,7 @@
     :reviewer-session (str "reviewer-session-" attempt)
     :repair-reviewer-session (str "repair-reviewer-session-" attempt)
     :target-repository "futon2"
+    :canonical-base-sha sha-b
     :target-worktree "/home/joe/worktrees/futon2-meta-self-heal-repair"}))
 
 (defn- receipt [request status payload]
@@ -84,6 +85,18 @@
 
 (defn- prepared [history options]
   (coordinator/prepare (durable history) options))
+
+(deftest prepare-derives-per-attempt-worktree-and-records-canonical-base
+  (let [start (prepared (opened-ledger)
+                        (-> (options)
+                            (dissoc :target-worktree)
+                            (assoc :target-worktree-root "/home/joe/worktrees/futon2/self-heal")))
+        order (get-in start [:transaction :work-order])]
+    (is (= :prepared (:status start)))
+    (is (= (str "/home/joe/worktrees/futon2/self-heal/" (:repair-id order) "/1")
+           (:target-worktree order)))
+    (is (= sha-b (:canonical-base-sha order)))
+    (is (= :valid (:status (coordinator/verify-transaction (:transaction start)))))))
 
 (deftest happy-path-is-dedicated-and-discharges-attributably
   (let [counts (atom {:author 0 :review 0 :enact 0 :retry 0 :forbidden 0})
