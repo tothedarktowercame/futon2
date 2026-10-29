@@ -1,4 +1,5 @@
 # E-kimi-task-32 — M-the-perfect-crime: resume operator-turn block006 (skip published)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Block006 historical operator turns (2026-08-24T17..21) interpreted and published: all 100 records in the block directory have .analysis.json and none remain analysis_status=requested. Evidence: /home/joe/code/storage/operator-turns/batches/2026-08-22_2026-09-21_block006/claude-13-turn-357.json.analysis.json.
 
 **Requisition:** completed — 2026-09-25T14:14:59Z, job invoke-1790344003436-24203-2cbb4f08, state done
 

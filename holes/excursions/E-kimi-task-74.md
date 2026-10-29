@@ -1,4 +1,5 @@
 # E-kimi-task-74 — PROOF-2a <2>3 lane C2: five first-layer wires — chosen precedence into enact-fn, sourced-rates status/rates into measured-a-version, the two decision-refusal test boxes driven by the real writer
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane C2 (WIRE-23-C2) landed: five first-layer wires — chosen precedence into enact-fn, sourced-rates status/rates into measured-a-version, two decision-refusal test boxes (futon3c 2b9125be). Evidence: 2b9125be.
 
 **Requisition:** completed — 2026-09-27T00:57:59Z, job invoke-1790467597996-25117-befbe211, state done
 

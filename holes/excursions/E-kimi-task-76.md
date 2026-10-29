@@ -1,4 +1,5 @@
 # E-kimi-task-76 — ARENA-D: scope the reader-complete arena absence packet (PROOF-2a <2>2d, discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): ARENA-D discovery packet delivered: reader-complete arena absence spec at futon2 6ee56279c, producing ARENA-D.md. Evidence: 6ee56279c, /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/ARENA-D.md.
 
 **Requisition:** completed — 2026-09-27T00:32:55Z, job invoke-1790468839898-25134-3d270662, state done
 

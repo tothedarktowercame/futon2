@@ -1,4 +1,5 @@
 # E-kimi-task-79 — 2B-NONE-D: cause and packet for each of the 16 unclassified <2>2b edges (discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): 2B-NONE-D discovery packet delivered: cause and smallest packet for each of the 16 :none edges, producing 2B-NONE-D.md and 2B-NONE-D.edn. Evidence: /home/joe/code/futon3c/holes/labs/M-wm-wiring/2B-NONE-D.md, /home/joe/code/futon3c/holes/labs/M-wm-wiring/2B-NONE-D.edn.
 
 **Requisition:** completed — 2026-09-27T00:58:53Z, job invoke-1790469302088-25145-e7a60911, state done
 

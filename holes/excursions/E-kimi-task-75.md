@@ -1,4 +1,5 @@
 # E-kimi-task-75 — PROOF-2a <2>3 lane A2: one wire — the enact test box receives a present publication observation (flight_enact_test case with a discharged repair obligation), then re-kind
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane A2 (WIRE-23-A2) landed: present publication observation crossing in flight_enact_test and re-kinded publication-observed wire (futon2 6d98d37c9, futon3c d5e33f17). Evidence: 6d98d37c9, d5e33f17.
 
 **Requisition:** completed — 2026-09-27T00:27:14Z, job invoke-1790467745651-25121-e0b3a524, state done
 

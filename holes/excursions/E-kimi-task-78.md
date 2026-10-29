@@ -1,4 +1,5 @@
 # E-kimi-task-78 — JOIN-2B-I: registry/map join reports each edge's <2>2b inventory class (PROOF-2a <2>2b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): JOIN-2B-I landed: wm_vs_equation_dag.bb classes every equation-DAG edge as :declared/:hole/:code-path-note/:none with regenerated output (futon3c 9204f6ed, accepted 00:45Z). Evidence: 9204f6ed.
 
 **Requisition:** completed — 2026-09-27T00:33:37Z, job invoke-1790468845444-25136-2f128c8e, state done
 

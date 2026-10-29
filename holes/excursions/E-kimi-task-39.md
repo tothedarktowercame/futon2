@@ -1,4 +1,5 @@
 # E-kimi-task-39 — operator round turn-c12-ptcrime: seat A, translate the turn into a cascade
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Seat A translated turn-c12-ptcrime into a pattern cascade; the deliverable translations/turn-c12-ptcrime.kimi-33.md exists (12489 bytes, 2026-09-25). Evidence: /home/joe/code/storage/operator-turns/translations/turn-c12-ptcrime.kimi-33.md.
 
 **Requisition:** completed — 2026-09-25T19:12:47Z, job invoke-1790363294206-24284-540dfe45, state done
 

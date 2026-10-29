@@ -1,4 +1,5 @@
 # E-kimi-task-73 — PROOF-2a <2>3 lane B: five first-layer wire tests, the temperature chain (beta@precision x3) and the attempts (x2)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane B (WIRE-23-B) landed: five first-layer wire tests for the temperature chain (beta@precision x3) and the attempts (x2), added in futon3c commit f2b3b9ad6 (WIRE-23-B). Evidence: f2b3b9ad6.
 
 **Requisition:** completed — 2026-09-27T00:04:30Z, job invoke-1790466353397-25098-ec109c4f, state done
 

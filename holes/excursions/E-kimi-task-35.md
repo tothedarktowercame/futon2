@@ -1,4 +1,5 @@
 # E-kimi-task-35 — M-the-perfect-crime: interpret operator-turn block009
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Block009 (2026-08-26T09..22) interpreted and published: 97/97 records analyzed, none left requested. Evidence: /home/joe/code/storage/operator-turns/batches/2026-08-22_2026-09-21_block009/claude-13-turn-10.json.analysis.json.
 
 **Requisition:** completed — 2026-09-25T14:40:56Z, job invoke-1790345779042-24206-3feabd28, state done
 

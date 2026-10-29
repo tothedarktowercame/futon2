@@ -1,4 +1,5 @@
 # E-kimi-task-70 — F1a-2-I: write measured-A version on the tick's admitted decision (futon2, for claude-8)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): F1a-2-I landed: :measured-a with :rates-sha written on the tick's admitted cascade decision in futon2 war_machine.clj, with wire test and map declaration (futon2 5d8105f2). Evidence: 5d8105f2.
 
 **Requisition:** completed — 2026-09-26T15:11:39Z, job invoke-1790434531104-24910-912c51d7, state done
 

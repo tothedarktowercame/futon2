@@ -1,4 +1,5 @@
 # E-kimi-task-7 — evidence http-backend answers a failed read with [] and 0 (absence as a value): consumers and fix
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Discovery packet delivered: EVIDENCE-ABSENCE-D.md documenting the http-backend []/0 substitutions, their consumers, and the typed-absence fix. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/EVIDENCE-ABSENCE-D.md.
 
 **Requisition:** completed — 2026-09-25T01:04:19Z, job invoke-1790298039723-24079-47356633, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-41 — operator round turn-c12-saucers: seat A, translate the turn into a cascade
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Seat A translated turn-c12-saucers into a pattern cascade; the deliverable translations/turn-c12-saucers.kimi-31.md exists (11681 bytes, 2026-09-25). Evidence: /home/joe/code/storage/operator-turns/translations/turn-c12-saucers.kimi-31.md.
 
 **Requisition:** completed — 2026-09-25T19:17:32Z, job invoke-1790363637263-24287-3e228002, state done
 

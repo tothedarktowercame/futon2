@@ -1,4 +1,5 @@
 # E-kimi-task-77 — W11-D: module layout closing the absent [R8 R6] F edge (PROOF-2a <2>1d, discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): W11-D discovery packet delivered: module layout for the absent [R8 R6] F edge, producing W11-D.md. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/W11-D.md.
 
 **Requisition:** completed — 2026-09-27T00:50:08Z, job invoke-1790468842850-25135-7e402842, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-72 — PROOF-2a <2>3 lane A: six first-layer wire tests, the publication and enactment-carry group (measurement, locators, increment, repair/publication, publication-observed x2)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane A (WIRE-23-A) landed: six first-layer wire tests for the publication/enactment-carry group (futon3c 004f90be, accepted 00:09Z). Evidence: 004f90be.
 
 **Requisition:** completed — 2026-09-27T00:06:46Z, job invoke-1790466351556-25097-4b2f542c, state done
 
