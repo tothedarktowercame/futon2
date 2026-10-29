@@ -1191,19 +1191,39 @@
       {:status :not-applicable
        :reason :selection-complete-no-ask-required}))
 
-(defn- retained-selected-target-reading [result]
-  (or (get-in result [:checkpoints :selection :judgment
-                      :selected-target-reading-request])
-      (get-in result [:checkpoints :selection :sorry
-                      :selected-target-reading-request])
-      {:status :not-applicable
-       :reason :selected-target-reading-not-required}))
+(defn- retained-selected-target-reading
+  ([result]
+   (retained-selected-target-reading nil result))
+  ([reading-state result]
+   (let [{:keys [status record]}
+         (if (instance? clojure.lang.IDeref reading-state)
+           @reading-state
+           reading-state)]
+     (or record
+         (get-in result [:checkpoints :selection :judgment
+                         :selected-target-reading-request])
+         (get-in result [:checkpoints :selection :sorry
+                         :selected-target-reading-request])
+         (case status
+           :not-started
+           {:status :not-applicable
+            :reason :selected-target-reading-not-required}
+           :started
+           {:status :absent
+            :reason :selected-target-reading-started-without-result}
+           :completed
+           {:status :absent
+            :reason :selected-target-reading-completed-without-result}
+           {:status :absent
+            :reason :selection-checkpoint-without-request})))))
 
 (defn- retained-reading-frontiers
   "Keep the current menu measurement separate from bounded preparation work.
   Preparation's pending count is never a selection verdict."
-  [result outer-task-selection]
-  (let [preparation (retained-selected-target-reading result)
+  ([result outer-task-selection]
+   (retained-reading-frontiers nil result outer-task-selection))
+  ([reading-state result outer-task-selection]
+   (let [preparation (retained-selected-target-reading reading-state result)
         prepared-frontier (:frontier preparation)
         field (or (get-in outer-task-selection [:policy :policy-field])
                   (get-in outer-task-selection [:policy-field])
@@ -1237,8 +1257,8 @@
                                               (when (seq ks) [(:target-id f) ks]))) families))}
        {:status :unavailable :reason :target-policy-field-not-retained}))
      :preparation-backlog
-     (select-keys preparation [:schema :status :reason :deadline-ms :field-source-pin
-                               :frontier :records :pending :other-failures])}))
+      (select-keys preparation [:schema :status :reason :deadline-ms :field-source-pin
+                                :frontier :records :pending :other-failures])})))
 
 (defn persist-run-record!
   [raw-opts run-id started-at result]
@@ -1247,6 +1267,7 @@
                 observed
                 (observed-route (terminal-fallback-route result)))
         grounded-commit (grounded-commit-for result)
+        selected-target-reading-state (:selected-target-reading/state raw-opts)
         nano-time (or (:nano-time-fn raw-opts) #(System/nanoTime))
         elapsed-nanos (when-let [start (:run-timing/start-nanos raw-opts)]
                         (max 0 (- (nano-time) start)))
@@ -1434,8 +1455,11 @@
                     ;; it is inapplicable.  Keep that distinct from the typed
                     ;; absence/refusal produced when an ask was required.
                     :interpretation-ask (retained-interpretation-ask result)
-                    :selected-target-reading (retained-selected-target-reading result)
-                    :reading-frontiers (retained-reading-frontiers result outer-task-selection)
+                    :selected-target-reading
+                    (retained-selected-target-reading selected-target-reading-state result)
+                    :reading-frontiers
+                    (retained-reading-frontiers selected-target-reading-state
+                                                result outer-task-selection)
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
@@ -2427,12 +2451,17 @@
   [opts judgement repair-fn redecide]
   (if-not (and repair-fn (selected-target-reading/preparation-needed? judgement))
     {:judgement judgement :record nil}
-    (let [record (try (repair-fn opts judgement)
+    (let [reading-state (:selected-target-reading/state opts)
+          _ (when reading-state
+              (reset! reading-state {:status :started}))
+          record (try (repair-fn opts judgement)
                       (catch Throwable e
                         {:schema :wm/selected-target-reading-request-v1
                          :status :refused
                          :kind :selected-target-reading-repair-threw
-                         :published false :message (ex-message e)}))]
+                         :published false :message (ex-message e)}))
+          _ (when reading-state
+              (reset! reading-state {:status :completed :record record}))]
       (if (:published record)
         (try
           {:judgement (-> (redecide record)
@@ -9178,8 +9207,10 @@
                         run-id started-at)
         nano-time (or (:nano-time-fn raw-opts) #(System/nanoTime))
         phase-events (atom [])
+        selected-target-reading-state (atom {:status :not-started})
         chronology-start (registered-telemetry/chronology-start raw-opts)
         raw-opts (assoc raw-opts :participants/state (atom nil)
+                                :selected-target-reading/state selected-target-reading-state
                                 :declaration-reads/state (atom nil)
                                 :habit-reads/state (atom [])
                                 :job-liveness/state (atom [])
