@@ -135,6 +135,22 @@
           "Expected exactly one JSON object (one fence or one balanced object)"
           (catch Exception e (ex-message e)))))))
 
+(defn contact-with-format-correction
+  "One completed undecodable response gets one format correction. Transport
+  failures do not consume this format budget. Both responses remain evidence."
+  [{:keys [contact request decode job-ref]
+    :or {decode response-map job-ref :job-id}}]
+  (let [first-response (contact request)
+        first-answer (decode first-response)
+        correction (when (and (nil? first-answer) (= "done" (:state first-response)))
+                     {:round 1 :limit 1 :author-job (job-ref first-response)
+                      :parser-error (response-parse-error first-response)})
+        response (if correction (contact (assoc request :format-correction correction))
+                     first-response)]
+    {:response response :answer (if correction (decode response) first-answer)
+     :format-correction correction
+     :responses (cond-> [first-response] correction (conj response))}))
+
 (defn exchange
   "Run one external handoff through the common contact boundary.
 

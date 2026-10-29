@@ -533,18 +533,9 @@
                          (vec (sort (keys (capability-dispatch/routes opts))))))]
         (if-not (= :dispatched (:status req))
           (or req ctx)
-          (let [first-response (author-contact req)
-                first-answer (handoff/response-map first-response)
-                correction (when (and (nil? first-answer)
-                                      (= "done" (:state first-response)))
-                             {:round 1 :limit 1
-                              :author-job (contact-job first-response)
-                              :parser-error (handoff/response-parse-error first-response)})
-                author-response (if correction
-                                  (author-contact (assoc req :format-correction correction))
-                                  first-response)
-                author-answer (if correction (handoff/response-map author-response)
-                                  first-answer)
+          (let [{author-response :response author-answer :answer correction :format-correction}
+                (handoff/contact-with-format-correction
+                 {:contact author-contact :request req :job-ref contact-job})
                 author-binding (open-resume/validate-author-binding req author-answer)
                 delivery (when (= :bound (:status author-binding))
                            (patch-delivery/check-delivery author-answer))
@@ -616,6 +607,7 @@
 
 (defn- selection-judge
   [opts days]
+  (let [opts (selected-target-reading/current-options opts)]
   (wm/generate-war-machine
    days
    (merge (wm/accumulation-config)
@@ -634,7 +626,7 @@
                              :reading-precision-declaration])
           (select-keys opts [:meta-field-observation :meta-field-source-pin])
           ;; Construction publishes below. Do not publish twice.
-          {:trace? false :include-advisory-lanes? false :defer-render? true})))
+          {:trace? false :include-advisory-lanes? false :defer-render? true}))))
 
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
@@ -831,6 +823,48 @@
 (defn- new-run-id []
   (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
 
+(defn reading-reselection-port
+  "One click-local removal and fresh outer certificate, retaining the first
+  choice and refusal. The pending learning carrier follows the replacement."
+  [makeup state observation initial-selection selection-state persist-pending!]
+  (let [used? (atom false)]
+    (fn [refusal]
+      (when (compare-and-set! used? false true)
+        (let [target (:target refusal)
+              exclusion {:target target :reason :selected-target-reading-unavailable
+                         :scope :this-click :reader-refusal refusal}
+              ranked (disj (set (:outer-score/admitted initial-selection)) target)
+              reduced (update observation :field
+                              #(vec (filter (fn [c] (contains? ranked (:target c))) %)))
+              result (when (seq (:field reduced)) (outer-select/select makeup state reduced))
+              next-target (get-in result [:selection :selected :target])
+              retained (-> (or result {})
+                           (update :selection #(some-> % (dissoc :candidates)))
+                           (assoc :outer-field/admitted (:outer-score/admitted result)
+                                  :giraffe/run-id (:giraffe/run-id observation)
+                                  :giraffe/manifest-sha256 (:giraffe/manifest-sha256 observation)
+                                  :makeup/sha256 (:makeup/sha256 makeup)
+                                  :focus (:focus observation)
+                                  :selected-relation (when next-target
+                                                      ((:relation observation)
+                                                       (:focus observation) next-target))
+                                  :outer-field/excluded
+                                  (conj (vec (or (:outer-field/excluded initial-selection)
+                                                 (into (vec (:outer-field/excluded observation))
+                                                       (:outer-score/excluded initial-selection))))
+                                        exclusion)
+                                  :knowledge-producer-requests
+                                  (:knowledge-producer-requests initial-selection)
+                                  :outer/learning (:outer/learning initial-selection)
+                                  :reading-reselection {:limit 1 :used 1
+                                                        :previous-selection initial-selection
+                                                        :refusals [refusal]}))]
+          (reset! selection-state {:task (when next-target {:id next-target})
+                                   :outer/selection retained})
+          (when next-target
+            (persist-pending! retained)
+            {:target next-target :selection retained}))))))
+
 (defn- run-ordinary-opportunity!
   "Run one production opportunity with the report-backed defaults installed.
   A caller-supplied task enters the existing task path unchanged.  Otherwise
@@ -893,9 +927,20 @@
                         {:selection retained-selection
                          :run-id run-id
                          :giraffe/run-id (:giraffe/run-id observation)})))
-              (run-ordinary-opportunity-with-task!
-               (assoc opts :run-id run-id :task {:id target}
-                      :outer/selection retained-selection)))
+              (let [selection-state (atom {:task {:id target} :outer/selection retained-selection})
+                    live-opts (assoc opts :run-id run-id :task {:id target}
+                                    :outer/selection retained-selection
+                                    :reading-reselection/state selection-state)
+                    reselect (reading-reselection-port
+                              makeup state observation retained-selection selection-state
+                              (fn [replacement]
+                                (when-not (= :deferred (:status learning))
+                                  (outer-state/write-state!
+                                   state-path (assoc state :pending
+                                                     {:selection replacement :run-id run-id
+                                                      :giraffe/run-id (:giraffe/run-id observation)})))))]
+                (run-ordinary-opportunity-with-task!
+                 (assoc live-opts :selected-target-reading-reselect-fn reselect))))
             (do
               (when (= :applied (:status learning))
                 (outer-state/write-state! state-path state))
