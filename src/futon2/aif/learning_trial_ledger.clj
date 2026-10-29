@@ -11,7 +11,9 @@
 
 (load-identity/register! *ns* *file*)
 ;; Absolute, like the cohort root: the serving JVM runs with futon3c as cwd.
-(def default-root "/home/joe/code/futon2/data/wm-learning-trials")
+(def default-root
+  (or (System/getenv "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT")
+      "/home/joe/code/futon2/data/wm-learning-trials"))
 (defonce ^:private mutex (Object.))
 
 (defn- records [text]

@@ -120,7 +120,8 @@
 (def default-agency-base "http://127.0.0.1:7070")
 (def default-substrate-base "http://127.0.0.1:7073")
 (def default-phase-replay-input-root
-  "/home/joe/code/futon2/data/wm-phase-replay-inputs")
+  (or (System/getenv "FUTON_WM_PHASE_REPLAY_INPUT_ROOT")
+      "/home/joe/code/futon2/data/wm-phase-replay-inputs"))
 
 (def ^:dynamic *runtime-defaults*
   "Production functions supplied by futon2.aif.full-loop-runtime. Tests and
@@ -155,7 +156,8 @@
   `^tick-run-record-(\\d{4}-\\d{2}-\\d{2})-(.+)\\.edn$` and a bare-UUID id
   has no date (claude-7's inbox-zero analysis, 2026-09-17). A caller that
   wants a receipt kept as evidence passes :run-record-dir explicitly."
-  "/home/joe/code/futon2/data/wm-runs")
+  (or (System/getenv "FUTON_WM_RUN_RECORD_DIR")
+      "/home/joe/code/futon2/data/wm-runs"))
 (def default-agent-budget-ms (* 45 60 1000))
 (def semantic-epoch :full-loop-real-actuation-v6)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
