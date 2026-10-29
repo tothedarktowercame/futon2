@@ -103,25 +103,17 @@
     (contains? opts :meta-medic-authority-resolution)
     (let [resolution (:meta-medic-authority-resolution opts)]
       (if (medic-authority/resolved-context? resolution)
-        (let [external (medic-authority/resolution-verifier resolution)]
-          {:status :ready
-           :identity (medic-authority/resolution-identity resolution)
-           :verifier (fn [observation]
-                       (or (external observation)
-                           (out-of-band/retained-checked-medic-authority
-                            observation)))})
+        {:status :ready
+         :identity (medic-authority/resolution-identity resolution)
+         :verifier (medic-authority/resolution-verifier resolution)}
         {:status :refused :reason :meta-self-heal/medic-authority-unavailable}))
 
     (contains? opts :meta-medic-authority-context)
     (let [resolved (medic-authority/resolve-context
                     (:meta-medic-authority-context opts))]
       (if (= :ready (:status resolved))
-        (let [external (medic-authority/resolution-verifier (:resolution resolved))]
-          {:status :ready :identity (:identity resolved)
-           :verifier (fn [observation]
-                       (or (external observation)
-                           (out-of-band/retained-checked-medic-authority
-                            observation)))})
+        {:status :ready :identity (:identity resolved)
+         :verifier (medic-authority/resolution-verifier (:resolution resolved))}
         resolved))
 
     :else {:status :absent
