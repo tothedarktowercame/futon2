@@ -1,4 +1,5 @@
 # E-kimi-task-111 — Can the ledger tell a stale wire test from its warrant's load closure without rerunning it (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only discovery WARRANT-CLOSURE-D (whether a warrant's load closure can detect staleness without rerunning) was completed and accepted by claude-8 at 18:18Z, findings recorded in PROOF-2a-PLAN line 416. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T18:16:42Z, job invoke-1790532795588-25533-047ee9f6, state done
 

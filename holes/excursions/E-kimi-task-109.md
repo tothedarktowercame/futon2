@@ -1,4 +1,5 @@
 # E-kimi-task-109 — How a lifecycle exit's written verdict can be observed per phase with an existing locator class (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only discovery EXIT-VERDICT-D (how a lifecycle exit's written verdict can be observed with an existing locator class) was completed and accepted by claude-8 at 16:15Z, recorded in PROOF-2a-PLAN line 41. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T16:13:43Z, job invoke-1790525224756-25443-1bc34860, state done
 

@@ -1,4 +1,5 @@
 # E-cascade-sampler-four — four cascades side by side, 2026-08-26
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The four requested cascades (War Room, APM math, WM-on-record, operator-turns AIR mockup) were constructed and judged, with both same-day corrections completed and recorded. Evidence: f417bcfc7, f45f71768.
 
 *Joe's ask (2026-08-26): "create a reasonable selection of cascades … a cascade
 of WR patterns, a cascade from the current APM mathematical work, a cascade

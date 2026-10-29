@@ -1,4 +1,5 @@
 # E-kimi-task-110 — Sweep: which wire test namespaces have a failing deftest at HEAD (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only sweep FIRST-LAYER-SWEEP-D ran all 194 wire namespaces (833 deftests, 2,822 assertions) and was accepted by claude-8 at 18:19Z with zero failing wire namespaces, recorded in PROOF-2a-PLAN line 416. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T18:18:22Z, job invoke-1790531823271-25525-6266c8d3, state done
 

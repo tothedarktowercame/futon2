@@ -1,4 +1,5 @@
 # E-kimi-task-106 — H-interp: how an outcome-statement want would be observed and assembled (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only discovery HINTERP-GRAIN-D2 was completed and accepted by claude-8 at 15:27Z as discovery (its proposed C9 packet not adopted), findings recorded in PROOF-2a-PLAN line 41. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T15:20:11Z, job invoke-1790521708256-25384-ade59e73, state done
 

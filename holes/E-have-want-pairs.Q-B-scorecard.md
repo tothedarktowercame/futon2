@@ -1,4 +1,5 @@
 # Q-B magnet-quality scorecard — E-have-want-pairs
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The Q-B magnet-quality probe ran a mechanical-magnet ladder over 319 real items and recorded its verdict (mechanical have-want magnet lifts F where want-side NL text exists; conditional pass for the E1/E2 gate). Evidence: /home/joe/code/futon6/data/c-vector/magnet-quality-scorecard.json.
 
 **Probe by:** claude-6 · **Date:** 2026-07-01 · **For:** C-cascade-real E1/E2 gate (via claude-4).
 **Charter:** `E-have-want-pairs.md` §Q-B. **Sim-only; 0 :7071 writes.**

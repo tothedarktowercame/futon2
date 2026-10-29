@@ -1,4 +1,5 @@
 # E-kimi-task-1 — outcomes extractor: outcome identity (E1) and the consequence voice (E2), H-C-D §4
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Fix packet for outcomes-extractor defects E1 (outcome identity) and E2 (consequence voice) completed by kimi-5, with the requisition recording state done and the script and test namespace present in futon2. Evidence: /home/joe/code/futon2/scripts/wm/extract-outcomes.clj, /home/joe/code/futon2/test/futon2/wm/extract_outcomes_test.clj, 5c9b9d45.
 
 **Requisition:** completed — 2026-09-25T00:58:59Z, job invoke-1790296666011-24052-56b6c171, state done
 

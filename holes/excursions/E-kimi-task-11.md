@@ -1,4 +1,5 @@
 # E-kimi-task-11 — a failed or silently windowed evidence read never reads as a complete empty result (AR-43)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): AR-43 fix packet landed as futon3c commit 70b2a4a9 (one commit across three layers: typed read failures from http-backend, window defaults stamped, consumers C1/C2/C3 refusing), recorded in the PROOF-2-THEOREM AR-42/AR-43 row. Evidence: 70b2a4a99.
 
 **Requisition:** completed — 2026-09-25T01:34:19Z, job invoke-1790298329569-24087-d5187a85, state done
 

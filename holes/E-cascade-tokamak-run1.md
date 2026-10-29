@@ -1,4 +1,5 @@
 # E-cascade-tokamak-run1 — the pattern cascade ran the tokamak
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The 12-seed/5-controller tokamak cascade run was executed and its findings (rotate+1 trap reproduced, NEXT-STEP claim overstated, unevidenced boxes unreachable) recorded in the committed report. Evidence: f68ee2b75, /home/joe/code/futon2/holes/cascade-tokamak-v0.edn.
 
 **Date:** 2026-07-16. Joe: *"I think it would be great to try it! Even if it
 fails spectacularly it would be interesting."* It did not fail spectacularly. It

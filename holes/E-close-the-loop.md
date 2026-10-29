@@ -1,4 +1,5 @@
 # Excursion: close the loop — nail the fold INTERFACE first (E-close-the-loop)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): All three exit conditions landed: the data-agnostic fold interface minted (9f0a5bf), impl #1 and impl #2 closing the gate on real missions (ae016ec et al.), plus later live wiring (3cfd429/5a6741a). Evidence: 9f0a5bf, ae016ec, 3cfd429.
 
 **Date:** 2026-06-26 · **Status:** DERIVE (the interface, as a sorry) — charter for the driver (claude-10).
 **Authored by:** claude-10 (with Joe, 2026-06-26).

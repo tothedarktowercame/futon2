@@ -1,4 +1,5 @@
 # E-kimi-task-105 — H-interp want-token grain: what the wired ask step passes to the prompt (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only discovery HINTERP-GRAIN-D was completed and accepted by claude-8 at 15:09Z with the answer NO (all six want tokens are lifecycle exit lines, zero outcome statements), recorded in PROOF-2a-PLAN line 41. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T14:58:09Z, job invoke-1790520726399-25364-d2710477, state done
 

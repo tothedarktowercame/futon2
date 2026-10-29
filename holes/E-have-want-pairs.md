@@ -1,4 +1,5 @@
 # Excursion: have-want pairs — provenance, reliance, and the magnet (E-have-want-pairs)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Excursion closed 2026-07-02 with all three exit conditions met (Q-A reliance verdict, Q-B scorecard, foliation ratified) and the proof-join remainder spawned rather than absorbed. Evidence: ecf2a37, /home/joe/code/futon6/data/c-vector/magnet-quality-scorecard.json.
 
 **Date:** 2026-06-27 · **Status:** ✅ **CLOSED 2026-07-02** — all 3 exit conditions met (author's ruling, claude-10). Proof-join remainder SPAWNED to `E-proof-join-population`, not absorbed (§3).
 **Authored by:** claude-10 (with Joe, 2026-06-27). **Discharged by:** claude-11 (Q-A reliance verdict + Q-C ship) + claude-6 (Q-B scorecard). **Owner:** claude-10 (author).

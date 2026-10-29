@@ -1,4 +1,5 @@
 # E-kimi-task-10 — outcomes extractor E3, the capability contrast (H-C-D §4)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Fix packet for outcomes-extractor defect E3 (capability-contrast cue voice, recall 6/6 on M-futon-seams) completed by kimi-3, with the requisition recording state done and the deliverables present in futon2. Evidence: /home/joe/code/futon2/scripts/wm/extract-outcomes.clj, /home/joe/code/futon2/test/futon2/wm/extract_outcomes_test.clj, 5c9b9d45.
 
 **Requisition:** completed — 2026-09-25T01:15:44Z, job invoke-1790298250720-24084-538acf12, state done
 

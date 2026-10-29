@@ -1,4 +1,5 @@
 # E-kimi-task-108 — Where lifecycle exits come from today across all missions, and what supplying them from the definition needs (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only discovery LIFECYCLE-EXITS-D (census over 114 mission files by the real reader) was completed and accepted by claude-8 at 15:56Z, recorded in PROOF-2a-PLAN line 41. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T15:55:03Z, job invoke-1790523929466-25416-444d0de6, state done
 

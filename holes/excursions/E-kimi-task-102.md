@@ -1,4 +1,5 @@
 # E-kimi-task-102 — BZ-D: learning zeta per D2 — the paper's beta_zeta rule against item 3's trajectory (discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only discovery BZ-D on learning zeta per Joe's D2 ruling was completed and accepted by claude-8 at 03:45Z; its findings are recorded in PROOF-2a-PLAN line 134 and led to the BZ-I packets (futon2 65dd9d025, f7684f966) that followed. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T03:43:32Z, job invoke-1790480340665-25279-002a4aee, state done
 

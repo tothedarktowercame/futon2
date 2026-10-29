@@ -1,7 +1,7 @@
 # E-evaluate-policies-spikes
 
 **Date:** 2026-07-03
-**Status:** two spikes COMPLETE same-day (chartered from M-evaluate-policies ARGUE §9.6–§9.7
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Both ARGUE-phase spikes (the 'conditions on' exhibit column and the spectral-potentials vs constructor-functionals measurement) were completed same-day with regenerated exhibit and JSON artifact on disk. Evidence: /home/joe/code/futon2/holes/labs/M-evaluate-policies/exhibit/argue-exhibit.pdf, /home/joe/code/futon2/holes/labs/M-evaluate-policies/spike-spectral/spectral-comparison.json, /home/joe/code/futon2/scripts/spike_spectral_potentials.py.
 offers; Joe: "Let's do the two small offers, possibly written up in E-evaluate-policies-spikes")
 **Owner:** Fable (claude-code session) — E-prefix convention: bounded scope-out, single agent
 end-to-end.

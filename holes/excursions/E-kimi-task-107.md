@@ -1,4 +1,5 @@
 # E-kimi-task-107 — H-interp: can the locator-question reading give an outcome statement a checkable locator (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only discovery HINTERP-GRAIN-D3 was completed and accepted by claude-8 at 15:38Z (locator-question reading can give outcome statements checkable locators of existing classes), recorded in PROOF-2a-PLAN line 41. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T15:32:51Z, job invoke-1790522854100-25399-92264610, state done
 

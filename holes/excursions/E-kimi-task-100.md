@@ -1,4 +1,5 @@
 # E-kimi-task-100 — HG2-Ic-D: how the real evaluator reaches the field's ready entries (discovery, no edits)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only discovery HG2-Ic-D on how the real evaluator reaches the field's :ready entries was completed and accepted by claude-8 at 03:42Z, findings recorded in PROOF-2a-PLAN line 246. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T03:37:10Z, job invoke-1790479875977-25274-62066a07, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-113 — PRODUCER-5: one producer test and its wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): PRODUCER-5 conversion of the small-observe group (6 readers) was completed on 2026-09-28 and its commit and report exist. Evidence: b0bbf058, /home/joe/code/storage/test-registry/producer-5/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T18:42:28Z, job invoke-1790619676755-26102-7f711a2b, state done
 
