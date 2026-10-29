@@ -11,6 +11,13 @@
 (def patch "95145f09395145f09395145f09395145f0939514")
 (def review "42bfb4bb542bfb4bb542bfb4bb542bfb4bb542bf")
 (def integration "5a5b421bc5a5b421bc5a5b421bc5a5b421bc5a5b")
+(def retained-hot-load-run
+  (delay
+    (edn/read-string
+     (slurp "test/fixtures/immune-loop/terminal-hot-load-failed-e0b9aab6.edn"))))
+(def retained-hot-load-pin
+  {:path "test/fixtures/immune-loop/terminal-hot-load-failed-e0b9aab6.edn"
+   :sha256 "38c230330dca99aba2850f4ba9bcb50e1e3d5918859cac48e8c3bd5e9e0ca33d"})
 
 ;; Projected by extract_click1_terminal_projection.clj from retained record
 ;; sha256 e9a5eb355f9a6f70b41d5bdbd99e127badcd6d13e6bd7165867fa2bb9477f404.
@@ -27,6 +34,38 @@
   (let [result (ledger/append-transition history event)]
     (is (= :appended (:status result)) (pr-str result))
     (:ledger result)))
+
+(deftest retained-q6-hot-load-failure-does-not-inherit-the-nil-cause-injury
+  ;; This is the retained e0b9aab6 record: its close omitted :failure, while
+  ;; its pinned Q6 terminal says the cascade-resume hot-load failed.
+  (let [historical-id "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0"
+        hot-load (classify @retained-hot-load-run retained-hot-load-pin)
+        other (classify {:run/id "other-q6-refusal" :click/id "other-click"
+                         :failure {:absent :no-failure}
+                         :q6 {:terminal {:schema :wm/q6-terminal-v1
+                                         :run/id "other-q6-refusal"
+                                         :outcome {:status :present
+                                                   :outcome :refused
+                                                   :kind :compile-refused
+                                                   :phase :compile}}}}
+                        {:path "fixtures/other-q6.edn"
+                         :sha256 (apply str (repeat 64 "7"))})
+        unclassified (classify {:run/id "unclassified-run" :click/id "nil-click"
+                                :failure {:absent :no-failure}
+                                :terminal-receipt {:outcome :incomplete}}
+                               {:path "fixtures/unclassified.edn"
+                                :sha256 (apply str (repeat 64 "8"))})
+        classifications [hot-load other unclassified]
+        integrated (reduce (fn [history classification]
+                             (:ledger (terminal/integrate history classification)))
+                           ledger/empty-ledger classifications)]
+    (is (= [:hot-load-failed :compile-refused :unclassified-terminal-failure]
+           (mapv :failure-kind classifications)))
+    (is (= [:cascade-resume :compile :unknown-stage]
+           (mapv :failure-stage classifications)))
+    (is (= 3 (count (set (map :injury-id classifications)))))
+    (is (not-any? #{historical-id} (map :injury-id classifications)))
+    (is (= 3 (count (:injuries (ledger/active-injuries integrated)))))))
 
 (deftest successful-close-images-are-non-injuries
   (testing "click 1's retained grounded progress is a non-injury"

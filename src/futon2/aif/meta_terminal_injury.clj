@@ -43,20 +43,57 @@
        (string? (:sha256 x)) (boolean (re-matches pin-re (:sha256 x)))))
 (defn- refusal [reason & [details]]
   (merge {:status :refused :reason reason} details))
+(defn- retained-phase [record]
+  (or (get-in record [:q6 :terminal :outcome :stage])
+      (get-in record [:q6 :terminal :outcome :phase])
+      (get-in record [:terminal-receipt :failure-stage])
+      (get-in record [:terminal-receipt :phase])
+      (get-in record [:run-output :failure-stage])
+      (get-in record [:run-output :phase])
+      (get-in record [:registered-run/chronology :last-phase])
+      (:last-phase record)))
+
+(defn- retained-q6-failure
+  "The typed terminal condition retained by Q6 when the close map failed to
+  populate :failure.  Q6 is part of the pinned run record, and this projection
+  accepts any typed refused/incomplete outcome."
+  [record]
+  (let [terminal (get-in record [:q6 :terminal])
+        observed (:outcome terminal)]
+    (when (and (= :wm/q6-terminal-v1 (:schema terminal))
+               (= (or (:run/id record) (:run-id record)) (:run/id terminal))
+               (= :present (:status observed))
+               (contains? #{:refused :incomplete} (:outcome observed))
+               (keyword? (:kind observed)))
+      {:kind (:kind observed)
+       :stage (or (retained-phase record)
+                  (when (= :hot-load-failed (:kind observed))
+                    :cascade-resume)
+                  :unknown-stage)})))
+
+(defn- retained-terminal-outcome [record]
+  (or (get-in record [:terminal-receipt :outcome])
+      (get-in record [:failure :detail :outcome])
+      (:outcome record)
+      (get-in record [:q6 :terminal :outcome :outcome])))
+
 (defn- failure-kind [record]
   (or (get-in record [:failure :kind])
       (get-in record [:failure :detail :failure-kind])
-      (get-in record [:terminal-receipt :failure-kind])))
+      (get-in record [:terminal-receipt :failure-kind])
+      (:kind (retained-q6-failure record))
+      (when (contains? #{:refused :incomplete}
+                       (retained-terminal-outcome record))
+        :unclassified-terminal-failure)))
 (defn- failure-stage [record]
   (or (get-in record [:failure :stage])
       (get-in record [:failure :detail :failure-stage])
+      (:stage (retained-q6-failure record))
       :unknown-stage))
 (defn- run-id [record] (or (:run/id record) (:run-id record)))
 (defn- click-id [record] (or (:click/id record) (:click-id record)))
 (defn- outcome [record]
-  (or (get-in record [:terminal-receipt :outcome])
-      (get-in record [:failure :detail :outcome])
-      (:outcome record)))
+  (retained-terminal-outcome record))
 (defn producer-qualified-already-satisfied? [record]
   ;; PROOF-2b's author-refusal producer establishes commit existence before
   ;; throwing this typed close. Classification trusts only the mutually
@@ -90,7 +127,10 @@
 (defn- cause-key [record]
   (or (get-in record [:failure :cause :cause-id])
       (get-in record [:failure :detail :cause-id])
-      [(failure-kind record) (failure-stage record) (target record)]))
+      (let [kind (failure-kind record)]
+        (if (= :unclassified-terminal-failure kind)
+          [kind (run-id record)]
+          [kind (failure-stage record) (target record)]))))
 (def ^:private cause-fields [:reason :kind :failure-kind :absent])
 (defn- supported-cause-entries [record]
   ;; P10 retains a bounded cause vector here.  The other entries are the
