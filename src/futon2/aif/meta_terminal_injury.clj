@@ -9,7 +9,8 @@
 
 (def classification-schema :wm/meta-terminal-classification-v1)
 (def explicit-non-injury-kinds
-  {:reviewed-claim-refused :reviewed-claim-refused
+  {:author-response-unparseable :author-response-unparseable
+   :reviewed-claim-refused :reviewed-claim-refused
    :abstained :ordinary-selection-abstention
    :operator-cancelled :operator-cancelled
    :declared-no-work :declared-no-work

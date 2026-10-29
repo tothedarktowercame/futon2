@@ -213,9 +213,20 @@
     :else k))
 
 (defn- normalized-decisions [answer]
-  (when (map? (:decisions answer))
-    (into {} (map (fn [[k v]] [(decoded-hole-id k) v]))
-          (:decisions answer))))
+  (let [claim (:decisions answer)]
+    (cond
+      (map? claim)
+      (into {} (map (fn [[k v]] [(decoded-hole-id k) v])) claim)
+
+      ;; JSON cannot encode vector map keys. Each array row carries its key
+      ;; explicitly; duplicate keys remain a malformed claim, never last-wins.
+      (and (vector? claim)
+           (every? #(and (map? %) (contains? % :hole)) claim)
+           (= (count claim) (count (set (map :hole claim)))))
+      (into {} (map (fn [row] [(decoded-hole-id (:hole row))
+                               (dissoc row :hole)])) claim)
+
+      :else nil)))
 
 (defn validate-author-binding
   "Validate the unreviewed author identity and descriptor before product inspection.
@@ -311,7 +322,7 @@
                                                (nil? (get (capability-dispatch/routes opts)
                                                           (:capability clause))))
                                       [id (:capability clause)])) decisions))
-        claim (:decisions accepted)
+        claim (normalized-decisions accepted)
         claim-matches? (json-claim-matches? claim decisions)
         claim-operational? (and (= required (set (keys claim)))
                                 (every? (fn [v]
