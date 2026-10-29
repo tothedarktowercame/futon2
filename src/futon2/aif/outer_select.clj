@@ -5,6 +5,34 @@
 (defn- refuse! [kind data]
   (throw (ex-info "Outer selection refused" (assoc data :kind kind))))
 
+(defn known-term-field
+  "Supply R20Step.applySelectionStep only the known-term subset; retain the
+  excluded population and its knowledge requests separately, without zeroes."
+  [{:keys [field facts]}]
+  (reduce
+   (fn [result candidate]
+     (let [target (:target candidate)
+           fact (if (fn? facts) (facts target) (get facts target))
+           graph (:graph-terms fact)
+           terms (filterv #(or (= :unknown (:status graph))
+                               (not (nat-int? (get fact %)))) [:cone :unblocks])]
+       (if (empty? terms)
+         (update result :field conj candidate)
+         (let [reason (or (:reason graph) :graph-term-not-observed)
+               request {:kind :outer-score/graph-term-knowledge-request
+                        :target target :producer (or (:producer graph) :dependency-reader-reviewer)
+                        :terms terms :reason reason
+                        :prerequisites (:prerequisites graph)
+                        :scope (select-keys graph [:scope :population-sha :coverage])}]
+           (-> result
+               (update :excluded conj
+                       {:kind :outer-score/graph-term-unavailable :target target
+                        :terms (mapv (fn [term] {:term term :reason reason
+                                                :prerequisites (:prerequisites graph)}) terms)
+                        :graph-terms graph :knowledge-producer-request request})
+               (update :requests conj request))))))
+   {:field [] :excluded [] :requests []} field))
+
 (defn select
   "Score the makeup's cascade menu and return Lean `step` selection fields.
 
@@ -12,7 +40,13 @@
   `:tie?` records that condition because ties are a defect to remove with
   better evidence, not a task-selection rule (Joe, 2026-10-28)."
   [makeup state observation]
-  (let [menu (:cascades makeup)]
+  (let [menu (:cascades makeup)
+        partition (known-term-field observation)
+        observation (assoc observation :field (:field partition))]
+    (when (empty? (:field partition))
+      (refuse! :outer-score/no-known-graph-members
+               {:outer-score/excluded (:excluded partition)
+                :knowledge-producer-requests (:requests partition)}))
     (when-not (seq menu)
       (refuse! :empty-cascade-menu {}))
     (let [score-input (merge (select-keys observation [:focus :relation :facts :field])
@@ -34,7 +68,10 @@
             model (outer-score/outer-model
                    (assoc score-input :cascade (:steps chosen)))
             picked (:pick model)]
-        {:cascade-index index
+        {:outer-score/admitted (mapv :target (:field partition))
+         :outer-score/excluded (:excluded partition)
+         :knowledge-producer-requests (:requests partition)
+         :cascade-index index
          :cascade-id (:id chosen)
          :cascade-scores scores
          :selection (when picked {:candidates (:field observation)

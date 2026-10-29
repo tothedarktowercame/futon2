@@ -105,3 +105,29 @@
                   (get-in result [:selection :selected :target])))
         (is (every? #(and (number? %) (Double/isFinite (double %)))
                     (:cascade-scores result))))))
+
+(deftest unknown-graph-member-is-excluded-with-a-producer-request
+  (let [graph {:status :unknown :reason :prerequisite-unresolved
+               :scope :population/missions-excursions :population-sha "frozen"
+               :prerequisites [{:raw_target "external prerequisite" :kind "depends-on"
+                                :absence :unresolved-prerequisite}]}
+        obs (assoc-in base-observation [:facts "M-unknown"]
+                      {:status :undetermined :cone nil :unblocks nil :graph-terms graph})
+        result (outer-select/select base-makeup base-state obs)
+        exclusion (first (:outer-score/excluded result))]
+    (is (= "M-ready" (get-in result [:selection :selected :target])))
+    (is (= ["M-ready"] (:outer-score/admitted result)))
+    (is (= ["M-ready"] (mapv :target (get-in result [:selection :candidates]))))
+    (is (= :outer-score/graph-term-unavailable (:kind exclusion)))
+    (is (= [:cone :unblocks] (mapv :term (:terms exclusion))))
+    (is (= (:prerequisites graph) (get-in exclusion [:terms 0 :prerequisites])))
+    (is (= [(:knowledge-producer-request exclusion)] (:knowledge-producer-requests result)))
+    (is (nil? (get-in obs [:facts "M-unknown" :cone])))
+    (let [all-unknown (assoc obs :field [{:target "M-unknown" :reach 1/2}])
+          refusal (try (outer-select/select base-makeup base-state all-unknown)
+                       nil (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :outer-score/no-known-graph-members (:kind refusal)))
+      (is (= 1 (count (:outer-score/excluded refusal)))))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (outer-score/apply-selection-step (:facts obs) (:field obs) :by-cone))
+        "The numeric scorer still refuses an unknown; the boundary never supplies a zero.")))

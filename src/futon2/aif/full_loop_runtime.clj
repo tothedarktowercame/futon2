@@ -829,14 +829,15 @@
               selection (outer-select/select makeup state observation)
               retained-selection (-> selection
                                      (assoc :outer-field/admitted
-                                            (mapv :target (:field observation)))
+                                            (:outer-score/admitted selection))
                                      (update :selection #(some-> % (dissoc :candidates)))
                                      (assoc :giraffe/run-id (:giraffe/run-id observation)
                                             :giraffe/manifest-sha256
                                             (:giraffe/manifest-sha256 observation)
                                             :makeup/sha256 (:makeup/sha256 makeup)
                                             :outer-field/excluded
-                                            (:outer-field/excluded observation)
+                                            (into (vec (:outer-field/excluded observation))
+                                                  (:outer-score/excluded selection))
                                             :focus (:focus observation)
                                             :selected-relation
                                             (when-let [target (get-in selection

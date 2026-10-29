@@ -94,12 +94,14 @@
              rows (:order pass)]
          (when-not (and (vector? rows)
                         (every? #(and (:id %) (contains? % :status)
-                                      (nat-int? (:unblocks %)) (nat-int? (:cone %))) rows))
+                                      (or (and (nat-int? (:unblocks %)) (nat-int? (:cone %)))
+                                          (and (= :unknown (get-in % [:graph-terms :status]))
+                                               (nil? (:cone %)) (nil? (:unblocks %))))) rows))
            (refuse! :giraffe-pass-invalid {:run-dir (.getPath dir)}))
          (let [targets (mapv (comp name :id) rows)
                declarations (construction-inputs/target-source-declarations targets authority)
                registry-by-id (registry-entries authority)
-               entries (mapv (fn [{:keys [id status unblocks cone]} declaration]
+               entries (mapv (fn [{:keys [id status unblocks cone graph-terms completion dependency-reading]} declaration]
                                (let [target (name id)]
                                  {:candidate {:target target
                                               :reach (:default-reach makeup)}
@@ -107,7 +109,8 @@
                                   :declaration declaration
                                   :fact {:status status
                                          :unblocks unblocks
-                                         :cone cone}}))
+                                         :cone cone :graph-terms graph-terms
+                                         :completion completion :dependency-reading dependency-reading}}))
                              rows declarations)
                available (filterv #(nil? (get-in % [:declaration :source-absent])) entries)
                satisfied (into {}
