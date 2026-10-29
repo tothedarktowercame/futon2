@@ -39,28 +39,55 @@
     (is (= 1 (get-in x [:enumerated-tasks :count]))
         "a selected live policy can no longer be reported beside zero enumerated tasks")))
 
-(deftest outer-selection-population-is-the-authoritative-selection-world
+(deftest outer-selection-is-compared-with-independent-registry-census
   (let [outer {:schema :wm/outer-task-selection-v1
                :support [{:id "M-live" :kind :mission}]
                :excluded [{:id "E-held" :kind :excursion
                            :ineligible-reason :ownership/actively-held}
                           {:id "T-off-map" :kind :ticket
                            :ineligible-reason :pipeline/not-on-current-map}]}
-        ;; The independent task census deliberately disagrees. Once selection
-        ;; has retained its input field, rereading mutable registries here
-        ;; would create a world that the selector never observed.
+        ;; Decision (claude-11, 2026-10-29): Q1 compares the selector's
+        ;; enumeration with an independent registry census, because a check
+        ;; whose two sides come from one source cannot fail.
+        census {:missions ["M-live" "M-unseen"]
+                :excursions ["E-held"]
+                :tickets ["T-off-map"]}
         x (world/capture {:selection-certificate
                           {:candidates [{:target "M-live"}]}}
-                         {} nil outer opts)]
+                         {} nil outer
+                         (assoc opts :world-task-sets-fn (constantly census)))
+        exported (:facts (facts/facts-for-record
+                          {:world-at-selection x}
+                          "fixture.edn"
+                          {:patterns #{} :seats #{}}))]
     (is (= ["M-live" "E-held" "T-off-map"]
            (mapv :id (concat (:support outer) (:excluded outer)))))
     (is (= #{"M-live" "E-held" "T-off-map"}
            (set (get-in x [:enumerated-tasks :ids]))))
-    (is (= ["M-live"] (get-in x [:open-tasks :missions :ids])))
+    (is (= ["M-live" "M-unseen"] (get-in x [:open-tasks :missions :ids])))
     (is (= ["E-held"] (get-in x [:open-tasks :excursions :ids])))
     (is (= ["T-off-map"] (get-in x [:open-tasks :tickets :ids])))
+    (is (not= (set (get-in x [:enumerated-tasks :ids]))
+              (set (mapcat :ids (vals (:open-tasks x))))))
+    (is (= 4 (get-in x [:q1-diagnostic :open-task-count])))
+    (is (= 3 (get-in x [:q1-diagnostic :enumerated-task-count])))
+    (is (= {:count 1 :ids ["M-unseen"] :truncated? false}
+           (get-in x [:q1-diagnostic :open-tasks-missing-from-outer-population])))
+    (is (not= (set (exported "enumeratedTasks"))
+              (set (concat (exported "openMissions")
+                           (exported "openExcursions")
+                           (exported "openTickets")))))))
+
+(deftest independent-census-can-equal-outer-enumeration
+  (let [outer {:schema :wm/outer-task-selection-v1
+               :support [{:id "M-a" :kind :mission}]
+               :excluded [{:id "E-a" :kind :excursion}
+                          {:id "T-a" :kind :ticket}]}
+        x (world/capture decision {} nil outer opts)]
     (is (= (set (get-in x [:enumerated-tasks :ids]))
-           (set (mapcat :ids (vals (:open-tasks x))))))))
+           (set (mapcat :ids (vals (:open-tasks x))))))
+    (is (= {:count 0 :ids [] :truncated? false}
+           (get-in x [:q1-diagnostic :open-tasks-missing-from-outer-population])))))
 
 (deftest live-outer-selection-carries-the-whole-enumerated-population
   (let [excluded (mapv (fn [n] {:target (str "E-held-" n)
@@ -70,9 +97,14 @@
                :outer-field/admitted ["M-live" "T-ready"]
                :outer-field/excluded excluded
                :selection {:selected {:target "M-live"}}}
+        census {:missions ["M-live"]
+                :excursions (mapv :target excluded)
+                :tickets ["T-ready"]}
         snapshot (world/capture {:selection-certificate
                                  {:candidates [{:target "M-live"}]}}
-                                {} nil outer opts)
+                                {} nil outer
+                                (assoc opts :world-task-sets-fn
+                                       (constantly census)))
         exported (:facts (facts/facts-for-record
                           {:world-at-selection snapshot}
                           "fixture.edn"
