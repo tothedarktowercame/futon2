@@ -595,6 +595,8 @@
            (set (:forbidden-boundaries result))))))
 
 (deftest pinned-injury-evidence-produces-a-durable-diagnosis-input
+  ;; 2ae19e85f bounded producer requests: causal fields remain inline, while
+  ;; non-causal metadata such as :run/id is indexed and read from the pin.
   (let [dir (root)
         pin (recorded-injury-source! dir)
         {:keys [ledger active]} (durable-with-active-source pin)
@@ -608,8 +610,11 @@
         receipt (edn/read-string (slurp (get-in result [:diagnosis-evidence-pin :path])))]
     (is (= :available (:status result)))
     (is (= pin (:source-record-pin @seen)))
-    (is (= "2026-10-19-bd1f106d-5bdc-4b9d-8350-5d9c9bd6832f"
-           (get-in @seen [:injury-record :run/id])))
+    (is (nil? (get-in @seen [:injury-record :run/id])))
+    (is (some #(= [:run/id] (:path %)) (:record-index @seen)))
+    (is (some #(and (= [:run/id] (:path %))
+                    (= :available-in-pinned-record (:reason %)))
+              (:abbreviated-fields @seen)))
     (is (= :fold-output-invalid (get-in @seen [:injury-record :failure :kind])))
     (is (= (get-in result [:diagnosis-evidence-pin :sha256])
            (load-identity/sha256
@@ -741,6 +746,9 @@
     (is (= production-functions (get-in receipt [:diagnosis :production-functions])))))
 
 (deftest diagnosis-without-verified-production-functions-is-refused-unpersisted
+  ;; 22248f271 deliberately gives an invalid diagnosis one bounded correction;
+  ;; a producer that repeats it is refused as correction-exhausted, retaining
+  ;; both rounds' validation defects under :first and :second.
   (let [ghost "futon2.aif.meta-live-outer-selector/no-such-selector"
         absent (diagnose-with (root) {:class :configuration})
         unresolvable-dir (root)
@@ -756,19 +764,23 @@
                  (root)
                  (diagnosis-fixture-with-entry
                   2 {:file "../elsewhere/src/futon2/aif/full_loop_runner.clj"}))]
-    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason absent)))
-    (is (= :absent (:production-functions-field absent)))
-    (is (= production/required-production-roles (:missing-roles absent)))
-    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason unresolvable)))
-    (is (= [ghost] (:unresolvable-vars unresolvable)))
-    (is (= [:selection-entrypoint] (:missing-roles unresolvable)))
+    (is (every? #(= :meta-self-heal/diagnosis-correction-exhausted (:reason %))
+                [absent unresolvable missing-role escaped]))
+    (is (= :absent (get-in absent [:first :production-functions-field])))
+    (is (= production/required-production-roles
+           (get-in absent [:second :missing-roles])))
+    (is (= [ghost] (get-in unresolvable [:first :unresolvable-vars])))
+    (is (= [:selection-entrypoint]
+           (get-in unresolvable [:second :missing-roles])))
     (is (nil? (persisted-diagnoses unresolvable-dir)))
-    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason missing-role)))
-    (is (= [:terminal-routing-entrypoint] (:missing-roles missing-role)))
-    (is (nil? (:unresolvable-vars missing-role)))
+    (is (= [:terminal-routing-entrypoint]
+           (get-in missing-role [:first :missing-roles])))
+    (is (nil? (get-in missing-role [:second :unresolvable-vars])))
     (is (nil? (persisted-diagnoses role-dir)))
-    (is (= ["../elsewhere/src/futon2/aif/full_loop_runner.clj"] (:missing-files escaped)))
-    (is (= [:terminal-routing-entrypoint] (:missing-roles escaped)))
+    (is (= ["../elsewhere/src/futon2/aif/full_loop_runner.clj"]
+           (get-in escaped [:first :missing-files])))
+    (is (= [:terminal-routing-entrypoint]
+           (get-in escaped [:second :missing-roles])))
     (is (every? nil? (map :diagnosis-evidence-pin [absent unresolvable missing-role escaped])))
     (is (every? false? (map :repair-claimed? [absent unresolvable missing-role escaped])))))
 
@@ -1173,14 +1185,19 @@
   ;; refusal fires only when a var that F11a verified no longer resolves when
   ;; the request is built; the second half forces that with a redef of the
   ;; request-time resolver.
+  ;; 22248f271 changed the first layer to attempt one correction. This fixture
+  ;; repeats the invented var, so the intended terminal reason is exhaustion.
   (let [dir (root)
         invented (produced-diagnosis!
                   dir {:class :configuration
                        :production-functions
                        (conj production-functions
                              {:role :x :var "no.such.ns/invented-fn" :file "src/x.clj"})})]
-    (is (= :meta-self-heal/diagnosis-production-functions-absent (:reason invented)))
-    (is (= ["no.such.ns/invented-fn"] (:unresolvable-vars invented))))
+    (is (= :meta-self-heal/diagnosis-correction-exhausted (:reason invented)))
+    (is (= ["no.such.ns/invented-fn"]
+           (get-in invented [:first :unresolvable-vars])))
+    (is (= ["no.such.ns/invented-fn"]
+           (get-in invented [:second :unresolvable-vars]))))
   (let [dir (root)
         calls (atom 0)
         diagnosis (produced-diagnosis! dir)
