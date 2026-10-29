@@ -75,6 +75,8 @@
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.open-cascade-refinement :as open-cascade-refinement]
+            [futon2.aif.outer-refusal-index :as outer-refusal-index]
+            [futon2.aif.outer-refusal-history :as outer-refusal-history]
             [futon2.aif.revision-pattern-use :as revision-pattern-use]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.pattern-registry :as patterns]
@@ -1460,6 +1462,10 @@
                     :reading-frontiers
                     (retained-reading-frontiers selected-target-reading-state
                                                 result outer-task-selection)
+                    :outer-repeat-comparison
+                    (or (some-> (:outer-repeat-comparison/state raw-opts) deref)
+                        {:schema :wm/outer-repeat-comparison-v1
+                         :status :not-reached})
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
@@ -1538,6 +1544,7 @@
                      true
                      (terminal-receipt/attach (:outcome result)))
             written (run-record-io/write-run-record-stream! dir run-id record)]
+        (outer-refusal-index/append-run-record! dir written record)
         ;; this run's close in the Q6 run stream, beside the record it names
         (previous-run/close! dir q6-terminal written nil)
         {:run-record-status :present
@@ -8416,6 +8423,33 @@
                       (cohort/append-pre-author-baseline!
                        cohort-source (:data-root execution-cohort) attempt-id mission-baseline)
                       (cohort/append-pre-author-baseline! attempt-id mission-baseline)))
+                outer-repeat-inputs
+                {:schema :wm/outer-repeat-inputs-v1
+                 :target target
+                 :selection-input-digest (:selection-input-digest world-at-selection)
+                 :outer-selection
+                 (select-keys (:outer/selection opts)
+                              [:cascade-id :cascade-index :giraffe/run-id
+                               :giraffe/manifest-sha256 :makeup/sha256 :focus
+                               :selected-relation])
+                 :selected-target-reading-sha256 (sha256 selected-target-reading-record)
+                 :selected-reading-sha256 (sha256 selected-reading-record)
+                 :construction-sha256 (sha256 construction)
+                 :repository author-repo
+                 :pre-author-head (:head pre-author-head)
+                 :d-task-dispatch-sha256 (sha256 @d-task-dispatch)
+                 :mission-baseline-sha256 (sha256 mission-baseline)}
+                _outer-repeat-comparison
+                (run-phase!
+                 opts @phase-context :outer-repeat-comparison
+                 #(let [comparison
+                        (outer-refusal-history/compare-history
+                         (or (:run-record-dir opts) default-run-record-dir)
+                         outer-repeat-inputs)]
+                    (when-let [state (:outer-repeat-comparison/state opts)]
+                      (reset! state comparison))
+                    (outer-refusal-history/require-new-inputs! comparison))
+                 #(select-keys % [:status]))
                 author-prompt-text
                 (prompt-for-head pre-author-head)
                 author-response
@@ -9217,6 +9251,7 @@
                                 :registered-run/job-ledger (atom {:order [] :jobs {}})
                                 :scan-report/state (atom nil)
                                 :preference-refresh/state (atom nil)
+                                :outer-repeat-comparison/state (atom nil)
                                 :phase-events/state phase-events
                                 :selection-timing/state
                                 (or (:selection-timing/state raw-opts)
