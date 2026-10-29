@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
+            [futon2.aif.out-of-band-fix :as out-of-band]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.load-identity :as load-identity]
@@ -1515,13 +1516,13 @@
          :failures (Long/parseLong (nth summary 2))
          :errors (Long/parseLong (nth summary 3))}))))
 
-(defn acceptance-replay-port
+(defn ordinary-acceptance-replay-port
   "Build the tooling-process port that compares a retained red admission run
   with one current run of the identical admitted acceptance source. Missing or
   mismatched pins are reported as input-unavailable so the coordinator can use
   its existing whole-child retry."
   ([run-acceptance]
-   (acceptance-replay-port run-acceptance default-acceptance-root))
+   (ordinary-acceptance-replay-port run-acceptance default-acceptance-root))
   ([run-acceptance acceptance-root]
   (fn [{:keys [work-order transaction phase predecessor-pin
                effective-retry-click]}]
@@ -1600,6 +1601,31 @@
                   :retry-click (or effective-retry-click enact-retry-click)
                   :phase-replay-receipt replay
                   :adapter "wm-acceptance-replay"}})))))
+
+(defn acceptance-replay-port
+  ([run-acceptance] (acceptance-replay-port run-acceptance default-acceptance-root))
+  ([run-acceptance root]
+   (let [ordinary (ordinary-acceptance-replay-port run-acceptance root)]
+     (fn [{:keys [work-order transaction phase predecessor-pin effective-retry-click]
+           :as request}]
+       (if-let [evidence (out-of-band/compute! root work-order run-acceptance)]
+         (let [pin (out-of-band/retain! root "out-of-band-results" evidence)]
+           (if (not= :checked (:status evidence))
+             (assoc evidence :out-of-band-receipt-pin pin)
+             (coordinator/seal-port-receipt
+              {:phase phase :injury-id (:injury-id work-order)
+               :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+               :predecessor-pin predecessor-pin :status :succeeded
+               :payload {:repair-id (:repair-id work-order)
+                         :patch-sha (get-in (coordinator/current-receipt-for transaction :author)
+                                            [:payload :patch-sha])
+                         :retry-click effective-retry-click
+                         :fixed-by (:fixed-by evidence)
+                         :out-of-band-receipt-pin pin
+                         :phase-replay-receipt {:outcome :repaired
+                                                :out-of-band-receipt-pin pin}
+                         :adapter "wm-out-of-band-fix"}})))
+         (ordinary request))))))
 
 (defn- effect-ports [opts]
   (or (:meta-repair-ports opts)

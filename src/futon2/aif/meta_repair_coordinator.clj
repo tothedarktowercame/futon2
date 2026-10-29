@@ -836,7 +836,7 @@
                                            [:phase-replay-receipt :outcome])))
                   (let [closed (accepted!
                                 (append-transition!
-                                 history4 {:injury-id injury-id :state :discharged
+                                 history4 (cond-> {:injury-id injury-id :state :discharged
                                            :attempt attempt :repair-id repair-id
                                            :patch-sha patch-sha
                                            :retry-click transition-retry-click
@@ -846,6 +846,9 @@
                                              (:receipt-pin retry-receipt))
                                            :port-receipt-pin
                                            (:receipt-pin retry-receipt)}
+                                           (:fixed-by retry-payload)
+                                           (assoc :fixed-by (:fixed-by retry-payload)
+                                                  :out-of-band-receipt-pin (:out-of-band-receipt-pin retry-payload)))
                                  authority-verifier))]
                     {:status :discharged :ledger (:ledger closed) :transaction tx4})
 

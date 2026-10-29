@@ -154,6 +154,26 @@
     (is (= (get-in result [:transaction :receipts 3 :receipt-pin])
            (get-in result [:ledger :entries 5 :phase-replay-receipt-pin])))))
 
+(deftest out-of-band-discharge-keeps-enacted-history
+  (let [start (prepared (opened-ledger) (options))
+        replay (fn [request]
+                 (receipt request :succeeded
+                   {:repair-id (get-in request [:work-order :repair-id])
+                    :patch-sha sha-a :retry-click (:effective-retry-click request)
+                    :fixed-by (apply str (repeat 40 "b"))
+                    :out-of-band-receipt-pin diagnosis-pin
+                    :phase-replay-receipt {:outcome :repaired}}))
+        result (coordinator/coordinate
+                 (durable (opened-ledger)) (:transaction start)
+                 (assoc (ports) :acceptance-replay replay))
+        close (last (get-in result [:ledger :entries]))]
+    (is (= :discharged (:status result)))
+    (is (= (apply str (repeat 40 "b")) (:fixed-by close)))
+    (is (= diagnosis-pin (:out-of-band-receipt-pin close)))
+    (is (= sha-a (:patch-sha close)))
+    (is (= (:work-order (:transaction start))
+           (get-in result [:transaction :work-order])))))
+
 (deftest enacted-admitted-acceptance-failure-reopens
   (let [calls (atom 0)
         start (prepared (opened-ledger) (assoc (options)
