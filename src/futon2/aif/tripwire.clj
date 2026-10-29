@@ -19,6 +19,7 @@
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
+            [futon2.aif.stop-line :as stop-line]
             [futon2.aif.trace :as trace]
             [futon2.aif.wm.debugger :as debugger])
   (:import [java.nio.file Files StandardOpenOption]
@@ -221,10 +222,12 @@
           cohort-complete? (= :cohort-complete outcome)
           enumerated? (or cohort-complete?
                           (contains? cohort/outcome-kinds outcome))
-          admitted-verification? (= :historical-verification-awaiting-validation outcome)
-          zero-achievement? (and (not= :grounded-change outcome)
-                                 (not cohort-complete?)
-                                 (not admitted-verification?))
+          ;; `:cohort-complete` ends the cohort without opening an attempt, so
+          ;; it is T3-only. Every opportunity outcome shared with close-core
+          ;; uses the same finding-suppression rule.
+          zero-achievement? (and (not cohort-complete?)
+                                 (not (stop-line/no-finding-required?
+                                       observation)))
           statuses (when (and zero-achievement? durable-attempt-id)
                      (attempt-finding-statuses
                       (or (:repair-root observation) repair/default-root)

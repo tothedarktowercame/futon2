@@ -138,6 +138,31 @@
                      :repair-root (.getPath root)}]
     (is (empty? (tripwire/evaluate-wire :T3 observation)))))
 
+(deftest t3-agrees-with-runner-stop-line-suppression
+  (let [base {:phase :opportunity :transition :end
+              :external-attempt-id "ea1-held--attempt-002"
+              :repair-root (.getPath (temp-dir))
+              :tripwire/force? true}
+        grounded {:repo "futon0"
+                  :sha "cfb1408629826c6d825e2ddc06aad84ee5ac6108"}]
+    (testing "the held producer-qualified already-satisfied close is complete"
+      (is (empty? (tripwire/evaluate-wire
+                   :T3 (assoc base :outcome :already-satisfied
+                              :grounded-commit grounded)))))
+    (testing "an unqualified already-satisfied outcome still needs a finding"
+      (is (= [:missing-durable-stop-line]
+             (mapv :kind
+                   (tripwire/evaluate-wire
+                    :T3 (assoc base :outcome :already-satisfied))))))
+    (testing "grounded progress is an achieved end"
+      (is (empty? (tripwire/evaluate-wire
+                   :T3 (assoc base :outcome :grounded-progress)))))
+    (testing "incomplete without a finding remains stopped"
+      (is (= [:missing-durable-stop-line]
+             (mapv :kind
+                   (tripwire/evaluate-wire
+                    :T3 (assoc base :outcome :incomplete))))))))
+
 (deftest t4-a-matrix-provenance-trips-without-grounding-witness
   (let [event {:event-id "qa-1" :entity-id "impl-1"}
         violations (tripwire/evaluate-wire
