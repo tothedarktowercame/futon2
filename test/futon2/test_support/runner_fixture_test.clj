@@ -5,6 +5,7 @@
    runs deposited into the canonical store (finding F1, PACKETS-2026-10-19.md)."
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.test-support.runner-fixture :as runner-fixture]))
 
@@ -46,3 +47,30 @@
     (testing "the frozen archive is untouched"
       (is (= archived-before (file-set archived-root))))
     (is (some? @seen) "deposit was exercised")))
+
+(deftest strategic-selection-replay-input-stays-under-fixture-root
+  (let [live-root runner/default-phase-replay-input-root
+        before (file-set live-root)
+        observed (atom nil)]
+    (runner-fixture/with-hermetic-traces
+      (fn []
+        (let [temporary-root runner/default-phase-replay-input-root
+              selection (runner/strategic-selection!
+                         {:strategic-selection-invoke-fn
+                          (fn [_]
+                            {:ok true
+                             :selection {:status :verified-live-selection
+                                         :selected-mission-ids ["M-fixture"]}})}
+                         {:scheduler-habit-ranking ["M-fixture"]})
+              written (file-set temporary-root)]
+          (reset! observed {:temporary-root temporary-root :written written})
+          (is (= :verified-live-selection (:status selection)))
+          (is (not= live-root temporary-root))
+          (is (= 2 (count written))
+              "the real selection call writes its request and response replay inputs"))))
+    (is (= before (file-set live-root))
+        "the live replay-input file set is unchanged")
+    (is (every? #(.startsWith ^String %
+                              ^String (:temporary-root @observed))
+                (keys (:written @observed)))
+        "every replay input was written below the fixture root")))
