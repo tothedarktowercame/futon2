@@ -464,20 +464,16 @@
   [repo]
   (primary-checkout? repo))
 
-(defn load-missions-from-files
-  "The explicit FILE scan of primary checkouts: `<repo>/holes/M-*.md` and
-   `<repo>/holes/missions/M-*.md` under code-root,
-   with the scan-root fences and dedupe documented below. This is the
-   ingester's reader (scripts/futon2/aif/mission_substrate_ingest.clj) and the
-   form the test suite uses against tmpdirs; the machine's default load
-   (`load-missions`, zero-arg) reads substrate-2 and never falls back here."
-  ([code-root]
-   (let [root (io/file code-root)
-         ;; The contract admits M-*.md directly in holes/ or holes/missions/.
+(defn load-missions-from-repos
+  "Shared file reader for explicit primary repo roots. Uses the registry's
+   path fences, status/gate grammar and ID dedupe; never reads substrate."
+  [repos]
+  (let [;; The contract admits M-*.md directly in holes/ or holes/missions/.
          ;; Enumerate exactly those two directories in each primary checkout.
          ;; Walking all of ~/code traversed build trees, worktrees and node_modules before filtering
          ;; them out, turning a single construction lookup into minutes of IO.
-         mission-files (->> (or (.listFiles root) (make-array File 0))
+         mission-files (->> repos
+                            (map io/file)
                             (filter #(.isDirectory ^File %))
                             (filter mission-scan-repo?)
                             (mapcat #(vector (io/file % "holes")
@@ -501,7 +497,14 @@
                        (remove #(derived-mission-id? (:id %)))
                        (dedupe-by-id)
                        vec)]
-     {:missions missions})))
+    {:missions missions}))
+
+(defn load-missions-from-files
+  "Read mission files from primary checkouts under code-root through the
+   shared explicit-repo reader. Zero-arg load-missions still uses substrate."
+  [code-root]
+  (load-missions-from-repos
+   (or (.listFiles (io/file code-root)) (make-array File 0))))
 
 (defn- parse-entity-props
   "The entities read route returns :entity/props as an EDN string; normalize
