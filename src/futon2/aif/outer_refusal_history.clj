@@ -6,7 +6,8 @@
   the identities it actually retained. This namespace never opens a terminal
   run record."
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [futon2.aif.meta-terminal-injury :as terminal-injury]))
 
 (def index-name "outer-refusal-index.ednl")
 
@@ -53,7 +54,9 @@
    :record-sha256 record-sha256
    :target (record-target record)
    :failure (select-keys (:failure record) [:kind :stage])
-   :inputs (record-inputs record)})
+   :finished-work? (terminal-injury/finished-work? record)
+   :inputs (record-inputs record)
+   :effective-run-identity (:effective-run-identity record)})
 
 (defn read-index
   "Read the compact index under DIR. A malformed index is a typed refusal;
