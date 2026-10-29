@@ -133,18 +133,33 @@
   "Version a sealed work order after a durable unsatisfiable-acceptance claim.
   Both the new work order and enclosing transaction are sealed normally."
   [transaction acceptance-test superseded-admission-pin current-admission-pin
-   claim-observation-pin]
+  claim-observation-pin]
   (let [old-order (:work-order transaction)
+        version-root (or (get-in old-order [:acceptance-supersession
+                                            :author-worktree-version-root])
+                         (:target-worktree old-order))
+        version-segment (subs (:sha256 current-admission-pin) 0 12)
+        version-root-file (io/file version-root)
+        target-worktree (str (.getParent version-root-file) "/"
+                             (.getName version-root-file) "-version-"
+                             version-segment)
+        author-receipt (last (filter #(= :author (:phase %))
+                                     (:receipts transaction)))
         supersession {:schema :wm/acceptance-supersession-v1
                       :claim-observation-pin claim-observation-pin
                       :superseded-work-order-pin (:work-order-pin old-order)
                       :superseded-admission-pin superseded-admission-pin
-                      :current-admission-pin current-admission-pin}
+                      :current-admission-pin current-admission-pin
+                      :author-worktree-version-root version-root
+                      :superseded-target-worktree (:target-worktree old-order)
+                      :superseded-author-patch-sha
+                      (get-in author-receipt [:payload :patch-sha])}
         order (seal-work-order
                (-> old-order
                    (dissoc :work-order-pin)
                    (assoc :acceptance-test acceptance-test
                           :acceptance-admission-pin current-admission-pin
+                          :target-worktree target-worktree
                           :superseded-work-order-pin (:work-order-pin old-order)
                           :acceptance-supersession supersession)))]
     (seal-transaction

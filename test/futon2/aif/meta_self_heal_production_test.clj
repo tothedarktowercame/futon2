@@ -2176,6 +2176,12 @@
            (get-in rebound [:transaction :work-order :acceptance-test :id])))
     (is (= new-pin (get-in rebound [:transaction :acceptance-supersession
                                     :current-admission-pin])))
+    (is (= (get-in transaction [:work-order :target-worktree])
+           (get-in rebound [:transaction :acceptance-supersession
+                            :superseded-target-worktree])))
+    (is (= (str (get-in transaction [:work-order :target-worktree])
+                "-version-" (subs (:sha256 new-pin) 0 12))
+           (get-in rebound [:transaction :work-order :target-worktree])))
     (is (= :valid
            (:status (coordinator/verify-transaction (:transaction rebound)))))
     (is (= :accepted (:status dispatched)))
