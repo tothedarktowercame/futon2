@@ -1,4 +1,5 @@
 # E-kimi-task-97 — HPUB-WRITE-I: H-publish write side witnessed once, post-A1 close reaches :receipt-committed (test-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): HPUB-WRITE-I test-only witness accepted 02:57Z: futon2 38c29235d adds the hermetic test driving a post-A1 discharge to :receipt-committed, warrant test-registry-6627e138. Evidence: 38c29235d, /home/joe/code/futon2/test/futon2/aif/repair_publication_write_test.clj.
 
 **Requisition:** completed — 2026-09-27T02:54:21Z, job invoke-1790477103201-25251-3a89232b, state done
 

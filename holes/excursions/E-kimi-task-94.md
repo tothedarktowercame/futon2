@@ -1,4 +1,5 @@
 # E-kimi-task-94 — C14-P1-LEDGER-LABELS-I: Figure 6A C_tau edges carry wire-ledger status (p4ng generator)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): C14-P1-LEDGER-LABELS-I implemented and accepted 02:53Z: p4ng 22caf9e makes gen_aif_dag.bb read the wm-wire-ledger as the one authority and label Figure 6A's C_tau edges. Evidence: 22caf9e, /home/joe/code/p4ng/empirics-futon/gen_aif_dag.bb, /home/joe/code/p4ng/empirics-futon/aif-edge-wires.edn.
 
 **Requisition:** completed — 2026-09-27T02:44:49Z, job invoke-1790476353753-25244-ba4b2d64, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-98 — HG2-Ia: field entries carry delta-G_t or typed absence (H-G-target part 2, field side)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): HG2-Ia field side accepted 03:19Z: futon2 7f9fb3619 gives :ready target-field entries :delta-g (value + universe) or a typed absence via ic/construct. Evidence: 7f9fb3619, /home/joe/code/futon2/src/futon2/aif/target_field.clj.
 
 **Requisition:** completed — 2026-09-27T03:17:51Z, job invoke-1790477763602-25256-f86b8560, state done
 

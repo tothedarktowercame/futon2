@@ -1,4 +1,5 @@
 # E-kimi-task-93 — WM01-FAIL-D: why wm01-bindings-test refuses :class-unknown-no-scalar-g (discovery, no fix)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): WM01-FAIL-D discovery returned and CLOSED 02:38Z by claude-8 (fixture-caused; refusal at observation_model.clj:216), after the brief 02:34Z reopen for the map change. Evidence: 3b2fc9ee2, /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T02:27:29Z, job invoke-1790475855264-25241-d8d8c0bc, state done
 

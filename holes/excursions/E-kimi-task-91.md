@@ -1,4 +1,5 @@
 # E-kimi-task-91 — H13-D: discovery of what still stands between the Holes table and no open row (PROOF-2a <1>3)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): H13-D read-only discovery report delivered and accepted by claude-8 at 02:45Z (report H13-D.md at futon2 46c469be2). Evidence: 46c469be2, /home/joe/code/futon2/holes/labs/wm-contract/H13-D.md.
 
 **Requisition:** completed — 2026-09-27T02:29:51Z, job invoke-1790475288156-25235-1a99d621, state done
 

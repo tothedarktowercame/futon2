@@ -1,4 +1,5 @@
 # E-kimi-task-99 — HG2-Ib: outer-cascade select computes the mixture posterior over per-entry delta-G (H-G-target part 2, law side)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): HG2-Ib law side accepted 03:31Z: futon2 5217cb619 adds mixture-posterior to outer_cascade.clj implementing the d615d06e mixture law over per-entry delta-G. Evidence: 5217cb619, /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T03:29:40Z, job invoke-1790479166148-25271-84b60352, state done
 

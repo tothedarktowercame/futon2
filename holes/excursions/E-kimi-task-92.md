@@ -1,4 +1,5 @@
 # E-kimi-task-92 — C14-D: discovery of what still stands between the machine's C_tau and explicit/audited (PROOF-2a <1>4)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): C14-D read-only discovery report delivered and accepted by claude-8 at 02:33Z (report C14-D.md at futon2 ad561637f). Evidence: ad561637f, /home/joe/code/futon2/holes/labs/wm-contract/C14-D.md.
 
 **Requisition:** completed — 2026-09-27T02:20:06Z, job invoke-1790475290486-25236-4f917f9e, state done
 

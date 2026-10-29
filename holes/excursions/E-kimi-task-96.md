@@ -1,4 +1,5 @@
 # E-kimi-task-96 — HG2-D: H-G-target part 2 composition — mixture law mechanics and function boundary (discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): HG2-D discovery accepted 02:56Z by claude-8 (no file change, as specified): the mixture-law composition and function boundary were fixed and fed HG2-Ia/Ib. Evidence: 45657548c, /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T02:49:20Z, job invoke-1790477095589-25250-6e7f5e3f, state done
 

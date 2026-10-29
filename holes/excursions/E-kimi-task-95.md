@@ -1,4 +1,5 @@
 # E-kimi-task-95 — C14-P8-AS-R3-REFERENCE-D: does the class observable have an A-S R3 reference (discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): C14-P8-AS-R3-REFERENCE-D discovery accepted 02:47Z by claude-8 with the answer REFERENCE ABSENT; read-only task, no file change expected, recorded in the PROOF-2a-PLAN LOG. Evidence: ea99da35c, /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2a-PLAN.md.
 
 **Requisition:** completed — 2026-09-27T02:35:33Z, job invoke-1790476361891-25245-56ce0e92, state done
 
