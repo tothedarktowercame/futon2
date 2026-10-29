@@ -1458,6 +1458,42 @@
   (when-let [source (get-in acceptance-test [:source :text])]
     (load-identity/sha256 (.getBytes source "UTF-8"))))
 
+(defn- acceptance-test-identity [acceptance-test]
+  (when-let [source-sha (acceptance-source-identity acceptance-test)]
+    {:id (:id acceptance-test)
+     :command (:command acceptance-test)
+     :source-sha256 source-sha}))
+
+(defn resolve-acceptance-admission
+  "Resolve one legacy admission by injury and exact admitted-test identity.
+   Only content-addressed acceptance files whose names match their bytes are
+   candidates. Zero or several matches deliberately return nil."
+  [acceptance-root work-order]
+  (let [dir (io/file acceptance-root)
+        wanted (acceptance-test-identity (:acceptance-test work-order))
+        matches (when (and wanted (.isDirectory dir))
+                  (->> (.listFiles dir)
+                       (filter #(.isFile %))
+                       (keep (fn [file]
+                               (try
+                                 (let [bytes (Files/readAllBytes (.toPath file))
+                                       sha (load-identity/sha256 bytes)
+                                       pin {:path (.getPath file) :sha256 sha}
+                                       admission (edn/read-string (String. bytes "UTF-8"))]
+                                   (when (and (= (.getName file)
+                                                 (str "acceptance-" sha ".edn"))
+                                              (= :wm/meta-acceptance-admission-v1
+                                                 (:schema admission))
+                                              (= :accepted (:status admission))
+                                              (= (:injury-id work-order)
+                                                 (:injury-id admission))
+                                              (= wanted
+                                                 (acceptance-test-identity
+                                                  (:acceptance-test admission))))
+                                     {:pin pin :admission admission}))
+                                 (catch Throwable _ nil))))))]
+    (when (= 1 (count matches)) (first matches))))
+
 (defn- read-pinned-text [pin]
   (try
     (when (pin? pin)
@@ -1484,10 +1520,15 @@
   with one current run of the identical admitted acceptance source. Missing or
   mismatched pins are reported as input-unavailable so the coordinator can use
   its existing whole-child retry."
-  [run-acceptance]
+  ([run-acceptance]
+   (acceptance-replay-port run-acceptance default-acceptance-root))
+  ([run-acceptance acceptance-root]
   (fn [{:keys [work-order transaction phase predecessor-pin]}]
-    (let [admission-pin (:acceptance-admission-pin work-order)
-          admission (read-pinned-edn admission-pin)
+    (let [explicit-pin (:acceptance-admission-pin work-order)
+          resolved (when-not explicit-pin
+                     (resolve-acceptance-admission acceptance-root work-order))
+          admission-pin (or explicit-pin (:pin resolved))
+          admission (or (read-pinned-edn explicit-pin) (:admission resolved))
           acceptance-test (:acceptance-test work-order)
           admitted-test (:acceptance-test admission)
           admitted-source (acceptance-source-identity admitted-test)
@@ -1529,6 +1570,7 @@
                   :entry-var entry-var
                   :path-witness path-witness
                   :admission-pin admission-pin
+                  :admission-resolution (if resolved :lookup :pinned)
                   :admission-run-pin (:run-pin admitted-run)
                   :current-run-pin (:run-pin current-run)
                   :admission-source-identity admitted-source
@@ -1550,7 +1592,7 @@
                   :patch-sha (get-in author [:payload :patch-sha])
                   :retry-click (get-in enact [:payload :retry-click])
                   :phase-replay-receipt replay
-                  :adapter "wm-acceptance-replay"}}))))
+                  :adapter "wm-acceptance-replay"}})))))
 
 (defn- effect-ports [opts]
   (or (:meta-repair-ports opts)

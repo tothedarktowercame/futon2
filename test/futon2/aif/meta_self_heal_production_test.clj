@@ -133,6 +133,74 @@
     (is (= :phase-mismatch (:outcome wrong)))
     (is (nil? (:path-witness wrong)))))
 
+(def retained-live-root
+  "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22")
+
+(deftest legacy-admission-lookup-resolves-retained-enacted-work-orders
+  (let [acceptance-root (str retained-live-root "/acceptances")
+        cases [{:transaction "transaction.edn.deferred-injury_2aef7e0c0f48a851a781b41642bf30e52e3fa246.edn"
+                :admission "6bc0bd69fb04d1d5ee946dbff09e7e4f428d9fd14fd1f33cd5a23bcfe144014e"
+                :run "b7a762df15846ec0e421ebd19be812f93ada0347bda05729bc5f96b1d9c46683"}
+               {:transaction "transaction.edn.attempt-1.retired.edn"
+                :admission "79e288600a675336ef5b56c74b533d8ab52b64ba1cada44ebb1b2434e04d9b56"
+                :run "7a7326eb8ab9bc76ca9fd019633bbeb3b32a53fdd6f1b4c0ce27322cc70c87a9"}]]
+    (doseq [{:keys [transaction admission run]} cases]
+      (let [retained (edn/read-string (slurp (str retained-live-root "/" transaction)))
+            resolved (production/resolve-acceptance-admission
+                      acceptance-root (:work-order retained))]
+        (is (= admission (get-in resolved [:pin :sha256])) transaction)
+        (is (= run (get-in resolved [:admission :result :run-pin :sha256]))
+            transaction)))))
+
+(deftest legacy-admission-lookup-is-unique-and-recorded-in-replay
+  (let [dir (root)
+        acceptance-root (str dir "/acceptances")
+        _ (.mkdirs (java.io.File. acceptance-root))
+        test (acceptance-case "legacy-lookup")
+        injury-id "injury/legacy-lookup"
+        red-pin {:path (str dir "/red.log") :sha256 (apply str (repeat 64 "a"))}
+        admission {:schema :wm/meta-acceptance-admission-v1 :status :accepted
+                   :injury-id injury-id :acceptance-test test
+                   :result {:status :ran :outcome :failed :exit 1
+                            :run-pin red-pin}}
+        persist! (fn [record]
+                   (let [bytes (.getBytes (str (pr-str record) "\n") "UTF-8")
+                         sha (load-identity/sha256 bytes)]
+                     (spit (str acceptance-root "/acceptance-" sha ".edn")
+                           (String. bytes "UTF-8"))))
+        _ (persist! admission)
+        order {:injury-id injury-id :repair-id "repair/legacy" :attempt 1
+               :acceptance-test test}
+        current-log (str "Testing " (get-in test [:source :namespace]) "\n\n"
+                         "Ran 1 tests containing 1 assertions.\n"
+                         "0 failures, 0 errors.\n")
+        current-path (str dir "/current.log")
+        _ (spit current-path current-log)
+        current-pin {:path current-path
+                     :sha256 (load-identity/sha256 (.getBytes current-log "UTF-8"))}
+        transaction {:receipts [{:phase :author
+                                 :payload {:patch-sha (apply str (repeat 40 "a"))}}
+                                {:phase :enact :payload {:retry-click "click/legacy"}}]}
+        port (production/acceptance-replay-port
+              (constantly {:status :ran :outcome :passed :exit 0
+                           :run-pin current-pin}) acceptance-root)
+        replay (get-in (port {:work-order order :transaction transaction
+                              :phase :retry :predecessor-pin current-pin})
+                       [:payload :phase-replay-receipt])]
+    (is (= :lookup (:admission-resolution replay)))
+    (is (= :repaired (:outcome replay)))
+    (let [absent-order (assoc order :injury-id "injury/absent")
+          absent (get-in (port {:work-order absent-order :transaction transaction
+                                :phase :retry :predecessor-pin current-pin})
+                         [:payload :phase-replay-receipt])]
+      (is (= :input-unavailable (:outcome absent))))
+    (persist! (assoc admission :duplicate-retained-record true))
+    (let [ambiguous (get-in (port {:work-order order :transaction transaction
+                                   :phase :retry :predecessor-pin current-pin})
+                            [:payload :phase-replay-receipt])]
+      (is (= :input-unavailable (:outcome ambiguous))
+          "several sha-verified exact matches remain input-unavailable"))))
+
 (defn- diagnosis-fixture [class]
   {:class class :production-functions production-functions})
 
