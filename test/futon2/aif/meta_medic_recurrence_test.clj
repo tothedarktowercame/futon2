@@ -130,6 +130,55 @@
       (is (= (:ordinal entry)
              (:ordinal (get-in effective [:injuries (:injury-id fresh)])))))))
 
+(deftest medic-recurrence-on-another-injurys-retry-is-inconclusive
+  (let [injury-a (:injury-id (classified "opening" "detect" opening-pin))
+        history-a (enacted-ledger)
+        pin-b (pin "other-opening" "6")
+        pin-b-recurrence (pin "other-recurrence" "7")
+        failure-b {:kind :other-covered-injury :stage :construction
+                   :detail {:target "other-covered-injury"}}
+        classify-b (fn [run click source-pin]
+                     (terminal/classify
+                      {:run/id run :click/id click :failure failure-b}
+                      source-pin))
+        opened-b (terminal/integrate
+                  history-a (classify-b "other-opening" "other-detect" pin-b)
+                  synthetic-authority)
+        injury-b (get-in opened-b [:classification :injury-id])
+        opened-b-ledger (:ledger opened-b)
+        opened-b-entry (:entry opened-b)
+        operation-b (-> (operation-for opened-b-ledger opened-b-entry "medic/other")
+                        (assoc-in [:request :candidate :original-record-id] (:path pin-b))
+                        (assoc-in [:request :candidate :original-pin] (:sha256 pin-b))
+                        (assoc-in [:request :evidence :original-record-id] (:path pin-b))
+                        (assoc-in [:request :evidence :original-pin] (:sha256 pin-b)))
+        covered-b-result (ledger/append-medic-repaired
+                          opened-b-ledger medic-record-pin operation-b
+                          synthetic-authority)
+        _ (is (= :appended (:status covered-b-result))
+              (pr-str covered-b-result))
+        covered-b (:ledger covered-b-result)
+        result (terminal/integrate
+                covered-b
+                (classify-b "other-recurrence" "retry/exact" pin-b-recurrence)
+                synthetic-authority)
+        entries (:entries (:ledger result))
+        recurrence (last (filter #(and (= ledger/transition-schema (:schema %))
+                                       (= injury-b (:injury-id %)))
+                                 entries))
+        retry-observation (ledger/pending-requeue (:ledger result) injury-a
+                                                  synthetic-authority)]
+    (is (not= injury-a injury-b))
+    (is (= :medic-recurrence (:reason recurrence)))
+    (is (= :reopened (:state recurrence)))
+    (is (= :retry-inconclusive (:observation-kind retry-observation)))
+    (is (= injury-a (:injury-id retry-observation)))
+    (is (= "retry/exact" (:retry-click retry-observation)))
+    (is (= pin-b-recurrence (:record-pin retry-observation)))
+    (is (= {:injury-id injury-a :repair-id "repair/synthetic"
+            :retry-click "retry/exact"}
+           (:retry-of result)))))
+
 (deftest exact-enacted-retry-remains-existing-route
   (let [history (:ledger (cover-latest (enacted-ledger) "medic/enacted-exact"))
         result (terminal/integrate history
