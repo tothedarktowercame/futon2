@@ -927,6 +927,13 @@
                     :review-refusal (if (contains? response :refusal)
                                       (:refusal response)
                                       (select-keys response [:reason :reason/type :detail]))})
+          (and (:author-unsatisfiable-claim request)
+               (not (and (true? (get-in response [:satisfiability
+                                                   :can-pass-after-correct-repair?]))
+                    (string? (get-in response [:satisfiability :reason]))
+                    (not (str/blank? (get-in response [:satisfiability :reason]))))))
+          (refusal :meta-self-heal/acceptance-review-satisfiability-absent
+                   {:request request :review response})
           (not= request-identity response-identity)
           (refusal :meta-self-heal/acceptance-review-identity-mismatch
                    {:request request
@@ -946,6 +953,7 @@
                          :diagnosis-evidence-pin (:diagnosis-evidence-pin proposal)
                          :proposal-evidence-pin (:acceptance-evidence-pin proposal)
                          :acceptance-test (:acceptance-test proposal)
+                         :satisfiability (:satisfiability response)
                          :review response :repair-claimed? false}
                 written (persist-acceptance!
                          (acceptance-path (or (:meta-acceptance-root opts)
@@ -1740,9 +1748,32 @@
                     :acceptance-test (:acceptance-test work-order)}]
         (if (= expected actual)
           {:status :valid :source :admitted-acceptance}
-          (refusal :meta-self-heal/acceptance-transaction-mismatch
-                   {:acceptance-observation observation
-                    :expected expected :actual actual}))))))
+          (let [claim (->> (get-in opts [:meta-diagnosis-context :durable-ledger
+                                         :ledger :entries])
+                           (filter #(and (= :acceptance-unsatisfiable-claimed
+                                            (:observation-kind %))
+                                         (= (:injury-id work-order) (:injury-id %))
+                                         (= (:repair-id work-order) (:repair-id %))
+                                         (= (:attempt work-order) (:attempt %))))
+                           last)]
+            (if-not claim
+              (refusal :meta-self-heal/acceptance-transaction-mismatch
+                       {:acceptance-observation observation
+                        :expected expected :actual actual})
+              (let [old-pin (:acceptance-admission-pin work-order)
+                    new-pin (:acceptance-admission-pin observation)
+                    rebound (-> transaction
+                                (assoc-in [:work-order :acceptance-test]
+                                          (:acceptance-test observation))
+                                (assoc-in [:work-order :acceptance-admission-pin] new-pin)
+                                (assoc :acceptance-supersession
+                                       {:schema :wm/acceptance-supersession-v1
+                                        :claim-observation-pin (:entry-pin claim)
+                                        :superseded-admission-pin old-pin
+                                        :current-admission-pin new-pin}))]
+                {:status :valid :source :claim-authorized-supersession
+                 :transaction rebound
+                 :acceptance-supersession (:acceptance-supersession rebound)}))))))))
 
 (defn attributable-retry-readiness
   "Authorize the one ordinary retry named by the latest enacted transition.
@@ -1856,6 +1887,7 @@
                                         (diagnosis-transaction-binding opts transaction))
                     acceptance-binding (when (= :valid (:status diagnosis-binding))
                                          (acceptance-transaction-binding opts transaction))
+                    transaction (or (:transaction acceptance-binding) transaction)
                     binding (or (when-not (= :valid (:status diagnosis-binding)) diagnosis-binding)
                                 acceptance-binding)]
                 (if (= :refused (:status movement))
@@ -2007,6 +2039,8 @@
                                                                                      [:status :reason :defects :detail])}))
                                     next-acceptance (when (= :valid (:status next-diagnosis))
                                                       (acceptance-transaction-binding opts next-transaction))
+                                    next-transaction (or (:transaction next-acceptance)
+                                                         next-transaction)
                                     next-binding (or (when-not (= :valid (:status next-diagnosis))
                                                       next-diagnosis)
                                                      next-acceptance)]
