@@ -14,8 +14,19 @@
 (def terminal-classes #{:focused :related :unrelated :stop-the-line})
 
 (defn- q6-terminal [record]
-  (some #(when (and (map? %) (= :wm/q6-terminal-v1 (:schema %))) %)
-        (tree-seq coll? seq record)))
+  (let [current (get-in record [:q6 :terminal])]
+    (if (and (map? current) (= :wm/q6-terminal-v1 (:schema current)))
+      current
+      ;; Legacy records lack the explicit current-terminal slot. Their maps
+      ;; can include string-keyed sorted chronology revisions: scan entries
+      ;; without invoking a comparator on a foreign keyword key.
+      (some (fn [node]
+              (when (and (map? node)
+                         (some (fn [[k v]]
+                                 (and (= :schema k) (= :wm/q6-terminal-v1 v)))
+                               node))
+                node))
+            (tree-seq coll? seq record)))))
 
 (defn index-entry [record record-path record-sha256]
   (let [terminal (q6-terminal record)
