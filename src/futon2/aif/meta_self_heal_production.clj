@@ -1205,13 +1205,31 @@
           :else
           (if-let [transaction (when-let [path (:transaction-path selection)]
                                  (load-transaction path))]
-            (let [work-order (:work-order transaction)]
+            (let [work-order (:work-order transaction)
+                  claim (->> (get-in context [:durable-ledger :ledger :entries])
+                             (filter #(and (= ledger/observation-schema (:schema %))
+                                           (= :acceptance-unsatisfiable-claimed
+                                              (:observation-kind %))
+                                           (= (:injury-id work-order) (:injury-id %))
+                                           (= (:repair-id work-order) (:repair-id %))
+                                           (= (:attempt work-order) (:attempt %))))
+                             last)]
               (if (contains? (:injuries active) (:injury-id work-order))
-                {:diagnosis-evidence-pin (:diagnosis-evidence-pin work-order)
-                 :acceptance-test (:acceptance-test work-order)
-                 :source :carried-transaction
-                 :transaction-pin (:transaction-pin transaction)
-                 :attempt (:attempt work-order)}
+                (cond->
+                 {:diagnosis-evidence-pin (:diagnosis-evidence-pin work-order)
+                  :source-record-pin (:cause-record-pin work-order)
+                  :acceptance-test (:acceptance-test work-order)
+                  :injury-id (:injury-id work-order)
+                  :repair-id (:repair-id work-order)
+                  :source :carried-transaction
+                  :transaction-pin (:transaction-pin transaction)
+                  :attempt (:attempt work-order)}
+                  claim
+                  (assoc :acceptance-unsatisfiable-claim
+                         {:attempt (:attempt claim)
+                          :acceptance-test (:acceptance-test work-order)
+                          :author-evidence (:author-evidence claim)
+                          :observation-pin (:entry-pin claim)}))
                 {:status :absent :reason :transaction-injury-not-active}))
             {:status :absent :reason :no-transaction}))))))
 
