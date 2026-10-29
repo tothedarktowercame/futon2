@@ -1,6 +1,8 @@
 (ns futon2.aif.meta-repair-coordinator-test
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-repair-coordinator :as coordinator]))
 
@@ -549,6 +551,95 @@
                first :record-pin)))
     (is (= 1 (-> result :ledger :entries last :requeues)))
     (is (= :retry-requeue-1 (-> @calls first :phase)))))
+
+(deftest already-ingested-other-injury-child-is-reconciled-on-retry
+  (let [source "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-12/ledger-before.edn"
+        temp-root (.toFile (java.nio.file.Files/createTempDirectory
+                            "retry-reconcile-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        ledger-copy (io/file temp-root "ledger.edn")
+        source-history (edn/read-string (slurp source))
+        injury-id "injury/ad038c4804bdd146142db0a9ac74dfe42a863e52"
+        repair-id "repair/c667a5c7974f8a4d30cef6f9be8bd1042c0c5f8c"
+        retry-click (->> (:entries source-history)
+                         (filter #(and (= injury-id (:injury-id %))
+                                       (= :enacted (:state %))))
+                         last :retry-click)
+        run-record "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-9e2103c1-c48f-496f-b8d5-2421fb7f68f0.edn"
+        run-copy (io/file temp-root "iteration-11-run.edn")
+        _ (with-open [in (io/input-stream run-record)] (io/copy in run-copy))
+        record-pin (->> (:entries source-history)
+                        (keep :new-cause-pin)
+                        (filter #(= run-record (:path %)))
+                        first)
+        copied-pin (assoc record-pin :path (.getPath run-copy))
+        history (-> source-history
+                    (update :entries
+                            (fn [entries]
+                              (mapv #(if (= record-pin (:new-cause-pin %))
+                                       (ledger/seal-entry
+                                        (assoc % :new-cause-pin copied-pin))
+                                       %)
+                                    entries)))
+                    ledger/seal-ledger)
+        _ (spit ledger-copy (pr-str history))
+        transaction {:work-order {:injury-id injury-id :repair-id repair-id
+                                  :attempt 2}
+                     :receipts []}
+        retry-port (fn [request]
+                     (receipt request :queued
+                              {:retry-click (:retry-click request)}))
+        ps {:retry retry-port
+            :retry-click-id (fn [_ _ ordinal _]
+                              (str "retry/reconciled-" ordinal))}
+        verifier (constantly true)
+        result (#'coordinator/coordinate-queued-retry
+                history transaction ps injury-id repair-id 2 verifier)
+        observations (filter #(and (= :retry-inconclusive (:observation-kind %))
+                                   (= injury-id (:injury-id %))
+                                   (= retry-click (:retry-click %)))
+                             (get-in result [:ledger :entries]))
+        replay (#'coordinator/coordinate-queued-retry
+                (:ledger result) (:transaction result) ps
+                injury-id repair-id 2 verifier)
+        replay-observations
+        (filter #(and (= :retry-inconclusive (:observation-kind %))
+                      (= injury-id (:injury-id %))
+                      (= retry-click (:retry-click %)))
+                (get-in replay [:ledger :entries]))]
+    (is (= :awaiting-retry (:status result)))
+    (is (= "retry/reconciled-1" (:retry-click result)))
+    (is (= 1 (count observations)))
+    (is (= copied-pin (:record-pin (first observations))))
+    (is (= 1 (count replay-observations))
+        "a second coordinate does not append the reconciliation twice")
+    (let [mismatch-record (assoc (edn/read-string (slurp run-copy))
+                                 :click/id "different-child-click")
+          mismatch-bytes (.getBytes (pr-str mismatch-record) "UTF-8")
+          mismatch-file (io/file temp-root "different-child.edn")
+          _ (with-open [out (io/output-stream mismatch-file)]
+              (.write out mismatch-bytes))
+          mismatch-pin {:path (.getPath mismatch-file)
+                        :sha256 (load-identity/sha256 mismatch-bytes)}
+          mismatch-history
+          (-> source-history
+              (update :entries
+                      (fn [entries]
+                        (mapv #(if (= record-pin (:new-cause-pin %))
+                                 (ledger/seal-entry
+                                  (assoc % :new-cause-pin mismatch-pin))
+                                 %)
+                              entries)))
+              ledger/seal-ledger)
+          mismatch (#'coordinator/coordinate-queued-retry
+                    mismatch-history transaction ps injury-id repair-id 2 verifier)
+          mismatch-observations
+          (filter #(and (= :retry-inconclusive (:observation-kind %))
+                        (= injury-id (:injury-id %))
+                        (= retry-click (:retry-click %)))
+                  (get-in mismatch [:ledger :entries]))]
+      (is (= :awaiting-retry (:status mismatch)))
+      (is (= retry-click (:retry-click mismatch)))
+      (is (empty? mismatch-observations)))))
 
 (deftest attribution-refused-requeue-is-replaced-before-old-id-dispatch
   (let [initial (awaiting-retry (opened-ledger))
