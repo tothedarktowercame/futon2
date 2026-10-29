@@ -7,7 +7,9 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.focus-receipt :as focus-receipt]
-            [futon2.aif.outer-state :as outer-state])
+            [futon2.aif.mission-registry :as mission-registry]
+            [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.wm.construction-inputs :as construction-inputs])
   (:import [java.nio.file Files]
            [java.security MessageDigest]))
 
@@ -35,14 +37,40 @@
     (catch Exception e
       (refuse! :giraffe-verifier-unavailable {:message (.getMessage e)}))))
 
+(defn- target-authority []
+  (let [loaded-tickets (mission-registry/load-tickets)
+        loaded-excursions (mission-registry/load-excursions)]
+    {:loaded-missions (mission-registry/load-missions)
+     :loaded-tickets loaded-tickets
+     :loaded-excursions loaded-excursions
+     :ticket-targets (mapv :id (:tickets loaded-tickets))
+     :excursion-targets (mapv :id (:excursions loaded-excursions))}))
+
+(defn- registry-entries [{:keys [loaded-missions loaded-tickets loaded-excursions]}]
+  (into {}
+        (map (juxt :id identity))
+        (concat (:missions loaded-missions)
+                (:tickets loaded-tickets)
+                (:excursions loaded-excursions))))
+
+(defn- excluded-candidate [target declaration registry-entry]
+  (cond-> {:target target
+           :reason (or (:status-class registry-entry)
+                       (:source-absent declaration)
+                       :source-unavailable)}
+    (:status-line registry-entry) (assoc :status-line (:status-line registry-entry))))
+
 (defn giraffe-field
   "Build Lean `Observation.field` and `Observation.facts` from a verified run.
 
   Returns `{:field ... :facts ... :giraffe/run-id ...
-  :giraffe/manifest-sha256 ...}`.  Candidate reach is the makeup's explicit
-  `:default-reach`, because task reach is not yet produced by the runtime."
+  :giraffe/manifest-sha256 ... :outer-field/excluded ...}`. Candidate reach
+  is the makeup's explicit `:default-reach`, because task reach is not yet
+  produced by the runtime. `target-source-declarations` is the shared inner
+  resolver authority for M-, E-, T-, and explicitly declared target kinds."
   ([run-dir] (giraffe-field run-dir (outer-state/load-makeup)))
-  ([run-dir makeup]
+  ([run-dir makeup] (giraffe-field run-dir makeup (target-authority)))
+  ([run-dir makeup authority]
    (let [dir (io/file run-dir)
          verification ((verifier) dir)]
      (when-not (:ok? verification)
@@ -60,17 +88,29 @@
                         (every? #(and (:id %) (contains? % :status)
                                       (nat-int? (:unblocks %)) (nat-int? (:cone %))) rows))
            (refuse! :giraffe-pass-invalid {:run-dir (.getPath dir)}))
-         (let [entries (mapv (fn [{:keys [id status unblocks cone]}]
+         (let [targets (mapv (comp name :id) rows)
+               declarations (construction-inputs/target-source-declarations targets authority)
+               registry-by-id (registry-entries authority)
+               entries (mapv (fn [{:keys [id status unblocks cone]} declaration]
                                (let [target (name id)]
                                  {:candidate {:target target
                                               :reach (:default-reach makeup)}
                                   :target target
+                                  :declaration declaration
                                   :fact {:status status
                                          :unblocks unblocks
                                          :cone cone}}))
-                             rows)]
-           {:field (mapv :candidate entries)
-            :facts (into {} (map (juxt :target :fact)) entries)
+                             rows declarations)
+               admitted (filterv #(nil? (get-in % [:declaration :source-absent])) entries)
+               excluded (into []
+                              (comp (remove #(nil? (get-in % [:declaration :source-absent])))
+                                    (map (fn [{:keys [target declaration]}]
+                                           (excluded-candidate target declaration
+                                                               (get registry-by-id target)))))
+                              entries)]
+           {:field (mapv :candidate admitted)
+            :facts (into {} (map (juxt :target :fact)) admitted)
+            :outer-field/excluded excluded
             :giraffe/run-id (:run-id manifest)
             :giraffe/manifest-sha256 (sha256 manifest-bytes)}))))))
 

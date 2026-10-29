@@ -5,6 +5,17 @@
 
 (def makeup {:default-reach 1/2})
 
+(def fixture-authority
+  {:loaded-missions
+   {:missions (mapv (fn [id]
+                      {:id id :path (str "/fixture/" id ".md")
+                       :status-class :open :status-line "OPEN"})
+                    ["M-ready" "M-cycle" "M-waiting"])}
+   :loaded-tickets {:tickets []}
+   :loaded-excursions {:excursions []}
+   :ticket-targets []
+   :excursion-targets []})
+
 (defn temp-dir []
   (.toFile (java.nio.file.Files/createTempDirectory
             "outer-observation-test"
@@ -51,13 +62,14 @@
   (testing "closed items are excluded and Giraffe statuses remain distinct"
     (let [dir (fixture-run!)
           result (binding [observation/*resolve-var* actual-var]
-                   (observation/giraffe-field dir makeup))]
+                   (observation/giraffe-field dir makeup fixture-authority))]
       (is (= ["M-ready" "M-cycle" "M-waiting"] (mapv :target (:field result))))
       (is (every? #(= 1/2 (:reach %)) (:field result)))
       (is (= {:status :ready :unblocks 2 :cone 4} (get-in result [:facts "M-ready"])))
       (is (= :undetermined (get-in result [:facts "M-cycle" :status])))
       (is (= :not-ready (get-in result [:facts "M-waiting" :status])))
-      (is (nil? (get-in result [:facts "M-closed"]))))))
+      (is (nil? (get-in result [:facts "M-closed"])))
+      (is (empty? (:outer-field/excluded result))))))
 
 (deftest unverified-run-refuses
   (let [dir (fixture-run!)
@@ -87,9 +99,17 @@
 
 (deftest real-giraffe-run-shape
   (let [dir (io/file "/home/joe/code/storage/giraffe/20261028T154151.285Z-b916cd4e")]
-    (if-not (.isDirectory dir)
-      (is true "skipped: retained Giraffe run directory is absent")
-      (let [result (binding [observation/*resolve-var* actual-var]
-                     (observation/giraffe-field dir makeup))]
-        (is (= 147 (count (:field result))))
-        (is (= 140 (count (filter #(= :ready (:status %)) (vals (:facts result))))))))))
+    (is (.isDirectory dir) "the retained Giraffe evidence must be present")
+    (let [result (binding [observation/*resolve-var* actual-var]
+                   (observation/giraffe-field dir makeup))
+          targets (set (map :target (:field result)))
+          excluded (some #(when (= "M-repl-wins-over-cli" (:target %)) %)
+                         (:outer-field/excluded result))]
+      (is (= {:target "M-repl-wins-over-cli"
+              :reason :inactive
+              :status-line "OPEN — parked"}
+             excluded))
+      (is (not (contains? targets "M-repl-wins-over-cli")))
+      (is (nil? (get-in result [:facts "M-repl-wins-over-cli"])))
+      (is (contains? targets "M-futonzero-prelim-practice"))
+      (is (some? (get-in result [:facts "M-futonzero-prelim-practice"]))))))
