@@ -35,8 +35,12 @@
 
 (defn seal-work-order [order]
   (sealed :meta-repair-work-order
-          (str "meta-repair-work-orders/" (:repair-id order) "/"
-               (:attempt order) ".edn")
+          (if-let [admission (get-in order [:acceptance-supersession
+                                             :current-admission-pin :sha256])]
+            (str "meta-repair-work-orders/" (:repair-id order) "/"
+                 (:attempt order) "/supersession-" admission ".edn")
+            (str "meta-repair-work-orders/" (:repair-id order) "/"
+                 (:attempt order) ".edn"))
           (assoc order :schema work-order-schema) :work-order-pin))
 (defn verify-work-order [order]
   (try
@@ -125,6 +129,52 @@
     (catch Throwable t
       (refusal :transaction/malformed {:detail (ex-message t)}))))
 
+(defn supersede-acceptance
+  "Version a sealed work order after a durable unsatisfiable-acceptance claim.
+  Both the new work order and enclosing transaction are sealed normally."
+  [transaction acceptance-test superseded-admission-pin current-admission-pin
+  claim-observation-pin]
+  (let [old-order (:work-order transaction)
+        version-root (or (get-in old-order [:acceptance-supersession
+                                            :author-worktree-version-root])
+                         (:target-worktree old-order))
+        version-segment (subs (:sha256 current-admission-pin) 0 12)
+        version-root-file (io/file version-root)
+        target-worktree (str (.getParent version-root-file) "/"
+                             (.getName version-root-file) "-version-"
+                             version-segment)
+        author-receipt (last (filter #(= :author (:phase %))
+                                     (:receipts transaction)))
+        supersession {:schema :wm/acceptance-supersession-v1
+                      :claim-observation-pin claim-observation-pin
+                      :superseded-work-order-pin (:work-order-pin old-order)
+                      :superseded-admission-pin superseded-admission-pin
+                      :current-admission-pin current-admission-pin
+                      :author-worktree-version-root version-root
+                      :superseded-target-worktree (:target-worktree old-order)
+                      :superseded-author-patch-sha
+                      (get-in author-receipt [:payload :patch-sha])}
+        order (seal-work-order
+               (-> old-order
+                   (dissoc :work-order-pin)
+                   (assoc :acceptance-test acceptance-test
+                          :acceptance-admission-pin current-admission-pin
+                          :target-worktree target-worktree
+                          :superseded-work-order-pin (:work-order-pin old-order)
+                          :acceptance-supersession supersession)))]
+    (seal-transaction
+     (-> transaction
+         (dissoc :transaction-pin)
+         (assoc :work-order order
+                :acceptance-supersession
+                (assoc supersession :retained-receipt-pins
+                       (mapv :receipt-pin (:receipts transaction)))
+                :receipt-work-order-bindings
+                (into {} (map (fn [receipt]
+                                [(get-in receipt [:receipt-pin :sha256])
+                                 (:work-order-pin old-order)]))
+                      (:receipts transaction)))))))
+
 (defn- latest-transition [history injury-id]
   (last (filter #(and (= ledger/transition-schema (:schema %))
                       (= injury-id (:injury-id %))) (:entries history))))
@@ -176,14 +226,15 @@
                 :received-receipt-pin received-pin
                 :admitted-values admitted-fallback
                 :received-values received-fallback}))))
+(declare current-receipt-for)
+
 (defn- resume-identity-refusal
   "The Lean law MetaRepairResumeIdentity.resumeIdentityOK: after :claimed,
   the transaction's retained author receipt is the ledger-admitted receipt."
   [history transaction injury-id repair-id attempt state]
   (when (#{:authored :reviewed :enacted} state)
     (let [ledger-author (authored-transition history injury-id repair-id attempt)
-          transaction-author (some #(when (= :author (:phase %)) %)
-                                   (:receipts transaction))
+          transaction-author (current-receipt-for transaction :author)
           ledger-patch-sha (:patch-sha ledger-author)
           transaction-patch-sha (get-in transaction-author [:payload :patch-sha])]
       (when-not (and ledger-author
@@ -269,10 +320,26 @@
     (catch Throwable t
       (refusal :coordinator/preparation-malformed {:detail (ex-message t)})))))
 
-(defn- receipt-for [transaction phase]
-  (some #(when (= phase (:phase %)) %) (:receipts transaction)))
+(defn current-receipts
+  "Receipts sealed for the transaction's current work-order version. Legacy
+  transactions without explicit bindings retain their complete receipt view."
+  [transaction]
+  (let [bindings (:receipt-work-order-bindings transaction)
+        current-pin (get-in transaction [:work-order :work-order-pin])]
+    (filterv #(or (not (seq bindings))
+                  (= current-pin
+                     (get bindings (get-in % [:receipt-pin :sha256]))))
+             (:receipts transaction))))
+
+(defn current-receipt-for [transaction phase]
+  (some #(when (= phase (:phase %)) %) (current-receipts transaction)))
 (defn- append-receipt [transaction receipt]
-  (seal-transaction (update transaction :receipts conj receipt)))
+  (seal-transaction
+   (-> transaction
+       (update :receipts conj receipt)
+       (assoc-in [:receipt-work-order-bindings
+                  (get-in receipt [:receipt-pin :sha256])]
+                 (get-in transaction [:work-order :work-order-pin])))))
 (defn- expected [order phase predecessor-pin]
   {:phase phase :injury-id (:injury-id order) :repair-id (:repair-id order)
    :attempt (:attempt order) :predecessor-pin predecessor-pin})
@@ -280,7 +347,7 @@
   ([transaction phase predecessor-pin port]
    (invoke-once transaction phase predecessor-pin port {}))
   ([transaction phase predecessor-pin port extra]
-   (if-let [existing (receipt-for transaction phase)]
+   (if-let [existing (current-receipt-for transaction phase)]
      {:status :recorded :receipt existing :transaction transaction}
      (try
        (let [response (port (merge {:work-order (:work-order transaction)
@@ -429,7 +496,7 @@
                                :retry-click retry-click})))))))))
 
 (defn- last-receipt-pin [transaction]
-  (:receipt-pin (last (:receipts transaction))))
+  (:receipt-pin (last (current-receipts transaction))))
 
 (defn- acceptance-replay-result
   "Run the enacted repair's admitted acceptance test before considering a
@@ -461,6 +528,41 @@
             :else {:status :checked :receipt response
                    :transaction (append-receipt transaction response)}))))))
 
+(defn- enacted-integration-refusal
+  [history transaction ports injury-id repair-id attempt]
+  (let [authored (authored-transition history injury-id repair-id attempt)
+        patch-sha (:patch-sha authored)
+        enacted (latest-transition history injury-id)
+        enact-receipt (current-receipt-for transaction :enact)
+        enacted-patch (or (:patch-sha enacted)
+                          (get-in enact-receipt [:payload :patch-sha]))
+        integration-commit (or (:integration-commit enacted)
+                               (get-in enact-receipt [:payload :integration-commit]))]
+    (cond
+      (nil? authored)
+      (refusal :coordinator/retry-authored-transition-unavailable
+               {:injury-id injury-id :repair-id repair-id :attempt attempt})
+
+      (not (and (string? patch-sha) (re-matches #"[0-9a-fA-F]{40}" patch-sha)))
+      (refusal :coordinator/retry-authored-patch-invalid
+               {:injury-id injury-id :repair-id repair-id
+                :attempt attempt :patch-sha patch-sha})
+
+      (and (some? enacted-patch) (not= patch-sha enacted-patch))
+      (refusal :coordinator/retry-enacted-patch-disagrees
+               {:injury-id injury-id :repair-id repair-id :attempt attempt
+                :field :patch-sha :expected patch-sha :actual enacted-patch})
+
+      (not (or (= patch-sha integration-commit)
+               (and (fn? (:integration-equivalent? ports))
+                    (true? ((:integration-equivalent? ports)
+                            (:work-order transaction) patch-sha
+                            integration-commit)))))
+      (refusal :coordinator/retry-enacted-patch-disagrees
+               {:injury-id injury-id :repair-id repair-id :attempt attempt
+                :field :integration-commit :expected patch-sha
+                :actual integration-commit}))))
+
 (defn- coordinate-queued-retry
   [history transaction ports injury-id repair-id attempt authority-verifier]
   (loop [history history
@@ -478,6 +580,12 @@
           n (or (ledger/requeue-ordinal history injury-id) 0)
           pending-requeue? (ledger/pending-requeue history injury-id
                                                    authority-verifier)
+          authored (authored-transition history injury-id repair-id attempt)
+          patch-sha (:patch-sha authored)
+          _ (when-let [identity-refusal
+                       (enacted-integration-refusal history transaction ports
+                                                   injury-id repair-id attempt)]
+              (stop! identity-refusal))
           queued (when (and (pos? n) (not pending-requeue?))
                    (accepted!
                     (invoke-once transaction (requeue-phase n)
@@ -485,39 +593,7 @@
                                  {:retry-click (:retry-click latest)
                                   :requeue-ordinal n})))
           retry-receipt (:receipt queued)
-          transaction (or (:transaction queued) transaction)
-          authored (authored-transition history injury-id repair-id attempt)
-          patch-sha (:patch-sha authored)
-          enacted (latest-transition history injury-id)
-          enacted-patch (:patch-sha enacted)
-          integration-commit (:integration-commit enacted)
-          _ (when-not authored
-              (stop! (refusal :coordinator/retry-authored-transition-unavailable
-                              {:injury-id injury-id :repair-id repair-id
-                               :attempt attempt})))
-          _ (when-not (and (string? patch-sha)
-                           (re-matches #"[0-9a-fA-F]{40}" patch-sha))
-              (stop! (refusal :coordinator/retry-authored-patch-invalid
-                              {:injury-id injury-id :repair-id repair-id
-                               :attempt attempt :patch-sha patch-sha})))
-          disagreement (cond
-                         (and (some? enacted-patch)
-                              (not= patch-sha enacted-patch))
-                         [:patch-sha enacted-patch]
-
-                         (and (some? integration-commit)
-                              (not= patch-sha integration-commit))
-                         [:integration-commit integration-commit]
-
-                         (and (nil? enacted-patch)
-                              (nil? integration-commit))
-                         [:integration-commit nil])
-          _ (when disagreement
-              (stop! (refusal :coordinator/retry-enacted-patch-disagrees
-                              {:injury-id injury-id :repair-id repair-id
-                               :attempt attempt :field (first disagreement)
-                               :expected patch-sha
-                               :actual (second disagreement)})))]
+          transaction (or (:transaction queued) transaction)]
       (when (and retry-receipt
                  (not (and (= :queued (:status retry-receipt))
                            (= (:retry-click latest)
@@ -713,7 +789,7 @@
                                            :port-receipt-pin
                                            (:receipt-pin enact-receipt)}
                                           (select-keys enact-payload
-                                                       [:reload-receipt
+                                                       [:patch-sha :reload-receipt
                                                         :integration-commit]))
                                 authority-verifier))
                               {:ledger history3})
@@ -724,6 +800,11 @@
                                    (:acceptance-replay ports))
                     _ (when (= :refused (:status replay-result))
                         (stop! replay-result))
+                    _ (when (not= :checked (:status replay-result))
+                        (when-let [identity-refusal
+                                   (enacted-integration-refusal
+                                    history4 tx3 ports injury-id repair-id attempt)]
+                          (stop! identity-refusal)))
                     retry-result (if (= :checked (:status replay-result))
                                    replay-result
                                    (accepted!

@@ -254,6 +254,30 @@
                                         :retry-click "click-retry-repair-1"}))}
                     overrides))))))
 
+(deftest cherry-equivalent-integration-is-checked-before-child-queue
+  (doseq [[equivalent? expected] [[true :awaiting-retry] [false :refused]]]
+    (let [calls (atom 0)
+          result (awaiting-retry
+                  (opened-ledger)
+                  {:enact (fn [r]
+                            (receipt r :succeeded
+                                     {:patch-sha sha-a :integration-commit sha-b
+                                      :retry-click "click-retry-repair-1"}))
+                   :integration-equivalent?
+                   (fn [_order patch integration]
+                     (and equivalent? (= sha-a patch) (= sha-b integration)))
+                   :retry (fn [r]
+                            (swap! calls inc)
+                            (receipt r :queued
+                                     {:repair-id (get-in r [:work-order :repair-id])
+                                      :patch-sha sha-a
+                                      :retry-click "click-retry-repair-1"}))})]
+      (is (= expected (:status result)) (str "equivalent=" equivalent?))
+      (is (= (if equivalent? 1 0) @calls)
+          "identity refusal happens before the retry child is queued")
+      (when-not equivalent?
+        (is (= :coordinator/retry-enacted-patch-disagrees (:reason result)))))))
+
 (defn- inconclusive [history suffix retry-click]
   (let [result (ledger/append-observation
                 history (record-pin suffix (subs suffix 0 1))

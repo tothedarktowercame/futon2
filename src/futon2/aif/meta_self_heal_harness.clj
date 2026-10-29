@@ -198,7 +198,9 @@
            :final-arbitration (arbitrate (:durable env'))
            :checkpoints checkpoints :calls @counters
            :repair-id (get-in result [:transaction :work-order :repair-id])
-           :patch-sha (get-in result [:transaction :receipts 0 :payload :patch-sha])})))))
+           :patch-sha (get-in (coordinator/current-receipt-for
+                               (:transaction result) :author)
+                              [:payload :patch-sha])})))))
 
 (defn -main [& args]
   (case (first args)

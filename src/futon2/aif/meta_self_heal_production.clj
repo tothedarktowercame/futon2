@@ -874,14 +874,17 @@
                             (integer? (:exit run-result))
                             (string? (:summary run-result))
                             (pin? (:run-pin run-result)))
-            request {:schema :wm/meta-acceptance-review-request-v1
-                     :injury-id (:injury-id proposal)
-                     :source-record-pin (:source-record-pin proposal)
-                     :diagnosis-evidence-pin (:diagnosis-evidence-pin proposal)
-                     :proposal-evidence-pin (:acceptance-evidence-pin proposal)
-                     :acceptance-test (:acceptance-test proposal)
-                     :result-status :ran-before-repair
-                     :result run-result :repair-claimed? false}
+            request (cond-> {:schema :wm/meta-acceptance-review-request-v1
+                             :injury-id (:injury-id proposal)
+                             :source-record-pin (:source-record-pin proposal)
+                             :diagnosis-evidence-pin (:diagnosis-evidence-pin proposal)
+                             :proposal-evidence-pin (:acceptance-evidence-pin proposal)
+                             :acceptance-test (:acceptance-test proposal)
+                             :result-status :ran-before-repair
+                             :result run-result :repair-claimed? false}
+                      (:meta-acceptance-unsatisfiable-claim opts)
+                      (assoc :author-unsatisfiable-claim
+                             (:meta-acceptance-unsatisfiable-claim opts)))
             ;; F16 (off-click replay 5, 2026-10-19): a proposal whose run
             ;; PASSES before any repair does not pin the injury; it is refused
             ;; here, typed, without spending a reviewer invoke.
@@ -1312,8 +1315,8 @@
                         (when-let [{deferred-transaction :transaction :as deferred}
                                    (transaction-snapshot (.getPath file))]
                           (let [deferred-order (:work-order deferred-transaction)
-                                deferred-author (some #(when (= :author (:phase %)) %)
-                                                      (:receipts deferred-transaction))]
+                                deferred-author (coordinator/current-receipt-for
+                                                 deferred-transaction :author)]
                             (when (and (= [injury-id repair-id attempt]
                                           [(:injury-id deferred-order)
                                            (:repair-id deferred-order)
@@ -1510,8 +1513,8 @@
                     (nil? path-witness) :phase-mismatch
                     (and (zero? (:failures report)) (zero? (:errors report))) :repaired
                     :else :same-failure)
-          author (some #(when (= :author (:phase %)) %) (:receipts transaction))
-          enact (some #(when (= :enact (:phase %)) %) (:receipts transaction))
+          author (coordinator/current-receipt-for transaction :author)
+          enact (coordinator/current-receipt-for transaction :enact)
           replay {:schema :wm/pinned-admission-phase-replay-receipt-v1
                   :injury-id (:injury-id work-order)
                   :repair-id (:repair-id work-order)
@@ -1561,6 +1564,9 @@
           ;; :coordinator/retry-click-id-unavailable only at the requeue.
           (fn? (:retry-click-id-fn opts))
           (assoc :retry-click-id (:retry-click-id-fn opts))
+          (fn? (:repair-integration-equivalent-fn opts))
+          (assoc :integration-equivalent?
+                 (:repair-integration-equivalent-fn opts))
           ;; One-click frontier (2026-10-22): the coordinator reads this
           ;; read-only port to observe a meta-retry child that failed
           ;; service-side before any run record existed. Absence is not a
@@ -1575,12 +1581,12 @@
    stale on the first requeue. Read the last retry-family receipt's click,
    else the enact receipt's, else nil."
   [transaction]
-  (let [receipts (:receipts transaction)
+  (let [receipts (coordinator/current-receipts transaction)
         phase-name #(when (keyword? (:phase %)) (name (:phase %)))
         retry? #(let [n (phase-name %)]
                   (and n (or (= "retry" n) (str/starts-with? n "retry-requeue-"))))]
     (or (get-in (last (filter retry? receipts)) [:payload :retry-click])
-        (get-in (some #(when (= :enact (:phase %)) %) receipts)
+        (get-in (coordinator/current-receipt-for transaction :enact)
                 [:payload :retry-click]))))
 (defn- work-order-options [opts]
   (cond-> (assoc (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
@@ -1760,20 +1766,34 @@
               (refusal :meta-self-heal/acceptance-transaction-mismatch
                        {:acceptance-observation observation
                         :expected expected :actual actual})
-              (let [old-pin (:acceptance-admission-pin work-order)
+              (let [old-pin (or (:acceptance-admission-pin work-order)
+                                (some (fn [file]
+                                        (try
+                                          (let [bytes (Files/readAllBytes (.toPath file))
+                                                receipt (:value (store/read-one-form
+                                                                 (String. bytes "UTF-8")))]
+                                            (when (and (= :wm/meta-acceptance-admission-v1
+                                                          (:schema receipt))
+                                                       (= (:acceptance-test work-order)
+                                                          (:acceptance-test receipt)))
+                                              {:path (.getCanonicalPath file)
+                                               :sha256 (load-identity/sha256 bytes)}))
+                                          (catch Throwable _ nil)))
+                                      (seq (.listFiles
+                                            (io/file (or (:meta-acceptance-root opts)
+                                                         default-acceptance-root))))))
                     new-pin (:acceptance-admission-pin observation)
-                    rebound (-> transaction
-                                (assoc-in [:work-order :acceptance-test]
-                                          (:acceptance-test observation))
-                                (assoc-in [:work-order :acceptance-admission-pin] new-pin)
-                                (assoc :acceptance-supersession
-                                       {:schema :wm/acceptance-supersession-v1
-                                        :claim-observation-pin (:entry-pin claim)
-                                        :superseded-admission-pin old-pin
-                                        :current-admission-pin new-pin}))]
-                {:status :valid :source :claim-authorized-supersession
-                 :transaction rebound
-                 :acceptance-supersession (:acceptance-supersession rebound)}))))))))
+                    rebound (when (and (pin? old-pin) (pin? new-pin))
+                              (coordinator/supersede-acceptance
+                               transaction (:acceptance-test observation)
+                               old-pin new-pin (:entry-pin claim)))]
+                (if-not rebound
+                  (refusal :meta-self-heal/acceptance-supersession-pin-unavailable
+                           {:superseded-admission-pin old-pin
+                            :current-admission-pin new-pin})
+                  {:status :valid :source :claim-authorized-supersession
+                   :transaction rebound
+                   :acceptance-supersession (:acceptance-supersession rebound)})))))))))
 
 (defn attributable-retry-readiness
   "Authorize the one ordinary retry named by the latest enacted transition.
@@ -1924,7 +1944,9 @@
                                        :injury-id (get-in result [:transaction :work-order :injury-id])
                                        :repair-id (get-in result [:transaction :work-order :repair-id])
                                        :attempt (get-in result [:transaction :work-order :attempt])
-                                       :patch-sha (get-in result [:transaction :receipts 0 :payload :patch-sha])
+                                       :patch-sha (get-in (coordinator/current-receipt-for
+                                                           (:transaction result) :author)
+                                                          [:payload :patch-sha])
                                        :retry-click (latest-retry-click (:transaction result))
                                        :checkpoint-receipts receipts}
                                 (string? (:detail result))
@@ -1986,8 +2008,9 @@
                                                         (get-in result [:transaction :work-order
                                                                         :acceptance-test])
                                                         :author-evidence
-                                                        (get-in result [:transaction :receipts 0
-                                                                        :payload :evidence])}))
+                                                        (get-in (coordinator/current-receipt-for
+                                                                 (:transaction result) :author)
+                                                                [:payload :evidence])}))
                                             (:meta-diagnosis-observation opts)))
                             next-durable (when (and (= :held (:status result))
                                                     (= :author-failed (:reason result))

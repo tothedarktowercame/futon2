@@ -1184,6 +1184,10 @@
         seen-review (atom nil)
         satisfiability {:can-pass-after-correct-repair? true
                         :reason "set equality can hold after decoding both sides"}
+        claim {:author-evidence {:assertion "ordered equality"
+                                 :reason "the order is impossible"}
+               :observation-pin {:path "ledger/claim.edn"
+                                 :sha256 (apply str (repeat 64 "c"))}}
         run-calls (atom [])
         run-once (fn [acceptance-test]
                    (swap! run-calls conj acceptance-test)
@@ -1196,6 +1200,7 @@
                         :status :accepted :satisfiability satisfiability))
         admitted (production/admit-acceptance!
                   {:meta-acceptance-root (str dir "/acceptances")
+                   :meta-acceptance-unsatisfiable-claim claim
                    :meta-acceptance-run-fn run-once
                    :meta-acceptance-review-fn accept} proposal)
         tampered (production/admit-acceptance!
@@ -1232,6 +1237,7 @@
     (is (= (:acceptance-test proposal) (:acceptance-test admitted)))
     (is (= :ran-before-repair (:result-status @seen-review)))
     (is (= run-result (:result @seen-review)))
+    (is (= claim (:author-unsatisfiable-claim @seen-review)))
     (is (= run-result (:result admitted)))
     (is (= satisfiability
            (:satisfiability
@@ -2125,8 +2131,8 @@
     (is (= (:id (:acceptance-test order)) (get-in result [:actual :acceptance-test :id])))
     (is (zero? @calls))))
 
-(deftest iteration-23-claim-authorizes-recorded-acceptance-supersession
-  (let [root "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-23"
+(deftest iteration-24-claim-authorizes-recorded-acceptance-supersession
+  (let [root "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-24"
         transaction (edn/read-string (slurp (str root "/transaction-after.edn")))
         admission (edn/read-string (slurp (str root "/acceptance-admission-pin.edn")))
         ledger (edn/read-string (slurp (str root "/ledger-after.edn")))
@@ -2143,6 +2149,22 @@
         opts {:meta-acceptance-observation observation
               :meta-diagnosis-context {:durable-ledger {:ledger ledger}}}
         rebound (#'production/acceptance-transaction-binding opts transaction)
+        author-calls (atom 0)
+        predecessor (get-in transaction [:receipts 0 :predecessor-pin])
+        dispatched (#'coordinator/invoke-once
+                    (:transaction rebound) :author predecessor
+                    (fn [request]
+                      (swap! author-calls inc)
+                      (coordinator/seal-port-receipt
+                       {:phase :author
+                        :injury-id (get-in request [:work-order :injury-id])
+                        :repair-id (get-in request [:work-order :repair-id])
+                        :attempt (get-in request [:work-order :attempt])
+                        :predecessor-pin (:predecessor-pin request)
+                        :status :succeeded :payload {:patch-sha "fresh"}})))
+        ordinary (#'coordinator/invoke-once
+                  transaction :author predecessor
+                  (fn [_] (throw (ex-info "ordinary resume must reuse" {}))))
         refused (#'production/acceptance-transaction-binding
                  (assoc-in opts [:meta-diagnosis-context :durable-ledger :ledger :entries]
                            (vec (remove #(= :acceptance-unsatisfiable-claimed
@@ -2154,6 +2176,32 @@
            (get-in rebound [:transaction :work-order :acceptance-test :id])))
     (is (= new-pin (get-in rebound [:transaction :acceptance-supersession
                                     :current-admission-pin])))
+    (is (= (get-in transaction [:work-order :target-worktree])
+           (get-in rebound [:transaction :acceptance-supersession
+                            :superseded-target-worktree])))
+    (is (= (str (get-in transaction [:work-order :target-worktree])
+                "-version-" (subs (:sha256 new-pin) 0 12))
+           (get-in rebound [:transaction :work-order :target-worktree])))
+    (is (= :valid
+           (:status (coordinator/verify-transaction (:transaction rebound)))))
+    (is (= :accepted (:status dispatched)))
+    (is (= 1 @author-calls) "old rejection is retained but not reused")
+    (is (= "fresh" (get-in (coordinator/current-receipt-for
+                             (:transaction dispatched) :author)
+                            [:payload :patch-sha])))
+    (is (= :recorded (:status ordinary)) "same-version resume still reuses")
+    (is (= 1 (count (get-in rebound [:transaction :acceptance-supersession
+                                     :retained-receipt-pins]))))
+    (is (= 1 (count (filter #(= :acceptance-unsatisfiable-claimed
+                               (:observation-kind %))
+                            (:entries ledger))))
+        "fresh dispatch does not reset the injury-level return limit")
+    (is (not= (get-in rebound [:transaction :acceptance-supersession
+                               :superseded-admission-pin])
+              (get-in rebound [:transaction :acceptance-supersession
+                               :current-admission-pin])))
+    (is (some? (get-in rebound [:transaction :acceptance-supersession
+                                :claim-observation-pin])))
     (is (= :meta-self-heal/acceptance-transaction-mismatch (:reason refused)))))
 
 (deftest effect-ports-carry-the-adapter-click-minting-function
