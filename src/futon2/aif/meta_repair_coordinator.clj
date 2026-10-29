@@ -35,8 +35,12 @@
 
 (defn seal-work-order [order]
   (sealed :meta-repair-work-order
-          (str "meta-repair-work-orders/" (:repair-id order) "/"
-               (:attempt order) ".edn")
+          (if-let [admission (get-in order [:acceptance-supersession
+                                             :current-admission-pin :sha256])]
+            (str "meta-repair-work-orders/" (:repair-id order) "/"
+                 (:attempt order) "/supersession-" admission ".edn")
+            (str "meta-repair-work-orders/" (:repair-id order) "/"
+                 (:attempt order) ".edn"))
           (assoc order :schema work-order-schema) :work-order-pin))
 (defn verify-work-order [order]
   (try
@@ -124,6 +128,29 @@
       (refusal :transaction/invalid))
     (catch Throwable t
       (refusal :transaction/malformed {:detail (ex-message t)}))))
+
+(defn supersede-acceptance
+  "Version a sealed work order after a durable unsatisfiable-acceptance claim.
+  Both the new work order and enclosing transaction are sealed normally."
+  [transaction acceptance-test superseded-admission-pin current-admission-pin
+   claim-observation-pin]
+  (let [old-order (:work-order transaction)
+        supersession {:schema :wm/acceptance-supersession-v1
+                      :claim-observation-pin claim-observation-pin
+                      :superseded-work-order-pin (:work-order-pin old-order)
+                      :superseded-admission-pin superseded-admission-pin
+                      :current-admission-pin current-admission-pin}
+        order (seal-work-order
+               (-> old-order
+                   (dissoc :work-order-pin)
+                   (assoc :acceptance-test acceptance-test
+                          :acceptance-admission-pin current-admission-pin
+                          :superseded-work-order-pin (:work-order-pin old-order)
+                          :acceptance-supersession supersession)))]
+    (seal-transaction
+     (-> transaction
+         (dissoc :transaction-pin)
+         (assoc :work-order order :acceptance-supersession supersession)))))
 
 (defn- latest-transition [history injury-id]
   (last (filter #(and (= ledger/transition-schema (:schema %))

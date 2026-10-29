@@ -1184,6 +1184,10 @@
         seen-review (atom nil)
         satisfiability {:can-pass-after-correct-repair? true
                         :reason "set equality can hold after decoding both sides"}
+        claim {:author-evidence {:assertion "ordered equality"
+                                 :reason "the order is impossible"}
+               :observation-pin {:path "ledger/claim.edn"
+                                 :sha256 (apply str (repeat 64 "c"))}}
         run-calls (atom [])
         run-once (fn [acceptance-test]
                    (swap! run-calls conj acceptance-test)
@@ -1196,6 +1200,7 @@
                         :status :accepted :satisfiability satisfiability))
         admitted (production/admit-acceptance!
                   {:meta-acceptance-root (str dir "/acceptances")
+                   :meta-acceptance-unsatisfiable-claim claim
                    :meta-acceptance-run-fn run-once
                    :meta-acceptance-review-fn accept} proposal)
         tampered (production/admit-acceptance!
@@ -1232,6 +1237,7 @@
     (is (= (:acceptance-test proposal) (:acceptance-test admitted)))
     (is (= :ran-before-repair (:result-status @seen-review)))
     (is (= run-result (:result @seen-review)))
+    (is (= claim (:author-unsatisfiable-claim @seen-review)))
     (is (= run-result (:result admitted)))
     (is (= satisfiability
            (:satisfiability
@@ -2125,8 +2131,8 @@
     (is (= (:id (:acceptance-test order)) (get-in result [:actual :acceptance-test :id])))
     (is (zero? @calls))))
 
-(deftest iteration-23-claim-authorizes-recorded-acceptance-supersession
-  (let [root "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-23"
+(deftest iteration-24-claim-authorizes-recorded-acceptance-supersession
+  (let [root "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-24"
         transaction (edn/read-string (slurp (str root "/transaction-after.edn")))
         admission (edn/read-string (slurp (str root "/acceptance-admission-pin.edn")))
         ledger (edn/read-string (slurp (str root "/ledger-after.edn")))
@@ -2154,6 +2160,14 @@
            (get-in rebound [:transaction :work-order :acceptance-test :id])))
     (is (= new-pin (get-in rebound [:transaction :acceptance-supersession
                                     :current-admission-pin])))
+    (is (= :valid
+           (:status (coordinator/verify-transaction (:transaction rebound)))))
+    (is (not= (get-in rebound [:transaction :acceptance-supersession
+                               :superseded-admission-pin])
+              (get-in rebound [:transaction :acceptance-supersession
+                               :current-admission-pin])))
+    (is (some? (get-in rebound [:transaction :acceptance-supersession
+                                :claim-observation-pin])))
     (is (= :meta-self-heal/acceptance-transaction-mismatch (:reason refused)))))
 
 (deftest effect-ports-carry-the-adapter-click-minting-function

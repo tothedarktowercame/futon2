@@ -874,14 +874,17 @@
                             (integer? (:exit run-result))
                             (string? (:summary run-result))
                             (pin? (:run-pin run-result)))
-            request {:schema :wm/meta-acceptance-review-request-v1
-                     :injury-id (:injury-id proposal)
-                     :source-record-pin (:source-record-pin proposal)
-                     :diagnosis-evidence-pin (:diagnosis-evidence-pin proposal)
-                     :proposal-evidence-pin (:acceptance-evidence-pin proposal)
-                     :acceptance-test (:acceptance-test proposal)
-                     :result-status :ran-before-repair
-                     :result run-result :repair-claimed? false}
+            request (cond-> {:schema :wm/meta-acceptance-review-request-v1
+                             :injury-id (:injury-id proposal)
+                             :source-record-pin (:source-record-pin proposal)
+                             :diagnosis-evidence-pin (:diagnosis-evidence-pin proposal)
+                             :proposal-evidence-pin (:acceptance-evidence-pin proposal)
+                             :acceptance-test (:acceptance-test proposal)
+                             :result-status :ran-before-repair
+                             :result run-result :repair-claimed? false}
+                      (:meta-acceptance-unsatisfiable-claim opts)
+                      (assoc :author-unsatisfiable-claim
+                             (:meta-acceptance-unsatisfiable-claim opts)))
             ;; F16 (off-click replay 5, 2026-10-19): a proposal whose run
             ;; PASSES before any repair does not pin the injury; it is refused
             ;; here, typed, without spending a reviewer invoke.
@@ -1760,20 +1763,34 @@
               (refusal :meta-self-heal/acceptance-transaction-mismatch
                        {:acceptance-observation observation
                         :expected expected :actual actual})
-              (let [old-pin (:acceptance-admission-pin work-order)
+              (let [old-pin (or (:acceptance-admission-pin work-order)
+                                (some (fn [file]
+                                        (try
+                                          (let [bytes (Files/readAllBytes (.toPath file))
+                                                receipt (:value (store/read-one-form
+                                                                 (String. bytes "UTF-8")))]
+                                            (when (and (= :wm/meta-acceptance-admission-v1
+                                                          (:schema receipt))
+                                                       (= (:acceptance-test work-order)
+                                                          (:acceptance-test receipt)))
+                                              {:path (.getCanonicalPath file)
+                                               :sha256 (load-identity/sha256 bytes)}))
+                                          (catch Throwable _ nil)))
+                                      (seq (.listFiles
+                                            (io/file (or (:meta-acceptance-root opts)
+                                                         default-acceptance-root))))))
                     new-pin (:acceptance-admission-pin observation)
-                    rebound (-> transaction
-                                (assoc-in [:work-order :acceptance-test]
-                                          (:acceptance-test observation))
-                                (assoc-in [:work-order :acceptance-admission-pin] new-pin)
-                                (assoc :acceptance-supersession
-                                       {:schema :wm/acceptance-supersession-v1
-                                        :claim-observation-pin (:entry-pin claim)
-                                        :superseded-admission-pin old-pin
-                                        :current-admission-pin new-pin}))]
-                {:status :valid :source :claim-authorized-supersession
-                 :transaction rebound
-                 :acceptance-supersession (:acceptance-supersession rebound)}))))))))
+                    rebound (when (and (pin? old-pin) (pin? new-pin))
+                              (coordinator/supersede-acceptance
+                               transaction (:acceptance-test observation)
+                               old-pin new-pin (:entry-pin claim)))]
+                (if-not rebound
+                  (refusal :meta-self-heal/acceptance-supersession-pin-unavailable
+                           {:superseded-admission-pin old-pin
+                            :current-admission-pin new-pin})
+                  {:status :valid :source :claim-authorized-supersession
+                   :transaction rebound
+                   :acceptance-supersession (:acceptance-supersession rebound)})))))))))
 
 (defn attributable-retry-readiness
   "Authorize the one ordinary retry named by the latest enacted transition.
