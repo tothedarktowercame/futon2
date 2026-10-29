@@ -10,7 +10,7 @@
            [java.util UUID]))
 
 (def index-name "reading-policy-class-history-index.ednl")
-(def terminal-name #"^tick-run-record-.+\.edn$")
+(def terminal-name #"^tick-run-record-[^.]+\.edn$")
 (def terminal-classes #{:focused :related :unrelated :stop-the-line})
 
 (defn- q6-terminal [record]

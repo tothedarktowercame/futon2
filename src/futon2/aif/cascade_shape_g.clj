@@ -372,6 +372,7 @@
                          (if (= :observation-impossible-under-policy (:status class-failure))
                            :zero-posterior-mass
                            :class-free-energy-unavailable))
+                 :inference class-failure
                  :policy-id id :target target :candidate candidate
                  :horizon horizon :terminals terminals
                  :preference-at-each-step preference

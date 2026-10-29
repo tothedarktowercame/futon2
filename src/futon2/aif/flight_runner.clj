@@ -543,7 +543,7 @@
   when there is no record, or the record carries no report."
   [run-record-dir]
   (let [files (->> (.listFiles (io/file run-record-dir))
-                   (filter #(re-matches #"tick-run-record-.*\.edn" (.getName ^java.io.File %))))
+                   (filter #(re-matches #"tick-run-record-[^.]+\.edn" (.getName ^java.io.File %))))
         newest (when (seq files) (apply max-key #(.lastModified ^java.io.File %) files))]
     (if-not newest
       {:absent :no-run-record :dir (str run-record-dir)}

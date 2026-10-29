@@ -633,7 +633,7 @@
         out (or output "holes/labs/wm-contract/RUN-FACTS-history-2026-09-30.md")
         paths (->> (.listFiles (io/file dir))
                    (filter #(.isFile ^java.io.File %))
-                   (filter #(re-matches #"tick-run-record-.*\.edn" (.getName ^java.io.File %)))
+                   (filter #(re-matches #"tick-run-record-[^.]+\.edn" (.getName ^java.io.File %)))
                    (sort-by #(.getName ^java.io.File %))
                    (mapv #(.getPath ^java.io.File %)))
         snap (snapshot)
