@@ -24,10 +24,20 @@
   ;; The mission observation universe is the selected wants, not every token
   ;; carried by the pattern action. The untouched dispatch is retained below
   ;; as the immutable request binding.
-  (-> dispatch
-      (assoc-in [:occurrence :action/value :want] wants)
-      (update-in [:occurrence :action/value :observation-locators]
-                 #(select-keys % wants))))
+  (cond-> (-> dispatch
+              (assoc-in [:occurrence :action/value :want] wants)
+              (update-in [:occurrence :action/value :observation-locators]
+                         #(select-keys % wants)))
+    (get-in dispatch [:occurrence :action/value :mission-want-source])
+    ;; The source-derived mission census is independent of the retired
+    ;; pattern prediction universe. Legacy declaration-backed callers retain
+    ;; their existing authority path.
+    (assoc :universe (set wants) :declarations []
+           :selected-action-observation-carrier
+           (assoc (:selected-action-observation-carrier dispatch)
+                  :observation-locators
+                  (select-keys (get-in dispatch [:occurrence :action/value :observation-locators])
+                               wants)))))
 
 (defn- read-selected [dispatch wants repository revision]
   (->> (d-task/artifact-tokens (selected-dispatch dispatch wants)

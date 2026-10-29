@@ -5,6 +5,7 @@
   fold under each policy's structural reading-policy key (cascade-habit-store
   policy-view); a ranked entry carries no E of its own before that."
   (:require [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.selected-mission-contract :as mission-contract]
             [futon2.aif.wm.family-canonical-g :as canonical-g]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
@@ -30,7 +31,9 @@
   "The scored policy's action, carrying its history key and the exact
   interpretation it owes, both bound to its identity."
   [policy score]
-  (let [action (prefix-admission/validate-sealed-reading-policy-key! (:candidate score))
+  (let [action (mission-contract/attach
+                (prefix-admission/validate-sealed-reading-policy-key! (:candidate score))
+                (:mission-want-contract policy))
         action (cond-> action
                  (:authoring-resolution policy)
                  (assoc :authoring-resolution (:authoring-resolution policy)))]
@@ -189,10 +192,16 @@
                         target-id (merge (dissoc squares :status)
                                          {:excerpt-digest (:excerpt-digest reading)
                                           :analysis-digest (:analysis-digest reading)}))
-                       (target-family/policy-family
-                        {:reading reading :graph (:graph loaded)
-                         :occurrence-squares (or squares {:entries {}})
-                         :retraction retraction})))))
+                       (let [contract (mission-contract/source-contract
+                                       "/home/joe/code" target-id source-path (slurp source-path))]
+                         (update (target-family/policy-family
+                                  {:reading reading :graph (:graph loaded)
+                                   :occurrence-squares (or squares {:entries {}})
+                                   :retraction retraction})
+                                 :policies (fn [policies]
+                                             (mapv #(cond-> % contract
+                                                      (assoc :mission-want-contract contract))
+                                                   policies))))))))
                (catch Exception e
                  (failed-field-family
                   target-id {:kind :target-source-unreadable
