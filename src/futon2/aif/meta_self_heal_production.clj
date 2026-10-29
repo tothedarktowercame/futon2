@@ -1578,6 +1578,8 @@
                                              enact-retry-click)
                   :admission-run-pin (:run-pin admitted-run)
                   :current-run-pin (:run-pin current-run)
+                  :admission-store-isolation (:store-isolation admitted-run)
+                  :store-isolation (:store-isolation current-run)
                   :admission-source-identity admitted-source
                   :current-source-identity current-source
                   :before-predicate (when available? :failing)
