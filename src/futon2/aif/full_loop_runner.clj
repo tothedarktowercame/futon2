@@ -1515,7 +1515,7 @@
                      (:controlled-sut result)
                      (assoc :controlled-sut (:controlled-sut result))
                      (contains? raw-opts :outer/selection)
-                     (assoc :outer/selection (:outer/selection raw-opts))
+                     (assoc :outer/selection (:outer/selection (selected-target-reading/current-options raw-opts)))
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
                      (assoc :open-stop-lines
                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
@@ -2573,7 +2573,7 @@
                     :discharge (:status after)
                     :events events})}))))
 
-(defn selected-target-reading-step
+(defn- selected-target-reading-once
   "Prepare missing readings, then call REDECIDE once after publication.
   With a retained outer choice this only reconstructs that target's cascade.
   With an incomplete pre-choice field, preparation supplies the missing input
@@ -2607,6 +2607,38 @@
                         (assoc-in [:decision :selection-certificate
                                    :selected-target-reading-request] record))
          :record record}))))
+
+(defn selected-target-reading-step
+  "At most two targets. Only exhausted format correction authorizes removal
+  of the first target; both reading records survive if the second fails."
+  [opts judgement repair-fn redecide]
+  (let [first-result (selected-target-reading-once opts judgement repair-fn redecide)
+        refusal (:record first-result)
+        reselect (:selected-target-reading-reselect-fn opts)]
+    (if-not (and reselect (= :selected-target-reading-unavailable (:kind refusal)))
+      first-result
+      (if-let [next-judgement (reselect refusal (:window-days opts))]
+        (let [second-result (selected-target-reading-once
+                             (selected-target-reading/current-options opts)
+                             next-judgement repair-fn redecide)
+              second-record (:record second-result)
+              _ (when (and (= :refused (:status second-record))
+                           (:reading-reselection/state opts))
+                  (swap! (:reading-reselection/state opts)
+                         update-in [:outer/selection :reading-reselection :refusals]
+                         conj second-record))
+              record (assoc (or second-record {:status :not-required})
+                            :reading-attempts [refusal second-record]
+                            :reselection {:limit 1 :used 1 :excluded-target (:target refusal)})
+              _ (when-let [reading-state (:selected-target-reading/state opts)]
+                  (reset! reading-state {:status :completed :record record}))
+              j (-> (:judgement second-result)
+                    (assoc :selected-target-reading-request record)
+                    (assoc-in [:decision :selection-certificate
+                               :selected-target-reading-request] record))]
+          {:judgement j :record record})
+        (update first-result :record assoc :reselection
+                {:limit 1 :used 1 :reason :no-remaining-candidate})))))
 
 (defn occurrence-square-authoring-step
   "Publish occurrence squares, then rerun only inner cascade construction
@@ -7108,7 +7140,7 @@
                           {:close close-judgment-base
                            :occurrence @action-occurrence
                            :route-attestation (:receipt route-account)
-                           :outer-selection (:outer/selection opts)
+                           :outer-selection (:outer/selection (selected-target-reading/current-options opts))
                            :focus-receipt (get-in selection-judgment
                                                   [:controller-decision :selection-certificate
                                                    :focus-receipt])}))
@@ -7701,7 +7733,15 @@
              opts @phase-context :selected-target-reading
              (fn []
                (selected-target-reading-step
-                opts judgement0-base
+                (cond-> opts
+                  (:selected-target-reading-reselect-fn opts)
+                  (assoc :window-days window-days
+                         :selected-target-reading-reselect-fn
+                         (fn [refusal _]
+                           (when ((:selected-target-reading-reselect-fn opts) refusal)
+                             ;; Use the same production judge and run-local
+                             ;; timing/configuration as the first selection.
+                             (:judgement (selection-judge window-days)))))) judgement0-base
                 (when (nil? (:flight opts)) target-reading-fn)
                 (fn [record]
                (try
@@ -7734,6 +7774,7 @@
                                failure-data e))))))))
              (fn [result]
                {:reading-status (get-in result [:record :status])}))
+            opts (selected-target-reading/current-options opts)
             {judgement0-squares :judgement
              occurrence-square-authoring-record :record}
             (run-phase!
@@ -7893,7 +7934,7 @@
                                 @phase-context
                                 (:decision judgement0) roster
                                 (or selected-reading-record interpretation-ask-record)
-                                (or (:outer/selection opts)
+                                (or (:outer/selection (selected-target-reading/current-options opts))
                                     (:outer-task-selection judgement0)))
             mode-flags ((runtime-default opts :mode-flags-fn))
             ordinary-entry (selected-entry judgement0)
@@ -8628,7 +8669,7 @@
                 {:schema :wm/effective-run-identity-v1
                  :target target
                  :giraffe-manifest-sha256
-                 (get-in opts [:outer/selection :giraffe/manifest-sha256])
+                 (get-in (selected-target-reading/current-options opts) [:outer/selection :giraffe/manifest-sha256])
                  :policy-id (get-in entry [:action :policy-key 2])
                  :compiled-check-set-sha256
                  (sha256
@@ -8661,7 +8702,7 @@
                  :target target
                  :selection-input-digest (:selection-input-digest world-at-selection)
                  :outer-selection
-                 (select-keys (:outer/selection opts)
+                 (select-keys (:outer/selection (selected-target-reading/current-options opts))
                               [:cascade-id :cascade-index :giraffe/run-id
                                :giraffe/manifest-sha256 :makeup/sha256 :focus
                                :selected-relation])

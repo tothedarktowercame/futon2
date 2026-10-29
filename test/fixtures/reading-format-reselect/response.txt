@@ -1,0 +1,145 @@
+Good. I have plenty of valid pattern ids. Now build the JSON. 77 sentences. I'll classify ~24 sentences with fragments; rest unresolved with honest reasons.
+
+Constraints per fragment:
+- offsets within sentence, text exact.
+- intent label regex.
+- target nonempty.
+- relations from vocabulary.
+- display_cues short, within fragment span, word budget ≤ max(floor(sentence words/2), 2) for sentences >8 words.
+- pattern_refs nonempty with id+rationale.
+- reusable_cues optional entries with start/end/text/intent/rationale; intent regex.
+- rnode_cues: need node/operation matching contract — I'll skip (empty array) to avoid drops.
+
+Let me pick fragments carefully with correct offsets. I'll compute offsets from given sentence start values and text. Sentence texts are given with start; offsets within the source: fragment start = sentence.start + index in sentence text.
+
+Plan sentences and fragments (index within sentence text):
+
+s1 (0-80): title. Fragment: "memories as typed dialogue acts" — starts after "# M-typed-memories — ". Count: "# M-typed-memories — memories..." Let me count precisely: text: `# M-typed-memories — memories as typed dialogue acts over the futon1b hypergraph`. "# M-typed-memories — " length: "#"1 " "1 "M-typed-memories"17 " "1 "—"1 " "1 = 22. So "memories as typed dialogue acts" at 22..(22+31=53). intent "define", target "mission framing", relations ["goal","context"]. Display cue: "typed dialogue acts" (words 3 ≤ budget; sentence has 12 words, budget 6). pattern_refs: agency/self-attribution? Better: aif/... hmm. Use "agent/state-is-hypothesis"? For dialogue acts: use "aif/no-self-certification"? Simplest safe: "stack-coherence/evidence-ledger" for "typed memories". I'll choose per fragment reasonably.
+
+s2: "\nDate: 2026-07-22" — metadata; unresolved.
+
+s3: status sentence: fragment "**Status:** OPEN — **DERIVE**" — indices: text starts "**Status:** OPEN — **DERIVE** (chartered..." "**Status:** OPEN — " = 10+1+4+1+1+1=18? "**Status:**"=11 chars? *,*,S,t,a,t,u,s,:,*,* = 11. Then " "=1 →12, "OPEN"=4→16, " "=1→17, "—"=1→18, " "=1→19. So "**DERIVE**" at 19..28. intent "declare-status", target "mission status", relations ["context"], cue "**DERIVE**" 1 word fine. pattern ref: "agent/scope-before-action".
+
+s4: "the Claude pipeline chased into 9 hypergraph stages, §MAP; DERIVE opened" — fragment "9 hypergraph stages" (index: "the Claude pipeline chased into " = 32) 32..51. intent "record-progress", relations ["context"], target "MAP phase output". cue same. pattern: "agent/trail-enables-return".
+
+s5: fragment "MVP + upgrade path" — index: "same day as a **prototype ladder** at Joe's direction: " count: same4 day4... let me count: "same day as a " =14; "**prototype ladder**"=19 →33; " "=1→34; "at"=2→36; " "=1→37; "Joe's"=5→42; " "=1→43; "direction:"=10→53; " "=1→54. So at 54..72 "MVP + upgrade path". intent "choose-approach", relations ["rationale"], cue "prototype ladder" at 14..31. pattern: "agent/reduction-to-kernel".
+
+s8: "tool end-to-end). One position staged for ARGUE (§Staged for ARGUE)." — fragment "One position staged for ARGUE" at index 19 ("tool end-to-end). "=17? "tool end-to-end)." = t,o,o,l,space,e,n,d,-,t,o,-,e,n,d,). =17. then space →18. So at 18..47. intent "stage-next-step", relations ["goal"], cue "staged for ARGUE" subset 22..38. pattern: "agent/commitment-varies-with-confidence".
+
+s9: fragment "pattern-conditioned recall" — "…**Retrieval strategy added 2026-07-23** — " count: "**Retrieval strategy added 2026-07-23**" = 2+9+1+8+1+5+1+10+2 = 39? R-e-t-r-i-e-v-a-l =9; " "=1; strategy=8; " "=1; added=5; " "=1; 2026-07-23=10; ** =2 each end → total 2+9+1+8+1+5+1+10+2=39. Then " — "=3 →42. "pattern-conditioned recall" at 42..68. intent "design-retrieval", relations ["goal"], cue same, 2 words. pattern: "agent/handoff-preserves-context"? Better something about retrieval — "pattern-interpretation/reproduce-the-recorded-run"? Use "stack-coherence/evidence-ledger". Hmm, choose "aif/status-gated-belief-update"? I'll use "musn/use-requires-evidence" where use-evidence relevant. For retrieval: there's no retrieval family visible... check families list further? There's "memory" family with name-a-reusable-artifact. Use that.
+
+s12: sequence sentence. fragment "DERIVE (P1 retrieval wiring)" — "Sequence ahead: " wait text: "ahead: DERIVE (P1 retrieval wiring) → ARGUE → VERIFY → INSTANTIATE." — "ahead: "=7. fragment 7..34. intent "plan-sequence", relations ["goal","dependency"], cue "P1 retrieval wiring" 17..36? that's beyond 34. cue must be inside fragment span. fragment is 7..34 "DERIVE (P1 retrieval wiring)". cue "P1 retrieval wiring" at 15..34. pattern: "agent/scope-before-action".
+
+s13: fragment "**Shared-regime Phases 2 and 3 ACCEPTED live 2026-07-23**" — length: 2+13+1+6+1+1+1+1+1+7+1+9+1+4+2 = let's count: "**Shared-regime" =15, " Phases"=7→22, " 2"=2→24, " and"=4→28, " 3"=2→30, " ACCEPTED"=9→39, " live"=5→44, " 2026-07-23"=11→55, "**"=2→57. So 0..57. intent "record-acceptance", relations ["evidence"? no—"context"], cue "ACCEPTED live" at 31..44. pattern: "test-registry/register-the-run".
+
+s17: fragment "search → select → full-body recall → cited use" — index: text "search → select → full-body recall → cited use → separately witnessed Lean". "search → select → full-body recall → cited use" = 46 chars: search6 +3(→ with spaces: " → "=3) each. compute: "search"6, " → "3→9, "select"6→15, " → "3→18, "full-body recall"16→34, " → "3→37, "cited use"9→46. So 0..46. intent "verify-retrieval-loop", relations ["dependency"], cue "cited use" 37..46. pattern: "musn/use-requires-evidence".
+
+s18: fragment "bitemporal challenge/supersession/retraction" — index: "outcome. Phase 3 then added " = 28. 28..72 (44 chars: b-i-t... "bitemporal"10+1+"challenge/supersession/retraction"=31 →42 chars; 28..70). cue "supersession/retraction" 1 word fine. intent "add-lifecycle", relations ["action"], pattern: "aif/status-gated-belief-update"? For bitemporal memory — use "memory/surface-the-closed-set"? Better: "stack-coherence/staleness-scan" (supersession/staleness). Use that.
+
+s21: fragment "independently witnessed outcomes" — index: "fresh Lean trials closed with " = 30. 30..62. intent "require-independent-witness", relations ["condition"], cue same. pattern: "agent/evidence-over-assertion".
+
+s23: fragment "P1 PSR wiring and lifecycle rung" — index: "mission's " = 10. 10..43. intent "close-milestone", relations ["goal"], cue "P1 PSR wiring" 10..23. pattern: "test-registry/warrant-rides-the-handoff"? Fine.
+
+s24: "dark-only WM consumer." whole? fragment "dark-only WM consumer" 0..21. intent "identify-next-consumer", relations ["context"], cue same, pattern: "agent/student-dispatch"? eh. use "aif/niche-construction"? I'll use "agent/eat-your-own-tail" (mission applying its own substrate — actually appropriate! "eat your own tail" = using own memory). Yes good.
+
+s29: "use. Phases 1–3 are accepted live; Phase 4 is next." fragment "Phase 4 is next" at index: "use. Phases 1–3 are accepted live; " = 5+1+7+1+3+1+3+1+8+1+5? count: "use. "=5, "Phases 1–3"=10→15, " are"=4→19, " accepted"=9→28, " live;"=5→33, " "=1→34. So 34..49. intent "state-next-phase", relations ["goal"], cue same. pattern: "agent/scope-before-action".
+
+s31: fragment "ArSE populates by construction" — index: "  channel (bells) with IATC performatives so " = 2+7+1+7+1+4+1+4+1+12+1+3+1 = count: "  "=2, "channel"=7→9, " ("=2→11, "bells"=5→16, ")"=1→17, " with"=5→22, " IATC"=5→27, " performatives"=14→41, " so"=3→44, " "=1→45. 45..75. intent "populate-by-construction", relations ["rationale"], cue same. pattern: "aif/term-to-channel-traceability"? Fits (typing channels). Yes.
+
+s33: fragment "the memory substrate populates by construction" — index: "  (what an agent learns) so " = 2+1+5+1+2+1+5+1+7+1+3+1= count: "  "=2, "(what"=5→7, " an"=3→10, " agent"=6→16, " learns)"=8→24, " so"=3→27, " "=1→28. 28..75 ("the memory substrate populates by construction" = 3+1+7+1+9+1+9+1+2+1+12=47). 28..75. intent "generalize-typing", relations ["goal","rationale"], cue "epistemic" wait that's in s32. cue "populates by construction" at 56..81? within 28..75: offset of "populates" within fragment: "the memory substrate "=21, so 28+21=49..49+24=73 "populates by construction". pattern: "aif/term-to-channel-traceability".
+
+s36: "  path is in the same hazard class; whatever discipline resolves one should" — fragment "same hazard class" at index: "  path is in the " = 2+4+1+2+1+2+1+3+1=17. 17..34. intent "classify-hazard", relations ["dependency"], cue same. pattern: "apparatus/new-failure-class-is-a-design-defect"? Hmm—hazard class reuse. Better "agent/environment-over-optimization"? Use "apparatus/success-must-not-resemble-failure"? Not great. "same hazard class" = shared defect class → use "stack-coherence/stack-blocker-detection"? I'll use "aif/no-self-certification"? no. Choose "apparatus/model-upstream-and-coupled" (shared root cause)? Simplest honest: pattern_rejections? Keep it: "apparatus/repairs-name-defects-not-neighborhoods" (resolve by discipline shared). Eh — I'll use "agent/environment-over-optimization"? Not fitting. Use "apparatus/one-authority-per-question"? no. Honestly best fit: "memory/no-tightening-while-held"? no. I'll cite "stack-coherence/evidence-ledger"? weak. Alternative: skip s36 fragment; mark unresolved? It's meaningful though. Use "aif/placeholder-is-load-bearing"? no.
+
+Let me check families for something like "shared hazard" — there's "buffer-cleaner/exempt-the-in-use"... Actually "the same hazard class; whatever discipline resolves one should resolve the other" is a coupling/shared-cause claim: "apparatus/model-upstream-and-coupled" fits (model upstream, coupled). Use it.
+
+s37: "resolve the other." — continuation; leave unresolved (fragmentary continuation)? It's its own sentence; mark unresolved "continuation fragment".
+
+s39: fragment "The read side of this mission builds on it." — "FTS5 text search (D1). " = 22. fragment 22..65 "The read side of this mission builds on it." (43 chars). intent "reuse-proven-seam", relations ["dependency"], cue "builds on it" at 22+30=52..64? "The read side of this mission " =31, so "builds on it" 53..65. pattern: "agent/trail-enables-return"? Better "stack-coherence/futon1-storage-coherence"? Use "apparatus/replayable-not-precious"? I'll use "stack-coherence/futon1-storage-coherence".
+
+s45: fragment "the hardening work in flight" — index: "  `:expensive-read-busy`) — " = 2+21+1+3+1=28? "`:expensive-read-busy`"=22, "  "=2→2, +22=24, ")"→25, " — "→28. So 28..56 ("the hardening work in flight"=27). intent "track-in-flight-work", relations ["context"], cue same. pattern: "apparatus/open-conditions-live-in-a-ledger". Good fit.
+
+s54: fragment "**Not closed**" at index 17 ("  vitality timer. " = 18? text: "  vitality timer. **Not closed** — week-long...": "  "=2, "vitality timer."=14→16, " "=1→17. 17..30 includes asterisks "**Not closed**"=13 chars →17..30. intent "flag-open-condition", relations ["condition"], cue same. pattern: "apparatus/open-conditions-live-in-a-ledger".
+
+s56: fragment "checked against the TN's diagnostic signature" — index: "  this mission should be " = 2+4+1+7+1+6+1+2+1=25. "  this mission should be " = count: 2 spaces=2, "this"=4→6, " mission"=8→14, " should"=7→21, " be"=3→24, " "=1→25. 25..70 (45 chars: "checked against the TN's diagnostic signature"=45). intent "reuse-known-signature", relations ["dependency"], cue "diagnostic signature" at 25+25=50..70. pattern: "apparatus/default-to-the-cheap-error"? Better "apparatus/repairs-name-defects-not-neighborhoods"? Use "stack-coherence/staleness-scan"? Use "apparatus/monitors-measure-the-work"? Honest pick: "apparatus/recorded-failures-before-live-runs" (check prior incident before fresh diagnosis). 
+
+s63: fragment "the query primitive already exists; the gap is wiring, not infrastructure" — index: "  existing futon1b `?end=` hyperedge query. Five rungs (pattern endpoints" no wait s63 text: "  primitive already exists; the gap is wiring, not infrastructure. P1". "  "=2, then "primitive already exists; the gap is wiring, not infrastructure." So fragment "the gap is wiring, not infrastructure" at index 2+ "primitive already exists; " = 25 → 27..64. intent "locate-the-gap", relations ["rationale"], cue "wiring, not infrastructure" at 27+ "the gap is "=11 → 38..64. pattern: "agent/environment-over-optimization" (gap is env not model)? Actually fits: infrastructure exists, wiring needed → "agent/environment-over-optimization" plausible. Use it.
+
+s66: fragment "the agent applies it and cites that ID" — index: "  `psr_search`; selecting it returns one of the a94A06 memory IDs; the" no, s66: "  agent applies it and cites that ID." — fragment "applies it and cites that ID" at 8..36? "  agent "=8. "applies it and cites that ID"=27 → 8..35. intent "acceptance-criterion", relations ["condition"], cue "cites that ID" 21..34. pattern: "musn/use-requires-evidence". 
+
+s69: fragment "share the memory contract" — index: "  substrate extended to strategic mission selection. The WM and Zaif runners" no that's s68. s69: "  should share the memory contract, store, endpoint retrieval, provenance," — "  should "=9. "share the memory contract"=25 → 9..34. intent "unify-contract", relations ["dependency"], cue same. pattern: "agency/invariants" (shared contract/invariants). 
+
+s71: fragment "a cheap test tier for the common mechanism" — index: "  Mathematics runs become " = 26. 26..68 ("a cheap test tier for the common mechanism"=42). intent "tier-the-tests", relations ["rationale"], cue "cheap test tier" 26..41. pattern: "agent/escalation-cost-vs-risk"? Use "aif/measurement-window-hygiene"? Use "agent/budget-bounds-exploration" (cheap tests before expensive). Good.
+
+s72: "evidence that a WM-specific policy or outcome model is correct." — fragment "not" hmm. Mark unresolved (negative clause, covered by s71).
+
+s76: fragment "Memories are its third instantiation" — index: "  M-typed-bells. " = 16. 16..52? "Memories are its third instantiation"=36 →16..52. intent "count-instantiations", relations ["context"], cue "third instantiation" 31..50. pattern: "aif/term-to-channel-traceability"? third channel instantiation — okay reuse same. Or "agent/eat-your-own-tail". Use "aif/term-to-channel-traceability".
+
+s77: fragment "memories = the agent's dialogue with its past self" — index: "  ArSE = Q&A threads, " = 2+4+1+1+1+2+1+7+1+1 = count: "  "=2, "ArSE"=4→6, " = "=3→9, "Q&A"=3→12, " threads,"=9→21, " "=1→22. 22..72 ("memories = the agent's dialogue with its past self"=50). intent "frame-memories-as-dialogue", relations ["rationale"], cue "dialogue with its past self" at 22+ "memories = the agent's "=24 → 46..73? "dialogue with its past self"=27 → 46..73 ≤72? 46+27=73 >72. Recompute fragment length: "memories = the agent's dialogue with its past self": memories8+3( = )... m-e-m-o-r-i-e-s=8, " = "=3→11, "the"=3→14, " "=1, "agent's"=7→22, " "=1→23, "dialogue"=8→31, " "=1→32, "with"=4→36, " "=1→37, "its"=3→40, " "=1→41, "past"=4→45, " "=1→46, "self"=4→50. So fragment 22..72. cue "dialogue with its past self" = within fragment at offset 23 → 45..72. Good. pattern: "agency/self-attribution". Nice.
+
+s32: fragment "type the *epistemic* channel" — s32 text: "  This mission is the same move one layer in: type the *epistemic* channel". index of "type the *epistemic* channel": "  This mission is the same move one layer in: " = 2+4+1+7+1+2+1+3+1+4+1+3+1+5+1+2+1=... count: "  "2, "This"4→6, " mission"8→14, " is"3→17, " the"4→21, " same"5→26, " move"5→31, " one"4→35, " layer"6→41, " in:"4→45, " "1→46. 46..74 ("type the *epistemic* channel"=28). intent "extend-typing", relations ["action","context"], cue "*epistemic* channel" 55..74. pattern: "aif/term-to-channel-traceability". Good.
+
+Check display-cue budgets per sentence (only enforced when sentence >8 words). My cues are 1-4 words, sentences 8-12 words → budget ≥4. s13 sentence words: "**Shared-regime Phases 2 and 3 ACCEPTED live 2026-07-23** — after the Phase 1" = 13 words, budget 6; cue 2 words fine. s45 sentence: "  `:expensive-read-busy`) — the hardening work in flight; see \"Related ongoing" = ~12 words, budget 6; cue 4 words fine. s63: sentence 11 words, cue 3. fine. s66 sentence only 7 words → no budget check. fine.
+
+Intent labels must match ^[a-z][a-z0-9_-]*$ — all mine do.
+
+Pattern refs must exist: verify ids: agent/trail-enables-return ✓, agent/scope-before-action ✓, agent/reduction-to-kernel ✓, agent/commitment-varies-with-confidence ✓, memory/name-a-reusable-artifact ✓, test-registry/register-the-run ✓, musn/use-requires-evidence ✓, stack-coherence/staleness-scan ✓, agent/evidence-over-assertion ✓, test-registry/warrant-rides-the-handoff ✓, agent/eat-your-own-tail ✓, aif/term-to-channel-traceability ✓, apparatus/model-upstream-and-coupled ✓, stack-coherence/futon1-storage-coherence ✓, apparatus/open-conditions-live-in-a-ledger ✓, apparatus/recorded-failures-before-live-runs ✓, agent/environment-over-optimization ✓, agency/invariants ✓, agent/budget-bounds-exploration ✓, agency/self-attribution ✓, aif/no-self-certification (unused).
+
+Declaration must match id line (@arg ... id). Should be fine but I can spot check a few unusual ones quickly? The validator greps "^@(?:arg|flexiarg|multiarg) id$". I'll run a quick check on all ids I cite.
+
+reusable_cues: add a couple: e.g. "populates by construction" (s31 45..75) intent "populate-by-construction", rationale; and "wiring, not infrastructure" s63 38..64 intent "locate-the-gap". And "diagnostic signature" s56. Range: inside-source, text exact, ≤8 words/80 chars. Validate against source directly (script checks source[start:end]).
+
+rnode_cues: empty array.
+
+unresolved reasons for the rest — short strings.
+
+Labeller: "wm-author".
+
+Now write the JSON. Fragment list per sentence id; ensure every sentence s1..s77 appears exactly once.
+
+Let me double-check a few offsets against source strings.
+
+s1 text index check: `# M-typed-memories — memories as typed dialogue acts over the futon1b hypergraph`. "# " =2, "M-typed-memories"=17→19, " — "— wait: "# M-typed-memories — memories..." after "M-typed-memories" comes " — " (space, em dash, space)=3→22. So "memories as typed dialogue acts" starts 22, length 8+1+2+1+5+1+8+1+4=31 → 22..53. Cue "typed dialogue acts" starts at 22+"memories as "=12 →34..52. ✓.
+
+s3: "**Status:** OPEN — **DERIVE** (chartered..." check "**Status:**": * S t a t u s : * * = 11 ✓. +1=12, OPEN→16, " "→17, "—"→18, " "→19. "**DERIVE**"=9 → 19..28 ✓.
+
+s4: "the Claude pipeline chased into 9 hypergraph stages, §MAP; DERIVE opened": "the "=4, "Claude"=6→10, " "→11, "pipeline"=8→19, " "→20, "chased"=6→26, " "→27, "into"=4→31, " "→32. "9 hypergraph stages"=1+1+11+1+6=19 → 32..51 ✓.
+
+s5: "same day as a **prototype ladder** at Joe's direction: MVP + upgrade path,": "same day as a "=14, "**prototype ladder**": 2+9+1+6+2=20 →34, " "→35, "at"→37, " "→38, "Joe's"=5→43, " "→44, "direction:"=10→54, " "→55. So "MVP + upgrade path" at 55..73 (3+3+7+5=18). Cue "prototype ladder" at 16..31 (inside "**prototype ladder**": ** at 14..16, so 16..31 "prototype ladder"). ✓.
+
+s8: "tool end-to-end). One position staged for ARGUE (§Staged for ARGUE).": "tool end-to-end)." = 4+1+10+1 = t-o-o-l(4), space(5), e-n-d---t-o---e-n-d = "end-to-end"10→15, ")"→16, "."→17, " "→18. "One position staged for ARGUE": One3+1+position8+1+staged6+1+for3+1+ARGUE5=29 → 18..47. Cue "staged for ARGUE" at 18+13=31..47. ✓.
+
+s9: "**Retrieval strategy added 2026-07-23** — pattern-conditioned recall via": computed prefix 39 then " — "→42. "pattern-conditioned recall"=19+1+6=26 → 42..68. ✓ sentence end 749? s9 end=617, 42..68 within (sentence length 72). ✓.
+
+s12: "ahead: DERIVE (P1 retrieval wiring) → ARGUE → VERIFY → INSTANTIATE.": "ahead: "=7. "DERIVE (P1 retrieval wiring)"=6+1+3+1+9+1+7=28 → 7..35. Cue "P1 retrieval wiring" at 7+7=14..33. ✓.
+
+s13: cue "ACCEPTED live": fragment 0..57 "**Shared-regime Phases 2 and 3 ACCEPTED live 2026-07-23**". Offsets: "**"=2, "Shared-regime"=13→15, " "→16, "Phases"=6→22, " "→23, "2"→24, " "→25, "and"→28, " "→29, "3"→30, " "→31, "ACCEPTED"=8→39, " "→40, "live"→44, " 2026-07-23"→55, "**"→57. So cue "ACCEPTED live" at 31..44. ✓.
+
+s17: computed 0..46; cue "cited use" at 37..46. ✓.
+
+s18: "outcome. Phase 3 then added bitemporal challenge/supersession/retraction,": "outcome. "=9, "Phase"=5→14, " "=15, "3"→16, " then"→21, " added"→27, " "→28. "bitemporal challenge/supersession/retraction"=10+1+31=42 → 28..70. Cue "supersession/retraction" at 28+21=49..72 — beyond 70! "challenge/"=9, "supersession"=12 → 21, "/"→22, "retraction"=10 → offset within fragment 22..45? "bitemporal "=11, "challenge/supersession/retraction"=31 → 11..42. So fragment 28..70, cue "supersession/retraction" starts 28+11+10=49 ("challenge" is 9 chars: c-h-a-l-l-e-n-g-e=9, "/"=1 → "challenge/"=10). So cue 28+11+10=49..49+22=71? "supersession/retraction"=12+1+10=23 →49..72 >70. Wrong. Recompute: "bitemporal"=10, " "=1 →11, "challenge"=9→20, "/"→21, "supersession"=12→33, "/"→34, "retraction"=10→44. Hmm 11+9+1+12+1+10=44. Earlier I said 42 — wrong; it's 44 → fragment 28..72. Sentence s18 range 1129..1202, so fine. Fragment 28..72. Cue "supersession/retraction" at 28+21=49..49+23=72 ✓ exactly.
+
+Wait "challenge/supersession/retraction": challenge(9)+/(1)+supersession(12)+/(1)+retraction(10)=33. So fragment length = 10+1+33=44 ✓. Cue offset: bitemporal(10)+space(1)+challenge(9)+/(1)=21 → 49, length 23 → 49..72. But cue end must be < fragment end? start <= a < b <= end: b=72=end ok. ✓.
+
+s21: "fresh Lean trials closed with independently witnessed outcomes; see": "fresh "=6, "Lean"→11, " "→12, "trials"=6→18, " "→19, "closed"=6→25, " "→26, "with"→30, " "→31. "independently witnessed outcomes"=13+1+9+1+8=32 → 31..63. Sentence end 1418, start 1351: within. ✓.
+
+s23: "mission's P1 PSR wiring and lifecycle rung; shared-regime Phase 4 is the": "mission's "=10, "P1 PSR wiring and lifecycle rung"=2+1+3+1+6+1+3+1+9+1+4=32? P1(2) " "(3) PSR(6) " "(7) wiring(13) " "(14) and(17) " "(18) lifecycle(27) " "(28) rung(32). → 10..42. Cue "P1 PSR wiring" 10..23. ✓.
+
+s24: "dark-only WM consumer.": fragment "dark-only WM consumer" 0..21. Cue same. ✓.
+
+s29: "use. Phases 1–3 are accepted live; Phase 4 is next.": "use. "=5, "Phases 1–3"=6+1+3=10→15, " are"→19, " accepted"→28, " live;"→33, " "→34, "Phase 4 is next"=15 → 34..49. Sentence length 51. ✓.
+
+s31: "  channel (bells) with IATC performatives so ArSE populates by construction.": prefix computed 45. "ArSE populates by construction"=4+1+9+1+2+1+12=30 → 45..75. Sentence len 76. ✓. Cue "populates by construction" at 45+5=50..74.
+
+s32: "  This mission is the same move one layer in: type the *epistemic* channel": prefix 46. "type the *epistemic* channel"=4+1+3+1+11+1+7=28 → 46..74. Sentence len 74 → end must be ≤74; sentence 2040-2114 =74 chars; 46+28=74 ✓. Cue "*epistemic* channel": "type the "=9 → 55..74 ("*epistemic*"=11+" channel"=8=19 → 55..74) ✓.
+
+s33: "  (what an agent learns) so the memory substrate populates by construction.": "  (what an agent learns) so " = 2+5+3+6+8+3+1 = compute: "  "2, "(what"5→7, " an"3→10, " agent"6→16, " learns)"8→24, " so"3→27, " "1→28. "the memory substrate populates by construction"=3+1+7+1+9+1+9+1+2+1+12=47 → 28..75. Sentence len 75 (2115..2190=75) ✓. Cue "populates by construction" at 28+21=49..73? "the memory substrate "=21 → offset 21; "populates by construction"=24 → 49..73 ✓.
+
+s36: "  path is in the same hazard class; whatever discipline resolves one should": "  path is in the " = 2+4+1+2+1+2+1+3+1=17. "same hazard class"=16 → 17..33. ✓.
+
+s39: "  FTS5 text search (D1). The read side of this mission builds on it.": "  FTS5 text search (D1). " = 2+4+1+4+1+6+1+4+1 = "  "2, FTS5→6, " "→7, text→11, " "→12, search→18, " "→19, "(D1)."→23, " "→24. "The read side of this mission builds on it."=3+1+4+1+4+1+2+1+7+1+6+1+2+1+3=43 → 24..67. Sentence len 68 ✓. Cue "builds on it" at 24+31=55..67. ✓.
+
+s45: "  `:expensive-read-busy`) — the hardening work in flight; see \"Related ongoing": "  `:expensive-read-busy`" = 2+21+2=25, ")"→26, " — "→29. "the hardening work in flight"=27 → 29..56. ✓.
+
+s54: "  vitality timer. **Not closed** — week-long steady-state acceptance": "  vitality timer. "=18. "**Not closed**"=13 → 18..31. ✓.
+
+s56: "  this mission should be checked against the TN's diagnostic signature": "  this mission should be "=24? compute: "  "2, this→6,

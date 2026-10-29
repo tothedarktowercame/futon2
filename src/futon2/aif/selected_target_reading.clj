@@ -238,7 +238,7 @@
 (defn prompt
   "Prompt for the designated author.  The reply is analysis JSON only; the
   machine, not the seat, validates and publishes it."
-  [{:keys [request acceptance-contract validation-feedback prior-analysis]}]
+  [{:keys [request acceptance-contract validation-feedback prior-analysis format-correction]}]
   (str "Produce one session_turn_analysis analysis for this immutable request. "
        "Quote every fragment and display cue exactly, including punctuation and "
        "whitespace. The machine derives Unicode-codepoint offsets from each quote "
@@ -252,6 +252,12 @@
        "/home/joe/code/futon3/library. Do not publish it and do not change repositories. "
        "Reply with exactly one JSON object in the analysis-input shape accepted by "
        "/home/joe/code/futon3c/scripts/session_turn_analysis.py complete.\n\n"
+       (when format-correction
+         (str "No JSON object was found in your preceding response. Parser error: "
+              (:parser-error format-correction)
+              ". Return exactly one JSON object in the analysis-input shape below, "
+              "with labeller and sentences (id, fragments, unresolved_reason), "
+              "not a plan or commentary. This is the only format correction.\n\n"))
        (when validation-feedback
          (str "Your preceding answer was rejected by that validator: "
               validation-feedback
@@ -347,14 +353,36 @@
                     contact (fn [issued]
                               (handoff/exchange {:contact answer-fn :request issued
                                                  :decode decode}))
-                    exchange (contact issued)
+                    formatted (handoff/contact-with-format-correction
+                               {:contact answer-fn :request issued
+                                :decode #(decode (if (and (map? %) (nil? (:state %))) %
+                                                    (handoff/response-payload %)))})
+                    _ (doseq [[n response] (map-indexed vector (:responses formatted))]
+                        (spit (io/file (.getParentFile request-file)
+                                       (str "format-response-" (inc n) ".edn"))
+                              (pr-str response)))
+                    exchange (handoff/exchange
+                              {:contact (constantly (:response formatted))
+                               :request issued :decode decode})
                     analysis (:value exchange)]
                 (if-not (= :validated (:status exchange))
                   (refused need
-                           (if (= :designated-author-unavailable (:reason exchange))
+                           (cond
+                             (and (:format-correction formatted)
+                                  (= :response-invalid (:reason exchange)))
+                             :selected-target-reading-unavailable
+                             (= :designated-author-unavailable (:reason exchange))
                              :designated-author-unavailable
-                             :selected-target-reading-answer-invalid)
+                             :else :selected-target-reading-answer-invalid)
                            {:author author :contacted? (:contacted? exchange)
+                            :format-correction (:format-correction formatted)
+                            :reader-job-ids (mapv :job-id (:responses formatted))
+                            :response-pins
+                            (mapv (fn [n]
+                                    (let [f (io/file (.getParentFile request-file)
+                                                     (str "format-response-" n ".edn"))]
+                                      {:path (str f) :sha256 (file-digest f)}))
+                                  (range 1 (inc (count (:responses formatted)))))
                             :answer (select-keys exchange
                                                  [:status :reason :job-id :message])})
                   (let [analysis-input (io/file (.getParentFile request-file)
@@ -484,6 +512,8 @@
                            :request-sha256 request-sha
                            :analysis-digest (:analysis-digest publication)
                            :job-id (:job-id exchange)
+                           :format-correction (:format-correction formatted)
+                           :reader-job-ids (mapv :job-id (:responses formatted))
                            :validation (:validation publication)})))))))))))))
 
 (defn repair!
@@ -491,3 +521,6 @@
   selected-target contract. Pre-choice preparation uses repair-need! directly."
   [opts judgement]
   (repair-need! opts (selected-need judgement)))
+
+(defn current-options [opts]
+  (merge opts (some-> (:reading-reselection/state opts) deref)))
