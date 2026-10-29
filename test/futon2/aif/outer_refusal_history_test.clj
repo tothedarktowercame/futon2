@@ -23,6 +23,15 @@
      (io/file dir history/index-name)
      (history/index-entry record source (index/sha256-file source)))))
 
+(deftest absent-index-is-distinct-from-empty-history
+  (let [dir (temp-dir)
+        inputs {:schema :wm/outer-repeat-inputs-v1 :target "M-no-index"}
+        comparison (history/compare-history dir inputs)]
+    (is (= :history-index-absent (:status comparison)))
+    (is (= inputs (:inputs comparison)))
+    (is (empty? (:comparisons comparison)))
+    (is (= comparison (history/require-new-inputs! comparison)))))
+
 (deftest retained-repick-has-changed-inputs
   (testing "the real recommendation-bindings re-pick is not stopped"
     (let [dir (temp-dir)

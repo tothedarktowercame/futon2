@@ -61,7 +61,9 @@
   [dir]
   (let [file (io/file dir index-name)]
     (if-not (.isFile file)
-      []
+      {:schema :wm/outer-repeat-comparison-v1
+       :status :history-index-absent
+       :index-path (.getPath file)}
       (with-open [reader (io/reader file)]
         (->> (line-seq reader)
              (map-indexed
@@ -81,16 +83,19 @@
   Legacy unreadable rows remain visible in the index but cannot authorize a
   refusal because they carry no target or inputs."
   [dir target]
-  (->> (read-index dir)
-       (filter #(and (= :indexed (:status %))
-                     (keyword? (get-in % [:failure :kind]))
-                     (= target (:target %))))
-       (mapv (fn [row]
-               {:path (:record-path row)
-                :record-sha256 (:record-sha256 row)
-                :run-id (:run-id row)
-                :failure (:failure row)
-                :inputs (:inputs row)}))))
+  (let [index (read-index dir)]
+    (if (map? index)
+      index
+      (->> index
+           (filter #(and (= :indexed (:status %))
+                         (keyword? (get-in % [:failure :kind]))
+                         (= target (:target %))))
+           (mapv (fn [row]
+                   {:path (:record-path row)
+                    :record-sha256 (:record-sha256 row)
+                    :run-id (:run-id row)
+                    :failure (:failure row)
+                    :inputs (:inputs row)}))))))
 
 (defn compare-refusals
   "Compare CURRENT inputs with prior refusals.
@@ -128,7 +133,10 @@
 (defn compare-history
   "Read and compare the terminal refusal history for CURRENT inputs."
   [dir current]
-  (compare-refusals current (prior-refusals dir (:target current))))
+  (let [priors (prior-refusals dir (:target current))]
+    (if (map? priors)
+      (assoc priors :inputs current :comparisons [])
+      (compare-refusals current priors))))
 
 (defn require-new-inputs!
   "Return COMPARISON, or refuse an unchanged repeat with both identities."
