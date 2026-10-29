@@ -6,12 +6,13 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.registered-run-telemetry :as telemetry]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.tripwire :as tripwire]
             [futon2.aif.wm.debugger :as debugger])
-  (:import [java.nio.file Files]
+  (:import [java.nio.file Files StandardCopyOption]
            [java.time Instant]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
@@ -794,11 +795,116 @@
              "src/futon2/aif/tripwire.clj"}
            paths))))
 
-(deftest t12-is-chartered-disabled-and-inert
-  (is (= {:title "four-opportunity zero-grounding target wedge"
-          :enabled? false :status :chartered-stub}
+(def ^:private t12-live-root "/home/joe/code/futon2/data/wm-runs")
+
+(def ^:private t12-live-run-ids
+  ["2026-10-28-f38e1524-1cde-489c-b3e0-d70bfcf9a4f7"
+   "2026-10-28-931e738d-d2ed-4c02-8c77-158567d83e22"
+   "2026-10-28-ca9861a5-dcf7-4d3d-8cf0-c597e5be735c"
+   "2026-10-28-20533916-ed05-4af7-acbf-8ab22ab18321"
+   "2026-10-28-6c47070e-b23e-4f7d-a837-a4153d0bbd7c"
+   "2026-10-28-81bc5d16-76a1-41d3-8fb4-9184074db728"
+   "2026-10-28-efb2884b-1216-48a7-a9e8-cff9f3d4f8c3"])
+
+(defn- copy-live-t12-history!
+  "Copy retained record bytes and their actual sealed stream carriers."
+  [target ids]
+  (let [wanted (set ids)
+        events (:events (previous-run/read-stream t12-live-root))]
+    (doseq [id ids]
+      (let [source (io/file t12-live-root (str "tick-run-record-" id ".edn"))
+            destination (io/file target (.getName source))]
+        (Files/copy (.toPath source) (.toPath destination)
+                    (into-array StandardCopyOption
+                                [StandardCopyOption/REPLACE_EXISTING]))))
+    (spit (previous-run/stream-file target)
+          (apply str
+                 (for [event events
+                       :when (contains? wanted (:run/id event))]
+                   (str (pr-str
+                         (if (= :closed (:event event))
+                           (assoc event :record-file
+                                  (.getCanonicalPath
+                                   (io/file target
+                                            (str "tick-run-record-"
+                                                 (:run/id event) ".edn"))))
+                           event))
+                        "\n"))))))
+
+(defn- t12-observation
+  ([root] (t12-observation root nil))
+  ([root run-id]
+   (#'tripwire/cross-run-observation
+    (cond-> {:repair-root (.getPath root)
+             :run-record-dir (.getPath root)
+             :cohort? true
+             :tripwire/cohort-history []
+             :tripwire/a-matrix-events []
+             :tripwire/grounding-witnesses []}
+      run-id (assoc :run-id run-id))
+    {:phase :opportunity :transition :start})))
+
+(deftest t12-retained-zero-grounding-streak-fires-before-fifth-opportunity
+  (is (= {:title "four-opportunity zero-grounding target wedge" :enabled? true}
          (get @tripwire/wire-registry :T12)))
-  (is (empty? (tripwire/evaluate-wire :T12 {:tripwire/force? true}))))
+  (let [root (temp-dir)]
+    (copy-live-t12-history! root (take 3 t12-live-run-ids))
+    (is (empty? (tripwire/evaluate-wire :T12 (t12-observation root))))
+    (copy-live-t12-history! root (take 4 t12-live-run-ids))
+    ;; The runner appends the fifth opportunity's start before tripwire
+    ;; observation. It is excluded by exact current-run identity, not mistaken
+    ;; for an older unclosed run that would break the streak.
+    (spit (previous-run/stream-file root)
+          (str (pr-str {:event :started :run/id "current-fifth"
+                        :startedAt "2026-10-28T21:44:45Z"}) "\n") :append true)
+    (let [observation (t12-observation root "current-fifth")
+          witness (first (tripwire/evaluate-wire :T12 observation))]
+      (is (= :four-opportunity-zero-grounding-target-wedge (:kind witness)))
+      (is (= "M-current" (:target witness)))
+      (is (= 4 (:consecutive-count witness)))
+      (is (= (vec (take 4 t12-live-run-ids)) (:run-ids witness)))
+      (is (every? #(re-matches #"[0-9a-f]{64}" (:sha256 %))
+                  (:record-pins witness)))
+      (let [report-root (temp-dir)
+            data (halted! {:run-id "current-fifth"
+                           :repair-root (.getPath root)
+                           :run-record-dir (.getPath root)
+                           :cohort? true
+                           :tripwire/report-root (.getPath report-root)
+                           :tripwire/disabled-wire-ids
+                           (disj (set (keys @tripwire/wire-registry)) :T12)
+                           :tripwire/cohort-history []
+                           :tripwire/a-matrix-events []
+                           :tripwire/grounding-witnesses []}
+                          {:phase :opportunity :transition :start})]
+        (is (= :T12 (:tripwire/wire-id data)))
+        (is (.isFile (io/file (:tripwire/report data))))))))
+
+(deftest t12-retained-seven-record-source-and-progress-resets
+  (let [root (temp-dir)]
+    (copy-live-t12-history! root t12-live-run-ids)
+    (let [history (:t12-run-history (t12-observation root))
+          recent (vec (take-last tripwire/t12-window-size history))]
+      (is (= tripwire/t12-window-size (count history)))
+      (is (= (vec (take-last tripwire/t12-window-size t12-live-run-ids))
+             (mapv :run-id history)))
+      (is (= 1 (count (tripwire/evaluate-wire
+                       :T12 {:tripwire/force? true
+                             :t12-run-history history}))))
+      (is (empty? (tripwire/evaluate-wire
+                   :T12 {:tripwire/force? true
+                         :t12-run-history
+                         (assoc-in recent [1 :target] "M-other")})))
+      (is (empty? (tripwire/evaluate-wire
+                   :T12 {:tripwire/force? true
+                         :t12-run-history
+                         (-> recent
+                             (assoc-in [2 :run-output]
+                                       {:schema :wm/run-output-v1
+                                        :status :present :outcome :changed})
+                             (assoc-in [2 :terminal-commit]
+                                       {:repo "futon2" :sha "abc"})
+                             (assoc-in [2 :grounded-commit-reference?] true))}))))))
 
 (def run-5b-repo "/home/joe/code/futon5a")
 
