@@ -251,11 +251,16 @@
       (= (:by answer) (:accepted-by answer))
       (bad :answer-author-equals-reviewer {:who (:by answer)})
 
-      ;; every requisitioned hole resolved, no foreign hole invented
-      (not= (set (map :hole-id (:holes requisition)))
+      ;; every requisitioned hole resolved, no foreign hole invented.
+      ;; The comparison runs over DECODED hole ids on BOTH sides: requisition
+      ;; hole ids arriving over the JSON transport carry the encoded string /
+      ;; keyword form (e.g. "[\"p/x\" 6]"), which decoded-hole-id maps to the
+      ;; canonical vector id the answer's decision keys are normalized to
+      ;; (injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0).
+      (not= (set (map (comp decoded-hole-id :hole-id) (:holes requisition)))
             (set (keys decisions)))
       (bad :answer-holes-unresolved
-           {:requisitioned (vec (sort (map (comp pr-str :hole-id)
+           {:requisitioned (vec (sort (map (comp pr-str decoded-hole-id :hole-id)
                                            (:holes requisition))))
             :answered (vec (sort (map pr-str (keys decisions))))})
 
