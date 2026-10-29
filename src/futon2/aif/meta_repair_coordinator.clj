@@ -1,8 +1,11 @@
 (ns futon2.aif.meta-repair-coordinator
   "Dedicated META self-heal coordinator. It has no ordinary task/policy/fold
   dependencies; all effects are explicit author/review/enact/retry ports."
-  (:require [clojure.string :as str]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-injury-ledger :as ledger]))
 
 (def work-order-schema :wm/meta-repair-work-order-v1)
@@ -304,51 +307,86 @@
 (defn- requeue-phase [n]
   (keyword (str "retry-requeue-" n)))
 
-(defn- failed-child-observation
-  "Read the durable service-side non-success of one meta-retry child through
-   the read-only :retry-click-status-fn port. Returns the evidence map only
-   for a durably recorded service failure or completed typed non-success whose
-   durable acceptance record says the runner returned no run record and whose
-   evidence pin seals the bytes the observation will cite; other states return nil. A recorded
-   non-success without a valid evidence pin refuses typedly rather than
-   observing unsourced evidence."
-  [ports retry-click]
-  (when-let [status-fn (:retry-click-status-fn ports)]
-    (let [observed (try (status-fn retry-click) (catch Throwable _ nil))]
-      (when (map? observed)
-        (let [service-failed? (and (= :failed (:status observed))
-                                   (= :service-failed
-                                      (get-in observed [:result :outcome])))
-              completed-without-run-record?
-              (and (= :completed (:status observed))
-                   (keyword? (get-in observed [:result :runtime-disposition :reason]))
-                   (= :absent (:run-record-status observed))
-                   (= :runner-did-not-return-run-record
-                      (:run-record-absence observed))
-                   (false? (:run-record-reference-conflict? observed)))]
-          (cond
-          (not (or service-failed? completed-without-run-record?)) nil
-          (not (pin? (:evidence-pin observed)))
-          (refusal :coordinator/failed-child-evidence-refused
-                   {:retry-click retry-click
-                    :result (select-keys (:result observed) [:outcome :error])})
-          :else observed))))))
+(defn- entry-classification-pin [entry]
+  (or (:new-cause-pin entry) (:cause-record-pin entry) (:record-pin entry)))
 
-(defn- observe-failed-child!
+(defn- pinned-run-record-click [pin]
+  (try
+    (let [file (io/file (:path pin))]
+      (when (.isFile file)
+        (let [bytes (java.nio.file.Files/readAllBytes (.toPath file))]
+          (when (= (:sha256 pin) (load-identity/sha256 bytes))
+            (let [record (edn/read-string (String. bytes "UTF-8"))]
+              (or (:click/id record) (:click-id record)))))))
+    (catch Throwable _ nil)))
+
+(defn- already-ingested-other-injury-pin
+  [history injury-id retry-click]
+  (let [enacted (last (filter #(and (= injury-id (:injury-id %))
+                                    (= :enacted (:state %))
+                                    (= retry-click (:retry-click %)))
+                              (:entries history)))]
+    (when enacted
+      (some (fn [entry]
+              (let [pin (entry-classification-pin entry)]
+                (when (and (> (:ordinal entry) (:ordinal enacted))
+                           (not= injury-id (:injury-id entry))
+                           (pin? pin)
+                           (= retry-click (pinned-run-record-click pin)))
+                  pin)))
+            (rseq (:entries history))))))
+
+(defn- retry-child-observation
+  "Read durable evidence for one meta-retry child. First reconcile a pinned
+   run record already classified onto another injury; otherwise consult the
+   narrow :retry-click-status-fn fallback for service failure or completed
+   typed non-success without a run record. Other states return nil."
+  [history ports injury-id retry-click]
+  (if-let [ingested-pin (already-ingested-other-injury-pin
+                         history injury-id retry-click)]
+    {:status :completed :evidence-pin ingested-pin}
+    (when-let [status-fn (:retry-click-status-fn ports)]
+      (let [observed (try (status-fn retry-click) (catch Throwable _ nil))]
+        (when (map? observed)
+          (let [service-failed? (and (= :failed (:status observed))
+                                     (= :service-failed
+                                        (get-in observed [:result :outcome])))
+                completed-without-run-record?
+                (and (= :completed (:status observed))
+                     (keyword? (get-in observed [:result :runtime-disposition :reason]))
+                     (= :absent (:run-record-status observed))
+                     (= :runner-did-not-return-run-record
+                        (:run-record-absence observed))
+                     (false? (:run-record-reference-conflict? observed)))]
+            (cond
+              (not (or service-failed? completed-without-run-record?)) nil
+              (not (pin? (:evidence-pin observed)))
+              (refusal :coordinator/failed-child-evidence-refused
+                       {:retry-click retry-click
+                        :result (select-keys (:result observed) [:outcome :error])})
+              :else observed)))))))
+
+(defn- observe-retry-child!
   "Append the :retry-inconclusive observation terminal ingestion would have
-  appended for a child that failed service-side before any run record
-  existed (one-click frontier 2026-10-22: wm-requeue-7-4-repair/239cf988
-  died at the stale-runner-source refusal, before persist-run-record!, so
-  the ledger never saw it). The observation cites the child's own durable
-  acceptance evidence by pin; no failure or success is synthesized, and an
-  already-ingested evidence pin is never observed twice. Returns the
-  advanced history, or nil when there is nothing durable to observe."
+   appended for a child that failed service-side before any run record
+   existed (one-click frontier 2026-10-22: wm-requeue-7-4-repair/239cf988
+   died at the stale-runner-source refusal, before persist-run-record!, so
+   the ledger never saw it). The observation cites the child's own durable
+   acceptance evidence by pin; no failure or success is synthesized. A
+   retry-attributed observation is never appended twice, while a pin already
+   consumed by a different injury may receive the missing retry attribution.
+   Returns the advanced history, or nil when there is nothing durable to observe."
   [history ports injury-id retry-click authority-verifier]
-  (when-let [observed (failed-child-observation ports retry-click)]
+  (when-let [observed (retry-child-observation
+                       history ports injury-id retry-click)]
     (if (= :refused (:status observed))
       (stop! observed)
       (let [pin (:evidence-pin observed)]
-        (when-not (some #(= pin (:record-pin %)) (:entries history))
+        (when-not (some #(and (= :retry-inconclusive (:observation-kind %))
+                              (= pin (:record-pin %))
+                              (= injury-id (:injury-id %))
+                              (= retry-click (:retry-click %)))
+                        (:entries history))
           (let [appended (ledger/append-observation
                           history pin :retry-inconclusive
                           {:injury-id injury-id :retry-click retry-click}
@@ -371,9 +409,9 @@
           (ledger/pending-requeue history injury-id authority-verifier)
           observed-history
           (when-not pending-before-observation?
-            (observe-failed-child! history ports injury-id
-                                   (:retry-click latest-before-observation)
-                                   authority-verifier))
+            (observe-retry-child! history ports injury-id
+                                  (:retry-click latest-before-observation)
+                                  authority-verifier))
           history (or observed-history history)
           latest (latest-transition history injury-id)
           n (or (ledger/requeue-ordinal history injury-id) 0)
