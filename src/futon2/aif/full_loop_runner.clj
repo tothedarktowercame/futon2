@@ -31,6 +31,7 @@
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.token-outcome-pair :as token-outcome-pair]
             [futon2.aif.pattern-observation :as pattern-observation]
+            [futon2.aif.policy-satisfaction :as policy-satisfaction]
             [futon2.aif.selected-want-outcome :as selected-want-outcome]
             [futon2.aif.reviewer-falsifier :as reviewer-falsifier]
             [futon2.aif.surprise :as surprise]
@@ -1544,6 +1545,14 @@
                      (assoc :grounded-commit grounded-commit)
                      true
                      (terminal-receipt/attach (:outcome result)))
+            satisfaction (policy-satisfaction/retain!
+                          (:policy-satisfaction-root raw-opts)
+                          {:run-record record
+                           :construction (get-in result [:checkpoints :construction :judgment])
+                           :mission-source-sha256
+                           (get-in result [:checkpoints :construction :judgment
+                                           :mission-source-sha256])})
+            record (cond-> record satisfaction (assoc :policy-satisfaction satisfaction))
             written (run-record-io/write-run-record-stream! dir run-id record)]
         (outer-refusal-index/append-run-record! dir written record)
         ;; this run's close in the Q6 run stream, beside the record it names
@@ -8129,6 +8138,7 @@
                     (swap! checkpoints update :selection reconcile-selection-publication record))
                 construction-cell
                 (term (cond-> {:mission (str target)
+                              :mission-source-sha256 (get-in mission [:source :sha256])
                               :cascade (select-keys construction
                                                     [:psi :cascade-score :semilattice :cascade-structure
                                                      :operational-plan
