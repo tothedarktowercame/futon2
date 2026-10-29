@@ -1,0 +1,12 @@
+{
+  "schema": "wm/open-cascade-authoring-response-v1",
+  "requisition-id": "aab759a850cbf03fdda5c253c1ccb7c0bd71df81c29ac946cb74c3a2d78747de",
+  "cascade-digest": "ee1da18c2cf14fcad3b1ba68afc2c98ddd98ced91db7627732df5c3321d5d352",
+  "by": "wm-author",
+  "decisions": "Authored operational clauses for exactly the three listed holes, keyed by hole id, each with :operation, :capability, :completion-check plus :consumes/:produces. Completion checks quote the observable condition in the pinned mission status line ('INSTANTIATE complete (2026-05-01) for evidence-store sibling'; 'STOP-THE-LINE HOT-FIX, outside normal queue cadence'; 'Three remaining siblings handed to Codex via GitHub issue #65').",
+  "patch": {
+    "namespace": "futon2.aif.wm.authored.req-aab759a8",
+    "var": "futon2.aif.wm.authored.req-aab759a8/decisions",
+    "source-digest": "beba8263dc0e5550b00ad1a8650ed0894fd42b3aad3c75f170a724d102da55b5"
+  }
+}

@@ -14,7 +14,7 @@
            [java.util UUID]))
 
 (def ^:private terminal-record-name
-  #"^tick-run-record-\d{4}-\d{2}-\d{2}-[^.]+\.edn$")
+  #"^tick-run-record-[^.]+\.edn$")
 
 (defn sha256-file
   "Return the SHA-256 hex digest of FILE without retaining its bytes."
