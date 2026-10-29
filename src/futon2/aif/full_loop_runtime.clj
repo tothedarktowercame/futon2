@@ -53,6 +53,12 @@
   "/home/joe/code/futon2/data/wm-cascade-continuation-failures")
 (def default-ticket-readiness-manifest
   "/home/joe/code/futon2/data/wm-ticket-readiness/manifest.edn")
+(def default-ticket-readiness-prompt-budget-chars
+  ;; futon3c.agents.zai-api/default-context-policy records 128000 as the
+  ;; conservative floor used when the provider publishes no measured limit.
+  ;; A character bound at that same floor is stricter for ordinary prose.
+  128000)
+(def default-ticket-readiness-source-summary-limit 16)
 (def default-giraffe-root "/home/joe/code/storage/giraffe")
 
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
@@ -178,20 +184,55 @@
 (defn- designated-author-answer-fn [opts prompt-fn]
   (designated-agent-answer-fn opts (:author opts) prompt-fn "brief"))
 
-(defn- ticket-readiness-prompt [proposal]
-  (str "Assess exactly one bounded ticket preparation increment. Return one JSON object: "
-       "{schema:'wm/ticket-readiness-response-v1', increment:'preparation', "
-       "ticket-id, source-pin, proposal-pin, increment-id, increment-want, "
-       "increment-locator, "
-       "preparation-dependencies:'satisfied'|'blocked'}. "
-       "Do not claim implementation completion or global dependency coverage. Proposal: "
-       (pr-str proposal)))
+(defn- readiness-source-pin [source]
+  (if (map? source)
+    (select-keys source [:id :path :sha256 :revision])
+    {:id (str source)}))
+
+(defn- ticket-readiness-prompt [opts proposal]
+  (let [budget (:ticket-readiness-prompt-budget-chars opts)
+        source-limit (:ticket-readiness-source-summary-limit opts)
+        sources (vec (:sources proposal))
+        summary {:schema (:schema proposal)
+                 :status (:status proposal)
+                 :origin (:origin proposal)
+                 :proposal-pin (ticket-readiness/value-digest proposal)
+                 :target (if (map? (:target proposal))
+                           (select-keys (:target proposal)
+                                        [:id :path :sha256 :revision])
+                           {:id (str (:target proposal))})
+                 :source-count (count sources)
+                 :source-pins (mapv readiness-source-pin
+                                    (take source-limit sources))
+                 :source-pins-truncated? (> (count sources) source-limit)}
+        prompt
+        (str "Assess exactly one bounded ticket preparation increment. Return one JSON object: "
+             "{schema:'wm/ticket-readiness-response-v1', increment:'preparation', "
+             "ticket-id, source-pin, proposal-pin, increment-id, increment-want, "
+             "increment-locator, "
+             "preparation-dependencies:'satisfied'|'blocked'}. "
+             "Do not claim implementation completion or global dependency coverage. "
+             "The proposal is identified by its full-value pin; source bodies are not "
+             "part of this contact. Proposal summary: " (pr-str summary))
+        prompt-chars (count prompt)]
+    (if (<= prompt-chars budget)
+      {:status :ready :prompt prompt :prompt-chars prompt-chars
+       :prompt-budget-chars budget :proposal-summary summary}
+      {:state :not-contacted :status :refused
+       :reason :readiness/prompt-over-budget
+       :prompt-chars prompt-chars :prompt-budget-chars budget
+       :proposal-pin (:proposal-pin summary)})))
 
 (defn ticket-readiness-refresh-config
   "Production preparation-only composition from existing canonical readers.
   The Agency response is retained beside the manifest before validation."
   [opts]
-  (let [manifest-path (or (:ticket-readiness-manifest-path opts)
+  (let [opts (merge {:ticket-readiness-prompt-budget-chars
+                     default-ticket-readiness-prompt-budget-chars
+                     :ticket-readiness-source-summary-limit
+                     default-ticket-readiness-source-summary-limit}
+                    opts)
+        manifest-path (or (:ticket-readiness-manifest-path opts)
                           default-ticket-readiness-manifest)
         tickets (->> (:tickets (mission-registry/load-tickets))
                      (filter mission-registry/live-ticket?) vec)
@@ -200,15 +241,17 @@
                      (readiness-inputs/ticket-readiness-input
                       ticket snapshot (meta-pipeline/pipeline-membership snapshot))))
         contact-resolver #(runner/read-job! opts %)
-        contact (designated-agent-answer-fn opts (:author opts)
-                                            ticket-readiness-prompt "brief")]
+        contact (designated-agent-answer-fn opts (:author opts) :prompt "brief")]
     {:tickets tickets :manifest-path manifest-path :input-fn input-fn
      :contact-resolver contact-resolver
      :prepare-fn (fn [ticket]
                    (interpretation-request/prepare-proposal!
                     (:id ticket) :ticket mission-registry/default-code-root))
      :answer-fn (fn [proposal]
-                  (let [response (contact proposal)
+                  (let [prompt-result (ticket-readiness-prompt opts proposal)
+                        response (if (= :ready (:status prompt-result))
+                                   (contact prompt-result)
+                                   prompt-result)
                         answer (handoff/response-map response)
                         result-pin (ticket-readiness/retain-contact-result!
                                     manifest-path response)]

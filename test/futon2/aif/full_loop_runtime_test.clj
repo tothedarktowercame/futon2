@@ -81,6 +81,61 @@
     (is (fn? (:ticket-readiness-refresh preview)))
     (is (every? #(re-matches #"T-.+" (:ticket-id %)) results))))
 
+(defn- readiness-proposal-with-sources [n]
+  {:schema :wm/cascade-proposal-request-v1
+   :status :proposed
+   :origin :retrieval-proposed
+   :target {:id "T-evidence-pinned-to-mutable-prose-26082026"
+            :path "/home/joe/code/futon3c/holes/tickets/T-evidence-pinned-to-mutable-prose-26082026.md"
+            :sha256 (apply str (repeat 64 "a"))}
+   :sources
+   (mapv (fn [i]
+           {:id (str "/retained/source/" i "#" (apply str (repeat 64 "b")))
+            :path (str "/retained/source/" i)
+            :sha256 (apply str (repeat 64 "b"))
+            :revision (apply str (repeat 40 "c"))
+            :body (apply str (repeat 4096 "unbounded source body "))})
+         (range n))})
+
+(deftest retained-readiness-shape-produces-a-bounded-pinned-prompt
+  ;; Iteration 8's failed prompt was for this exact ticket and began with an
+  ;; unbounded :sources vector.  Preserve that population shape, including
+  ;; bodies which the old `(pr-str proposal)` sent to the provider.
+  (let [proposal (readiness-proposal-with-sources 64)
+        old-chars (count (str "Proposal: " (pr-str proposal)))
+        result (#'runtime/ticket-readiness-prompt
+                {:ticket-readiness-prompt-budget-chars
+                 runtime/default-ticket-readiness-prompt-budget-chars
+                 :ticket-readiness-source-summary-limit
+                 runtime/default-ticket-readiness-source-summary-limit}
+                proposal)]
+    (is (> old-chars runtime/default-ticket-readiness-prompt-budget-chars))
+    (is (= :ready (:status result)))
+    (is (< (:prompt-chars result) (:prompt-budget-chars result)))
+    (is (= 64 (get-in result [:proposal-summary :source-count])))
+    (is (= runtime/default-ticket-readiness-source-summary-limit
+           (count (get-in result [:proposal-summary :source-pins]))))
+    (is (not (clojure.string/includes? (:prompt result) "unbounded source body")))))
+
+(deftest over-budget-readiness-refuses-before-provider-contact
+  (let [contacts (atom 0)
+        proposal (readiness-proposal-with-sources 1)
+        config (with-redefs [flight-runner/agency-answer-fn
+                             (fn [_]
+                               (fn [_]
+                                 (swap! contacts inc)
+                                 {:state :completed :text "unexpected"}))]
+                 (runtime/ticket-readiness-refresh-config
+                  {:author "wm-author"
+                   :ticket-readiness-prompt-budget-chars 1
+                   :ticket-readiness-source-summary-limit 1}))
+        result ((:answer-fn config) proposal)]
+    (is (= 0 @contacts))
+    (is (= :refused (:status result)))
+    (is (= :readiness/prompt-over-budget (:reason result)))
+    (is (pos? (:prompt-chars result)))
+    (is (= 1 (:prompt-budget-chars result)))))
+
 (deftest claimed-injury-carries-intake-bindings-from-its-transaction
   (let [dir (f32-root)
         ledger-path (str dir "/ledger.edn")
