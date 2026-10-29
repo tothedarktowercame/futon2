@@ -27,6 +27,23 @@
                                  :sha256 (apply str (repeat 64 "a"))}})
           :meta-repair-ports ports}))
 
+(deftest absent-acceptance-return-limit-is-omitted-but-explicit-invalid-values-refuse
+  (let [env (harness/prepare-environment! (root))
+        base (harness/work-order-options env)
+        absent (#'production/work-order-options base)
+        prepared (coordinator/prepare (:durable env) absent)
+        explicit-nil (#'production/work-order-options
+                      (assoc base :meta-acceptance-return-limit nil))
+        negative (#'production/work-order-options
+                  (assoc base :meta-acceptance-return-limit -1))]
+    (is (not (contains? absent :acceptance-return-limit)))
+    (is (= :prepared (:status prepared)))
+    (is (= :valid
+           (:status (coordinator/verify-work-order (:work-order prepared)))))
+    (is (contains? explicit-nil :acceptance-return-limit))
+    (is (= :refused (:status (coordinator/prepare (:durable env) explicit-nil))))
+    (is (= :refused (:status (coordinator/prepare (:durable env) negative))))))
+
 (defn- acceptance-case
   ([id] (acceptance-case id :configuration))
   ([id expected]
