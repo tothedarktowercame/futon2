@@ -1,4 +1,5 @@
 # E-kimi-task-170 — pattern-stage reading kimi-2-1790890069 (7 patterns)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): 7-pattern stage-labelling task whose answers the loop harness checked and accepted (7 accepted, 0 refused); accepted labels persisted in the additions file. Evidence: /home/joe/code/futon0/analysis/audits/pattern-stage-read-loop.log.jsonl, /home/joe/code/futon0/analysis/audits/pattern-stage-additions-2026-10-01.jsonl.
 
 **Requisition:** completed — 2026-10-01T21:31:07Z, job invoke-1790890069897-29868-a6084cbd, state done
 

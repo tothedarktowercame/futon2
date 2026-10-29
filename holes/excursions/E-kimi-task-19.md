@@ -1,4 +1,5 @@
 # E-kimi-task-19 — registry: newest run for a COMMAND, so gate runs are lookupable
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): latest-run-for-command landed in futon3c as commit b38658218 'test-registry: latest-run-for-command — gate runs (bb/sh/lake) are lookupable'. Evidence: b3865821869c72a96137d5784ac4f7eab06997a3.
 
 **Requisition:** completed — 2026-09-25T03:02:56Z, job invoke-1790304031138-24111-afe10ca9, state done
 

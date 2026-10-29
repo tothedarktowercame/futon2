@@ -1,4 +1,5 @@
 # E-kimi-task-24 — H-interp: one interpretation grammar, keys normalised and :forces required
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Receipt-key normalisation (:scope->:scope-limit, :author->:by) and required :forces landed with tests and warrant, swept into futon2 commit 8f85742a; the excursion's own outcome section records the landing. Evidence: 8f85742a.
 
 **Requisition:** completed — 2026-09-25T02:58:21Z, job invoke-1790304588428-24125-f1b68e1e, state done
 

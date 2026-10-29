@@ -1,4 +1,5 @@
 # E-kimi-task-154 — 象 backfill pack kimi-1-1790886885 (8 turns, 2026-09-26_2026-09-27_block000)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The 8-turn 象 backfill pack kimi-1-1790886885 was worked to completion: the loop log records job invoke-1790886886647-29813-c9ff29a6 state done with 6 published and 2 refused for recorded citation reasons (the excursion's own rule allows leaving out turns that cannot be read). Evidence: /home/joe/code/storage/operator-turns/backfill-loop.jsonl.
 
 **Requisition:** completed — 2026-10-01T20:49:27Z, job invoke-1790886886647-29813-c9ff29a6, state done
 

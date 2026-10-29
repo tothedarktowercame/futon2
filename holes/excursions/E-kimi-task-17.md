@@ -1,4 +1,5 @@
 # E-kimi-task-17 — H-C: a definition of outcome for E4/E5/E6
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): H-C discovery packet delivered: the definition of 'outcome' with the E4/E5/E6 classification exists as proof2/packets/H-C-DEF.md, authored kimi-5 2026-09-25. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/H-C-DEF.md.
 
 **Requisition:** completed — 2026-09-25T02:49:17Z, job invoke-1790304026692-24109-600bc1f5, state done
 

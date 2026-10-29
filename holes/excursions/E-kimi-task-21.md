@@ -1,4 +1,5 @@
 # E-kimi-task-21 — H-grain fix: grain-gate as code, pinned by click-001
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Built futon2.aif.grain-gate with the six typed refusals and click-001-live-pinned tests; landed as futon2 commit fc482415b and the namespace and test files exist. Evidence: fc482415b, /home/joe/code/futon2/src/futon2/aif/grain_gate.clj, /home/joe/code/futon2/test/futon2/aif/grain_gate_test.clj.
 
 **Requisition:** completed — 2026-09-25T02:52:43Z, job invoke-1790304299748-24117-f0432713, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-23 — H-interp: agent-search retrieval in the want-interpretation prompt
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Ported the agent-search retrieval affordance into the want-interpretation prompt and validator; agent-search is present in futon2 want_interpretation.clj with its tests. Evidence: /home/joe/code/futon2/src/futon2/aif/want_interpretation.clj.
 
 **Requisition:** completed — 2026-09-25T02:56:04Z, job invoke-1790304585938-24124-5c428c41, state done
 

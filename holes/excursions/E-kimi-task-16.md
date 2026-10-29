@@ -1,4 +1,5 @@
 # E-kimi-task-16 — H-grain discovery: grain as data and the pre-enactment check
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The H-grain discovery packet was delivered as futon2/holes/labs/wm-contract/proof2/packets/H-GRAIN-D.md (13 KB, authored by kimi-4 citing E-kimi-task-16) and committed as 80541ebc7. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/H-GRAIN-D.md, 80541ebc71f8a6bc5da8b12cdd1bf24a7091b72f.
 
 **Requisition:** completed — 2026-09-25T02:44:26Z, job invoke-1790304024683-24108-622ed86c, state done
 

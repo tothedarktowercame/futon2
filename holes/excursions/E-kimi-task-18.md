@@ -1,4 +1,5 @@
 # E-kimi-task-18 — registry: namespace ledger reaches the live lookup and the CLI
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Namespace-ledger-path resolution landed in futon3c as commit 7466251cf 'registry: namespace ledger reaches the live lookup and the CLI'. Evidence: 7466251cf4f819eb1fa95c62add79113bba4d0fc.
 
 **Requisition:** completed — 2026-09-25T02:46:00Z, job invoke-1790304029096-24110-6c84f651, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-25 — H-C: outcome filter by the four-clause definition (E4/E5)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The four-clause outcome filter landed in the futon2 outcomes extractor at commit 3bf04be3, which exists in the repo. Evidence: 3bf04be3.
 
 **Requisition:** completed — 2026-09-25T03:03:13Z, job invoke-1790304752383-24128-6bc0e3dd, state done
 

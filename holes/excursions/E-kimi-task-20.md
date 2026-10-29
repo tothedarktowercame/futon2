@@ -1,4 +1,5 @@
 # E-kimi-task-20 — two one-assertion pins and three non-author registrations
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Both one-assertion pins (universe-absent no-op and both-sentences-cued) and the non-author registrations landed in futon2 as commits c87d8113a and 43ed49c50, both titled E-kimi-task-20. Evidence: c87d8113a9a0e88c2e60545b28a14e6a1c6f2cbc, 43ed49c50dac7bb72799496e6b504343ed663193.
 
 **Requisition:** completed — 2026-09-25T02:46:59Z, job invoke-1790304033160-24112-dd4f2c85, state done
 

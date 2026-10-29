@@ -1,4 +1,5 @@
 # E-kimi-task-2 — constructor scores every candidate of one problem over one token universe (H-VALUE-G-D §6)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The three no-op-when-absent universe edits landed in futon2 as commit a98f5879 'H-VALUE-G-D: constructor scores every candidate of one problem over ONE token universe'. Evidence: a98f5879a4e179700deb54bf9ab9bb03b9005360.
 
 **Requisition:** completed — 2026-09-25T00:57:00Z, job invoke-1790296989691-24060-b5d19c1a, state done
 

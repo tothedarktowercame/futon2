@@ -1,4 +1,5 @@
 # E-kimi-task-22 — ledger build scans the whole store or records why not
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Made the namespace-ledger build page through the whole store with no fixed cap and record typed failure; the paged build (:query/before cursors, no fixed cap) is present in futon3c test_registry.clj. Evidence: /home/joe/code/futon3c/src/futon3c/test_registry.clj.
 
 **Requisition:** completed — 2026-09-25T02:58:31Z, job invoke-1790304483672-24122-0442da01, state done
 

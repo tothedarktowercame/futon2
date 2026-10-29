@@ -1,4 +1,5 @@
 # E-kimi-task-156 — 象 backfill pack kimi-3-1790887129 (10 turns, live-retry_block000)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The 10-turn live-retry 象 backfill pack kimi-3-1790887129 was annotated and published: the loop log records job invoke-1790887131974-29822-f47cca98 state done, published 10, refused 0. Evidence: /home/joe/code/storage/operator-turns/backfill-loop.jsonl.
 
 **Requisition:** completed — 2026-10-01T20:44:58Z, job invoke-1790887131974-29822-f47cca98, state done
 

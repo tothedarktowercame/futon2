@@ -1,4 +1,5 @@
 # E-kimi-task-158 — 象 backfill pack kimi-3-1790887517 (2 turns, 2026-07-01_2026-07-31_block006)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The 2-turn 象 backfill pack kimi-3-1790887517 (block006) was annotated and published: the loop log records job invoke-1790887519684-29828-e7b2d3cf state done, published 2, refused 0. Evidence: /home/joe/code/storage/operator-turns/backfill-loop.jsonl.
 
 **Requisition:** completed — 2026-10-01T20:49:11Z, job invoke-1790887519684-29828-e7b2d3cf, state done
 
