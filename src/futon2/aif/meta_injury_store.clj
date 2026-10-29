@@ -206,6 +206,48 @@
     (catch Throwable t
       (refusal :store/medic-transaction-failed {:detail (ex-message t)})))))
 
+(defn transact-cause-reattribution!
+  "Locked atomic persistence for the medic correction and its replacement
+  opening.  No intermediate one-entry ledger is ever written."
+  [path record-pin operation authority-verifier]
+  (try
+    (let [lock-file (io/file (str path ".lock"))]
+      (when-let [parent (.getParentFile lock-file)] (.mkdirs parent))
+      (with-open [channel (FileChannel/open
+                           (.toPath lock-file)
+                           (into-array StandardOpenOption
+                                       [StandardOpenOption/CREATE StandardOpenOption/WRITE]))
+                  _lock (.lock channel)]
+        (let [file (io/file path)]
+          (if-not (.isFile file)
+            (refusal :store/durable-ledger-required)
+            (let [read-result (read-one-form (slurp file))
+                  value (:value read-result)
+                  checked (when (= :read (:status read-result))
+                            (ledger/validate-ledger value authority-verifier))]
+              (cond
+                (not= :read (:status read-result)) read-result
+                (not= :valid (:status checked))
+                (refusal :store/tampered-ledger {:defects (:defects checked)})
+                :else
+                (let [result (ledger/append-cause-reattribution
+                              value record-pin operation authority-verifier)
+                      result-check (when (= :appended (:status result))
+                                     (ledger/validate-ledger
+                                      (:ledger result) authority-verifier))]
+                  (cond
+                    (not= :appended (:status result)) result
+                    (not= :valid (:status result-check))
+                    (refusal :store/invalid-medic-reattribution-result
+                             {:defects (:defects result-check)})
+                    :else (do (atomic-write! path (:ledger result))
+                              (assoc result
+                                     :durability :atomic-locked-one-form))))))))))
+    (catch java.nio.channels.OverlappingFileLockException _
+      (refusal :store/lock-contended))
+    (catch Throwable t
+      (refusal :store/medic-reattribution-failed {:detail (ex-message t)}))))
+
 (defn ingest-record-file!
   "Pin exact record bytes, require exactly one EDN form, classify, then perform
   the locked atomic transaction."

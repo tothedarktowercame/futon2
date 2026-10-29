@@ -6,6 +6,7 @@
   namespace performs no filesystem, network, store, or ledger mutation."
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
+            [futon2.aif.cause-reattribution :as reattribution]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-injury-ledger :as ledger]
@@ -42,7 +43,8 @@
   [external]
   (fn [observation]
     (or (try (true? (external observation)) (catch Throwable _ false))
-        (out-of-band/retained-checked-medic-authority observation))))
+        (out-of-band/retained-checked-medic-authority observation)
+        (reattribution/retained-authority observation))))
 
 (defn resolution-verifier [value]
   (when (resolved-context? value)
