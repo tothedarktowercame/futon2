@@ -29,6 +29,21 @@
 
 (defn- digest [x] (evidence/value-digest x))
 
+(deftest open-cascade-author-prompt-states-operational-clause-schema
+  (let [prompt (#'runtime/open-cascade-author-prompt
+                {:requisition-id "retained"
+                 :prior-resume-cause
+                 {:kind :resume-incomplete
+                  :missing-fields
+                  [{:hole-id ["pattern/a" 0]
+                    :missing [:operation :capability :completion-check]}]}})]
+    (is (str/includes? prompt ":operation"))
+    (is (str/includes? prompt ":capability"))
+    (is (str/includes? prompt ":completion-check"))
+    (is (str/includes? prompt ":consumes"))
+    (is (str/includes? prompt ":produces"))
+    (is (str/includes? prompt ":resume-incomplete"))))
+
 (defn- f32-root []
   (.getCanonicalPath
    (.toFile (java.nio.file.Files/createTempDirectory
@@ -276,7 +291,9 @@
                :source-digest (digest :source)}
         error {:kind :wm/open-cascade-execution-error
                :cascade-digest d :holes holes :phase :compile :attempts []
-               :resume-port {:retry (fn [_] {:cascade-digest d :outcome :redone})}}
+               :resume-port {:retry (fn [_] {:status :cascade-ready
+                                             :cascade-digest d
+                                             :outcome :redone})}}
         fenced (fn [value]
                  {:state "done"
                   :result (str "```json\n" (json/generate-string value) "\n```")})
