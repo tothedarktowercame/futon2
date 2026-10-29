@@ -17,6 +17,8 @@
             [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.interpretation-request :as interpretation-request]
+            [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.reading-policy-precision :as reading-precision]
             [futon2.aif.wm.cascade-decision :as cascade-decision]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
@@ -80,6 +82,76 @@
     (is (= before (slurp manifest)) "read-only composition does not assess or write")
     (is (fn? (:ticket-readiness-refresh preview)))
     (is (every? #(re-matches #"T-.+" (:ticket-id %)) results))))
+
+(defn- readiness-proposal-with-sources [n]
+  {:schema :wm/cascade-proposal-request-v1
+   :status :proposed
+   :origin :retrieval-proposed
+   :target {:id "T-evidence-pinned-to-mutable-prose-26082026"
+            :path "/home/joe/code/futon3c/holes/tickets/T-evidence-pinned-to-mutable-prose-26082026.md"
+            :sha256 (apply str (repeat 64 "a"))}
+   :sources
+   (mapv (fn [i]
+           {:id (str "/retained/source/" i "#" (apply str (repeat 64 "b")))
+            :path (str "/retained/source/" i)
+            :sha256 (apply str (repeat 64 "b"))
+            :revision (apply str (repeat 40 "c"))
+            :body (apply str (repeat 4096 "unbounded source body "))})
+         (range n))})
+
+(deftest ^:slow real-retained-readiness-proposal-is-bounded-and-informative
+  (let [ticket-id "T-evidence-pinned-to-mutable-prose-26082026"
+        ticket (first (filter #(= ticket-id (:id %))
+                              (:tickets (mission-registry/load-tickets))))
+        proposal (interpretation-request/prepare-proposal!
+                  ticket-id :ticket (System/getProperty "user.dir"))
+        citations (get-in proposal [:retrieval :citations])
+        result (#'runtime/ticket-readiness-prompt
+                {:ticket-readiness-prompt-budget-chars
+                 runtime/default-ticket-readiness-prompt-budget-chars
+                 :ticket-readiness-source-summary-limit
+                 runtime/default-ticket-readiness-source-summary-limit
+                 :ticket-readiness-citation-limit
+                 runtime/default-ticket-readiness-citation-limit
+                 :ticket-readiness-citation-chars
+                 runtime/default-ticket-readiness-citation-chars
+                 :ticket-readiness-candidate-limit
+                 runtime/default-ticket-readiness-candidate-limit
+                 :ticket-readiness-candidate-chars
+                 runtime/default-ticket-readiness-candidate-chars}
+                proposal)]
+    (is (> (count (pr-str proposal))
+           runtime/default-ticket-readiness-prompt-budget-chars)
+        "iteration-8 ticket reconstructs a genuinely over-budget proposal")
+    (is (= :ready (:status result)))
+    (is (< (:prompt-chars result) (:prompt-budget-chars result)))
+    (is (seq (get-in result [:proposal-summary :candidates])))
+    (doseq [citation citations]
+      (let [prefix (subs (:quote citation)
+                         0 (min 128 (count (:quote citation))))
+            escaped-prefix (subs (pr-str prefix) 1 (dec (count (pr-str prefix))))]
+        (is (str/includes? (:prompt result) escaped-prefix))))
+    (is (str/includes? (:prompt result) (pr-str (:source ticket)))
+        "the prompt contains the exact source-pin the validator requires")))
+
+(deftest over-budget-readiness-refuses-before-provider-contact
+  (let [contacts (atom 0)
+        proposal (readiness-proposal-with-sources 1)
+        config (with-redefs [flight-runner/agency-answer-fn
+                             (fn [_]
+                               (fn [_]
+                                 (swap! contacts inc)
+                                 {:state :completed :text "unexpected"}))]
+                 (runtime/ticket-readiness-refresh-config
+                  {:author "wm-author"
+                   :ticket-readiness-prompt-budget-chars 1
+                   :ticket-readiness-source-summary-limit 1}))
+        result ((:answer-fn config) proposal)]
+    (is (= 0 @contacts))
+    (is (= :refused (:status result)))
+    (is (= :readiness/prompt-over-budget (:reason result)))
+    (is (pos? (:prompt-chars result)))
+    (is (= 1 (:prompt-budget-chars result)))))
 
 (deftest claimed-injury-carries-intake-bindings-from-its-transaction
   (let [dir (f32-root)
