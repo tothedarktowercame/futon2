@@ -164,7 +164,9 @@
   the one-form file only after an admitted append. Missing files never denote
   an empty ledger. Exact persisted replay is delegated to
   append-medic-repaired and remains byte-preserving before stale-root checks."
-  [path record-pin operation authority-verifier]
+  ([path record-pin operation authority-verifier]
+   (transact-medic-disposition! path record-pin operation nil authority-verifier))
+  ([path record-pin operation attribution authority-verifier]
   (try
     (let [lock-path (str path ".lock")
           lock-file (io/file lock-path)]
@@ -188,7 +190,7 @@
                 (refusal :store/tampered-ledger {:defects (:defects checked)})
                 :else
                 (let [result (ledger/append-medic-repaired
-                              value record-pin operation authority-verifier)]
+                              value record-pin operation attribution authority-verifier)]
                   (if-not (= :appended (:status result))
                     result
                     (let [result-check (ledger/validate-ledger
@@ -202,7 +204,7 @@
     (catch java.nio.channels.OverlappingFileLockException _
       (refusal :store/lock-contended))
     (catch Throwable t
-      (refusal :store/medic-transaction-failed {:detail (ex-message t)}))))
+      (refusal :store/medic-transaction-failed {:detail (ex-message t)})))))
 
 (defn ingest-record-file!
   "Pin exact record bytes, require exactly one EDN form, classify, then perform

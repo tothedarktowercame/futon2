@@ -10,6 +10,7 @@
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-self-heal-production :as production]
             [futon2.aif.meta-self-heal-harness :as harness]
+            [futon2.aif.out-of-band-fix :as out-of-band]
             [futon2.aif.load-identity :as load-identity]))
 
 (defn- root []
@@ -55,6 +56,93 @@
                :path "test/futon2/aif/meta_selection_contract_acceptance_test.clj"
                :text (str "(ns " namespace "\n  (:require [clojure.test :refer [deftest is]]))\n"
                           "(deftest acceptance-control (is true))\n")}})))
+
+(defn- open-out-of-band-artifact [env historical-pin]
+  {:schema :wm/out-of-band-acceptance-v1
+   :injury-id (get-in env [:ingestion :entry :injury-id])
+   :historical-pin historical-pin
+   :failure-kind :fold-output-invalid
+   :failure-stage :construction
+   :fixed-by (apply str (repeat 40 "b"))
+   :acceptance-test (acceptance-case "open-out-of-band")})
+
+(defn- checked-open-evidence [env]
+  (let [pin (:record-path env)
+        run-pin {:path pin :sha256 (load-identity/sha256
+                                    (java.nio.file.Files/readAllBytes
+                                     (.toPath (java.io.File. pin))))}]
+    {:schema :wm/out-of-band-fix-receipt-v1
+     :status :checked :fixed-by (apply str (repeat 40 "b"))
+     :base-sha (apply str (repeat 40 "c"))
+     :historical-pin (get-in env [:ingestion :entry :cause-record-pin])
+     :historical-cause-checked? true
+     :current {:run-pin run-pin}
+     :current-report {:tests 1 :assertions 1 :failures 0 :errors 0}
+     :counterfactual {:run-pin run-pin}
+     :counterfactual-report {:tests 1 :assertions 1 :failures 1 :errors 0}}))
+
+(deftest checked-open-out-of-band-artifact-discharges-before-contact
+  (let [env (harness/prepare-environment! (root))
+        acceptance-root (str (:root env) "/acceptances")
+        artifact (open-out-of-band-artifact
+                  env (get-in env [:ingestion :entry :cause-record-pin]))
+        artifact-pin (out-of-band/retain-artifact! acceptance-root artifact)
+        calls (atom {})
+        options (assoc (opts env (harness/fake-ports (:repo env) calls :success))
+                       :meta-acceptance-root acceptance-root
+                       :meta-diagnosis-fn (fn [_] (throw (ex-info "diagnosis contacted" {})))
+                       :meta-acceptance-fn (fn [_] (throw (ex-info "acceptance contacted" {}))))
+        result (with-redefs [out-of-band/compute!
+                             (fn [& _]
+                               (assoc (checked-open-evidence env)
+                                      :artifact-pin artifact-pin))]
+                 (runtime/run-opportunity! options))
+        loaded (store/load-durable-ledger
+                (:ledger-path env) out-of-band/retained-checked-medic-authority)
+        close (last (get-in loaded [:ledger :entries]))]
+    (is (= :discharged (:status result)) (pr-str result))
+    (is (= :open-out-of-band-medic (:route result)))
+    (is (= {} @calls) "no author, review, enact, or retry port was contacted")
+    (is (= :medic-repaired (:observation-kind close)))
+    (is (= :out-of-band-fix (:medic-disposition close)))
+    (is (= (:fixed-by artifact) (:fixed-by close)))
+    (is (= (:out-of-band-receipt-pin result)
+           (:out-of-band-receipt-pin close)))
+    (is (= out-of-band/checked-medic-verifier
+           (get-in close [:medic-stamp :verifier])))
+    (is (empty? (get-in (ledger/effective-active-injuries
+                         (:ledger loaded) out-of-band/retained-checked-medic-authority)
+                        [:injuries])))))
+
+(deftest mismatched-open-out-of-band-artifact-holds-before-diagnosis
+  (let [env (harness/prepare-environment! (root))
+        acceptance-root (str (:root env) "/acceptances")
+        wrong-path (str (:root env) "/wrong-history.edn")
+        _ (spit wrong-path (slurp (:record-path env)))
+        wrong-pin {:path wrong-path
+                   :sha256 (load-identity/sha256
+                            (java.nio.file.Files/readAllBytes
+                             (.toPath (java.io.File. wrong-path))))}
+        _ (out-of-band/retain-artifact!
+           acceptance-root (open-out-of-band-artifact env wrong-pin))
+        result (runtime/run-opportunity!
+                (assoc (opts env (harness/fake-ports (:repo env) (atom {}) :success))
+                       :target-repository (:repo env)
+                       :meta-acceptance-root acceptance-root
+                       :meta-diagnosis-fn (fn [_] (throw (ex-info "diagnosis contacted" {}))))) ]
+    (is (= :held (:status result)))
+    (is (= :out-of-band/historical-cause-mismatch (:reason result)))
+    (is (= :open-out-of-band (:phase result)))))
+
+(deftest absent-open-out-of-band-artifact-preserves-existing-route
+  (let [env (harness/prepare-environment! (root))
+        context (production/diagnosis-context
+                 (assoc (opts env {}) :meta-acceptance-root
+                        (str (:root env) "/empty-acceptances")))]
+    (is (nil? (production/open-out-of-band-route!
+               (assoc (opts env {}) :meta-acceptance-root
+                      (str (:root env) "/empty-acceptances"))
+               context)))))
 
 (def ^:private repository-root (System/getProperty "user.dir"))
 

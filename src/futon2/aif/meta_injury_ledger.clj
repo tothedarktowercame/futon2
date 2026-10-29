@@ -527,26 +527,41 @@
 (defn- observation-defects
   ([entry] (observation-defects nil entry deny-medic-authority))
   ([ledger entry authority-verifier]
-  (cond-> []
-    (not (pin? (:record-pin entry))) (conj :observation/record-pin)
-    (not (keyword? (:observation-kind entry))) (conj :observation/kind)
-    (and (= :retry-inconclusive (:observation-kind entry))
-         (or (not (nonblank? (:injury-id entry)))
-             (not (nonblank? (:retry-click entry)))))
-    (conj :observation/retry-attribution)
-    (and (= :acceptance-unsatisfiable-claimed (:observation-kind entry))
-         (or (not (nonblank? (:injury-id entry)))
-             (not (nonblank? (:repair-id entry)))
-             (not (positive-int? (:attempt entry)))
-             (not (and (map? (:author-evidence entry))
-                       (nonblank? (get-in entry [:author-evidence :assertion]))
-                       (nonblank? (get-in entry [:author-evidence :reason]))))))
-    (conj :observation/acceptance-unsatisfiable-evidence)
-    (and (= :medic-repaired (:observation-kind entry))
-         (not= :admitted (:status (check-medic-operation
-                                  ledger (:medic-operation entry)
-                                  authority-verifier))))
-    (conj :observation/medic-admission))))
+   (cond-> []
+     (not (pin? (:record-pin entry)))
+     (conj :observation/record-pin)
+     (not (keyword? (:observation-kind entry)))
+     (conj :observation/kind)
+     (and (= :retry-inconclusive (:observation-kind entry))
+          (or (not (nonblank? (:injury-id entry)))
+              (not (nonblank? (:retry-click entry)))))
+     (conj :observation/retry-attribution)
+     (and (= :acceptance-unsatisfiable-claimed (:observation-kind entry))
+          (or (not (nonblank? (:injury-id entry)))
+              (not (nonblank? (:repair-id entry)))
+              (not (positive-int? (:attempt entry)))
+              (not (and (map? (:author-evidence entry))
+                        (nonblank? (get-in entry [:author-evidence :assertion]))
+                        (nonblank? (get-in entry [:author-evidence :reason]))))))
+     (conj :observation/acceptance-unsatisfiable-evidence)
+     (and (= :medic-repaired (:observation-kind entry))
+          (not= :admitted (:status (check-medic-operation
+                                   ledger (:medic-operation entry)
+                                   authority-verifier))))
+     (conj :observation/medic-admission)
+     (and (= :out-of-band-fix (:medic-disposition entry))
+          (or (not (sha? (:fixed-by entry)))
+              (not (pin? (:out-of-band-receipt-pin entry)))
+              (not= (:record-pin entry) (:out-of-band-receipt-pin entry))
+              (not= (:out-of-band-receipt-pin entry)
+                    (get-in entry [:medic-operation :authority-receipt-pin]))
+              (not (and (map? (:medic-stamp entry))
+                        (= :wm/out-of-band-medic-stamp-v1
+                           (get-in entry [:medic-stamp :schema]))
+                        (nonblank? (get-in entry [:medic-stamp :verifier]))
+                        (= (:out-of-band-receipt-pin entry)
+                           (get-in entry [:medic-stamp :receipt-pin]))))))
+     (conj :observation/out-of-band-medic-stamp))))
 
 (defn append-observation
   "Append a pinned non-transition record. It cannot alter injury state.
@@ -585,7 +600,9 @@
 (defn append-medic-repaired
   "Pure typed medic append. AUTHORITY-VERIFIER verifies an external retained
   authority receipt against the exact ledger/operation/payload context."
-  [ledger record-pin operation authority-verifier]
+  ([ledger record-pin operation authority-verifier]
+   (append-medic-repaired ledger record-pin operation nil authority-verifier))
+  ([ledger record-pin operation attribution authority-verifier]
   (try
     (let [checked (validate-ledger ledger authority-verifier)
           prior (filter #(and (observation? %)
@@ -608,14 +625,18 @@
               admission)
             (let [previous (last (:entries ledger))
                   entry (seal-entry
-                         {:schema observation-schema
-                          :ordinal (inc (count (:entries ledger)))
-                          :record-pin record-pin
-                          :observation-kind :medic-repaired
-                          :medic-operation operation
-                          :predecessor (when previous
-                                         {:entry-id (:entry-id previous)
-                                          :entry-pin (:entry-pin previous)})})
+                         (merge
+                          {:schema observation-schema
+                           :ordinal (inc (count (:entries ledger)))
+                           :record-pin record-pin
+                           :observation-kind :medic-repaired
+                           :medic-operation operation
+                           :predecessor (when previous
+                                          {:entry-id (:entry-id previous)
+                                           :entry-pin (:entry-pin previous)})}
+                          (select-keys attribution
+                                       [:medic-disposition :fixed-by
+                                        :out-of-band-receipt-pin :medic-stamp])))
                   result-ledger (seal-ledger (update ledger :entries conj entry))
                   result-check (validate-ledger result-ledger authority-verifier)]
               (if (= :valid (:status result-check))
@@ -624,7 +645,7 @@
                 (refusal :medic/result-invalid
                          {:ledger-defects (:defects result-check)})))))))
     (catch Throwable t
-      (refusal :medic/malformed {:detail (ex-message t)}))))
+      (refusal :medic/malformed {:detail (ex-message t)})))))
 
 (defn validate-ledger
   "Total validation of seals, global append chain and every injury transition."

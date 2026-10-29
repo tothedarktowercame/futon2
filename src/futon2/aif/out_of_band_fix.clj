@@ -5,6 +5,7 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.walk :as walk]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.load-identity :as identity]))
 
 (defn- refuse! [reason & [detail]]
@@ -79,6 +80,104 @@
        (zero? (:failures current -1)) (zero? (:errors current -1))
        (pos? (:tests counterfactual 0)) (pos? (:failures counterfactual 0))
        (zero? (:errors counterfactual -1))))
+
+(def checked-medic-verifier
+  "futon2.aif.out-of-band-fix/checked-medic-authority")
+
+(defn checked-medic-operation
+  "Translate a checked out-of-band receipt into the existing genuine-repair
+  medic payload. The correction excludes the exact open occurrence; it does
+  not manufacture claim, author, review, or enact transitions."
+  [ledger open-entry artifact-pin receipt-pin receipt]
+  (let [candidate {:kind :genuine-repair
+                   :injury-id (:injury-id open-entry)
+                   :entry-id (str (:ordinal open-entry))
+                   :predecessor-entry-id nil
+                   :patch-id (:fixed-by receipt)
+                   :reviewer "DarkTower.WarMachine.OutOfBandFix"
+                   :evaluator checked-medic-verifier
+                   :evidence-pin (:sha256 receipt-pin)
+                   :cause-record-id (get-in open-entry [:cause-record-pin :path])
+                   :cause-pin (get-in open-entry [:cause-record-pin :sha256])
+                   :acceptance-contract (:sha256 artifact-pin)
+                   :pre-replay-receipt (get-in receipt [:historical-pin :sha256])
+                   :post-replay-receipt (get-in receipt [:current :run-pin :sha256])
+                   :negative-control-receipt
+                   (get-in receipt [:counterfactual :run-pin :sha256])
+                   :source-revision (:base-sha receipt)
+                   :original-acceptance-repaired? true}
+        request {:candidate candidate :evidence candidate}
+        authority-receipt-pin receipt-pin
+        operation-id (action-identity/digest
+                      [:open-out-of-band-medic
+                       {:ledger-pin (:ledger-pin ledger)
+                        :request request :authority-receipt-pin authority-receipt-pin}])]
+    {:operation {:operation-id operation-id
+                 :expected-ledger-pin (:ledger-pin ledger)
+                 :request request
+                 :authority-receipt-pin authority-receipt-pin}
+     :attribution {:medic-disposition :out-of-band-fix
+                   :fixed-by (:fixed-by receipt)
+                   :out-of-band-receipt-pin receipt-pin
+                   :medic-stamp {:schema :wm/out-of-band-medic-stamp-v1
+                                 :verifier checked-medic-verifier
+                                 :receipt-pin receipt-pin}}}))
+
+(defn checked-medic-authority
+  "Authority predicate for one exact persisted checked receipt and operation."
+  [expected-operation receipt-pin receipt]
+  (fn [{:keys [operation candidate evidence]}]
+    (try
+      (let [persisted (edn/read-string (read-pin receipt-pin))]
+        (and (= :checked (:status receipt))
+             (= receipt persisted)
+             (= expected-operation operation)
+             (= candidate evidence)
+             (= candidate (get-in operation [:request :candidate]))
+             (= receipt-pin (:authority-receipt-pin operation))
+             (qualifies? (:historical-cause-checked? receipt)
+                         (:current-report receipt)
+                         (:counterfactual-report receipt))))
+      (catch Throwable _ false))))
+
+(defn retained-checked-medic-authority
+  "Re-establish the named medic verifier from the persisted checked receipt.
+  This is the authority used when validating a ledger after process restart."
+  [{:keys [ledger operation current candidate evidence]}]
+  (try
+    (let [receipt-pin (:authority-receipt-pin operation)
+          receipt (edn/read-string (read-pin receipt-pin))
+          expected {:kind :genuine-repair
+                    :injury-id (:injury-id current)
+                    :entry-id (:entry-id current)
+                    :predecessor-entry-id (:predecessor-entry-id current)
+                    :patch-id (:fixed-by receipt)
+                    :reviewer "DarkTower.WarMachine.OutOfBandFix"
+                    :evaluator checked-medic-verifier
+                    :evidence-pin (:sha256 receipt-pin)
+                    :cause-record-id (:cause-record-id current)
+                    :cause-pin (:cause-pin current)
+                    :acceptance-contract (get-in receipt [:artifact-pin :sha256])
+                    :pre-replay-receipt (get-in receipt [:historical-pin :sha256])
+                    :post-replay-receipt (get-in receipt [:current :run-pin :sha256])
+                    :negative-control-receipt
+                    (get-in receipt [:counterfactual :run-pin :sha256])
+                    :source-revision (:base-sha receipt)
+                    :original-acceptance-repaired? true}
+          request {:candidate expected :evidence expected}
+          expected-id (action-identity/digest
+                       [:open-out-of-band-medic
+                        {:ledger-pin (:ledger-pin ledger)
+                         :request request :authority-receipt-pin receipt-pin}])]
+      (and (= :checked (:status receipt))
+           (= expected candidate evidence)
+           (= request (:request operation))
+           (= expected-id (:operation-id operation))
+           (= (:ledger-pin ledger) (:expected-ledger-pin operation))
+           (qualifies? (:historical-cause-checked? receipt)
+                       (:current-report receipt)
+                       (:counterfactual-report receipt))))
+    (catch Throwable _ false)))
 
 (defn compute!
   "Compute the three evidence checks in tooling processes via the normal
