@@ -457,7 +457,7 @@ payload = dict(zip(
     sys.argv[1:6]), trigger="duree-click-on-demand")
 if sys.argv[6]:
     payload["g-law"] = sys.argv[6]
-payload["interpretation-seats"] = sys.argv[7].split(",")
+if sys.argv[7].strip(): payload["interpretation-seats"] = sys.argv[7].split(",")
 print(json.dumps(payload))
 PYJSON
 )
