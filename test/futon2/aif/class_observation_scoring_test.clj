@@ -74,32 +74,11 @@
    {:cascade-belief q0} candidates
    {:observation-model model
     :horizon-steps horizon
-    :prediction-context {:occurrence-id "test-occ" :tau horizon
-                         :class-free-energy {:policy-key :test-policy
-                                             :window 0 :sources []}}
+    :prediction-context {:occurrence-id "test-occ" :tau horizon}
     :cascade-spec {:want acceptance :evidence #{} :zeroed #{}}}))
 
 (defn- steps-of [entry]
   (get-in entry [:certificate :steps]))
-
-(deftest empty-retained-history-closes-q7-f-path
-  (let [target "history-target"
-        accepted [target :accepted]
-        step (cpol/token-interpretation
-              :accepts {:guard {:needs #{} :forbids #{accepted}}
-                        :produces #{accepted}})
-        candidate {:kind :cascade-candidate :id :history-policy :target target
-                   :precedence [(assoc step :target target)]}
-        model (class-model {:universe #{accepted} :acceptance #{accepted}
-                            :horizon 1 :target-class {target :focused}})
-        ranked (rank {#{} 1} [candidate] model 1 #{accepted})
-        entry (first ranked)
-        f (get-in entry [:certificate :f])]
-    (is (= :computed (:status f)))
-    (is (= 0.0 (:value f)))
-    (is (= [] (:history f)))
-    (is (zero? (count (filter #(and (map? %) (= :not-supplied (:status %)))
-                              (tree-seq coll? seq entry)))))))
 
 (deftest scorer-separates-a-candidate-that-never-reaches-acceptance
   (let [target "stated-target"

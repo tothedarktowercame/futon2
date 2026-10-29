@@ -224,8 +224,7 @@
         conditioned (if (:prediction-only? opts)
                       {:status :not-requested :reason :prediction-only-score}
                       (om/query observation-model {:op :condition :belief predicted
-                                                   :observation observation :target (:target candidate)
-                                                   :context prediction-context}))
+                                                   :observation observation :context prediction-context}))
         raw-risk (reduce + 0.0 (map :risk steps))
         raw-ambiguity (reduce + 0.0 (map :ambiguity steps))
         raw-information (if (= :beta-pattern (:parameter-information-mode opts))
@@ -287,7 +286,7 @@
                                        :units :nats}
                              :rates-provenance {:source :observation-model/query
                                                 :model observation-model}
-                             :f (:f conditioned)}}]
+                             :f (assoc conditioned :value (:f conditioned))}}]
     (if (= :computed (:status conditioned))
       (assoc entry :f (:f conditioned) :posterior (:posterior conditioned))
       entry)))
