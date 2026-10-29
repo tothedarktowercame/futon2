@@ -1,3 +1,4 @@
 {:schema :wm/self-heal-runtime-v1
  :acceptance-static-correction-limit 1
- :acceptance-return-limit 1}
+ :acceptance-return-limit 1
+ :cause-scope-required? true}
