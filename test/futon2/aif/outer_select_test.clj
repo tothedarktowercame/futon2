@@ -83,9 +83,8 @@
 
 (deftest real-giraffe-selection-demonstration
   (let [dir (io/file "/home/joe/code/storage/giraffe/20261028T154151.285Z-b916cd4e")]
-    (if-not (.isDirectory dir)
-      (is true "skipped: retained Giraffe run directory is absent")
-      (let [makeup (outer-state/load-makeup)
+    (is (.isDirectory dir) "the retained Giraffe evidence must be present")
+    (let [makeup (outer-state/load-makeup)
             state (outer-state/init-state makeup)
             field (binding [outer-observation/*resolve-var* actual-var]
                     (outer-observation/giraffe-field dir makeup))
@@ -102,5 +101,7 @@
                           :scores (:cascade-scores result)
                           :tie? (:tie? result)}))
         (is (some? (:selection result)))
+        (is (not= "M-repl-wins-over-cli"
+                  (get-in result [:selection :selected :target])))
         (is (every? #(and (number? %) (Double/isFinite (double %)))
-                    (:cascade-scores result)))))))
+                    (:cascade-scores result))))))

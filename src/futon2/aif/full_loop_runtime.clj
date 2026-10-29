@@ -654,6 +654,8 @@
                                             :giraffe/manifest-sha256
                                             (:giraffe/manifest-sha256 observation)
                                             :makeup/sha256 (:makeup/sha256 makeup)
+                                            :outer-field/excluded
+                                            (:outer-field/excluded observation)
                                             :focus (:focus observation)
                                             :selected-relation
                                             (when-let [target (get-in selection
