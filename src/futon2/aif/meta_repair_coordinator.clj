@@ -590,6 +590,9 @@
           (when-not (= patch-sha (get-in review-receipt [:payload :patch-sha]))
             (stop! (refusal :coordinator/review-patch-substitution
                             {:ledger history2 :transaction tx2})))
+          (when-not (= patch-sha (get-in review-receipt [:payload :reviewer-sha]))
+            (stop! (refusal :coordinator/reviewer-head-substitution
+                            {:ledger history2 :transaction tx2})))
           (when (not= :authored (:state (latest-transition history2 injury-id)))
             (when-let [refusal (unadmitted-phase-receipt
                                 history2 review-receipt injury-id repair-id

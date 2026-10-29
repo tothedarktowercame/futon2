@@ -71,7 +71,7 @@
                               {:patch-sha sha-a
                                :worktree (get-in r [:work-order :target-worktree])}))
      :review (fn [r] (receipt r :succeeded
-                              {:patch-sha sha-a :reviewer-sha sha-b}))
+                              {:patch-sha sha-a :reviewer-sha sha-a}))
      :enact (fn [r] (receipt r :succeeded
                              {:patch-sha sha-a :integration-commit sha-a
                               :retry-click "click-retry-repair-1"}))
@@ -289,6 +289,19 @@
     (is (= :coordinator/port-receipt-refused (:reason malformed)))
     (is (= :coordinator/port-receipt-refused (:reason substitute)))
     (is (= :author (:phase substitute)))))
+
+(deftest reviewer-head-must-be-the-approved-author-patch
+  (let [history (opened-ledger)
+        tx (:transaction (prepared history (options)))
+        result (coordinator/coordinate
+                (durable history) tx
+                (ports {:review (fn [r]
+                                  (receipt r :succeeded
+                                           {:patch-sha sha-a
+                                            :reviewer-sha sha-b}))}))]
+    (is (= :refused (:status result)))
+    (is (= :coordinator/reviewer-head-substitution (:reason result)))
+    (is (nil? (some #(when (= :enacted (:state %)) %) (get-in result [:ledger :entries]))))))
 
 (deftest resumed-transaction-must-bind-the-ledger-authored-receipt
   ;; Lean: MetaRepairResumeIdentity.matching_enacted_resume_allowed and
