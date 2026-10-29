@@ -97,6 +97,7 @@
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.selection-timing :as selection-timing]
+            [futon2.aif.stop-line :as stop-line]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-discharge :as repair-discharge]
             [futon2.aif.repair-discharge-receipt :as discharge-receipt]
@@ -6456,13 +6457,9 @@
                                         (repair-class-for
                                          (or (:failure-kind data) outcome)))
                        finding
-                       (when-not (or (#{:grounded-change :grounded-progress} outcome)
-                                     admitted-verification?
-                                     ;; PROOF-2b click 14: the author
-                                     ;; reported the want already satisfied
-                                     ;; by an existing commit — a correct
-                                     ;; answer, not a machine failure
-                                     (= :already-satisfied outcome))
+                       (when-not (stop-line/no-finding-required?
+                                  {:outcome outcome
+                                   :grounded-commit (:grounded-commit data)})
                          (or existing-finding
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
@@ -7153,10 +7150,17 @@
                      nil)
                    (emit-phase! opts @phase-context
                                 {:phase :opportunity :transition :end :outcome outcome
+                                 ;; PROOF-2b validates this existing commit at
+                                 ;; author-wait. Retain it on the end event so
+                                 ;; T3 applies the same qualified rule as the
+                                 ;; finding producer instead of seeing only the
+                                 ;; outcome label.
+                                 :grounded-commit (:grounded-commit data)
                                  :duration-ms (- (System/currentTimeMillis) started)
                                  :tripwire/snapshot
                                  {:grounded-commit
-                                  (when (:witness data) (:commit data))
+                                  (or (:grounded-commit data)
+                                      (when (:witness data) (:commit data)))
                                   :reviewer-job (:review-job data)
                                   :grounding-witnesses
                                   (cond-> [] (:witness data) (conj (:witness data)))}})
