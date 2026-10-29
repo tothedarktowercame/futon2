@@ -4,7 +4,9 @@
             [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.close-retention :as retention]
-            [futon2.aif.load-identity :as load-identity]))
+            [futon2.aif.focus-receipt :as focus-receipt]
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.stop-line :as stop-line]))
 
 (load-identity/register! *ns* *file*)
 
@@ -19,7 +21,7 @@
                      :kernel/id :wm/run-ending-classification-kernel-v1
                      :mode :record-only}
                     (select-keys d [:schema :kernel/id :mode]))
-                 (= #{:outcome :grounded? :artifact-only? :failure-kind :occurrence
+                 (= #{:outcome :grounded? :grounded-commit :artifact-only? :failure-kind :occurrence
                       :route-attestation :route-attestation-ref}
                     (set (:close-judgment-keys d))))
     (refuse! :unsupported-version))
@@ -64,7 +66,7 @@
                  (= :present (get-in % [:attestation :status])))
            (:increments route)))
 
-(defn- classify* [{:keys [close occurrence route-attestation focus-receipt
+(defn- classify* [{:keys [close occurrence route-attestation focus-receipt outer-selection
                            expected-digests declaration]}]
   (let [d (validate-declaration! (or declaration (futon2.aif.run-ending-classification/declaration)))
         judgment (close-judgment close)
@@ -89,6 +91,8 @@
             (validate-digest! (:focus-receipt expected-digests) focus-receipt :focus-receipt))
         ids (identity-data close occurrence)
         increments (qualifying-increments route)
+        qualified-already-satisfied?
+        (stop-line/producer-qualified-already-satisfied? judgment)
         typed-failure? (and (false? (:grounded? judgment))
                             (false? (:artifact-only? judgment))
                             (keyword? (:failure-kind judgment)))
@@ -96,6 +100,11 @@
         _ (when (and (seq increments) typed-failure?) (refuse! :increment-failure-contradiction))
         increment (first increments)
         target (get-in increment [:criterion :target])
+        occurrence-target (get-in occurrence [:action/value :target])
+        outer-target (get-in outer-selection [:selection :selected :target])
+        outer-relation (when (= occurrence-target outer-target)
+                         (:selected-relation outer-selection))
+        outer-ending (get focus-receipt/scorer-class outer-relation)
         facet-rows (filterv #(and (= target (:target %))
                                   (contains? (:facet-map d) (:class %)))
                             (:candidates focus-receipt))
@@ -105,6 +114,8 @@
         facet (:class (first facet-rows))
         class (cond
                 (seq missing-close) :unknown
+                (and qualified-already-satisfied? outer-ending) outer-ending
+                qualified-already-satisfied? :unknown
                 (and increment facet) (get-in d [:facet-map facet])
                 increment :unknown
                 typed-failure? :known-typed-failure
@@ -112,7 +123,10 @@
         missing (when (= :unknown class)
                   (vec (concat
                         (map #(vector :close-key %) missing-close)
-                        (when (and (empty? missing-close) (nil? increment) (not typed-failure?))
+                        (when (and qualified-already-satisfied? (nil? outer-ending))
+                          [:outer-selection-relation])
+                        (when (and (empty? missing-close) (nil? increment)
+                                   (not typed-failure?) (not qualified-already-satisfied?))
                           [:attested-increment])
                         (when (and increment (nil? facet)) [:commit-facets-v1-relation]))))]
     {:schema :wm/run-ending-classification-receipt-v1
@@ -130,14 +144,23 @@
                :focus-receipt
                (if focus-receipt {:status :present :schema (:schema focus-receipt)
                                   :sha256 (identity/digest focus-receipt)}
-                   {:status :absent :reason :focus-receipt-unavailable})}
+                   {:status :absent :reason :focus-receipt-unavailable})
+               :outer-selection
+               (if outer-selection
+                 {:status :present :sha256 (identity/digest outer-selection)
+                  :target outer-target :relation outer-relation}
+                 {:status :absent :reason :outer-selection-unavailable})}
      :attestation (when increment increment)
-     :facet (when (and increment facet) (first facet-rows))
+     :facet (cond
+              (and increment facet) (first facet-rows)
+              outer-ending {:target outer-target :class outer-relation
+                            :ending-class outer-ending})
      :input-sha256 (identity/digest
                     {:close-projection (projection judgment d)
                      :identity ids
                      :route-attestation-sha256 (some-> route identity/digest)
-                     :focus-receipt-sha256 (some-> focus-receipt identity/digest)})}))
+                     :focus-receipt-sha256 (some-> focus-receipt identity/digest)
+                     :outer-selection-sha256 (some-> outer-selection identity/digest)})}))
 
 (defn classify [input]
   (try (classify* input)

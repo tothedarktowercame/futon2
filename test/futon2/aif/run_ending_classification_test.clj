@@ -169,3 +169,34 @@
     (is (= :recorded (:status r)) (pr-str (select-keys r [:kind :detail])))
     (is (= :known-typed-failure (:class r)))
     (is (= :explanation-invalid (:failure-kind r)))))
+
+(def attempt-002-root
+  "/home/joe/code/futon2/data/wm-full-loop-machinery-156/wm-contract-machinery-156-v1/attempt-002")
+(def attempt-002-run-record
+  "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-b1a049d7-d4f8-4f63-be69-6872d86e8827.edn")
+
+(deftest retained-qualified-already-satisfied-emits-terminal-relation
+  (let [close (edn/read-string {:default tagged-literal}
+                               (slurp (str attempt-002-root "/007-closed.edn")))
+        route (edn/read-string
+               (slurp (str attempt-002-root "/retained/route-attestation.edn")))
+        run-record (edn/read-string {:default tagged-literal}
+                                    (slurp attempt-002-run-record))
+        grounded-commit (get-in run-record [:failure :detail :grounded-commit])
+        qualified-close (assoc-in close [:payload :judgment :grounded-commit]
+                                  grounded-commit)
+        classified (kernel/classify
+                    {:close qualified-close
+                     :route-attestation route
+                     :outer-selection (:outer/selection run-record)})
+        unqualified (kernel/classify
+                     {:close close
+                      :route-attestation route
+                      :outer-selection (:outer/selection run-record)})]
+    (is (= {:repo "futon0"
+            :sha "cfb1408629826c6d825e2ddc06aad84ee5ac6108"}
+           grounded-commit))
+    (is (= :related (:class classified)) (pr-str classified))
+    (is (= grounded-commit (get-in classified [:close-projection :grounded-commit])))
+    (is (= :known-typed-failure (:class unqualified)))
+    (is (= :already-satisfied (:failure-kind unqualified)))))

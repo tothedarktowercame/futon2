@@ -16,6 +16,14 @@
        (string? (:sha grounded-commit))
        (boolean (re-matches #"[0-9a-f]{7,40}" (:sha grounded-commit)))))
 
+(defn producer-qualified-already-satisfied?
+  "Whether the producer retained the typed already-satisfied outcome together
+  with the existing commit it validated."
+  [{:keys [outcome failure-kind grounded-commit]}]
+  (and (= :already-satisfied outcome)
+       (= :already-satisfied failure-kind)
+       (qualified-grounded-commit? grounded-commit)))
+
 (defn no-finding-required?
   "Whether OUTCOME is a completed opportunity that requires no stop-line
   finding.  `:already-satisfied` is successful only when the runner-retained
@@ -25,5 +33,5 @@
                    :grounded-progress
                    :historical-verification-awaiting-validation}
                  outcome)
-      (and (= :already-satisfied outcome)
-           (qualified-grounded-commit? grounded-commit))))
+      (producer-qualified-already-satisfied?
+       {:outcome outcome :failure-kind outcome :grounded-commit grounded-commit})))

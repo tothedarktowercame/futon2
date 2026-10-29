@@ -6922,7 +6922,8 @@
                                :resource-use {:agent-turns @dispatched-turns}}
                               (select-keys data
                                            [:witness :effective-run-configuration
-                                            :standing-readback :failure-kind]))
+                                            :standing-readback :failure-kind
+                                            :grounded-commit]))
                        run-ending-result
                        (when (and cohort? @action-occurrence)
                          (retain-run-ending!
@@ -6931,6 +6932,7 @@
                           {:close close-judgment-base
                            :occurrence @action-occurrence
                            :route-attestation (:receipt route-account)
+                           :outer-selection (:outer/selection opts)
                            :focus-receipt (get-in selection-judgment
                                                   [:controller-decision :selection-certificate
                                                    :focus-receipt])}))
