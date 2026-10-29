@@ -5,6 +5,7 @@
   returned to scoring. Every set is a sorted id vector with count and digest;
   failed parts are named in :failures and contribute to :failure-count."
   (:require [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.enumeration-completeness :as enumeration]
             [futon2.aif.mission-registry :as registry])
@@ -139,11 +140,21 @@
                          :distinct-count (count (distinct ids))})))
       rows)))
 
-(defn- population-task-sets [population]
-  (reduce (fn [sets {:keys [id kind]}]
-            (update sets (keyword (str (name kind) "s")) conj (str id)))
-          {:missions [] :excursions [] :tickets []}
-          population))
+(def ^:private q1-missing-id-limit 25)
+
+(defn- q1-diagnostic [task-carrier enumerated-carrier retained-outer-population?]
+  (when (and (not= :failed (:status task-carrier))
+             (not= :failed (:status enumerated-carrier)))
+    (let [open-ids (set (mapcat :ids (vals task-carrier)))
+          enumerated-ids (set (:ids enumerated-carrier))
+          missing (vec (sort (set/difference open-ids enumerated-ids)))]
+      (cond-> {:open-task-count (count open-ids)
+               :enumerated-task-count (count enumerated-ids)}
+        retained-outer-population?
+        (assoc :open-tasks-missing-from-outer-population
+               {:count (count missing)
+                :ids (vec (take q1-missing-id-limit missing))
+                :truncated? (> (count missing) q1-missing-id-limit)})))))
 
 (defn capture
   "Capture after DECISION is final. Dependencies are injectable for hermetic
@@ -162,11 +173,12 @@
                                #(outer-task-population outer-selection))
         retained-outer-population? (and outer-selection
                                         (not= :failed (:status outer-population)))
+        ;; Q1's open side is an independent census. Reading it once here keeps
+        ;; the three registry sets coherent with one another while ensuring
+        ;; the selector's retained field cannot define both sides of Q1.
         task-sets (part :open-tasks
-                        #(if retained-outer-population?
-                           (population-task-sets outer-population)
-                           ((or (:world-task-sets-fn opts)
-                                default-task-sets) code-root)))
+                        #((or (:world-task-sets-fn opts)
+                              default-task-sets) code-root))
         enumerated (part :enumerated-tasks
                          #(if retained-outer-population?
                             (map :id outer-population)
@@ -182,6 +194,8 @@
                        (into {} (map (fn [[k ids]] [k (id-set ids)]) task-sets)))
         enumerated-carrier (if (= :failed (:status enumerated)) enumerated
                                (id-set enumerated))
+        q1-diagnostic-carrier (q1-diagnostic task-carrier enumerated-carrier
+                                             retained-outer-population?)
         seat-carrier (if (= :failed (:status seats)) seats
                          (into {} (map (fn [[k ids]] [k (id-set ids)]) seats)))
         enumerator-source "src/futon2/aif/mission_registry.clj"
@@ -202,6 +216,7 @@
                   :code-sha256 (part :enumerator-code
                                      #(sha256 (slurp enumerator-source)))}
      :enumerated-tasks enumerated-carrier
+     :q1-diagnostic q1-diagnostic-carrier
      :pattern-library library
      :seat-roster seat-carrier
      :selection-input-digest (sha256 (pr-str inputs))
