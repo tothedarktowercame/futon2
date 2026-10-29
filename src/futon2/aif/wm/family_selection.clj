@@ -6,6 +6,7 @@
   policy-view); a ranked entry carries no E of its own before that."
   (:require [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.selected-mission-contract :as mission-contract]
+            [futon2.aif.occurrence-index :as occurrence-index]
             [futon2.aif.wm.family-canonical-g :as canonical-g]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
@@ -43,6 +44,15 @@
 (defn- scored->ranked [policy score rank]
   (let [entry (first (:scorer-result score))
         computed-f (:computed-f score)
+        occurrence-index-evidence
+        (vec (for [node (get-in score [:candidate :arrangement :nodes])
+                   [index fragment] (occurrence-index/indexed-fragments (:analysis policy))
+                   :when (and (= (select-keys fragment [:start :end]) (:fragment-span node))
+                              (some #(= (:pattern node) (:id %)) (:pattern_refs fragment))
+                              (not= [(:pattern node) index] (:occurrence-id node)))]
+               {:source-occurrence-id [(:pattern node) index]
+                :arranged-occurrence-id (:occurrence-id node)
+                :span (:fragment-span node)}))
         g-terms {:risk (:risk score)
                  :ambiguity (:ambiguity score)
                  :expected-information-gain (:information-gain score)
@@ -54,7 +64,8 @@
                         (assoc :g-terms (merge (get-in entry [:certificate :g-terms])
                                               g-terms)))]
     (cond-> (-> entry
-        (assoc :action (reading-action policy score)
+        (assoc :occurrence-index-evidence occurrence-index-evidence
+               :action (reading-action policy score)
                :reading-pin (:reading-pin policy)
                :cascade-id (:policy-id policy)
                :policy-id (:policy-id policy)
@@ -387,7 +398,11 @@
                                                  ranked))))]))
                      rows)
         summaries (mapv (fn [row]
-                          (let [row (dissoc row :scored :constructed-keys)]
+                          (let [target-refusals (filterv #(= (:target-id row) (:target-id %))
+                                                         (:refusals bound))
+                                row (-> (dissoc row :scored :constructed-keys)
+                                        (update :failures into target-refusals)
+                                        (update :failure-count + (count target-refusals)))]
                             (if bound
                               (update row :policies
                                       (fn [ps]

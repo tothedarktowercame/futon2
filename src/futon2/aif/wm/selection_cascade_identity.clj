@@ -162,7 +162,8 @@
        (let [r (bind-entry entry readings authored)]
          (if (:refusal r)
            (recur more kept (conj refusals (assoc (:refusal r)
-                                                  :target-id (:target-id entry)))
+                                                  :target-id (:target-id entry)
+                                                  :occurrence-index-evidence (:occurrence-index-evidence entry)))
                   digests)
            (recur more (conj kept (:entry r)) refusals
                   (assoc digests (:policy-id entry) (:digest r))))))))))

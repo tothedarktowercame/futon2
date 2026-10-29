@@ -15,7 +15,8 @@
   rejected pattern never becomes a node, but its id/reason/query remain on
   that variant. Thus every node is a validator-stamped pattern_ref, never a
   retrieval hit that 象 rejected."
-  (:require [futon2.aif.load-identity :as load-identity]))
+  (:require [futon2.aif.occurrence-index :as occurrence-index]
+            [futon2.aif.load-identity :as load-identity]))
 
 (load-identity/register! *ns* *file*)
 
@@ -29,11 +30,7 @@
        (string? (:source_sha256 ref)) (re-matches #"[0-9a-f]{64}" (:source_sha256 ref))))
 
 (defn- fragment-records [analysis]
-  (->> (:sentences analysis)
-       (mapcat (fn [sentence]
-                 (map #(assoc % :sentence-id (:id sentence)) (:fragments sentence))))
-       (sort-by (juxt :start :end :sentence-id))
-       vec))
+  (mapv second (occurrence-index/indexed-fragments analysis)))
 
 (defn- node [fragment-index fragment ref]
   {:pattern (:id ref)

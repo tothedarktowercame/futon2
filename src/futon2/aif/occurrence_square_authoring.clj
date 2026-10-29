@@ -2,6 +2,7 @@
   "Pre-G authoring of situation maps for every occurrence in one retained
   target reading. The machine constructs, validates and publishes squares."
   (:require [cheshire.core :as json]
+            [futon2.aif.occurrence-index :as occurrence-index]
             [clojure.string :as str]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.occurrence-square-registry :as registry]
@@ -21,8 +22,7 @@
          :pattern-sha256 (:source_sha256 ref)
          :fragment (select-keys fragment [:start :end :text :intent :target
                                           :rationale :relations])}))
-    (map-indexed vector
-                 (mapcat :fragments (get-in reading [:analysis :sentences]))))))
+    (occurrence-index/indexed-fragments (:analysis reading)))))
 
 (defn selected-need [judgement]
   (let [families (get-in judgement [:decision :selection-certificate

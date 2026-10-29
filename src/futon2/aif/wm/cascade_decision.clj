@@ -1050,14 +1050,26 @@
          :measured-a :token-a-bmr :live-c-scored :retry-declines]))
 
 (defn- family-refusals
-  "One typed refusal per target whose family produced no scored policy, with
-  every failure that target carried."
+  "Retain each rejected policy, even when pre-join summaries still list it."
   [rows]
-  (vec (for [{:keys [target-id failures policies]} rows
-             :when (empty? policies)]
-         {:target target-id :stage :policy-family :kind :no-policy-family
-          :failure-kind (or (:kind (first failures)) :empty-policy-family)
-          :failures (vec failures)})))
+  (vec
+   (mapcat
+    (fn [{:keys [target-id failures policies]}]
+      (let [policy-failures (filterv :policy-id failures)]
+        (cond
+          (seq policy-failures)
+          (mapv (fn [failure]
+                  {:target target-id :stage (:stage failure :policy-family)
+                   :kind :no-policy-family :policy-id (:policy-id failure)
+                   :failure-kind (:kind failure)
+                   :reason (or (:clause failure) (:reason failure) (:kind failure))
+                   :failures [failure]}) policy-failures)
+          (empty? policies)
+          [{:target target-id :stage :policy-family
+            :kind (if (seq failures) :no-policy-family :no-candidates)
+            :failure-kind (or (:kind (first failures)) :no-candidates)
+            :failures (vec failures)}]
+          :else []))) rows)))
 
 (def ^:private progress-authority
   {:authority :cascade-shape-g/arranged-progress-model
@@ -1235,8 +1247,8 @@
       ;; emptied it (the outer selector's), else a typed empty field
       {:decision (abstain (or (seq (filter #(= :outer-task-selection-refused (:kind %))
                                            (:refusals assembled)))
-                              [{:target nil :stage :policy-family :kind :no-policy-family
-                                :failure-kind :no-enumerated-target}]))}
+                              [{:target nil :stage :policy-family :kind :no-candidates
+                                :failure-kind :no-candidates}]))}
 
       (not computed?)
       {:decision (abstain (family-refusals families))}
