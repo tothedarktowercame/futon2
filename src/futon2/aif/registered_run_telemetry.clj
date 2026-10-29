@@ -206,7 +206,7 @@
 
 (defn latest-prior-record [dir]
   (when-let [f (->> (or (.listFiles (io/file dir)) (make-array java.io.File 0))
-                    (filter #(re-matches #"tick-run-record-.*\.edn" (.getName ^java.io.File %)))
+                    (filter #(re-matches #"tick-run-record-[^.]+\.edn" (.getName ^java.io.File %)))
                     (sort-by #(.lastModified ^java.io.File %) >)
                     first)]
     (try

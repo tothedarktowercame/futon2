@@ -287,7 +287,7 @@
                    (annotate-failure
                     target (merge {:kind (or (:kind score) :policy-scoring-refused)
                                    :policy-id (:policy-id p)}
-                                  (select-keys score [:cycle :reason :units :roots
+                                  (select-keys score [:inference :cycle :reason :units :roots
                                                       :bound :limit]))))
                  (remove #(= :computed (:status (second %))) attempted))
            failures (into (mapv #(annotate-failure target %) (:failures family))

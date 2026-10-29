@@ -274,7 +274,7 @@
   (if (seq args)
     (map io/file args)
     (->> (.listFiles (io/file run-dir))
-         (filter #(re-matches #"tick-run-record-.*\.edn" (.getName %)))
+         (filter #(re-matches #"tick-run-record-[^.]+\.edn" (.getName %)))
          (sort-by #(.getName %)))))
 
 ;; ---------------------------------------------------------------- selftest
