@@ -124,6 +124,63 @@
     (is (= "click-retry-repair-1"
            (get-in result [:ledger :entries 5 :retry-click])))))
 
+(defn- replay-port [outcome calls]
+  (fn [request]
+    (swap! calls inc)
+    (receipt request (if (= :repaired outcome) :succeeded :failed)
+             {:repair-id (get-in request [:work-order :repair-id])
+              :patch-sha sha-a :retry-click "click-retry-repair-1"
+              :phase-replay-receipt
+              {:outcome outcome :admission-pin pin-a
+               :admission-run-pin pin-a :current-run-pin diagnosis-pin}})))
+
+(deftest enacted-admitted-acceptance-pass-discharges-with-replay-receipt
+  (let [calls (atom 0)
+        fallback (atom 0)
+        start (prepared (opened-ledger) (assoc (options)
+                                               :acceptance-admission-pin pin-a))
+        result (coordinator/coordinate
+                (durable (opened-ledger)) (:transaction start)
+                (assoc (ports {:retry (fn [r] (swap! fallback inc)
+                                        ((:retry (ports)) r))})
+                       :acceptance-replay (replay-port :repaired calls)))]
+    (is (= :discharged (:status result)))
+    (is (= 1 @calls))
+    (is (zero? @fallback))
+    (is (= (get-in result [:transaction :receipts 3 :receipt-pin])
+           (get-in result [:ledger :entries 5 :phase-replay-receipt-pin])))))
+
+(deftest enacted-admitted-acceptance-failure-reopens
+  (let [calls (atom 0)
+        start (prepared (opened-ledger) (assoc (options)
+                                               :acceptance-admission-pin pin-a))
+        result (coordinator/coordinate
+                (durable (opened-ledger)) (:transaction start)
+                (assoc (ports) :acceptance-replay
+                       (replay-port :same-failure calls)))]
+    (is (= :reopened (:status result)) (pr-str result))
+    (is (= 1 @calls))
+    (is (= :reopened (get-in result [:ledger :entries 5 :state])))))
+
+(deftest missing-admission-replay-input-falls-back-to-whole-child
+  (let [replay-calls (atom 0)
+        child-calls (atom 0)
+        unavailable (fn [request]
+                      (swap! replay-calls inc)
+                      (receipt request :failed
+                               {:phase-replay-receipt {:outcome :input-unavailable}}))
+        child (:retry (ports))
+        start (prepared (opened-ledger) (options))
+        result (coordinator/coordinate
+                (durable (opened-ledger)) (:transaction start)
+                (assoc (ports)
+                       :acceptance-replay unavailable
+                       :retry (fn [request] (swap! child-calls inc)
+                                (child request))))]
+    (is (= :discharged (:status result)))
+    (is (= 1 @replay-calls))
+    (is (= 1 @child-calls))))
+
 (deftest unsatisfiable-acceptance-claim-returns-to-acceptance-without-spending-attempt
   (let [history (opened-ledger)
         start (prepared history (options))
