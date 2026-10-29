@@ -11,7 +11,8 @@
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.medic-disposition :as medic]
-            [futon2.aif.out-of-band-fix :as out-of-band])
+            [futon2.aif.out-of-band-fix :as out-of-band]
+            [futon2.aif.ordinary-author-refusal :as author-refusal])
   (:import [java.io PushbackReader StringReader]))
 
 (def intent-schema :wm/meta-medic-intent-v1)
@@ -44,7 +45,8 @@
   (fn [observation]
     (or (try (true? (external observation)) (catch Throwable _ false))
         (out-of-band/retained-checked-medic-authority observation)
-        (reattribution/retained-authority observation))))
+        (reattribution/retained-authority observation)
+        (author-refusal/retained-authority observation))))
 
 (defn resolution-verifier [value]
   (when (resolved-context? value)
