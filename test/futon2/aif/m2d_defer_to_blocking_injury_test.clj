@@ -196,3 +196,19 @@
         context (p/diagnosis-context opts)]
     (is (= :fresh (get-in context [:injury-selection :mode])))
     (is (= blocker (get-in context [:injury-selection :injury-id])))))
+
+(deftest discharged-canonical-restores-retained-2aef-transaction
+  (let [root "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22"
+        path (str root "/transaction.edn")
+        deferred (str path ".deferred-injury_2aef7e0c0f48a851a781b41642bf30e52e3fa246.edn")
+        injury-id "injury/2aef7e0c0f48a851a781b41642bf30e52e3fa246"
+        history (edn/read-string (slurp (str root "/ledger.edn")))
+        selection (p/injury-selection path {:ledger history}
+                                      {:injuries {injury-id {:state :enacted}}})]
+    (is (= "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0"
+           (get-in selection [:stale-transaction :injury-id]))
+        "the retained canonical slot is the discharged iteration-25 repair")
+    (is (= :restore (:mode selection)) (pr-str selection))
+    (is (= injury-id (:injury-id selection)))
+    (is (= deferred (:transaction-path selection)))
+    (is (= path (:restore-to selection)))))
