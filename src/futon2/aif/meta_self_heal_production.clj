@@ -1757,8 +1757,9 @@
                                      :continued-from continued)
                               (let [prepared (prepare-repair
                                               next-durable
-                                              (continued-work-order-options
-                                               opts (:attempt reopened))
+                                              (assoc (continued-work-order-options
+                                                      opts (:attempt reopened))
+                                                     :injury-id injury-id)
                                               authority-verifier)
                                     next-transaction (:transaction prepared)
                                     next-diagnosis (if next-transaction

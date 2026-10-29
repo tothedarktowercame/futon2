@@ -1501,6 +1501,68 @@
             :entry {:state :abandoned :attempt 3 :reason :attempt-limit-exhausted}}
            (:continuation result)))))
 
+(deftest author-failed-continuation-remains-bound-to-the-reopened-injury
+  (let [dir (root)
+        ledger-path (str dir "/ledger.edn")
+        transaction-path (str dir "/transaction.edn")
+        original-history (click-7-fixture "ledger")
+        transaction (click-7-fixture "transaction")
+        order (:work-order transaction)
+        other-pin {:path "fixture://lexically-earlier-active-injury"
+                   :sha256 (apply str (repeat 64 "2"))}
+        other-classification
+        (terminal/classify
+         {:run/id "continuation-binding-other-injury"
+          :click/id "continuation-binding-other-injury"
+          :failure {:kind :fixture-other-active-injury :stage :author}}
+         other-pin)
+        other-injury-id (:injury-id other-classification)
+        history (:ledger (terminal/integrate original-history other-classification))
+        failed-author-pin {:path "meta-self-heal/author/continuation-binding-failed.edn"
+                           :sha256 (apply str (repeat 64 "f"))}
+        _ (is (neg? (compare other-injury-id (:injury-id order))))
+        _ (spit ledger-path (str (pr-str history) "\n"))
+        _ (spit transaction-path (str (pr-str transaction) "\n"))
+        author-orders (atom [])
+        sealed (fn [request]
+                 (let [work-order (:work-order request)]
+                   (coordinator/seal-port-receipt
+                    {:phase (:phase request) :injury-id (:injury-id work-order)
+                     :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+                     :predecessor-pin (:predecessor-pin request)
+                     :status :failed
+                     :payload {:reason :agency-response-not-one-edn-map}})))
+        ports {:author (fn [request]
+                         (swap! author-orders conj (:work-order request))
+                         (sealed request))
+               :review sealed :enact sealed :retry sealed}
+        options {:meta-injury-ledger-path ledger-path
+                 :meta-repair-transaction-path transaction-path
+                 :meta-repair-ports ports
+                 :meta-acceptance-run-fn (constantly {:status :ran :outcome :failed
+                                                      :exit 1 :summary "fixture"
+                                                      :run-pin failed-author-pin})
+                 :diagnosis-evidence-pin (:diagnosis-evidence-pin order)
+                 :acceptance-test (:acceptance-test order)
+                 :meta-diagnosis-observation
+                 {:status :available
+                  :injury-id (:injury-id order)
+                  :source-record-pin (:cause-record-pin order)
+                  :diagnosis-evidence-pin (:diagnosis-evidence-pin order)}
+                 :meta-acceptance-observation {:status :present}
+                 :author (:author order) :reviewer (:reviewer order)
+                 :repair-reviewer "fixture/repair-reviewer"
+                 :author-session "fixture-author-attempt-two"
+                 :reviewer-session "fixture-reviewer-attempt-two"
+                 :repair-reviewer-session "fixture-repair-reviewer-attempt-two"
+                 :target-repository (:target-repository order)
+                 :target-worktree dir}
+        result (production/route! options)]
+    (is (not= :meta-self-heal/diagnosis-transaction-mismatch (:reason result))
+        (pr-str result))
+    (is (= (:injury-id order) (get-in (first @author-orders) [:injury-id])))
+    (is (= 2 (get-in (first @author-orders) [:attempt])))))
+
 (deftest click-7-refused-retirement-at-attempt-two-keeps-the-record
   ;; F32 wake fix (claude-5, 2026-10-20). Attempt 1 replays its failed author
   ;; receipt and attempt 2 authors and fails; the ledger reopens attempt 3, but
