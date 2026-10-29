@@ -359,8 +359,12 @@
           (let [appended (ledger/append-medic-recurrence
                           history (:injury-id classification)
                           (:record-pin classification) authority-verifier)]
-            (assoc appended :classification classification :transition
-                   (get-in appended [:entry :state])))
+            (if other-injury-retry?
+              (append-other-injury-retry-observation
+               appended classification enacted (get-in appended [:entry :state])
+               authority-verifier)
+              (assoc appended :classification classification :transition
+                     (get-in appended [:entry :state]))))
 
           (contains? ledger/active-states (:state previous))
           (let [appended (ledger/append-observation
