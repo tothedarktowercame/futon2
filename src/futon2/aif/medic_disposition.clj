@@ -11,13 +11,15 @@
   (:require [clojure.string :as str]))
 
 (def schema :wm/medic-disposition-v1)
-(def correction-kinds #{:historical-misclassification :genuine-repair
-                        :cause-reattribution})
+(def correction-kinds #{:historical-misclassification :ordinary-author-refusal
+                        :genuine-repair :cause-reattribution})
 (def replay-results #{:producer-qualified-non-injury
                       :unsupported-author-refusal :done-at-base-revision :injury
-                      :successful-close-non-injury})
+                      :successful-close-non-injury
+                      :ordinary-author-refusal-non-injury})
 (def non-injury-replays
-  #{:producer-qualified-non-injury :successful-close-non-injury})
+  #{:producer-qualified-non-injury :successful-close-non-injury
+    :ordinary-author-refusal-non-injury})
 
 (declare payload-valid?)
 
@@ -26,6 +28,9 @@
     :reviewer :evaluator :evidence-pin})
 (def ^:private historical-fields
   (into common-fields [:original-record-id :original-pin :classifier-revision :replay]))
+(def ^:private author-refusal-fields
+  (into common-fields [:original-record-id :original-pin :author-response-id
+                       :author-response-pin :classifier-revision :replay]))
 (def ^:private genuine-fields
   (into common-fields [:cause-record-id :cause-pin :acceptance-contract
                        :pre-replay-receipt :post-replay-receipt
@@ -91,6 +96,7 @@
 (defn- payload-fields [kind]
   (case kind
     :historical-misclassification historical-fields
+    :ordinary-author-refusal author-refusal-fields
     :genuine-repair genuine-fields
     :cause-reattribution reattribution-fields
     nil))
@@ -107,6 +113,8 @@
          (not= (:reviewer payload) (:evaluator payload))
          (case kind
            :historical-misclassification (contains? replay-results (:replay payload))
+           :ordinary-author-refusal
+           (= :ordinary-author-refusal-non-injury (:replay payload))
            :genuine-repair (boolean? (:original-acceptance-repaired? payload))
            :cause-reattribution
            (and (keyword? (:failure-kind payload))
@@ -125,6 +133,10 @@
          (and (= (:cause-record-id current) (:original-record-id candidate))
               (= (:cause-pin current) (:original-pin candidate))
               (contains? non-injury-replays (:replay candidate)))
+         :ordinary-author-refusal
+         (and (= (:cause-record-id current) (:original-record-id candidate))
+              (= (:cause-pin current) (:original-pin candidate))
+              (= :ordinary-author-refusal-non-injury (:replay candidate)))
          :genuine-repair
          (and (= (:cause-record-id current) (:cause-record-id candidate))
               (= (:cause-pin current) (:cause-pin candidate))
