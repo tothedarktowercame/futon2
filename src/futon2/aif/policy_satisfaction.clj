@@ -12,22 +12,33 @@
                 (map #(get-in % [:clause :completion-check])
                      (get-in construction [:cascade :operational-plan :steps])))))
 
-(defn evidence-record [{:keys [run-record construction mission-source-sha256]}]
+(defn- family-census [selection-judgment mission]
+  (->> (:ranked-candidates selection-judgment)
+       (filter #(= mission (:target %)))
+       (mapv (fn [candidate]
+               {:policy-id (:cascade-id candidate)
+                :authoring-resolution (get-in candidate [:action :authoring-resolution])}))))
+
+(defn evidence-record [{:keys [run-record construction mission-source-sha256
+                               selection-judgment]}]
   (when (and (terminal/producer-qualified-already-satisfied? run-record)
              (string? mission-source-sha256)
              (seq (completion-checks construction)))
     (let [grounded (get-in run-record [:failure :detail :grounded-commit])
           authoring-resolution (get-in construction [:cascade :selected-action
-                                                     :authoring-resolution])]
+                                                     :authoring-resolution])
+          census (family-census selection-judgment (:mission construction))]
       (when (and (= (completion-checks construction)
                     (:completion-checks authoring-resolution))
-                 (string? (:digest authoring-resolution)))
+                 (string? (:digest authoring-resolution))
+                 (seq census))
       {:schema :wm/policy-satisfaction-v1
        :mission-id (:mission construction)
        :mission-source-sha256 mission-source-sha256
        :policy-id (:selected-cascade construction)
        :completion-checks (completion-checks construction)
        :authoring-resolution authoring-resolution
+       :policy-family-census census
        :grounded-commit (select-keys grounded [:repo :sha])
        :producer {:run-id (:run/id run-record)
                   :classification :producer-qualified-already-satisfied}}))))
@@ -59,17 +70,34 @@
            vec)
       [])))
 
+(defn matching-record [retained target mission-sha policy]
+  (some #(when (and (= target (:mission-id %))
+                    (= (:policy-id policy) (:policy-id %))
+                    (= mission-sha (:mission-source-sha256 %))
+                    (= (get-in policy [:authoring-resolution :completion-checks])
+                       (:completion-checks %))
+                    (= (get-in policy [:authoring-resolution :digest])
+                       (get-in % [:authoring-resolution :digest]))) %)
+        retained))
+
+(defn all-satisfied-exclusion [root target mission-sha]
+  (let [retained (records root)]
+    (some (fn [{:keys [policy-family-census] :as record}]
+            (when (and (= target (:mission-id record))
+                       (= mission-sha (:mission-source-sha256 record))
+                       (seq policy-family-census))
+              (let [covered (mapv #(matching-record retained target mission-sha %)
+                                  policy-family-census)]
+                (when (every? some? covered)
+                  {:target target :reason :all-policies-already-satisfied
+                   :policy-ids (mapv :policy-id policy-family-census)
+                   :record-pins (mapv :record-pin covered)}))))
+          retained)))
+
 (defn exclude-satisfied [field root mission-sha-by-target]
   (let [retained (records root)
         match (fn [target policy]
-                (some #(when (and (= target (:mission-id %))
-                                  (= (:policy-id policy) (:policy-id %))
-                                  (= (get mission-sha-by-target target) (:mission-source-sha256 %))
-                                  (= (get-in policy [:authoring-resolution :completion-checks])
-                                     (:completion-checks %))
-                                  (= (get-in policy [:authoring-resolution :digest])
-                                     (get-in % [:authoring-resolution :digest]))) %)
-                      retained))]
+                (matching-record retained target (get mission-sha-by-target target) policy))]
     (update field :families
             (fn [families]
               (mapv (fn [{:keys [target-id policies] :as family}]

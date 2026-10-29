@@ -1549,6 +1549,7 @@
                           (:policy-satisfaction-root raw-opts)
                           {:run-record record
                            :construction (get-in result [:checkpoints :construction :judgment])
+                           :selection-judgment (get-in result [:checkpoints :selection :judgment])
                            :mission-source-sha256
                            (get-in result [:checkpoints :construction :judgment
                                            :mission-source-sha256])})

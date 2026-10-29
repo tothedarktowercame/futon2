@@ -9,6 +9,7 @@
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.policy-satisfaction :as policy-satisfaction]
             [futon2.aif.wm.construction-inputs :as construction-inputs])
   (:import [java.nio.file Files]
            [java.security MessageDigest]))
@@ -60,6 +61,13 @@
                        :source-unavailable)}
     (:status-line registry-entry) (assoc :status-line (:status-line registry-entry))))
 
+(defn- declaration-sha [declaration]
+  (or (:source-sha256 declaration)
+      (when-let [path (:source-path declaration)]
+        (let [file (io/file path)]
+          (when (.isFile file)
+            (sha256 (Files/readAllBytes (.toPath file))))))))
+
 (defn giraffe-field
   "Build Lean `Observation.field` and `Observation.facts` from a verified run.
 
@@ -101,8 +109,16 @@
                                          :unblocks unblocks
                                          :cone cone}}))
                              rows declarations)
-               admitted (filterv #(nil? (get-in % [:declaration :source-absent])) entries)
-               excluded (into []
+               available (filterv #(nil? (get-in % [:declaration :source-absent])) entries)
+               satisfied (into {}
+                               (keep (fn [{:keys [target declaration]}]
+                                       (when-let [exclusion
+                                                  (policy-satisfaction/all-satisfied-exclusion
+                                                   nil target (declaration-sha declaration))]
+                                         [target exclusion])))
+                               available)
+               admitted (filterv #(nil? (get satisfied (:target %))) available)
+               excluded (into (vec (vals satisfied))
                               (comp (remove #(nil? (get-in % [:declaration :source-absent])))
                                     (map (fn [{:keys [target declaration]}]
                                            (excluded-candidate target declaration
