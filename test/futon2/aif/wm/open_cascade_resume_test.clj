@@ -97,9 +97,9 @@
     (is (= :answer-reviewer-mismatch
            (:kind (r/validate-answer
                    req (assoc ok :accepted-by "someone-else")))))
-    ;; holes unresolved or foreign hole invented
-    (is (= :answer-holes-unresolved
-           (:kind (r/validate-answer
+    ;; JSON is only a claim; output coverage is checked after verified loading.
+    (is (= :accepted
+           (:status (r/validate-answer
                    req (assoc ok :decisions
                               {:hole/other {:decision "x"}})))))
     ;; loadable patch required
@@ -230,7 +230,9 @@
         click-budget (atom 3)
         selection-counter (atom 2)
         retry-ctx (atom nil)
-        loaded-product {:occurrence/verified {:operation :apply}}
+        loaded-product {:hole/guard-source {:operation :apply
+                                                  :capability :wm/pattern-apply
+                                                  :completion-check :observed}}
         error (held-error {:retry (fn [ctx]
                                     (reset! retry-ctx ctx)
                                     {:status :cascade-ready

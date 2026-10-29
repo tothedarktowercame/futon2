@@ -35,7 +35,8 @@
   abstention or refusal values.  Every attempt — failed answers, malformed
   answers, unknown senders, retries — is preserved in the ledger,
   append-only."
-  (:require [clojure.edn :as edn]
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [futon2.aif.interpretation-evidence :as evidence]))
 
 (def resume-schema :wm/open-cascade-resume-v1)
@@ -217,11 +218,12 @@
 
 (defn validate-answer
   "Validate a returned authoring answer against the shared handoff
-  contracts: it names THIS requisition id, THIS cascade digest, resolves
-  every requisitioned hole by id, carries a decision attributed to the
+  contracts before loading: it names THIS requisition id and cascade digest,
+  carries a claim attributed to the
   requisition's author and accepted by its reviewer (author and reviewer
   distinct), and provides a loadable patch.  Unknown or malformed answers
-  are typed errors with everything preserved; nothing is guessed."
+  are typed errors with everything preserved. Hole coverage is checked on
+  the verified function output, never on the JSON claim."
   [requisition answer]
   (let [bad (fn [kind repair]
               {:status :error :kind kind :repair repair})
@@ -251,19 +253,6 @@
       (= (:by answer) (:accepted-by answer))
       (bad :answer-author-equals-reviewer {:who (:by answer)})
 
-      ;; every requisitioned hole resolved, no foreign hole invented.
-      ;; The comparison runs over DECODED hole ids on BOTH sides: requisition
-      ;; hole ids arriving over the JSON transport carry the encoded string /
-      ;; keyword form (e.g. "[\"p/x\" 6]"), which decoded-hole-id maps to the
-      ;; canonical vector id the answer's decision keys are normalized to
-      ;; (injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0).
-      (not= (set (map (comp decoded-hole-id :hole-id) (:holes requisition)))
-            (set (keys decisions)))
-      (bad :answer-holes-unresolved
-           {:requisitioned (vec (sort (map (comp pr-str decoded-hole-id :hole-id)
-                                           (:holes requisition))))
-            :answered (vec (sort (map pr-str (keys decisions))))})
-
       (not (and (map? (:patch answer))
                 (string? (get-in answer [:patch :namespace]))
                 (string? (get-in answer [:patch :var]))
@@ -279,6 +268,60 @@
        :patch (:patch answer)
        :by (:by answer)
        :accepted-by (:accepted-by answer)})))
+
+(defn- json-claim-matches? [claim decisions]
+  ;; Compare in the transport's value domain: JSON spells keyword values as
+  ;; strings. Map order is immaterial; occurrence keys were already decoded.
+  (try
+    (= (json/parse-string (json/generate-string claim))
+       (json/parse-string (json/generate-string decisions)))
+    (catch Exception _ false)))
+
+(defn validate-product
+  "Check answers from the reviewed function. JSON decisions are only a claim;
+  a malformed or differing claim remains a typed defect even if code answers."
+  [requisition accepted product]
+  (let [decisions (normalized-decisions {:decisions product})
+        required (set (map (comp decoded-hole-id :hole-id) (:holes requisition)))
+        answered (set (keys decisions))
+        missing (remove answered required)
+        foreign (remove required answered)
+        incomplete (into {} (keep (fn [id]
+                                    (let [value (get decisions id)
+                                          fields (filterv #(nil? (get value %))
+                                                          [:operation :capability
+                                                           :completion-check])]
+                                      (when (seq fields) [id fields]))) required))
+        claim (:decisions accepted)
+        claim-matches? (json-claim-matches? claim decisions)
+        claim-operational? (and (= required (set (keys claim)))
+                                (every? (fn [v]
+                                          (and (map? v)
+                                               (every? #(some? (get v %))
+                                                       [:operation :capability
+                                                        :completion-check])))
+                                        (vals claim)))
+        delivery {:source :reviewed-patch-function
+                  :patch (:patch accepted)
+                  :requisition-id (:requisition-id requisition)
+                  :answered (vec (sort-by pr-str answered))
+                  :claim-matches? claim-matches?
+                  :author-response-defects
+                  (cond-> []
+                    (or (not claim-operational?) (not claim-matches?))
+                    (conj {:kind (if claim-operational?
+                                   :author-response/decisions-mismatch
+                                   :author-response/decisions-not-operational)
+                           :claimed-decisions claim}))}]
+    (if (and (map? product) (empty? missing) (empty? foreign) (empty? incomplete))
+      {:status :accepted :decisions decisions :answer-delivery delivery}
+      {:status :error :kind :answer-holes-unresolved
+       :answer-delivery delivery
+       :repair {:missing-ids (vec (sort-by pr-str missing))
+                :foreign-ids (vec (sort-by pr-str foreign))
+                :missing-fields incomplete
+                :requisitioned (vec (sort-by pr-str required))
+                :answered (vec (sort-by pr-str answered))}})))
 
 (defn submit-answer!
   "Submit an answer for a dispatched requisition.  Validated answers are
@@ -349,8 +392,9 @@
                                  :namespace (:namespace descriptor)
                                  :var (:var descriptor)
                                  :value-type (.getName (class patch))})))
-            product (patch {:cascade-digest (:cascade-digest accepted)
-                            :phase (:phase requisition)})]
+            product (patch (assoc requisition
+                                  :cascade-digest (:cascade-digest accepted)
+                                  :phase (:phase requisition)))]
         (record! ledger :attempts (assoc attempt :outcome :loaded :product product)))
       (catch Throwable t
         (let [cause (bounded-cause t)]
@@ -485,13 +529,16 @@
                                           patch-loader)]
                     (if (= :error (:status loaded))
                       loaded
-                      (resume! ledger (assoc recognized
-                                             :authoring accepted
-                                             ;; The reviewed JSON describes and
-                                             ;; authorizes the patch.  The
-                                             ;; hot-loaded function is the
-                                             ;; authoritative occurrence-keyed
-                                             ;; product the held phase consumes.
-                                             :authoring-product (:product loaded))
-                               {:click-budget click-budget
-                                :selection-counter selection-counter})))))))))))
+                      (let [delivery (validate-product requisition accepted (:product loaded))]
+                        (if (= :error (:status delivery))
+                          delivery
+                          (let [resumed (resume! ledger
+                                                (assoc recognized
+                                                       :authoring (assoc accepted :decisions (:decisions delivery))
+                                                       :authoring-product (:decisions delivery))
+                                                {:click-budget click-budget
+                                                 :selection-counter selection-counter})]
+                            (cond-> (assoc resumed :answer-delivery (:answer-delivery delivery))
+                              (map? (:result resumed))
+                              (assoc-in [:result :answer-delivery]
+                                        (:answer-delivery delivery))))))))))))))))
