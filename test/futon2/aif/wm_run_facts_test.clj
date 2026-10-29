@@ -24,6 +24,20 @@
     (is (= (inc (get-in base [:facts "pathAbsenceCount"]))
            (get-in changed [:facts "pathAbsenceCount"])))))
 
+(deftest noncanonical-class-history-is-a-q7-absence-but-impossibility-is-not
+  (let [chosen {:target "M-x" :candidate :c1 :precedence [:p1]}
+        with-status (fn [status]
+                      {:decision {:chosen chosen
+                                  :selection-certificate
+                                  {:candidates [{:id {:target "M-x" :candidate :c1
+                                                      :precedence [:p1]}
+                                                 :class-f {:status status}}]}}})]
+    (is (= [[:decision :selected-candidate :class-f]]
+           (facts/absence-paths
+            (with-status :history-unavailable-noncanonical-policy-key))))
+    (is (empty? (facts/absence-paths
+                 (with-status :observation-impossible-under-policy))))))
+
 (deftest missing-slice-is-not-recomputable-not-zero-or-conforming
   (let [export (facts/facts-for-record record "r" snap)
         construction (get-in export [:facts "targetConstruction"])]

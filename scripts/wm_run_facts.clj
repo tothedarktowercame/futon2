@@ -138,6 +138,7 @@
     (walk [] root)))
 
 (def absence-statuses #{:absent :not-supplied :missing :refused :failed
+                        :history-unavailable-noncanonical-policy-key
                         "absent" "not-supplied" "missing" "refused" "failed"})
 
 (defn- selected-candidate

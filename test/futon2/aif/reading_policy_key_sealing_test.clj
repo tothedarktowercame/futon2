@@ -1,6 +1,7 @@
 (ns futon2.aif.reading-policy-key-sealing-test
   (:require [clojure.test :refer [deftest is]]
-            [futon2.aif.policy-prefix-admission :as admission]))
+            [futon2.aif.policy-prefix-admission :as admission]
+            [futon2.aif.cascade-shape-g :as shape-g]))
 
 (def canonical-candidate
   {:target "M-a" :id "M-a/policy-1"
@@ -21,3 +22,23 @@
             :reason :policy-id-not-canonical-for-target}
            (:policy-key-carrier sealed)))
     (is (nil? (:policy-key sealed)))))
+
+(deftest impossible-class-history-records-zero-posterior-weight
+  (let [cascade {:nodes [{:pattern "p"}] :precedence ["p"] :edges []}
+        candidate (shape-g/arranged->candidate "M-a" "M-a/policy-1" cascade)
+        key (:policy-key candidate)
+        source {:path "impossible-run"
+                :record {:run/id "impossible-run"
+                         :terminal {:schema :wm/q6-terminal-v1
+                                    :choice {:status :present :policy-key key}}
+                         :run-ending-classification {:class :related}}}
+        score (shape-g/score-arranged
+               "M-a" "M-a/policy-1" cascade nil
+               {:class-free-energy {:window 1 :sources [source]}})]
+    (is (= :refused (:status score)))
+    (is (= :zero-posterior-mass (:kind score)))
+    (is (= 0.0 (get-in score [:class-emission :posterior-weight])))
+    (is (= :observation-impossible-under-policy
+           (get-in score [:class-emission :reason :status])))
+    (is (= :related
+           (get-in score [:class-emission :reason :f :failure :class])))))

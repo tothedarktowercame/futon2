@@ -101,6 +101,59 @@
     (is (zero? (count (filter #(and (map? %) (= :not-supplied (:status %)))
                               (tree-seq coll? seq entry)))))))
 
+(deftest noncanonical-history-absence-remains-in-certificate
+  (let [target "noncanonical-target"
+        accepted [target :accepted]
+        step (cpol/token-interpretation :accepts
+               {:guard {:needs #{} :forbids #{accepted}} :produces #{accepted}})
+        candidate {:kind :cascade-candidate :id "chain" :target target
+                   :precedence [(assoc step :target target)]}
+        model (class-model {:universe #{accepted} :acceptance #{accepted}
+                            :horizon 1 :target-class {target :focused}})
+        result (cos/rank-cascade-actions
+                {:cascade-belief {#{} 1}} [candidate]
+                {:observation-model model :horizon-steps 1
+                 :prediction-context {:occurrence-id "noncanonical" :tau 1
+                                      :class-free-energy
+                                      {:policy-key-carrier
+                                       {:status :policy-key-noncanonical
+                                        :reason :policy-id-not-canonical-for-target}}}
+                 :cascade-spec {:want #{accepted} :evidence #{} :zeroed #{}}})
+        entry (first result)]
+    (is (= :history-unavailable-noncanonical-policy-key
+           (get-in entry [:inference :status])))
+    (is (= :history-unavailable-noncanonical-policy-key
+           (get-in entry [:certificate :f :status])))))
+
+(deftest impossible-history-has-zero-posterior-treatment-and-reason
+  (let [target "impossible-target"
+        accepted [target :accepted]
+        step (cpol/token-interpretation :accepts
+               {:guard {:needs #{} :forbids #{accepted}} :produces #{accepted}})
+        candidate {:kind :cascade-candidate :id :impossible :target target
+                   :precedence [(assoc step :target target)]}
+        model (class-model {:universe #{accepted} :acceptance #{accepted}
+                            :horizon 1 :target-class {target :focused}})
+        source {:path "run-impossible"
+                :record {:run/id "run-impossible"
+                         :terminal {:schema :wm/q6-terminal-v1
+                                    :choice {:status :present
+                                             :policy-key [:wm/reading-policy-v1 "T" "T/policy-1" {}]}}
+                         :run-ending-classification {:class :related}}}
+        result (cos/rank-cascade-actions
+                {:cascade-belief {#{} 1}} [candidate]
+                {:observation-model model :horizon-steps 1
+                 :prediction-context {:occurrence-id "impossible" :tau 1
+                                      :class-free-energy
+                                      {:policy-key [:wm/reading-policy-v1 "T" "T/policy-1" {}]
+                                                          :window 1 :sources [source]}}
+                 :cascade-spec {:want #{accepted} :evidence #{} :zeroed #{}}})
+        entry (get-in result [:candidates 0])]
+    (is (= :observation-impossible-under-policy (get-in entry [:inference :status])))
+    (is (= :observation-impossible-under-policy
+           (get-in entry [:certificate :f :status])))
+    (is (= :related (get-in entry [:certificate :f :failure :class])))))
+
 (deftest scorer-separates-a-candidate-that-never-reaches-acceptance
   (let [target "stated-target"
         start [target :start]

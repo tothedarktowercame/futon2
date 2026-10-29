@@ -288,9 +288,9 @@
                              :rates-provenance {:source :observation-model/query
                                                 :model observation-model}
                              :f (:f conditioned)}}]
-    (if (= :computed (:status conditioned))
-      (assoc entry :f (:f conditioned) :posterior (:posterior conditioned))
-      entry)))
+    (cond-> (assoc entry :f (:f conditioned))
+      (= :computed (:status conditioned))
+      (assoc :posterior (:posterior conditioned)))))
 
 (defn rank-cascade-actions
   "Same arguments as efe's cascade scorer. Presence of :observation-model
@@ -323,7 +323,11 @@
                                                                  (subsets (:universe model)))}]))))
             entries (mapv #(score-candidate (:cascade-belief state) % opts preference) candidates)
             failures (if (:prediction-only? opts) []
-                         (filterv #(not= :computed (get-in % [:inference :status])) entries))]
+                         (filterv #(not (contains?
+                                         #{:computed
+                                           :history-unavailable-noncanonical-policy-key}
+                                         (get-in % [:inference :status])))
+                                  entries))]
         (if (seq failures)
           {:status (if (some #(= :missing (get-in % [:inference :status])) failures)
                      :missing :contradiction)

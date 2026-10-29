@@ -329,8 +329,7 @@
                              {:required [:policy-key :window :sources]}))
                 prediction (class-predictive model belief (:horizon model) target)
                 result (class-f/evaluate policy-key window sources prediction)]
-            {:posterior belief :status (if noncanonical? :computed (:status result))
-             :f result}))
+            {:posterior belief :status (:status result) :f result}))
       (refuse! :unsupported-observation-query {:op op}))
     (= :progress-count (:kind model))
     (case op
