@@ -45,10 +45,11 @@
       (sorted-map))))
 
 (defn with-hermetic-traces
-  "Temporary trace, run-record, learning-ledger, morning-brief and meta-injury
-  roots for a runner test namespace, and a check that the production trace,
-  brief and injury file sets did not change. A futon3c test that drove the
-  runner without this fixture wrote two fixture ticks into the live trace on
+  "Temporary trace, run-record, phase-replay-input, learning-ledger,
+  morning-brief and meta-injury roots for a runner test namespace, and a check
+  that the corresponding production file sets did not change. The run-record
+  root also owns the reading-policy class history index. A futon3c test that
+  drove the runner without this fixture wrote two fixture ticks into the live trace on
   2026-09-28; on 2026-10-19 four fixture runs wrote injury records and HEAD.edn
   into data/wm-meta-injuries because this fixture left the injury root live."
   [f]
@@ -58,13 +59,20 @@
                                   "wm-runner-record-suite-"
                                   (make-array FileAttribute 0)))
         live-trace @#'trace/default-trace-dir
+        live-run-records runner/default-run-record-dir
+        live-phase-replay-inputs runner/default-phase-replay-input-root
         live-brief morning-brief/default-root
         live-injuries meta-injury-store/default-root
-        before [(production-file-set live-trace) (production-file-set live-brief)
+        before [(production-file-set live-trace)
+                (production-file-set live-run-records)
+                (production-file-set live-phase-replay-inputs)
+                (production-file-set live-brief)
                 (production-file-set live-injuries)]]
     (try
       (with-redefs-fn {#'trace/default-trace-dir (.getPath root)
                        #'runner/default-run-record-dir (.getPath run-record-root)
+                       #'runner/default-phase-replay-input-root
+                       (str (io/file root "phase-replay-inputs"))
                        #'learning-ledger/default-root
                        (str (io/file root "learning-ledger"))
                        #'morning-brief/default-root
@@ -73,9 +81,12 @@
                        (str (io/file root "meta-injuries"))}
         f)
       (is (= before [(production-file-set live-trace)
+                      (production-file-set live-run-records)
+                      (production-file-set live-phase-replay-inputs)
                       (production-file-set live-brief)
                       (production-file-set live-injuries)])
-          "the suite must not add, remove or grow production trace, morning-brief or meta-injury files")
+          (str "the suite must not change production trace, run-record, "
+               "phase-replay-input, morning-brief or meta-injury files"))
       (finally
         (doseq [file (reverse (file-seq root))] (io/delete-file file true))
         (doseq [file (reverse (file-seq run-record-root))]
