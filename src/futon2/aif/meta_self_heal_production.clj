@@ -1420,6 +1420,27 @@
   (when-let [source (get-in acceptance-test [:source :text])]
     (load-identity/sha256 (.getBytes source "UTF-8"))))
 
+(defn- read-pinned-text [pin]
+  (try
+    (when (pin? pin)
+      (let [bytes (Files/readAllBytes (.toPath (io/file (:path pin))))]
+        (when (= (:sha256 pin) (load-identity/sha256 bytes))
+          (String. bytes "UTF-8"))))
+    (catch Throwable _ nil)))
+
+(defn- acceptance-run-report [run-pin expected-namespace]
+  (when-let [log (read-pinned-text run-pin)]
+    (let [namespaces (mapv second (re-seq #"(?m)^Testing\s+(\S+)\s*$" log))
+          summary (re-find #"(?m)^Ran\s+(\d+)\s+tests?\s+containing\s+\d+\s+assertions?\.\s*$[\r\n]+^(\d+)\s+failures?,\s+(\d+)\s+errors?\.\s*$"
+                           log)]
+      (when summary
+        {:namespace-witness (when (= [expected-namespace] namespaces)
+                              expected-namespace)
+         :testing-namespaces namespaces
+         :tests (Long/parseLong (nth summary 1))
+         :failures (Long/parseLong (nth summary 2))
+         :errors (Long/parseLong (nth summary 3))}))))
+
 (defn acceptance-replay-port
   "Build the tooling-process port that compares a retained red admission run
   with one current run of the identical admitted acceptance source. Missing or
@@ -1448,10 +1469,17 @@
           checked? (and (= :ran (:status current-run))
                         (contains? #{:passed :failed :errored} (:outcome current-run))
                         (pin? (:run-pin current-run)))
+          entry-var (get-in admitted-test [:source :namespace])
+          report (when checked?
+                   (acceptance-run-report (:run-pin current-run) entry-var))
+          path-witness (when (and (= entry-var (:namespace-witness report))
+                                  (pos? (:tests report 0)))
+                         entry-var)
           outcome (cond
                     (not available?) :input-unavailable
                     (not checked?) :input-unavailable
-                    (= :passed (:outcome current-run)) :repaired
+                    (nil? path-witness) :phase-mismatch
+                    (and (zero? (:failures report)) (zero? (:errors report))) :repaired
                     :else :same-failure)
           author (some #(when (= :author (:phase %)) %) (:receipts transaction))
           enact (some #(when (= :enact (:phase %)) %) (:receipts transaction))
@@ -1460,17 +1488,19 @@
                   :repair-id (:repair-id work-order)
                   :patch-sha (get-in author [:payload :patch-sha])
                   :phase-id :admitted-acceptance
-                  :entry-var (:id acceptance-test)
-                  :path-witness (:id acceptance-test)
+                  :entry-var entry-var
+                  :path-witness path-witness
                   :admission-pin admission-pin
                   :admission-run-pin (:run-pin admitted-run)
                   :current-run-pin (:run-pin current-run)
                   :admission-source-identity admitted-source
                   :current-source-identity current-source
                   :before-predicate (when available? :failing)
-                  :after-predicate (when checked?
-                                     (if (= :passed (:outcome current-run))
+                  :after-predicate (when path-witness
+                                     (if (and (zero? (:failures report))
+                                              (zero? (:errors report)))
                                        :passing :failing))
+                  :run-report report
                   :input-available (boolean (and available? checked?))
                   :outcome outcome}]
       (coordinator/seal-port-receipt

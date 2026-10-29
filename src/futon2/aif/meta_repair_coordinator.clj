@@ -453,7 +453,8 @@
             (not= :valid (:status checked))
             (refusal :coordinator/acceptance-replay-receipt-refused
                      {:receipt-defects (:defects checked)})
-            (= :input-unavailable outcome) {:status :input-unavailable}
+            (contains? #{:input-unavailable :phase-mismatch} outcome)
+            {:status :input-unavailable}
             (not (contains? #{:repaired :same-failure} outcome))
             (refusal :coordinator/acceptance-replay-outcome-refused
                      {:outcome outcome})

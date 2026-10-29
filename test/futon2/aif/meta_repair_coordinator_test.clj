@@ -162,24 +162,25 @@
     (is (= 1 @calls))
     (is (= :reopened (get-in result [:ledger :entries 5 :state])))))
 
-(deftest missing-admission-replay-input-falls-back-to-whole-child
-  (let [replay-calls (atom 0)
-        child-calls (atom 0)
-        unavailable (fn [request]
-                      (swap! replay-calls inc)
-                      (receipt request :failed
-                               {:phase-replay-receipt {:outcome :input-unavailable}}))
-        child (:retry (ports))
-        start (prepared (opened-ledger) (options))
-        result (coordinator/coordinate
-                (durable (opened-ledger)) (:transaction start)
-                (assoc (ports)
-                       :acceptance-replay unavailable
-                       :retry (fn [request] (swap! child-calls inc)
-                                (child request))))]
-    (is (= :discharged (:status result)))
-    (is (= 1 @replay-calls))
-    (is (= 1 @child-calls))))
+(deftest inconclusive-admission-replay-falls-back-to-whole-child
+  (doseq [outcome [:input-unavailable :phase-mismatch]]
+    (let [replay-calls (atom 0)
+          child-calls (atom 0)
+          inconclusive (fn [request]
+                         (swap! replay-calls inc)
+                         (receipt request :failed
+                                  {:phase-replay-receipt {:outcome outcome}}))
+          child (:retry (ports))
+          start (prepared (opened-ledger) (options))
+          result (coordinator/coordinate
+                  (durable (opened-ledger)) (:transaction start)
+                  (assoc (ports)
+                         :acceptance-replay inconclusive
+                         :retry (fn [request] (swap! child-calls inc)
+                                  (child request))))]
+      (is (= :discharged (:status result)) (name outcome))
+      (is (= 1 @replay-calls) (name outcome))
+      (is (= 1 @child-calls) (name outcome)))))
 
 (deftest unsatisfiable-acceptance-claim-returns-to-acceptance-without-spending-attempt
   (let [history (opened-ledger)
