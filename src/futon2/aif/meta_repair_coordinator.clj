@@ -51,6 +51,9 @@
                                   (:author order) (:reviewer order)
                                   (:repair-reviewer order) (:target-repository order)
                                   (:target-worktree order)])) (conj :identities)
+                    (and (some? (:canonical-base-sha order))
+                         (not (sha? (:canonical-base-sha order))))
+                    (conj :canonical-base-sha)
                     (not (= 3 (count (set sessions)))) (conj :sessions/distinct)
                     (not (every? nonblank? sessions)) (conj :sessions/present)
                     (not (pos-int? (:attempt order))) (conj :attempt)
@@ -217,14 +220,19 @@
           repair-id (or (:repair-id entry)
                         (str "repair/" (subs (identity/digest
                                              [:meta-repair injury-id]) 0 40)))
+          target-worktree (or (:target-worktree options)
+                              (when-let [root (:target-worktree-root options)]
+                                (str (str/replace root #"/+$" "") "/"
+                                     repair-id "/" attempt)))
           order (seal-work-order
                  (merge (select-keys options
                                      [:diagnosis-evidence-pin :acceptance-test
                                       :author :reviewer :repair-reviewer
                                       :author-session :reviewer-session
                                       :repair-reviewer-session
-                                      :target-repository :target-worktree])
+                                      :target-repository :canonical-base-sha])
                         {:injury-id injury-id :repair-id repair-id :attempt attempt
+                         :target-worktree target-worktree
                          ;; F38 (2026-10-20): the effective limit, not the
                          ;; ledger's raw :attempt-limit, so that a corrected
                          ;; reopen's attempt (4 under a limit of 3 plus two
