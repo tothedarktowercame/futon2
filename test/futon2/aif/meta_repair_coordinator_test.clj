@@ -127,12 +127,16 @@
 (defn- replay-port [outcome calls]
   (fn [request]
     (swap! calls inc)
-    (receipt request (if (= :repaired outcome) :succeeded :failed)
-             {:repair-id (get-in request [:work-order :repair-id])
-              :patch-sha sha-a :retry-click "click-retry-repair-1"
-              :phase-replay-receipt
-              {:outcome outcome :admission-pin pin-a
-               :admission-run-pin pin-a :current-run-pin diagnosis-pin}})))
+    (let [enact-click "click-retry-repair-1"
+          effective-click (or (:effective-retry-click request) enact-click)]
+      (receipt request (if (= :repaired outcome) :succeeded :failed)
+               {:repair-id (get-in request [:work-order :repair-id])
+                :patch-sha sha-a :retry-click effective-click
+                :phase-replay-receipt
+                {:outcome outcome :admission-pin pin-a
+                 :enact-retry-click enact-click
+                 :effective-retry-click effective-click
+                 :admission-run-pin pin-a :current-run-pin diagnosis-pin}}))))
 
 (deftest enacted-admitted-acceptance-pass-discharges-with-replay-receipt
   (let [calls (atom 0)
@@ -161,6 +165,56 @@
     (is (= :reopened (:status result)) (pr-str result))
     (is (= 1 @calls))
     (is (= :reopened (get-in result [:ledger :entries 5 :state])))))
+
+(declare awaiting-retry inconclusive)
+
+(deftest acceptance-replay-after-requeues-cites-latest-enacted-click
+  (let [initial (awaiting-retry (opened-ledger))
+        observed (inconclusive (:ledger initial) "7-retained" "click-retry-repair-1")
+        requeued (coordinator/coordinate
+                  (durable observed) (:transaction initial)
+                  (ports {:retry (fn [r]
+                                   (receipt r :queued
+                                            {:retry-click (:retry-click r)}))}))
+        replay-calls (atom 0)
+        result (coordinator/coordinate
+                (durable (:ledger requeued)) (:transaction requeued)
+                (assoc (ports) :acceptance-replay
+                       (replay-port :repaired replay-calls)))
+        discharge (-> result :ledger :entries last)
+        replay (-> result :transaction :receipts last :payload
+                   :phase-replay-receipt)]
+    (is (= :discharged (:status result)) (pr-str result))
+    (is (= 1 @replay-calls))
+    (is (= "click-retry-requeue-1" (:retry-click discharge))
+        "the ledger admits discharge against its latest enacted transition")
+    (is (= "click-retry-repair-1" (:enact-retry-click replay)))
+    (is (= "click-retry-requeue-1" (:effective-retry-click replay)))))
+
+(deftest retained-iteration-27-discharge-requires-requeue-3-click
+  (let [history (edn/read-string
+                 (slurp "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-27/ledger-before.edn"))
+        injury-id "injury/ad038c4804bdd146142db0a9ac74dfe42a863e52"
+        enacted (filter #(and (= injury-id (:injury-id %))
+                              (= :enacted (:state %)))
+                        (:entries history))
+        original (first enacted)
+        effective (last enacted)
+        discharge {:injury-id injury-id :state :discharged
+                   :attempt (:attempt effective) :repair-id (:repair-id effective)
+                   :patch-sha (:patch-sha effective) :outcome :success
+                   :injury-predecessor {:entry-id (:entry-id effective)
+                                        :entry-pin (:entry-pin effective)}
+                   :port-receipt-pin {:path "iteration-27/replay-receipt.edn"
+                                      :sha256 (apply str (repeat 64 "a"))}}
+        defects (fn [retry-click]
+                  (#'ledger/state-defects history
+                                           (assoc discharge :retry-click retry-click)))]
+    (is (= 85 (:ordinal original)))
+    (is (= 93 (:ordinal effective)))
+    (is (= [:retry/attribution] (defects (:retry-click original))))
+    (is (empty? (defects (:retry-click effective)))
+        "the ledger's transition predicate admits the latest requeue click")))
 
 (deftest inconclusive-admission-replay-falls-back-to-whole-child
   (doseq [outcome [:input-unavailable :phase-mismatch]]

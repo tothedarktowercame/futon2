@@ -502,12 +502,13 @@
   "Run the enacted repair's admitted acceptance test before considering a
   whole-child retry.  `:input-unavailable` is the sole fallback: a checked
   pass discharges and a checked failure reopens."
-  [transaction predecessor-pin port]
+  [transaction predecessor-pin effective-retry-click port]
   (when (fn? port)
     (let [order (:work-order transaction)
           response (try
                      (port {:work-order order :transaction transaction
-                            :phase :retry :predecessor-pin predecessor-pin})
+                            :phase :retry :predecessor-pin predecessor-pin
+                            :effective-retry-click effective-retry-click})
                      (catch Throwable t
                        (refusal :coordinator/acceptance-replay-threw
                                 {:detail (ex-message t)})))]
@@ -795,8 +796,11 @@
                               {:ledger history3})
                     history4 (:ledger enacted)
                     _ (checkpoint! ports :enact history4 tx3)
+                    effective-retry-click
+                    (:retry-click (latest-transition history4 injury-id))
                     replay-result (acceptance-replay-result
                                    tx3 (:receipt-pin enact-receipt)
+                                   effective-retry-click
                                    (:acceptance-replay ports))
                     _ (when (= :refused (:status replay-result))
                         (stop! replay-result))
@@ -812,10 +816,14 @@
                                                  (:retry ports))))
                     retry-receipt (:receipt retry-result)
                     tx4 (:transaction retry-result)
-                    retry-payload (:payload retry-receipt)]
+                    retry-payload (:payload retry-receipt)
+                    transition-retry-click
+                    (if (= :checked (:status replay-result))
+                      effective-retry-click retry-click)]
                 (when-not (and (= repair-id (:repair-id retry-payload))
                                (= patch-sha (:patch-sha retry-payload))
-                               (= retry-click (:retry-click retry-payload)))
+                               (= transition-retry-click
+                                  (:retry-click retry-payload)))
                   (stop! (refusal :coordinator/retry-attribution-refused
                                   {:ledger history4 :transaction tx4})))
                 (cond
@@ -831,7 +839,7 @@
                                  history4 {:injury-id injury-id :state :discharged
                                            :attempt attempt :repair-id repair-id
                                            :patch-sha patch-sha
-                                           :retry-click retry-click
+                                           :retry-click transition-retry-click
                                            :outcome (or (:outcome retry-payload) :success)
                                            :phase-replay-receipt-pin
                                            (when (get retry-payload :phase-replay-receipt)
@@ -846,7 +854,7 @@
                                   (ledger/append-retry-result
                                    history4 {:injury-id injury-id :repair-id repair-id
                                              :patch-sha patch-sha
-                                             :retry-click retry-click
+                                             :retry-click transition-retry-click
                                              :new-cause-pin
                                              (or (:new-cause-pin retry-payload)
                                                  (get-in retry-payload
