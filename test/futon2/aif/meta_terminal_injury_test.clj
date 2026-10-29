@@ -38,40 +38,34 @@
 (deftest retained-q6-hot-load-failure-does-not-inherit-the-nil-cause-injury
   ;; This is the retained e0b9aab6 record: its close omitted :failure, while
   ;; its pinned Q6 terminal says the cascade-resume hot-load failed.
-  (let [nil-cause (classify {:run/id "old-nil-cause" :click/id "old-click"
-                             :failure {:absent :no-failure}
-                             :terminal-receipt {:outcome :incomplete}}
-                            pin-a)
-        old-id (:injury-id nil-cause)
-        opened (:ledger (terminal/integrate ledger/empty-ledger nil-cause))
-        claimed (append! opened {:injury-id old-id :state :claimed :attempt 1
-                                 :repair-id "repair/old" :algorithm "self-heal"
-                                 :author-session "a" :reviewer-session "r"})
-        authored (append! claimed {:injury-id old-id :state :authored :attempt 1
-                                   :repair-id "repair/old" :patch-sha patch
-                                   :worktree "/fixture/worktree"})
-        reviewed (append! authored {:injury-id old-id :state :reviewed :attempt 1
-                                    :repair-id "repair/old" :verdict :approved
-                                    :reviewer-sha review :reviewer-session "r"})
-        enacted (append! reviewed {:injury-id old-id :state :enacted :attempt 1
-                                   :repair-id "repair/old"
-                                   :integration-commit integration
-                                   :retry-click "old-retry"})
-        success (classify {:run/id "old-success" :click/id "old-retry"
-                           :outcome :success}
-                          {:path "fixtures/old-success.edn"
-                           :sha256 (apply str (repeat 64 "8"))})
-        discharged (:ledger (terminal/integrate enacted success))
-        classified (classify @retained-hot-load-run retained-hot-load-pin)
-        integrated (terminal/integrate discharged classified)]
-    (is (= "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0" old-id))
-    (is (= :hot-load-failed (:failure-kind classified)))
-    (is (= :cascade-resume (:failure-stage classified)))
-    (is (not= old-id (:injury-id classified)))
-    (is (= :open (:transition integrated)) (pr-str integrated))
-    (is (= :discharged
-           (->> (get-in integrated [:ledger :entries])
-                (filter #(= old-id (:injury-id %))) last :state)))))
+  (let [historical-id "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0"
+        hot-load (classify @retained-hot-load-run retained-hot-load-pin)
+        other (classify {:run/id "other-q6-refusal" :click/id "other-click"
+                         :failure {:absent :no-failure}
+                         :q6 {:terminal {:schema :wm/q6-terminal-v1
+                                         :run/id "other-q6-refusal"
+                                         :outcome {:status :present
+                                                   :outcome :refused
+                                                   :kind :compile-refused
+                                                   :phase :compile}}}}
+                        {:path "fixtures/other-q6.edn"
+                         :sha256 (apply str (repeat 64 "7"))})
+        unclassified (classify {:run/id "unclassified-run" :click/id "nil-click"
+                                :failure {:absent :no-failure}
+                                :terminal-receipt {:outcome :incomplete}}
+                               {:path "fixtures/unclassified.edn"
+                                :sha256 (apply str (repeat 64 "8"))})
+        classifications [hot-load other unclassified]
+        integrated (reduce (fn [history classification]
+                             (:ledger (terminal/integrate history classification)))
+                           ledger/empty-ledger classifications)]
+    (is (= [:hot-load-failed :compile-refused :unclassified-terminal-failure]
+           (mapv :failure-kind classifications)))
+    (is (= [:cascade-resume :compile :unknown-stage]
+           (mapv :failure-stage classifications)))
+    (is (= 3 (count (set (map :injury-id classifications)))))
+    (is (not-any? #{historical-id} (map :injury-id classifications)))
+    (is (= 3 (count (:injuries (ledger/active-injuries integrated)))))))
 
 (deftest successful-close-images-are-non-injuries
   (testing "click 1's retained grounded progress is a non-injury"
