@@ -1,6 +1,6 @@
 # E-rollout-kill-test — run the ≥15% non-greedy test; kill or keep
 
-**Status: OPEN (2026-07-05). An EXCURSION deliberately, not a mission:
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The pre-registered >=15% non-greedy kill test ran to a KEEP verdict, then the operator superseded it with a RETIRED-ON-THEORY ruling and successor chartering; the re-runnable gate script exists. Evidence: /home/joe/code/futon2/scripts/kill_test_rollout.clj.
 one bounded question with a pre-registered threshold, single-owner,
 answerable in a session or two. Owner: TBD. Reviewer: claude-16.**
 

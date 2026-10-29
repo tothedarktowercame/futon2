@@ -1,4 +1,5 @@
 # E-r18-faithfulness-audit — the per-quantity faithfulness audit (turns R18 yellow)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Per-quantity adversarial faithfulness audit of all 16 named AIF quantities was delivered, turning R18 yellow via the badges file. Evidence: /home/joe/code/futon2/data/r18-badges.edn.
 
 **Date:** 2026-07-03 · **Owner:** claude-2 (dispatched by claude-11, Joe-ratified) · **Status:** DELIVERED — R18 goes
 **absent → partial**. Every named AIF quantity in `futon2.aif.*` (+ the cascade `F` on futon3a) now carries a
