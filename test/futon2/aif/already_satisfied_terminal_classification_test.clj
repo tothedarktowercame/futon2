@@ -1,8 +1,8 @@
 (ns futon2.aif.already-satisfied-terminal-classification-test
   "Pinned acceptance for producer-qualified already-satisfied terminal closes.
 
-  This boundary is non-injury but not repair success: an attributable retry is
-  retained as :retry-inconclusive, never discharged."
+  A producer-qualified attributable retry discharges; an unqualified
+  already-satisfied retry remains inconclusive."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
@@ -11,9 +11,9 @@
             [futon2.aif.meta-terminal-injury :as terminal]))
 
 (def pinned-record-path
-  "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-d0608eec-cca3-45de-9c19-14d6db26577d.edn")
+  "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-b1a049d7-d4f8-4f63-be69-6872d86e8827.edn")
 (def pinned-record-sha256
-  "6ca9604a70652c6dfb27c834248e5c875816540c285278f5c3918347e8fe9715")
+  "0d11787aff478942a451d153665a67834688c3f754e5a7d84ee58b3f637def68")
 (def pin-a {:path "fixtures/a.edn"
             :sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
 (def patch "95145f09395145f09395145f09395145f0939514")
@@ -28,7 +28,17 @@
 (defn- pinned-record []
   (is (.isFile (io/file pinned-record-path)))
   (is (= pinned-record-sha256 (sha256 pinned-record-path)))
-  (edn/read-string (slurp pinned-record-path)))
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "qualified-already-satisfied-"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))
+        copy (io/file root "record.edn")]
+    (try
+      (io/copy (io/file pinned-record-path) copy)
+      (is (= pinned-record-sha256 (sha256 copy)))
+      (edn/read-string (slurp copy))
+      (finally
+        (.delete copy)
+        (.delete root)))))
 
 (defn- append! [history event]
   (let [result (ledger/append-transition history event)]
@@ -76,7 +86,7 @@
     (is (= :duplicate (:status duplicate)))
     (is (= (:ledger first-result) (:ledger duplicate)))))
 
-(deftest attributable-already-satisfied-retry-is-inconclusive-not-discharged
+(deftest attributable-qualified-already-satisfied-retry-discharges
   (let [record (assoc (pinned-record) :click/id "retry-click")
         classification (terminal/classify
                         record {:path "fixtures/already-satisfied-retry.edn"
@@ -87,11 +97,42 @@
         active (:injuries (ledger/active-injuries (:ledger result)))]
     (is (= :producer-qualified-already-satisfied
            (:non-injury-reason classification)))
+    (is (= :discharged (:transition result)))
+    (is (= :discharged (:state last-entry)))
+    (is (= (:record-pin classification) (:result-record-pin last-entry)))
+    (is (= injury-id (:injury-id last-entry)))
+    (is (nil? (get active injury-id)))))
+
+(deftest unqualified-already-satisfied-retry-remains-inconclusive
+  (let [record {:run/id "unqualified" :click/id "retry-unqualified"
+                :failure {:kind :declared-no-work :stage :author-wait
+                          :detail {:outcome :already-satisfied}}
+                :run-output {:outcome :already-satisfied}}
+        classification (terminal/classify
+                        record {:path "fixtures/unqualified-retry.edn"
+                                :sha256 (apply str (repeat 64 "c"))})
+        {:keys [injury-id ledger]} (enacted-ledger "retry-unqualified")
+        result (terminal/integrate ledger classification)
+        last-entry (last (:entries (:ledger result)))
+        active (:injuries (ledger/active-injuries (:ledger result)))]
+    (is (= :declared-no-work (:non-injury-reason classification)))
     (is (= :retry-inconclusive (:transition result)))
     (is (= :retry-inconclusive (:observation-kind last-entry)))
     (is (= injury-id (:injury-id last-entry)))
-    (is (= :enacted (:state (get active injury-id))))
-    (is (not-any? #(= :discharged (:state %)) (:entries (:ledger result))))))
+    (is (= :enacted (:state (get active injury-id))))))
+
+(deftest successful-task-outcome-retry-still-discharges
+  (let [classification (terminal/classify
+                        {:run/id "success" :click/id "retry-success" :outcome :success}
+                        {:path "fixtures/success-retry.edn"
+                         :sha256 (apply str (repeat 64 "d"))})
+        {:keys [ledger]} (enacted-ledger "retry-success")
+        result (terminal/integrate ledger classification)
+        last-entry (last (:entries (:ledger result)))]
+    (is (= :successful-task-outcome (:non-injury-reason classification)))
+    (is (= :discharged (:transition result)))
+    (is (= :discharged (:state last-entry)))
+    (is (= (:record-pin classification) (:result-record-pin last-entry)))))
 
 (deftest unsupported-refusal-and-stale-done-remain-injuries
   (let [claimed-sha "891001d08d8b37eaf50e13f985dee30c8d34340a"

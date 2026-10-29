@@ -172,6 +172,7 @@
                                     :producer-qualified-already-satisfied)
                                   (get explicit-non-injury-kinds kind)
                                   (when (and (nil? kind)
+                                             (not= :already-satisfied terminal-outcome)
                                              (or (contains? successful-images
                                                             (close-outcome-image
                                                              terminal-outcome))
@@ -267,7 +268,11 @@
 
       (= :non-injury (:classification classification))
       (if-let [enacted (enacted-for-retry history (:click-id classification))]
-        (if (= :successful-task-outcome (:non-injury-reason classification))
+        ;; DarkTower.WarMachine.SelfHealRoute.closing_dischargesOnlyOnSuccess:
+        ;; these are exactly the two retry outcomes whose closing is discharged.
+        (if (contains? #{:successful-task-outcome
+                         :producer-qualified-already-satisfied}
+                       (:non-injury-reason classification))
         (let [authored (last (filter #(and (= ledger/transition-schema (:schema %))
                                           (= (:injury-id enacted) (:injury-id %))
                                           (= :authored (:state %))
