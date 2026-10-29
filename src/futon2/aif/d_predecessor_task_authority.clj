@@ -23,7 +23,8 @@
 (load-identity/register! *ns* *file*)
 
 (def authority :d-predecessor-task-authority-v1)
-(def default-root "data/wm-d-task-enactment")
+;; The serving JVM runs from futon3c; never resolve evidence against its cwd.
+(def default-root "/home/joe/code/futon2/data/wm-d-task-enactment")
 (def scope {:certifies :executed-with-artifacts
             :does-not-establish #{:e1-portfolio-membership :r6-r11-domain
                                   :machine-enactment-correspondence}})

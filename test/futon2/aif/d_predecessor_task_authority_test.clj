@@ -535,3 +535,15 @@
       (finally
         (doseq [file (reverse (file-seq dir))]
           (io/delete-file file true))))))
+
+(deftest default-root-is-canonical-from-serving-working-directory
+  ;; Do not chdir or write either live store. Resolve exactly as a default
+  ;; consumer does, including the actual process working directory.
+  (is (.isAbsolute (io/file task/default-root)))
+  (is (= "/home/joe/code/futon2/data/wm-d-task-enactment"
+         (.getCanonicalPath (io/file task/default-root))))
+  (doseq [cwd ["/home/joe/code/futon3c" "/tmp"]]
+    (let [base (.toPath (io/file cwd))
+          root (.toPath (io/file task/default-root))]
+      (is (= "/home/joe/code/futon2/data/wm-d-task-enactment"
+             (str (.normalize (.resolve base root))))))))
