@@ -267,7 +267,8 @@
         prompt-chars (count prompt)]
     (if (<= prompt-chars budget)
       {:status :ready :prompt prompt :prompt-chars prompt-chars
-       :prompt-budget-chars budget :proposal-summary summary}
+       :prompt-budget-chars budget :proposal-pin (:proposal-pin summary)
+       :proposal-summary summary}
       {:state :not-contacted :status :refused
        :reason :readiness/prompt-over-budget
        :prompt-chars prompt-chars :prompt-budget-chars budget
@@ -308,7 +309,11 @@
      :answer-fn (fn [proposal]
                   (let [prompt-result (ticket-readiness-prompt opts proposal)
                         response (if (= :ready (:status prompt-result))
-                                   (contact prompt-result)
+                                   (merge (contact prompt-result)
+                                          (select-keys prompt-result
+                                                       [:prompt-chars
+                                                        :prompt-budget-chars
+                                                        :proposal-pin]))
                                    prompt-result)
                         answer (handoff/response-map response)
                         result-pin (ticket-readiness/retain-contact-result!
