@@ -1,4 +1,5 @@
 # E-kimi-task-124 — FAMILY-flight: the flight producers become one test namespace (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The 24 flight producer test namespaces were merged into the family namespace wm_wire_producer_family_flight_test.clj, accepted in commit 48524c375. Evidence: 48524c3758307b94a0de5314a15aea69ef47f42b, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_producer_family_flight_test.clj.
 
 **Requisition:** completed — 2026-09-28T20:37:35Z, job invoke-1790627172163-26218-e71cc995, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-135 — M-象-2000 INTERACT-1 §0: dramaturge scene driver
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): INTERACT-1 §0 dramaturge scene driver built: the scene macro file, the shell runner and the stub replayer stream all exist, and the driver landed as futon4 commit 19bc167f. Evidence: /home/joe/code/futon4/dev/arxana-dramaturge-scene.el, /home/joe/code/futon4/dev/run-dramaturge-scenes.sh, /home/joe/code/futon3c/emacs/scenes/streams/stub-hello.ndjson, 19bc167f.
 
 **Requisition:** completed — 2026-09-30T03:36:27Z, job invoke-1790737913926-28100-5557ee6a, state done
 

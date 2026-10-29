@@ -1,4 +1,5 @@
 # E-kimi-task-136 — M-象-2000 INTERACT-1 I13: trace rules on every event, violation in the 象 modeline
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): I13 landed: xiang-trace.el re-runs rules on every recorded event and shows violations in the 象 modeline segment (commit 881ddb78d in futon3c; the modeline-segment code is present in the live file). Evidence: 881ddb78d, /home/joe/code/futon3c/emacs/xiang-trace.el.
 
 **Requisition:** completed — 2026-09-30T03:59:03Z, job invoke-1790739789958-28138-8e20694c, state done
 

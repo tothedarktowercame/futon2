@@ -1,4 +1,5 @@
 # E-kimi-task-15 — H-interp discovery: interpretation step today vs hand cascades
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): H-interp discovery packet comparing the machine's want-interpretation step with claude-1's hand-written cascades was completed and accepted, and the deliverable H-INTERP-D.md exists in futon2. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/H-INTERP-D.md.
 
 **Requisition:** completed — 2026-09-25T02:47:07Z, job invoke-1790304022734-24107-3fbcd834, state done
 

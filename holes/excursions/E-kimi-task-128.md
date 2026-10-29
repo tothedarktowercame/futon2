@@ -1,4 +1,5 @@
 # E-kimi-task-128 — PROGRESS-D: intermediate-progress checker, discovery (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only PROGRESS-D discovery on the intermediate-progress checker, delivered as storage/proof-2a/progress-d/REPORT.md. Evidence: /home/joe/code/storage/proof-2a/progress-d/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T21:09:41Z, job invoke-1790629428341-26336-72955f7a, state done
 

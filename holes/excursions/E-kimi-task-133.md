@@ -1,4 +1,5 @@
 # E-kimi-task-133 — simulated customer (cto) views hyperreal.enterprises with images
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Simulated-customer run (cto persona) completed; the required persona report file was written and exists. Evidence: /home/joe/code/storage/futon7a/customer-sims/2026-09-29-kimi/kimi-3-cto.md.
 
 **Requisition:** completed — 2026-09-29T03:43:51Z, job invoke-1790652179269-27461-07dfd75f, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-131 — simulated customer (strategist) views hyperreal.enterprises with images
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Simulated-customer run for the strategist persona delivered with screenshots: kimi-1-strategist.md plus kimi-1 screenshot/text/link files under storage/futon7a/customer-sims/2026-09-29-kimi/. Evidence: /home/joe/code/storage/futon7a/customer-sims/2026-09-29-kimi/kimi-1-strategist.md, /home/joe/code/storage/futon7a/customer-sims/2026-09-29-kimi/shots/kimi-1-01-home-01.png.
 
 **Requisition:** completed — 2026-09-29T03:47:34Z, job invoke-1790652170192-27459-5b8573de, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-13 — non-author warrants for a98f5879, 96b78e47, 5c9b9d45
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Non-author warrants were registered for a98f5879 (incl. futon2.aif.efe-test, recorded in the warrant index at 2026-09-25T01:14:50Z, minutes before the requisition completed), 96b78e47 and 5c9b9d45; all three pinned commits exist in futon2. Evidence: a98f5879a4e179700deb54bf9ab9bb03b9005360, 96b78e470a0cc4116d5ba0f5ff5b7b928435d332, 5c9b9d45ad5df162ccdd6d25f4bb6b9a585534d9, /home/joe/code/futon2/data/test-warrants/index.json.
 
 **Requisition:** completed — 2026-09-25T01:16:04Z, job invoke-1790298617549-24092-42a85bc2, state done
 

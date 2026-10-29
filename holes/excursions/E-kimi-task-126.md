@@ -1,4 +1,5 @@
 # E-kimi-task-126 — CREEP-D: account of PROOF-2 sections complete then reopened (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only CREEP-D account of when the PROOF sections were complete and what reopened them, delivered as storage/proof-2a/creep-d/REPORT.md. Evidence: /home/joe/code/storage/proof-2a/creep-d/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T20:52:31Z, job invoke-1790628292365-26258-b545e0a1, state done
 

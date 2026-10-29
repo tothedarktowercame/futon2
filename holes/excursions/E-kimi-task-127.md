@@ -1,4 +1,5 @@
 # E-kimi-task-127 — HGT-E-D: target-grain E for Clause T, discovery (read-only)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Read-only HGT-E-D discovery on target-grain E for Clause T, delivered as storage/proof-2a/hgt-e-d/REPORT.md. Evidence: /home/joe/code/storage/proof-2a/hgt-e-d/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T21:08:19Z, job invoke-1790629387980-26330-1eba05d7, state done
 

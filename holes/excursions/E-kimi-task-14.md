@@ -1,4 +1,5 @@
 # E-kimi-task-14 — H-order: constructor emits a containment order over units
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): H-order constructor change landed: futon2 commit bfb05766 exists and futon2/src/futon2/aif/construction.clj now emits :units/:descent/:meets/:missing-meets. Evidence: bfb05766, /home/joe/code/futon2/src/futon2/aif/construction.clj.
 
 **Requisition:** completed — 2026-09-25T02:55:12Z, job invoke-1790304020957-24106-4ae6bd58, state done
 

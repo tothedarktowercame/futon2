@@ -1,4 +1,5 @@
 # E-kimi-task-122 — Producer groups 54 55 56: producer tests and their wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Producer groups 54, 55 and 56 were converted to producer records with record readers, one commit per group, with reports in storage/test-registry/producer-{54,55,56}/. Evidence: 7c38a1317ccdbf0506afea7ef030468bc3af2470, 9c79461c4bb01d9e0b9f8f17aa932d646c19fe94, 9ad6047cb6a454b9db304cb96c3fad73d507527e, /home/joe/code/storage/test-registry/producer-54/REPORT.md, /home/joe/code/storage/test-registry/producer-55/REPORT.md, /home/joe/code/storage/test-registry/producer-56/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T20:04:53Z, job invoke-1790624851042-26188-635c9d5f, state done
 

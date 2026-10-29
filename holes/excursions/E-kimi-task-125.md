@@ -1,4 +1,5 @@
 # E-kimi-task-125 — FAMILY-decision: the decision producers become one test namespace (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The 19 decision producer test namespaces were merged into one family test namespace, committed in 6eda2af9b and accepted in 770301dd6. Evidence: 6eda2af9b9537aa7083960f1f3eeb5c2486e27d3, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_producer_family_decision_test.clj.
 
 **Requisition:** completed — 2026-09-28T20:52:26Z, job invoke-1790627175126-26219-b8cf2f3f, state done
 

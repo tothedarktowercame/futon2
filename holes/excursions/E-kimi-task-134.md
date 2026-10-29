@@ -1,4 +1,5 @@
 # E-kimi-task-134 — simulated customer (solo-operator) views hyperreal.enterprises with images
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Simulated-customer run (solo-operator persona) completed; the required persona report file was written and exists. Evidence: /home/joe/code/storage/futon7a/customer-sims/2026-09-29-kimi/kimi-4-solo-operator.md.
 
 **Requisition:** completed — 2026-09-29T03:31:12Z, job invoke-1790652195639-27462-ba4f88c3, state done
 

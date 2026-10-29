@@ -1,4 +1,5 @@
 # E-kimi-task-123 — Producer groups 59: producer tests and their wire-test readers (M-warrant-limit)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Producer group 59 (run-opportunity! reader) was converted to a producer record, committed in futon3c with a report in storage/test-registry/producer-59/. Evidence: 504e0cf6f36b1b7e65fa983887520ef56431ecde, /home/joe/code/storage/test-registry/producer-59/REPORT.md.
 
 **Requisition:** completed — 2026-09-28T20:01:19Z, job invoke-1790625427747-26199-9694bd1e, state done
 

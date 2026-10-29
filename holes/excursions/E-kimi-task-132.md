@@ -1,4 +1,5 @@
 # E-kimi-task-132 — simulated customer (skimmer) views hyperreal.enterprises with images
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Simulated-customer run for the skimmer persona delivered with screenshots: kimi-2-skimmer.md plus ten kimi-2 screenshot/text/link files under storage/futon7a/customer-sims/2026-09-29-kimi/shots/. Evidence: /home/joe/code/storage/futon7a/customer-sims/2026-09-29-kimi/kimi-2-skimmer.md, /home/joe/code/storage/futon7a/customer-sims/2026-09-29-kimi/shots/kimi-2-01-home-01.png.
 
 **Requisition:** completed — 2026-09-29T03:25:46Z, job invoke-1790652174061-27460-511fb16b, state done
 
