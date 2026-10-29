@@ -9,7 +9,8 @@
             [futon2.aif.action-identity :as identity]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-injury-ledger :as ledger]
-            [futon2.aif.medic-disposition :as medic])
+            [futon2.aif.medic-disposition :as medic]
+            [futon2.aif.out-of-band-fix :as out-of-band])
   (:import [java.io PushbackReader StringReader]))
 
 (def intent-schema :wm/meta-medic-intent-v1)
@@ -33,8 +34,19 @@
 (defn resolution-identity [value]
   (when (resolved-context? value) (.-identity ^AuthorityResolution value)))
 
+(defn with-retained-authorities
+  "Extend the resolved external medic authority with entry-local authorities
+  whose complete evidence is retained by the entry itself. Either verifier
+  may accept an entry; the retained one accepts only entries whose own receipt
+  re-derives."
+  [external]
+  (fn [observation]
+    (or (try (true? (external observation)) (catch Throwable _ false))
+        (out-of-band/retained-checked-medic-authority observation))))
+
 (defn resolution-verifier [value]
-  (when (resolved-context? value) (.-verifier ^AuthorityResolution value)))
+  (when (resolved-context? value)
+    (with-retained-authorities (.-verifier ^AuthorityResolution value))))
 
 (def required-findings
   {:producer-qualified-non-injury
