@@ -73,3 +73,35 @@
       (is (= ["r1" "r2"] (mapv #(get-in % [:record :run/id]) (:sources selected)))))
     (write-record! dir "r3" :focused)
     (is (= :history-index-incomplete (:status (index/history dir key-a 2))))))
+
+(deftest live-chronology-string-keyed-sorted-map-does-not-break-terminal-search
+  (let [fixture (edn/read-string (slurp "test/resources/wm/class-history/run001-projection.edn"))
+        retained (:record fixture)
+        chronology (:registered-run/chronology retained)
+        ;; EDN hydration loses collection type. Restore the sorted-map emitted
+        ;; by registered-run-telemetry/source-revisions, using the retained values.
+        revisions (into (sorted-map) (:source-revisions-before chronology))
+        live-record (array-map :run/id (:run/id retained)
+                               :registered-run/chronology
+                               (assoc chronology :source-revisions-before revisions)
+                               :q6 (:q6 retained))
+        dir (temp-dir)
+        file (io/file dir "tick-run-record-run001.edn")]
+    (try
+      (is (seq revisions))
+      (is (every? string? (keys revisions)))
+      (is (= :wm/q6-terminal-v1 (get-in live-record [:q6 :terminal :schema])))
+      (spit file (pr-str live-record))
+      ;; Real append, then coverage and the retained policy identity. No live stores.
+      (index/append-run-record! dir file live-record)
+      (let [indexed (index/read-index dir)
+            row (first (:rows indexed))]
+        (is (= :complete (:status indexed)))
+        (is (= 1 (:covered-count indexed)))
+        (is (= (:run/id retained) (:run-id row)))
+        (is (= (:policy-key-sha256
+                 (index/index-entry (select-keys live-record [:run/id :q6])
+                                    (.getPath file) (:source-sha256 fixture)))
+               (:policy-key-sha256 row))))
+      (finally
+        (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))

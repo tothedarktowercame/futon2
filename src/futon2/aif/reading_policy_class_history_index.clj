@@ -14,7 +14,15 @@
 (def terminal-classes #{:focused :related :unrelated :stop-the-line})
 
 (defn- q6-terminal [record]
-  (some #(when (and (map? %) (= :wm/q6-terminal-v1 (:schema %))) %)
+  ;; A live record contains string-keyed sorted maps (chronology revisions).
+  ;; Keyword lookup would ask their comparator to compare unlike key types.
+  ;; Inspect entries instead; retain the existing first-terminal traversal.
+  (some (fn [node]
+          (when (and (map? node)
+                     (some (fn [[k v]]
+                             (and (= :schema k) (= :wm/q6-terminal-v1 v)))
+                           node))
+            node))
         (tree-seq coll? seq record)))
 
 (defn index-entry [record record-path record-sha256]
