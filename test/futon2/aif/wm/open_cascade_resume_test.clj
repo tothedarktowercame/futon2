@@ -306,7 +306,7 @@
   "/home/joe/code/futon2/data/wm-executable-cascades/af6294ee687ca69fac2cb0ddd7e75c92cccf38e716a5082f3a3333d41e218f91.edn")
 
 (def retained-patch-path
-  "/home/joe/code/futon3c/src/futon3c/wm/enactment_clauses.clj")
+  "test/resources/wm/e43/prior_producer.clj")
 
 (defn- compile-product [structural clauses]
   (let [compiled (compiler/compile-executable
@@ -334,7 +334,7 @@
   (load-file retained-patch-path)
   (let [retained (edn/read-string (slurp retained-cascade-path))
         structural (:structural retained)
-        patch-fn (ns-resolve 'futon3c.wm.enactment-clauses 'enact-clauses)
+        patch-fn (ns-resolve 'futon3c.wm.e43-prior-producer 'enact-clauses)
         product (patch-fn {:cascade-digest retained-cascade-digest
                            :phase :compile})
         compiled (compile-product structural product)
