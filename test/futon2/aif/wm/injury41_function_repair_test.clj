@@ -257,6 +257,46 @@
     (is (str/ends-with? (str (:value-type (ex-data thrown))) "Map"))
     (is (fn? (loader (assoc descriptor :var "decisions"))))))
 
+(deftest retained-enactment-clauses-without-registration-has-a-distinct-cause
+  (let [source-file (io/file "/home/joe/code/futon3c/src/futon3c/wm/enactment_clauses.clj")
+        source (slurp source-file)
+        digest (load-identity/sha256 (.getBytes source "UTF-8"))
+        namespace "futon3c.wm.enactment-clauses"
+        n (symbol namespace)
+        loader (var-get #'runtime/patch-loader)
+        descriptor {:namespace namespace :var "enact-clauses"
+                    :source-digest digest}
+        thrown (with-redefs [clojure.core/require (fn [& _] (load-string source))
+                             load-identity/registry (atom {})]
+                 (try (loader descriptor) nil
+                      (catch clojure.lang.ExceptionInfo t t)))]
+    (is (= "bba7869aecef4049c0033d67fd44255d92febe39a90c4a57f8a899fb4b0257ff"
+           digest)
+        "the fixture is the retained enactment_clauses.clj bytes")
+    (is (= :patch-namespace-not-registered (:kind (ex-data thrown))))
+    (is (= namespace (:namespace (ex-data thrown))))
+    (when (find-ns n) (remove-ns n))))
+
+(deftest retained-resume-path-reports-the-unregistered-enactment-namespace
+  (with-open-error [error]
+    (let [source (slurp "/home/joe/code/futon3c/src/futon3c/wm/enactment_clauses.clj")
+          digest (load-identity/sha256 (.getBytes source "UTF-8"))
+          namespace "futon3c.wm.enactment-clauses"
+          n (symbol namespace)
+          driven (with-redefs [clojure.core/require (fn [& _] (load-string source))
+                               load-identity/registry (atom {})]
+                   (drive-handler
+                    error
+                    (author-variant {:namespace namespace :var "enact-clauses"
+                                     :source-digest digest})
+                    (review-variant {:source-digest digest})))]
+      (is (= :hot-load-failed (get-in driven [:result :kind])))
+      (is (= :patch-namespace-not-registered
+             (get-in driven [:result :cause :kind])))
+      (is (= namespace (get-in driven [:result :cause :namespace])))
+      (is (= 0 (:retry-calls driven)))
+      (when (find-ns n) (remove-ns n)))))
+
 (deftest retained-answer-naming-the-data-var-refuses-at-hot-load-before-retry
   ;; THE REPAIR.  Red on the source that ran fc464172: there the map passed
   ;; ifn?, the retry refused :verified-authoring-product-missing and resume!
@@ -449,7 +489,9 @@
         (is (str/includes? prompt "function"))
         (is (str/includes? prompt "{:cascade-digest :phase}"))
         (is (str/includes? prompt "data var"))
-        (is (str/includes? prompt ":patch-var-not-a-function"))))))
+        (is (str/includes? prompt ":patch-var-not-a-function"))))
+    (is (str/includes? author-prompt "load-identity/register!"))
+    (is (str/includes? author-prompt ":patch-namespace-not-registered"))))
 
 (deftest zz-report-journal-restarts
   ;; Not an assertion about the repair: a visible count of how often the

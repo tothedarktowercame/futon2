@@ -332,7 +332,10 @@
        "must name a function (defn) of one context map {:cascade-digest :phase} "
        "that returns the decision map keyed by hole id; a bare data var (a def'd "
        "map, set or keyword) is refused at hot-load as "
-       ":patch-var-not-a-function.\n\n"
+       ":patch-var-not-a-function. The patch namespace must require "
+       "futon2.aif.load-identity and call (load-identity/register! *ns* *file*) "
+       "at top level; the trusted loader refuses an unregistered namespace as "
+       ":patch-namespace-not-registered.\n\n"
        (pr-str req)))
 
 (defn- open-cascade-review-prompt [{:keys [requisition author-answer]}]
@@ -416,6 +419,10 @@
     (require n :reload)
     (let [loaded (get @load-identity/registry n)
           resolved (ns-resolve n v)]
+      (when-not loaded
+        (throw (ex-info "reviewed patch namespace did not register its load identity"
+                        {:kind :patch-namespace-not-registered
+                         :namespace namespace})))
       (when-not (= source-digest (:sha256 loaded))
         (throw (ex-info "reviewed patch source digest does not match loaded source"
                         {:kind :patch-source-digest-mismatch
