@@ -28,7 +28,7 @@
 (def model-provenance
   {:kind :lean-model
    :definition "DarkTower.WarMachine.RepairCascadeG.costKernel"
-   :commit "c9b0cc2004d7cf863c0f87eeb46a5f624d581de4"})
+   :commit "3b7c08368ea4fea599b2159b916759aabea03daa"})
 
 (def genuine-repair
   {:id :genuine-repair
@@ -44,7 +44,8 @@
 
 (def historical-misclassification
   {:id :historical-misclassification
-   :patterns [:reproduce-on-retained-inputs
+   :patterns [:locate-the-producer-first
+              :reproduce-on-retained-inputs
               :a-correct-refusal-is-not-the-defect
               :retire-by-appending-to-the-ledger]})
 

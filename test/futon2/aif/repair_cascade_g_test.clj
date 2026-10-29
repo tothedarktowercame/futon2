@@ -21,7 +21,7 @@
 
 (deftest recorded-cascade-guard-check
   (is (= 5 (repair/admitted-count :never-defect repair/genuine-repair)))
-  (is (= 2 (repair/admitted-count :never-defect repair/historical-misclassification)))
+  (is (= 4 (repair/admitted-count :never-defect repair/historical-misclassification)))
   (is (= :closure (repair/predicted-outcome
                    (repair/apply-cascade repair/genuine-repair
                                          (repair/initial-repair-state :never-defect)))))
@@ -31,9 +31,12 @@
   (is (= :closure (repair/predicted-outcome
                    (repair/apply-cascade repair/genuine-repair
                                          (repair/initial-repair-state :real-defect)))))
-  (is (= :injury-persistence (repair/predicted-outcome
-                              (repair/apply-cascade repair/historical-misclassification
-                                                    (repair/initial-repair-state :real-defect))))))
+  (is (= :useful-blocker-discovery
+         (repair/predicted-outcome
+          (repair/apply-cascade repair/historical-misclassification
+                                (repair/initial-repair-state :real-defect)))))
+  (is (= "3b7c08368ea4fea599b2159b916759aabea03daa"
+         (:commit repair/model-provenance))))
 
 (def fix-then-reproduce
   {:id :fix-then-reproduce
