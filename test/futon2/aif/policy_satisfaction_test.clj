@@ -1,5 +1,8 @@
 (ns futon2.aif.policy-satisfaction-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is testing]]
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.policy-authoring-resolution :as resolution]
             [futon2.aif.policy-satisfaction :as sut]
             [futon2.aif.wm.authored.req-f0ba279a :as authored]))
 
@@ -9,10 +12,12 @@
 (def grounded {:repo "/home/joe/code/futon0"
                :sha "cfb1408629826c6d825e2ddc06aad84ee5ac6108"})
 (def checks (vec (sort-by pr-str (map :completion-check (vals authored/clauses)))))
+(def authoring-resolution (resolution/for-policy policy-id))
 (def construction
   {:mission mission :selected-cascade policy-id
    :cascade {:operational-plan
-             {:steps (mapv (fn [check] {:clause {:completion-check check}}) checks)}}})
+             {:steps (mapv (fn [check] {:clause {:completion-check check}}) checks)}
+             :selected-action {:authoring-resolution authoring-resolution}}})
 (def qualified
   {:run/id "attempt-002"
    :failure {:kind :already-satisfied :stage :author-wait
@@ -20,7 +25,8 @@
                       :outcome :already-satisfied :grounded-commit grounded}}
    :run-output {:outcome :already-satisfied}})
 (def field {:families [{:status :computed :target-id mission
-                        :policies [{:policy-id policy-id :cascade {:nodes []}}
+                        :policies [{:policy-id policy-id :cascade {:nodes []}
+                                    :authoring-resolution authoring-resolution}
                                    {:policy-id (str mission "/policy-other") :cascade {:nodes []}}]
                         :failures [] :failure-count 0}]})
 
@@ -34,12 +40,22 @@
     (is (= policy-id (:policy-id retained)))
     (is (= checks (:completion-checks retained)))
     (is (= grounded (:grounded-commit retained)))
+    (is (.isAbsolute (io/file sut/default-root)))
+    (is (= (get-in retained [:record-pin :sha256])
+           (evidence/sha256
+            (java.nio.file.Files/readAllBytes
+             (.toPath (io/file (get-in retained [:record-pin :path])))))))
     (is (= [(str mission "/policy-other")] (mapv :policy-id (:policies family))))
     (is (= :policy-already-satisfied (-> family :failures last :kind)))
     (is (get-in family [:failures 0 :record-pin :sha256]))
     (testing "mission byte change invalidates the evidence"
       (is (= 2 (count (get-in (sut/exclude-satisfied field root {mission "changed"})
                               [:families 0 :policies])))))
+    (testing "authored check-set change invalidates the evidence"
+      (let [changed (assoc-in field [:families 0 :policies 0 :authoring-resolution]
+                              (assoc authoring-resolution :completion-checks []))]
+        (is (= 2 (count (get-in (sut/exclude-satisfied changed root {mission mission-sha})
+                                [:families 0 :policies]))))))
     (testing "an unqualified close writes nothing"
       (is (nil? (sut/retain! root {:run-record (assoc-in qualified [:failure :stage] :build)
                                    :construction construction
@@ -49,7 +65,8 @@
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-policy-satisfaction" (make-array java.nio.file.attribute.FileAttribute 0)))
         one (assoc-in field [:families 0 :policies]
-                      [{:policy-id policy-id :cascade {:nodes []}}])]
+                      [{:policy-id policy-id :cascade {:nodes []}
+                        :authoring-resolution authoring-resolution}])]
     (sut/retain! root {:run-record qualified :construction construction
                        :mission-source-sha256 mission-sha})
     (let [family (get-in (sut/exclude-satisfied one root {mission mission-sha}) [:families 0])]

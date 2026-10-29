@@ -5,7 +5,7 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.meta-terminal-injury :as terminal]))
 
-(def default-root "data/wm-policy-satisfaction")
+(def default-root "/home/joe/code/futon2/data/wm-policy-satisfaction")
 
 (defn completion-checks [construction]
   (vec (sort-by pr-str
@@ -16,24 +16,31 @@
   (when (and (terminal/producer-qualified-already-satisfied? run-record)
              (string? mission-source-sha256)
              (seq (completion-checks construction)))
-    (let [grounded (get-in run-record [:failure :detail :grounded-commit])]
+    (let [grounded (get-in run-record [:failure :detail :grounded-commit])
+          authoring-resolution (get-in construction [:cascade :selected-action
+                                                     :authoring-resolution])]
+      (when (and (= (completion-checks construction)
+                    (:completion-checks authoring-resolution))
+                 (string? (:digest authoring-resolution)))
       {:schema :wm/policy-satisfaction-v1
        :mission-id (:mission construction)
        :mission-source-sha256 mission-source-sha256
        :policy-id (:selected-cascade construction)
        :completion-checks (completion-checks construction)
+       :authoring-resolution authoring-resolution
        :grounded-commit (select-keys grounded [:repo :sha])
        :producer {:run-id (:run/id run-record)
-                  :classification :producer-qualified-already-satisfied}})))
+                  :classification :producer-qualified-already-satisfied}}))))
 
 (defn retain! [root input]
   (when-let [record (evidence-record input)]
-    (let [digest (evidence/value-digest record)
-          dir (io/file (or root default-root))
-          target (io/file dir (str digest ".edn"))]
+    (let [dir (io/file (or root default-root))
+          bytes (.getBytes (str (pr-str record) "\n") "UTF-8")
+          file-digest (evidence/sha256 bytes)
+          target (io/file dir (str file-digest ".edn"))]
       (.mkdirs dir)
-      (spit target (str (pr-str record) "\n"))
-      (assoc record :record-pin {:sha256 digest :path (.getAbsolutePath target)}))))
+      (with-open [out (java.io.FileOutputStream. target)] (.write out bytes))
+      (assoc record :record-pin {:sha256 file-digest :path (.getAbsolutePath target)}))))
 
 (defn records [root]
   (let [dir (io/file (or root default-root))]
@@ -42,9 +49,12 @@
            (filter #(and (.isFile %) (.endsWith (.getName %) ".edn")))
            (sort-by #(.getName %))
            (keep (fn [f]
-                   (try (assoc (edn/read-string (slurp f))
-                               :record-pin {:path (.getAbsolutePath f)
-                                            :sha256 (subs (.getName f) 0 (- (count (.getName f)) 4))})
+                   (try (let [bytes (java.nio.file.Files/readAllBytes (.toPath f))
+                              digest (evidence/sha256 bytes)
+                              expected (subs (.getName f) 0 (- (count (.getName f)) 4))]
+                          (when (= expected digest)
+                            (assoc (edn/read-string (String. bytes "UTF-8"))
+                                   :record-pin {:path (.getAbsolutePath f) :sha256 digest})))
                         (catch Exception _ nil))))
            vec)
       [])))
@@ -55,10 +65,10 @@
                 (some #(when (and (= target (:mission-id %))
                                   (= (:policy-id policy) (:policy-id %))
                                   (= (get mission-sha-by-target target) (:mission-source-sha256 %))
-                                  (let [checks (vec (sort-by pr-str
-                                                            (map (fn [n] (get-in n [:clause :completion-check]))
-                                                                 (get-in policy [:cascade :nodes]))))]
-                                    (or (empty? checks) (= checks (:completion-checks %))))) %)
+                                  (= (get-in policy [:authoring-resolution :completion-checks])
+                                     (:completion-checks %))
+                                  (= (get-in policy [:authoring-resolution :digest])
+                                     (get-in % [:authoring-resolution :digest]))) %)
                       retained))]
     (update field :families
             (fn [families]

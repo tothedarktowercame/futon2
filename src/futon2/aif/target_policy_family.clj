@@ -7,6 +7,7 @@
             [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.pattern-graph-pin :as graph-pin]
+            [futon2.aif.policy-authoring-resolution :as authoring-resolution]
             [futon2.aif.pattern-retraction :as retraction]
             [futon2.aif.occurrence-square-registry :as square-registry]
             [futon2.aif.retraction-cascade :as retraction-cascade]))
@@ -87,8 +88,11 @@
                (if (seen structure) acc
                    (-> acc (update :seen conj structure)
                        (update :rows conj
-                               (assoc policy :policy-id
-                                      (stable-id (:target policy) structure)))))))
+                               (let [policy-id (stable-id (:target policy) structure)]
+                                 (cond-> (assoc policy :policy-id policy-id)
+                                   (authoring-resolution/for-policy policy-id)
+                                   (assoc :authoring-resolution
+                                          (authoring-resolution/for-policy policy-id)))))))))
            {:seen #{} :rows []} policies)))
 
 (defn policy-family
