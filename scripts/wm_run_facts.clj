@@ -139,6 +139,7 @@
 
 (def absence-statuses #{:absent :not-supplied :missing :refused :failed
                         :history-unavailable-noncanonical-policy-key
+                        :history-index-absent :history-index-incomplete
                         "absent" "not-supplied" "missing" "refused" "failed"})
 
 (defn- selected-candidate

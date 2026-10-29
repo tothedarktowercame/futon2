@@ -1,26 +1,25 @@
 (ns futon2.aif.reading-policy-class-free-energy
   "Per-reading-policy class-channel F from retained completed-run records."
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [futon2.aif.reading-policy-class-history-index :as history-index]))
 
 (def terminal-classes #{:focused :related :unrelated :stop-the-line})
+
+(defn absolute-history-directory! [path]
+  (let [directory (io/file path)]
+    (when-not (.isAbsolute directory)
+      (throw (ex-info "Class history root must be absolute"
+                      {:kind :relative-class-history-root :path path})))
+    directory))
 
 (defn history-context
   "Read the declared window and retained records. The declaration, rather than
   scorer code, owns both the rate-like window and history location."
-  []
+  [policy-key]
   (let [declaration (-> "wm/reading-policy-class-f-v1.edn" io/resource slurp edn/read-string)
-        directory (io/file (:run-record-directory declaration))
-        files (if (.isDirectory directory)
-                (sort-by #(.getName %)
-                         (filter #(and (.isFile %) (.startsWith (.getName %) "tick-run-record-")
-                                       (.endsWith (.getName %) ".edn"))
-                                 (.listFiles directory)))
-                [])]
-    {:window (:history-window declaration)
-     :sources (mapv (fn [file]
-                      {:path (.getPath file) :record (edn/read-string (slurp file))})
-                    files)}))
+        directory (absolute-history-directory! (:run-record-directory declaration))]
+    (history-index/history directory policy-key (:history-window declaration))))
 
 (defn- q6-terminal [record]
   (some #(when (and (map? %) (= :wm/q6-terminal-v1 (:schema %))) %)

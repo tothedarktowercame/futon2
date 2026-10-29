@@ -321,14 +321,21 @@
       (do (when-not (and (map? belief) (seq belief) (m/normalized-exact? belief)
                          (every? set? (keys belief)))
             (refuse! :invalid-state-belief {:belief belief}))
-          (let [{:keys [policy-key policy-key-carrier window sources]} (:class-free-energy context)
+          (let [{:keys [policy-key policy-key-carrier window sources status]
+                 :as history} (:class-free-energy context)
                 noncanonical? (= :policy-key-noncanonical (:status policy-key-carrier))
-                _ (when-not (or noncanonical?
+                unavailable? (contains? #{:history-index-absent :history-index-incomplete} status)
+                _ (when-not (or noncanonical? unavailable?
                                 (and policy-key (some? window) (vector? sources)))
                     (refuse! :class-free-energy-history-not-supplied
                              {:required [:policy-key :window :sources]}))
                 prediction (class-predictive model belief (:horizon model) target)
-                result (class-f/evaluate policy-key window sources prediction)]
+                result (if unavailable?
+                         (assoc (select-keys history
+                                            [:status :index-path :missing-records
+                                             :covered-count :record-count :window])
+                                :value nil :history nil :policy-key policy-key)
+                         (class-f/evaluate policy-key window sources prediction))]
             {:posterior belief :status (:status result) :f result}))
       (refuse! :unsupported-observation-query {:op op}))
     (= :progress-count (:kind model))

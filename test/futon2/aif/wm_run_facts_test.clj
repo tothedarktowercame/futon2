@@ -36,7 +36,11 @@
            (facts/absence-paths
             (with-status :history-unavailable-noncanonical-policy-key))))
     (is (empty? (facts/absence-paths
-                 (with-status :observation-impossible-under-policy))))))
+                 (with-status :observation-impossible-under-policy))))
+    (is (= [[:decision :selected-candidate :class-f]]
+           (facts/absence-paths (with-status :history-index-absent))))
+    (is (= [[:decision :selected-candidate :class-f]]
+           (facts/absence-paths (with-status :history-index-incomplete))))))
 
 (deftest missing-slice-is-not-recomputable-not-zero-or-conforming
   (let [export (facts/facts-for-record record "r" snap)

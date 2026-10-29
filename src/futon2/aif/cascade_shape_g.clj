@@ -348,7 +348,7 @@
                                              :class-free-energy
                                              (merge (or (:class-free-energy class-context)
                                                         (when (:policy-key candidate)
-                                                          (class-f/history-context)))
+                                                          (class-f/history-context (:policy-key candidate))))
                                                     {:policy-key (:policy-key candidate)
                                                      :policy-key-carrier (:policy-key-carrier candidate)})}
                         :observation observation

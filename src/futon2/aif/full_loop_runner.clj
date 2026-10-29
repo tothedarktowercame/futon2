@@ -77,6 +77,7 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.open-cascade-refinement :as open-cascade-refinement]
             [futon2.aif.outer-refusal-index :as outer-refusal-index]
+            [futon2.aif.reading-policy-class-history-index :as class-history-index]
             [futon2.aif.outer-refusal-history :as outer-refusal-history]
             [futon2.aif.effective-run-history :as effective-run-history]
             [futon2.aif.revision-pattern-use :as revision-pattern-use]
@@ -1562,6 +1563,7 @@
             record (cond-> record satisfaction (assoc :policy-satisfaction satisfaction))
             written (run-record-io/write-run-record-stream! dir run-id record)]
         (outer-refusal-index/append-run-record! dir written record)
+        (class-history-index/append-run-record! dir written record)
         ;; this run's close in the Q6 run stream, beside the record it names
         (previous-run/close! dir q6-terminal written nil)
         {:run-record-status :present
