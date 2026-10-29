@@ -134,6 +134,7 @@
              (= expected-operation operation)
              (= candidate evidence)
              (= candidate (get-in operation [:request :candidate]))
+             (= (:injury-id receipt) (:injury-id candidate))
              (= receipt-pin (:authority-receipt-pin operation))
              (qualifies? (:historical-cause-checked? receipt)
                          (:current-report receipt)
@@ -171,6 +172,7 @@
                          :request request :authority-receipt-pin receipt-pin}])]
       (and (= :checked (:status receipt))
            (= expected candidate evidence)
+           (= (:injury-id receipt) (:injury-id candidate))
            (= request (:request operation))
            (= expected-id (:operation-id operation))
            (= (:ledger-pin ledger) (:expected-ledger-pin operation))
@@ -178,6 +180,20 @@
                        (:current-report receipt)
                        (:counterfactual-report receipt))))
     (catch Throwable _ false)))
+
+(defn scoped-medic-authority
+  "Keep a pending operation's receipt authority local to that operation.
+  Every previously retained medic operation is checked only by the normal
+  authority that was resolved before this append."
+  [normal-authority expected-operation specific-authority]
+  (let [expected-id (:operation-id expected-operation)]
+    (fn [{:keys [operation] :as context}]
+      (try
+        (true? ((if (= expected-id (:operation-id operation))
+                  specific-authority
+                  normal-authority)
+                context))
+        (catch Throwable _ false)))))
 
 (defn compute!
   "Compute the three evidence checks in tooling processes via the normal

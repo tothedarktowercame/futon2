@@ -1739,6 +1739,9 @@
                      (:ledger durable-ledger) entry pin receipt-pin evidence)
                     authority (out-of-band/checked-medic-authority
                                operation receipt-pin evidence)
+                    authority (out-of-band/scoped-medic-authority
+                               (:meta-medic-authority-verifier opts)
+                               operation authority)
                     written (store/transact-medic-disposition!
                              (:meta-injury-ledger-path opts)
                              receipt-pin operation attribution authority)]
