@@ -17,9 +17,11 @@
   "The canonical store publishes to the primary checkout. Other store roots
    own an isolated publication tree; callers may supply explicit destinations."
   [root]
-  (let [repo (if (= (.getCanonicalPath (io/file root)) canonical-store)
+  (let [repo (if-let [isolated (System/getenv "FUTON_WM_TICKET_PUBLICATION_ROOT")]
+               (io/file isolated)
+               (if (= (.getCanonicalPath (io/file root)) canonical-store)
                (io/file "/home/joe/code/futon2")
-               (io/file root "ticket-publication"))]
+               (io/file root "ticket-publication")))]
     {:ticket-dir (str (io/file repo "holes/tickets"))
      :queue-path (if (= repo (io/file "/home/joe/code/futon2"))
                    queue/live-path
@@ -101,7 +103,10 @@
   ([root id {:keys [ticket-dir queue-path]}]
    (when-not (and (string? id) (re-matches #"[A-Za-z0-9][A-Za-z0-9._-]*" id))
      (throw (ex-info "Unsafe finding identity" {:kind :finding-ticket-id-invalid})))
-   (let [source (publication/checked-file! (io/file root "findings" (str id ".edn")))
+   (let [{:keys [ticket-dir queue-path]}
+         (if (System/getenv "FUTON_WM_TICKET_PUBLICATION_ROOT")
+           (destinations root) {:ticket-dir ticket-dir :queue-path queue-path})
+         source (publication/checked-file! (io/file root "findings" (str id ".edn")))
          bytes (java.nio.file.Files/readAllBytes (.toPath source))
          finding (edn/read-string (String. bytes "UTF-8"))
          ticket (str "T-" id)
