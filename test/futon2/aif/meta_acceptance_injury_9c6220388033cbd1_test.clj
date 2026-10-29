@@ -1,7 +1,13 @@
 (ns futon2.aif.meta-acceptance-injury-9c6220388033cbd1-test
-  "Acceptance pin (round 2, correcting first-proposal pin
-   801c0794d9013888acf411dfef252404a71344b8ee6154ed7b88eb3f1620aaa1 per review
-   refusal :acceptance/fails-for-unrelated-reason) for
+  "Acceptance pin (round 3, correcting round-2 pin per review refusal
+   :acceptance/fails-for-unrelated-reason: the round-2 assertion
+   (= decoded-hole-ids (sort-by pr-str (keys (:decisions result)))) was
+   unsatisfiable by any implementation — the constant was declared in
+   non-sorted order while sort-by pr-str is a stable total order, so
+   \"[\\\"apparatus/...\\\" 10]\" necessarily sorts before
+   \"[\\\"problems/...\\\" 6]\". Round 3 compares the hole-id key SETS, which
+   is order-independent and pins exactly the injury: no extra, no missing,
+   no unresolved hole) for
    injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0
    (tick-run-record-2026-10-29-9e2103c1-c48f-496f-b8d5-2421fb7f68f0.edn,
    sha256 1cf5cba29be9db338e3e69277836c9c99e63c792c63cb28de1da3618eb9172b8).
@@ -32,13 +38,13 @@
    so the complete answer is accepted and the resume can proceed under the
    same cascade digest without a new click.
 
-   Round-2 scope fix: every deftest that can fail before repair fails ONLY on
-   the hole-id decode comparison. The loop-node-evaluator entrypoint is still
+   Scope: every deftest that can fail before repair fails ONLY on the
+   hole-id decode comparison. The loop-node-evaluator entrypoint is still
    exercised (it is one of the diagnosis's required production functions) but
    its assertion is scoped to what that entrypoint's own contract guarantees —
    annotation without veto, per the 2026-10-19 frontier ruling — so it is green
    both before and after the repair and cannot mask or masquerade as the
-   injury's failure (review refusal detail, first run lines 117-119).
+   injury's failure.
 
    No stubs: every function under test is production. The only injected seam
    is :strategic-selection-invoke-fn, the replacement bridge named in
@@ -126,7 +132,7 @@
       (is (map? exercise))
       (is (= :wm/loop-node-exercise-v1 (:schema exercise)))
       (is (contains? #{:complete :incomplete} (:status exercise))
-          "annotation only: this entrypoint never vetoes, so it is scoped out of the injury's failure attribution (review refusal, first run line 117)"))))
+          "annotation only: this entrypoint never vetoes, so it is scoped out of the injury's failure attribution"))))
 
 (deftest held-context-and-requisition-bind-the-pinned-cascade
   (testing "recognize holds the error and authoring-requisition dispatches for the pinned holes"
@@ -151,7 +157,10 @@
                "comparison must run over decoded hole ids on both sides"))
       (is (= :accepted (:status result)))
       (is (= (:requisition-id requisition) (:requisition-id result)))
-      (is (= decoded-hole-ids (sort-by pr-str (keys (:decisions result))))))))
+      (is (= (set decoded-hole-ids) (set (keys (:decisions result))))
+          "order-independent hole-id set equality: every requisitioned hole
+           answered, no extra, no missing — attainable by the repaired
+           comparison over decoded ids on both sides"))))
 
 (deftest submit-answer-preserves-and-records-whatever-it-returns
   (testing "submit-answer! records the whole answer append-only and the ledger chain stays verified"
@@ -171,7 +180,7 @@
   (testing "terminal-receipt (terminal-routing-entrypoint) routes the injured close as exactly one :failure receipt"
     (let [record {:run/id "2026-10-29-9e2103c1-c48f-496f-b8d5-2421fb7f68f0"
                   :startedAt "2026-10-29T03:21:33.301712294Z"
-                  :click/id "wm-retry-repair/c667a5c7974f8a4d30cef6f9be8bd1042c0c5f8c-2-patch-a1939dabaa7444a9ace0916af1e897e92abdb52d"
+                  :click/id "wm-retry-repair/c667a5c7974f8a4d30cef6f9be8bd042c0c5f8c-2-patch-a1939dabaa7444a9ace0916af1e897e92abdb52d"
                   :selection-event {:event :cascade-selected :target target}
                   :failure {:kind :answer-holes-unresolved :stage :cascade-resume}}
           receipt (terminal-receipt/terminal-receipt record)]
