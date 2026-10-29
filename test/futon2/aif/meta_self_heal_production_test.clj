@@ -570,9 +570,11 @@
         diagnosis (produced-diagnosis! dir)
         repair {:appended 1 :error "EOF while reading; 3 `{` opened, 2 `}` closed outside strings"}
         retry {:first-error "read a symbol, not a map with keyword keys" :first-preview "I have…"}
+        fallback :meta-self-heal/acceptance-source-file-absent
         answer (fn [_] {:status :proposed
                               :acceptance-test (acceptance-case "P17-repaired" {:kind :configuration-injury})
-                              :read-repair repair :read-retry retry})
+                              :read-repair repair :read-retry retry
+                              :source-transport-fallback fallback})
         result (production/produce-acceptance!
                 {:meta-acceptance-root (str dir "/acceptances") :meta-acceptance-fn answer}
                 diagnosis)
@@ -592,6 +594,7 @@
     (is (= repair (:acceptance-read-repair result))
         "F21: deleting the :acceptance-read-repair copy makes this fail")
     (is (= retry (:acceptance-read-retry result)))
+    (is (= fallback (:acceptance-source-transport-fallback result)))
     (is (not (contains? receipt :acceptance-read-repair)) "the receipt is the proposal, not its transport")
     (is (= :proposed (:status plain)))
     (is (not (contains? plain :acceptance-read-repair)) "an answer that needed no repair carries no key")
