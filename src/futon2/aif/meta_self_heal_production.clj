@@ -1,6 +1,8 @@
 (ns futon2.aif.meta-self-heal-production
   "Fail-closed serving arbitration for durable dedicated META repair."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
@@ -627,7 +629,9 @@
                        (when-let [correction (:meta-acceptance-correction opts)]
                          {:correction correction})
                        (when-let [correction (:meta-acceptance-review-correction opts)]
-                         {:review-correction correction}))
+                         {:review-correction correction})
+                       (when-let [correction (:meta-acceptance-static-correction opts)]
+                         {:static-correction correction}))
         response (try (accept request)
                       (catch Throwable _
                         {:status :failed
@@ -758,6 +762,63 @@
                 :else {:status :available :pin pin :receipt receipt}))))
         (catch Throwable _
           (refusal :meta-self-heal/acceptance-proposal-unreadable))))))
+
+(def ^:private static-finding-types
+  #{:unresolved-symbol :unresolved-namespace :syntax})
+
+(defn- acceptance-static-check-result [source result]
+  (let [parsed (try {:report (edn/read-string (:out result))}
+                    (catch Throwable t {:parse-error (ex-message t)}))
+        findings (->> (get-in parsed [:report :findings])
+                      (filter #(contains? static-finding-types (:type %))) vec)]
+    (cond
+      (:parse-error parsed)
+      {:status :failed :diagnostics [{:type :tooling-failure
+                                     :message (:parse-error parsed)}]
+       :source source}
+      (not (contains? #{0 2 3} (:exit result)))
+      {:status :failed :diagnostics [{:type :tooling-failure
+                                     :exit (:exit result)
+                                     :message (str/trim (or (:err result) ""))}]
+       :source source}
+      (seq findings)
+      {:status :failed :diagnostics findings :source source}
+      :else {:status :clean})))
+
+(defn- acceptance-static-check [opts source]
+  (let [repository (or (:meta-repository-root opts) default-repository-root)]
+    (acceptance-static-check-result
+     source
+     (shell/sh "clj-kondo" "--lint" "-" "--config"
+               "{:output {:format :edn}}"
+               :dir repository :in source))))
+
+(defn- statically-prepare-proposal [opts diagnosis-observation proposal]
+  (if-not (nat-int? (:meta-acceptance-static-correction-limit opts))
+    (refusal :meta-self-heal/acceptance-static-correction-limit-required
+             {:injury-id (:injury-id diagnosis-observation)
+              :repair-claimed? false})
+    (loop [proposal proposal
+         remaining (:meta-acceptance-static-correction-limit opts)]
+    (if-not (= :proposed (:status proposal))
+      proposal
+      (let [source (get-in proposal [:acceptance-test :source :text])
+            check ((or (:meta-acceptance-static-check-fn opts)
+                       #(acceptance-static-check opts %)) source)]
+        (if (= :clean (:status check))
+          proposal
+          (if-not (pos? remaining)
+            (refusal :meta-self-heal/acceptance-static-correction-exhausted
+                     {:injury-id (:injury-id diagnosis-observation)
+                      :static-diagnostics (:diagnostics check)
+                      :proposed-source source :repair-claimed? false})
+            (recur (produce-acceptance!
+                    (assoc opts :meta-acceptance-static-correction
+                           {:diagnostics (:diagnostics check) :source source
+                            :instruction (str "Correct only the reported static errors; "
+                                              "preserve the test intent and assertions.")})
+                    diagnosis-observation)
+                   (dec remaining)))))))))
 
 (declare admit-acceptance*)
 
@@ -907,7 +968,9 @@
     {:status :present :acceptance-test (:acceptance-test opts) :source :supplied}
 
     (= :available (:status diagnosis-observation))
-    (let [proposal (produce-acceptance! opts diagnosis-observation)
+    (let [proposal (statically-prepare-proposal
+                    opts diagnosis-observation
+                    (produce-acceptance! opts diagnosis-observation))
           first-result (if (= :proposed (:status proposal))
                          (admit-acceptance! opts proposal)
                          proposal)]
