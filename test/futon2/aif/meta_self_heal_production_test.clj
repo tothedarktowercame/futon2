@@ -201,6 +201,61 @@
       (is (= :input-unavailable (:outcome ambiguous))
           "several sha-verified exact matches remain input-unavailable"))))
 
+(deftest stale-canonical-is-retired-before-selected-deferred-restore
+  (let [calls (atom [])
+        injury-id "injury/2aef7e0c0f48a851a781b41642bf30e52e3fa246"
+        stale {:work-order {:injury-id "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0"}}
+        restored {:work-order {:injury-id injury-id :repair-id "repair/2aef"
+                               :attempt 1}}
+        loads (atom [stale restored])
+        selection {:mode :restore :injury-id injury-id
+                   :transaction-path "/retained/transaction.edn.deferred-injury_2aef.edn"
+                   :transaction-sha256 (apply str (repeat 64 "a"))
+                   :restore-to "/retained/transaction.edn"
+                   :stale-transaction {:injury-id (get-in stale [:work-order :injury-id])}}
+        durable {:status :loaded :ledger {:entries []}}
+        active {:status :computed :injuries {injury-id {:state :enacted :attempt 1}}}
+        opts {:meta-injury-ledger-path "/retained/ledger.edn"
+              :meta-repair-transaction-path "/retained/transaction.edn"
+              :meta-diagnosis-context {:durable-ledger durable
+                                       :active-injuries active
+                                       :injury-selection selection}
+              :meta-repair-ports {:author identity}
+              :meta-acceptance-run-fn identity
+              :diagnosis-evidence-pin {:path "diagnosis" :sha256 (apply str (repeat 64 "b"))}
+              :acceptance-test (acceptance-case "route-restore")}
+        result
+        (with-redefs-fn
+          {#'production/load-durable (fn [& _] durable)
+           #'production/effective-active (fn [& _] active)
+           #'production/injury-selection (fn [& _] selection)
+           #'production/load-transaction
+           (fn [_]
+             (let [value (first @loads)]
+               (swap! loads subvec 1)
+               (swap! calls conj (if (= value stale) :load-canonical :load-restored))
+               value))
+           #'production/retire-stale-transaction!
+           (fn [& _] (swap! calls conj :retire-canonical) {:status :retired})
+           #'production/move-selected-transaction!
+           (fn [_] (swap! calls conj :restore-deferred)
+             {:status :moved :path "/retained/transaction.edn"})
+           #'production/prepare-repair
+           (fn [& _] (swap! calls conj :prepare) {:status :prepared})
+           #'production/diagnosis-transaction-binding (fn [& _] {:status :valid})
+           #'production/acceptance-transaction-binding (fn [& _] {:status :valid})
+           #'production/coordinate-repair
+           (fn [_ transaction _ _]
+             (swap! calls conj :coordinate)
+             (is (= restored transaction))
+             {:status :refused :reason :fixture-stop})}
+          #(production/route! opts))]
+    (is (= [:load-canonical :retire-canonical :restore-deferred
+            :load-restored :coordinate]
+           @calls))
+    (is (= :fixture-stop (:reason result)))
+    (is (not-any? #{:prepare} @calls))))
+
 (defn- diagnosis-fixture [class]
   {:class class :production-functions production-functions})
 

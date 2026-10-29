@@ -1917,13 +1917,19 @@
                                 initial-selection)
                     durable (or refreshed durable)
                     active (or refreshed-active active)
+                    stale-retirement
+                    (when (:stale-transaction selection)
+                      (if-let [stale (load-transaction transaction-path)]
+                        (retire-stale-transaction! transaction-path stale)
+                        (refusal :meta-self-heal/stale-transaction-unreadable)))
                     movement (cond
                                (nil? selection)
                                (refusal :meta-self-heal/injury-selection-missing)
-                               (:stale-transaction selection)
-                               (if-let [stale (load-transaction transaction-path)]
-                                 (retire-stale-transaction! transaction-path stale)
-                                 (refusal :meta-self-heal/stale-transaction-unreadable))
+                               (= :refused (:status stale-retirement))
+                               stale-retirement
+                               (and stale-retirement (= :restore (:mode selection)))
+                               (move-selected-transaction! selection)
+                               stale-retirement stale-retirement
                                :else (move-selected-transaction! selection))
                     resumed0 (when-not (or (= :refused (:status movement))
                                            (= :retired (:status movement))
