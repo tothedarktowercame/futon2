@@ -766,28 +766,40 @@
 (def ^:private static-finding-types
   #{:unresolved-symbol :unresolved-namespace :syntax})
 
-(defn- acceptance-static-check [opts source]
-  (let [repository (or (:meta-repository-root opts) default-repository-root)
-        result (shell/sh "clj-kondo" "--lint" "-" "--config"
-                         "{:output {:format :edn}}"
-                         :dir repository :in source)
-        report (try (edn/read-string (:out result))
-                    (catch Throwable t
-                      {:findings [{:type :tooling-output :message (ex-message t)}]}))
-        findings (->> (:findings report)
+(defn- acceptance-static-check-result [source result]
+  (let [parsed (try {:report (edn/read-string (:out result))}
+                    (catch Throwable t {:parse-error (ex-message t)}))
+        findings (->> (get-in parsed [:report :findings])
                       (filter #(contains? static-finding-types (:type %))) vec)]
-    (if (seq findings)
+    (cond
+      (:parse-error parsed)
+      {:status :failed :diagnostics [{:type :tooling-failure
+                                     :message (:parse-error parsed)}]
+       :source source}
+      (not (contains? #{0 2 3} (:exit result)))
+      {:status :failed :diagnostics [{:type :tooling-failure
+                                     :exit (:exit result)
+                                     :message (str/trim (or (:err result) ""))}]
+       :source source}
+      (seq findings)
       {:status :failed :diagnostics findings :source source}
-      (if (zero? (:exit result))
-        {:status :clean}
-        {:status :failed
-         :diagnostics [{:type :tooling-failure
-                        :message (str/trim (or (:err result) (:out result)))}]
-         :source source}))))
+      :else {:status :clean})))
+
+(defn- acceptance-static-check [opts source]
+  (let [repository (or (:meta-repository-root opts) default-repository-root)]
+    (acceptance-static-check-result
+     source
+     (shell/sh "clj-kondo" "--lint" "-" "--config"
+               "{:output {:format :edn}}"
+               :dir repository :in source))))
 
 (defn- statically-prepare-proposal [opts diagnosis-observation proposal]
-  (loop [proposal proposal
-         remaining (get opts :meta-acceptance-static-correction-limit 1)]
+  (if-not (nat-int? (:meta-acceptance-static-correction-limit opts))
+    (refusal :meta-self-heal/acceptance-static-correction-limit-required
+             {:injury-id (:injury-id diagnosis-observation)
+              :repair-claimed? false})
+    (loop [proposal proposal
+         remaining (:meta-acceptance-static-correction-limit opts)]
     (if-not (= :proposed (:status proposal))
       proposal
       (let [source (get-in proposal [:acceptance-test :source :text])
@@ -806,7 +818,7 @@
                             :instruction (str "Correct only the reported static errors; "
                                               "preserve the test intent and assertions.")})
                     diagnosis-observation)
-                   (dec remaining))))))))
+                   (dec remaining)))))))))
 
 (declare admit-acceptance*)
 
