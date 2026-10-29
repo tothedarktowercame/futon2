@@ -22,7 +22,9 @@
 
 (load-identity/register! *ns* *file*)
 
-(def default-root "/home/joe/code/futon2/data/wm-repair-obligations")
+(def default-root
+  (or (System/getenv "FUTON_WM_REPAIR_OBLIGATION_ROOT")
+      "/home/joe/code/futon2/data/wm-repair-obligations"))
 
 (def artifact-shapes #{:code-commit :data-deposit :spec-document})
 (defonce ^:private finding-publication-monitors (atom {}))
