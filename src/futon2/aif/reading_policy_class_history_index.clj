@@ -26,6 +26,8 @@
                               (vector? key) (terminal-classes class))
                        :indexed :not-applicable)
              :run-id (or (:run/id record) (:run-id record))
+             :run-started-at (or (:startedAt record) (:started-at record)
+                                 (:run/id record) (:run-id record))
              :record-path (.getCanonicalPath (io/file record-path))
              :record-sha256 record-sha256}
       key (assoc :policy-key-sha256 (identity/digest key))
@@ -55,12 +57,12 @@
             covered (set indexed-paths)
             missing (vec (remove covered records))
             unexpected (vec (remove (set records) indexed-paths))
-            ordered? (= records indexed-paths)
             unreadable (filterv #(= :unreadable (:status %)) rows)]
-        (if (or (seq missing) (seq unexpected) (not ordered?) (seq unreadable))
+        (if (or (seq missing) (seq unexpected)
+                (not= (count records) (count indexed-paths)) (seq unreadable))
           {:status :history-index-incomplete :index-path (.getCanonicalPath file)
            :missing-records missing :unexpected-records unexpected
-           :ordered-projection? ordered? :unreadable unreadable
+           :unreadable unreadable
            :covered-count (count covered) :record-count (count records)}
           {:status :complete :index-path (.getCanonicalPath file)
            :rows rows :covered-count (count covered) :record-count (count records)})))))
@@ -95,29 +97,34 @@
     (io/make-parents target)
     (try
       (let [files (terminal-files dir)
-            bytes-read (volatile! 0)]
+            bytes-read (volatile! 0)
+            rows
+            (mapv
+             (fn [file]
+               (let [path (.getCanonicalPath file)
+                     digest (MessageDigest/getInstance "SHA-256")
+                     parsed (try
+                              (with-open [stream (DigestInputStream. (io/input-stream file) digest)
+                                          reader (java.io.PushbackReader. (io/reader stream))]
+                                (let [record (edn/read reader)]
+                                  (loop [] (when-not (= -1 (.read reader)) (recur)))
+                                  record))
+                              (catch Exception e e))
+                     _ (vswap! bytes-read + (.length file))
+                     pin (format "%064x" (BigInteger. 1 (.digest digest)))]
+                 (try
+                   (if (instance? Exception parsed)
+                     (throw parsed)
+                     (index-entry parsed path pin))
+                   (catch Exception e
+                     {:schema :wm/reading-policy-class-history-index-entry-v1
+                      :status :unreadable :record-path path :record-sha256 pin
+                      :run-started-at nil
+                      :error-class (.getName (class e)) :error (.getMessage e)}))))
+             files)]
       (with-open [writer (io/writer temporary)]
-        (doseq [file files]
-          (let [path (.getCanonicalPath file)
-                digest (MessageDigest/getInstance "SHA-256")
-                parsed (try
-                         (with-open [stream (DigestInputStream. (io/input-stream file) digest)
-                                     reader (java.io.PushbackReader. (io/reader stream))]
-                           (let [record (edn/read reader)]
-                             (loop [] (when-not (= -1 (.read reader)) (recur)))
-                             record))
-                         (catch Exception e e))
-                _ (vswap! bytes-read + (.length file))
-                pin (format "%064x" (BigInteger. 1 (.digest digest)))
-                row (try
-                      (if (instance? Exception parsed)
-                        (throw parsed)
-                        (index-entry parsed path pin))
-                      (catch Exception e
-                        {:schema :wm/reading-policy-class-history-index-entry-v1
-                         :status :unreadable :record-path path :record-sha256 pin
-                         :error-class (.getName (class e)) :error (.getMessage e)}))]
-            (.write writer (str (pr-str row) "\n")))))
+        (doseq [row (sort-by (juxt :run-started-at :record-path) rows)]
+          (.write writer (str (pr-str row) "\n"))))
       (Files/move (.toPath temporary) (.toPath target)
                   (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
       {:path (.getCanonicalPath target) :records (count files) :bytes-read @bytes-read})
