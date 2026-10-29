@@ -1822,11 +1822,30 @@
                           :timeout 30000 :throw false})
         parsed (try (json/parse-string (:body r) true)
                     (catch Throwable _ {:raw (:body r)}))]
-    (if (<= 200 (:status r) 299)
-      parsed
+    (cond
+      (<= 200 (:status r) 299) parsed
+
+      ;; Agency guarantees this refusal precedes job creation. Preserve it for
+      ;; the held phase's operator-driven :retry; never redispatch in HTTP code.
+      (and (= 503 (:status r))
+           (= "clock-store-busy" (:error parsed))
+           (= "clock/store-busy" (:error/code parsed))
+           (true? (:dispatch/not-created? parsed))
+           (nil? (:job-id parsed)))
+      (throw (ex-info "Agency clock store busy; dispatch not created"
+                      {:outcome :clock-store-busy
+                       :failure-kind :clock/store-busy
+                       :error/code :clock/store-busy
+                       :dispatch/not-created? true
+                       :status (:status r)
+                       :retry-after (or (get-in r [:headers "retry-after"])
+                                        (get-in r [:headers "Retry-After"]))
+                       :response parsed}))
+
+      :else
       (throw (ex-info "Agency dispatch failed"
                       {:outcome :dispatch-failed :status (:status r)
-                      :response parsed})))))
+                       :response parsed})))))
 
 (defn- strategic-selection-http-invoke!
   [{:keys [agency-base strategic-selection-timeout-ms]} request]
