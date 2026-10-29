@@ -23,6 +23,8 @@
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.matched-observation-evidence :as matched]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
+            [futon2.aif.reading-policy-class-free-energy :as class-f]
             [futon2.aif.retraction-cascade :as retraction-cascade]))
 
 (def class-universe
@@ -199,9 +201,10 @@
               order)
         pattern-map (into {} (map (juxt :id identity)) patterns)
         descent (mapv (juxt :from :to) (remove #(= :overlap (:kind %)) edges))]
-    {:kind :cascade-candidate :id id :target target
-     :precedence {:co-apply {:units order :descent descent :patterns pattern-map}}
-     :arrangement {:nodes nodes :edges edges :precedence order}}))
+    (prefix-admission/seal-reading-policy-key
+     {:kind :cascade-candidate :id id :target target
+      :precedence {:co-apply {:units order :descent descent :patterns pattern-map}}
+      :arrangement {:nodes nodes :edges edges :precedence order}})))
 
 (defn- candidate-patterns [candidate]
   (let [{:keys [units patterns]} (get-in candidate [:precedence :co-apply])]
@@ -341,7 +344,13 @@
                         :observation-model class-model
                         :parameter-information-mode :none
                         :g-normalization :per-step-capacity-and-pattern
-                        :prediction-context {:occurrence-id (str id) :tau horizon}
+                        :prediction-context {:occurrence-id (str id) :tau horizon
+                                             :class-free-energy
+                                             (merge (or (:class-free-energy class-context)
+                                                        (when (:policy-key candidate)
+                                                          (class-f/history-context (:policy-key candidate))))
+                                                    {:policy-key (:policy-key candidate)
+                                                     :policy-key-carrier (:policy-key-carrier candidate)})}
                         :observation observation
                         :cascade-spec {:want acceptance :evidence #{} :zeroed #{}
                                        :c {:source :terminal-class-preference}
@@ -356,16 +365,24 @@
                       (+ (double (:controller-score entry))
                          (double class-risk)
                          (double class-ambiguity)))
-         result {:status (if entry :computed :refused)
+         class-failure (when-not class-entry
+                         (get-in class-ranked [:failures 0 :inference]))
+         result {:status (if (and entry class-entry) :computed :refused)
+                 :kind (when class-failure
+                         (if (= :observation-impossible-under-policy (:status class-failure))
+                           :zero-posterior-mass
+                           :class-free-energy-unavailable))
                  :policy-id id :target target :candidate candidate
                  :horizon horizon :terminals terminals
                  :preference-at-each-step preference
                  :progress-risk (get-in entry [:certificate :g-terms :risk])
                  :progress-ambiguity (get-in entry [:certificate :g-terms :ambiguity])
-                 :risk (+ (double (get-in entry [:certificate :g-terms :risk]))
-                          (double class-risk))
-                 :ambiguity (+ (double (get-in entry [:certificate :g-terms :ambiguity]))
-                               (double class-ambiguity))
+                 :risk (when class-entry
+                         (+ (double (get-in entry [:certificate :g-terms :risk]))
+                            (double class-risk)))
+                 :ambiguity (when class-entry
+                              (+ (double (get-in entry [:certificate :g-terms :ambiguity]))
+                                 (double class-ambiguity)))
                  :information-gain information
                  ;; Q4: G is compared across horizons only as the declared
                  ;; normalized rates; the declaration and the raw sums it
@@ -375,7 +392,13 @@
                                 {:risk (:risk raw) :ambiguity (:ambiguity raw)
                                  :information-gain (:expected-information-gain raw)})
                  :progress-g (:controller-score entry)
-                 :class-emission {:status (if class-entry :computed :refused)
+                 :class-emission {:status (if class-entry :computed (:status class-failure))
+                                  :f-status (when class-entry
+                                              (get-in class-entry [:inference :status]))
+                                  :posterior-weight (when (= :observation-impossible-under-policy
+                                                             (:status class-failure))
+                                                      0.0)
+                                  :reason class-failure
                                   :consumed-in-g? (boolean class-entry)
                                   :composition :add-class-risk-and-ambiguity-once
                                   :model class-model

@@ -74,11 +74,85 @@
    {:cascade-belief q0} candidates
    {:observation-model model
     :horizon-steps horizon
-    :prediction-context {:occurrence-id "test-occ" :tau horizon}
+    :prediction-context {:occurrence-id "test-occ" :tau horizon
+                         :class-free-energy {:policy-key :test-policy
+                                             :window 0 :sources []}}
     :cascade-spec {:want acceptance :evidence #{} :zeroed #{}}}))
 
 (defn- steps-of [entry]
   (get-in entry [:certificate :steps]))
+
+(deftest empty-retained-history-closes-q7-f-path
+  (let [target "history-target"
+        accepted [target :accepted]
+        step (cpol/token-interpretation
+              :accepts {:guard {:needs #{} :forbids #{accepted}}
+                        :produces #{accepted}})
+        candidate {:kind :cascade-candidate :id :history-policy :target target
+                   :precedence [(assoc step :target target)]}
+        model (class-model {:universe #{accepted} :acceptance #{accepted}
+                            :horizon 1 :target-class {target :focused}})
+        ranked (rank {#{} 1} [candidate] model 1 #{accepted})
+        entry (first ranked)
+        f (get-in entry [:certificate :f])]
+    (is (= :computed (:status f)))
+    (is (= 0.0 (:value f)))
+    (is (= [] (:history f)))
+    (is (zero? (count (filter #(and (map? %) (= :not-supplied (:status %)))
+                              (tree-seq coll? seq entry)))))))
+
+(deftest noncanonical-history-absence-remains-in-certificate
+  (let [target "noncanonical-target"
+        accepted [target :accepted]
+        step (cpol/token-interpretation :accepts
+               {:guard {:needs #{} :forbids #{accepted}} :produces #{accepted}})
+        candidate {:kind :cascade-candidate :id "chain" :target target
+                   :precedence [(assoc step :target target)]}
+        model (class-model {:universe #{accepted} :acceptance #{accepted}
+                            :horizon 1 :target-class {target :focused}})
+        result (cos/rank-cascade-actions
+                {:cascade-belief {#{} 1}} [candidate]
+                {:observation-model model :horizon-steps 1
+                 :prediction-context {:occurrence-id "noncanonical" :tau 1
+                                      :class-free-energy
+                                      {:policy-key-carrier
+                                       {:status :policy-key-noncanonical
+                                        :reason :policy-id-not-canonical-for-target}}}
+                 :cascade-spec {:want #{accepted} :evidence #{} :zeroed #{}}})
+        entry (first result)]
+    (is (= :history-unavailable-noncanonical-policy-key
+           (get-in entry [:inference :status])))
+    (is (= :history-unavailable-noncanonical-policy-key
+           (get-in entry [:certificate :f :status])))))
+
+(deftest impossible-history-has-zero-posterior-treatment-and-reason
+  (let [target "impossible-target"
+        accepted [target :accepted]
+        step (cpol/token-interpretation :accepts
+               {:guard {:needs #{} :forbids #{accepted}} :produces #{accepted}})
+        candidate {:kind :cascade-candidate :id :impossible :target target
+                   :precedence [(assoc step :target target)]}
+        model (class-model {:universe #{accepted} :acceptance #{accepted}
+                            :horizon 1 :target-class {target :focused}})
+        source {:path "run-impossible"
+                :record {:run/id "run-impossible"
+                         :terminal {:schema :wm/q6-terminal-v1
+                                    :choice {:status :present
+                                             :policy-key [:wm/reading-policy-v1 "T" "T/policy-1" {}]}}
+                         :run-ending-classification {:class :related}}}
+        result (cos/rank-cascade-actions
+                {:cascade-belief {#{} 1}} [candidate]
+                {:observation-model model :horizon-steps 1
+                 :prediction-context {:occurrence-id "impossible" :tau 1
+                                      :class-free-energy
+                                      {:policy-key [:wm/reading-policy-v1 "T" "T/policy-1" {}]
+                                                          :window 1 :sources [source]}}
+                 :cascade-spec {:want #{accepted} :evidence #{} :zeroed #{}}})
+        entry (get-in result [:candidates 0])]
+    (is (= :observation-impossible-under-policy (get-in entry [:inference :status])))
+    (is (= :observation-impossible-under-policy
+           (get-in entry [:certificate :f :status])))
+    (is (= :related (get-in entry [:certificate :f :failure :class])))))
 
 (deftest scorer-separates-a-candidate-that-never-reaches-acceptance
   (let [target "stated-target"

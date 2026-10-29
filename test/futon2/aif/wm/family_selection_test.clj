@@ -5,6 +5,7 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as ledger]
             [futon2.aif.pattern-graph-pin :as graph-pin]
+            [futon2.aif.reading-policy-class-free-energy :as class-f]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.wm.family-selection :as sut])
   (:import [java.nio.file Files]
@@ -16,7 +17,9 @@
   (let [root (.getPath (.toFile (Files/createTempDirectory
                                  "family-selection-ledger-"
                                  (make-array FileAttribute 0))))]
-    (with-redefs [ledger/default-root root]
+    (with-redefs [ledger/default-root root
+                  class-f/history-context (fn [_]
+                                            {:status :complete :window 0 :sources []})]
       (run))))
 
 (use-fixtures :each with-empty-learning-ledger)

@@ -30,8 +30,8 @@
   "The scored policy's action, carrying its history key and the exact
   interpretation it owes, both bound to its identity."
   [policy score]
-  (let [action (:candidate score)
-        action (cond-> (assoc action :policy-key (prefix-admission/reading-policy-key action))
+  (let [action (prefix-admission/validate-sealed-reading-policy-key! (:candidate score))
+        action (cond-> action
                  (:authoring-resolution policy)
                  (assoc :authoring-resolution (:authoring-resolution policy)))]
     (assoc action :interpretation-debt
@@ -78,8 +78,8 @@
   candidate's, else (SCORE nil) the key of its arranged candidate; a policy
   whose arrangement cannot be compiled is named by target and policy id."
   [policy score]
-  (or (some-> (:candidate score) prefix-admission/reading-policy-key)
-      (try (prefix-admission/reading-policy-key
+  (or (get-in score [:candidate :policy-key])
+      (try (:policy-key
             (shape-g/arranged->candidate (:target policy) (:policy-id policy)
                                          (:cascade policy)))
            (catch Exception _ nil))
@@ -369,8 +369,7 @@
                             [(:target-id row)
                              (cond-> {:constructed (vec (:constructed-keys row))
                                       :scored (mapv (fn [[_ score]]
-                                                      (prefix-admission/reading-policy-key
-                                                       (:candidate score)))
+                                                      (get-in score [:candidate :policy-key]))
                                                     (:scored row))}
                                (= :certified (:status certified))
                                (assoc :admitted
