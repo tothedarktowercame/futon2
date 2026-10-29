@@ -16,6 +16,7 @@
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.morning-brief :as brief]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.trace :as trace]
@@ -101,8 +102,7 @@
     :T9 {:title "phase wall-clock budget" :enabled? true}
     :T10 {:title "loaded/file code coherence" :enabled? true}
     :T11 {:title "Agency job-state alphabet" :enabled? true}
-    :T12 {:title "four-opportunity zero-grounding target wedge"
-          :enabled? false :status :chartered-stub}
+    :T12 {:title "four-opportunity zero-grounding target wedge" :enabled? true}
     :T13 {:title "author-artifact binding" :enabled? true}}))
 
 (defonce ^:private phase-snapshots (atom {}))
@@ -573,10 +573,40 @@
                                :timestamps timestamps}))))
           jobs))))
 
-(defn- t12 [_]
-  ;; Chartered by the third shadow run. Implementation waits for a calibrated
-  ;; distinction between a productive multi-turn target and a true soft wedge.
-  nil)
+(def t12-window-size
+  "The bounded zero-grounding streak chartered by M-wm-tripwires lines 88-92:
+  four completed opportunities. Kept as data so calibration can exercise the
+  boundary without burying a second literal in the predicate."
+  4)
+
+(defn- t12-zero-grounding? [run]
+  (and (:t12/readable? run)
+       (string? (:target run))
+       (= {:schema :wm/run-output-v1
+           :status :absent
+           :reason :run-not-grounded
+           :outcome (:outcome run)}
+          (:run-output run))
+       (= {:absent :no-grounded-commit} (:terminal-commit run))
+       (false? (:grounded-commit-reference? run))))
+
+(defn- t12 [{:keys [phase transition t12-run-history] :as observation}]
+  (when (or (:tripwire/force? observation)
+            (and (= :opportunity phase) (= :start transition)))
+    (let [window-size (or (:tripwire/t12-window-size observation)
+                          t12-window-size)
+          recent (vec (take-last window-size t12-run-history))
+          targets (mapv :target recent)]
+      (when (and (pos-int? window-size)
+                 (= window-size (count recent))
+                 (every? t12-zero-grounding? recent)
+                 (apply = targets))
+        [{:kind :four-opportunity-zero-grounding-target-wedge
+          :target (first targets)
+          :consecutive-count window-size
+          :run-ids (mapv :run-id recent)
+          :outcomes (mapv :outcome recent)
+          :record-pins (mapv :record-pin recent)}]))))
 
 (defn- commit-sha [repo commit]
   (when (and (string? repo) (not (str/blank? (str commit))))
@@ -1227,6 +1257,78 @@
              record)
       record)))
 
+(defn- t12-run-record
+  "Read one completed run only when the run stream's sealed close and the
+  referenced record agree on identity, start instant, target, and outcome.
+  Invalid evidence remains an unreadable history entry, so it breaks rather
+  than shortens a consecutive streak."
+  [run-record-dir started closed]
+  (let [run-id (:run/id started)
+        q6 (:q6 closed)
+        expected (io/file run-record-dir (str "tick-run-record-" run-id ".edn"))
+        referenced (some-> (:record-file closed) io/file)]
+    (try
+      (let [path-ok? (and referenced
+                          (= (.getCanonicalPath expected)
+                             (.getCanonicalPath referenced)))
+            bytes (when (and path-ok? (.isFile expected))
+                    (Files/readAllBytes (.toPath expected)))
+            record (when bytes (edn/read-string (String. bytes "UTF-8")))
+            target (get-in record [:decision :chosen :target])
+            outcome (get-in record [:terminal-receipt :outcome])
+            valid? (and (= :wm/q6-terminal-v1 (:schema q6))
+                        (previous-run/intact? q6)
+                        (= run-id (:run/id closed) (:run/id q6) (:run/id record))
+                        (= (:startedAt started) (:startedAt q6) (:startedAt record))
+                        (= target (get-in q6 [:choice :target]))
+                        (= :present (get-in q6 [:choice :status]))
+                        (= outcome (:outcome (:run-output record)))
+                        (map? (:terminal-receipt record)))]
+        (cond-> {:run-id run-id
+                 :started-at (:startedAt started)
+                 :t12/readable? (boolean valid?)}
+          valid?
+          (assoc :target target
+                 :outcome outcome
+                 :run-output (:run-output record)
+                 :terminal-commit (get-in record [:terminal-receipt :commit])
+                 :grounded-commit-reference? (contains? record :grounded-commit)
+                 :record-pin {:path (.getCanonicalPath expected)
+                              :sha256 (sha256-bytes bytes)})))
+      (catch Throwable _
+        {:run-id run-id :started-at (:startedAt started)
+         :t12/readable? false}))))
+
+(defn- t12-run-history [run-record-dir window-size current-run-id]
+  (let [{:keys [status events]} (previous-run/read-stream run-record-dir)]
+    (if-not (= :present status)
+      []
+      (let [starts (group-by :run/id (filter #(= :started (:event %)) events))
+            closes (group-by :run/id (filter #(= :closed (:event %)) events))]
+        (->> starts
+             ;; run-opportunity! appends this run's :started event before the
+             ;; :opportunity/:start observation. It is not history and has no
+             ;; close yet; older unclosed runs remain barriers.
+             (remove (fn [[run-id _]] (= current-run-id run-id)))
+             (map (fn [[run-id start-events]]
+                    {:run-id run-id :start-events start-events
+                     :close-events (get closes run-id)
+                     :started-at (:startedAt (first start-events))}))
+             (sort-by (fn [{:keys [started-at]}]
+                        (try (Instant/parse (str started-at))
+                             (catch Throwable _ Instant/MIN))))
+             ;; Some historical records are hundreds of MB. Only the streak
+             ;; window can affect T12, so never hydrate the rest of the store.
+             (take-last window-size)
+             (map (fn [{:keys [run-id start-events close-events started-at]}]
+                    (if (and (= 1 (count start-events))
+                             (= 1 (count close-events)))
+                      (t12-run-record run-record-dir
+                                      (first start-events) (first close-events))
+                      {:run-id run-id :started-at started-at
+                       :t12/readable? false})))
+             vec)))))
+
 (defn- cross-run-observation [opts observation]
   (if (and (= :opportunity (:phase observation))
            (= :start (:transition observation))
@@ -1266,6 +1368,13 @@
                         (filter #(contains? entity-ids (:implementation-id %)))
                         vec)
                    (catch Throwable _ []))))
+          t12-history
+          (if (contains? opts :tripwire/t12-run-history)
+            (:tripwire/t12-run-history opts)
+            (t12-run-history
+             (or (:run-record-dir opts) "/home/joe/code/futon2/data/wm-runs")
+             (or (:tripwire/t12-window-size opts) t12-window-size)
+             (:run-id opts)))
           history (mapv (fn [attempt]
                           (let [selected (or (:selected-stop-line attempt)
                                              (:selected-mission attempt))
@@ -1285,7 +1394,8 @@
               :closed-repair-ids closed-ids
               :findings findings
               :a-matrix-events (vec a-matrix-events)
-              :grounding-witnesses grounding-witnesses}
+              :grounding-witnesses grounding-witnesses
+              :t12-run-history t12-history}
              (:tripwire/cross-run-snapshot opts)))
     observation))
 
