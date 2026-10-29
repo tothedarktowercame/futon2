@@ -1523,7 +1523,8 @@
   ([run-acceptance]
    (acceptance-replay-port run-acceptance default-acceptance-root))
   ([run-acceptance acceptance-root]
-  (fn [{:keys [work-order transaction phase predecessor-pin]}]
+  (fn [{:keys [work-order transaction phase predecessor-pin
+               effective-retry-click]}]
     (let [explicit-pin (:acceptance-admission-pin work-order)
           resolved (when-not explicit-pin
                      (resolve-acceptance-admission acceptance-root work-order))
@@ -1562,6 +1563,7 @@
                     :else :same-failure)
           author (coordinator/current-receipt-for transaction :author)
           enact (coordinator/current-receipt-for transaction :enact)
+          enact-retry-click (get-in enact [:payload :retry-click])
           replay {:schema :wm/pinned-admission-phase-replay-receipt-v1
                   :injury-id (:injury-id work-order)
                   :repair-id (:repair-id work-order)
@@ -1571,6 +1573,9 @@
                   :path-witness path-witness
                   :admission-pin admission-pin
                   :admission-resolution (if resolved :lookup :pinned)
+                  :enact-retry-click enact-retry-click
+                  :effective-retry-click (or effective-retry-click
+                                             enact-retry-click)
                   :admission-run-pin (:run-pin admitted-run)
                   :current-run-pin (:run-pin current-run)
                   :admission-source-identity admitted-source
@@ -1590,7 +1595,7 @@
         :status (if (= :repaired outcome) :succeeded :failed)
         :payload {:repair-id (:repair-id work-order)
                   :patch-sha (get-in author [:payload :patch-sha])
-                  :retry-click (get-in enact [:payload :retry-click])
+                  :retry-click (or effective-retry-click enact-retry-click)
                   :phase-replay-receipt replay
                   :adapter "wm-acceptance-replay"}})))))
 

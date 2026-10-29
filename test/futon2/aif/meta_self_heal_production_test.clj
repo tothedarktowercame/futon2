@@ -91,6 +91,8 @@
     (is (= admission-pin (:admission-pin replay)))
     (is (= run-pin (:admission-run-pin replay)))
     (is (= current-pin (:current-run-pin replay)))
+    (is (= "click/retry" (:enact-retry-click replay)))
+    (is (= "click/retry" (:effective-retry-click replay)))
     (is (= (:admission-source-identity replay)
            (:current-source-identity replay)))))
 
@@ -151,6 +153,19 @@
         (is (= admission (get-in resolved [:pin :sha256])) transaction)
         (is (= run (get-in resolved [:admission :result :run-pin :sha256]))
             transaction)))))
+
+(deftest current-ad038-deferred-order-uniquely-resolves-superseding-admission
+  (let [transaction (edn/read-string
+                     (slurp (str retained-live-root "/transaction.edn")))
+        resolved (production/resolve-acceptance-admission
+                  (str retained-live-root "/acceptances")
+                  (:work-order transaction))]
+    (is (= "137d98610839b01e9df519f1d202d5808c84929a61580518f30c734f09c16ae0"
+           (get-in resolved [:pin :sha256])))
+    (is (= "acceptance/injury-ad038c4804-downstream-busy-cause-retention"
+           (get-in resolved [:admission :acceptance-test :id])))
+    (is (= "8b32cca6d85c6e616c58381801a7c4d1619473dfc03310bb7645b71891fa07ba"
+           (get-in resolved [:admission :result :run-pin :sha256])))))
 
 (deftest legacy-admission-lookup-is-unique-and-recorded-in-replay
   (let [dir (root)
