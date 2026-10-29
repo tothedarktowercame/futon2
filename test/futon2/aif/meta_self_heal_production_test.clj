@@ -59,10 +59,14 @@
         test (acceptance-case "retained-admission-replay")
         run-pin {:path (str dir "/admission-run.log")
                  :sha256 (apply str (repeat 64 "1"))}
+        admission-isolation {:temporary-roots ["/retained/red"]
+                             :environment {:wm-store "/retained/red"}
+                             :removed? true}
         admission {:schema :wm/meta-acceptance-admission-v1
                    :status :accepted :acceptance-test test
                    :result {:status :ran :outcome :failed :exit 1
-                            :summary "red" :run-pin run-pin}}
+                            :summary "red" :run-pin run-pin
+                            :store-isolation admission-isolation}}
         admission-path (str dir "/admission.edn")
         bytes (.getBytes (str (pr-str admission) "\n") "UTF-8")
         _ (spit admission-path (String. bytes "UTF-8"))
@@ -75,9 +79,13 @@
         _ (spit current-path current-log)
         current-pin {:path current-path
                      :sha256 (load-identity/sha256 current-bytes)}
+        current-isolation {:temporary-roots ["/retained/green"]
+                           :environment {:wm-store "/retained/green"}
+                           :removed? true}
         port (production/acceptance-replay-port
               (constantly {:status :ran :outcome :passed :exit 0
-                           :summary "green" :run-pin current-pin}))
+                           :summary "green" :run-pin current-pin
+                           :store-isolation current-isolation}))
         order {:injury-id "injury/retained" :repair-id "repair/retained"
                :attempt 1 :acceptance-test test
                :acceptance-admission-pin admission-pin}
@@ -85,7 +93,10 @@
                                 {:phase :enact :payload {:retry-click "click/retry"}}]}
         response (port {:work-order order :transaction transaction :phase :retry
                         :predecessor-pin admission-pin})
-        replay (get-in response [:payload :phase-replay-receipt])]
+        replay (get-in response [:payload :phase-replay-receipt])
+        persisted-path (str dir "/replay-port-receipt.edn")
+        _ (spit persisted-path (str (pr-str response) "\n"))
+        persisted (edn/read-string (slurp persisted-path))]
     (is (= :succeeded (:status response)))
     (is (= :repaired (:outcome replay)))
     (is (= admission-pin (:admission-pin replay)))
@@ -93,6 +104,10 @@
     (is (= current-pin (:current-run-pin replay)))
     (is (= "click/retry" (:enact-retry-click replay)))
     (is (= "click/retry" (:effective-retry-click replay)))
+    (is (= admission-isolation (:admission-store-isolation replay)))
+    (is (= current-isolation (:store-isolation replay)))
+    (is (= current-isolation
+           (get-in persisted [:payload :phase-replay-receipt :store-isolation])))
     (is (= (:admission-source-identity replay)
            (:current-source-identity replay)))))
 
