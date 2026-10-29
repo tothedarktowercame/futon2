@@ -74,6 +74,14 @@
           {:outcome (:outcome detail)
            :failure-kind (:failure-kind detail)
            :grounded-commit grounded}))))
+
+(defn finished-work?
+  "True only when the existing terminal semantics establish finished work."
+  [record]
+  (let [image (close-outcome-image (outcome record))]
+    (or (= :changed image)
+        (and (= :already-satisfied image)
+             (producer-qualified-already-satisfied? record)))))
 (defn- target [record]
   (let [candidate (or (get-in record [:failure :target])
                       (get-in record [:failure :detail :target]))]

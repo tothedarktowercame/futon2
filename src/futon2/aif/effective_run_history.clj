@@ -7,21 +7,13 @@
   [:target :giraffe-manifest-sha256 :policy-id
    :compiled-check-set-sha256 :mission-source-sha256])
 
-(def transient-failure-kinds
-  ;; The environmental-hold arm of full-loop-runner/repair-class-for.
-  #{:agent-unavailable :agent-readiness-failed :substrate-unavailable
-    :dispatch-failed :abstained :no-selection :guardrail-refusal
-    :transport-timeout :transport-unavailable :trigger-ineligible
-    :operator-cancelled})
-
 (defn comparable? [identity]
   (every? #(some? (get identity %)) required-keys))
 
 (defn blocking-row? [row]
   (and (= :indexed (:status row))
        (comparable? (:effective-run-identity row))
-       (not (contains? transient-failure-kinds
-                       (get-in row [:failure :kind])))))
+       (true? (:finished-work? row))))
 
 (defn compare-rows [identity rows]
   (if-not (comparable? identity)
