@@ -150,7 +150,15 @@
     (seal-transaction
      (-> transaction
          (dissoc :transaction-pin)
-         (assoc :work-order order :acceptance-supersession supersession)))))
+         (assoc :work-order order
+                :acceptance-supersession
+                (assoc supersession :retained-receipt-pins
+                       (mapv :receipt-pin (:receipts transaction)))
+                :receipt-work-order-bindings
+                (into {} (map (fn [receipt]
+                                [(get-in receipt [:receipt-pin :sha256])
+                                 (:work-order-pin old-order)]))
+                      (:receipts transaction)))))))
 
 (defn- latest-transition [history injury-id]
   (last (filter #(and (= ledger/transition-schema (:schema %))
@@ -297,9 +305,21 @@
       (refusal :coordinator/preparation-malformed {:detail (ex-message t)})))))
 
 (defn- receipt-for [transaction phase]
-  (some #(when (= phase (:phase %)) %) (:receipts transaction)))
+  (let [bindings (:receipt-work-order-bindings transaction)
+        current-pin (get-in transaction [:work-order :work-order-pin])]
+    (some #(when (and (= phase (:phase %))
+                      (or (nil? bindings)
+                          (= current-pin
+                             (get bindings (get-in % [:receipt-pin :sha256])))))
+             %)
+          (:receipts transaction))))
 (defn- append-receipt [transaction receipt]
-  (seal-transaction (update transaction :receipts conj receipt)))
+  (seal-transaction
+   (-> transaction
+       (update :receipts conj receipt)
+       (assoc-in [:receipt-work-order-bindings
+                  (get-in receipt [:receipt-pin :sha256])]
+                 (get-in transaction [:work-order :work-order-pin])))))
 (defn- expected [order phase predecessor-pin]
   {:phase phase :injury-id (:injury-id order) :repair-id (:repair-id order)
    :attempt (:attempt order) :predecessor-pin predecessor-pin})

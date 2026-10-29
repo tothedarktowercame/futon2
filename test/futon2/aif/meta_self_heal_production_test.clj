@@ -2149,6 +2149,22 @@
         opts {:meta-acceptance-observation observation
               :meta-diagnosis-context {:durable-ledger {:ledger ledger}}}
         rebound (#'production/acceptance-transaction-binding opts transaction)
+        author-calls (atom 0)
+        predecessor (get-in transaction [:receipts 0 :predecessor-pin])
+        dispatched (#'coordinator/invoke-once
+                    (:transaction rebound) :author predecessor
+                    (fn [request]
+                      (swap! author-calls inc)
+                      (coordinator/seal-port-receipt
+                       {:phase :author
+                        :injury-id (get-in request [:work-order :injury-id])
+                        :repair-id (get-in request [:work-order :repair-id])
+                        :attempt (get-in request [:work-order :attempt])
+                        :predecessor-pin (:predecessor-pin request)
+                        :status :succeeded :payload {:patch-sha "fresh"}})))
+        ordinary (#'coordinator/invoke-once
+                  transaction :author predecessor
+                  (fn [_] (throw (ex-info "ordinary resume must reuse" {}))))
         refused (#'production/acceptance-transaction-binding
                  (assoc-in opts [:meta-diagnosis-context :durable-ledger :ledger :entries]
                            (vec (remove #(= :acceptance-unsatisfiable-claimed
@@ -2162,6 +2178,15 @@
                                     :current-admission-pin])))
     (is (= :valid
            (:status (coordinator/verify-transaction (:transaction rebound)))))
+    (is (= :accepted (:status dispatched)))
+    (is (= 1 @author-calls) "old rejection is retained but not reused")
+    (is (= :recorded (:status ordinary)) "same-version resume still reuses")
+    (is (= 1 (count (get-in rebound [:transaction :acceptance-supersession
+                                     :retained-receipt-pins]))))
+    (is (= 1 (count (filter #(= :acceptance-unsatisfiable-claimed
+                               (:observation-kind %))
+                            (:entries ledger))))
+        "fresh dispatch does not reset the injury-level return limit")
     (is (not= (get-in rebound [:transaction :acceptance-supersession
                                :superseded-admission-pin])
               (get-in rebound [:transaction :acceptance-supersession
