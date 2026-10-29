@@ -71,6 +71,7 @@
             [futon2.aif.observation-label-wire :as observation-label-wire]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.mission-observation :as mission-observation]
+            [futon2.aif.selected-mission-contract :as mission-contract]
             [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
@@ -8538,11 +8539,9 @@
                                         :target-repository-head
                                         (:head head-observation))
                                  target mission construction stop-lines))
+                _ (mission-contract/require-before-author! (:selected-action construction))
                 mission-applicable?
-                (or (and (str/starts-with? (str target) "M-")
-                         (seq (get-in construction [:selected-action :want]))
-                         (not= :repair-machine-failure
-                               (get-in construction [:selected-action :type])))
+                (or (mission-contract/mission? (:selected-action construction))
                     ;; A ticket preparation selected by the canonical outer
                     ;; policy is also an exact selected-want observation. It
                     ;; must traverse the durable pre-author baseline and the
