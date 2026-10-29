@@ -1,4 +1,5 @@
 # E-r1-a-matrix-design — the explicit observation model A for R1 belief
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The explicit observation model A was built dark in futon2.aif.belief (a-matrix-v0 and channel-emission-matrix present with the reduction/witness tests), default :legacy byte-identical as designed. Evidence: /home/joe/code/futon2/src/futon2/aif/belief.clj, /home/joe/code/futon2/test/futon2/aif/belief_test.clj.
 
 **Date:** 2026-07-04 · **Parcel:** M-aif-faithfulness §2.3 B-3a (author claude-7,
 reviewer claude-12) · **Status:** v0 BUILT DARK (`:likelihood-mode`, default

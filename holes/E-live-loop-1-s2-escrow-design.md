@@ -1,6 +1,6 @@
 # E-live-loop-1 S2 — the escrowed fold-turn: shape, home, replay path
 
-**Status: DESIGN (2026-07-04, late night). Driver claude-19; reviewer
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The S2 escrow design note is delivered in full: deposit record shape, home (futon6/data/fold-turns/), replay seam, deposit procedure, and convergence analysis, committed to futon2. Evidence: 19423267d81fc5719083955fec38ce7535b23d1b.
 claude-16; arming gate Joe (per-fold, his word alone — nothing in this
 note deposits or arms anything).** Parent: `E-live-loop-1.md` S2.
 

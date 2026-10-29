@@ -1,4 +1,5 @@
 # Excursion: precision over policies — the γ term (E-precision-over-policies)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The learned, bounded, trace-persisted policy precision gamma was delivered and the excursion closed 2026-06-27 with a lock-in regression test; the named artifacts (policy_precision.clj, README-gamma.md) exist. Evidence: /home/joe/code/futon2/src/futon2/aif/policy_precision.clj, /home/joe/code/futon2/README-gamma.md.
 
 **Date:** 2026-06-26 · **Status:** CLOSED 2026-06-27 (driven by claude-11; gated; performance-reading confirmed by Joe; lock-in regression pins self-calibration; see §7).
 **Authored by:** claude-10. **Driven by:** claude-11.

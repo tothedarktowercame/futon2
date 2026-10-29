@@ -1,7 +1,7 @@
 # Excursion: Policy-rollout engine (`futon2.aif.rollout`) — the SEARCH half of the AlphaZero split
 
 **Type:** Excursion (E-prefix; bounded build, owned end-to-end by claude-4 per [[project_e_prefix_excursions]]).
-**Status:** ✅ **LANDED + REVIEWED PASS 2026-06-09.** codex-2 built (futon2 `65f137d` "Add policy
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): The futon2.aif.rollout policy-rollout engine landed and passed claude-4's review on 2026-06-09 (futon2 65f137d, futon3a 2122daf both exist); the return channel was explicitly reserved for v1. Evidence: 65f137d, 2122daf.
 rollout engine" — `futon2.aif.rollout` + test + witness; futon3a `2122daf` "Extract pure meme
 transition step" — `meme.step`, the MUST-A kernel). claude-4 review (merge gated):
 - **MUST-A ✓** single-source — `promote! → cap-ascent/plan → meme.step/step`; the sim calls the same
