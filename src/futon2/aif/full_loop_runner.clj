@@ -77,6 +77,7 @@
             [futon2.aif.open-cascade-refinement :as open-cascade-refinement]
             [futon2.aif.outer-refusal-index :as outer-refusal-index]
             [futon2.aif.outer-refusal-history :as outer-refusal-history]
+            [futon2.aif.effective-run-history :as effective-run-history]
             [futon2.aif.revision-pattern-use :as revision-pattern-use]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.pattern-registry :as patterns]
@@ -1467,6 +1468,11 @@
                     (or (some-> (:outer-repeat-comparison/state raw-opts) deref)
                         {:schema :wm/outer-repeat-comparison-v1
                          :status :not-reached})
+                    :effective-run-identity
+                    (some-> (:effective-run-comparison/state raw-opts) deref :identity)
+                    :effective-run-comparison
+                    (or (some-> (:effective-run-comparison/state raw-opts) deref)
+                        {:schema :wm/effective-run-comparison-v1 :status :not-reached})
                     :outer-task-selection outer-task-selection
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
@@ -8436,6 +8442,38 @@
                       (cohort/append-pre-author-baseline!
                        cohort-source (:data-root execution-cohort) attempt-id mission-baseline)
                       (cohort/append-pre-author-baseline! attempt-id mission-baseline)))
+                effective-run-identity
+                {:schema :wm/effective-run-identity-v1
+                 :target target
+                 :giraffe-manifest-sha256
+                 (get-in opts [:outer/selection :giraffe/manifest-sha256])
+                 :policy-id (get-in entry [:action :policy-key 2])
+                 :compiled-check-set-sha256
+                 (sha256
+                  (->> (tree-seq coll? seq construction)
+                       (filter map?)
+                       (mapcat (fn [m]
+                                 (for [[occurrence clause] m
+                                       :when (and (vector? occurrence)
+                                                  (map? clause)
+                                                  (contains? clause :completion-check))]
+                                   [occurrence (:completion-check clause)])))
+                       distinct
+                       (sort-by pr-str)
+                       vec))
+                 :mission-source-sha256 (get-in mission [:source :sha256])
+                 :base-head (:head pre-author-head)}
+                _effective-run-comparison
+                (run-phase!
+                 opts @phase-context :effective-run-comparison
+                 #(let [comparison
+                        (effective-run-history/compare-index
+                         (or (:run-record-dir opts) default-run-record-dir)
+                         effective-run-identity)]
+                    (when-let [state (:effective-run-comparison/state opts)]
+                      (reset! state comparison))
+                    (effective-run-history/require-novel! comparison))
+                 #(select-keys % [:status]))
                 outer-repeat-inputs
                 {:schema :wm/outer-repeat-inputs-v1
                  :target target
@@ -9265,6 +9303,7 @@
                                 :scan-report/state (atom nil)
                                 :preference-refresh/state (atom nil)
                                 :outer-repeat-comparison/state (atom nil)
+                                :effective-run-comparison/state (atom nil)
                                 :phase-events/state phase-events
                                 :selection-timing/state
                                 (or (:selection-timing/state raw-opts)

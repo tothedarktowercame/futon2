@@ -53,7 +53,8 @@
    :record-sha256 record-sha256
    :target (record-target record)
    :failure (select-keys (:failure record) [:kind :stage])
-   :inputs (record-inputs record)})
+   :inputs (record-inputs record)
+   :effective-run-identity (:effective-run-identity record)})
 
 (defn read-index
   "Read the compact index under DIR. A malformed index is a typed refusal;
