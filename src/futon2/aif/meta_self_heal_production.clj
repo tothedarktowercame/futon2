@@ -1670,11 +1670,12 @@
         (get-in (coordinator/current-receipt-for transaction :enact)
                 [:payload :retry-click]))))
 (defn- work-order-options [opts]
-  (cond-> (assoc (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
-                                    :repair-reviewer :author-session :reviewer-session
-                                    :repair-reviewer-session :target-repository :target-worktree
-                                    :target-worktree-root :canonical-base-sha])
-                 :acceptance-return-limit (:meta-acceptance-return-limit opts))
+  (cond-> (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
+                             :repair-reviewer :author-session :reviewer-session
+                             :repair-reviewer-session :target-repository :target-worktree
+                             :target-worktree-root :canonical-base-sha])
+    (contains? opts :meta-acceptance-return-limit)
+    (assoc :acceptance-return-limit (:meta-acceptance-return-limit opts))
     (or (:acceptance-admission-pin opts)
         (get-in opts [:meta-acceptance-observation :acceptance-admission-pin]))
     (assoc :acceptance-admission-pin
