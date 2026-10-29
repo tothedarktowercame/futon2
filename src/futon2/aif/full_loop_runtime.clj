@@ -65,6 +65,31 @@
 (def default-ticket-readiness-candidate-limit 16)
 (def default-ticket-readiness-candidate-chars 1024)
 (def default-giraffe-root "/home/joe/code/storage/giraffe")
+(def self-heal-runtime-config-resource "wm/self-heal-runtime.edn")
+
+(defn self-heal-runtime-config
+  "Read the declared production limits for the dedicated self-heal route.
+  Missing or malformed declarations remain absent so the consumer returns its
+  typed configuration refusal."
+  []
+  (try
+    (let [resource (io/resource self-heal-runtime-config-resource)
+          config (when resource (edn/read-string (slurp resource)))]
+      (if (and (= :wm/self-heal-runtime-v1 (:schema config))
+               (nat-int? (:acceptance-static-correction-limit config)))
+        config
+        {}))
+    (catch Throwable _ {})))
+
+(defn production-self-heal-options
+  "Compose declared self-heal runtime limits into the options consumed by
+  prepare-acceptance. This is the serving composition boundary."
+  [opts]
+  (let [config (self-heal-runtime-config)]
+    (cond-> opts
+      (contains? config :acceptance-static-correction-limit)
+      (assoc :meta-acceptance-static-correction-limit
+             (:acceptance-static-correction-limit config)))))
 
 (def budget-observation-schema :wm/meta-click-budget-observation-v1)
 
@@ -865,7 +890,7 @@
   "Arbitrate durable META injuries before constructing any ordinary policy
   field. An active injury consumes the opportunity without fallback."
   [opts authority]
-  (let [
+  (let [opts (production-self-heal-options opts)
         ;; Never honor a caller-supplied derived verifier. Only a validated
         ;; explicit context may create this process-local function.
         opts (cond-> (dissoc opts :meta-medic-authority-verifier)

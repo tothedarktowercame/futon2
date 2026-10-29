@@ -29,6 +29,14 @@
 
 (defn- digest [x] (evidence/value-digest x))
 
+(deftest production-self-heal-options-carry-declared-static-correction-limit
+  (let [declared (runtime/self-heal-runtime-config)
+        composed (runtime/production-self-heal-options {})]
+    (is (= :wm/self-heal-runtime-v1 (:schema declared)))
+    (is (= (:acceptance-static-correction-limit declared)
+           (:meta-acceptance-static-correction-limit composed)))
+    (is (= 1 (:meta-acceptance-static-correction-limit composed)))))
+
 (deftest open-cascade-author-prompt-states-operational-clause-schema
   (let [prompt (#'runtime/open-cascade-author-prompt
                 {:requisition-id "retained"
