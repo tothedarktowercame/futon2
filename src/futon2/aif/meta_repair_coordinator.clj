@@ -58,6 +58,9 @@
                     (not (every? nonblank? sessions)) (conj :sessions/present)
                     (not (pos-int? (:attempt order))) (conj :attempt)
                     (not (pos-int? (:attempt-limit order))) (conj :attempt-limit)
+                    (and (contains? order :acceptance-return-limit)
+                         (not (nat-int? (:acceptance-return-limit order))))
+                    (conj :acceptance-return-limit)
                     (> (:attempt order 1) (:attempt-limit order 0))
                     (conj :attempt/exceeds-limit)
                     (not (pin? (:cause-record-pin order))) (conj :cause-pin)
@@ -230,6 +233,7 @@
                                       :author :reviewer :repair-reviewer
                                       :author-session :reviewer-session
                                       :repair-reviewer-session
+                                      :acceptance-return-limit
                                       :target-repository :canonical-base-sha])
                         {:injury-id injury-id :repair-id repair-id :attempt attempt
                          :target-worktree target-worktree
@@ -307,6 +311,21 @@
 (defn- held! [reason phase history transaction receipt]
   (stop! {:status :held :reason reason :phase phase :ledger history
           :transaction transaction :receipt receipt}))
+(defn- acceptance-unsatisfiable-evidence [receipt]
+  (let [payload (:payload receipt)
+        evidence (:evidence payload)]
+    (when (and (= :rejected (:status receipt))
+               (= :acceptance-test-unsatisfiable (:reason payload))
+               (map? evidence)
+               (nonblank? (:assertion evidence))
+               (nonblank? (:reason evidence)))
+      evidence)))
+(defn- acceptance-return-count [history injury-id repair-id]
+  (count (filter #(and (= ledger/observation-schema (:schema %))
+                       (= :acceptance-unsatisfiable-claimed (:observation-kind %))
+                       (= injury-id (:injury-id %))
+                       (= repair-id (:repair-id %)))
+                 (:entries history))))
 (defn- checkpoint! [ports phase history transaction]
   (when (= phase (:stop-after ports))
     (stop! {:status :checkpoint :phase phase :ledger history
@@ -553,17 +572,36 @@
             author-receipt (:receipt author-result)
             tx1 (:transaction author-result)]
         (when-not (= :succeeded (:status author-receipt))
-          ;; A failed sealed author answer is evidence for a fresh attempt,
-          ;; not a terminal hold.  append-retry-result supplies the existing
-          ;; attempt-limit behavior and validates the claim predecessor.
-          (let [reopened (accepted!
-                          (ledger/append-retry-result
-                           history1 {:injury-id injury-id :repair-id repair-id
-                                     :reason :author-failed
-                                     :port-receipt-pin
-                                     (:receipt-pin author-receipt)}
-                           authority-verifier))]
-            (held! :author-failed :author (:ledger reopened) tx1 author-receipt)))
+          (if-let [evidence (acceptance-unsatisfiable-evidence author-receipt)]
+            (let [return-count (acceptance-return-count history1 injury-id repair-id)
+                  observed (accepted!
+                            (ledger/append-observation
+                             history1 (:receipt-pin author-receipt)
+                             :acceptance-unsatisfiable-claimed
+                             {:injury-id injury-id :repair-id repair-id
+                              :attempt attempt :author-evidence evidence}
+                             authority-verifier))
+                  exhausted? (>= return-count
+                                 (:acceptance-return-limit order))]
+              (stop! {:status :held
+                      :reason (if exhausted?
+                                :acceptance-return-limit-exhausted
+                                :acceptance-test-unsatisfiable)
+                      :phase :author :ledger (:ledger observed) :transaction tx1
+                      :receipt author-receipt
+                      :acceptance-return-count (inc return-count)
+                      :acceptance-return-limit (:acceptance-return-limit order)
+                      :acceptance-unsatisfiable-evidence evidence}))
+            ;; Ordinary author failures still advance through the existing
+            ;; retry/attempt-limit grammar.
+            (let [reopened (accepted!
+                            (ledger/append-retry-result
+                             history1 {:injury-id injury-id :repair-id repair-id
+                                       :reason :author-failed
+                                       :port-receipt-pin
+                                       (:receipt-pin author-receipt)}
+                             authority-verifier))]
+              (held! :author-failed :author (:ledger reopened) tx1 author-receipt))))
         (let [patch-sha (get-in author-receipt [:payload :patch-sha])
               worktree (get-in author-receipt [:payload :worktree])
               _ (when-not (and (sha? patch-sha) (nonblank? worktree))

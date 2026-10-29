@@ -698,6 +698,28 @@
     (is (not (contains? plain-refused :acceptance-source-retry)))
     (is (not (contains? plain-refused :acceptance-source-read-error)))))
 
+(deftest author-unsatisfiable-evidence-is-data-for-the-fresh-acceptance-proposal
+  (let [dir (root)
+        diagnosis (produced-diagnosis! dir)
+        claim {:attempt 3
+               :acceptance-test {:id "meta-acceptance-injury-9c6220388033cbd1-r2"}
+               :author-evidence
+               {:assertion "(= decoded-hole-ids (sort-by pr-str (keys (:decisions result))))"
+                :reason "the literal problems/apparatus order cannot equal pr-str sorted apparatus/problems order"}}
+        seen (atom nil)
+        result (production/produce-acceptance!
+                {:meta-acceptance-root (str dir "/acceptance-reconsideration")
+                 :meta-acceptance-unsatisfiable-claim claim
+                 :meta-acceptance-fn
+                 (fn [request]
+                   (reset! seen request)
+                   {:status :proposed
+                    :acceptance-test (acceptance-case "9c622038-corrected" :injury)})}
+                diagnosis)]
+    (is (= :proposed (:status result)))
+    (is (= claim (:author-unsatisfiable-claim @seen)))
+    (is (= 3 (get-in @seen [:author-unsatisfiable-claim :attempt])))))
+
 (deftest acceptance-review-identifies-source-by-proposal-pin
   ;; F24 (click wm-click-a8f4dea6, 2026-10-20): the independent reviewer
   ;; accepted the test identity but omitted its 4 KB :source echo. The
