@@ -481,15 +481,18 @@
                 :error "Serving runner source drifts from the canonical checkout"}
        :evidence-pin (child-acceptance-pin click-id)})))
 
-(defn- attribution-refused-status-fn [refused-click]
+(defn- completed-without-run-record-status-fn
+  [refused-click reason]
   (fn [click-id]
     (when (= refused-click click-id)
       {:status :completed
-       :refusal :retry-attribution-refused
+       :run-record-status :absent
+       :run-record-absence :runner-did-not-return-run-record
+       :run-record-reference-conflict? false
        :result {:outcome :unknown
                 :runtime-disposition
                 {:status :refused
-                 :reason :meta-self-heal/retry-attribution-refused}}
+                 :reason reason}}
        :evidence-pin (child-acceptance-pin click-id)})))
 
 (defn- observation-count
@@ -567,7 +570,8 @@
                       (swap! dispatched conj (:retry-click r))
                       (receipt r :queued {:retry-click (:retry-click r)}))
              :retry-click-status-fn
-             (attribution-refused-status-fn malformed-id)})
+             (completed-without-run-record-status-fn
+              malformed-id :meta-self-heal/retry-attribution-refused)})
         result (coordinator/coordinate (durable (:ledger malformed))
                                        (:transaction initial) ps)
         replacement (:retry-click result)]
@@ -580,6 +584,20 @@
     (is (= 2 (-> result :ledger :entries last :requeues)))
     (is (= 1 (observation-count (:ledger result)
                                 (child-acceptance-pin malformed-id))))))
+
+(deftest arbitrary-typed-completion-without-run-record-is-observed
+  (doseq [reason [:makeup-unavailable :another-typed-refusal]]
+    (let [initial (awaiting-retry (opened-ledger))
+          click (:retry-click initial)
+          result (coordinator/coordinate
+                  (durable (:ledger initial)) (:transaction initial)
+                  (requeue-ports
+                   {:retry-click-status-fn
+                    (completed-without-run-record-status-fn click reason)}))]
+      (is (= :awaiting-retry (:status result)) (name reason))
+      (is (= 1 (observation-count (:ledger result)
+                                  (child-acceptance-pin click)))
+          (name reason)))))
 
 (deftest failed-child-observation-is-not-duplicated
   ;; Crash repair between the observation append and the requeue append, plus
@@ -653,7 +671,18 @@
 (deftest running-or-completed-child-is-never-observed
   ;; Only a durable :service-failed outcome is evidence: a completed, running
   ;; or unknown child must not append anything.
-  (doseq [observed [{:status :completed :result {:outcome :cohort-complete}}
+  (doseq [observed [{:status :completed :result {:outcome :cohort-complete}
+                     :run-record-status :present}
+                    {:status :completed
+                     :result {:runtime-disposition {:reason :makeup-unavailable}}
+                     :run-record-status :present
+                     :run-record-absence :runner-did-not-return-run-record
+                     :run-record-reference-conflict? false}
+                    {:status :completed
+                     :result {:runtime-disposition {:reason :makeup-unavailable}}
+                     :run-record-status :absent
+                     :run-record-absence :runner-did-not-return-run-record
+                     :run-record-reference-conflict? true}
                     {:status :running}
                     {:status :not-found}
                     nil]]

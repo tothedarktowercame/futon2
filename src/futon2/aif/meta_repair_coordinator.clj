@@ -307,9 +307,9 @@
 (defn- failed-child-observation
   "Read the durable service-side non-success of one meta-retry child through
    the read-only :retry-click-status-fn port. Returns the evidence map only
-   for a durably recorded service failure or completed
-   :meta-self-heal/retry-attribution-refused result whose evidence pin seals
-   the bytes the observation will cite; other states return nil. A recorded
+   for a durably recorded service failure or completed typed non-success whose
+   durable acceptance record says the runner returned no run record and whose
+   evidence pin seals the bytes the observation will cite; other states return nil. A recorded
    non-success without a valid evidence pin refuses typedly rather than
    observing unsourced evidence."
   [ports retry-click]
@@ -319,13 +319,15 @@
         (let [service-failed? (and (= :failed (:status observed))
                                    (= :service-failed
                                       (get-in observed [:result :outcome])))
-              attribution-refused?
+              completed-without-run-record?
               (and (= :completed (:status observed))
-                   (= :retry-attribution-refused (:refusal observed))
-                   (= :meta-self-heal/retry-attribution-refused
-                      (get-in observed [:result :runtime-disposition :reason])))]
+                   (keyword? (get-in observed [:result :runtime-disposition :reason]))
+                   (= :absent (:run-record-status observed))
+                   (= :runner-did-not-return-run-record
+                      (:run-record-absence observed))
+                   (false? (:run-record-reference-conflict? observed)))]
           (cond
-          (not (or service-failed? attribution-refused?)) nil
+          (not (or service-failed? completed-without-run-record?)) nil
           (not (pin? (:evidence-pin observed)))
           (refusal :coordinator/failed-child-evidence-refused
                    {:retry-click retry-click
