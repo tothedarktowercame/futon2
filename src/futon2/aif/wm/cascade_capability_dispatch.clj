@@ -6,6 +6,14 @@
             [clojure.java.io :as io]
             [futon2.aif.interpretation-evidence :as evidence]))
 
+(def default-routes
+  {:wm/pattern-apply :full-loop-build-review-close})
+
+(defn routes
+  "The route vocabulary shared by compilation, requisition and delivery."
+  [opts]
+  (or (:cascade-capability-routes opts) default-routes))
+
 (def receipt-schema :wm/cascade-effect-receipt-v1)
 
 (defn receipt-digest [receipt]

@@ -1687,9 +1687,7 @@
                               (seq (get-in compiled-record [:frontier]))
                               (let [routing
                                     (capability-dispatch/route-frontier
-                                     (or (:cascade-capability-routes opts)
-                                         {:wm/pattern-apply
-                                          :full-loop-build-review-close})
+                                     (capability-dispatch/routes opts)
                                      compiled-record)]
                                 (if (= :routed (:status routing))
                                   {:status :cascade-ready

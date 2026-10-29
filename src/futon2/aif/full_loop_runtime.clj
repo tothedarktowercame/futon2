@@ -2,6 +2,7 @@
   "Production composition root for the full-loop runner."
   (:require [cheshire.core :as json]
             [futon2.aif.wm.cascade-patch-delivery :as patch-delivery]
+            [futon2.aif.wm.cascade-capability-dispatch :as capability-dispatch]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -369,7 +370,9 @@
        "map, set or keyword) is refused at hot-load as "
        ":patch-var-not-a-function. Each decision value is an operational "
        "clause and must contain :operation, :capability, and "
-       ":completion-check; :consumes and :produces are optional. A previous "
+       ":completion-check. Routable :capability values are "
+       (pr-str (:routable-capabilities req))
+       "; use only these keys, not hole-owner names. :consumes and :produces are optional. A previous "
        ":resume-incomplete cause in the requisition names the missing fields "
        "that this fresh patch must supply. The patch namespace must require "
        "futon2.aif.load-identity and call (load-identity/register! *ns* *file*) "
@@ -511,13 +514,27 @@
                                   opts reviewer open-cascade-review-prompt "work"))
             ctx (open-resume/recognize error)
             req (when (= :held (:status ctx))
-                  (open-resume/authoring-requisition ctx author reviewer))]
+                  (assoc (open-resume/authoring-requisition ctx author reviewer)
+                         :routable-capabilities
+                         (vec (sort (keys (capability-dispatch/routes opts))))))]
         (if-not (= :dispatched (:status req))
           (or req ctx)
           (let [author-response (author-contact req)
                 author-answer (handoff/response-map author-response)
-                delivery (when author-answer (patch-delivery/check-delivery author-answer))
-                reviewer-response (when (= :delivered (:status delivery))
+                author-binding (open-resume/validate-author-binding req author-answer)
+                delivery (when (= :bound (:status author-binding))
+                           (patch-delivery/check-delivery author-answer))
+                ledger (open-resume/new-ledger (or (:run-id opts) "held-click"))
+                ;; Check the canonical, digest-validated function's product before
+                ;; spending a reviewer contact. Review still binds this source.
+                loaded (when (= :delivered (:status delivery))
+                         (open-resume/hot-load! ledger req author-answer
+                           (or (:open-cascade-patch-loader opts) patch-loader)))
+                product-check (when loaded
+                                (if (= :error (:status loaded)) loaded
+                                  (open-resume/validate-product req author-answer
+                                                               (:product loaded) opts)))
+                reviewer-response (when (= :accepted (:status product-check))
                                     (reviewer-contact {:requisition req
                                                        :author-answer author-answer}))
                 reviewed (when reviewer-response
@@ -531,8 +548,7 @@
                          (= (get-in author-answer [:patch :source-digest])
                             (get-in reviewed [:patch :source-digest])))
                   (assoc author-answer :accepted-by (:accepted-by reviewed))
-                  reviewed)
-                ledger (open-resume/new-ledger (or (:run-id opts) "held-click"))]
+                  reviewed)]
             (cond
               (nil? author-answer)
               {:status :error
@@ -540,8 +556,14 @@
                :author author
                :author-job (contact-job author-response)}
 
+              (not= :bound (:status author-binding))
+              (assoc author-binding :author-job (contact-job author-response))
+
               (not= :delivered (:status delivery))
               (assoc delivery :author-job (contact-job author-response))
+
+              (not= :accepted (:status product-check))
+              (assoc product-check :author-job (contact-job author-response))
 
               (nil? reviewed)
               {:status :error
@@ -552,7 +574,8 @@
               :else
               (open-resume/handle-error!
                ledger error author reviewer accepted-answer
-               {:click-budget (:click-budget opts)
+               {:cascade-capability-routes (capability-dispatch/routes opts)
+                :click-budget (:click-budget opts)
                 :selection-counter (:selection-counter opts)
                 :patch-loader (or (:open-cascade-patch-loader opts)
                                   patch-loader)}))))))))
