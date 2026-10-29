@@ -35,7 +35,10 @@
     (is (= :wm/self-heal-runtime-v1 (:schema declared)))
     (is (= (:acceptance-static-correction-limit declared)
            (:meta-acceptance-static-correction-limit composed)))
-    (is (= 1 (:meta-acceptance-static-correction-limit composed)))))
+    (is (= 1 (:meta-acceptance-static-correction-limit composed)))
+    (is (= (:acceptance-return-limit declared)
+           (:meta-acceptance-return-limit composed)))
+    (is (= 1 (:meta-acceptance-return-limit composed)))))
 
 (deftest open-cascade-author-prompt-states-operational-clause-schema
   (let [prompt (#'runtime/open-cascade-author-prompt

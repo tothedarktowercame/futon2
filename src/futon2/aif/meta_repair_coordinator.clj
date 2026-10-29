@@ -55,6 +55,9 @@
                     (not (every? nonblank? sessions)) (conj :sessions/present)
                     (not (pos-int? (:attempt order))) (conj :attempt)
                     (not (pos-int? (:attempt-limit order))) (conj :attempt-limit)
+                    (and (contains? order :acceptance-return-limit)
+                         (not (nat-int? (:acceptance-return-limit order))))
+                    (conj :acceptance-return-limit)
                     (> (:attempt order 1) (:attempt-limit order 0))
                     (conj :attempt/exceeds-limit)
                     (not (pin? (:cause-record-pin order))) (conj :cause-pin)
@@ -223,6 +226,7 @@
                                       :author :reviewer :repair-reviewer
                                       :author-session :reviewer-session
                                       :repair-reviewer-session
+                                      :acceptance-return-limit
                                       :target-repository :target-worktree])
                         {:injury-id injury-id :repair-id repair-id :attempt attempt
                          ;; F38 (2026-10-20): the effective limit, not the
@@ -308,6 +312,12 @@
                (nonblank? (:assertion evidence))
                (nonblank? (:reason evidence)))
       evidence)))
+(defn- acceptance-return-count [history injury-id repair-id]
+  (count (filter #(and (= ledger/observation-schema (:schema %))
+                       (= :acceptance-unsatisfiable-claimed (:observation-kind %))
+                       (= injury-id (:injury-id %))
+                       (= repair-id (:repair-id %)))
+                 (:entries history))))
 (defn- checkpoint! [ports phase history transaction]
   (when (= phase (:stop-after ports))
     (stop! {:status :checkpoint :phase phase :ledger history
@@ -555,10 +565,25 @@
             tx1 (:transaction author-result)]
         (when-not (= :succeeded (:status author-receipt))
           (if-let [evidence (acceptance-unsatisfiable-evidence author-receipt)]
-            (stop! {:status :held :reason :acceptance-test-unsatisfiable
-                    :phase :author :ledger history1 :transaction tx1
-                    :receipt author-receipt
-                    :acceptance-unsatisfiable-evidence evidence})
+            (let [return-count (acceptance-return-count history1 injury-id repair-id)
+                  observed (accepted!
+                            (ledger/append-observation
+                             history1 (:receipt-pin author-receipt)
+                             :acceptance-unsatisfiable-claimed
+                             {:injury-id injury-id :repair-id repair-id
+                              :attempt attempt :author-evidence evidence}
+                             authority-verifier))
+                  exhausted? (>= return-count
+                                 (:acceptance-return-limit order))]
+              (stop! {:status :held
+                      :reason (if exhausted?
+                                :acceptance-return-limit-exhausted
+                                :acceptance-test-unsatisfiable)
+                      :phase :author :ledger (:ledger observed) :transaction tx1
+                      :receipt author-receipt
+                      :acceptance-return-count (inc return-count)
+                      :acceptance-return-limit (:acceptance-return-limit order)
+                      :acceptance-unsatisfiable-evidence evidence}))
             ;; Ordinary author failures still advance through the existing
             ;; retry/attempt-limit grammar.
             (let [reopened (accepted!

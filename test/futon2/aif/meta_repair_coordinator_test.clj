@@ -51,6 +51,7 @@
     :author-session (str "author-session-" attempt)
     :reviewer-session (str "reviewer-session-" attempt)
     :repair-reviewer-session (str "repair-reviewer-session-" attempt)
+    :acceptance-return-limit 1
     :target-repository "futon2"
     :target-worktree "/home/joe/worktrees/futon2-meta-self-heal-repair"}))
 
@@ -126,8 +127,37 @@
     (is (= evidence (:acceptance-unsatisfiable-evidence result)))
     (is (= 1 (get-in result [:transaction :work-order :attempt])))
     (is (= 1 (:attempt (last (filter :state (get-in result [:ledger :entries]))))))
+    (is (= :acceptance-unsatisfiable-claimed
+           (:observation-kind (last (get-in result [:ledger :entries])))))
+    (is (= evidence (:author-evidence (last (get-in result [:ledger :entries])))))
     (is (= [:open :claimed]
            (->> (get-in result [:ledger :entries]) (keep :state) vec)))))
+
+(deftest acceptance-return-limit-exhaustion-is-a-typed-hold
+  (let [history (opened-ledger)
+        evidence {:assertion "(= impossible-order sorted-order)"
+                  :reason "the operands have provably different order"}
+        repair-id (get-in (prepared history (options))
+                          [:transaction :work-order :repair-id])
+        prior (ledger/append-observation
+               history {:path "meta-repair-port-receipts/repair/prior/1/author.edn"
+                        :sha256 (apply str (repeat 64 "9"))}
+               :acceptance-unsatisfiable-claimed
+               {:injury-id "injury/2026-10-19/reload"
+                :repair-id repair-id :attempt 1 :author-evidence evidence})
+        start (prepared (:ledger prior) (options))
+        result (coordinator/coordinate
+                (durable (:ledger prior)) (:transaction start)
+                (ports {:author (fn [request]
+                                  (receipt request :rejected
+                                           {:reason :acceptance-test-unsatisfiable
+                                            :evidence evidence}))}))]
+    (is (= :held (:status result)))
+    (is (= :acceptance-return-limit-exhausted (:reason result)))
+    (is (= 1 (get-in result [:transaction :work-order :attempt])))
+    (is (= 2 (count (filter #(= :acceptance-unsatisfiable-claimed
+                                (:observation-kind %))
+                            (get-in result [:ledger :entries])))))))
 
 (deftest ordinary-author-failure-still-consumes-an-attempt
   (let [history (opened-ledger)

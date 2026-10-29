@@ -1438,9 +1438,10 @@
         (get-in (some #(when (= :enact (:phase %)) %) receipts)
                 [:payload :retry-click]))))
 (defn- work-order-options [opts]
-  (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
-                     :repair-reviewer :author-session :reviewer-session
-                     :repair-reviewer-session :target-repository :target-worktree]))
+  (assoc (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
+                            :repair-reviewer :author-session :reviewer-session
+                            :repair-reviewer-session :target-repository :target-worktree])
+         :acceptance-return-limit (:meta-acceptance-return-limit opts)))
 
 (defn- continued-work-order-options
   "A continued author attempt needs new port-session identities even though its

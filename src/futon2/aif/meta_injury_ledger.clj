@@ -534,6 +534,14 @@
          (or (not (nonblank? (:injury-id entry)))
              (not (nonblank? (:retry-click entry)))))
     (conj :observation/retry-attribution)
+    (and (= :acceptance-unsatisfiable-claimed (:observation-kind entry))
+         (or (not (nonblank? (:injury-id entry)))
+             (not (nonblank? (:repair-id entry)))
+             (not (positive-int? (:attempt entry)))
+             (not (and (map? (:author-evidence entry))
+                       (nonblank? (get-in entry [:author-evidence :assertion]))
+                       (nonblank? (get-in entry [:author-evidence :reason]))))))
+    (conj :observation/acceptance-unsatisfiable-evidence)
     (and (= :medic-repaired (:observation-kind entry))
          (not= :admitted (:status (check-medic-operation
                                   ledger (:medic-operation entry)
@@ -562,7 +570,8 @@
                        :predecessor (when previous
                                       {:entry-id (:entry-id previous)
                                        :entry-pin (:entry-pin previous)})}
-                      (select-keys attribution [:injury-id :retry-click]))
+                      (select-keys attribution [:injury-id :retry-click :repair-id
+                                                :attempt :author-evidence]))
                defects (observation-defects ledger entry authority-verifier)]
            (if (seq defects)
              (refusal (first defects) {:defects defects})
