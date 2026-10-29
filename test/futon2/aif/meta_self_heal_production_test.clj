@@ -72,7 +72,9 @@
                                     (java.nio.file.Files/readAllBytes
                                      (.toPath (java.io.File. pin))))}]
     {:schema :wm/out-of-band-fix-receipt-v1
-     :status :checked :fixed-by (apply str (repeat 40 "b"))
+     :status :checked
+     :injury-id (get-in env [:ingestion :entry :injury-id])
+     :fixed-by (apply str (repeat 40 "b"))
      :base-sha (apply str (repeat 40 "c"))
      :historical-pin (get-in env [:ingestion :entry :cause-record-pin])
      :historical-cause-checked? true
