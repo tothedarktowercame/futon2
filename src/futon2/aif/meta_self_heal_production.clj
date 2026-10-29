@@ -575,7 +575,7 @@
    the proposal onto every admission result (F22b)."
   [:acceptance-read-error :acceptance-read-retry :acceptance-transport-retry
    :acceptance-read-repair :acceptance-source-retry :acceptance-source-read-error
-   :acceptance-source-repair])
+   :acceptance-source-repair :acceptance-source-transport-fallback])
 
 (defn- producer-trace
   "What the producer did to get its answer, as record keys: F19's reader error
@@ -610,7 +610,10 @@
     ;; (:source-repair, with the character, its line and column and the
     ;; reader error); the proposal's source text is the repaired text.
     (contains? response :source-repair)
-    (assoc :acceptance-source-repair (:source-repair response))))
+    (assoc :acceptance-source-repair (:source-repair response))
+    (contains? response :source-transport-fallback)
+    (assoc :acceptance-source-transport-fallback
+           (:source-transport-fallback response))))
 
 (defn- produce-acceptance-from-request!
   "The port call and receipt half of produce-acceptance!, once every
