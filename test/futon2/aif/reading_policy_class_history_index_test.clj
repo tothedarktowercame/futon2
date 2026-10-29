@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.reading-policy-class-free-energy :as class-f]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.reading-policy-class-history-index :as index])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -105,3 +106,17 @@
                (:policy-key-sha256 row))))
       (finally
         (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
+
+(deftest current-terminal-wins-over-different-predecessor-policy
+  (let [retained (:record (edn/read-string
+                           (slurp "test/resources/wm/class-history/run001-projection.edn")))
+        terminal (get-in retained [:q6 :terminal])
+        predecessor (assoc-in terminal [:choice :policy-key]
+                              [:wm/reading-policy-v1 "M-other" "other-policy" {}])
+        record (assoc retained :q6 (array-map :predecessor {:previous predecessor}
+                                              :terminal terminal))
+        row (index/index-entry record "/tmp/record.edn" "fixture")]
+    (is (not= (get-in predecessor [:choice :policy-key])
+              (get-in terminal [:choice :policy-key])))
+    (is (= (identity/digest (get-in terminal [:choice :policy-key]))
+           (:policy-key-sha256 row)))))
