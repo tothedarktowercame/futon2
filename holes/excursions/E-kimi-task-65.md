@@ -1,4 +1,5 @@
 # E-kimi-task-65 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 5 Construction, order (10 wires)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane 5 Construction/order wire tests (constructor order-use descent/units/precedence, weighted-error, flight-assembly universes) landed in futon3c's wire test suite. Evidence: a55dbe2d17ea62ba321ccbe9199603e84dd6ff53, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_constructor_order_use_descent_test.clj, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_flight_assembly_assemble_one_universes_test.clj.
 
 **Requisition:** completed — 2026-09-26T15:19:18Z, job invoke-1790433618752-24896-a51af456, state done
 

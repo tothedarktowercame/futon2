@@ -1,4 +1,5 @@
 # E-kimi-task-61 — Sidecar P6b: wire scope index into the futon1b server (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): P6b scope-index server wiring (its job died with RST_STREAM and the same work was finished in E-kimi-task-62); the deliverable landed as commit 798f2db in futon1b. Evidence: 798f2db47dba531da5ef157944f0860fe2da4bb7.
 
 **Requisition:** completed — 2026-09-26T14:17:22Z, job invoke-1790431906285-24869-0f3a0a77, state failed
 

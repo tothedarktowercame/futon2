@@ -1,4 +1,5 @@
 # E-kimi-task-82 — LEAN-DAG-G1-I: an import counts only if the reached module declares the term (PROOF-2a <2>1b G1)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): gen_lean_dag.bb changed to count an import only when a reached source module declares the term, with :reached-without-term and fixture tests; committed in p4ng (61aef7b plus claude-9's 62af31d). Evidence: 61aef7b, 62af31d.
 
 **Requisition:** completed — 2026-09-27T01:15:02Z, job invoke-1790471039215-25165-f6b00157, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-81 — JOIN-TERM-D: whether each declared edge's crediting field carries its term (PROOF-2a <2>2b, discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): JOIN-TERM-D packet delivered: per-edge verdicts on whether each declared edge's crediting map field carries its term, finding [CTAU-TOKEN R5] and [R6 R16] do not; committed in futon3c. Evidence: 631893d0, /home/joe/code/futon3c/holes/labs/M-wm-wiring/JOIN-TERM-D.md.
 
 **Requisition:** completed — 2026-09-27T01:11:39Z, job invoke-1790470838887-25161-f0a166c6, state done
 

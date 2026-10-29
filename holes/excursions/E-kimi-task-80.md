@@ -1,4 +1,5 @@
 # E-kimi-task-80 — W9-D: co-application kernel at C1's containment order, the honest closer for [R2 R6] (PROOF-2a <2>1d, discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): W9-D discovery packet delivered: the honest closer for the [R2 R6] interp edge, committed as W9-D.md in futon2 and accepted in the plan log. Evidence: 06b647c2d, /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/W9-D.md.
 
 **Requisition:** completed — 2026-09-27T01:03:07Z, job invoke-1790470281794-25156-c56d8bf6, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-66 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 1 Loop entry, target field (9 wires)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane 1 Loop-entry/target-field wire tests (eligibility, loop-entry trigger, r1-outer-cascade draw-seed/chosen-target, r8-overlap) landed in futon3c's wire test suite. Evidence: a55dbe2d17ea62ba321ccbe9199603e84dd6ff53, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_eligibility_r1_outer_cascade_eligible_test.clj, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_loop_entry_r1_outer_cascade_trigger_test.clj.
 
 **Requisition:** completed — 2026-09-26T15:35:16Z, job invoke-1790433627454-24897-17c5440a, state failed
 

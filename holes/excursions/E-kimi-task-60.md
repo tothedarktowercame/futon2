@@ -1,4 +1,5 @@
 # E-kimi-task-60 — Sidecar P6a: mark table + Q9 node join (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): P6a mark+gnode tables and Q9 node-join added to the futon1b scope sidecar, committed. Evidence: 934e4d7846a4d4d0c894301f452c09e3081f48f8.
 
 **Requisition:** completed — 2026-09-26T14:31:01Z, job invoke-1790431902497-24868-9acea0ea, state done
 

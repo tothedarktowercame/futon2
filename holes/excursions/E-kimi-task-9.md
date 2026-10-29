@@ -1,4 +1,5 @@
 # E-kimi-task-9 — non-author warrants for the AR-42 commits (b6e8f76e, 61ab13eb)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Non-author test warrants test-registry-92a3cc0b and test-registry-7890d0cc registered for the AR-42 commits; both warrant ids are recorded in the PROOF-2 THEOREM draft and the registry's namespace ledger. Evidence: /home/joe/code/futon2/holes/labs/wm-contract/PROOF-2-THEOREM-draft-2026-09-24.md.
 
 **Requisition:** completed — 2026-09-25T01:09:27Z, job invoke-1790298043815-24081-9b3b89d0, state done
 

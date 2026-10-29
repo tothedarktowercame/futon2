@@ -1,4 +1,5 @@
 # E-kimi-task-83 — W9-1-LEAN: co-application kernel at C1's containment order (PROOF-2a <2>1d)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): New mathlib4 module CoApplicationAtMachine instantiating the co-application kernel at C1's containment order, committed as 0e976af61e and built (.olean present). Evidence: 0e976af61e, /home/joe/code/mathlib4/DarkTower/WarMachine/Proof2/CoApplicationAtMachine.lean.
 
 **Requisition:** completed — 2026-09-27T01:18:56Z, job invoke-1790471042966-25166-e4167552, state done
 

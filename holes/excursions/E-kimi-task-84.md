@@ -1,4 +1,5 @@
 # E-kimi-task-84 — G1-DEMOTIONS-D: what closes each edge the declaration rule demoted (PROOF-2a <2>1, discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): G1-DEMOTIONS-D packet delivered: cause and smallest closer for every edge the G1 declaration rule demoted, committed in futon2 (a590fe5c0) and on disk. Evidence: a590fe5c0, /home/joe/code/futon2/holes/labs/wm-contract/proof2/packets/G1-DEMOTIONS-D.md.
 
 **Requisition:** completed — 2026-09-27T01:32:22Z, job invoke-1790471807828-25177-9915ce56, state done
 

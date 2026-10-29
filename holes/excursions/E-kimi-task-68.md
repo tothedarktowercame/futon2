@@ -1,4 +1,5 @@
 # E-kimi-task-68 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 9 Habit (E), publish (8 wires)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane 9 Habit/publish wire tests (r10 publication-observed, r7-increment delta, r7-fold-call enactment-fold, wc wires) landed in futon3c's wire test suite. Evidence: 35b7e16db9e1470228b7e0fd71ddc82a04374775, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_r7_fold_call_enactment_fold_test.clj, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_r10_observe_publication_r0_test_publication_observed_test.clj.
 
 **Requisition:** completed — 2026-09-26T15:13:29Z, job invoke-1790433645709-24899-f0abd720, state done
 

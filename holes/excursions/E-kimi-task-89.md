@@ -1,4 +1,5 @@
 # E-kimi-task-89 — ITEM6-ADAPTER-I: seven-column accumulation BMR adapter + aggregate score receipt (PROOF-2a <1>2 item 6, prototype label)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): futon2.aif.accumulation-bmr implemented: the seven-column BMR adapter and aggregate score receipt, on disk in futon2 with warrant test-registry-4e9a3a07 recorded in the namespace ledger. Evidence: /home/joe/code/futon2/src/futon2/aif/accumulation_bmr.clj, /home/joe/code/futon3c/data/test-registry/namespace-ledger.edn.
 
 **Requisition:** completed — 2026-09-27T02:08:45Z, job invoke-1790474640347-25229-4ae210c4, state done
 

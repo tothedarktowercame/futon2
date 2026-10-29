@@ -1,4 +1,5 @@
 # E-kimi-task-64 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 10 Click, flight record (12 wires)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane 10 Click/flight-record wire tests (flight-cast, flight-click, flight-record-summary, flight-run) landed in futon3c's wire test suite. Evidence: c0558c7de1e7848e30d395d95cf5c7eb0f843ef4, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_flight_cast_click_start_author_test.clj, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_flight_run_flight_driver_summary_needs_test.clj.
 
 **Requisition:** completed — 2026-09-26T15:35:53Z, job invoke-1790433611740-24895-34c76f01, state failed
 

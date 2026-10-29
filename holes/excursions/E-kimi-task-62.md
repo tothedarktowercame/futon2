@@ -1,4 +1,5 @@
 # E-kimi-task-62 — Sidecar P6b RESUME: finish scope route wiring after RST_STREAM (futon1b)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): P6b resume completed the /api/alpha/scopes server wiring and its test, committed as 798f2db in futon1b. Evidence: 798f2db47dba531da5ef157944f0860fe2da4bb7, /home/joe/code/futon1b/test_scope_route.clj.
 
 **Requisition:** completed — 2026-09-26T14:21:43Z, job invoke-1790432303870-24876-517f0b39, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-63 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 7a Selection, decision, registry (12 wires)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane 7a Selection/decision/registry wire tests (c8-registry-get, r9-classify/decision/embedding/selection-law) landed in futon3c's wire test suite. Evidence: a9b31a729c7d9fff6a30c18f35a263e9edd33d7e, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_c8_registry_get_entry_message_test.clj, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_r9_selection_law_decision_per_policy_argmax_test.clj.
 
 **Requisition:** completed — 2026-09-26T15:35:46Z, job invoke-1790433603841-24894-184883b9, state failed
 

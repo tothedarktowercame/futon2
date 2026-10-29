@@ -1,4 +1,5 @@
 # E-kimi-task-88 — PROVER-CB-D: provenance through a collection callback for [R2 R6]/[R2 R4] interp (PROOF-2a <2>2b, discovery)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): PROVER-CB-D discovery packet delivered: the data path from interpretations to a candidate's :patterns through the mapv callback and the checked prover rules, committed in futon3c (fff484cb) and on disk. Evidence: fff484cb, /home/joe/code/futon3c/holes/labs/M-wm-wiring/PROVER-CB-D.md.
 
 **Requisition:** completed — 2026-09-27T02:06:12Z, job invoke-1790474125428-25223-392115a1, state done
 

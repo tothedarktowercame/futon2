@@ -1,4 +1,5 @@
 # E-kimi-task-69 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 8 Grain gate, enactment, W_c (7 wires)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Lane 8 Grain-gate/enactment/W_c wire tests (r0-enact-step attempts/grain-gate, r0-wc, r5-gate grain) landed in futon3c's wire test suite. Evidence: a55dbe2d17ea62ba321ccbe9199603e84dd6ff53, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_r0_wc_grain_gate_test.clj, /home/joe/code/futon3c/test/futon3c/diagramprover/wm_wire_r5_gate_grain_test.clj.
 
 **Requisition:** completed — 2026-09-26T15:15:20Z, job invoke-1790433652300-24900-d273d9ce, state done
 

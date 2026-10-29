@@ -1,4 +1,5 @@
 # E-kimi-task-90 — ITEM6-CONSUMER-I: declared proposal family + BMR score receipt computed from the published accumulation under the append lock, retained on every route (PROOF-2a <1>2 item 6, prototype label)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): ITEM6-CONSUMER-I scoring consumer implemented: proposal family declared in the registry and BMR receipt computed under the append lock in trace.clj, accepted by claude-8 with fixes at futon2 2eb713275. Evidence: 3ae54abe4, 2eb713275, /home/joe/code/futon2/src/futon2/aif/accumulation_bmr.clj.
 
 **Requisition:** completed — 2026-09-27T02:36:00Z, job invoke-1790475076712-25232-f599cd9e, state done
 

@@ -1,4 +1,5 @@
 # E-kimi-task-8 — test registry keeps a namespace-to-newest-run ledger at registration (AR-42 finding i)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): Namespace-to-newest-run ledger added to the futon3c test registry at registration so latest-run-for-namespace stops scanning; the ledger file exists in the codebase. Evidence: /home/joe/code/futon3c/data/test-registry/namespace-ledger.edn.
 
 **Requisition:** completed — 2026-09-25T01:17:50Z, job invoke-1790298042129-24080-a78a3d33, state done
 

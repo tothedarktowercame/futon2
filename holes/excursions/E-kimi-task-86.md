@@ -1,4 +1,5 @@
 # E-kimi-task-86 — P-inst-Q: the Lean consumer of [R4 R5] Q(o|pi) at the machine's rollout (PROOF-2a <2>1)
+**Status:** DONE — confirmed 2026-10-29 (Giraffe closing check): P-inst-Q Lean module (OutcomeRiskAtMachine) closing the [R4 R5] Q(o|pi) edge, committed as mathlib4 747d3e1e64 and built; the registry re-point was deliberately held pending, which is a separate packet, not this task's stated deliverable. Evidence: 747d3e1e64, /home/joe/code/mathlib4/DarkTower/WarMachine/Proof2/OutcomeRiskAtMachine.lean.
 
 **Requisition:** completed — 2026-09-27T02:01:27Z, job invoke-1790472791547-25195-3c441099, state done
 
