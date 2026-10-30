@@ -1,0 +1,16 @@
+{:schema :wm/meta-medic-genuine-repair-evaluation-v1
+ :intent-digest "dbbf5a99ebcfd9f9103f21ef456215d588bdca08772fae9f596b9ee11cc2a2d3"
+ :evaluator {:seat "claude-9" :session "d97917be-09d2-416a-95b3-4964f0b0562a"}
+ :acceptance-contract-pin
+ {:path "/home/joe/code/futon2/test/futon2/aif/wm/injury41_function_repair_test.clj"
+  :sha256 "8f6990e647da34fd64dd122d6ca9e42ac8efc33bba1578efbe2569eabadfb3c4"}
+ :pre-replay-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/pre-replay.edn"
+  :sha256 "afbf9898fed221b5ec17ee5fe18ce4b5c8c8509a36ce12673805bf3eb0d8cd56"}
+ :post-replay-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/post-replay.edn"
+  :sha256 "a1845d9cd0aeb64b611a1e4359f17ebaf58f8c1bd2c26bf6133284b70adcc60b"}
+ :negative-control-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/negative-replay.edn"
+  :sha256 "9553109a1d9c021439943c92336f1cdb84ce679bed11a506995ef961aaec4f0d"}
+ :verdict :original-acceptance-repaired}

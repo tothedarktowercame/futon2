@@ -1,0 +1,30 @@
+{:schema :wm/meta-medic-authority-v1,
+ :not-a-cryptographic-attestation true,
+ :review-pin
+ {:path
+  "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/qualification-review.edn",
+  :sha256
+  "8f0492304fd16a07eb6fdc2c549c1d442a700710c2e2effd33df9a26e11909d8"},
+ :scope :entry-47-historical-misclassification,
+ :intent-digest
+ "ef96364cac60092d3be45512064d1f35121a9cf565f64af7b156a388408f05cf",
+ :evaluation-pin
+ {:path
+  "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/evaluation-receipt.edn",
+  :sha256
+  "98017c7cb505ae0dccb53f693c166fb4253d9d8c5a411417cac5108a9d0fab78"},
+ :authority-basis
+ {:operator
+  "Joe, 2026-10-25 ~13:27Z: activate that code and get the historical blocking injuries cleared by Agency helpers",
+  :instruction-job "invoke-1792935365143-3571-9dddf9c1",
+  :subsequent-ruling
+  "2026-10-26: no click while known injured; observational defects, Lean model and Clojure repairs first",
+  :coordinator-record
+  {:path
+   "/home/joe/notes/wm-next/offline-repair/authority/47-adoption/coordinator-authorization.md",
+   :sha256
+   "3671177013feac12215cd94668c20be706d16b867e1dae26a0fe8151ba1215fb"},
+  :coordinator-recorded-at "2026-10-26 17:38:44 UTC"},
+ :verdict :qualified,
+ :authorizer
+ {:seat "codex-11", :session "01a16136-8ec4-7972-8723-f8afda943b96"}}

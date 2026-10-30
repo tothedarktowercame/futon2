@@ -1,0 +1,5 @@
+{:schema :wm/meta-medic-genuine-repair-review-v1
+ :intent-digest "3eede72bb23c11c8752bfbbd092a0ffbfe043ece0274d465cd3dbca1f14a8d85"
+ :evaluation-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/evaluation-receipt.edn", :sha256 "00fdce5f803b7453c348c487d7f522264e558d2565daafc685bbfeb6cce54163"}
+ :reviewer {:seat "claude-9", :session "d97917be-09d2-416a-95b3-4964f0b0562a"}
+ :verdict :genuine-repair-qualified}

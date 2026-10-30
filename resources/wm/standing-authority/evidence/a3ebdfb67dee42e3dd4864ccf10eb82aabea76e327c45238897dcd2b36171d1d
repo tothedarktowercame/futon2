@@ -1,0 +1,7 @@
+{:schema :wm/meta-medic-genuine-repair-authority-v1
+ :intent-digest "c311e9f0defb09dfb3b103af31c9f0b8f4f7220a8dcc3b4a81dc97d56568e424"
+ :evaluation-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/evaluation-receipt.edn" :sha256 "c98cfc2d98f140e7659823f83c0b1ed8e67818576e179a7b331c22842d3eee63"}
+ :review-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/review-receipt.edn" :sha256 "efddc475240730aeb4113d113277dbeef5691569a4d40b840e6511df81767563"}
+ :scope :04-selected-want-identity-propagation-only
+ :authorizer {:seat "codex-11" :session "01a16136-8ec4-7972-8723-f8afda943b96"}
+ :verdict :qualified}

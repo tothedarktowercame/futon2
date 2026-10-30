@@ -1,0 +1,17 @@
+{:schema :wm/meta-medic-genuine-repair-evaluation-v1
+ :intent-digest "c1fc78cd262741589517d713d65d0bf8c709d7979db36a625addfacb86da962b"
+ :evaluator
+ {:seat "codex-12" :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}
+ :acceptance-contract-pin
+ {:path "/home/joe/code/futon2/test/futon2/aif/meta_selection_retention_acceptance_test.clj"
+  :sha256 "5f62bee17c05fc5b0388800ebd6c799d12e0f42bc6cbd41f6e7e23680a81a542"}
+ :pre-replay-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/pre-replay.edn"
+  :sha256 "c5d364e1e980a6d281065ec103873d53d5ab9fa0b7f95493a7aa680db9fe2fc1"}
+ :post-replay-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/post-replay.edn"
+  :sha256 "52714a9e251ee1f493f39c6096156a2e74ec38ed96e23029e150b6b3a50a6e78"}
+ :negative-control-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/negative-replay.edn"
+  :sha256 "fd6683b7c6b5a6a53ae450f3fd2052fb9a15293d45b032f9b1ad94d75be8b103"}
+ :verdict :original-acceptance-repaired}

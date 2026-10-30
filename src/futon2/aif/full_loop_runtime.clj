@@ -17,8 +17,8 @@
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.meta-injury-store :as injury-store]
             [futon2.aif.meta-medic-authority :as medic-authority]
+            [futon2.aif.standing-authority :as standing]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
-            [futon2.aif.out-of-band-fix :as out-of-band]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
@@ -121,8 +121,7 @@
          :verifier (medic-authority/resolution-verifier (:resolution resolved))}
         resolved))
 
-    :else {:status :absent
-           :verifier out-of-band/retained-checked-medic-authority}))
+    :else (standing/standing-resolution)))
 
 (defn- valid-click-availability? [availability]
   (and (= :wm/ordinary-click-availability-v1 (:schema availability))

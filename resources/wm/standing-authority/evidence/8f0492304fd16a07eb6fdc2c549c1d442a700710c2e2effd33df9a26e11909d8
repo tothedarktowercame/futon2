@@ -1,0 +1,80 @@
+{:schema :wm/meta-medic-qualification-review-v1,
+ :exit 0,
+ :limitations
+ [:classification-finding-is-over-reconstructed-record
+  :original-record-still-classifies-as-injury
+  :author-response-bound-by-reviewed-retained-agency-capture
+  :attributable-retry-history-is-synthetic
+  :referenced-controls-not-rerun
+  :not-live-clearance-authorization
+  :not-fresh-ledger-validation
+  :roster-identity-not-cryptographic-attestation],
+ :scope :retained-historical-occurrence-only,
+ :intent-digest
+ "ef96364cac60092d3be45512064d1f35121a9cf565f64af7b156a388408f05cf",
+ :source-revision "807183b388b70340a04054696d7d34165677f081",
+ :evaluation-pin
+ {:path
+  "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/evaluation-receipt.edn",
+  :sha256
+  "98017c7cb505ae0dccb53f693c166fb4253d9d8c5a411417cac5108a9d0fab78"},
+ :reviewed-at "2026-10-26 17:32:46 UTC",
+ :verdict :historical-misclassification-qualified,
+ :evidence-mode
+ {:producer-replay :independently-rerun,
+  :empty-history :independently-rerun,
+  :done-at-base
+  {:mode :prior-reviewed-hash-verified,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/referenced-evidence-green.log",
+    :sha256
+    "5e071f6cef89c015c405037e699cc0da6a1a91fa5a090f771558cbbbc858c7dc"},
+   :deftests [unsupported-refusal-and-stale-done-remain-injuries]},
+  :attributable-retry :independently-rerun,
+  :classification :independently-rerun,
+  :qualifier-removal
+  {:mode :prior-reviewed-hash-verified,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/referenced-evidence-green.log",
+    :sha256
+    "5e071f6cef89c015c405037e699cc0da6a1a91fa5a090f771558cbbbc858c7dc"},
+   :deftests [non-already-card-does-not-enter-the-proof-ref-branch]},
+  :guard-removal
+  {:mode :prior-reviewed-hash-verified,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/referenced-evidence-green.log",
+    :sha256
+    "5e071f6cef89c015c405037e699cc0da6a1a91fa5a090f771558cbbbc858c7dc"},
+   :deftests
+   [unknown-card-proof-ref-remains-invalid
+    an-extracted-unknown-sha-does-not-fall-through-to-proof-ref]},
+  :unsupported-refusal
+  {:mode :prior-reviewed-hash-verified,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/referenced-evidence-green.log",
+    :sha256
+    "5e071f6cef89c015c405037e699cc0da6a1a91fa5a090f771558cbbbc858c7dc"},
+   :deftests [unsupported-refusal-and-stale-done-remain-injuries]},
+  :author-response-binding
+  {:mode :independently-rerun,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/coordinator-binding-output.edn",
+    :sha256
+    "092ba33bc2135e16c42a4efab1e6f9b704a6dc4cfd528c039e864c2e668b6859"},
+   :execution :retained-independent-first-pass}},
+ :output-pin
+ {:path
+  "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/coordinator-replay.edn",
+  :sha256
+  "3083fe079fd30eff21707a481b4e549c1de4dc40bdb6a363ffd650651c600c71"},
+ :independent-command
+ ["clojure"
+  "-M"
+  "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/evaluate.clj"],
+ :reviewer
+ {:seat "codex-11", :session "01a16136-8ec4-7972-8723-f8afda943b96"}}

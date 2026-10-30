@@ -1,0 +1,13 @@
+{:schema :wm/meta-medic-qualification-review-v1
+ :intent-digest "4c48601953083b0985982d817bd2de381fd16306247d9f200584a282882f6b96"
+ :evaluation-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/evaluation-receipt.edn" :sha256 "32edf04ddffe3296b7993333f36c9e120a1c9f9ca52d799350d3f906eace7385"}
+ :reviewer {:seat "codex-11" :session "01a16136-8ec4-7972-8723-f8afda943b96"}
+ :verdict :historical-misclassification-qualified
+ :reviewed-at "2026-10-25 00:33:11 UTC"
+ :scope :retained-historical-occurrence-only
+ :source-revision "7e19d0b19f48bb562e7b9273a863b5cfb20cf1c2"
+ :independent-command ["clojure" "-M" "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/evaluate.clj"]
+ :exit 0
+ :output-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/coordinator-replay.edn" :sha256 "fd4a8bf657e09e7d741d76d0a6792b756548144a490eecd37ff4277872fea489"}
+ :evidence-mode {:classification :independently-rerun :empty-history :independently-rerun :attributable-retry :independently-rerun :negative-controls :prior-reviewed-hash-verified}
+ :limitations [:not-live-clearance-authorization :not-fresh-ledger-validation :trusted-principal-adapter-not-implemented]}

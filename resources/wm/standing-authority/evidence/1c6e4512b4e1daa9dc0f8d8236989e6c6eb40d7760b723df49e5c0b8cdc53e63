@@ -1,0 +1,7 @@
+{:schema :wm/meta-medic-genuine-repair-authority-v1
+ :intent-digest "1e23232ee4999e952a32790238e115dc4e87960af4886a0c5bc5aae83e2ee410"
+ :evaluation-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/evaluation-receipt.edn" :sha256 "2022c2d977df6aa548a5fd32a556b9b98efdc77aa8f36ff9cbb8d7ab2f81ee99"}
+ :review-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/review-receipt.edn" :sha256 "0f57cc576c119689fc9268627f3dc3998f3c71b50cf6b126a36f251b99d02006"}
+ :scope :940-typed-cascade-resume-error-held-state-retention-only
+ :authorizer {:seat "codex-11" :session "01a16136-8ec4-7972-8723-f8afda943b96"}
+ :verdict :qualified}

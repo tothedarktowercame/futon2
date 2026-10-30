@@ -1,0 +1,84 @@
+{:schema :wm/meta-medic-evaluation-v1
+ :status :evaluated
+ :intent-digest "ef96364cac60092d3be45512064d1f35121a9cf565f64af7b156a388408f05cf"
+ :evaluator {:seat "codex-12" :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}
+ :agency-job "invoke-1793034125044-4325-ef56c3fc"
+ :source {:repository "/home/joe/code/futon2"
+          :classifier-revision "807183b388b70340a04054696d7d34165677f081"
+          :patch-provenance "097fd9f4c73edc8d8fe324b5d29bc4183c635f19"}
+ :inputs
+ {:original-record
+  {:retained-path "authority/47-evaluation/original-record.edn"
+   :source-path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-f444287e-51e6-445b-a85d-25d45cc52a43.edn"
+   :sha256 "d36c4a643d642f257cf04e5c99be0c0cd75fb59718ad1c5cb3c44745c64168bf"}
+  :reconstructed-record
+  {:path "authority/47-evaluation/reconstructed-record.edn"
+   :sha256 "cf18d93bf005498bb7d6f0d183eed5baf3a47be129dc084742826ea820954f05"}
+  :ledger-snapshot
+  {:path "authority/47-evaluation/ledger-snapshot.edn"
+   :file-sha256 "ea57776b995fe50279979dedc12b8988ff562daa9fe39967e0d6f9f50a64ea55"
+   :ledger-root "1ce6e7dc3e895e545bdf1d51a71885c9399ab4fe7301297f76b23e913a10e270"}
+  :contract
+  {:path "holes/labs/wm-contract/already-satisfied-terminal-classification-invariant.md"
+   :sha256 "7b8788e96ff60cfd1138a5c641ec148d0defd17cf1f3b9a96e3c021552f7b63d"}
+  :author-response
+  {:result {:path "authority/47-evaluation/author-result.txt"
+            :sha256 "af4cc4f5ba4d2f901edaef96d0559b9b6749207f20f8328c4e87aaba409ee413"}
+   :retained-job {:path "authority/47-evaluation/author-job-retained.json"
+                  :sha256 "c1acbc5e85804519274c601afddddca9f424d66e32884b41cbede54ca7c390ce"}
+   :live-capture {:path "authority/47-evaluation/author-job-live-capture.json"
+                  :sha256 "616aa4e1306882d9e68f37627b599da56256bf7015d472b1a5b43fb27c9b0554"}
+   :binding {:path "authority/47-evaluation/author-result-binding.md"
+             :sha256 "16c13cb4eac2b13b60a69d943d9720db5bea2004c5407f6b071430293cfc0e65"}
+   :binding-script {:path "authority/47-evaluation/binding.clj"
+                    :sha256 "b5aaf24b2ee9f945f378cdd3494717bcb3e5e45ca93161405bb12c55f66cb815"}
+   :binding-rerun {:path "authority/47-evaluation/binding-rerun-output.edn"
+                   :sha256 "092ba33bc2135e16c42a4efab1e6f9b704a6dc4cfd528c039e864c2e668b6859"}}}
+ :command ["clojure" "-M"
+           "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/evaluate.clj"]
+ :command-exit 0
+ :replay-output-pin
+ {:path "authority/47-evaluation/replay-output.edn"
+  :sha256 "3083fe079fd30eff21707a481b4e549c1de4dc40bdb6a363ffd650651c600c71"}
+ :findings
+ {:classification :producer-qualified-already-satisfied
+  :empty-history :no-injury
+  :attributable-retry :retry-inconclusive
+  :unsupported-refusal :injury
+  :done-at-base :injury
+  :guard-removal :rejected
+  :qualifier-removal :rejected}
+ :finding-evidence
+ {:rerun [:classification :empty-history :attributable-retry]
+  :referenced
+  {:unsupported-refusal-and-done-at-base
+   {:path "authority/47-evaluation/referenced-evidence-green.log"
+    :sha256 "5e071f6cef89c015c405037e699cc0da6a1a91fa5a090f771558cbbbc858c7dc"
+    :deftest unsupported-refusal-and-stale-done-remain-injuries}
+   :guard-removal
+   {:path "authority/47-evaluation/referenced-evidence-green.log"
+    :sha256 "5e071f6cef89c015c405037e699cc0da6a1a91fa5a090f771558cbbbc858c7dc"
+    :deftests [unknown-card-proof-ref-remains-invalid
+               an-extracted-unknown-sha-does-not-fall-through-to-proof-ref]}
+   :qualifier-removal
+   {:path "authority/47-evaluation/referenced-evidence-green.log"
+    :sha256 "5e071f6cef89c015c405037e699cc0da6a1a91fa5a090f771558cbbbc858c7dc"
+    :deftest non-already-card-does-not-enter-the-proof-ref-branch}}
+  :producer-replay
+  {:reconstructed-record
+   {:path "authority/47-evaluation/reconstructed-record.edn"
+    :sha256 "cf18d93bf005498bb7d6f0d183eed5baf3a47be129dc084742826ea820954f05"}
+   :script {:path "authority/47-evaluation/evaluate.clj"
+            :sha256 "c62e562784b89c6ead463d499ff8eefeccf7bd25da894e77dc8a603d57541fec"}
+   :pre-repair-red {:path "authority/47-evaluation/producer-replay-red.log"
+                    :sha256 "ca2234b1a8293c4e546736804805c803bbaea07ef55a026c9fadce2c75867a67"}}}
+ :limitations
+ [:author-response-bound-by-reviewed-retained-agency-capture
+  :classification-finding-is-over-reconstructed-record
+  :original-record-still-classifies-as-injury
+  :evaluator-trust-adapter-absent
+  :review-receipt-absent
+  :reviewer-trust-attestation-absent
+  :authorization-receipt-absent
+  :authorizer-trust-attestation-absent
+  :final-operation-not-constructed]}

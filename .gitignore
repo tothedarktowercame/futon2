@@ -49,6 +49,7 @@ resources/wm/*
 !resources/wm/approved-algorithms.edn
 !resources/wm/outer-learning-authority.edn
 !resources/wm/cascade-sources/
+!resources/wm/standing-authority/
 # PROOF-wm-works 1.2 2.3 (2026-09-22, zai-1): completion-evidence resources for
 # the repair-ticket candidates. C3 locators read git at a commit; without these
 # whitelists the produced tokens could never be observed true (data/* and

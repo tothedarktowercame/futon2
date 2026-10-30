@@ -1,0 +1,50 @@
+{:schema :wm/meta-medic-evaluation-v1
+ :status :evaluated
+ :intent-digest "4c48601953083b0985982d817bd2de381fd16306247d9f200584a282882f6b96"
+ :evaluator {:seat "codex-12" :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}
+ :agency-job "invoke-1792888253336-3421-4a0aabe8"
+ :source {:repository "/home/joe/code/futon2"
+          :classifier-revision "7e19d0b19f48bb562e7b9273a863b5cfb20cf1c2"
+          :patch-provenance "36afa9142331fbe99eb99b67ae510322ca543f0c"}
+ :inputs
+ {:original-record {:retained-path "authority/a9-evaluation/original-record.edn"
+                    :source-path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-d0608eec-cca3-45de-9c19-14d6db26577d.edn"
+                    :sha256 "6ca9604a70652c6dfb27c834248e5c875816540c285278f5c3918347e8fe9715"}
+  :ledger-snapshot {:path "backlog-triage/snapshots/ledger.edn"
+                    :file-sha256 "7c15670ec8d1e1f08876cff8bfba70eb8edce1728eb438767719663f41f6d0e1"
+                    :ledger-root "bdb8f7289f527fc29656048ebdefcd49dba17d0ef0963d749ad649db2ead163c"}
+  :contract {:path "holes/labs/wm-contract/already-satisfied-terminal-classification-invariant.md"
+             :sha256 "7b8788e96ff60cfd1138a5c641ec148d0defd17cf1f3b9a96e3c021552f7b63d"}}
+ :command ["clojure" "-M"
+           "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/evaluate.clj"]
+ :command-exit 0
+ :replay-output-pin {:path "authority/a9-evaluation/replay-output.edn"
+                     :sha256 "fd4a8bf657e09e7d741d76d0a6792b756548144a490eecd37ff4277872fea489"}
+ :findings
+ {:classification :producer-qualified-already-satisfied
+  :empty-history :no-injury
+  :attributable-retry :retry-inconclusive
+  :unsupported-refusal :injury
+  :done-at-base :injury
+  :guard-removal :rejected
+  :qualifier-removal :rejected}
+ :finding-evidence
+ {:rerun [:classification :empty-history :attributable-retry]
+  :referenced
+  {:unsupported-refusal-and-done-at-base
+   {:path "backlog-triage/classification-restored-green.log"
+    :sha256 "77c66496ea72d90b9016a0c7008176f2da30323184ae0511f4211b01e83f81a4"}
+   :guard-removal
+   {:path "backlog-triage/classification-mutation-red.log"
+    :sha256 "b9d9ec1d3f11ddaac5b61c3bdc3aa93034bb18ce6fa2d81928a2a736cb6974d7"}
+   :qualifier-removal
+   {:path "backlog-triage/coordinator-qualifiers.log"
+    :sha256 "6a02e150ba6420d93d622c1b2e5350277a4a2bb5054f4480d58ec05c94c76f97"}}}
+ :limitations
+ [:historical-ledger-root-not-fresh-for-adoption
+  :evaluator-trust-adapter-absent
+  :review-receipt-absent
+  :reviewer-trust-attestation-absent
+  :authorization-receipt-absent
+  :authorizer-trust-attestation-absent
+  :final-operation-not-constructed]}

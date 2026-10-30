@@ -1,0 +1,1 @@
+{:schema :wm/meta-medic-genuine-repair-replay-v1, :acceptance-contract-pin {:path "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/acceptance-contract.md", :sha256 "2803377d18f4d1826b6d2dc041cc433607068dff187e0cf35d4bea7f83495d00"}, :phase :post, :verdict :original-contract-repaired}

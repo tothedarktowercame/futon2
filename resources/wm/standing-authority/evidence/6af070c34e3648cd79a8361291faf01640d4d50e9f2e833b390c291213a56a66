@@ -1,0 +1,79 @@
+{:schema :wm/meta-medic-qualification-review-v1,
+ :exit 0,
+ :limitations
+ [:not-live-clearance-authorization
+  :not-fresh-ledger-validation
+  :seven-retained-medic-observations-authority-not-verified
+  :structural-ledger-validation-used-constantly-true-callback
+  :attributable-retry-history-is-synthetic
+  :referenced-controls-not-rerun
+  :reviewer-identity-from-session-environment-not-cryptographic-attestation],
+ :scope :retained-historical-occurrence-only,
+ :intent-digest
+ "fa8d1cdd86886a58c67593fdd8bad220409ed72fa395140bd607f202bd197644",
+ :source-revision "7c4b83ff2887d03519d127c9a67e3b3517a64936",
+ :evaluation-pin
+ {:path
+  "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/evaluation-receipt.edn",
+  :sha256
+  "91e0b60aa8ec982df2b37ef14e69eabed6140a8430a4c85459ace4f4c858da5c"},
+ :reviewed-at "2026-10-26 14:51:16 UTC",
+ :verdict :historical-misclassification-qualified,
+ :evidence-mode
+ {:classification :independently-rerun,
+  :empty-history :independently-rerun,
+  :attributable-retry :independently-rerun,
+  :unsupported-refusal
+  {:mode :prior-reviewed-hash-verified,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/unsupported-and-done-at-base-green.log",
+    :sha256
+    "84b9fdfd036d4e55c036a4088cccae761bc15d792b7ace3653451c6127c15029"}},
+  :done-at-base
+  {:mode :prior-reviewed-hash-verified,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/unsupported-and-done-at-base-green.log",
+    :sha256
+    "84b9fdfd036d4e55c036a4088cccae761bc15d792b7ace3653451c6127c15029"}},
+  :image-removal
+  {:mode :prior-reviewed-hash-verified,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/image-removal-red.log",
+    :sha256
+    "66fd5dc533e9ce1b32045bb400b59abee930b0644f245c0d6bec169f81e6c0b5"}},
+  :failure-present
+  {:mode :prior-reviewed-hash-verified,
+   :pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/review-failure-present-deftest.log",
+    :sha256
+    "df3bf7df7ec9204aedb4fbd78630902fd38b8ee92cd9b808163976cf5debae10"},
+   :deftest successful-image-with-failure-present-remains-an-injury,
+   :source-revision "19703e187378d0e6d7e65531593665fc48406058",
+   :warrant
+   "test-registry-94605ca0d4a697069ce77ac7d962bb4c8545f8b981a4c9e3de299c51e5ca3fe0",
+   :warrant-payload-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/coordinator-corrected-warrant.edn",
+    :sha256
+    "94605ca0d4a697069ce77ac7d962bb4c8545f8b981a4c9e3de299c51e5ca3fe0"},
+   :registry-log-pin
+   {:ledger "/home/joe/code/storage/registry-ledger",
+    :path
+    "/home/joe/code/storage/test-registry/futon2-suite/futon2.aif.meta-terminal-injury-test/20261026T144536Z/8c87bb8d-ed54-4040-92ea-4dcfcdf9ff85.log",
+    :sha256
+    "8865099fe8b54eed69de61874521aab4dea70b8fbc5baa1a86589d65a2dcd25d"}}},
+ :output-pin
+ {:path
+  "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/coordinator-replay.edn",
+  :sha256
+  "98ac233fb740943fb6f47d7a75d24325f7519c41654c425667a65460de4f98e3"},
+ :independent-command
+ ["clojure"
+  "-M"
+  "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/evaluate.clj"],
+ :reviewer
+ {:seat "codex-11", :session "01a16136-8ec4-7972-8723-f8afda943b96"}}

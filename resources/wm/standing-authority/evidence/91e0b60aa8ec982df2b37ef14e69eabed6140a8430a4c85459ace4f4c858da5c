@@ -1,0 +1,61 @@
+{:schema :wm/meta-medic-evaluation-v1
+ :status :evaluated
+ :intent-digest "fa8d1cdd86886a58c67593fdd8bad220409ed72fa395140bd607f202bd197644"
+ :evaluator {:seat "codex-12" :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}
+ :agency-job "invoke-1793025350237-4291-e630cc46"
+ :source {:repository "/home/joe/code/futon2"
+          :classifier-revision "7c4b83ff2887d03519d127c9a67e3b3517a64936"
+          :patch-provenance "aa8bf5ed5e38bdc8e097d41f8aac40e5ac049192"}
+ :inputs
+ {:original-record
+  {:retained-path "authority/45-evaluation/original-record.edn"
+   :source-path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-8be8ff03-5009-4f3d-8c12-5b11cfd46d92.edn"
+   :sha256 "e9a5eb355f9a6f70b41d5bdbd99e127badcd6d13e6bd7165867fa2bb9477f404"}
+  :ledger-snapshot
+  {:path "authority/45-evaluation/ledger-snapshot.edn"
+   :file-sha256 "4afd33d7a461aa100a89af90f94f87c04660a99623f7d71f030c6c4fc44e56c4"
+   :ledger-root "8a76b61bfa2ba5021d2e25c3049bd72ecd3d2f565b62f6b3c39b14240897b4fc"}
+  :contract
+  {:path "holes/labs/wm-contract/successful-close-terminal-classification-invariant.md"
+   :sha256 "ad70d6986ebec90b706523092a02e68ead7e66f10c6c2674f3d10b1159064e40"}}
+ :command ["clojure" "-M"
+           "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/evaluate.clj"]
+ :command-exit 0
+ :replay-output-pin
+ {:path "authority/45-evaluation/replay-output.edn"
+  :sha256 "98ac233fb740943fb6f47d7a75d24325f7519c41654c425667a65460de4f98e3"}
+ :findings
+ {:classification :successful-task-outcome
+  :empty-history :no-injury
+  :attributable-retry :discharged
+  :unsupported-refusal :injury
+  :done-at-base :injury
+  :image-removal :injury
+  :failure-present :injury}
+ :finding-evidence
+ {:rerun [:classification :empty-history :attributable-retry]
+  :referenced
+  {:unsupported-refusal-and-done-at-base
+   {:path "authority/45-evaluation/unsupported-and-done-at-base-green.log"
+    :sha256 "84b9fdfd036d4e55c036a4088cccae761bc15d792b7ace3653451c6127c15029"
+    :deftest unsupported-refusal-and-stale-done-remain-injuries}
+   :failure-present
+   {:warrant "test-registry-465a3c3ad1aa8f0373a48c4f6ffb4fbec397b3bb355335f3863980db82195641"
+    :path "authority/45-evaluation/failure-present-green.log"
+    :sha256 "c9bcc430509ffa9f5b15f2dec42e093e3be87510d3df98cad55fab9932bd0712"
+    :deftest successful-close-images-are-non-injuries}
+   :image-removal
+   {:revision "dfd250115"
+    :path "authority/45-evaluation/image-removal-red.log"
+    :sha256 "66fd5dc533e9ce1b32045bb400b59abee930b0644f245c0d6bec169f81e6c0b5"
+    :deftest successful-close-images-are-non-injuries
+    :failures 3
+    :outcomes [:grounded-progress :already-satisfied :grounded-no-change]}}}
+ :limitations
+ [:structural-ledger-validation-used-supplied-nonauthorizing-callback
+  :evaluator-trust-adapter-absent
+  :review-receipt-absent
+  :reviewer-trust-attestation-absent
+  :authorization-receipt-absent
+  :authorizer-trust-attestation-absent
+  :final-operation-not-constructed]}
