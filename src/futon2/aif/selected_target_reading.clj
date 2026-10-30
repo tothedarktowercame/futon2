@@ -5,6 +5,7 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.handoff-contract :as handoff]
+            [futon2.aif.pinned-file-delivery :as delivery]
             [futon2.aif.analysis-cascade :as analysis-cascade]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.target-reading-registry :as registry]))
@@ -238,7 +239,7 @@
 (defn prompt
   "Prompt for the designated author.  The reply is analysis JSON only; the
   machine, not the seat, validates and publishes it."
-  [{:keys [request acceptance-contract validation-feedback prior-analysis format-correction]}]
+  [{:keys [request acceptance-contract validation-feedback prior-analysis format-correction analysis-output-path]}]
   (str "Produce one session_turn_analysis analysis for this immutable request. "
        "Quote every fragment and display cue exactly, including punctuation and "
        "whitespace. The machine derives Unicode-codepoint offsets from each quote "
@@ -250,12 +251,19 @@
        "a non-empty pattern_refs array; each reference is an object with id, rationale, "
        "status='candidate', and source_sha256. Use only actual patterns under "
        "/home/joe/code/futon3/library. Do not publish it and do not change repositories. "
-       "Reply with exactly one JSON object in the analysis-input shape accepted by "
+       (when analysis-output-path
+         (str "Write the complete analysis JSON to " analysis-output-path
+              ". Reply only with {\"path\":\"" analysis-output-path
+              "\",\"sha256\":\"<SHA-256 of the file bytes>\"}. "
+              "The file must stay inside this request directory. Do not paste a large analysis into the reply. "
+              "Small inline analysis objects remain accepted. "
+              "The acceptance contract below describes the file contents, not the path/sha256 reply envelope. "))
+       "The analysis must have the analysis-input shape accepted by "
        "/home/joe/code/futon3c/scripts/session_turn_analysis.py complete.\n\n"
        (when format-correction
          (str "No JSON object was found in your preceding response. Parser error: "
               (:parser-error format-correction)
-              ". Return exactly one JSON object in the analysis-input shape below, "
+              ". Correct the file descriptor or return exactly one small analysis JSON object, "
               "with labeller and sentences (id, fragments, unresolved_reason), "
               "not a plan or commentary. This is the only format correction.\n\n"))
        (when validation-feedback
@@ -344,17 +352,33 @@
               :else
               (let [issued {:target (:target need) :kind :selected-target-reading
                             :request-id request-sha :request request :author author
-                            :acceptance-contract acceptance-contract}
+                            :acceptance-contract acceptance-contract
+                            :analysis-output-path (str (io/file (.getParentFile request-file) "authored-analysis.json"))}
+                    delivery-error (atom nil)
+                    delivery-pin (atom nil)
                     decode (fn [raw]
-                             (cond
-                               (map? (:analysis raw)) (:analysis raw)
-                               (map? raw) raw
-                               :else (analysis-string raw)))
+                             (reset! delivery-error nil)
+                             (reset! delivery-pin nil)
+                             (let [value (if (map? raw) raw (analysis-string raw))]
+                               (if (and (map? value) (or (contains? value :path)
+                                                        (contains? value :sha256)))
+                                 (let [file (delivery/contained-file
+                                             (str (.getParentFile request-file)) (:path value))
+                                       result (if file (delivery/read-file file (:sha256 value))
+                                                  {:status :refused :reason :path-outside-request})]
+                                   (if (= :file (:status result))
+                                     (let [analysis (analysis-string (:text result))]
+                                       (if analysis (do (reset! delivery-pin (:pin result)) analysis)
+                                           (do (reset! delivery-error {:reason :file-json-invalid}) nil)))
+                                     (do (reset! delivery-error (dissoc result :text)) nil)))
+                                 (or (:analysis value) value))))
                     contact (fn [issued]
                               (handoff/exchange {:contact answer-fn :request issued
                                                  :decode decode}))
                     formatted (handoff/contact-with-format-correction
                                {:contact answer-fn :request issued
+                                :parse-error #(if @delivery-error (pr-str @delivery-error)
+                                                  (handoff/response-parse-error %))
                                 :decode #(decode (if (and (map? %) (nil? (:state %))) %
                                                     (handoff/response-payload %)))})
                     _ (doseq [[n response] (map-indexed vector (:responses formatted))]
@@ -376,6 +400,7 @@
                              :else :selected-target-reading-answer-invalid)
                            {:author author :contacted? (:contacted? exchange)
                             :format-correction (:format-correction formatted)
+                            :file-delivery-error @delivery-error
                             :reader-job-ids (mapv :job-id (:responses formatted))
                             :response-pins
                             (mapv (fn [n]
@@ -511,6 +536,7 @@
                            :request-file (.getPath request-file)
                            :request-sha256 request-sha
                            :analysis-digest (:analysis-digest publication)
+                           :analysis-source-pin @delivery-pin
                            :job-id (:job-id exchange)
                            :format-correction (:format-correction formatted)
                            :reader-job-ids (mapv :job-id (:responses formatted))
