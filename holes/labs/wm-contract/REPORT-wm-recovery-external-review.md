@@ -83,3 +83,7 @@ Please prioritize a bounded recovery recommendation. Reporting polish, Q9 export
 This report and its JSON inventory are Git-tracked. Raw ledger snapshots, process-local probe outputs, and many retained bundles currently live in local notes/data; their absence from an external checkout is a known reproducibility limitation, not proof they validate. The recovery branch must package the necessary pinned evidence or provide a supported reproducible fixture before claiming external reproduction. Do not copy admin tokens, session files, or unrelated private logs into review artifacts.
 
 The committed tracker is authoritative; supplementary notes are not a replacement. Six closed rows are listed in the companion JSON. Q1 equality is snapshot-specific; standing algorithm A entries and broad live A4/B1 claims are not implied by 608/608 M/E/T coverage.
+
+### Inventory validation correction
+
+The first handoff copied some incomplete/inexact SHA strings from the local decision report. The companion JSON now preserves those reported strings and supplies independently recomputed SHA-256 values for all eleven retained authorization files. Its correction list names each discrepancy. This establishes file-byte hashes, not independent agreement with the ledger pins; an external review must not conflate those checks. The initial validation failure did not stop the first documentation push; this forward correction preserves that history.

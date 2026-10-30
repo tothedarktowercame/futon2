@@ -45,7 +45,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/a9-adoption/authorization-receipt.edn",
         "sha256": "e828f719f9841dac0e26093437f79a9a6f0f601619acb554670b8f4e9e96afec",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "e828f719f9841dac0e26093437f79a9a6f0f601619acb554670b8f4e9e96afec",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "authority-basis cites Joe 2026-10-25 ~13:27Z instruction + coordinator-record /home/joe/notes/wm-next/offline-repair/current-clearance/coordinator-authorization.md sha 4543b0af4a2dcd6b574fa17e42f9f099a52b49760f803175dae12e9b18b06b4 (byte-verified today) + instruction-job invoke-1792935365143-3571-9dddf9c1",
       "operation-id": "4f6885fd88c0b04ae48997ec1be03844b5a4d7e4c9b39d3e153e82d47e2a8607",
@@ -66,7 +69,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/authorization-receipt.edn",
         "sha256": "1b27528db09a83bdae7bb48100b31fecdbd661e13b06a653b593315df375a0b4",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "1b27528db09a83bdae7bb48100b31fecdbd661e13b06a653b593315df375a0b4",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "no embedded authority-basis; chain = dir coordinator-authorization.md/coordinator-*-review.md + dispatch logs",
       "operation-id": "de442c15cb41a64e9e2de4409f82a93e7b388f9aedb4f02a5ae0ed2cc03fd6ed",
@@ -86,7 +92,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/authorization-receipt.edn",
         "sha256": "1c6e4512b4e1daa9dc0f8d8236989e6c6eb40d7760b723df49e5c0b8cdc53e63",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "1c6e4512b4e1daa9dc0f8d8236989e6c6eb40d7760b723df49e5c0b8cdc53e63",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "same dir-level chain, no embedded basis",
       "operation-id": "1f9072128905fb34381a360edb5665cdf6ac14b848a235ddda412b47781647e4",
@@ -106,7 +115,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/authorization-receipt.edn",
         "sha256": "a3ebdfb67dee42e3dd4864ccf10eb82aabea76e327c45238897dcd2b36171d1d",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "a3ebdfb67dee42e3dd4864ccf10eb82aabea76e327c45238897dcd2b36171d1d",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "dir coordinator-*.md chain",
       "operation-id": "b28c9663841e8634dce49ad83fa4d3069ff7a632122a2b24ee6688f6c812f423",
@@ -125,8 +137,11 @@
       },
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/authorization-receipt.edn",
-        "sha256": "bbef7960bbe44a32971f08e8e59257a44fd746556d5285212d14e1ff5d2ccf0ea",
-        "on-disk-sha-matches": true
+        "sha256": "bbef7960bbe44a32971f088e59257a44fd746556d5285212d14e1ff5d2ccf0ea",
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "bbef7960bbe44a32971f08e8e59257a44fd746556d5285212d14e1ff5d2ccf0ea",
+        "source_report_hash_equals_observed": false,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "dir-level chain",
       "operation-id": "940e555c30b160ed7644fd4c320e9e4a47ea174e265882848720610f98e3fa0",
@@ -146,7 +161,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/authorization-receipt.edn",
         "sha256": "11a1bead72dc3598b49cebb4e12ebabb73a4aa54e73a858a62d7796e6e0a6520",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "11a1bead72dc3598b49cebb4e12ebabb73a4aa54e73a858a62d7796e6e0a6520",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "dir-level chain",
       "operation-id": "244f64d63a1d7d4a39cc1322add3029d3b07fdb4d86423f9a5b99ecc2daa3e73",
@@ -166,7 +184,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/authorization-receipt.edn",
         "sha256": "c46d4e2e17d1993d5156455b99f3a331fce75900bb76739017444c1198f0b68e",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "c46d4e2e17d1993d5156455b99f3a331fce75900bb76739017444c1198f0b68e",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "dir-level chain",
       "operation-id": "b73fbd202cb6bca824e7b10edba96fe3268c79d89d282625025844081101f6f8",
@@ -186,7 +207,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/45-adoption/authorization-receipt.edn",
         "sha256": "7e45765b01a83b4e49b0ccf5e64b9fbfcea1d558e5347d2aa8de1122ef912f7f",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "7e45765b01a83b4e49b0ccf5e64b9fbfcea1d558e5347d2aa8de1122ef912f7f",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "embedded basis cites Joe 2026-10-25 instruction + 2026-10-26 no-click-while-injured ruling + coordinator-record 45-adoption/coordinator-authorization.md sha 8e4567d3\u2026 (byte-verified today)",
       "operation-id": "263dcf88333c0a6bf4cf0e53a6201d1d321ad39923657d0138ee4a8d6159082d",
@@ -206,7 +230,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/47-adoption/authorization-receipt.edn",
         "sha256": "03660ae6afa82fdac42ca1096a0dfa03f7b716620de2703d585c023d11c24e68",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "03660ae6afa82fdac42ca1096a0dfa03f7b716620de2703d585c023d11c24e68",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "embedded basis cites Joe 2026-10-25 + 2026-10-26 rulings + coordinator-record 47-adoption/coordinator-authorization.md sha 3671177013\u2026 (byte-verified today)",
       "operation-id": "987e211ae0189af76e21cec5718fffdb4d96d80a081ab12842ea098567c95a63",
@@ -226,7 +253,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/authorization-receipt.edn",
         "sha256": "8e4bae968156e7a8435b1b3d94ab14bdf75fac54aeec03aa961e5fed70276665",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "8e4bae968156e7a8435b1b3d94ab14bdf75fac54aeec03aa961e5fed70276665",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "no embedded basis; 49-adoption/49-evaluation dir chain",
       "operation-id": "fb82e4b93b6f414f66c00a420117621d8880b239660b9cf4f7797fe202e40ed6",
@@ -246,7 +276,10 @@
       "receipt": {
         "path": "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/authorization.edn",
         "sha256": "3745e32d65a55aa8af49ea2b50ab404721eb2579ba21c163ce71365390e033d0",
-        "on-disk-sha-matches": true
+        "on-disk-sha-matches": true,
+        "source_report_sha256": "3745e32d65a55aa8af49ea2b50ab404721eb2579ba21c163ce71365390e033d0",
+        "source_report_hash_equals_observed": true,
+        "verification_scope": "SHA256 recomputed from current retained file; ledger-pin agreement remains source-report claim, not independently checked here"
       },
       "coordinator-chain": "t3-retirement/acceptance-boundary.md process + review.edn (claude-11) + provenance.md; NO embedded operator basis in the receipt",
       "operation-id": "4c9c9406168761e8bc7526ff357410fa39c5e7f33be67502641dc800afe8469b",
@@ -273,5 +306,13 @@
     "C3-B2-ANSWER-DELIVERY",
     "D1-SELECTED-WANT-REVISION-EVIDENCE",
     "B2-SELECTED-TARGET-READING-RESPONSE"
-  ]
+  ],
+  "coordinator_hash_corrections": [
+    {
+      "ordinal": 42,
+      "reported": "bbef7960bbe44a32971f08e8e59257a44fd746556d5285212d14e1ff5d2ccf0ea",
+      "observed": "bbef7960bbe44a32971f088e59257a44fd746556d5285212d14e1ff5d2ccf0ea"
+    }
+  ],
+  "validation_note": "Initial handoff copied malformed/inexact hash strings from local decision report. This revision preserves those strings and independently hashes every retained authorization file. No ledger agreement is inferred solely from this correction."
 }
