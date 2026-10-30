@@ -76,14 +76,31 @@
       (is (thrown? clojure.lang.ExceptionInfo (#'gate/check-beta! (update d :selection-certificate dissoc :reading-precision-carry)))))
     (is (= (:beta-posterior carry)
            (:beta-posterior (affect/valence-carry predecessor (get-in c [:receipt :precision-row])))))))
-(deftest invalid-q-refuses
+(deftest unreadable-carry-redeclares
+  ;; An unreadable predecessor q is the R20 packet's redeclared cold start, with
+  ;; its reason on record; refusing would repeat on every later run.
   (let [r (frozen) fs (families r)
+        predecessor {:status :present :previous {:valence-carry {:q-after {:status :absent :reason :retained-test-q-failure}}}}
         result (selection/select-over-families fs
-                 {
-                    :bind-cascade-identity {:readings #(decision/occurrence-readings % (:reading-pin %))}
+                 {:bind-cascade-identity {:readings #(decision/occurrence-readings % (:reading-pin %))}
                   :certify (#'decision/certify-reading-family (:field r) fs nil
-                             {:q6/predecessor {:status :present :previous {:valence-carry {:q-after {:status :absent :reason :retained-test-q-failure}}}}
-                              :outer/makeup-path "data/wm-learning/outer-makeup.edn"})})]
-    (is (= :refused (:status result)))
-    (is (= :valence-beta-unavailable (get-in result [:refusal :carry :reason])) (pr-str (:refusal result)))
-    (is (nil? (get-in result [:refusal :beta])))))
+                             {:q6/predecessor predecessor
+                              :outer/makeup-path "data/wm-learning/outer-makeup.edn"})})
+        carry (get-in result [:certification :receipt :reading-precision-carry])]
+    (is (= {:cold-start :redeclared :after :retained-test-q-failure}
+           (:source (affect/carried-valence-prior predecessor))))
+    (is (= :selected (:status result)) (pr-str (:refusal result)))
+    (is (= 1.25 (:beta-prior carry)))))
+(deftest failed-prior-refuses
+  (is (thrown? clojure.lang.ExceptionInfo
+               (cs/iterate-precision {:status :absent :reason :x} 16
+                                     [{:id :a :habit 1 :g 0 :f 0}]))))
+(deftest zero-support-keeps-prior-mass
+  ;; PrecisionFromObservation.priorPolicy has no F: an impossible prefix keeps
+  ;; prior mass, so the expected-G change is 0 - softmax prior weight times G.
+  (let [l (Math/log 3)
+        c [{:id :a :habit 1 :g 0 :f 0}
+           {:id :b :habit 1 :g (* 1.25 l) :f nil :f-status :zero-support}]
+        prior-b (/ (Math/exp (- l)) (+ 1 (Math/exp (- l))))]
+    (is (close? (- 1.25 (* prior-b 1.25 l))
+                (:beta-posterior (cs/iterate-precision 1.25 1 c))))))

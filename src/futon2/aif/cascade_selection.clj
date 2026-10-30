@@ -151,12 +151,13 @@
         {:beta-prior beta-prior :iterations iterations :beta-posterior beta :trace trace}
         (let [prior (selection-posterior
                      {:beta beta :candidates
-                      (mapv #(if (= :zero-support (:f-status %)) %
-                               (assoc % :f 0.0 :f-status :computed)) candidates)})
+                      ;; priorPolicy has no F term, so an impossible observed
+                      ;; prefix (:zero-support, F = +inf) still has prior mass;
+                      ;; only its posterior mass is 0.
+                      (mapv #(assoc % :f 0.0 :f-status :computed) candidates)})
               delta (reduce + 0.0
                             (for [c candidates
-                                  :when (and (not= :zero-support (:f-status c))
-                                             (number? (:g c))
+                                  :when (and (number? (:g c))
                                              (Double/isFinite (double (:g c))))]
                               (* (- (get posterior (:id c)) (get prior (:id c))) (:g c))))
               next-beta (+ beta-prior delta)]
