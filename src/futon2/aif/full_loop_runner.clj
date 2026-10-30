@@ -4110,7 +4110,10 @@
        "   runner reads that sha as the grounded commit). End exactly with:\n"
        "   FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head. This reports only\n"
        "   the selected construction's existing evidence; it does not claim that the\n"
-       "   whole mission is complete.\n"
+       "   whole mission is complete. The existing commit must visibly be work on the\n"
+       "   SELECTED target: its message names the target id, or it touches the\n"
+       "   target's mission file or a path carrying the target id. A commit that\n"
+       "   does none of these is refused mechanically before any reviewer reads it.\n"
        "If no safe substantive parcel is possible, make no commit and finish with "
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>.")))
 
@@ -4877,9 +4880,54 @@
     (resolve-fn commit)
     (resolve-build commit target-repo)))
 
+(defn- commit-message
+  "The full message of COMMIT in REPO, or nil when Git cannot show it."
+  [repo commit]
+  (let [r (git repo "log" "-1" "--format=%B" commit)]
+    (when (zero? (:exit r)) (:out r))))
+
+(defn claimed-commit-cites-target
+  "Whether an existing-artifact claim's commit is visibly work on the
+  selected target. It cites the target when its MESSAGE contains the target
+  id, or one of its changed FILES is the selected mission's source file (by
+  file name), or one of its changed FILES carries the target id in its path.
+
+  Click fc2e27e3 (2026-10-30, run 2026-10-30-e5f08d91, M-typed-memories):
+  the author answered in 27 s by claiming futon3c 7aac5ca07, an inbox-zero
+  promotion whose message says `Mission: M-giraffe` and whose only file is
+  `holes/excursions/E-argument-game-search.md`. The claim qualified for
+  review on commit existence alone, a reviewer seat was dispatched and
+  charged, and the click closed :reviewed-claim-refused four hours later.
+  This check refuses such a claim before any dispatch. It never approves:
+  a citing commit still goes to the reviewer, who judges satisfaction.
+  Lean: `DarkTower/WarMachine/AlreadySatisfiedReview.lean` revision 2,
+  `Evidence.citesTarget` and `Result.claimNotOnTarget`
+  (`noncited_closes_without_review`, `close_eq_closeByReview_of_cites`)."
+  [{:keys [target source-path message files]}]
+  (let [target (str target)
+        files (vec (or files []))
+        source-name (when (string? source-path) (.getName (io/file source-path)))
+        message-cites? (and (not (str/blank? target)) (string? message)
+                            (str/includes? message target))
+        source-file (when source-name
+                      (some #(when (= source-name (.getName (io/file %))) %) files))
+        target-path (when-not (str/blank? target)
+                      (some #(when (str/includes? % target) %) files))]
+    {:cites? (boolean (or message-cites? source-file target-path))
+     :target target
+     :message-cites-target? (boolean message-cites?)
+     :source-file source-file
+     :target-path target-path
+     :files files}))
+
+(declare review-cited-already-satisfied-claim!)
+
 (defn review-already-satisfied-claim!
   "Review an existing-artifact claim through the ordinary dispatch/poll ports.
-  Existence qualifies the claim for review; it does not supply the verdict."
+  Existence qualifies the claim for review; it does not supply the verdict.
+  A claimed commit that does not cite the selected target
+  (`claimed-commit-cites-target`) is refused here, before any reviewer is
+  dispatched or charged, as `:claimed-artifact-not-on-selected-target`."
   [opts phase-context prompt-opts target mission construction author-job classification charge!]
   (let [grounded (:grounded-commit classification)
         commit (:sha grounded)
@@ -4902,7 +4950,37 @@
             (throw (ex-info "Selected completion definition changed before review"
                             {:outcome :build-failed :failure-kind :review-completion-source-mismatch})))
         completion-text (String. source-bytes "UTF-8")
-        prompt (str (reviewer-prompt prompt-opts target construction repo commit author-job [])
+        citation (claimed-commit-cites-target
+                  {:target target
+                   :source-path (:path source)
+                   :message ((or (:commit-message-fn opts) commit-message) repo commit)
+                   :files files})]
+    (if-not (:cites? citation)
+      {:outcome :guardrail-refusal
+       :failure-kind :claimed-artifact-not-on-selected-target
+       :failure-stage :author-wait
+       :target target :commit commit :grounded-commit grounded
+       :author-job author-job
+       :claim-citation citation
+       :refusal-reason (str "Claimed existing commit " commit " in " (:repo grounded)
+                            " does not cite the selected target " (pr-str target)
+                            ": its message does not name the target and its "
+                            (count files) " changed file(s) are neither the target's "
+                            "mission file nor a path carrying the target id. "
+                            "Refused before reviewer dispatch.")
+       :reviewed-claim-refused? false
+       :claim-refused-before-review? true}
+      (review-cited-already-satisfied-claim!
+       opts phase-context prompt-opts target mission construction author-job
+       charge! grounded commit repo files completion-text citation))))
+
+(defn- review-cited-already-satisfied-claim!
+  "The reviewer dispatch for an existing-artifact claim whose commit cites
+  the selected target. Split from `review-already-satisfied-claim!` so the
+  mechanical citation refusal sits before the first charge."
+  [opts phase-context prompt-opts target mission construction author-job
+   charge! grounded commit repo files completion-text citation]
+  (let [prompt (str (reviewer-prompt prompt-opts target construction repo commit author-job [])
                     "\nALREADY-SATISFIED CLAIM: no new implementation is claimed. Judge whether "
                     "this exact existing commit satisfies the selected task, not merely whether it exists.\n"
                     "SELECTED TASK COMPLETION DEFINITION / RETAINED MISSION:\n" (pr-str mission) "\n" completion-text
@@ -4931,6 +5009,7 @@
     {:outcome outcome :failure-kind kind :failure-stage :author-wait
      :target target :commit commit :grounded-commit grounded
      :author-job author-job :review-job job :review-verdict verdict :review-gate gate
+     :claim-citation citation
      :refusal-reason (when-not accepted? (or apparatus (job-text job)))
      :reviewed-claim-refused? (boolean refused?)}))
 

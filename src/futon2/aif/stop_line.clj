@@ -31,7 +31,11 @@
   [{:keys [outcome failure-kind grounded-commit reviewed-claim-refused?]}]
   (or (and (= :guardrail-refusal outcome)
            (or (true? reviewed-claim-refused?)
-               (= :author-response-unparseable failure-kind)))
+               (= :author-response-unparseable failure-kind)
+               ;; An existing-artifact claim refused mechanically before
+               ;; review because its commit does not cite the selected
+               ;; target: the author's answer, not the apparatus, is wrong.
+               (= :claimed-artifact-not-on-selected-target failure-kind)))
       (contains? #{:grounded-change
                    :grounded-progress
                    :historical-verification-awaiting-validation}
