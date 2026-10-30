@@ -18,7 +18,6 @@
             [futon2.aif.meta-injury-store :as injury-store]
             [futon2.aif.meta-medic-authority :as medic-authority]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
-            [futon2.aif.out-of-band-fix :as out-of-band]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
@@ -122,7 +121,15 @@
         resolved))
 
     :else {:status :absent
-           :verifier out-of-band/retained-checked-medic-authority}))
+           ;; Standing retained authority is the same per-grammar union used
+           ;; by every resolved context (5a1de6f3b): each retained verifier
+           ;; re-derives its own operation/receipt binding and fails closed
+           ;; on any other grammar. Wiring the raw out-of-band verifier here
+           ;; admitted only the genuine-repair grammar and rejected the
+           ;; cause-reattribution and ordinary-author-refusal retained
+           ;; receipts the runtime itself had appended (ordinals 118, 125).
+           :verifier (medic-authority/with-retained-authorities
+                      (fn [_] false))}))
 
 (defn- valid-click-availability? [availability]
   (and (= :wm/ordinary-click-availability-v1 (:schema availability))

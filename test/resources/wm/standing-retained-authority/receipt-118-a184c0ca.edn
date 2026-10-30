@@ -1,0 +1,19 @@
+{:schema :wm/cause-reattribution-receipt-v1
+ :status :checked
+ :verifier "DarkTower.WarMachine.HistoricalMisclassificationCorrection"
+ :candidate
+ {:kind :cause-reattribution
+  :injury-id "injury/41a00c626ed7f9f9d5454e148745c951ec3db80e"
+  :entry-id "117"
+  :predecessor-entry-id "18"
+  :patch-id "cause-reattribution/ordinal-117"
+  :reviewer "claude-11"
+  :evaluator "codex-14"
+  :evidence-pin "7f117d5b702d1fef59ee5e32992a639ac8655d8c0d3ea2ce72969df3e43d5d26"
+  :original-record-id "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-43ec20a7-c3ba-4726-a43c-a827b2b3e66d.edn"
+  :original-pin "7f117d5b702d1fef59ee5e32992a639ac8655d8c0d3ea2ce72969df3e43d5d26"
+  :rejected-cause-id "cause/cb720a22abcb20b33d0e381573c1036cba694c99020f37452f67487b250409b5"
+  :replacement-injury-id "injury/a46779bc8935e575ff19ea6719aa1be7122f8c40"
+  :replacement-cause-id "cause/4c4479f1face93053cbc10147e3a66bee690f8c8c99c0c9f45fcfb780a58e6f4"
+  :failure-kind :capability-route-missing
+  :failure-stage :cascade-resume}}
