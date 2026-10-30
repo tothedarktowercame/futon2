@@ -1,4 +1,7 @@
 {:schema :wm/outer-makeup-v1
+ ;; R20Step.Makeup.precisionIterations; C463-pymdp-spm-crosscheck.md:37,
+ ;; spm_MDP_VB_X.m:224-245, fixed Ni=16 (not convergence).
+ :precision-iterations 16
  ;; Joe's 55/35/5/5 terminal ending-class starter kit; not-yet-evaluated is not terminal.
  :c-kit {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100
          :not-yet-evaluated 0}

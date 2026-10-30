@@ -23,7 +23,6 @@
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.outer-state :as outer-state]
-            [futon2.aif.reading-policy-precision :as reading-precision]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
@@ -186,17 +185,6 @@
            :reason :ordinary-click-budget-reader-failed
            :provenance {:status :absent} :observation-time {:status :absent}
            :phase :pre-admission})))))
-
-(defn- ensure-reading-precision-campaign!
-  [opts]
-  (let [path (or (:reading-precision-campaign-path opts)
-                 default-reading-precision-campaign-path)
-        file (io/file path)]
-    (when (.isFile file)
-      (let [campaign (edn/read-string (slurp file))
-            current (reading-precision/campaign-status)]
-        (when-not (= (:sha256 campaign) (:sha256 current))
-          (reading-precision/register-campaign! campaign))))))
 
 (defn- designated-agent-answer-fn
   "Agency answer port for machine requests.  It contacts exactly the
@@ -622,8 +610,7 @@
                              :pattern-graph-path :target-reading-root
                              :occurrence-square-root :pattern-library-root
                              :require-occurrence-squares?
-                             ;; an operator's identity-bound beta declaration
-                             :reading-precision-declaration])
+                             :q6/predecessor :r20/makeup :outer/makeup-path])
           (select-keys opts [:meta-field-observation :meta-field-source-pin])
           ;; Construction publishes below. Do not publish twice.
           {:trace? false :include-advisory-lanes? false :defer-render? true}))))
@@ -631,7 +618,6 @@
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
   [opts]
-  (ensure-reading-precision-campaign! opts)
   (let [injury-authority (or (:meta-injury-authority opts)
                              (injury-store/load-authority
                               (or (:meta-injury-root opts)

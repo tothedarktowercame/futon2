@@ -1,5 +1,8 @@
 (ns futon2.aif.wm.cascade-decision
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.affective-level :as affective]
+            [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.cascade-selection :as cascade-selection]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -1133,11 +1136,10 @@
     (or (:reading-precision-carry cert) (:policy-precision-state cert))))
 
 (defn- certify-reading-family
-  "Before the one selector call: certify every scored record's one C
-  (reading-policy-preference) and decide beta continuity over the
-  reading-precision identity of what was scored (reading-policy-precision).
-  Either refuses typed, and the selector is not called."
-  [field families declared opts]
+  "Certify C and compute R20 betaPosterior from carried valence and the exact
+  prepared E/G/F menu. Identity drift is recorded, not a precision refusal.
+  Invalid valence or precision inputs refuse before selection."
+  [field families _declared opts]
   (fn [ranked scored]
     (let [preference (mapv (fn [[p score]]
                              (pref/certify (assoc score :policy-id (:policy-id p)
@@ -1146,18 +1148,29 @@
           uncertified (remove #(= :certified (:status %)) preference)
           {:keys [config refusal]} (precision-config field families ranked scored)
           identity (when config (precision/identity-of config))
+          prior (affective/carried-valence-prior
+                 (or (:q6/predecessor opts) previous-run/*predecessor*))
+          prepared (policy/prepare-selection-inputs ranked opts)
           carry (when config
-                  (try (precision/carry-beta {:previous (previous-precision opts)
-                                              :initialized-beta declared
-                                              :config config
-                                              ;; an explicit identity-bound beta
-                                              ;; declaration, the only re-arm
-                                              ;; after a refusal (ruling (b))
-                                              :declaration
-                                              (or (:reading-precision-declaration opts)
-                                                  (precision/declaration-for identity))})
-                       (catch clojure.lang.ExceptionInfo e
-                         {:status :refused :reason (:kind (ex-data e))})))]
+                  (try
+                    (let [makeup (or (:r20/makeup opts)
+                                     (outer-state/load-makeup
+                                      (or (:outer/makeup-path opts) outer-state/default-makeup-path)))
+                          iteration (cascade-selection/iterate-precision
+                                     (:beta-prior prior) (:precision-iterations makeup)
+                                     (:candidates prepared))
+                          previous (previous-precision opts)]
+                      (precision/seal
+                       (merge iteration
+                              {:schema :wm/r20-reading-precision-v1 :status :computed
+                               :authority :r20-beta-from-valence :q (:q prior)
+                               :level :hesp-level :source (:source prior)
+                               :makeup-sha256 (:makeup/sha256 makeup)
+                               :identity identity :previous-identity (:identity previous)
+                               :identity-changed (not= identity (:identity previous))})))
+                    (catch clojure.lang.ExceptionInfo e
+                      {:status :refused :reason (or (:kind (ex-data e)) (get-in (ex-data e) [:refusal :kind]))
+                       :cause (ex-data e)})))]
       (cond
         (seq uncertified)
         {:status :refused :kind :preference-not-certified
@@ -1167,26 +1180,12 @@
         (= :refused (:status carry))
         {:status :refused :kind :reading-precision-refused :carry carry}
         :else
-        {:status :certified :beta (:beta carry)
-         :receipt {:reading-precision-carry carry
+        {:status :certified :beta (:beta-posterior carry)
+         :prepared-selection prepared
+         :receipt {:precision-row (select-keys carry [:beta-prior :beta-posterior :iterations :authority :source])
+                   :reading-precision-carry carry
                    :reading-precision-identity identity
                    :preference-receipts preference}}))))
-
-(defn- declared-beta
-  "The one declared β over the targets with computed families, or a typed
-  refusal. No default is supplied."
-  [assembled families]
-  (let [targets (map :target-id (filter #(= :computed (:status %)) families))
-        betas (map #(get-in assembled [:declared-betas %]) targets)]
-    (cond
-      (some nil? betas)
-      {:refusal {:kind :beta-not-declared :stage :selection
-                 :target (first (keep (fn [[t b]] (when (nil? b) t)) (map vector targets betas)))
-                 :targets (vec (keep (fn [[t b]] (when (nil? b) t)) (map vector targets betas)))}}
-      (not= 1 (count (distinct betas)))
-      {:refusal {:kind :incommensurable-family :stage :selection :target nil
-                 :beta (vec (distinct betas))}}
-      :else {:beta (first betas)})))
 
 (defn- selector-refusal->judge-refusal
   "Run the one selector call F. A typed refusal from the selection law
@@ -1230,7 +1229,6 @@
                   {:steps [] :dir-status {:absent :no-flight-steps-in-opts}})
         census (prefix-admission/history-census steps)
         pin (prefix-admission/census-pin census)
-        {:keys [beta refusal]} (declared-beta assembled families)
         attach-f (fn [ranked]
                    (policy-prefix/production-ranked
                     ranked {:conditioning-status (if (:dir-status steps) :not-run :admitted)}
@@ -1253,16 +1251,13 @@
       (not computed?)
       {:decision (abstain (family-refusals families))}
 
-      refusal
-      {:decision (abstain (into [refusal] (family-refusals families)))}
-
       :else
       (let [result (selector-refusal->judge-refusal
                     families
                     #(family-selection/select-over-families
                     families
                     {:g-law (:g-law opts)
-                     :certify (certify-reading-family field families beta opts)
+                     :certify (certify-reading-family field families nil (assoc opts :policy-history-pin pin))
                      ;; Q6 before the one selector: the previous run's
                      ;; refused choice, on the same selection inputs, is
                      ;; removed from the menu

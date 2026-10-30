@@ -12,6 +12,7 @@
             [clojure.string]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-model-manifest :as manifest]
+            [futon2.aif.affective-level :as affect]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.cascade-selection :as selection]
@@ -263,7 +264,8 @@
         decision (:decision r)
         posterior (posterior-of r)]
     (is (= 1 (:selector-calls r)))
-    (is (= {:value 1 :status :declared} (:beta decision)) "β = 1 is recorded :declared")
+    (is (= {:value (:beta-prior (affect/carried-valence-prior nil)) :status :r20-computed}
+           (:beta decision)) "R20 fixed iteration on the fixture's constant F retains its valence prior")
     (is (every? #(= (:policy-key %) (prefix-admission/candidate-key %)) (keys posterior))
         "every posterior candidate carries its own reading-policy identity")
     (is (< 0.999999999 (reduce + (vals posterior)) 1.000000001) "the posterior is normalised")
@@ -371,21 +373,19 @@
         unread {:steps [] :read [] :unread [] :dir-status {:absent :no-flights-dir}}
         calls (atom 0)
         select policy/select-action-cascades
-        e (with-redefs [policy/select-action-cascades
-                        (fn [& args] (swap! calls inc) (apply select args))]
-            (try (wm-cd/cascade-decision (route/assembled fx 1)
-                                         (route/opts fx {:conditioning-steps unread}))
-                 nil
-                 (catch clojure.lang.ExceptionInfo e e)))
+        result (with-redefs [policy/select-action-cascades
+                             (fn [& args] (swap! calls inc) (apply select args))]
+                 (wm-cd/cascade-decision (route/assembled fx 1)
+                                        (route/opts fx {:conditioning-steps unread})))
         other (try (with-redefs [family-selection/select-over-families
                                  (fn [& _] (throw (ex-info "something else" {:kind :x})))]
                      (wm-cd/cascade-decision (route/assembled fx 1) (route/opts fx {})))
                    nil
                    (catch clojure.lang.ExceptionInfo e e))]
-    (is (= 1 @calls) "the one selector call ran and refused")
-    (is (= "cascade decision refused" (ex-message e)))
-    (is (= :free-energy-not-supplied (:kind (ex-data e))))
-    (is (= :historical-prefix-f (:missing (ex-data e))))
-    (is (= route/target (:target (ex-data e))))
-    (is (= :free-energy-not-supplied (get-in (ex-data e) [:refusal :kind])))
+    ;; R20 iteration consumes F before the selector, so the same missing-F
+    ;; refusal now occurs during certification, with zero selector contacts.
+    (is (zero? @calls))
+    (is (= :free-energy-not-supplied
+           (get-in result [:decision :refusals 0 :carry :reason])))
+    (is (nil? (get-in result [:decision :beta])))
     (is (= "something else" (ex-message other)) "an unrelated failure is not dressed as a refusal")))

@@ -375,10 +375,20 @@
         certified (when (and certify (seq ranked)) (certify ranked scored))
         opts (cond-> (dissoc opts :attach-f :certify :exclude
                              :bind-cascade-identity :g-law)
-               (= :certified (:status certified)) (assoc :beta (:beta certified)))
+               (= :certified (:status certified)) (assoc :beta (:beta certified) :prepared-selection (:prepared-selection certified)
+                      :beta-status (when (:prepared-selection certified) :r20-computed)))
         excluded (when (and exclude (= :certified (:status certified)))
                    (exclude ranked opts certified))
         menu (if excluded (:ranked excluded) ranked)
+        ;; Q6 can reduce the domain: recompute precision on the remaining menu,
+        ;; preserving the exclusion receipt, before consuming E/G/F.
+        certified (if (and certify (seq menu) (not= menu ranked)
+                           (= :certified (:status certified)))
+                    (certify menu scored) certified)
+        opts (cond-> opts
+               (= :certified (:status certified))
+               (assoc :beta (:beta certified) :prepared-selection (:prepared-selection certified)
+                      :beta-status (when (:prepared-selection certified) :r20-computed)))
         failures (vec (concat (mapcat :failures rows)
                               (map #(assoc % :stage (:stage % :pre-selector))
                                    (:refusals bound))))

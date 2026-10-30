@@ -134,10 +134,9 @@
              :beta-prior-next next-beta
              :charge (charge beta-prior beta-posterior)}))))))
 
-(defn valence-carry
-  "Construct the sealed-Q6 payload for the next ordinary run.  This records
-  the current absence of beta-posterior; it does not alter gamma or selection."
-  [predecessor precision-row]
+(defn carried-valence-prior
+  "Resolve this run's Q6 valence and provenance once, shared by selection and close."
+  [predecessor]
   (let [cold? (and (= :absent (:status predecessor))
                    (= :no-earlier-started-run (:reason predecessor)))
         prior-carry (get-in predecessor [:previous :valence-carry])
@@ -145,9 +144,7 @@
         after-reason (cond
                        cold? nil
                        (= :present (:status predecessor))
-                       (if (failure? carried-q)
-                         (or (:reason carried-q) :carried-q-after-unreadable)
-                         (when-not carried-q :predecessor-has-no-valence-carry))
+                       (when-not carried-q :predecessor-has-no-valence-carry)
                        :else (or (:reason predecessor) :predecessor-status-unknown))
         redeclared? (some? after-reason)
         q-before (if (or cold? redeclared?) {:pos 0.5 :neg 0.5} carried-q)
@@ -155,9 +152,17 @@
                  cold? {:cold-start :declared :provenance :declared-cold-start-r20-packet}
                  redeclared? {:cold-start :redeclared :after after-reason}
                  :else {:previous-run/id (:previous-run/id predecessor)})
+        beta-prior (if (failure? q-before) q-before (descend hesp-level q-before))]
+    {:q q-before :source source :level :hesp-level :beta-prior beta-prior}))
+
+(defn valence-carry
+  "Construct the sealed-Q6 payload for the next ordinary run.  This records
+  the current absence of beta-posterior; it does not alter gamma or selection."
+  [predecessor precision-row]
+  (let [{:keys [q source beta-prior]} (carried-valence-prior predecessor)
+        q-before q
         beta-posterior (or (:beta-posterior precision-row)
                            (absent :no-precision-row))
-        beta-prior (when-not (failure? q-before) (descend hesp-level q-before))
         base {:schema :wm/r20-valence-carry-v1 :level :hesp-level :source source
               :q-before q-before :beta-prior beta-prior
               :beta-posterior beta-posterior :gamma-applied false}]
