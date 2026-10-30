@@ -58,6 +58,26 @@
    :inputs (record-inputs record)
    :effective-run-identity (:effective-run-identity record)})
 
+(defn reading-index-entries
+  "Project each intermediate reading refusal once, even if the run succeeds.
+  Reading rows deliberately lack terminal :failure and :finished-work? fields."
+  [record record-path record-sha]
+  (let [reading (:selected-target-reading record)
+        attempts (or (seq (:reading-attempts reading)) [reading])]
+    (->> attempts
+         (filter #(and (= :refused (:status %)) (keyword? (:kind %))
+                       (not (contains? #{:selected-target-reading-unchanged-refusal
+                                         :selected-target-reading-history-invalid} (:kind %)))))
+         distinct
+         (mapv (fn [attempt]
+                 {:schema :wm/reading-refusal-index-entry-v1 :status :indexed
+                  :run-id (:run/id record) :record-path record-path :record-sha256 record-sha
+                  :target (:target attempt) :refusal (:kind attempt)
+                  :reading-inputs (:reading-inputs attempt)
+                  :identity-status (if (:reading-inputs attempt) :retained :legacy-unavailable)
+                  :reader-job-ids (get-in attempt [:detail :reader-job-ids])
+                  :response-pins (get-in attempt [:detail :response-pins])})))))
+
 (defn read-index
   "Read the compact index under DIR. A malformed index is a typed refusal;
   terminal records are never opened here."

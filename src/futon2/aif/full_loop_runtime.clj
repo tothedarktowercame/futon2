@@ -687,7 +687,8 @@
              chosen-need (selected-target-reading/selected-need judgement)]
          (when chosen-need
            (selected-target-reading/repair!
-            (assoc live-opts :answer-fn answer-fn) judgement))))
+            (assoc live-opts :answer-fn answer-fn
+                   :run-record-dir (or (:run-record-dir live-opts) runner/default-run-record-dir)) judgement))))
      :occurrence-square-authoring-fn
      (fn [runner-opts judgement]
        (let [live-opts (merge opts runner-opts)
@@ -831,7 +832,7 @@
     (fn [refusal]
       (when (compare-and-set! used? false true)
         (let [target (:target refusal)
-              exclusion {:target target :reason :selected-target-reading-unavailable
+              exclusion {:target target :reason (:kind refusal)
                          :scope :this-click :reader-refusal refusal}
               ranked (disj (set (:outer-score/admitted initial-selection)) target)
               reduced (update observation :field
