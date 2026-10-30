@@ -348,6 +348,40 @@
                       :f-prefix (:f-prefix c)})
                    candidates)})
 
+(defn prepare-selection-inputs
+  "Prepare the exact E/G/F domain shared by precision iteration and selection."
+  [ranked-actions {:keys [habit-state enactment-fold pattern-feedback policy-history-pin]}]
+  (let [replay? (and (map? habit-state) (= :recorded-run (:source habit-state)))
+        e-input (if replay? (:state habit-state) enactment-fold)
+        e-label (if replay? :recorded-run :enactment-fold)
+        fold-state ((requiring-resolve 'futon2.aif.cascade-prior/coerce-state) e-input)
+        e-source (cond-> {:source e-label
+                          :records (count (:enactment-records fold-state))
+                          :samples (:samples fold-state)
+                          :uniform (zero? (:samples fold-state))}
+                   pattern-feedback
+                   (assoc :pattern-feedback
+                          {:status :consumed
+                           :schema :wm/pattern-feedback-metadata-v1
+                           :term :E
+                           :rule :verified-application-beta11-likelihood-ratio}))
+        ;; ⟨1⟩6: the ORIGINAL entries carry the prediction context the
+        ;; enacted-step record reads; attach may rebuild entries without it
+        original-ranked ranked-actions
+        ranked-actions ((requiring-resolve 'futon2.aif.cascade-habit-store/attach-state)
+                        e-input ranked-actions e-label)
+        ;; Learned pattern evidence belongs to E, not G. This preserves the
+        ;; runtime-G certificate while allowing verified cross-run experience
+        ;; to change the posterior over otherwise unchanged cascade policies.
+        ranked-actions (if pattern-feedback
+                         (cascade-feedback/attach-pattern-evidence-menu
+                          pattern-feedback ranked-actions)
+                         ranked-actions)
+        candidates (mapv (partial selection-candidate policy-history-pin) ranked-actions)
+        ]
+    {:ranked-actions ranked-actions :candidates candidates :e-source e-source
+     :original-ranked original-ranked}))
+
 (defn select-action-cascades
   "Cascade-candidate selection at a DECLARED β (tick 1, R14 requirement).
 
@@ -413,8 +447,8 @@
 
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
-  [ranked-actions {:keys [beta beta-state enactment-fold habit-state near-tie-threshold novelty-inputs
-                                 pattern-feedback policy-history-pin
+  [ranked-actions {:keys [beta beta-state near-tie-threshold novelty-inputs
+                                 policy-history-pin
                                  ticket-queue ticket-queue-refusals] :as opts}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
   ;; This is the mandatory live seam, not an optional caller-side attachment.
@@ -431,40 +465,15 @@
   ;; from the store); its provenance says :recorded-run so a replay is never
   ;; read as a live E. No live caller passes it (selection-reads-fold-test
   ;; checks every non-test caller).
-  (let [replay? (and (map? habit-state) (= :recorded-run (:source habit-state)))
-        e-input (if replay? (:state habit-state) enactment-fold)
-        e-label (if replay? :recorded-run :enactment-fold)
-        fold-state ((requiring-resolve 'futon2.aif.cascade-prior/coerce-state) e-input)
-        e-source (cond-> {:source e-label
-                          :records (count (:enactment-records fold-state))
-                          :samples (:samples fold-state)
-                          :uniform (zero? (:samples fold-state))}
-                   pattern-feedback
-                   (assoc :pattern-feedback
-                          {:status :consumed
-                           :schema :wm/pattern-feedback-metadata-v1
-                           :term :E
-                           :rule :verified-application-beta11-likelihood-ratio}))
-        ;; ⟨1⟩6: the ORIGINAL entries carry the prediction context the
-        ;; enacted-step record reads; attach may rebuild entries without it
-        original-ranked ranked-actions
-        ranked-actions ((requiring-resolve 'futon2.aif.cascade-habit-store/attach-state)
-                        e-input ranked-actions e-label)
-        ;; Learned pattern evidence belongs to E, not G. This preserves the
-        ;; runtime-G certificate while allowing verified cross-run experience
-        ;; to change the posterior over otherwise unchanged cascade policies.
-        ranked-actions (if pattern-feedback
-                         (cascade-feedback/attach-pattern-evidence-menu
-                          pattern-feedback ranked-actions)
-                         ranked-actions)
-        candidates (mapv (partial selection-candidate policy-history-pin) ranked-actions)
+  (let [{:keys [ranked-actions candidates e-source original-ranked]}
+        (or (:prepared-selection opts) (prepare-selection-inputs ranked-actions opts))
         _ (when (and beta-state
                      (not (and ((requiring-resolve 'futon2.aif.policy-precision-carry/intact?) beta-state)
                                (= beta (:beta beta-state))
                                (= beta (:tau beta-state))
                                (= (/ 1.0 beta) (:gamma beta-state)))))
             (throw (ex-info "precision carry consumption mismatch" {:kind :precision-consumption-mismatch})))
-        beta-status (if beta-state (:beta-status beta-state) :declared)
+        beta-status (or (:beta-status opts) (if beta-state (:beta-status beta-state) :declared))
         posterior (cascade-selection/selection-posterior
                    {:beta beta :candidates candidates})
         ;; An EMPTY cascade contributes NO action. `cascade-first-action`
@@ -608,7 +617,8 @@
       :beta-status beta-status
       :near-tie-threshold (get-in comparisons [:policy-comparison :near-tie-threshold])
       :gamma (/ 1.0 beta) :tau beta
-      :tau-source (if beta-state :carry-beta :declared-beta)
+      :tau-source (if (= :r20-computed beta-status) :r20-beta-from-valence
+                    (if beta-state :carry-beta :declared-beta))
       :posterior posterior
       :softmax-weights weights
       :action-marginal weights

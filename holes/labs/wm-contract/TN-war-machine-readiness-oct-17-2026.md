@@ -403,3 +403,5 @@ Campaign result: all five authorized clicks were spent and none carried a
 tick. Click 5 is not replayed or relabelled after repair. The campaign is
 closed with no remaining click authorization; another live run requires a
 new authorization and should be treated as a new readiness campaign.
+
+The campaign’s selection gate was replaced by R20 beta-from-valence on 2026-10-30 in futon2 `6a36b6006`.

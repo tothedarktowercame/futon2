@@ -148,12 +148,19 @@
   [decision]
   (let [{:keys [value status]} (:beta decision)]
     (when-not (and (map? (:beta decision))
-                   (contains? #{:declared :learned} status)
+                   (or (contains? #{:declared :learned} status)
+                       (and (= :r20-computed status)
+                            (let [r (get-in decision [:selection-certificate :reading-precision-carry])]
+                              (and (= :wm/r20-reading-precision-v1 (:schema r))
+                                   (= :computed (:status r))
+                                   (= :r20-beta-from-valence (:authority r))
+                                   (= value (:beta-posterior r))
+                                   ((requiring-resolve 'futon2.aif.reading-policy-precision/intact?) r)))))
                    (number? value)
                    (pos? value))
       (refuse! :beta-not-recorded
                {:beta (:beta decision)
-                :required {:value "positive number" :status "#{:declared :learned}"}}))))
+                :required {:value "positive number" :status "declared, learned, or sealed r20-computed"}}))))
 
 (defn- reading-policy? [candidate]
   (map? (get-in candidate [:precedence :co-apply])))

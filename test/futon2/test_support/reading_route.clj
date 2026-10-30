@@ -131,6 +131,7 @@
   "The production decision options for FX, merged with EXTRA."
   [fx extra]
   (merge {:task {:id target}
+          :outer/makeup-path (.getCanonicalPath (io/file "data/wm-learning/outer-makeup.edn"))
           :pattern-graph-path (str (:graph fx))
           :pattern-library-root (str (:library fx))
           :target-reading-root (str (:root fx))

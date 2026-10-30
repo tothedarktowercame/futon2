@@ -133,6 +133,39 @@
             (concat (map (fn [c p] [(:id c) (double p)]) finite probs)
                     (map (fn [c] [(:id c) 0.0]) infinite))))))
 
+(defn iterate-precision
+  "R20Step.lean:690-692: fixed-count firstIterate, starting at betaPrior.
+  PrecisionFromObservation.lean:35-52: priorPolicy, posteriorPolicy,
+  expectedGChange and firstIterate. Uses selection-posterior's exact domain
+  and validation; no convergence solver, clipping or implicit iteration count."
+  [beta-prior iterations candidates]
+  (when-not (nat-int? iterations)
+    (refuse! :precision-iterations-unavailable {:iterations iterations}))
+  (when-not (and (number? beta-prior) (pos? beta-prior)
+                 (Double/isFinite (double beta-prior)))
+    (refuse! :valence-beta-unavailable {:reason beta-prior}))
+  (loop [i 0 beta beta-prior trace []]
+    ;; Validate even the zero-iteration case.
+    (let [posterior (selection-posterior {:beta beta :candidates candidates})]
+      (if (= i iterations)
+        {:beta-prior beta-prior :iterations iterations :beta-posterior beta :trace trace}
+        (let [prior (selection-posterior
+                     {:beta beta :candidates
+                      ;; priorPolicy has no F term, so an impossible observed
+                      ;; prefix (:zero-support, F = +inf) still has prior mass;
+                      ;; only its posterior mass is 0.
+                      (mapv #(assoc % :f 0.0 :f-status :computed) candidates)})
+              delta (reduce + 0.0
+                            (for [c candidates
+                                  :when (and (number? (:g c))
+                                             (Double/isFinite (double (:g c))))]
+                              (* (- (get posterior (:id c)) (get prior (:id c))) (:g c))))
+              next-beta (+ beta-prior delta)]
+          (when-not (and (pos? next-beta) (Double/isFinite (double next-beta)))
+            (refuse! :precision-iterate-nonpositive
+                     {:iteration (inc i) :beta next-beta :beta-prior beta-prior}))
+          (recur (inc i) next-beta (conj trace {:iteration (inc i) :beta next-beta})))))))
+
 ;; ---------------------------------------------------------------------------
 ;; bayes-choice
 ;; ---------------------------------------------------------------------------
