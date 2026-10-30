@@ -11,6 +11,8 @@
 (def explicit-non-injury-kinds
   {:author-response-unparseable :author-response-unparseable
    :reviewed-claim-refused :reviewed-claim-refused
+   ;; AlreadySatisfiedReview.lean rev 2: `nonInjury .claimNotOnTarget = true`.
+   :claimed-artifact-not-on-selected-target :claimed-artifact-not-on-selected-target
    :abstained :ordinary-selection-abstention
    :operator-cancelled :operator-cancelled
    :declared-no-work :declared-no-work
