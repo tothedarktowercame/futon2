@@ -5,7 +5,8 @@
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-injury-observation :as injury]
             [futon2.aif.meta-injury-ledger :as ledger]
-            [futon2.aif.meta-terminal-injury :as terminal])
+            [futon2.aif.meta-terminal-injury :as terminal]
+            [futon2.aif.standing-authority :as standing])
   (:import [java.io PushbackReader StringReader]
            [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
@@ -39,8 +40,20 @@
     (catch Throwable t
       (refusal :store/malformed-edn {:detail (ex-message t)}))))
 
+(defn- standing-default-load
+  "Default (no verifier) loads resolve through the ONE shared standing
+  resolver (design P1) and stamp the outcome with its identity (design P4),
+  so every validation result names the exact authority that produced it.
+  An explicit verifier arity is untouched — callers opt out deliberately."
+  [load-fn path]
+  (let [resolution (standing/standing-resolution)]
+    (cond-> (load-fn path (:verifier resolution))
+      true (assoc :authority-identity (:identity resolution))
+      (= :refused (:status resolution))
+      (assoc :standing-authority-refusal (:reason resolution)))))
+
 (defn load-ledger
-  ([path] (load-ledger path (constantly false)))
+  ([path] (standing-default-load (fn [p v] (load-ledger p v)) path))
   ([path authority-verifier]
    (try
      (let [file (io/file path)]
@@ -83,7 +96,7 @@
 
 (defn load-durable-ledger
   "Load a disk-backed ledger with an exact source pin for coordinator input."
-  ([path] (load-durable-ledger* path (constantly false)))
+  ([path] (standing-default-load load-durable-ledger* path))
   ([path authority-verifier] (load-durable-ledger* path authority-verifier)))
 
 (defn- force-write! [^Path path text]

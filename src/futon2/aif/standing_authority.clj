@@ -123,3 +123,30 @@
   "Test hook only. Never called by production paths."
   []
   (reset! !context nil))
+
+(defn standing-resolution
+  "THE single shared medic-authority resolution (brittleness design P1).
+
+  The policy resource wm/standing-authority/policy.edn v1 IS the pin-addressed
+  approved-authority record (design P2): content-addressed (every evidence
+  artifact is a sha-named file re-hashed at load), scope-exact (grammar id +
+  ordinal/entry pins + three receipt pins per bundle), sealed (its own sha256
+  is pinned in the recovery report and the dispatch record), append-only (a
+  new approval is a new policy version, never an edit of this one).
+
+  Every default/cold-start, diagnosis, and store-loader path composes THIS
+  function; there is no other composition site. On a refused standing context
+  the retained per-grammar union remains the fail-closed baseline (never a
+  permissive fallback) and the typed refusal reason is carried for diagnosis.
+  The :identity on a ready resolution is the resolving code/authority
+  identity (design P4): load outcomes stamped with it tie a validation result
+  to the exact standing policy that produced it."
+  []
+  (let [context (standing-context)]
+    (cond-> {:status (if (= :ready (:status context)) :ready :absent)
+             :verifier (if (= :ready (:status context))
+                         (medic-authority/resolution-verifier (:resolution context))
+                         (medic-authority/with-retained-authorities (fn [_] false)))}
+      (= :ready (:status context)) (assoc :identity (:identity context))
+      (= :refused (:status context)) (assoc :standing-authority-refusal
+                                            (:reason context)))))

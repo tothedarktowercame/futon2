@@ -121,23 +121,7 @@
          :verifier (medic-authority/resolution-verifier (:resolution resolved))}
         resolved))
 
-    :else (let [standing (standing/standing-context)]
-            ;; Standing serving authority (operator-authorized 2026-10-31,
-            ;; recorded verbatim in wm/standing-authority/policy.edn): the
-            ;; recovered prior adoption bundles resolve beside the retained
-            ;; per-grammar union through ONE shared resolution path, so every
-            ;; loader composes the same verifier. Fail-closed: a refused
-            ;; standing context (missing/corrupt policy or evidence, ambiguous
-            ;; scopes) never falls back permissively — the retained union alone
-            ;; remains, the recovered ordinals refuse, and the refusal reason
-            ;; is surfaced on the resolution for diagnosis.
-            (cond-> {:status (if (= :ready (:status standing)) :ready :absent)
-                     :verifier (if (= :ready (:status standing))
-                                 (medic-authority/resolution-verifier (:resolution standing))
-                                 (medic-authority/with-retained-authorities (fn [_] false)))}
-              (= :ready (:status standing)) (assoc :identity (:identity standing))
-              (= :refused (:status standing)) (assoc :standing-authority-refusal
-                                                     (:reason standing))))))
+    :else (standing/standing-resolution)))
 
 (defn- valid-click-availability? [availability]
   (and (= :wm/ordinary-click-availability-v1 (:schema availability))

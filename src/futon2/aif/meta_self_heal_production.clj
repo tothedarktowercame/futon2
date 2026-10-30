@@ -9,7 +9,8 @@
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.meta-repair-coordinator :as coordinator])
+            [futon2.aif.meta-repair-coordinator :as coordinator]
+            [futon2.aif.standing-authority :as standing])
   (:import [java.nio.file Files StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))
 
@@ -23,7 +24,11 @@
 (def default-acceptance-root (str store/default-root "/acceptances"))
 (defn- refusal [reason & [details]] (merge {:status :refused :reason reason} details))
 (defn- medic-authority-verifier [opts]
-  (:meta-medic-authority-verifier opts))
+  ;; Single shared resolution (design P1): without an explicit verifier every
+  ;; diagnosis/read path composes the standing resolver's verifier, never a
+  ;; private composition. Fail-closed on a refused standing context.
+  (or (:meta-medic-authority-verifier opts)
+      (:verifier (standing/standing-resolution))))
 (defn- load-durable [path authority-verifier]
   (if authority-verifier
     (store/load-durable-ledger path authority-verifier)
@@ -1253,12 +1258,21 @@
 
 (defn carried-bindings-observation
   "Read a valid persisted repair transaction once and describe whether its
-  diagnosis and acceptance bindings belong to an active injury."
+  diagnosis and acceptance bindings belong to an active injury. A refused
+  durable ledger load is reported as :ledger-refused (design P3), never
+  silently mapped to :no-active-injury."
   [opts context]
   (let [active (:active-injuries context)]
-    (if (or (not= :computed (:status active))
-            (empty? (:injuries active)))
-      {:status :absent :reason :no-active-injury}
+    (if (and (nil? active)
+             (map? (:durable-ledger context))
+             (not= :loaded (:status (:durable-ledger context))))
+      {:status :absent :reason :ledger-refused
+       :durable-ledger-status (:status (:durable-ledger context))
+       :durable-ledger-reason (:reason (:durable-ledger context))
+       :durable-ledger-defects (:defects (:durable-ledger context))}
+      (if (or (not= :computed (:status active))
+              (empty? (:injuries active)))
+        {:status :absent :reason :no-active-injury}
       (let [selection (or (:injury-selection context)
                           (injury-selection (:meta-repair-transaction-path opts)
                                             (:durable-ledger context) active))]
@@ -1299,7 +1313,7 @@
                           :author-evidence (:author-evidence claim)
                           :observation-pin (:entry-pin claim)}))
                 {:status :absent :reason :transaction-injury-not-active}))
-            {:status :absent :reason :no-transaction}))))))
+            {:status :absent :reason :no-transaction})))))))
 
 (defn carried-bindings
   "Return persisted diagnosis and acceptance bindings for an active injury."

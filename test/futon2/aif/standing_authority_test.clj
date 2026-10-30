@@ -12,6 +12,8 @@
             [futon2.aif.load-identity :as li]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
+            [futon2.aif.meta-medic-authority :as medic-authority]
+            [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.standing-authority :as standing]))
 
 (def live-path "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/ledger.edn")
@@ -89,20 +91,77 @@
 
 (deftest four-loaders-fresh-jvm
   (when (.isFile (io/file live-path))
-    (let [v (standing/standing-verifier)]
-      (testing "authority-bearing loads succeed with the same shared verifier"
-        (is (= :loaded (:status (store/load-durable-ledger live-path v))))
-        (is (= :loaded (:status (store/load-ledger live-path v))))
-        (is (= 129 (count (:entries (:ledger (store/load-durable-ledger live-path v)))))))
-      (testing "default and deny loaders still refuse typed"
-        (doseq [loader [#(store/load-durable-ledger live-path)
-                        #(store/load-durable-ledger live-path (fn [_] false))
-                        #(store/load-ledger live-path)
-                        #(store/load-ledger live-path (fn [_] false))]]
-          (let [r (loader)]
-            (is (= :refused (:status r)))
-            (is (= [:entry/transition-invalid] (:defects r)))))))
+    (testing "explicit and DEFAULT (no-opts) loads share the one resolver (P1)"
+      (doseq [loader [#(store/load-durable-ledger live-path (standing/standing-verifier))
+                      #(store/load-durable-ledger live-path)
+                      #(store/load-ledger live-path (standing/standing-verifier))
+                      #(store/load-ledger live-path)]]
+        (let [r (loader)]
+          (is (= :loaded (:status r)) (pr-str (select-keys r [:status :defects])))
+          (is (= 129 (count (:entries (:ledger r))))))))
+    (testing "default loads stamp the resolving authority identity (P4)"
+      (let [r (store/load-durable-ledger live-path)]
+        (is (= (:identity (standing/standing-context)) (:authority-identity r)))
+        (is (not (contains? r :standing-authority-refusal)))))
+    (testing "deny verifier still refuses typed"
+      (doseq [loader [#(store/load-durable-ledger live-path (fn [_] false))
+                      #(store/load-ledger live-path (fn [_] false))]]
+        (let [r (loader)]
+          (is (= :refused (:status r)))
+          (is (= [:entry/transition-invalid] (:defects r))))))
     (is (= live-sha (file-sha live-path)))))
+
+(deftest precharge-refusal-set-witness
+  "Design P5(a): the exact refusal-set transition 13 -> 11 -> 0 pinned through
+  the default composition. Deny refuses all 16 medic ordinals (the precharge
+  witness); the retained union alone (post-039342915, pre-standing) refuses
+  exactly the 11 bundle-grammar ordinals; the standing resolver admits all."
+  (when-let [l (live-ledger)]
+    (let [count-refused
+          (fn [verifier selected]
+            (count (filter seq (vals (walk-defects l verifier selected)))))]
+      (is (= 16 (count-refused (fn [_] false) deny-failing-ordinals))
+          "deny control: no blanket trust, all 16 medic ordinals refuse")
+      (is (= 11 (count-refused (medic-authority/with-retained-authorities (fn [_] false))
+                               (into recovered-ordinals #{118 125})))
+          "composition fix only: exactly the 11 bundle-grammar ordinals refuse")
+      (is (zero? (count-refused (standing/standing-verifier)
+                                (into recovered-ordinals #{118 125})))
+          "standing default path: 0 refusals"))
+    (is (= live-sha (file-sha live-path)))))
+
+(defn- all-paths [x]
+  (cond
+    (map? x) (into #{} (comp (mapcat all-paths) (remove nil?)) (vals x))
+    (sequential? x) (into #{} (mapcat all-paths) x)
+    (string? x) (when (str/starts-with? x "/") #{x})
+    :else #{}))
+
+(def ^:private carried-bindings-observation
+  #'meta-self-heal/carried-bindings-observation)
+
+(deftest ledger-refused-is-not-silent-absence
+  "Design P3/D4: a refused durable ledger load surfaces :ledger-refused with
+  its typed status/reason/defects, never :no-active-injury."
+  (testing "refused durable load surfaces :ledger-refused"
+    (let [obs (carried-bindings-observation
+               {}
+               {:durable-ledger {:status :refused
+                                 :reason :store/tampered-ledger
+                                 :defects [:entry/transition-invalid]}})]
+      (is (= :absent (:status obs)))
+      (is (= :ledger-refused (:reason obs)))
+      (is (= :store/tampered-ledger (:durable-ledger-reason obs)))
+      (is (= [:entry/transition-invalid] (:durable-ledger-defects obs)))))
+  (testing "a computed empty active set stays :no-active-injury"
+    (is (= :no-active-injury
+           (:reason (carried-bindings-observation
+                     {}
+                     {:durable-ledger {:status :loaded :ledger {:entries []}}
+                      :active-injuries {:status :computed :injuries {}}})))))
+  (testing "no ledger at all is absence, not refusal"
+    (is (= :no-active-injury
+           (:reason (carried-bindings-observation {} {:durable-ledger nil}))))))
 
 (defn- hermetic-root [policy-map evidence-files]
   (let [dir (java.nio.file.Files/createTempDirectory
@@ -182,3 +241,14 @@
           (is (contains? (set (get (walk-defects doctored v #{41}) 41))
                          :observation/medic-admission))))
       (is (= live-sha-before (file-sha live-path)) "no writes"))))
+
+(deftest original-paths-inert-provenance
+  "Design P2/D2 — mutable working-tree receipt paths are inert provenance.
+  Resolution succeeds while pinned original paths are absent or moved on disk."
+  (let [policy (production-policy)
+        paths (all-paths policy)]
+    (is (seq paths))
+    (is (some (complement #(.isFile (io/file %))) paths)
+        "at least one pinned original path is absent on disk (e.g. the deleted
+            ordinal-50 test file) yet the standing context resolves")
+    (is (= :ready (:status (standing/standing-context))))))

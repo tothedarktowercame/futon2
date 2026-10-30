@@ -187,13 +187,19 @@
               "deny still fails all 16; the fix grants nothing to the deny path"))
         (testing "pre-click ledger shows the identical remaining blocker"
           (is (= [38 39 40 41 42 43 44 46 48 50 71] (localize pre union))))
-        (testing "all four supported loaders refuse with the exact typed defect until the blocker is resolved"
+        (testing "explicit union/deny verifiers still refuse the pinned pre-standing ledger with the exact typed defect"
           (let [refusals [(store/load-durable-ledger live-post-click union)
                           (store/load-ledger live-post-click union)
-                          (store/load-durable-ledger live-post-click)
-                          (store/load-ledger live-post-click)]]
+                          (store/load-durable-ledger live-post-click (fn [_] false))
+                          (store/load-ledger live-post-click (fn [_] false))]]
             (is (every? #(= [:refused :store/tampered-ledger]
                             ((juxt :status :reason) %)) refusals))
             (is (every? #(= [:entry/transition-invalid] (:defects %)) refusals))))
+        (testing "default (no-opts) loads now resolve through the standing resolver (P1) and load this ledger"
+          (let [defaults [(store/load-durable-ledger live-post-click)
+                          (store/load-ledger live-post-click)]]
+            (is (every? #(= :loaded (:status %)) defaults))
+            (is (every? #(contains? % :authority-identity) defaults)
+                "each outcome names the resolving authority (P4)")))
         (testing "live ledger bytes untouched by the witness"
           (is (= live-post-click-sha (file-sha live-post-click))))))))
