@@ -27,6 +27,11 @@
       "name": "evidence-review-addendum.json",
       "sha256": "74c849378eb5a15ba9cae578384227caeb78765af29f9ad90a2655545e67edc7",
       "availability": "local notes; summarized here, raw report not bundled"
+    },
+    {
+      "name": "authority-brittleness-design.json",
+      "sha256": "b8bdd20c0fa73826882c096e14bff4a7adac4c0e5dc05d8695f7886c46517b43",
+      "availability": "local report; causal findings and accepted scope summarized in REPORT"
     }
   ],
   "historical_authority_entries": [
@@ -314,5 +319,6 @@
       "observed": "bbef7960bbe44a32971f088e59257a44fd746556d5285212d14e1ff5d2ccf0ea"
     }
   ],
-  "validation_note": "Initial handoff copied malformed/inexact hash strings from local decision report. This revision preserves those strings and independently hashes every retained authorization file. No ledger agreement is inferred solely from this correction."
+  "validation_note": "Initial handoff copied malformed/inexact hash strings from local decision report. This revision preserves those strings and independently hashes every retained authorization file. No ledger agreement is inferred solely from this correction.",
+  "brittleness_prevention_status": "design accepted; implementation pending independent review, no live install"
 }

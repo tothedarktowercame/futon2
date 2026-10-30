@@ -87,3 +87,17 @@ The committed tracker is authoritative; supplementary notes are not a replacemen
 ### Inventory validation correction
 
 The first handoff copied some incomplete/inexact SHA strings from the local decision report. The companion JSON now preserves those reported strings and supplies independently recomputed SHA-256 values for all eleven retained authorization files. Its correction list names each discrepancy. This establishes file-byte hashes, not independent agreement with the ledger pins; an external review must not conflate those checks. The initial validation failure did not stop the first documentation push; this forward correction preserves that history.
+
+## Brittleness diagnosis and accepted prevention scope
+
+The subsequent design distinguishes established causes from hypotheses:
+
+1. The no-options default skipped the existing retained-authority union. Tests supplied explicit contexts, so they missed the production default. This accounts for two rejected receipt types; `039342915` is the independently reviewed partial correction.
+2. Eleven historical bundle approvals depended on a process-local TRUST predicate reconstructed during adoption. Their retained evidence also references mutable filesystem locations. Keeping receipt bytes alone did not preserve a restart-safe authorization context or all historical artifact dependencies.
+3. Authority composition is repeated across runtime resolution, diagnosis, and loader boundaries; inconsistent defaults allowed the first defect.
+4. `carried-bindings-observation` maps non-computed active sets to absence. This obscured the refusal in diagnostics; arbitration itself fails closed.
+5. The claimed old-code/reload timeline remains unproved. It is not needed to justify recovery.
+
+The approved prevention scope is a single shared authority resolver; a sealed, content-addressed record of precisely the approved trust scopes with their evidence; preservation of typed ledger refusal instead of absence; diagnostic resolver identity; and fresh-process/restart, moved-evidence, tamper, unknown-scope and pre-charge-refusal tests. This is implementation scope, **not a claim that it has landed**. New adoption writers must retain evidence needed for later revalidation; this does not automatically authorize new trust scopes. If writer changes exceed the existing retention boundary, return a concrete gap rather than silently expanding policy.
+
+The local causal-design report is pinned in the companion JSON. External reviewers should check the implementation against these claims, especially actual no-options production entry and receipt dependencies after a cold start.
