@@ -593,27 +593,56 @@
                 (and correction (get-in result [:result :answer-delivery]))
                 (assoc-in [:result :answer-delivery :format-correction] correction))))))))
 
+(defn reselect-q6-refusal
+  "Run the inner judge, reusing the single click-local reading reselection port
+  when Q6 removes the entire family. No port means no new selection authority.
+  The port owns the shared one-reselection budget (including reading failures)."
+  [opts judge]
+  (let [current (selected-target-reading/current-options opts)
+        generated (judge current)
+        q6 (get-in generated [:judgement :decision :selection-certificate :q6])
+        target (get-in current [:task :id])]
+    (if (and (= :refused (:status q6))
+             (= :repeat-choice-after-refusal (:kind q6))
+             target (:selected-target-reading-reselect-fn opts))
+      (let [refusal {:target target :kind :repeat-choice-after-refusal
+                     :scope :this-click
+                     :predecessor-run-id (get-in q6 [:predecessor :previous-run/id])
+                     :digest (:input-digest q6) :q6 q6}
+            replacement ((:selected-target-reading-reselect-fn opts) refusal)
+            after (selected-target-reading/current-options opts)]
+        (cond
+          (:target replacement) (judge after)
+          (nil? (get-in after [:task :id]))
+          {:absent :no-task-selected
+           :outer/selection (:outer/selection after)
+           :judgement {:decision {:status :absent :kind :no-task-selected
+                                  :refusals (:outer-field/excluded (:outer/selection after))}}}
+          :else generated))
+      generated)))
+
 (defn- selection-judge
   [opts days]
-  (let [opts (selected-target-reading/current-options opts)]
-  (wm/generate-war-machine
-   days
-   (merge (wm/accumulation-config)
-          (select-keys opts [:g-law :accumulate-strategic-habit? :run-id
-                             :loaded-code-identity :cascade-habit-path
-                             :cascade-feedback-path :cascade-feedback-metadata
-                             :observation-labels-path :flight :trace-dir
-                             :task
-                             :selection-timing/state :nano-time-fn
-                             ;; the decision forms every target's policy
-                             ;; family against this pinned graph
-                             :pattern-graph-path :target-reading-root
-                             :occurrence-square-root :pattern-library-root
-                             :require-occurrence-squares?
-                             :q6/predecessor :r20/makeup :outer/makeup-path])
-          (select-keys opts [:meta-field-observation :meta-field-source-pin])
-          ;; Construction publishes below. Do not publish twice.
-          {:trace? false :include-advisory-lanes? false :defer-render? true}))))
+  (reselect-q6-refusal opts
+    (fn [opts]
+     (wm/generate-war-machine
+    days
+    (merge (wm/accumulation-config)
+           (select-keys opts [:g-law :accumulate-strategic-habit? :run-id
+                              :loaded-code-identity :cascade-habit-path
+                              :cascade-feedback-path :cascade-feedback-metadata
+                              :observation-labels-path :flight :trace-dir
+                              :task
+                              :selection-timing/state :nano-time-fn
+                              ;; the decision forms every target's policy
+                              ;; family against this pinned graph
+                              :pattern-graph-path :target-reading-root
+                              :occurrence-square-root :pattern-library-root
+                              :require-occurrence-squares?
+                              :q6/predecessor :r20/makeup :outer/makeup-path])
+           (select-keys opts [:meta-field-observation :meta-field-source-pin])
+           ;; Construction publishes below. Do not publish twice.
+           {:trace? false :include-advisory-lanes? false :defer-render? true})))))
 
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
@@ -818,8 +847,9 @@
     (fn [refusal]
       (when (compare-and-set! used? false true)
         (let [target (:target refusal)
-              exclusion {:target target :reason (:kind refusal)
-                         :scope :this-click :reader-refusal refusal}
+              exclusion (merge {:target target :reason (:kind refusal)
+                                :scope :this-click :reader-refusal refusal}
+                               (select-keys refusal [:predecessor-run-id :digest]))
               ranked (disj (set (:outer-score/admitted initial-selection)) target)
               reduced (update observation :field
                               #(vec (filter (fn [c] (contains? ranked (:target c))) %)))
