@@ -181,6 +181,8 @@
                 :cascade-id (:cascade-id selection-result)}))
     (:steps entry)))
 
+(declare valid-state? check-pending-makeup!)
+
 (defn next-state
   "The learned-state part of Lean `R20Step.step`.
 
@@ -188,6 +190,7 @@
   gain and readiness-state counts with makeup rates, and increments the click
   count.  It performs no I/O."
   [makeup state selection-result observation {:keys [ending-class observed-gain]}]
+  (check-pending-makeup! makeup state selection-result)
   (let [cascade (chosen-cascade makeup selection-result)
         model (outer-score/outer-model
                (assoc observation
@@ -223,6 +226,64 @@
        (= #{:none :one :several} (set (keys (:gain-counts state))))
        (every? positive-number? (vals (:gain-counts state)))))
 
+(defn- state-bytes [state]
+  (.getBytes (str (pr-str (dissoc state :source)) "\n") "UTF-8"))
+
+(defn- makeup-values [makeup]
+  (dissoc makeup :makeup/sha256 :makeup/path))
+
+(defn- check-makeup-extension! [old new]
+  (validate-makeup! old :old-makeup)
+  (validate-makeup! new :new-makeup)
+  (when-not (and (not (contains? old :precision-iterations))
+                 (nat-int? (:precision-iterations new))
+                 (= (makeup-values old)
+                    (dissoc (makeup-values new) :precision-iterations)))
+    (refuse! :makeup-migration-not-precision-only
+             {:old (makeup-values old) :new (makeup-values new)})))
+
+(defn migrate-makeup-pin
+  "Pure, narrowly admitted Makeup extension. All state values except the pin
+  are retained unchanged. State SHAs use write-state!'s encoding; when the
+  supported reader supplied exact original bytes, the old SHA pins those bytes.
+  The receipt is stored separately, never inserted into the learned state."
+  [state old-makeup new-makeup]
+  (check-makeup-extension! old-makeup new-makeup)
+  (when-not (and (valid-state? state)
+                 (= (:makeup/sha256 state) (:makeup/sha256 old-makeup))
+                 (string? (:makeup/sha256 new-makeup)))
+    (refuse! :makeup-migration-state-mismatch {}))
+  (let [migrated (assoc state :makeup/sha256 (:makeup/sha256 new-makeup))
+        receipt {:schema :wm/makeup-pin-migration-v1
+                 :old-makeup old-makeup :new-makeup new-makeup
+                 :old-makeup-sha256 (:makeup/sha256 old-makeup)
+                 :new-makeup-sha256 (:makeup/sha256 new-makeup)
+                 :old-state-sha256 (or (::bytes-sha256 (meta state))
+                                       (sha256 (state-bytes state)))
+                 :new-state-sha256 (sha256 (state-bytes migrated))
+                 :learning-parameters-equal true}]
+    {:state (with-meta migrated {::migration receipt}) :receipt receipt}))
+
+(defn- checked-migration? [state makeup receipt]
+  (and (= :wm/makeup-pin-migration-v1 (:schema receipt))
+       (true? (:learning-parameters-equal receipt))
+       (= makeup (:new-makeup receipt))
+       (= (:makeup/sha256 state) (:makeup/sha256 makeup)
+          (:new-makeup-sha256 receipt))
+       (= (:old-makeup-sha256 receipt) (get-in receipt [:old-makeup :makeup/sha256]))
+       (= (:new-state-sha256 receipt) (sha256 (state-bytes state)))
+       (do (check-makeup-extension! (:old-makeup receipt) (:new-makeup receipt)) true)))
+
+(defn- check-pending-makeup! [makeup state selection]
+  (when (:pending state)
+    (let [pin (:makeup/sha256 selection)
+          receipt (::migration (meta state))]
+      (when-not (or (= pin (:makeup/sha256 makeup))
+                    (and (= pin (:old-makeup-sha256 receipt))
+                         (checked-migration? state makeup receipt)))
+        (refuse! :pending-makeup-migration-required
+                 {:selection-makeup pin :current-makeup (:makeup/sha256 makeup)})))))
+
 (defn read-state
   "Read the durable `R20Step.State` carrier, or return init marked `:source :init`.
 
@@ -240,7 +301,15 @@
            (refuse! :makeup-changed {:path (str path)
                                      :expected (:makeup/sha256 makeup)
                                      :actual (:makeup/sha256 state)}))
-         (assoc state :source :durable))))))
+         (let [digest (sha256 bytes)
+               receipt-file (io/file (str path ".makeup-migration-" digest ".edn"))
+               receipt (when (.isFile receipt-file)
+                         (read-one (Files/readAllBytes (.toPath receipt-file))
+                                   :invalid-migration-receipt (str receipt-file)))
+               result (assoc state :source :durable)]
+           (when (and receipt (not (checked-migration? result makeup receipt)))
+             (refuse! :invalid-migration-receipt {:path (str receipt-file)}))
+           (with-meta result {::bytes-sha256 digest ::migration receipt})))))))
 
 (defn write-state!
   "Atomically replace the durable `R20Step.State` carrier in one directory."
@@ -253,7 +322,7 @@
          _ (io/make-parents target)
          temp (io/file parent (str "." (.getName target) "." (UUID/randomUUID) ".tmp"))]
      (try
-       (spit temp (str (pr-str (dissoc state :source)) "\n"))
+       (Files/write (.toPath temp) (state-bytes state) (make-array java.nio.file.OpenOption 0))
        (*before-state-move* temp target)
        (Files/move (.toPath temp) (.toPath target)
                    (into-array StandardCopyOption
@@ -263,3 +332,28 @@
         :click-count (:click-count state) :makeup/sha256 (:makeup/sha256 state)}
        (finally
          (when (.exists temp) (Files/deleteIfExists (.toPath temp))))))))
+
+(defn write-makeup-migration!
+  "Apply an already computed migration, retaining exact old bytes and its
+  separate receipt. Refuses a changed source file before any write."
+  [path {:keys [state receipt]}]
+  (let [target (io/file path)
+        bytes (Files/readAllBytes (.toPath target))
+        old-sha (sha256 bytes)
+        backup (io/file (str path ".pre-r20-" (subs old-sha 0 8)))
+        receipt-file (io/file (str path ".makeup-migration-"
+                                   (:new-state-sha256 receipt) ".edn"))]
+    (when-not (and (= old-sha (:old-state-sha256 receipt))
+                   (checked-migration? state (:new-makeup receipt) receipt)
+                   (= (dissoc (read-one bytes :invalid-state (str path)) :makeup/sha256 :source)
+                      (dissoc state :makeup/sha256 :source)))
+      (refuse! :makeup-migration-source-changed {:path (str path)}))
+    (when (and (.exists backup)
+               (not= old-sha (sha256 (Files/readAllBytes (.toPath backup)))))
+      (refuse! :makeup-migration-backup-conflict {:path (str backup)}))
+    (when-not (.exists backup)
+      (Files/write (.toPath backup) bytes (make-array java.nio.file.OpenOption 0)))
+    (spit receipt-file (str (pr-str receipt) "\n"))
+    (write-state! path state)
+    {:status :migrated :receipt receipt :backup (.getCanonicalPath backup)
+     :receipt-path (.getCanonicalPath receipt-file)}))

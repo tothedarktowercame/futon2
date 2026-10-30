@@ -166,7 +166,9 @@
         records (doto (io/file root "records") .mkdirs)
         current-dir (doto (io/file root "current-run") .mkdirs)
         run-id "retained-already-satisfied"
-        selected {:cascade-index 0 :cascade-id :ready
+        ;; Production retained selections always carry their Makeup pin.
+        selected {:makeup/sha256 (:makeup/sha256 makeup)
+                  :cascade-index 0 :cascade-id :ready
                   :selection {:selected candidate}
                   :focus "WM" :selected-relation :associated}
         state (assoc (outer-state/init-state makeup)
