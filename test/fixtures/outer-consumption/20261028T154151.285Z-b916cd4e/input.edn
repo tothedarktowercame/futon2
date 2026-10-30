@@ -1,0 +1,2128 @@
+{:as-of "2026-10-28",
+ :edges
+ [{:class :closure,
+   :file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+   :from :M-a-sorry-enterprise,
+   :kind :item,
+   :line 154,
+   :note
+   "A's own relationship table marks M-repl-wins-over-cli as a prerequisite: the evidence pipeline must work before the sorry-mining can run.",
+   :quote
+   "| M-repl-wins-over-cli | Prerequisite — evidence pipeline must work |",
+   :source :prose-reading,
+   :to :M-repl-wins-over-cli}
+  {:class :artifact,
+   :file "futon2/holes/missions/M-aif-gap-epistemic-affordance.md",
+   :from :M-aif-gap-epistemic-affordance,
+   :kind :item,
+   :line 66,
+   :note
+   "Constraint C5 requires every affordance price to be produced by the EIG implementation that mission supplies; A needs B's artifact.",
+   :quote "EIG implementation from `M-aif-policy-conditioned-eig`.",
+   :source :prose-reading,
+   :to :M-aif-policy-conditioned-eig}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-bounded-disposition.md",
+   :from :M-bounded-disposition,
+   :kind :item,
+   :line 132,
+   :note
+   "Labelled 'Apparatus dependency': this mission builds on B's probe/boundary/canary/boot-time-check infrastructure.",
+   :quote
+   "**Apparatus dependency:** M-invariant-queue-extend — the probe / boundary / canary / boot-time-check infrastructure both this mission and M-archaeology-control build on.",
+   :source :prose-reading,
+   :to :M-invariant-queue-extend}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-chipwitz-corps.md",
+   :from :M-chipwitz-corps,
+   :kind :item,
+   :line 14,
+   :note
+   "A's evaluation half runs on FutonZero, the machinery B builds; A needs that artifact to measure.",
+   :quote "(the evaluation half rides FutonZero)",
+   :source :prose-reading,
+   :to :M-futonzero-generative}
+  {:class :closure,
+   :file "futon5/holes/missions/M-coupling-as-constraint.md",
+   :from :M-coupling-as-constraint,
+   :kind :item,
+   :line 5,
+   :note "A's header states it is blocked by B until B is done.",
+   :quote
+   "**Blocked by:** M-xor-coupling-probe, M-tpg-coupling-evolution",
+   :source :prose-reading,
+   :to :M-xor-coupling-probe}
+  {:class :closure,
+   :file "futon5/holes/missions/M-coupling-as-constraint.md",
+   :from :M-coupling-as-constraint,
+   :kind :item,
+   :line 5,
+   :note "A's header states it is blocked by B until B is done.",
+   :quote
+   "**Blocked by:** M-xor-coupling-probe, M-tpg-coupling-evolution",
+   :source :prose-reading,
+   :to :M-tpg-coupling-evolution}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-action-cost-modelling.md",
+   :from :M-war-machine-pilot,
+   :kind :item,
+   :line 119,
+   :note
+   "Recorded the other way: the pilot consumes this excursion's prioritisation solution, so M-war-machine-pilot needs M-action-cost-modelling's artifact.",
+   :quote
+   "- **Consumed by** `M-war-machine-pilot.md` — the pilot's prioritisation problem is exactly what this excursion solves",
+   :source :prose-reading,
+   :to :M-action-cost-modelling}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-diagramprover.md",
+   :from :M-diagramprover,
+   :kind :item,
+   :line 170,
+   :note
+   "Listed verbatim under '**Blocking dependencies:**' — diagramprover needs the sorry-boundary data volume that M-apm-solutions Pass 1 produces.",
+   :quote
+   "- M-apm-solutions Pass 1 ≥200 problems (for sorry boundary data volume)",
+   :source :prose-reading,
+   :to :M-apm-solutions}
+  {:class :artifact,
+   :file "futon6/holes/missions/M-differentiable-substrate.md",
+   :from :M-differentiable-substrate,
+   :kind :item,
+   :line 19,
+   :note
+   "The gradient layer runs over the materialised metric/capability-graph that M-mission-scopes-into-substrate-2 D2 built; without that artifact there is nothing to differentiate.",
+   :quote
+   "- **Builds directly on** `M-mission-scopes-into-substrate-2` D2 (claude-3): the materialised",
+   :source :prose-reading,
+   :to :M-mission-scopes-into-substrate-2}
+  {:class :artifact,
+   :file "futon5a/holes/missions/M-eoi-outbox-management.md",
+   :from :M-eoi-outbox-management,
+   :kind :item,
+   :line 102,
+   :note
+   "The outbox/operations layer explicitly consumes the eoi-engine that M-expressions-of-interest owns; the engine is a produced artifact it depends on rather than rebuilds.",
+   :quote
+   "- **Authoring craft** lives in `M-expressions-of-interest` (the eoi-engine). This mission does **not** re-implement authoring; it *consumes* the engine and adds",
+   :source :prose-reading,
+   :to :M-expressions-of-interest}
+  {:class :artifact,
+   :file "futon4/holes/missions/M-essay-corpus-substrate.md",
+   :from :M-editorial-assistant,
+   :kind :item,
+   :line 7,
+   :note
+   "Stated as a direct blocks relation: editorial-assistant Stage 1's WebArxana-visibility completion criterion depends on this mission's D2 projector (other-way edge recorded from the named blocked mission).",
+   :quote
+   "**Blocks:** `M-editorial-assistant` Stage 1 — the editorial-log lands on imported essays so `annotations.edn` round-trips to XTDB by default instead of by aspiration.",
+   :source :prose-reading,
+   :to :M-essay-corpus-substrate}
+  {:class :artifact,
+   :file "futon4/holes/missions/M-essay-corpus-substrate.md",
+   :from :M-essays-edit-cycle,
+   :kind :item,
+   :line 8,
+   :note
+   "The corpus-substrate doc states essays-edit-cycle uses the per-essay home it establishes as its working substrate (other-way edge recorded from the consuming mission).",
+   :quote
+   "`M-essays-edit-cycle` (uses the same per-essay home as its working substrate)",
+   :source :prose-reading,
+   :to :M-essay-corpus-substrate}
+  {:class :artifact,
+   :file "futon5a/holes/missions/M-hypergraph-operator.md",
+   :from :M-hypergraph-operator,
+   :kind :item,
+   :line 85,
+   :note
+   "The mission's own 'Depends on' block names the evidence pipeline for Click data that M-repl-wins-over-cli must produce (see also line 70: Clicks 'depend on evidence API turns, which depend on M-repl-wins-over-cli').",
+   :quote
+   "- **Depends on:** M-repl-wins-over-cli (evidence pipeline for Click data),",
+   :source :prose-reading,
+   :to :M-repl-wins-over-cli}
+  {:class :artifact,
+   :file "futon5a/holes/missions/M-hypergraph-operator.md",
+   :from :M-self-improvement-loop,
+   :kind :item,
+   :line 87,
+   :note
+   "Other-way edge: M-hypergraph-operator's 'Enables' block states M-self-improvement-loop depends on it ('the pocketwatch IS the self-improvement loop', line 88), i.e. that mission needs the pocketwatch artifact this one builds.",
+   :quote
+   "- **Enables:** Click 2 (recording -> creative-boost), M-self-improvement-loop",
+   :source :prose-reading,
+   :to :M-hypergraph-operator}
+  {:class :artifact,
+   :file "futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+   :from :M-hyperreal-dictionary-planning,
+   :kind :item,
+   :line 9,
+   :note
+   "Listed under the header 'Immediate substrate dependencies:' (line 8): this mission needs the superpod substrate M-superpod-mark2 produces, not its closure.",
+   :quote "- `futon6/holes/missions/M-superpod-mark2.md`",
+   :source :prose-reading,
+   :to :M-superpod-mark2}
+  {:class :artifact,
+   :file "futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+   :from :M-hyperreal-dictionary-planning,
+   :kind :item,
+   :line 10,
+   :note
+   "Same 'Immediate substrate dependencies:' header (line 8): needs the substrate M-superpod-mark3 produces.",
+   :quote "- `futon6/holes/missions/M-superpod-mark3.md`",
+   :source :prose-reading,
+   :to :M-superpod-mark3}
+  {:class :artifact,
+   :file "futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+   :from :M-futonzero-mvp,
+   :kind :item,
+   :line 83,
+   :note
+   "Other-way edge: under 'The futon0 missions sharpen the consumer side' — M-futonzero-mvp's wants (tutor interventions, deterministic local artifacts, policy comparison) are demands on the substrate this mission is to produce.",
+   :quote
+   "- `M-futonzero-mvp` wants visible tutor interventions, deterministic local",
+   :source :prose-reading,
+   :to :M-hyperreal-dictionary-planning}
+  {:class :artifact,
+   :file "futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+   :from :M-futonzero-prelim-practice,
+   :kind :item,
+   :line 85,
+   :note
+   "Other-way edge: same consumer-side paragraph — wants 'teaching tactics, capability trajectories, pre-computed navigation layers' from the substrate this mission owns.",
+   :quote
+   "- `M-futonzero-prelim-practice` wants teaching tactics, capability",
+   :source :prose-reading,
+   :to :M-hyperreal-dictionary-planning}
+  {:class :alternative,
+   :file "futon3c/holes/missions/M-invariant-queue-extend.md",
+   :from :M-invariant-queue-extend,
+   :kind :item,
+   :line 49,
+   :note
+   "The lift is stated as either/or: waiting for M-war-machine to land runtime checks is one way among others (implementing minimal in-process versions here is the alternative), also lines 98 and 121.",
+   :quote
+   "`M-war-machine` but is not yet runtime-callable. Lift requires either waiting for `M-war-machine` to land runtime checks, or implementing",
+   :source :prose-reading,
+   :to :M-war-machine}
+  {:class :artifact,
+   :file "futon5a/holes/missions/M-learning-loop.md",
+   :from :M-learning-loop,
+   :kind :item,
+   :line 7,
+   :note
+   "Line 6-7: 'the apparatus M-trip-journal installs is what this mission mines' — this mission's input is the hinge-log/question-pool/sidecar apparatus (line 23) that M-trip-journal produces; it needs that artifact, not the parent mission's closure.",
+   :quote
+   "apparatus M-trip-journal installs is what this mission mines)",
+   :source :prose-reading,
+   :to :M-trip-journal}
+  {:class :artifact,
+   :file "futon3/holes/missions/M-pattern-application-diagnostic.md",
+   :from :M-superpod-mark3,
+   :kind :item,
+   :line 361,
+   :note
+   "M-pattern-application-diagnostic's text says M-superpod-mark3's Stage 3 prompt consumes this taxonomy, i.e. M-superpod-mark3 needs the taxonomy artifact.",
+   :quote
+   "The taxonomy is the choice space the arxiv-aware Stage 3 prompt in `M-superpod-mark3` consumes (see PAPER-SHAPES-INDEX.md §\"Use as a prompt choice space\").",
+   :source :prose-reading,
+   :to :M-pattern-application-diagnostic}
+  {:class :artifact,
+   :file "futon3/holes/missions/M-pattern-application-diagnostic.md",
+   :from :M-trip-journal,
+   :kind :item,
+   :line 33,
+   :note
+   "M-trip-journal's hinge-evaluation will consume the A-side typed records this mission produces.",
+   :quote
+   "- `futon5a/holes/missions/M-trip-journal.md` — installs the hinge-log register; will consume A-side typed records once they exist.",
+   :source :prose-reading,
+   :to :M-pattern-application-diagnostic}
+  {:class :artifact,
+   :file "futon3/holes/missions/M-pattern-mining.md",
+   :from :M-learning-loop,
+   :kind :item,
+   :line 144,
+   :note
+   "M-pattern-mining's text states M-learning-loop depends on the retrieval substrate whose well-formedness M-pattern-mining establishes.",
+   :quote
+   "M-learning-loop depends on the same substrate being well-formed.",
+   :source :prose-reading,
+   :to :M-pattern-mining}
+  {:class :artifact,
+   :file "futon3/holes/missions/M-pattern-mining.md",
+   :from :M-trip-journal,
+   :kind :item,
+   :line 115,
+   :note
+   "M-pattern-mining's text states it is the precondition for M-trip-journal's B→A register.",
+   :quote
+   "M-pattern-mining is the precondition for it: B→A learning depends on the A→B side being honest.",
+   :source :prose-reading,
+   :to :M-pattern-mining}
+  {:class :artifact,
+   :file "futon3/holes/missions/M-pattern-retrieval-calibration.md",
+   :from :M-pattern-retrieval-calibration,
+   :kind :item,
+   :line 714,
+   :note
+   "Explicit dependency: this mission's P-1 needs M-pattern-mining's P-8 auto-ingest watcher artifact.",
+   :quote
+   "**Dependencies surfaced:** P-1 needs M-pattern-mining P-8 (auto-ingest watcher) for the projection to be a substrate rather than a one-shot.",
+   :source :prose-reading,
+   :to :M-pattern-mining}
+  {:class :artifact,
+   :file "futon0/holes/missions/M-patterns-done-right.md",
+   :from :M-patterns-done-right,
+   :kind :item,
+   :line 150,
+   :note
+   "Listed under this mission's explicit Dependencies section: it needs the canonical parser, rulebook and conclusion-aliases from M-pattern-retrieval-calibration §D-9..D-11.",
+   :quote
+   "- M-pattern-retrieval-calibration §D-9..D-11 — canonical parser, rulebook, conclusion-aliases.",
+   :source :prose-reading,
+   :to :M-pattern-retrieval-calibration}
+  {:class :artifact,
+   :file "futon0/holes/missions/M-patterns-done-right.md",
+   :from :M-patterns-done-right,
+   :kind :item,
+   :line 151,
+   :note
+   "Listed under this mission's explicit Dependencies section: it needs the typed-slot schema and geometric commitment from M-pattern-application-diagnostic.",
+   :quote
+   "- M-pattern-application-diagnostic — typed-slot schema, geometric commitment (T, ∇, Δ).",
+   :source :prose-reading,
+   :to :M-pattern-application-diagnostic}
+  {:class :artifact,
+   :file "futon0/holes/missions/M-patterns-done-right.md",
+   :from :M-patterns-done-right,
+   :kind :item,
+   :line 152,
+   :note
+   "Listed under this mission's explicit Dependencies section: it needs M-the-futon-stack's CCT-1 canonical-parser invariant.",
+   :quote "- M-the-futon-stack §CCT-1 — canonical-parser invariant.",
+   :source :prose-reading,
+   :to :M-the-futon-stack}
+  {:class :closure,
+   :file "futon3c/holes/missions/M-stack-inhabitation.md",
+   :from :M-stack-inhabitation,
+   :kind :item,
+   :line 125,
+   :note
+   "Table names M-repl-wins-over-cli an explicit Prerequisite — the entry ceremony for the primary surface this mission tests.",
+   :quote
+   "| M-repl-wins-over-cli | Prerequisite (TESTING) — entry ceremony for the primary surface |",
+   :source :prose-reading,
+   :to :M-repl-wins-over-cli}
+  {:class :closure,
+   :file "futon3c/holes/missions/M-state-snapshot-witness.md",
+   :from :M-state-snapshot-witness,
+   :kind :item,
+   :line 67,
+   :note
+   "Foundation line says this mission depends on M-reachable-from-boot; snapshot creation belongs in the bootstrap path.",
+   :quote
+   "- **Foundation:** depends on M-reachable-from-boot (snapshot creation belongs in the bootstrap construction path).",
+   :source :prose-reading,
+   :to :M-reachable-from-boot}
+  {:class :closure,
+   :file "futon6/holes/missions/M-superpod-mark3.md",
+   :from :M-pattern-application-diagnostic,
+   :kind :item,
+   :line 13,
+   :note
+   "Other-way: mark3 is stated to be the substrate-side delivery for prototype 2 of M-pattern-application-diagnostic.",
+   :quote
+   "[`futon3/holes/missions/M-pattern-application-diagnostic.md`](../../../futon3/holes/missions/M-pattern-application-diagnostic.md) — mark3 is the substrate-side delivery for prototype 2 of that mission (math-corpus-as-hypergraph; pattern application",
+   :source :prose-reading,
+   :to :M-superpod-mark3}
+  {:class :alternative,
+   :file "futon5a/holes/missions/M-trip-journal.md",
+   :from :M-trip-journal,
+   :kind :item,
+   :line 373,
+   :note
+   "Trip-journal's exit criterion 7 requires a second mission (daily-scan named as candidate) to adopt the hinge-log before the convention counts as travelling — an external adoption dependency, with daily-scan only one candidate.",
+   :quote
+   "7. **Adoption-ready**: a second mission (candidate: M-daily-scan in futon7) begins maintaining a hinge-log, validating that the",
+   :source :prose-reading,
+   :to :M-daily-scan}
+  {:class :artifact,
+   :file "futon5a/holes/missions/M-war-machine-wiring.md",
+   :from :M-war-machine-wiring,
+   :kind :item,
+   :line 1509,
+   :note
+   "Wiring's substrate 4 is explicitly 'partially blocked' on operator-activity capture surfaces, of which the hinge-log capture is M-trip-journal's apparatus.",
+   :quote
+   "`holes/missions/M-*.md` parsing), hinge-log entries (per M-trip-journal apparatus — verify capture is live), operator priorities ledger (verify it exists). For each missing surface, the operator-coupled substrate (substrate 4) is partially blocked.",
+   :source :prose-reading,
+   :to :M-trip-journal}
+  {:class :artifact,
+   :file "futon4/holes/missions/M-web-arxana-missions.md",
+   :from :M-web-arxana-missions,
+   :kind :item,
+   :line 167,
+   :note
+   "The mission's L3 spine is to reuse the superpod NLP hypergraph system that M-prior-mathematics produced, so it needs that artifact.",
+   :quote
+   "capability-substitute — **reuse the superpod Stage-5 NLP hypergraph system** ([M-prior-mathematics], futon6 `superpod-job.py` / `clean-ner-kernel.py` / `topic_prior.py`)",
+   :source :prose-reading,
+   :to :M-prior-mathematics}
+  {:class :artifact,
+   :file "futon2/holes/missions/M-wm-strategic-mission-selection.md",
+   :from :M-wm-strategic-mission-selection,
+   :kind :item,
+   :line 184,
+   :note
+   "A live flip under this mission cannot be authorized by its own stages; only M-shared-memory-control-build-test's promotion gates authorize it.",
+   :quote
+   "The authoritative cross-repository build/test promotion gates are in futon3c `holes/missions/M-shared-memory-control-build-test.md`. The stages below state the WM theory dependencies; they do not independently authorize a live flip.",
+   :source :prose-reading,
+   :to :M-shared-memory-control-build-test}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-wm-wiring.md",
+   :from :M-wm-wiring,
+   :kind :item,
+   :line 82,
+   :note
+   "The wiring mission's own relationship section states it depends on M-autoclock-in as the first flight target and the clocking step.",
+   :quote
+   "Depends on PROOF-2a (the components and their clauses) and on M-autoclock-in (the first target and the clocking step).",
+   :source :prose-reading,
+   :to :M-autoclock-in}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-wm-wiring.md",
+   :from :M-wm-wiring,
+   :kind :item,
+   :line 82,
+   :note
+   "The outer cascade this mission wires reads operator-turn evidence that M-the-perfect-crime supplies.",
+   :quote
+   "M-the-perfect-crime supplies the operator-turn evidence the outer cascade reads and the red-tape cases.",
+   :source :prose-reading,
+   :to :M-the-perfect-crime}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-xenotype-its.md",
+   :from :M-xenotype-its,
+   :kind :item,
+   :line 8,
+   :note
+   "The lineage states this mission sits atop the corpus and loop that M-codex-sorry-loop provides.",
+   :quote "M-codex-sorry-loop (the corpus + loop this sits atop),",
+   :source :prose-reading,
+   :to :M-codex-sorry-loop}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-象-2000.md",
+   :from :M-象-2000,
+   :kind :item,
+   :line 155,
+   :note
+   "Listed under the mission's explicit \"Depends on:\" — clocks from M-autoclock-in give acts their mission context.",
+   :quote "M-autoclock-in (clocks give acts a mission context).",
+   :source :prose-reading,
+   :to :M-autoclock-in}
+  {:class :artifact,
+   :file "futon3c/holes/missions/M-象-2000.md",
+   :from :M-the-perfect-crime,
+   :kind :item,
+   :line 157,
+   :note
+   "M-象-2000's own Enables list names M-the-perfect-crime as something it enables (claim-checking against the record), so the need runs the other way.",
+   :quote
+   "- **Enables:** pattern attestation and library growth; the mined pattern graph (`futon3c/scripts/mined_pattern_graph.py`) as input to the War Machine; M-the-perfect-crime (checking a claim against the record as it stood).",
+   :source :prose-reading,
+   :to :M-象-2000}
+  {:class :closure,
+   :file "futon3c/holes/missions/M-giraffe.md",
+   :from :M-apm-capability-ratchet,
+   :kind :item,
+   :line 77,
+   :note
+   "Joe's stated order, 2026-10-26: the first cross-mission dependency in the operator's words.",
+   :quote
+   "the futon0 APM work (`M-apm-capability-ratchet`) does not make sense before the \"AI can pass prelims\" capability (`M-futonzero-prelim-practice`)",
+   :source :prose-reading,
+   :to :M-futonzero-prelim-practice}],
+ :items
+ [{:declared-status
+   "OPEN — MAP — capability-topology map and evidence-observation substrate survey added 2026-07-22",
+   :file "futon0/holes/missions/M-apm-capability-ratchet.md",
+   :id :M-apm-capability-ratchet,
+   :repo "futon0",
+   :source-order 0,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — CLOSED 2026-06-10 — operator close via WM pilot cycle #1 (pilot claude-3); caveats spun out to [[E-starmap-branch-merge]], [[E-starmap-full-registry-scan]], [[E-starmap-efe-hardening]], [[E-starmap-vsatarcs-regen]].",
+   :file "futon0/holes/missions/M-capability-star-map.md",
+   :id :M-capability-star-map,
+   :repo "futon0",
+   :source-order 1,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — The pinned FUTON corpus traversal and honest coverage record are complete in this file: 6,810 reachable-history items are accounted for by grain and repository.",
+   :file "futon0/holes/missions/M-capability-zones-S1-coverage.md",
+   :id :M-capability-zones-S1-coverage,
+   :repo "futon0",
+   :source-order 2,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — S1 seeds, `zone-of`, harvest, tests, and the coverage note landed in futon2 commit `56df8e52b` and `holes/missions/M-capability-zones-S1-coverage.md`.",
+   :file "futon0/holes/missions/M-capability-zones-S1-handoff.md",
+   :id :M-capability-zones-S1-handoff,
+   :repo "futon0",
+   :source-order 3,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — Both native-currency EFE legs and their discrimination/degradation tests landed in futon2 commit `b3b0e473c`.",
+   :file "futon0/holes/missions/M-capability-zones-S2a-handoff.md",
+   :id :M-capability-zones-S2a-handoff,
+   :repo "futon0",
+   :source-order 6,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — Artifact-shaped discharge contracts, backward compatibility, independent validation, and tests landed in futon2 commit `03d341d12`.",
+   :file "futon0/holes/missions/M-capability-zones-S2b-handoff.md",
+   :id :M-capability-zones-S2b-handoff,
+   :repo "futon0",
+   :source-order 7,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — acceptance landed as futon2 `200a850c`; `M-capability-zones.md` checkpoint 5 records owner review and green gates",
+   :file "futon0/holes/missions/M-capability-zones-S3-handoff.md",
+   :id :M-capability-zones-S3-handoff,
+   :repo "futon0",
+   :source-order 8,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — checkpoint 5 records the arc resolved: obligations 036, 037, 039, 041 and initialization resolved against grounded attempt-046; old status: INSTANTIATE (S1) — chartered 2026-07-19 (claude-9 draft from the morning-after",
+   :file "futon0/holes/missions/M-capability-zones.md",
+   :id :M-capability-zones,
+   :repo "futon0",
+   :source-order 9,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — HEAD (drafted 2026-08-21, claude-13 + Joe, emacs-repl)",
+   :file "futon0/holes/missions/M-futon-problems.md",
+   :id :M-futon-problems,
+   :repo "futon0",
+   :source-order 10,
+   :state-group :started}
+  {:declared-status "CLOSED — COMPLETE (2026-03-04)",
+   :file "futon0/holes/missions/M-futonzero-capability.md",
+   :id :M-futonzero-capability,
+   :repo "futon0",
+   :source-order 11,
+   :state-group :completed}
+  {:declared-status "OPEN — HEAD / IDENTIFY charter",
+   :file "futon0/holes/missions/M-futonzero-generative.md",
+   :id :M-futonzero-generative,
+   :repo "futon0",
+   :source-order 12,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY (mission proposal)",
+   :file "futon0/holes/missions/M-futonzero-mvp.md",
+   :id :M-futonzero-mvp,
+   :repo "futon0",
+   :source-order 13,
+   :state-group :started}
+  {:declared-status
+   "OPEN — HEAD — operator shape captured 2026-08-15; second operator session",
+   :file "futon0/holes/missions/M-futonzero-prelim-practice.md",
+   :id :M-futonzero-prelim-practice,
+   :repo "futon0",
+   :source-order 14,
+   :state-group :started}
+  {:declared-status
+   "HEAD and IDENTIFY accepted 2026-09-26 · **MAP closed** 2026-09-26",
+   :file "futon0/holes/missions/M-joe-told-me-about-futon.md",
+   :id :M-joe-told-me-about-futon,
+   :repo "futon0",
+   :source-order 15,
+   :state-group :started}
+  {:declared-status
+   "OPEN · HEAD drafted 2026-10-10 · MAP not started (a first-pass",
+   :file "futon0/holes/missions/M-landscape-positioning.md",
+   :id :M-landscape-positioning,
+   :repo "futon0",
+   :source-order 16,
+   :state-group :started}
+  {:declared-status
+   "OPEN — OPEN (drafted 2026-05-04; sibling to M-the-futon-stack).",
+   :file "futon0/holes/missions/M-patterns-done-right.md",
+   :id :M-patterns-done-right,
+   :repo "futon0",
+   :source-order 17,
+   :state-group :started}
+  {:declared-status
+   "OPEN — PARTIAL (Phase 1 shipped 2026-04-25; Phases 2–4 deferred)",
+   :file "futon0/holes/missions/M-stack-hud-refactor.md",
+   :id :M-stack-hud-refactor,
+   :repo "futon0",
+   :source-order 18,
+   :state-group :started}
+  {:declared-status
+   "OPEN — DERIVE phase, pre-INSTANTIATE. Authored 2026-05-21 by claude-9",
+   :file
+   "futon0/holes/missions/M-the-futon-stack-Q6-r12-design-choices.md",
+   :id :M-the-futon-stack-Q6-r12-design-choices,
+   :repo "futon0",
+   :source-order 19,
+   :state-group :started}
+  {:declared-status
+   "OPEN — ACTIVE (since November 2025; mission text drafted 2026-05-01).",
+   :file "futon0/holes/missions/M-the-futon-stack.md",
+   :id :M-the-futon-stack,
+   :repo "futon0",
+   :source-order 20,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY (mission proposal)",
+   :file "futon0/holes/missions/M-usage-hacking.md",
+   :id :M-usage-hacking,
+   :repo "futon0",
+   :source-order 21,
+   :state-group :started}
+  {:declared-status
+   "OPEN — HEAD. Campaign chartered by Joe (emacs-repl, 2026-09-15): \"we need to get real evidence that it can be completed… a new M-G-wm-wiring.md campaign that indexes into these checklist items as its (complex) gap, and that develops a strategy for working through them in a reasonable order that will get us to completion.\"",
+   :file "futon2/holes/missions/M-G-wm-wiring.md",
+   :id :M-G-wm-wiring,
+   :repo "futon2",
+   :source-order 22,
+   :state-group :started}
+  {:declared-status
+   "OPEN — **INSTANTIATE (Stage 1 production-wired; simulation spike complete; Stage 2 exogenous calibration pending)**",
+   :file "futon2/holes/missions/M-aif-a-matrix-faithfulness.md",
+   :id :M-aif-a-matrix-faithfulness,
+   :repo "futon2",
+   :source-order 23,
+   :state-group :started}
+  {:declared-status
+   "OPEN — **IDENTIFY — dependent on M-aif-policy-conditioned-eig**",
+   :file "futon2/holes/missions/M-aif-gap-epistemic-affordance.md",
+   :id :M-aif-gap-epistemic-affordance,
+   :repo "futon2",
+   :source-order 24,
+   :state-group :started}
+  {:declared-status
+   "OPEN — **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**",
+   :file "futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+   :id :M-aif-policy-conditioned-eig,
+   :repo "futon2",
+   :source-order 25,
+   :state-group :started}
+  {:declared-status "OPEN — OPEN — first continuous-backlog item",
+   :file "futon2/holes/missions/M-f11-find-production-successor.md",
+   :id :M-f11-find-production-successor,
+   :repo "futon2",
+   :source-order 26,
+   :state-group :started}
+  {:declared-status
+   "OPEN — CHARTERED 2026-08-25 (Joe + claude-13). Begins at IDENTIFY: the gap is crisp, so `HEAD` is skipped per `futon4/holes/mission-lifecycle.md`.",
+   :file "futon2/holes/missions/M-formal-war-machine.md",
+   :id :M-formal-war-machine,
+   :repo "futon2",
+   :source-order 27,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY (2026-04-28)",
+   :file "futon2/holes/missions/M-reflective-discipline.md",
+   :id :M-reflective-discipline,
+   :repo "futon2",
+   :source-order 28,
+   :state-group :started}
+  {:declared-status "OPEN — No prior status was recorded.",
+   :file "futon2/holes/missions/M-run-produces-its-own-brief.md",
+   :id :M-run-produces-its-own-brief,
+   :repo "futon2",
+   :source-order 29,
+   :state-group :started}
+  {:declared-status "OPEN — fixture episode milestone pending",
+   :file "futon2/holes/missions/M-u88-contextual-preferences.md",
+   :id :M-u88-contextual-preferences,
+   :repo "futon2",
+   :source-order 30,
+   :state-group :started}
+  {:declared-status
+   "OPEN — INSTANTIATE — Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open",
+   :file "futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+   :id :M-wm-aif-policy-grain-compliance,
+   :repo "futon2",
+   :source-order 31,
+   :state-group :started}
+  {:declared-status
+   "OPEN — DERIVE — typed candidate-projection kernel built dark; direct memory/cascade route now primary",
+   :file "futon2/holes/missions/M-wm-strategic-mission-selection.md",
+   :id :M-wm-strategic-mission-selection,
+   :repo "futon2",
+   :source-order 32,
+   :state-group :started}
+  {:declared-status
+   "OPEN — DERIVE (drafted 2026-07-16, claude-6 from Joe's directive; ratification = Joe). Implementation = codex (runner expert), invariant spec + review = claude-6 (adversarial reviewer of record for the full-loop runner, four verdict rounds 2026-07-16).",
+   :file "futon2/holes/missions/M-wm-tripwires.md",
+   :id :M-wm-tripwires,
+   :repo "futon2",
+   :source-order 33,
+   :state-group :started}
+  {:declared-status
+   "OPEN — HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.",
+   :file "futon2/holes/missions/M-zaif-harness-v1.md",
+   :id :M-zaif-harness-v1,
+   :repo "futon2",
+   :source-order 34,
+   :state-group :started}
+  {:declared-status
+   "SUPERSEDED — COMPLETE (SUPERSEDED) — Agency/Forum interfaces replaced by futon3c evidence landscape (store.clj + threads.clj) (2026-03)",
+   :file "futon3/holes/missions/M-agency-forum.md",
+   :id :M-agency-forum,
+   :repo "futon3",
+   :source-order 35,
+   :state-group :cancelled}
+  {:declared-status
+   "SUPERSEDED — COMPLETE (SUPERSEDED) — Agency invariants A0-A5 reimplemented in futon3c/agency/registry.clj (2026-03)",
+   :file "futon3/holes/missions/M-agency-rebuild.md",
+   :id :M-agency-rebuild,
+   :repo "futon3",
+   :source-order 36,
+   :state-group :cancelled}
+  {:declared-status "CLOSED — :done",
+   :file "futon3/holes/missions/M-agency-unified-routing.md",
+   :id :M-agency-unified-routing,
+   :repo "futon3",
+   :source-order 37,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-arxana-graph-persistence.md",
+   :id :M-arxana-graph-persistence,
+   :repo "futon3",
+   :source-order 38,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-codex-parity.md",
+   :id :M-codex-parity,
+   :repo "futon3",
+   :source-order 39,
+   :state-group :completed}
+  {:declared-status
+   "SUPERSEDED — COMPLETE (SUPERSEDED) — N:1 shared agent registry in futon3c replaces per-agent JVM model (2026-03)",
+   :file "futon3/holes/missions/M-drawbridge-multi-agent.md",
+   :id :M-drawbridge-multi-agent,
+   :repo "futon3",
+   :source-order 41,
+   :state-group :cancelled}
+  {:declared-status "OPEN — in progress",
+   :file "futon3/holes/missions/M-emacs-cursor-peripheral.md",
+   :id :M-emacs-cursor-peripheral,
+   :repo "futon3",
+   :source-order 42,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-f6-agents.md",
+   :id :M-f6-agents,
+   :repo "futon3",
+   :source-order 43,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-f6-arxiv.md",
+   :id :M-f6-arxiv,
+   :repo "futon3",
+   :source-order 44,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-f6-eval.md",
+   :id :M-f6-eval,
+   :repo "futon3",
+   :source-order 45,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-f6-ingest.md",
+   :id :M-f6-ingest,
+   :repo "futon3",
+   :source-order 46,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-f6-recursive.md",
+   :id :M-f6-recursive,
+   :repo "futon3",
+   :source-order 47,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-forum-organization.md",
+   :id :M-forum-organization,
+   :repo "futon3",
+   :source-order 48,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-fucodex-parity.md",
+   :id :M-fucodex-parity,
+   :repo "futon3",
+   :source-order 49,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-futon1a-evidence.md",
+   :id :M-futon1a-evidence,
+   :repo "futon3",
+   :source-order 50,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-futon1a-rebuild-scoping-review.md",
+   :id :M-futon1a-rebuild-scoping-review,
+   :repo "futon3",
+   :source-order 51,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-futon1a-rebuild.md",
+   :id :M-futon1a-rebuild,
+   :repo "futon3",
+   :source-order 52,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-futon1a-workplan.md",
+   :id :M-futon1a-workplan,
+   :repo "futon3",
+   :source-order 53,
+   :state-group :completed}
+  {:declared-status "CLOSED — DONE (2026-03-08) — all 7 criteria PASS",
+   :file "futon3/holes/missions/M-futon3x-e2e.md",
+   :id :M-futon3x-e2e,
+   :repo "futon3",
+   :source-order 54,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-graph-unification.md",
+   :id :M-graph-unification,
+   :repo "futon3",
+   :source-order 55,
+   :state-group :completed}
+  {:declared-status
+   "SUPERSEDED — COMPLETE (SUPERSEDED) — Lab capture reframed as evidence landscape in futon3c; evidence store + thread projection replace Arxana overlays (2026-03)",
+   :file "futon3/holes/missions/M-labs-integration.md",
+   :id :M-labs-integration,
+   :repo "futon3",
+   :source-order 56,
+   :state-group :cancelled}
+  {:declared-status
+   "CLOSED — COMPLETE (2026-04-28). All seven phases delivered;",
+   :file "futon3/holes/missions/M-live-geometric-stack.md",
+   :id :M-live-geometric-stack,
+   :repo "futon3",
+   :source-order 57,
+   :state-group :completed}
+  {:declared-status
+   "SUPERSEDED — COMPLETE (SUPERSEDED) — Identifier separation and runner defaults implemented in futon3c agency layer (2026-03)",
+   :file "futon3/holes/missions/M-make-agency-work-properly.md",
+   :id :M-make-agency-work-properly,
+   :repo "futon3",
+   :source-order 58,
+   :state-group :cancelled}
+  {:declared-status
+   "OPEN — HEAD complete; IDENTIFY drafted; MAP pilot run on 3-mission corpus; DERIVE and beyond pending",
+   :file "futon3/holes/missions/M-mission-coherence-patterns.md",
+   :id :M-mission-coherence-patterns,
+   :repo "futon3",
+   :source-order 59,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-mission-control-scoping.md",
+   :id :M-mission-control-scoping,
+   :repo "futon3",
+   :source-order 60,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-native-plan-coherence.md",
+   :id :M-native-plan-coherence,
+   :repo "futon3",
+   :source-order 61,
+   :state-group :completed}
+  {:declared-status
+   "SUPERSEDED — COMPLETE (SUPERSEDED) — PAR emission via futon3c peripheral/reflect.clj; detach/reattach via peripheral adapter model (2026-03)",
+   :file "futon3/holes/missions/M-par-session-punctuation.md",
+   :id :M-par-session-punctuation,
+   :repo "futon3",
+   :source-order 62,
+   :state-group :cancelled}
+  {:declared-status "OPEN — IDENTIFY (2026-04-27)",
+   :file "futon3/holes/missions/M-pattern-application-diagnostic.md",
+   :id :M-pattern-application-diagnostic,
+   :repo "futon3",
+   :source-order 63,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file
+   "futon3/holes/missions/M-pattern-inference-engine-scoping-review.md",
+   :id :M-pattern-inference-engine-scoping-review,
+   :repo "futon3",
+   :source-order 64,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-pattern-inference-engine.md",
+   :id :M-pattern-inference-engine,
+   :repo "futon3",
+   :source-order 65,
+   :state-group :completed}
+  {:declared-status "OPEN — IDENTIFY (2026-05-26)",
+   :file "futon3/holes/missions/M-pattern-ingest.md",
+   :id :M-pattern-ingest,
+   :repo "futon3",
+   :source-order 66,
+   :state-group :started}
+  {:declared-status
+   "OPEN — MAP (entered 2026-04-27, IDENTIFY 2026-04-26).",
+   :file "futon3/holes/missions/M-pattern-mining.md",
+   :id :M-pattern-mining,
+   :repo "futon3",
+   :source-order 67,
+   :state-group :started}
+  {:declared-status
+   "OPEN — DERIVE (entered 2026-05-04, MAP 2026-05-04, IDENTIFY 2026-05-04).",
+   :file "futon3/holes/missions/M-pattern-retrieval-calibration.md",
+   :id :M-pattern-retrieval-calibration,
+   :repo "futon3",
+   :source-order 68,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-plan-mermaid-viewer.md",
+   :id :M-plan-mermaid-viewer,
+   :repo "futon3",
+   :source-order 69,
+   :state-group :completed}
+  {:declared-status
+   "SUPERSEDED — COMPLETE (SUPERSEDED) — Bridge architecture resolved by futon3c unified dispatch + peripheral model (2026-03)",
+   :file "futon3/holes/missions/M-understand-fucodex.md",
+   :id :M-understand-fucodex,
+   :repo "futon3",
+   :source-order 70,
+   :state-group :cancelled}
+  {:declared-status
+   "OPEN — IDENTIFY + MAP (2026-05-22, perpetual-projection mode — no closure phase scheduled)",
+   :file "futon3/holes/missions/M-weird-modernism.md",
+   :id :M-weird-modernism,
+   :repo "futon3",
+   :source-order 71,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file "futon3/holes/missions/M-ws-emacs-log-stream.md",
+   :id :M-ws-emacs-log-stream,
+   :repo "futon3",
+   :source-order 72,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — ✅ **COMPLETE (2026-06-09, Joe).** All phases IDENTIFY→MAP→DERIVE→ARGUE→VERIFY→",
+   :file "futon3a/holes/missions/M-memes-arrows-patterns-diagrams.md",
+   :id :M-memes-arrows-patterns-diagrams,
+   :repo "futon3a",
+   :source-order 74,
+   :state-group :completed}
+  {:declared-status "OPEN — IDENTIFY",
+   :file "futon3a/holes/missions/M-pattern-posteriors.md",
+   :id :M-pattern-posteriors,
+   :repo "futon3a",
+   :source-order 75,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — Complete (all 6 failure modes fixed, 16 stability tests, 2026-02-23)",
+   :file "futon3c/holes/missions/M-IRC-stability.md",
+   :id :M-IRC-stability,
+   :repo "futon3c",
+   :source-order 77,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — HEAD / IDENTIFY / MAP / DERIVE / ARGUE / VERIFY all drafted and operator-ratified through 2026-05-27. VERIFY's 10 carried-forward tensions: 4 done (T1, T5, T8, T10), 4 held for downstream INSTANTIATE (T2, T4, T6, T9 — all blocked on `E-substrate-2-sorry-typing.md`'s own INSTANTIATE which is a future cycle), 2 future-Joe-triggered (T3, T7). Mission ready for INSTANTIATE when Joe ratifies.",
+   :file "futon3c/holes/missions/M-action-cost-modelling.md",
+   :id :M-action-cost-modelling,
+   :repo "futon3c",
+   :source-order 78,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-agency-hardening-datapoints.md",
+   :id :M-agency-hardening-datapoints,
+   :repo "futon3c",
+   :source-order 79,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — CLOSED 2026-06-12 (Joe's call) — **but see",
+   :file "futon3c/holes/missions/M-agency-hardening.md",
+   :id :M-agency-hardening,
+   :repo "futon3c",
+   :source-order 80,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-agency-refactor.md",
+   :id :M-agency-refactor,
+   :repo "futon3c",
+   :source-order 81,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — IDENTIFY — **PARKED** 2026-06-13 (Joe). Held: claude-1 on `/loop` manages",
+   :file "futon3c/holes/missions/M-agents-queue.md",
+   :id :M-agents-queue,
+   :repo "futon3c",
+   :source-order 82,
+   :state-group :started}
+  {:declared-status
+   "MAP (opened 2026-10-01 at IDENTIFY, claude-17 with codex-10; MAP recorded 2026-10-02). Live; open work is the unchecked items under \"Work items\".",
+   :file "futon3c/holes/missions/M-aif-over-the-operator.md",
+   :id :M-aif-over-the-operator,
+   :repo "futon3c",
+   :source-order 83,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — Complete (10/10 patterns written, commit 2713661, 2026-02-20)",
+   :file "futon3c/holes/missions/M-alfworld-pattern-discovery.md",
+   :id :M-alfworld-pattern-discovery,
+   :repo "futon3c",
+   :source-order 84,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — HEAD complete; IDENTIFY draft pending operator acceptance (2026-08-14)",
+   :file "futon3c/holes/missions/M-apm-demonstration.md",
+   :id :M-apm-demonstration,
+   :repo "futon3c",
+   :source-order 85,
+   :state-group :started}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-apm-solutions.md",
+   :id :M-apm-solutions,
+   :repo "futon3c",
+   :source-order 86,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — INSTANTIATE complete (2026-04-29) for three sibling artifact-classes; deferred siblings recorded in scope-out.",
+   :file "futon3c/holes/missions/M-archaeology-control.md",
+   :id :M-archaeology-control,
+   :repo "futon3c",
+   :source-order 87,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — INSTANTIATE-8 (2026-09-24). Durable clock decisions (INSTANTIATE-5), restoration (6), dispatch lineage (7a), Codex edit activity (7b) and requisition-scoped Kimi seats (8) are implemented. Inherited reclocking across a bell is **implemented and live** (7a; 29 `:source :inherited` decisions in the running Agency as of 2026-09-25) — an earlier revision of this line called it unbuilt, which was wrong. It is **not green**: its `^:slow` pinning test fails two assertions on this tree, because Joe's 2026-09-24 refusal-keeps-the-clock rule widened what `dispatch-inheritance` treats as an inheritable caller. Both are recorded in the second-pass correction at the end of INSTANTIATE-8. Outstanding: two places where a single turn is described by two disagreeing clocks — the Emacs buffer clock versus the durable decision for operator turns (the 2026-09-25 amendment to Rule 0 below), and a seat's requisition target versus the durable decision for a dispatched turn (the correction at the end of INSTANTIATE-8).",
+   :file "futon3c/holes/missions/M-autoclock-in.md",
+   :id :M-autoclock-in,
+   :repo "futon3c",
+   :source-order 88,
+   :state-group :started}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-autonomous-pattern-lifecycle.md",
+   :id :M-autonomous-pattern-lifecycle,
+   :repo "futon3c",
+   :source-order 89,
+   :state-group :started}
+  {:declared-status
+   "OPEN — INSTANTIATE complete (2026-04-29) for the stash slice; siblings handed to Codex via GitHub issue.",
+   :file "futon3c/holes/missions/M-bounded-disposition.md",
+   :id :M-bounded-disposition,
+   :repo "futon3c",
+   :source-order 90,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — open; all four DOCUMENT exit criteria met and the mission records “Mission COMPLETE 2026-05-03.”",
+   :file "futon3c/holes/missions/M-bounded-in-flight-state.md",
+   :id :M-bounded-in-flight-state,
+   :repo "futon3c",
+   :source-order 91,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — Drafted 2026-08-11; awaiting Joe's edit and greenlight.",
+   :file "futon3c/holes/missions/M-case-studies.md",
+   :id :M-case-studies,
+   :repo "futon3c",
+   :source-order 92,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY (chartered 2026-06-11 from a live motivating example)",
+   :file "futon3c/holes/missions/M-chipwitz-corps.md",
+   :id :M-chipwitz-corps,
+   :repo "futon3c",
+   :source-order 93,
+   :state-group :started}
+  {:declared-status "CLOSED — COMPLETE (2026-03-08)",
+   :file "futon3c/holes/missions/M-codex-agent-behaviour.md",
+   :id :M-codex-agent-behaviour,
+   :repo "futon3c",
+   :source-order 94,
+   :state-group :completed}
+  {:declared-status "CLOSED — DONE (2026-03-08)",
+   :file "futon3c/holes/missions/M-codex-irc-execution.md",
+   :id :M-codex-irc-execution,
+   :repo "futon3c",
+   :source-order 95,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — **CHARTERED at Joe's direction** (this conversation: \"produce a",
+   :file "futon3c/holes/missions/M-codex-sorry-loop.md",
+   :id :M-codex-sorry-loop,
+   :repo "futon3c",
+   :source-order 96,
+   :state-group :started}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-cyder.md",
+   :id :M-cyder,
+   :repo "futon3c",
+   :source-order 97,
+   :state-group :started}
+  {:declared-status
+   "OPEN — active — programme of work adopted 2026-08-02; generalised 2026-10-02 to a ladder of diagram flavours with skeleton use cases: Agency behaviour, and M-象-2000 via Fong-style open causal theories (see §Generalisation)",
+   :file "futon3c/holes/missions/M-diagramprover.md",
+   :id :M-diagramprover,
+   :repo "futon3c",
+   :source-order 98,
+   :state-group :started}
+  {:declared-status
+   "OPEN — HEAD complete; IDENTIFY complete; MAP substantially complete (2026-08-14)",
+   :file "futon3c/holes/missions/M-dionysus-winddown.md",
+   :id :M-dionysus-winddown,
+   :repo "futon3c",
+   :source-order 99,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-dispatch-peripheral-bridge.md",
+   :id :M-dispatch-peripheral-bridge,
+   :repo "futon3c",
+   :source-order 100,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — IDENTIFY — diagnosis recorded (Checkpoint 1). Cross-box federation routing",
+   :file "futon3c/holes/missions/M-federated-agency-hardening.md",
+   :id :M-federated-agency-hardening,
+   :repo "futon3c",
+   :source-order 101,
+   :state-group :started}
+  {:declared-status
+   "SUPERSEDED — SUPERSEDED-AS-MISSION toward E-first-flights-transferred-work — Phase A COMPLETE (2026-06-12, operator side-by-side verdict PASS — checkpoint 20). Full lifecycle IDENTIFY → MAP → DERIVE → ARGUE → VERIFY → INSTANTIATE ran 2026-06-11/12. Phase B (policy-grade G(s, π)) and the typed-grounds tail moved to Excursion ownership on 2026-07-06; related fold-frontier work may inform M-fold-ansatz, but M-first-flights no longer carries that work as an open WM target.",
+   :file "futon3c/holes/missions/M-first-flights.md",
+   :id :M-first-flights,
+   :repo "futon3c",
+   :source-order 102,
+   :state-group :cancelled}
+  {:declared-status "CLOSED — DONE (2026-03-08)",
+   :file "futon3c/holes/missions/M-forum-refactor.md",
+   :id :M-forum-refactor,
+   :repo "futon3c",
+   :source-order 103,
+   :state-group :completed}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-fulab-logic.md",
+   :id :M-fulab-logic,
+   :repo "futon3c",
+   :source-order 104,
+   :state-group :started}
+  {:declared-status
+   "**COMPLETE (2026-09-24)** — all eight phase exits met, each verdict in the section and checked against `holes/labs/M-futon-seams/lifecycle.edn` by `scripts/verdict_check.py`. Worked out of order and says so: §Working out of order records that artefacts for five later phases existed within two hours of the mission being written, while its Status line still read IDENTIFY, and what that cost. One instance of eight is enacted, which is the scope the IDENTIFY exit set. Phases 2–7 below were written *after* the work they describe, which is the mission's own most useful finding — see §Working out of order. Recorded from a Matrix conversation between Rob (`@facadebootstrap:into-the-matrix.my-familiar.com`) and claude-1, at Rob's request. Rob is having one of his evolvers record the same conversation on the mfuton side and intends to abstract the mfuton memory MCP's database calls.",
+   :file "futon3c/holes/missions/M-futon-seams.md",
+   :id :M-futon-seams,
+   :repo "futon3c",
+   :source-order 105,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-futon3-last-mile.md",
+   :id :M-futon3-last-mile,
+   :repo "futon3c",
+   :source-order 106,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-futon3c-codex.md",
+   :id :M-futon3c-codex,
+   :repo "futon3c",
+   :source-order 107,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — INSTANTIATE: stage 1 tickets source built 2026-10-27 (§INSTANTIATE; two questions for Joe; mission-docs source and the cone-against-history test still open); stage 2 next. VERIFY pilots 1 and 2 run and scored; DERIVE and ARGUE updated with their results (claude-13, 2026-10-27), plain-language paragraph under discussion with Joe; ARGUE approved provisionally pending the mock-up (2026-10-27; ARGUE open items listed in §Still open in ARGUE; DERIVE open from 2026-10-26, items still unchecked; HEAD, IDENTIFY and MAP exits recorded in §MAP close-out)",
+   :file "futon3c/holes/missions/M-giraffe.md",
+   :id :M-giraffe,
+   :repo "futon3c",
+   :source-order 108,
+   :state-group :started}
+  {:declared-status "CLOSED — DONE",
+   :file "futon3c/holes/missions/M-improve-irc.md",
+   :id :M-improve-irc,
+   :repo "futon3c",
+   :source-order 109,
+   :state-group :completed}
+  {:declared-status "DERIVE pending; MAP complete (2026-09-27)",
+   :file "futon3c/holes/missions/M-inbox-zero-claim-lifecycle.md",
+   :id :M-inbox-zero-claim-lifecycle,
+   :repo "futon3c",
+   :source-order 110,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY (scoped 2026-06-03 at C-substrate-completion dissolution) — **HIGH PRIORITY**, entry-gated. Not yet picked up.",
+   :file "futon3c/holes/missions/M-intent-curvature.md",
+   :id :M-intent-curvature,
+   :repo "futon3c",
+   :source-order 111,
+   :state-group :started}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-invariant-queue-extend.md",
+   :id :M-invariant-queue-extend,
+   :repo "futon3c",
+   :source-order 112,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — parked; the mission records “Mission status: CLOSED (2026-04-29) for INSTANTIATE + DOCUMENT.”",
+   :file "futon3c/holes/missions/M-invariant-queue-unstuck.md",
+   :id :M-invariant-queue-unstuck,
+   :repo "futon3c",
+   :source-order 113,
+   :state-group :completed}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-invariant-violations.md",
+   :id :M-invariant-violations,
+   :repo "futon3c",
+   :source-order 114,
+   :state-group :started}
+  {:declared-status
+   "OPEN — INSTANTIATE v1 LANDED on master + LIVE-VALIDATED 2026-06-10 (agent_pouch.clj, gate in make-claude-invoke-fn, flag FUTON3C_KANGAROO default OFF). VERIFY ✅ — live real-claude `feed-turn!` ×2: turn1 spawn 7.6s → \"ONE\", turn2 warm 3.4s → \"TWO\" (≈2.2× faster even fresh; gap scales with session size = the 5.8MB win). ACTIVATION: next restart (closure-capture, like Car-3) + cr-new agents + flag ON. Reviewed: OFF byte-for-byte cold; ON→cold-fallback on any Throwable; feed-turn! evicts pouch on failure (no desync).",
+   :file "futon3c/holes/missions/M-kangaroo.md",
+   :id :M-kangaroo,
+   :repo "futon3c",
+   :source-order 115,
+   :state-group :started}
+  {:declared-status
+   "OPEN — :designed — ground measured on draft8, slices cut, nothing built yet.",
+   :file "futon3c/holes/missions/M-latex-wysiwyg.md",
+   :id :M-latex-wysiwyg,
+   :repo "futon3c",
+   :source-order 116,
+   :state-group :started}
+  {:declared-status
+   "OPEN — **PROPOSED** (organised by claude-6 at Joe's handoff, 2026-07-27;",
+   :file "futon3c/holes/missions/M-memory-retrieval.md",
+   :id :M-memory-retrieval,
+   :repo "futon3c",
+   :source-order 117,
+   :state-group :started}
+  {:declared-status "CLOSED — Complete (2026-02-26)",
+   :file "futon3c/holes/missions/M-mission-control.md",
+   :id :M-mission-control,
+   :repo "futon3c",
+   :source-order 118,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-mission-peripheral.md",
+   :id :M-mission-peripheral,
+   :repo "futon3c",
+   :source-order 119,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — HEAD authored / IDENTIFY (charter). Greenlit by Joe 2026-06-08.",
+   :file "futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+   :id :M-mission-scopes-into-substrate-2,
+   :repo "futon3c",
+   :source-order 120,
+   :state-group :started}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-mission-wiring.md",
+   :id :M-mission-wiring,
+   :repo "futon3c",
+   :source-order 121,
+   :state-group :started}
+  {:declared-status
+   "OPEN — chartered 2026-07-26; parcel review and live cutover remain",
+   :file "futon3c/holes/missions/M-omni-wm-runner.md",
+   :id :M-omni-wm-runner,
+   :repo "futon3c",
+   :source-order 122,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file
+   "futon3c/holes/missions/M-operational-readiness-traceability.md",
+   :id :M-operational-readiness-traceability,
+   :repo "futon3c",
+   :source-order 123,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — Complete (all 8 issues done, all 4 gates met, 2026-02-20)",
+   :file "futon3c/holes/missions/M-operational-readiness.md",
+   :id :M-operational-readiness,
+   :repo "futon3c",
+   :source-order 124,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-peripheral-behavior.md",
+   :id :M-peripheral-behavior,
+   :repo "futon3c",
+   :source-order 125,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-peripheral-gauntlet.md",
+   :id :M-peripheral-gauntlet,
+   :repo "futon3c",
+   :source-order 126,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-peripheral-model.md",
+   :id :M-peripheral-model,
+   :repo "futon3c",
+   :source-order 127,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-peripheral-phenomenology.md",
+   :id :M-peripheral-phenomenology,
+   :repo "futon3c",
+   :source-order 128,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — **CLOSED 2026-05-29** (operator-ratified, emacs-repl with claude-2). The pilot now appears coherently across all four depths via the differential-operator REPL — see Closing Checkpoint at end. Immersive-storyteller elaboration deferred to `E-storyteller.md`; hole-budget governance to `E-cheesemonger.md`; LOOP-learning + doc-currency automation are named OPEN follow-ons.",
+   :file "futon3c/holes/missions/M-pilot-appearance.md",
+   :id :M-pilot-appearance,
+   :repo "futon3c",
+   :source-order 129,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — HEAD + IDENTIFY drafted; MAP grounded in live census (port 7071) + prior art; awaiting Joe ratification of the deliverable set and phase. Mission-close and phase transitions are Joe's call.",
+   :file "futon3c/holes/missions/M-populate-substrate-2.md",
+   :id :M-populate-substrate-2,
+   :repo "futon3c",
+   :source-order 132,
+   :state-group :started}
+  {:declared-status "CLOSED — DONE (TESTING)",
+   :file "futon3c/holes/missions/M-portfolio-inference.md",
+   :id :M-portfolio-inference,
+   :repo "futon3c",
+   :source-order 133,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-proof-peripheral.md",
+   :id :M-proof-peripheral,
+   :repo "futon3c",
+   :source-order 134,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-psr-pur-mesh-peripheral.md",
+   :id :M-psr-pur-mesh-peripheral,
+   :repo "futon3c",
+   :source-order 135,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — INSTANTIATE complete (2026-05-01) for evidence-store sibling — **STOP-THE-LINE HOT-FIX, outside normal queue cadence.** Three remaining siblings handed to Codex via GitHub issue #65.",
+   :file "futon3c/holes/missions/M-reachable-from-boot.md",
+   :id :M-reachable-from-boot,
+   :repo "futon3c",
+   :source-order 136,
+   :state-group :started}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-repl-wins-over-cli.md",
+   :id :M-repl-wins-over-cli,
+   :repo "futon3c",
+   :source-order 137,
+   :state-group :started}
+  {:declared-status
+   "OPEN — Phases 1–3 ACCEPTED live; Phases 4–7 ACCEPTED dark/shadow;",
+   :file
+   "futon3c/holes/missions/M-shared-memory-control-build-test.md",
+   :id :M-shared-memory-control-build-test,
+   :repo "futon3c",
+   :source-order 138,
+   :state-group :started}
+  {:declared-status
+   "OPEN — OPEN, no ruling. This file records a survey and both sides of the",
+   :file "futon3c/holes/missions/M-sigils-reconsidered.md",
+   :id :M-sigils-reconsidered,
+   :repo "futon3c",
+   :source-order 139,
+   :state-group :started}
+  {:declared-status "OPEN — open",
+   :file "futon3c/holes/missions/M-single-entry-point.md",
+   :id :M-single-entry-point,
+   :repo "futon3c",
+   :source-order 140,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — INSTANTIATE complete (2026-04-29) for the mission-home slice; siblings handed to Codex via GitHub issue #64.",
+   :file "futon3c/holes/missions/M-single-locus.md",
+   :id :M-single-locus,
+   :repo "futon3c",
+   :source-order 141,
+   :state-group :completed}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-sliding-blackboard.md",
+   :id :M-sliding-blackboard,
+   :repo "futon3c",
+   :source-order 142,
+   :state-group :started}
+  {:declared-status
+   "OPEN — :documented 2026-06-11 — every phase touched in one spoken day; GATE OPEN; retrospective in section 7; IOUs in 6.x.",
+   :file "futon3c/holes/missions/M-smart-emacs-cursor.md",
+   :id :M-smart-emacs-cursor,
+   :repo "futon3c",
+   :source-order 143,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-social-exotype.md",
+   :id :M-social-exotype,
+   :repo "futon3c",
+   :source-order 144,
+   :state-group :completed}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-stack-inhabitation.md",
+   :id :M-stack-inhabitation,
+   :repo "futon3c",
+   :source-order 145,
+   :state-group :started}
+  {:declared-status
+   "OPEN — INSTANTIATE in progress (2026-05-01) for the inventory-snapshot sibling; siblings to Codex.",
+   :file "futon3c/holes/missions/M-state-snapshot-witness.md",
+   :id :M-state-snapshot-witness,
+   :repo "futon3c",
+   :source-order 146,
+   :state-group :started}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-stepper-calibration.md",
+   :id :M-stepper-calibration,
+   :repo "futon3c",
+   :source-order 147,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — parked; all Completion Criteria by Phase are checked in this file",
+   :file "futon3c/holes/missions/M-structural-law.md",
+   :id :M-structural-law,
+   :repo "futon3c",
+   :source-order 148,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — DELIVERED (v1) - with named residue; first paired-consumer live consumption evidenced 2026-06-12. O1-O4 design-fit accepted by Joe; E1 + E2 escrow entries are `:contract-released`; E1 curvature query delivered; E2 continuity cut passed O4(b)/O4(c). Campaign dissolution remains a separate owner/Joe decision.",
+   :file "futon3c/holes/missions/M-substrate-metric.md",
+   :id :M-substrate-metric,
+   :repo "futon3c",
+   :source-order 153,
+   :state-group :completed}
+  {:declared-status "OPEN — HEAD",
+   :file "futon3c/holes/missions/M-the-perfect-crime.md",
+   :id :M-the-perfect-crime,
+   :repo "futon3c",
+   :source-order 154,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — COMPLETE (orchestration infra shipped: work queue, escalation→restart, REPL helpers, 13 tests/52 assertions, 2026-02-26)",
+   :file "futon3c/holes/missions/M-tickle-overnight.md",
+   :id :M-tickle-overnight,
+   :repo "futon3c",
+   :source-order 155,
+   :state-group :completed}
+  {:declared-status "CLOSED — archived",
+   :file "futon3c/holes/missions/M-transport-adapters.md",
+   :id :M-transport-adapters,
+   :repo "futon3c",
+   :source-order 156,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — **IDENTIFY — Joe's decisions recorded; MAP next** (2026-09-14, claude-19).",
+   :file "futon3c/holes/missions/M-turns-first.md",
+   :id :M-turns-first,
+   :repo "futon3c",
+   :source-order 157,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — **COMPLETE through DOCUMENT; flag-gated OFF by default** (2026-06-11). Full lifecycle",
+   :file "futon3c/holes/missions/M-typed-bells.md",
+   :id :M-typed-bells,
+   :repo "futon3c",
+   :source-order 158,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file "futon3c/holes/missions/M-typed-holes-ARGUE.md",
+   :id :M-typed-holes-ARGUE,
+   :repo "futon3c",
+   :source-order 159,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file "futon3c/holes/missions/M-typed-holes-DERIVE.md",
+   :id :M-typed-holes-DERIVE,
+   :repo "futon3c",
+   :source-order 160,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file "futon3c/holes/missions/M-typed-holes-MAP.md",
+   :id :M-typed-holes-MAP,
+   :repo "futon3c",
+   :source-order 161,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file "futon3c/holes/missions/M-typed-holes-VERIFY.md",
+   :id :M-typed-holes-VERIFY,
+   :repo "futon3c",
+   :source-order 162,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file
+   "futon3c/holes/missions/M-typed-holes-example-first-flights.md",
+   :id :M-typed-holes-example-first-flights,
+   :repo "futon3c",
+   :source-order 163,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file
+   "futon3c/holes/missions/M-typed-holes-example-mission-head.md",
+   :id :M-typed-holes-example-mission-head,
+   :repo "futon3c",
+   :source-order 164,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file "futon3c/holes/missions/M-typed-holes-example-scope-query.md",
+   :id :M-typed-holes-example-scope-query,
+   :repo "futon3c",
+   :source-order 165,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — SCOPED. Dispatch wave 1 (foundational, mathlib-backed) to the Codex",
+   :file "futon3c/holes/missions/M-typed-holes-lean-handoffs.md",
+   :id :M-typed-holes-lean-handoffs,
+   :repo "futon3c",
+   :source-order 166,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file "futon3c/holes/missions/M-typed-holes-lean-wave2-design.md",
+   :id :M-typed-holes-lean-wave2-design,
+   :repo "futon3c",
+   :source-order 167,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — DISPATCHED to Codex (2026-06-14). **Owner of result:** claude-2",
+   :file "futon3c/holes/missions/M-typed-holes-mathlib-handoff.md",
+   :id :M-typed-holes-mathlib-handoff,
+   :repo "futon3c",
+   :source-order 168,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — **CLOSED (2026-06-15, Joe).** Ran the full lifecycle",
+   :file "futon3c/holes/missions/M-typed-holes.md",
+   :id :M-typed-holes,
+   :repo "futon3c",
+   :source-order 169,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — **DERIVE** (chartered at IDENTIFY and MAP completed 2026-07-22 —",
+   :file "futon3c/holes/missions/M-typed-memories.md",
+   :id :M-typed-memories,
+   :repo "futon3c",
+   :source-order 170,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — DONE (2026-03-08) — Gates A+D pass, B+C deferred",
+   :file "futon3c/holes/missions/M-walkie-talkie.md",
+   :id :M-walkie-talkie,
+   :repo "futon3c",
+   :source-order 171,
+   :state-group :completed}
+  {:declared-status "CLOSED — complete",
+   :file
+   "futon3c/holes/missions/M-war-machine-first-outing-expectations.md",
+   :id :M-war-machine-first-outing-expectations,
+   :repo "futon3c",
+   :source-order 172,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — **CLOSED 2026-05-30** (operator-directed, emacs-repl with claude-5; codex-2 piloted M2). Full lifecycle IDENTIFY→MAP→DERIVE→ARGUE→VERIFY→INSTANTIATE ran in-session; M0–M4 done; the WM-pilot loop demonstrated end-to-end (codex-2 cleared the entire open-sorry queue following the WM, driven unattended-across-turns by `/loop`+whistle). See **Closing Checkpoint** at end for milestones + named follow-ons (the input-sources frontier, geometry→AIF bug, VSATARCS regen, bootstrap auto-register). The mission *asked*: which open edges must close to run the machine confidently for a while, and how such a run is set up — answered yes, demonstrated.",
+   :file "futon3c/holes/missions/M-war-machine-first-outing.md",
+   :id :M-war-machine-first-outing,
+   :repo "futon3c",
+   :source-order 173,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — HEAD → INSTANTIATE Phase 1-5 EXECUTED; v0 mission-complete in operational substance: claude-9 inhabited per DERIVE Choice 4 + ran first Pair-stage substantive cycle (cycle 408e44ed; anchor-0020 coherence-row authored; new :sub-kind :symptom-to-root-traceback; all 4 consent-gate success-criteria verified); pre-restart no-op flip demo on 0010 also retained; codex-8 closed 4/5 deferrals; awaiting operator acceptance bell to formally close v0",
+   :file "futon3c/holes/missions/M-war-machine-pilot.md",
+   :id :M-war-machine-pilot,
+   :repo "futon3c",
+   :source-order 174,
+   :state-group :started}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-war-machine-tuning.md",
+   :id :M-war-machine-tuning,
+   :repo "futon3c",
+   :source-order 175,
+   :state-group :started}
+  {:declared-status "OPEN — parked",
+   :file "futon3c/holes/missions/M-war-machine.md",
+   :id :M-war-machine,
+   :repo "futon3c",
+   :source-order 176,
+   :state-group :started}
+  {:declared-status "OPEN — MAP in progress (2026-09-28)",
+   :file "futon3c/holes/missions/M-warrant-limit.md",
+   :id :M-warrant-limit,
+   :repo "futon3c",
+   :source-order 177,
+   :state-group :started}
+  {:declared-status
+   "OPEN — HEAD, IDENTIFY, MAP, DERIVE, ARGUE met (Joe's read, 2026-09-25 ~23:55Z: \"it looks good to me\"); VERIFY entered (the wiring as a whole, by the diagramprover run over the machine's map); INSTANTIATE drafted: the overall wiring first, then the missing parts and hops.",
+   :file "futon3c/holes/missions/M-wm-wiring.md",
+   :id :M-wm-wiring,
+   :repo "futon3c",
+   :source-order 178,
+   :state-group :started}
+  {:declared-status
+   "OPEN — **PROPOSED** (Joe's design, this date, recorded by claude-6;",
+   :file "futon3c/holes/missions/M-xenotype-its.md",
+   :id :M-xenotype-its,
+   :repo "futon3c",
+   :source-order 179,
+   :state-group :started}
+  {:declared-status
+   "OPEN — CHARTERED 2026-07-25 (Joe's direction; this doc claude-4).",
+   :file "futon3c/holes/missions/M-zai-learning-loop.md",
+   :id :M-zai-learning-loop,
+   :repo "futon3c",
+   :source-order 180,
+   :state-group :started}
+  {:declared-status
+   "OPEN — INSTANTIATE (VERIFY passed, Joe 2026-09-27; builder codex-4)",
+   :file "futon3c/holes/missions/M-象-2000.md",
+   :id :M-象-2000,
+   :repo "futon3c",
+   :source-order 181,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY — evidence collected during the 2026-07-26/27 Outbox incident;",
+   :file "futon4/holes/missions/M-arxana-hardening.md",
+   :id :M-arxana-hardening,
+   :repo "futon4",
+   :source-order 183,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY. The local Essays subsystem already supports in-place",
+   :file "futon4/holes/missions/M-arxana-roundtrip.md",
+   :id :M-arxana-roundtrip,
+   :repo "futon4",
+   :source-order 184,
+   :state-group :started}
+  {:declared-status
+   "OPEN — HEAD. The queue substrate exists (`arxana-vsatarcs-essay-revision-queue.el` v0.5.28); the writer-action class exists (`arxana-vsatarcs-essay-revise.el` v0.5.29). The editorial-assistant layer is yet to land — this mission scopes it.",
+   :file "futon4/holes/missions/M-editorial-assistant.md",
+   :id :M-editorial-assistant,
+   :repo "futon4",
+   :source-order 185,
+   :state-group :started}
+  {:declared-status
+   "OPEN — Stage 1 partial-complete. D1 (home convention) + D3 (first-essay migration) landed; D2 (the essay projector in futon3c) is the outstanding work and is the scope of the Codex handoff below.",
+   :file "futon4/holes/missions/M-essay-corpus-substrate.md",
+   :id :M-essay-corpus-substrate,
+   :repo "futon4",
+   :source-order 186,
+   :state-group :started}
+  {:declared-status
+   "OPEN — specified; implementation not yet started (previous status: specified, implementation pending)",
+   :file "futon4/holes/missions/M-essays-diachronic-model.md",
+   :id :M-essays-diachronic-model,
+   :repo "futon4",
+   :source-order 187,
+   :state-group :started}
+  {:declared-status
+   "OPEN — ACTIVE. Read view and section-edit/save writeback are operational",
+   :file "futon4/holes/missions/M-essays-edit-cycle.md",
+   :id :M-essays-edit-cycle,
+   :repo "futon4",
+   :source-order 188,
+   :state-group :started}
+  {:declared-status "OPEN — READY TO EXECUTE",
+   :file "futon4/holes/missions/M-essays-retraction-visibility.md",
+   :id :M-essays-retraction-visibility,
+   :repo "futon4",
+   :source-order 189,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — Complete (EV-0 through EV-6 done, thread/notebook UI shipped, 2026-02-24)",
+   :file "futon4/holes/missions/M-evidence-viewer-refinements.md",
+   :id :M-evidence-viewer-refinements,
+   :repo "futon4",
+   :source-order 190,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — INSTANTIATE (Phase 2 API live-tested, 2026-03-06)",
+   :file "futon4/holes/missions/M-futon-enrichment.md",
+   :id :M-futon-enrichment,
+   :repo "futon4",
+   :source-order 191,
+   :state-group :started}
+  {:declared-status
+   "CLOSED (companion artifact; parent mission closed 2026-05-29)",
+   :file
+   "futon4/holes/missions/M-interest-network-coupling.aif-wiring.md",
+   :id :M-interest-network-coupling.aif-wiring,
+   :repo "futon4",
+   :source-order 192,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — **CLOSED 2026-05-29** — all four completion criteria met live + VC-1..7 pass; WM-AIF coupling capstone wired live into the War Machine judge path (§6 DOCUMENT). [History: Design-frozen v1 (2026-05-14).] IDENTIFY through VERIFY are complete on paper (§§1–4). Codex-7's sign-off-final landed after a second whistle round resolved four loose ends: daily-cadence-without-synthetic-churn discipline (§2.2), checkpoint phase as metadata not id-prefix (§2.0), VC-7 replay/idempotence (§4), and HEAD-as-escrow named as a surfaced pattern (§3.5). Next meaningful review point is the actual step (b) artefact (event vocabulary committed as flexiarg/schema), not another prose pass. **Ownership transfer 2026-05-26:** codex-7's outstanding INSTANTIATE scope — steps (a)/(b)/(c)/(d) plus the deferred piece #2 (single-essay diachronic / lifecycle work) — transferred to claude-3 (this session); see §Downstream finding for the routing context. Pipeline sequencing in §Sequencing role and §5 INSTANTIATE subject to revision as part of claude-3 step (a) re-sign-off. **Step (a) re-sign-off and step (b) artefact both landed 2026-05-26** (see §5.1); step (b) artefact at `~/code/futon3/library/structure/interest-event-vocabulary.flexiarg`. Step (e) now unblocked; steps (c)/(d) ready to start.",
+   :file "futon4/holes/missions/M-interest-network-coupling.md",
+   :id :M-interest-network-coupling,
+   :repo "futon4",
+   :source-order 193,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — **HEAD** — pre-IDENTIFY intake; explicitly a \"bonus lap\" gated behind the client-facing VSAT delivery. Not yet scoped, not yet resourced; the hardware it targets has not shipped.",
+   :file "futon4/holes/missions/M-librarian.md",
+   :id :M-librarian,
+   :repo "futon4",
+   :source-order 194,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY (2026-05-06, draft 2; draft 1 archived as `M-or-training-as-learning-system.v1.md`)",
+   :file "futon4/holes/missions/M-or-training-as-learning-system.md",
+   :id :M-or-training-as-learning-system,
+   :repo "futon4",
+   :source-order 195,
+   :state-group :started}
+  {:declared-status "IDENTIFY (2026-05-05, draft 1)",
+   :file
+   "futon4/holes/missions/M-or-training-as-learning-system.v1.md",
+   :id :M-or-training-as-learning-system.v1,
+   :repo "futon4",
+   :source-order 196,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY-redux (revised 2026-04-29). Prior INSTANTIATE-track is suspended pending re-IDENTIFY. The proof-of-concept capabilities landed today (canonical .mw flip, surgical wikitext edits via bot, annotation migration) reframed as feasibility evidence rather than the start of execution. Mission name retained but the mission-shape is up for revision: rewrite vs. refactor vs. zine-decomposition vs. hybrid.",
+   :file "futon4/holes/missions/M-peeragogy-rewrite.md",
+   :id :M-peeragogy-rewrite,
+   :repo "futon4",
+   :source-order 197,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — COMPLETE (2026-03-04). Was RE-OPENED (2026-03-03); gaps closed by M-three-column-stack. See §Closure below.",
+   :file "futon4/holes/missions/M-self-representing-stack.md",
+   :id :M-self-representing-stack,
+   :repo "futon4",
+   :source-order 198,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — IDENTIFY drafted 2026-05-07. MAP / DERIVE / ARGUE / VERIFY / INSTANTIATE / DOCUMENT to follow.",
+   :file
+   "futon4/holes/missions/M-simulating-or-training-as-learning-system.md",
+   :id :M-simulating-or-training-as-learning-system,
+   :repo "futon4",
+   :source-order 199,
+   :state-group :started}
+  {:declared-status "CLOSED — COMPLETE (2026-03-04)",
+   :file "futon4/holes/missions/M-three-column-stack.md",
+   :id :M-three-column-stack,
+   :repo "futon4",
+   :source-order 200,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — OPEN — INSTANTIATE (read-only INSTANTIATE-0 active; IDENTIFY opened 2026-06-01, MAP completed 2026-06-01, DERIVE accepted 2026-06-01, ARGUE accepted 2026-06-01, VERIFY accepted 2026-06-01 after count precision pass)",
+   :file "futon4/holes/missions/M-vsatarcs-invariants-integration.md",
+   :id :M-vsatarcs-invariants-integration,
+   :repo "futon4",
+   :source-order 201,
+   :state-group :started}
+  {:declared-status
+   "OPEN (companion artifact; parent mission in INSTANTIATE)",
+   :file
+   "futon4/holes/missions/M-vsatarcs-invariants-integration.witness-vsatarcs-fresh.md",
+   :id :M-vsatarcs-invariants-integration.witness-vsatarcs-fresh,
+   :repo "futon4",
+   :source-order 202,
+   :state-group :started}
+  {:declared-status "OPEN — OPEN — INSTANTIATE (started 2026-05-20)",
+   :file "futon4/holes/missions/M-vsatarcs-writer.md",
+   :id :M-vsatarcs-writer,
+   :repo "futon4",
+   :source-order 203,
+   :state-group :started}
+  {:declared-status
+   "OPEN — OPEN — HEAD. Three point-to-point bridges exist (WM-trace read, XTDB clicks consumer, intrinsic-values hyperedge round-trip); no cross-side coherence audit; mission scopes the convergence.",
+   :file "futon4/holes/missions/M-war-machine-vsatarcs-interop.md",
+   :id :M-war-machine-vsatarcs-interop,
+   :repo "futon4",
+   :source-order 204,
+   :state-group :started}
+  {:declared-status
+   "OPEN — OPEN — IDENTIFY + MAP complete 2026-06-07. **Layer 1 LIVE** — `/ego`",
+   :file "futon4/holes/missions/M-web-arxana-missions.md",
+   :id :M-web-arxana-missions,
+   :repo "futon4",
+   :source-order 205,
+   :state-group :started}
+  {:declared-status
+   "OPEN — OPEN — HEAD complete; IDENTIFY complete 2026-05-30; MAP pass complete",
+   :file "futon4/holes/missions/M-web-arxana-ui-improvements.md",
+   :id :M-web-arxana-ui-improvements,
+   :repo "futon4",
+   :source-order 206,
+   :state-group :started}
+  {:declared-status
+   "OPEN — OPEN — INSTANTIATE (2026-04-12). Interactive testing pass done.",
+   :file "futon4/holes/missions/M-webarxana.md",
+   :id :M-webarxana,
+   :repo "futon4",
+   :source-order 207,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — COMPLETE (2026-04-24, re-open pass closed same-day)",
+   :file "futon4/holes/missions/M-writing-ethics.md",
+   :id :M-writing-ethics,
+   :repo "futon4",
+   :source-order 208,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — SPEC / DERIVE (2026-07-14). Owner: Claude. Build: staged Zai handoffs (zai-10), Claude reviews each.",
+   :file "futon5/holes/missions/M-aif-tokamak.md",
+   :id :M-aif-tokamak,
+   :repo "futon5",
+   :source-order 209,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY opened 2026-06-02",
+   :file "futon5/holes/missions/M-categorical-code.md",
+   :id :M-categorical-code,
+   :repo "futon5",
+   :source-order 210,
+   :state-group :started}
+  {:declared-status "OPEN — Ready",
+   :file "futon5/holes/missions/M-coupling-as-constraint.md",
+   :id :M-coupling-as-constraint,
+   :repo "futon5",
+   :source-order 211,
+   :state-group :started}
+  {:declared-status "CLOSED — Complete",
+   :file "futon5/holes/missions/M-diagram-composition.md",
+   :id :M-diagram-composition,
+   :repo "futon5",
+   :source-order 212,
+   :state-group :completed}
+  {:declared-status "OPEN — MAP opened 2026-05-31",
+   :file "futon5/holes/missions/M-differentiable-code.md",
+   :id :M-differentiable-code,
+   :repo "futon5",
+   :source-order 213,
+   :state-group :started}
+  {:declared-status
+   "OPEN — (end of 2026-08-03): Slices 0, 1, 2, 2b, 3 and the critical-point",
+   :file "futon5/holes/missions/M-exotype-xenotype-eoc.md",
+   :id :M-exotype-xenotype-eoc,
+   :repo "futon5",
+   :source-order 214,
+   :state-group :started}
+  {:declared-status "OPEN — Ready",
+   :file "futon5/holes/missions/M-fulab-wiring-survey.md",
+   :id :M-fulab-wiring-survey,
+   :repo "futon5",
+   :source-order 215,
+   :state-group :started}
+  {:declared-status
+   "OPEN — DERIVE (drafted 2026-07-13, claude-6; ratification = Joe)",
+   :file "futon5/holes/missions/M-lab-standard.md",
+   :id :M-lab-standard,
+   :repo "futon5",
+   :source-order 216,
+   :state-group :started}
+  {:declared-status
+   "OPEN — PLAN / DERIVE (drafted 2026-07-14, claude-1; direction approved by Joe",
+   :file "futon5/holes/missions/M-metaca-search.md",
+   :id :M-metaca-search,
+   :repo "futon5",
+   :source-order 217,
+   :state-group :started}
+  {:declared-status "CLOSED — Complete",
+   :file "futon5/holes/missions/M-pattern-exotype-bridge.md",
+   :id :M-pattern-exotype-bridge,
+   :repo "futon5",
+   :source-order 218,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — IDENTIFY complete, ARGUE open. Chartered 2026-07-15 from the Figure-8",
+   :file "futon5/holes/missions/M-propagators.md",
+   :id :M-propagators,
+   :repo "futon5",
+   :source-order 219,
+   :state-group :started}
+  {:declared-status "CLOSED — Complete",
+   :file "futon5/holes/missions/M-sci-detection-pipeline.md",
+   :id :M-sci-detection-pipeline,
+   :repo "futon5",
+   :source-order 220,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — OPEN (companion artifact; parent mission in INSTANTIATE)",
+   :file "futon5/holes/missions/M-sci-reproduction-replay-ledger.md",
+   :id :M-sci-reproduction-replay-ledger,
+   :repo "futon5",
+   :source-order 221,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — INSTANTIATE — slices 1–3 done, reviewed, published to",
+   :file "futon5/holes/missions/M-sci-reproduction.md",
+   :id :M-sci-reproduction,
+   :repo "futon5",
+   :source-order 222,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — MAP (production run complete, diversity-coupling tradeoff identified)",
+   :file "futon5/holes/missions/M-tpg-coupling-evolution.md",
+   :id :M-tpg-coupling-evolution,
+   :repo "futon5",
+   :source-order 223,
+   :state-group :started}
+  {:declared-status
+   "OPEN — OPEN — DERIVE (XOR operator implemented, probe results in, wired into TPG)",
+   :file "futon5/holes/missions/M-xor-coupling-probe.md",
+   :id :M-xor-coupling-probe,
+   :repo "futon5",
+   :source-order 224,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY",
+   :file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+   :id :M-a-sorry-enterprise,
+   :repo "futon5a",
+   :source-order 225,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY (chartered from the capability-star-map \"8 operator-gated caps\"",
+   :file "futon5a/holes/missions/M-eoi-outbox-management.md",
+   :id :M-eoi-outbox-management,
+   :repo "futon5a",
+   :source-order 226,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — closed; Joe closed the scoped HEAD → IDENTIFY → MAP → ARGUE → DERIVE → DOCUMENT arc on 2026-06-04.",
+   :file "futon5a/holes/missions/M-explore-aiqa.md",
+   :id :M-explore-aiqa,
+   :repo "futon5a",
+   :source-order 227,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — MAP / DERIVE / ARGUE / VERIFY all complete 2026-05-11. INSTANTIATE *in progress* (encounter-first reordering): Anthropic EoI revised-draft landed 2026-05-13 as proof-of-concept that the full eoi-engine + Arxana-Essays loop works; checkpoint recorded in §6. Step (a) send-decision still pending; steps (b)/(c)/(d) queued; step (e) — EoI-network-as-interest-model with **completeness-not-closure** as the property the corpus should have — added 2026-05-13. Schema artefact at `/home/joe/code/atthangika-buckets.json`.",
+   :file "futon5a/holes/missions/M-expressions-of-interest.md",
+   :id :M-expressions-of-interest,
+   :repo "futon5a",
+   :source-order 228,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY",
+   :file "futon5a/holes/missions/M-hypergraph-operator.md",
+   :id :M-hypergraph-operator,
+   :repo "futon5a",
+   :source-order 229,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY (stub — develop interactively in a private session)",
+   :file "futon5a/holes/missions/M-landing-practice.md",
+   :id :M-landing-practice,
+   :repo "futon5a",
+   :source-order 230,
+   :state-group :started}
+  {:declared-status
+   "OPEN — INSTANTIATE (pipeline live; graph ingested live into Futon1b and rendered at WebArxana `/live/capability-graph.html` 2026-07-16; **criteria 3–4 ACCEPTED by operator 2026-07-22** — see checkpoint; follow-up: E-capability-graph-ui-polish)",
+   :file "futon5a/holes/missions/M-learning-loop.md",
+   :id :M-learning-loop,
+   :repo "futon5a",
+   :source-order 231,
+   :state-group :started}
+  {:declared-status "OPEN — DERIVE (2026-04-26)",
+   :file "futon5a/holes/missions/M-recommendation-bindings.md",
+   :id :M-recommendation-bindings,
+   :repo "futon5a",
+   :source-order 232,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY + DERIVE (bootstraps itself)",
+   :file "futon5a/holes/missions/M-self-improvement-loop.md",
+   :id :M-self-improvement-loop,
+   :repo "futon5a",
+   :source-order 233,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY (2026-04-19)",
+   :file "futon5a/holes/missions/M-stack-geometry.md",
+   :id :M-stack-geometry,
+   :repo "futon5a",
+   :source-order 234,
+   :state-group :started}
+  {:declared-status "OPEN — INSTANTIATE (2026-04-26)",
+   :file "futon5a/holes/missions/M-stack-stereolithography.md",
+   :id :M-stack-stereolithography,
+   :repo "futon5a",
+   :source-order 235,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY (2026-04-17)",
+   :file "futon5a/holes/missions/M-trip-journal.md",
+   :id :M-trip-journal,
+   :repo "futon5a",
+   :source-order 236,
+   :state-group :started}
+  {:declared-status
+   "OPEN — VERIFY (2026-05-01) — Checkpoint 1 lands stepper trial against M-reachable-from-boot trajectory; vocabulary passes structural-distinction test; substrate-2 commit-vertex coverage gap surfaced as V-1 pre-condition; D-7.5 vocabulary refinements identified (catalog-coverage, generalization-vs-addition, implicit-to-typed lift, epistemic-humility primitive)",
+   :file "futon5a/holes/missions/M-war-machine-wiring.md",
+   :id :M-war-machine-wiring,
+   :repo "futon5a",
+   :source-order 237,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — COMPLETE (full cycle IDENTIFY→INSTANTIATE, 2026-03-06)",
+   :file "futon6/holes/missions/M-P3-rational-reconstruction.md",
+   :id :M-P3-rational-reconstruction,
+   :repo "futon6",
+   :source-order 238,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — COMPLETE (VERIFY done, provenance JSON pending, 2026-03-07)",
+   :file "futon6/holes/missions/M-P7-rational-reconstruction.md",
+   :id :M-P7-rational-reconstruction,
+   :repo "futon6",
+   :source-order 239,
+   :state-group :completed}
+  {:declared-status
+   "CLOSED — COMPLETE (VERIFY done, pattern commit + provenance JSON pending, 2026-03-07)",
+   :file "futon6/holes/missions/M-P8-rational-reconstruction.md",
+   :id :M-P8-rational-reconstruction,
+   :repo "futon6",
+   :source-order 240,
+   :state-group :completed}
+  {:declared-status "OPEN — IDENTIFY (mission proposal)",
+   :file "futon6/holes/missions/M-artificial-stack-exchange.md",
+   :id :M-artificial-stack-exchange,
+   :repo "futon6",
+   :source-order 241,
+   :state-group :started}
+  {:declared-status
+   "SUPERSEDED — SUPERSEDED-AS-MISSION → recast toward Campaign-bayesian-structure-learning (Joe 2026-06-08; see §7b). Idea-of-record; NOT WM-pickable (a Campaign across math / differentiable-code / War-Machine domains, the last = E-efe-education).",
+   :file "futon6/holes/missions/M-bayesian-structure-learning.md",
+   :id :M-bayesian-structure-learning,
+   :repo "futon6",
+   :source-order 242,
+   :state-group :cancelled}
+  {:declared-status
+   "OPEN — DERIVE → INSTANTIATE — decisions resolved + holes articulated (Joe 2026-06-08): scope bindings (§2.1) + frequency-ordered MAP-REDUCE (§3.1) + SQLite; F1 schema delta in §8, holes in §9",
+   :file "futon6/holes/missions/M-canon-fingerprint-store.md",
+   :id :M-canon-fingerprint-store,
+   :repo "futon6",
+   :source-order 243,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY → pilot; claude-2 owns end-to-end (speculative-sequel scout)",
+   :file "futon6/holes/missions/M-differentiable-math.md",
+   :id :M-differentiable-math,
+   :repo "futon6",
+   :source-order 244,
+   :state-group :started}
+  {:declared-status
+   "OPEN — INSTANTIATE — scope-grain v2 producer live + wired to claude-4's rollout (see Checkpoint 1)",
+   :file "futon6/holes/missions/M-differentiable-substrate.md",
+   :id :M-differentiable-substrate,
+   :repo "futon6",
+   :source-order 245,
+   :state-group :started}
+  {:declared-status "OPEN — no prior status recorded",
+   :file "futon6/holes/missions/M-distributed-frontiermath.md",
+   :id :M-distributed-frontiermath,
+   :repo "futon6",
+   :source-order 246,
+   :state-group :started}
+  {:declared-status
+   "OPEN — DERIVE (working PoC in hand; derive gate minted below)",
+   :file "futon6/holes/missions/M-distributed-proofreaders.md",
+   :id :M-distributed-proofreaders,
+   :repo "futon6",
+   :source-order 247,
+   :state-group :started}
+  {:declared-status
+   "OPEN — HANDOFF-READY. Exploration by the claude owner-session; reviewed by fable-2 (whistle,",
+   :file "futon6/holes/missions/M-efe-bge-followon-actions.md",
+   :id :M-efe-bge-followon-actions,
+   :repo "futon6",
+   :source-order 248,
+   :state-group :started}
+  {:declared-status
+   "SUPERSEDED — FOLDED into Campaign `C-falsifiable-missions` (2026-06-10, futon3c/holes/campaigns/) — this umbrella's diagnosis (closed loop) + grounding edges E1–E5 are the campaign's charter material; the three chartered constituents (M-peradam-grounding / M-pattern-posteriors / M-arguing-worlds) operationalize them. **Retired as a standalone mission** per `:O-capstone-form` → campaign. Kept as the diagnosis record.",
+   :file "futon6/holes/missions/M-futonzero-grounding.md",
+   :id :M-futonzero-grounding,
+   :repo "futon6",
+   :source-order 249,
+   :state-group :cancelled}
+  {:declared-status "OPEN — IDENTIFY",
+   :file "futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+   :id :M-hyperreal-dictionary-planning,
+   :repo "futon6",
+   :source-order 250,
+   :state-group :started}
+  {:declared-status
+   "CLOSED — VERIFY complete (2026-07-04) — HEAD and IDENTIFY ratified by",
+   :file "futon6/holes/missions/M-live-efe-map.md",
+   :id :M-live-efe-map,
+   :repo "futon6",
+   :source-order 251,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — HEAD complete; IDENTIFY authored; MAP complete (scratch-work survey);",
+   :file "futon6/holes/missions/M-metric-harness.md",
+   :id :M-metric-harness,
+   :repo "futon6",
+   :source-order 252,
+   :state-group :started}
+  {:declared-status
+   "OPEN — DERIVE (design spec for batch-002; implementation follows)",
+   :file "futon6/holes/missions/M-paper-reverse-morphogenesis.md",
+   :id :M-paper-reverse-morphogenesis,
+   :repo "futon6",
+   :source-order 253,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY (2026-07-05). Chartered by Joe (emacs-repl) as the T1 follow-on",
+   :file "futon6/holes/missions/M-pheromone-field.md",
+   :id :M-pheromone-field,
+   :repo "futon6",
+   :source-order 254,
+   :state-group :started}
+  {:declared-status
+   "OPEN — step-1 CT prior BUILT (full corpus, 2026-05-31); step-2 posterior-vs-prior test next; Joe framed it, claude-2 drafted",
+   :file "futon6/holes/missions/M-prior-mathematics.md",
+   :id :M-prior-mathematics,
+   :repo "futon6",
+   :source-order 255,
+   :state-group :started}
+  {:declared-status
+   "OPEN — INSTANTIATE (sections 3.1–3.3 + anti-clobber filter landed 2026-05-20; loss-of-loss stopping rule open)",
+   :file "futon6/holes/missions/M-structure-seed-promotion.md",
+   :id :M-structure-seed-promotion,
+   :repo "futon6",
+   :source-order 256,
+   :state-group :started}
+  {:declared-status "OPEN — MAP",
+   :file "futon6/holes/missions/M-superpod-mark2.md",
+   :id :M-superpod-mark2,
+   :repo "futon6",
+   :source-order 257,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY",
+   :file "futon6/holes/missions/M-superpod-mark3.md",
+   :id :M-superpod-mark3,
+   :repo "futon6",
+   :source-order 258,
+   :state-group :started}
+  {:declared-status
+   "OPEN — DERIVE — preparation gates must pass before sending Rob's batch",
+   :file "futon6/holes/missions/M-symbol-grounding-scaling-plan.md",
+   :id :M-symbol-grounding-scaling-plan,
+   :repo "futon6",
+   :source-order 259,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY → MAP (sections 1–3); DERIVE for Layer 1 starting today",
+   :file "futon6/holes/missions/M-symbol-grounding.md",
+   :id :M-symbol-grounding,
+   :repo "futon6",
+   :source-order 260,
+   :state-group :started}
+  {:declared-status
+   "OPEN — HEAD (awaiting Joe's dictation of the conversations)",
+   :file "futon7/holes/missions/M-NA2026-outreach-debrief.md",
+   :id :M-NA2026-outreach-debrief,
+   :repo "futon7",
+   :source-order 261,
+   :state-group :started}
+  {:declared-status
+   "OPEN — IDENTIFY (opened 2026-07-30 by claude-1 at Joe's direction).",
+   :file "futon7/holes/missions/M-becoming-nomad.md",
+   :id :M-becoming-nomad,
+   :repo "futon7",
+   :source-order 262,
+   :state-group :started}
+  {:declared-status "OPEN — IDENTIFY",
+   :file "futon7/holes/missions/M-daily-scan.md",
+   :id :M-daily-scan,
+   :repo "futon7",
+   :source-order 263,
+   :state-group :started}
+  {:declared-status "CLOSED — COMPLETE",
+   :file "futon7/holes/missions/M-f7-lead-report.md",
+   :id :M-f7-lead-report,
+   :repo "futon7",
+   :source-order 264,
+   :state-group :completed}
+  {:declared-status
+   "OPEN — IDENTIFY (minted from a live design conversation, Joe + claude-2,",
+   :file "futon7/holes/missions/M-value-creation-loop.md",
+   :id :M-value-creation-loop,
+   :repo "futon7",
+   :source-order 265,
+   :state-group :started}]}

@@ -1,0 +1,2322 @@
+{:anomalies [],
+ :as-of "2026-10-28",
+ :cones
+ {:M-G-wm-wiring [],
+  :M-IRC-stability [],
+  :M-NA2026-outreach-debrief [],
+  :M-P3-rational-reconstruction [],
+  :M-P7-rational-reconstruction [],
+  :M-P8-rational-reconstruction [],
+  :M-a-sorry-enterprise [],
+  :M-action-cost-modelling [:M-war-machine-pilot],
+  :M-agency-forum [],
+  :M-agency-hardening [],
+  :M-agency-hardening-datapoints [],
+  :M-agency-rebuild [],
+  :M-agency-refactor [],
+  :M-agency-unified-routing [],
+  :M-agents-queue [],
+  :M-aif-a-matrix-faithfulness [],
+  :M-aif-gap-epistemic-affordance [],
+  :M-aif-over-the-operator [],
+  :M-aif-policy-conditioned-eig [:M-aif-gap-epistemic-affordance],
+  :M-aif-tokamak [],
+  :M-alfworld-pattern-discovery [],
+  :M-apm-capability-ratchet [],
+  :M-apm-demonstration [],
+  :M-apm-solutions [:M-diagramprover],
+  :M-archaeology-control [],
+  :M-artificial-stack-exchange [],
+  :M-arxana-graph-persistence [],
+  :M-arxana-hardening [],
+  :M-arxana-roundtrip [],
+  :M-autoclock-in [:M-the-perfect-crime :M-wm-wiring :M-象-2000],
+  :M-autonomous-pattern-lifecycle [],
+  :M-bayesian-structure-learning [],
+  :M-becoming-nomad [],
+  :M-bounded-disposition [],
+  :M-bounded-in-flight-state [],
+  :M-canon-fingerprint-store [],
+  :M-capability-star-map [],
+  :M-capability-zones [],
+  :M-capability-zones-S1-coverage [],
+  :M-capability-zones-S1-handoff [],
+  :M-capability-zones-S2a-handoff [],
+  :M-capability-zones-S2b-handoff [],
+  :M-capability-zones-S3-handoff [],
+  :M-case-studies [],
+  :M-categorical-code [],
+  :M-chipwitz-corps [],
+  :M-codex-agent-behaviour [],
+  :M-codex-irc-execution [],
+  :M-codex-parity [],
+  :M-codex-sorry-loop [:M-xenotype-its],
+  :M-coupling-as-constraint [],
+  :M-cyder [],
+  :M-daily-scan [],
+  :M-diagram-composition [],
+  :M-diagramprover [],
+  :M-differentiable-code [],
+  :M-differentiable-math [],
+  :M-differentiable-substrate [],
+  :M-dionysus-winddown [],
+  :M-dispatch-peripheral-bridge [],
+  :M-distributed-frontiermath [],
+  :M-distributed-proofreaders [],
+  :M-drawbridge-multi-agent [],
+  :M-editorial-assistant [],
+  :M-efe-bge-followon-actions [],
+  :M-emacs-cursor-peripheral [],
+  :M-eoi-outbox-management [],
+  :M-essay-corpus-substrate
+  [:M-editorial-assistant :M-essays-edit-cycle],
+  :M-essays-diachronic-model [],
+  :M-essays-edit-cycle [],
+  :M-essays-retraction-visibility [],
+  :M-evidence-viewer-refinements [],
+  :M-exotype-xenotype-eoc [],
+  :M-explore-aiqa [],
+  :M-expressions-of-interest [:M-eoi-outbox-management],
+  :M-f11-find-production-successor [],
+  :M-f6-agents [],
+  :M-f6-arxiv [],
+  :M-f6-eval [],
+  :M-f6-ingest [],
+  :M-f6-recursive [],
+  :M-f7-lead-report [],
+  :M-federated-agency-hardening [],
+  :M-first-flights [],
+  :M-formal-war-machine [],
+  :M-forum-organization [],
+  :M-forum-refactor [],
+  :M-fucodex-parity [],
+  :M-fulab-logic [],
+  :M-fulab-wiring-survey [],
+  :M-futon-enrichment [],
+  :M-futon-problems [],
+  :M-futon-seams [],
+  :M-futon1a-evidence [],
+  :M-futon1a-rebuild [],
+  :M-futon1a-rebuild-scoping-review [],
+  :M-futon1a-workplan [],
+  :M-futon3-last-mile [],
+  :M-futon3c-codex [],
+  :M-futon3x-e2e [],
+  :M-futonzero-capability [],
+  :M-futonzero-generative [:M-chipwitz-corps],
+  :M-futonzero-grounding [],
+  :M-futonzero-mvp [],
+  :M-futonzero-prelim-practice [:M-apm-capability-ratchet],
+  :M-giraffe [],
+  :M-graph-unification [],
+  :M-hypergraph-operator [:M-self-improvement-loop],
+  :M-hyperreal-dictionary-planning
+  [:M-apm-capability-ratchet
+   :M-futonzero-mvp
+   :M-futonzero-prelim-practice],
+  :M-improve-irc [],
+  :M-inbox-zero-claim-lifecycle [],
+  :M-intent-curvature [],
+  :M-interest-network-coupling [],
+  :M-interest-network-coupling.aif-wiring [],
+  :M-invariant-queue-extend [:M-bounded-disposition],
+  :M-invariant-queue-unstuck [],
+  :M-invariant-violations [],
+  :M-joe-told-me-about-futon [],
+  :M-kangaroo [],
+  :M-lab-standard [],
+  :M-labs-integration [],
+  :M-landing-practice [],
+  :M-landscape-positioning [],
+  :M-latex-wysiwyg [],
+  :M-learning-loop [],
+  :M-librarian [],
+  :M-live-efe-map [],
+  :M-live-geometric-stack [],
+  :M-make-agency-work-properly [],
+  :M-memes-arrows-patterns-diagrams [],
+  :M-memory-retrieval [],
+  :M-metaca-search [],
+  :M-metric-harness [],
+  :M-mission-coherence-patterns [],
+  :M-mission-control [],
+  :M-mission-control-scoping [],
+  :M-mission-peripheral [],
+  :M-mission-scopes-into-substrate-2 [:M-differentiable-substrate],
+  :M-mission-wiring [],
+  :M-native-plan-coherence [],
+  :M-omni-wm-runner [],
+  :M-operational-readiness [],
+  :M-operational-readiness-traceability [],
+  :M-or-training-as-learning-system [],
+  :M-or-training-as-learning-system.v1 [],
+  :M-paper-reverse-morphogenesis [],
+  :M-par-session-punctuation [],
+  :M-pattern-application-diagnostic
+  [:M-apm-capability-ratchet
+   :M-futonzero-mvp
+   :M-futonzero-prelim-practice
+   :M-hyperreal-dictionary-planning
+   :M-learning-loop
+   :M-patterns-done-right
+   :M-superpod-mark3
+   :M-trip-journal
+   :M-war-machine-wiring],
+  :M-pattern-exotype-bridge [],
+  :M-pattern-inference-engine [],
+  :M-pattern-inference-engine-scoping-review [],
+  :M-pattern-ingest [],
+  :M-pattern-mining
+  [:M-learning-loop
+   :M-pattern-retrieval-calibration
+   :M-patterns-done-right
+   :M-trip-journal
+   :M-war-machine-wiring],
+  :M-pattern-posteriors [],
+  :M-pattern-retrieval-calibration [:M-patterns-done-right],
+  :M-patterns-done-right [],
+  :M-peeragogy-rewrite [],
+  :M-peripheral-behavior [],
+  :M-peripheral-gauntlet [],
+  :M-peripheral-model [],
+  :M-peripheral-phenomenology [],
+  :M-pheromone-field [],
+  :M-pilot-appearance [],
+  :M-plan-mermaid-viewer [],
+  :M-populate-substrate-2 [],
+  :M-portfolio-inference [],
+  :M-prior-mathematics [:M-web-arxana-missions],
+  :M-proof-peripheral [],
+  :M-propagators [],
+  :M-psr-pur-mesh-peripheral [],
+  :M-reachable-from-boot [:M-state-snapshot-witness],
+  :M-recommendation-bindings [],
+  :M-reflective-discipline [],
+  :M-repl-wins-over-cli
+  [:M-a-sorry-enterprise
+   :M-hypergraph-operator
+   :M-self-improvement-loop
+   :M-stack-inhabitation],
+  :M-run-produces-its-own-brief [],
+  :M-sci-detection-pipeline [],
+  :M-sci-reproduction [],
+  :M-sci-reproduction-replay-ledger [],
+  :M-self-improvement-loop [],
+  :M-self-representing-stack [],
+  :M-shared-memory-control-build-test
+  [:M-wm-strategic-mission-selection],
+  :M-sigils-reconsidered [],
+  :M-simulating-or-training-as-learning-system [],
+  :M-single-entry-point [],
+  :M-single-locus [],
+  :M-sliding-blackboard [],
+  :M-smart-emacs-cursor [],
+  :M-social-exotype [],
+  :M-stack-geometry [],
+  :M-stack-hud-refactor [],
+  :M-stack-inhabitation [],
+  :M-stack-stereolithography [],
+  :M-state-snapshot-witness [],
+  :M-stepper-calibration [],
+  :M-structural-law [],
+  :M-structure-seed-promotion [],
+  :M-substrate-metric [],
+  :M-superpod-mark2
+  [:M-apm-capability-ratchet
+   :M-futonzero-mvp
+   :M-futonzero-prelim-practice
+   :M-hyperreal-dictionary-planning],
+  :M-superpod-mark3
+  [:M-apm-capability-ratchet
+   :M-futonzero-mvp
+   :M-futonzero-prelim-practice
+   :M-hyperreal-dictionary-planning
+   :M-learning-loop
+   :M-pattern-application-diagnostic
+   :M-patterns-done-right
+   :M-trip-journal
+   :M-war-machine-wiring],
+  :M-symbol-grounding [],
+  :M-symbol-grounding-scaling-plan [],
+  :M-the-futon-stack [:M-patterns-done-right],
+  :M-the-futon-stack-Q6-r12-design-choices [],
+  :M-the-perfect-crime [:M-wm-wiring],
+  :M-three-column-stack [],
+  :M-tickle-overnight [],
+  :M-tpg-coupling-evolution [:M-coupling-as-constraint],
+  :M-transport-adapters [],
+  :M-trip-journal [:M-learning-loop :M-war-machine-wiring],
+  :M-turns-first [],
+  :M-typed-bells [],
+  :M-typed-holes [],
+  :M-typed-holes-ARGUE [],
+  :M-typed-holes-DERIVE [],
+  :M-typed-holes-MAP [],
+  :M-typed-holes-VERIFY [],
+  :M-typed-holes-example-first-flights [],
+  :M-typed-holes-example-mission-head [],
+  :M-typed-holes-example-scope-query [],
+  :M-typed-holes-lean-handoffs [],
+  :M-typed-holes-lean-wave2-design [],
+  :M-typed-holes-mathlib-handoff [],
+  :M-typed-memories [],
+  :M-u88-contextual-preferences [],
+  :M-understand-fucodex [],
+  :M-usage-hacking [],
+  :M-value-creation-loop [],
+  :M-vsatarcs-invariants-integration [],
+  :M-vsatarcs-invariants-integration.witness-vsatarcs-fresh [],
+  :M-vsatarcs-writer [],
+  :M-walkie-talkie [],
+  :M-war-machine [],
+  :M-war-machine-first-outing [],
+  :M-war-machine-first-outing-expectations [],
+  :M-war-machine-pilot [],
+  :M-war-machine-tuning [],
+  :M-war-machine-vsatarcs-interop [],
+  :M-war-machine-wiring [],
+  :M-warrant-limit [],
+  :M-web-arxana-missions [],
+  :M-web-arxana-ui-improvements [],
+  :M-webarxana [],
+  :M-weird-modernism [],
+  :M-wm-aif-policy-grain-compliance [],
+  :M-wm-strategic-mission-selection [],
+  :M-wm-tripwires [],
+  :M-wm-wiring [],
+  :M-writing-ethics [],
+  :M-ws-emacs-log-stream [],
+  :M-xenotype-its [],
+  :M-xor-coupling-probe [:M-coupling-as-constraint],
+  :M-zai-learning-loop [],
+  :M-zaif-harness-v1 [],
+  :M-象-2000 [:M-the-perfect-crime :M-wm-wiring]},
+ :counts {:open 147, :ready 140, :ready-ignoring-externals 140},
+ :cycles [[:M-pattern-application-diagnostic :M-superpod-mark3]],
+ :glue {:glued? true, :theories 30},
+ :order
+ [{:cone 4,
+   :id :M-repl-wins-over-cli,
+   :rank 1,
+   :reason :order/ready-by-unblocks,
+   :source-order 137,
+   :status :ready,
+   :unblocks 2}
+  {:cone 1,
+   :id :M-futonzero-prelim-practice,
+   :rank 2,
+   :reason :order/ready-by-unblocks,
+   :source-order 14,
+   :status :ready,
+   :unblocks 1}
+  {:cone 1,
+   :id :M-reachable-from-boot,
+   :rank 3,
+   :reason :order/ready-by-unblocks,
+   :source-order 136,
+   :status :ready,
+   :unblocks 1}
+  {:cone 5,
+   :id :M-pattern-mining,
+   :rank 4,
+   :reason :order/ready-by-cone,
+   :source-order 67,
+   :status :ready,
+   :unblocks 0}
+  {:cone 4,
+   :id :M-superpod-mark2,
+   :rank 5,
+   :reason :order/ready-by-cone,
+   :source-order 257,
+   :status :ready,
+   :unblocks 0}
+  {:cone 3,
+   :id :M-autoclock-in,
+   :rank 6,
+   :reason :order/ready-by-cone,
+   :source-order 88,
+   :status :ready,
+   :unblocks 0}
+  {:cone 3,
+   :id :M-hyperreal-dictionary-planning,
+   :rank 7,
+   :reason :order/ready-by-cone,
+   :source-order 250,
+   :status :ready,
+   :unblocks 0}
+  {:cone 2,
+   :id :M-象-2000,
+   :rank 8,
+   :reason :order/ready-by-cone,
+   :source-order 181,
+   :status :ready,
+   :unblocks 0}
+  {:cone 2,
+   :id :M-essay-corpus-substrate,
+   :rank 9,
+   :reason :order/ready-by-cone,
+   :source-order 186,
+   :status :ready,
+   :unblocks 0}
+  {:cone 2,
+   :id :M-trip-journal,
+   :rank 10,
+   :reason :order/ready-by-cone,
+   :source-order 236,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-futonzero-generative,
+   :rank 11,
+   :reason :order/ready-by-cone,
+   :source-order 12,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-the-futon-stack,
+   :rank 12,
+   :reason :order/ready-by-cone,
+   :source-order 20,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-aif-policy-conditioned-eig,
+   :rank 13,
+   :reason :order/ready-by-cone,
+   :source-order 25,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-pattern-retrieval-calibration,
+   :rank 14,
+   :reason :order/ready-by-cone,
+   :source-order 68,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-action-cost-modelling,
+   :rank 15,
+   :reason :order/ready-by-cone,
+   :source-order 78,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-apm-solutions,
+   :rank 16,
+   :reason :order/ready-by-cone,
+   :source-order 86,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-codex-sorry-loop,
+   :rank 17,
+   :reason :order/ready-by-cone,
+   :source-order 96,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-invariant-queue-extend,
+   :rank 18,
+   :reason :order/ready-by-cone,
+   :source-order 112,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-mission-scopes-into-substrate-2,
+   :rank 19,
+   :reason :order/ready-by-cone,
+   :source-order 120,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-shared-memory-control-build-test,
+   :rank 20,
+   :reason :order/ready-by-cone,
+   :source-order 138,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-the-perfect-crime,
+   :rank 21,
+   :reason :order/ready-by-cone,
+   :source-order 154,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-tpg-coupling-evolution,
+   :rank 22,
+   :reason :order/ready-by-cone,
+   :source-order 223,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-xor-coupling-probe,
+   :rank 23,
+   :reason :order/ready-by-cone,
+   :source-order 224,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-expressions-of-interest,
+   :rank 24,
+   :reason :order/ready-by-cone,
+   :source-order 228,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-hypergraph-operator,
+   :rank 25,
+   :reason :order/ready-by-cone,
+   :source-order 229,
+   :status :ready,
+   :unblocks 0}
+  {:cone 1,
+   :id :M-prior-mathematics,
+   :rank 26,
+   :reason :order/ready-by-cone,
+   :source-order 255,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-futon-problems,
+   :rank 27,
+   :reason :order/ready-by-source-order,
+   :source-order 10,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-futonzero-mvp,
+   :rank 28,
+   :reason :order/ready-by-source-order,
+   :source-order 13,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-joe-told-me-about-futon,
+   :rank 29,
+   :reason :order/ready-by-source-order,
+   :source-order 15,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-landscape-positioning,
+   :rank 30,
+   :reason :order/ready-by-source-order,
+   :source-order 16,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-patterns-done-right,
+   :rank 31,
+   :reason :order/ready-by-source-order,
+   :source-order 17,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-stack-hud-refactor,
+   :rank 32,
+   :reason :order/ready-by-source-order,
+   :source-order 18,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-the-futon-stack-Q6-r12-design-choices,
+   :rank 33,
+   :reason :order/ready-by-source-order,
+   :source-order 19,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-usage-hacking,
+   :rank 34,
+   :reason :order/ready-by-source-order,
+   :source-order 21,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-G-wm-wiring,
+   :rank 35,
+   :reason :order/ready-by-source-order,
+   :source-order 22,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-aif-a-matrix-faithfulness,
+   :rank 36,
+   :reason :order/ready-by-source-order,
+   :source-order 23,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-aif-gap-epistemic-affordance,
+   :rank 37,
+   :reason :order/ready-by-source-order,
+   :source-order 24,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-f11-find-production-successor,
+   :rank 38,
+   :reason :order/ready-by-source-order,
+   :source-order 26,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-formal-war-machine,
+   :rank 39,
+   :reason :order/ready-by-source-order,
+   :source-order 27,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-reflective-discipline,
+   :rank 40,
+   :reason :order/ready-by-source-order,
+   :source-order 28,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-run-produces-its-own-brief,
+   :rank 41,
+   :reason :order/ready-by-source-order,
+   :source-order 29,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-u88-contextual-preferences,
+   :rank 42,
+   :reason :order/ready-by-source-order,
+   :source-order 30,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-wm-aif-policy-grain-compliance,
+   :rank 43,
+   :reason :order/ready-by-source-order,
+   :source-order 31,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-wm-strategic-mission-selection,
+   :rank 44,
+   :reason :order/ready-by-source-order,
+   :source-order 32,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-wm-tripwires,
+   :rank 45,
+   :reason :order/ready-by-source-order,
+   :source-order 33,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-zaif-harness-v1,
+   :rank 46,
+   :reason :order/ready-by-source-order,
+   :source-order 34,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-emacs-cursor-peripheral,
+   :rank 47,
+   :reason :order/ready-by-source-order,
+   :source-order 42,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-mission-coherence-patterns,
+   :rank 48,
+   :reason :order/ready-by-source-order,
+   :source-order 59,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-pattern-ingest,
+   :rank 49,
+   :reason :order/ready-by-source-order,
+   :source-order 66,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-weird-modernism,
+   :rank 50,
+   :reason :order/ready-by-source-order,
+   :source-order 71,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-pattern-posteriors,
+   :rank 51,
+   :reason :order/ready-by-source-order,
+   :source-order 75,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-agents-queue,
+   :rank 52,
+   :reason :order/ready-by-source-order,
+   :source-order 82,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-aif-over-the-operator,
+   :rank 53,
+   :reason :order/ready-by-source-order,
+   :source-order 83,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-apm-demonstration,
+   :rank 54,
+   :reason :order/ready-by-source-order,
+   :source-order 85,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-autonomous-pattern-lifecycle,
+   :rank 55,
+   :reason :order/ready-by-source-order,
+   :source-order 89,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-bounded-disposition,
+   :rank 56,
+   :reason :order/ready-by-source-order,
+   :source-order 90,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-case-studies,
+   :rank 57,
+   :reason :order/ready-by-source-order,
+   :source-order 92,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-chipwitz-corps,
+   :rank 58,
+   :reason :order/ready-by-source-order,
+   :source-order 93,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-cyder,
+   :rank 59,
+   :reason :order/ready-by-source-order,
+   :source-order 97,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-diagramprover,
+   :rank 60,
+   :reason :order/ready-by-source-order,
+   :source-order 98,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-dionysus-winddown,
+   :rank 61,
+   :reason :order/ready-by-source-order,
+   :source-order 99,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-federated-agency-hardening,
+   :rank 62,
+   :reason :order/ready-by-source-order,
+   :source-order 101,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-fulab-logic,
+   :rank 63,
+   :reason :order/ready-by-source-order,
+   :source-order 104,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-giraffe,
+   :rank 64,
+   :reason :order/ready-by-source-order,
+   :source-order 108,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-inbox-zero-claim-lifecycle,
+   :rank 65,
+   :reason :order/ready-by-source-order,
+   :source-order 110,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-intent-curvature,
+   :rank 66,
+   :reason :order/ready-by-source-order,
+   :source-order 111,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-invariant-violations,
+   :rank 67,
+   :reason :order/ready-by-source-order,
+   :source-order 114,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-kangaroo,
+   :rank 68,
+   :reason :order/ready-by-source-order,
+   :source-order 115,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-latex-wysiwyg,
+   :rank 69,
+   :reason :order/ready-by-source-order,
+   :source-order 116,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-memory-retrieval,
+   :rank 70,
+   :reason :order/ready-by-source-order,
+   :source-order 117,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-mission-wiring,
+   :rank 71,
+   :reason :order/ready-by-source-order,
+   :source-order 121,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-omni-wm-runner,
+   :rank 72,
+   :reason :order/ready-by-source-order,
+   :source-order 122,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-populate-substrate-2,
+   :rank 73,
+   :reason :order/ready-by-source-order,
+   :source-order 132,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-sigils-reconsidered,
+   :rank 74,
+   :reason :order/ready-by-source-order,
+   :source-order 139,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-single-entry-point,
+   :rank 75,
+   :reason :order/ready-by-source-order,
+   :source-order 140,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-sliding-blackboard,
+   :rank 76,
+   :reason :order/ready-by-source-order,
+   :source-order 142,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-smart-emacs-cursor,
+   :rank 77,
+   :reason :order/ready-by-source-order,
+   :source-order 143,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-turns-first,
+   :rank 78,
+   :reason :order/ready-by-source-order,
+   :source-order 157,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-typed-holes-mathlib-handoff,
+   :rank 79,
+   :reason :order/ready-by-source-order,
+   :source-order 168,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-typed-memories,
+   :rank 80,
+   :reason :order/ready-by-source-order,
+   :source-order 170,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-war-machine-pilot,
+   :rank 81,
+   :reason :order/ready-by-source-order,
+   :source-order 174,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-war-machine-tuning,
+   :rank 82,
+   :reason :order/ready-by-source-order,
+   :source-order 175,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-war-machine,
+   :rank 83,
+   :reason :order/ready-by-source-order,
+   :source-order 176,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-warrant-limit,
+   :rank 84,
+   :reason :order/ready-by-source-order,
+   :source-order 177,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-wm-wiring,
+   :rank 85,
+   :reason :order/ready-by-source-order,
+   :source-order 178,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-xenotype-its,
+   :rank 86,
+   :reason :order/ready-by-source-order,
+   :source-order 179,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-zai-learning-loop,
+   :rank 87,
+   :reason :order/ready-by-source-order,
+   :source-order 180,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-arxana-hardening,
+   :rank 88,
+   :reason :order/ready-by-source-order,
+   :source-order 183,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-arxana-roundtrip,
+   :rank 89,
+   :reason :order/ready-by-source-order,
+   :source-order 184,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-editorial-assistant,
+   :rank 90,
+   :reason :order/ready-by-source-order,
+   :source-order 185,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-essays-diachronic-model,
+   :rank 91,
+   :reason :order/ready-by-source-order,
+   :source-order 187,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-essays-edit-cycle,
+   :rank 92,
+   :reason :order/ready-by-source-order,
+   :source-order 188,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-essays-retraction-visibility,
+   :rank 93,
+   :reason :order/ready-by-source-order,
+   :source-order 189,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-futon-enrichment,
+   :rank 94,
+   :reason :order/ready-by-source-order,
+   :source-order 191,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-librarian,
+   :rank 95,
+   :reason :order/ready-by-source-order,
+   :source-order 194,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-or-training-as-learning-system,
+   :rank 96,
+   :reason :order/ready-by-source-order,
+   :source-order 195,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-or-training-as-learning-system.v1,
+   :rank 97,
+   :reason :order/ready-by-source-order,
+   :source-order 196,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-peeragogy-rewrite,
+   :rank 98,
+   :reason :order/ready-by-source-order,
+   :source-order 197,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-simulating-or-training-as-learning-system,
+   :rank 99,
+   :reason :order/ready-by-source-order,
+   :source-order 199,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-vsatarcs-invariants-integration,
+   :rank 100,
+   :reason :order/ready-by-source-order,
+   :source-order 201,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-vsatarcs-invariants-integration.witness-vsatarcs-fresh,
+   :rank 101,
+   :reason :order/ready-by-source-order,
+   :source-order 202,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-vsatarcs-writer,
+   :rank 102,
+   :reason :order/ready-by-source-order,
+   :source-order 203,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-war-machine-vsatarcs-interop,
+   :rank 103,
+   :reason :order/ready-by-source-order,
+   :source-order 204,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-web-arxana-missions,
+   :rank 104,
+   :reason :order/ready-by-source-order,
+   :source-order 205,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-web-arxana-ui-improvements,
+   :rank 105,
+   :reason :order/ready-by-source-order,
+   :source-order 206,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-webarxana,
+   :rank 106,
+   :reason :order/ready-by-source-order,
+   :source-order 207,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-aif-tokamak,
+   :rank 107,
+   :reason :order/ready-by-source-order,
+   :source-order 209,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-categorical-code,
+   :rank 108,
+   :reason :order/ready-by-source-order,
+   :source-order 210,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-differentiable-code,
+   :rank 109,
+   :reason :order/ready-by-source-order,
+   :source-order 213,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-exotype-xenotype-eoc,
+   :rank 110,
+   :reason :order/ready-by-source-order,
+   :source-order 214,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-fulab-wiring-survey,
+   :rank 111,
+   :reason :order/ready-by-source-order,
+   :source-order 215,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-lab-standard,
+   :rank 112,
+   :reason :order/ready-by-source-order,
+   :source-order 216,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-metaca-search,
+   :rank 113,
+   :reason :order/ready-by-source-order,
+   :source-order 217,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-propagators,
+   :rank 114,
+   :reason :order/ready-by-source-order,
+   :source-order 219,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-sci-reproduction-replay-ledger,
+   :rank 115,
+   :reason :order/ready-by-source-order,
+   :source-order 221,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-eoi-outbox-management,
+   :rank 116,
+   :reason :order/ready-by-source-order,
+   :source-order 226,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-landing-practice,
+   :rank 117,
+   :reason :order/ready-by-source-order,
+   :source-order 230,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-learning-loop,
+   :rank 118,
+   :reason :order/ready-by-source-order,
+   :source-order 231,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-recommendation-bindings,
+   :rank 119,
+   :reason :order/ready-by-source-order,
+   :source-order 232,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-self-improvement-loop,
+   :rank 120,
+   :reason :order/ready-by-source-order,
+   :source-order 233,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-stack-geometry,
+   :rank 121,
+   :reason :order/ready-by-source-order,
+   :source-order 234,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-stack-stereolithography,
+   :rank 122,
+   :reason :order/ready-by-source-order,
+   :source-order 235,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-war-machine-wiring,
+   :rank 123,
+   :reason :order/ready-by-source-order,
+   :source-order 237,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-artificial-stack-exchange,
+   :rank 124,
+   :reason :order/ready-by-source-order,
+   :source-order 241,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-canon-fingerprint-store,
+   :rank 125,
+   :reason :order/ready-by-source-order,
+   :source-order 243,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-differentiable-math,
+   :rank 126,
+   :reason :order/ready-by-source-order,
+   :source-order 244,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-differentiable-substrate,
+   :rank 127,
+   :reason :order/ready-by-source-order,
+   :source-order 245,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-distributed-frontiermath,
+   :rank 128,
+   :reason :order/ready-by-source-order,
+   :source-order 246,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-distributed-proofreaders,
+   :rank 129,
+   :reason :order/ready-by-source-order,
+   :source-order 247,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-efe-bge-followon-actions,
+   :rank 130,
+   :reason :order/ready-by-source-order,
+   :source-order 248,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-metric-harness,
+   :rank 131,
+   :reason :order/ready-by-source-order,
+   :source-order 252,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-paper-reverse-morphogenesis,
+   :rank 132,
+   :reason :order/ready-by-source-order,
+   :source-order 253,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-pheromone-field,
+   :rank 133,
+   :reason :order/ready-by-source-order,
+   :source-order 254,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-structure-seed-promotion,
+   :rank 134,
+   :reason :order/ready-by-source-order,
+   :source-order 256,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-symbol-grounding-scaling-plan,
+   :rank 135,
+   :reason :order/ready-by-source-order,
+   :source-order 259,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-symbol-grounding,
+   :rank 136,
+   :reason :order/ready-by-source-order,
+   :source-order 260,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-NA2026-outreach-debrief,
+   :rank 137,
+   :reason :order/ready-by-source-order,
+   :source-order 261,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-becoming-nomad,
+   :rank 138,
+   :reason :order/ready-by-source-order,
+   :source-order 262,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-daily-scan,
+   :rank 139,
+   :reason :order/ready-by-source-order,
+   :source-order 263,
+   :status :ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-value-creation-loop,
+   :rank 140,
+   :reason :order/ready-by-source-order,
+   :source-order 265,
+   :status :ready,
+   :unblocks 0}
+  {:cone 9,
+   :id :M-pattern-application-diagnostic,
+   :rank 141,
+   :reason :order/not-ready-by-source-order,
+   :source-order 63,
+   :status :undetermined,
+   :unblocks 0}
+  {:cone 9,
+   :id :M-superpod-mark3,
+   :rank 142,
+   :reason :order/not-ready-by-source-order,
+   :source-order 258,
+   :status :undetermined,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-apm-capability-ratchet,
+   :rank 143,
+   :reason :order/not-ready-by-source-order,
+   :source-order 0,
+   :status :not-ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-stack-inhabitation,
+   :rank 144,
+   :reason :order/not-ready-by-source-order,
+   :source-order 145,
+   :status :not-ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-state-snapshot-witness,
+   :rank 145,
+   :reason :order/not-ready-by-source-order,
+   :source-order 146,
+   :status :not-ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-coupling-as-constraint,
+   :rank 146,
+   :reason :order/not-ready-by-source-order,
+   :source-order 211,
+   :status :not-ready,
+   :unblocks 0}
+  {:cone 0,
+   :id :M-a-sorry-enterprise,
+   :rank 147,
+   :reason :order/not-ready-by-source-order,
+   :source-order 225,
+   :status :not-ready,
+   :unblocks 0}],
+ :readiness
+ {:M-G-wm-wiring {:reason :needs/none-declared, :status :ready},
+  :M-IRC-stability {:reason :lifecycle/completed, :status :done},
+  :M-NA2026-outreach-debrief
+  {:reason :needs/none-declared, :status :ready},
+  :M-P3-rational-reconstruction
+  {:reason :lifecycle/completed, :status :done},
+  :M-P7-rational-reconstruction
+  {:reason :lifecycle/completed, :status :done},
+  :M-P8-rational-reconstruction
+  {:reason :lifecycle/completed, :status :done},
+  :M-a-sorry-enterprise
+  {:evidence
+   [{:class :closure,
+     :file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+     :from :M-a-sorry-enterprise,
+     :kind :item,
+     :line 154,
+     :quote
+     "| M-repl-wins-over-cli | Prerequisite — evidence pipeline must work |",
+     :source :prose-reading,
+     :to :M-repl-wins-over-cli}],
+   :reason :needs/unmet,
+   :status :not-ready},
+  :M-action-cost-modelling
+  {:reason :needs/none-declared, :status :ready},
+  :M-agency-forum {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-agency-hardening {:reason :lifecycle/completed, :status :done},
+  :M-agency-hardening-datapoints
+  {:reason :lifecycle/completed, :status :done},
+  :M-agency-rebuild {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-agency-refactor {:reason :lifecycle/completed, :status :done},
+  :M-agency-unified-routing
+  {:reason :lifecycle/completed, :status :done},
+  :M-agents-queue {:reason :needs/none-declared, :status :ready},
+  :M-aif-a-matrix-faithfulness
+  {:reason :needs/none-declared, :status :ready},
+  :M-aif-gap-epistemic-affordance
+  {:reason :needs/all-met, :status :ready},
+  :M-aif-over-the-operator
+  {:reason :needs/none-declared, :status :ready},
+  :M-aif-policy-conditioned-eig
+  {:reason :needs/none-declared, :status :ready},
+  :M-aif-tokamak {:reason :needs/none-declared, :status :ready},
+  :M-alfworld-pattern-discovery
+  {:reason :lifecycle/completed, :status :done},
+  :M-apm-capability-ratchet
+  {:evidence
+   [{:class :closure,
+     :file "futon3c/holes/missions/M-giraffe.md",
+     :from :M-apm-capability-ratchet,
+     :kind :item,
+     :line 77,
+     :quote
+     "the futon0 APM work (`M-apm-capability-ratchet`) does not make sense before the \"AI can pass prelims\" capability (`M-futonzero-prelim-practice`)",
+     :source :prose-reading,
+     :to :M-futonzero-prelim-practice}],
+   :reason :needs/unmet,
+   :status :not-ready},
+  :M-apm-demonstration {:reason :needs/none-declared, :status :ready},
+  :M-apm-solutions {:reason :needs/none-declared, :status :ready},
+  :M-archaeology-control {:reason :lifecycle/completed, :status :done},
+  :M-artificial-stack-exchange
+  {:reason :needs/none-declared, :status :ready},
+  :M-arxana-graph-persistence
+  {:reason :lifecycle/completed, :status :done},
+  :M-arxana-hardening {:reason :needs/none-declared, :status :ready},
+  :M-arxana-roundtrip {:reason :needs/none-declared, :status :ready},
+  :M-autoclock-in {:reason :needs/none-declared, :status :ready},
+  :M-autonomous-pattern-lifecycle
+  {:reason :needs/none-declared, :status :ready},
+  :M-bayesian-structure-learning
+  {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-becoming-nomad {:reason :needs/none-declared, :status :ready},
+  :M-bounded-disposition {:reason :needs/all-met, :status :ready},
+  :M-bounded-in-flight-state
+  {:reason :lifecycle/completed, :status :done},
+  :M-canon-fingerprint-store
+  {:reason :needs/none-declared, :status :ready},
+  :M-capability-star-map {:reason :lifecycle/completed, :status :done},
+  :M-capability-zones {:reason :lifecycle/completed, :status :done},
+  :M-capability-zones-S1-coverage
+  {:reason :lifecycle/completed, :status :done},
+  :M-capability-zones-S1-handoff
+  {:reason :lifecycle/completed, :status :done},
+  :M-capability-zones-S2a-handoff
+  {:reason :lifecycle/completed, :status :done},
+  :M-capability-zones-S2b-handoff
+  {:reason :lifecycle/completed, :status :done},
+  :M-capability-zones-S3-handoff
+  {:reason :lifecycle/completed, :status :done},
+  :M-case-studies {:reason :needs/none-declared, :status :ready},
+  :M-categorical-code {:reason :needs/none-declared, :status :ready},
+  :M-chipwitz-corps {:reason :needs/all-met, :status :ready},
+  :M-codex-agent-behaviour
+  {:reason :lifecycle/completed, :status :done},
+  :M-codex-irc-execution {:reason :lifecycle/completed, :status :done},
+  :M-codex-parity {:reason :lifecycle/completed, :status :done},
+  :M-codex-sorry-loop {:reason :needs/none-declared, :status :ready},
+  :M-coupling-as-constraint
+  {:evidence
+   [{:class :closure,
+     :file "futon5/holes/missions/M-coupling-as-constraint.md",
+     :from :M-coupling-as-constraint,
+     :kind :item,
+     :line 5,
+     :quote
+     "**Blocked by:** M-xor-coupling-probe, M-tpg-coupling-evolution",
+     :source :prose-reading,
+     :to :M-xor-coupling-probe}
+    {:class :closure,
+     :file "futon5/holes/missions/M-coupling-as-constraint.md",
+     :from :M-coupling-as-constraint,
+     :kind :item,
+     :line 5,
+     :quote
+     "**Blocked by:** M-xor-coupling-probe, M-tpg-coupling-evolution",
+     :source :prose-reading,
+     :to :M-tpg-coupling-evolution}],
+   :reason :needs/unmet,
+   :status :not-ready},
+  :M-cyder {:reason :needs/none-declared, :status :ready},
+  :M-daily-scan {:reason :needs/none-declared, :status :ready},
+  :M-diagram-composition {:reason :lifecycle/completed, :status :done},
+  :M-diagramprover {:reason :needs/all-met, :status :ready},
+  :M-differentiable-code
+  {:reason :needs/none-declared, :status :ready},
+  :M-differentiable-math
+  {:reason :needs/none-declared, :status :ready},
+  :M-differentiable-substrate {:reason :needs/all-met, :status :ready},
+  :M-dionysus-winddown {:reason :needs/none-declared, :status :ready},
+  :M-dispatch-peripheral-bridge
+  {:reason :lifecycle/completed, :status :done},
+  :M-distributed-frontiermath
+  {:reason :needs/none-declared, :status :ready},
+  :M-distributed-proofreaders
+  {:reason :needs/none-declared, :status :ready},
+  :M-drawbridge-multi-agent
+  {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-editorial-assistant {:reason :needs/all-met, :status :ready},
+  :M-efe-bge-followon-actions
+  {:reason :needs/none-declared, :status :ready},
+  :M-emacs-cursor-peripheral
+  {:reason :needs/none-declared, :status :ready},
+  :M-eoi-outbox-management {:reason :needs/all-met, :status :ready},
+  :M-essay-corpus-substrate
+  {:reason :needs/none-declared, :status :ready},
+  :M-essays-diachronic-model
+  {:reason :needs/none-declared, :status :ready},
+  :M-essays-edit-cycle {:reason :needs/all-met, :status :ready},
+  :M-essays-retraction-visibility
+  {:reason :needs/none-declared, :status :ready},
+  :M-evidence-viewer-refinements
+  {:reason :lifecycle/completed, :status :done},
+  :M-exotype-xenotype-eoc
+  {:reason :needs/none-declared, :status :ready},
+  :M-explore-aiqa {:reason :lifecycle/completed, :status :done},
+  :M-expressions-of-interest
+  {:reason :needs/none-declared, :status :ready},
+  :M-f11-find-production-successor
+  {:reason :needs/none-declared, :status :ready},
+  :M-f6-agents {:reason :lifecycle/completed, :status :done},
+  :M-f6-arxiv {:reason :lifecycle/completed, :status :done},
+  :M-f6-eval {:reason :lifecycle/completed, :status :done},
+  :M-f6-ingest {:reason :lifecycle/completed, :status :done},
+  :M-f6-recursive {:reason :lifecycle/completed, :status :done},
+  :M-f7-lead-report {:reason :lifecycle/completed, :status :done},
+  :M-federated-agency-hardening
+  {:reason :needs/none-declared, :status :ready},
+  :M-first-flights {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-formal-war-machine {:reason :needs/none-declared, :status :ready},
+  :M-forum-organization {:reason :lifecycle/completed, :status :done},
+  :M-forum-refactor {:reason :lifecycle/completed, :status :done},
+  :M-fucodex-parity {:reason :lifecycle/completed, :status :done},
+  :M-fulab-logic {:reason :needs/none-declared, :status :ready},
+  :M-fulab-wiring-survey
+  {:reason :needs/none-declared, :status :ready},
+  :M-futon-enrichment {:reason :needs/none-declared, :status :ready},
+  :M-futon-problems {:reason :needs/none-declared, :status :ready},
+  :M-futon-seams {:reason :lifecycle/completed, :status :done},
+  :M-futon1a-evidence {:reason :lifecycle/completed, :status :done},
+  :M-futon1a-rebuild {:reason :lifecycle/completed, :status :done},
+  :M-futon1a-rebuild-scoping-review
+  {:reason :lifecycle/completed, :status :done},
+  :M-futon1a-workplan {:reason :lifecycle/completed, :status :done},
+  :M-futon3-last-mile {:reason :lifecycle/completed, :status :done},
+  :M-futon3c-codex {:reason :lifecycle/completed, :status :done},
+  :M-futon3x-e2e {:reason :lifecycle/completed, :status :done},
+  :M-futonzero-capability
+  {:reason :lifecycle/completed, :status :done},
+  :M-futonzero-generative
+  {:reason :needs/none-declared, :status :ready},
+  :M-futonzero-grounding
+  {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-futonzero-mvp {:reason :needs/all-met, :status :ready},
+  :M-futonzero-prelim-practice
+  {:reason :needs/all-met, :status :ready},
+  :M-giraffe {:reason :needs/none-declared, :status :ready},
+  :M-graph-unification {:reason :lifecycle/completed, :status :done},
+  :M-hypergraph-operator {:reason :needs/all-met, :status :ready},
+  :M-hyperreal-dictionary-planning
+  {:reason :needs/all-met, :status :ready},
+  :M-improve-irc {:reason :lifecycle/completed, :status :done},
+  :M-inbox-zero-claim-lifecycle
+  {:reason :needs/none-declared, :status :ready},
+  :M-intent-curvature {:reason :needs/none-declared, :status :ready},
+  :M-interest-network-coupling
+  {:reason :lifecycle/completed, :status :done},
+  :M-interest-network-coupling.aif-wiring
+  {:reason :lifecycle/completed, :status :done},
+  :M-invariant-queue-extend
+  {:alternative-available
+   [{:file "futon3c/holes/missions/M-invariant-queue-extend.md",
+     :line 49,
+     :quote
+     "`M-war-machine` but is not yet runtime-callable. Lift requires either waiting for `M-war-machine` to land runtime checks, or implementing",
+     :source :prose-reading,
+     :to :M-war-machine}],
+   :reason :needs/alternative-only,
+   :status :ready},
+  :M-invariant-queue-unstuck
+  {:reason :lifecycle/completed, :status :done},
+  :M-invariant-violations
+  {:reason :needs/none-declared, :status :ready},
+  :M-joe-told-me-about-futon
+  {:reason :needs/none-declared, :status :ready},
+  :M-kangaroo {:reason :needs/none-declared, :status :ready},
+  :M-lab-standard {:reason :needs/none-declared, :status :ready},
+  :M-labs-integration
+  {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-landing-practice {:reason :needs/none-declared, :status :ready},
+  :M-landscape-positioning
+  {:reason :needs/none-declared, :status :ready},
+  :M-latex-wysiwyg {:reason :needs/none-declared, :status :ready},
+  :M-learning-loop {:reason :needs/all-met, :status :ready},
+  :M-librarian {:reason :needs/none-declared, :status :ready},
+  :M-live-efe-map {:reason :lifecycle/completed, :status :done},
+  :M-live-geometric-stack
+  {:reason :lifecycle/completed, :status :done},
+  :M-make-agency-work-properly
+  {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-memes-arrows-patterns-diagrams
+  {:reason :lifecycle/completed, :status :done},
+  :M-memory-retrieval {:reason :needs/none-declared, :status :ready},
+  :M-metaca-search {:reason :needs/none-declared, :status :ready},
+  :M-metric-harness {:reason :needs/none-declared, :status :ready},
+  :M-mission-coherence-patterns
+  {:reason :needs/none-declared, :status :ready},
+  :M-mission-control {:reason :lifecycle/completed, :status :done},
+  :M-mission-control-scoping
+  {:reason :lifecycle/completed, :status :done},
+  :M-mission-peripheral {:reason :lifecycle/completed, :status :done},
+  :M-mission-scopes-into-substrate-2
+  {:reason :needs/none-declared, :status :ready},
+  :M-mission-wiring {:reason :needs/none-declared, :status :ready},
+  :M-native-plan-coherence
+  {:reason :lifecycle/completed, :status :done},
+  :M-omni-wm-runner {:reason :needs/none-declared, :status :ready},
+  :M-operational-readiness
+  {:reason :lifecycle/completed, :status :done},
+  :M-operational-readiness-traceability
+  {:reason :lifecycle/completed, :status :done},
+  :M-or-training-as-learning-system
+  {:reason :needs/none-declared, :status :ready},
+  :M-or-training-as-learning-system.v1
+  {:reason :needs/none-declared, :status :ready},
+  :M-paper-reverse-morphogenesis
+  {:reason :needs/none-declared, :status :ready},
+  :M-par-session-punctuation
+  {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-pattern-application-diagnostic
+  {:component [:M-pattern-application-diagnostic :M-superpod-mark3],
+   :evidence [:M-pattern-application-diagnostic :M-superpod-mark3],
+   :flag :needs-breakdown,
+   :reason :needs/cyclic,
+   :status :undetermined},
+  :M-pattern-exotype-bridge
+  {:reason :lifecycle/completed, :status :done},
+  :M-pattern-inference-engine
+  {:reason :lifecycle/completed, :status :done},
+  :M-pattern-inference-engine-scoping-review
+  {:reason :lifecycle/completed, :status :done},
+  :M-pattern-ingest {:reason :needs/none-declared, :status :ready},
+  :M-pattern-mining {:reason :needs/none-declared, :status :ready},
+  :M-pattern-posteriors {:reason :needs/none-declared, :status :ready},
+  :M-pattern-retrieval-calibration
+  {:reason :needs/all-met, :status :ready},
+  :M-patterns-done-right {:reason :needs/all-met, :status :ready},
+  :M-peeragogy-rewrite {:reason :needs/none-declared, :status :ready},
+  :M-peripheral-behavior {:reason :lifecycle/completed, :status :done},
+  :M-peripheral-gauntlet {:reason :lifecycle/completed, :status :done},
+  :M-peripheral-model {:reason :lifecycle/completed, :status :done},
+  :M-peripheral-phenomenology
+  {:reason :lifecycle/completed, :status :done},
+  :M-pheromone-field {:reason :needs/none-declared, :status :ready},
+  :M-pilot-appearance {:reason :lifecycle/completed, :status :done},
+  :M-plan-mermaid-viewer {:reason :lifecycle/completed, :status :done},
+  :M-populate-substrate-2
+  {:reason :needs/none-declared, :status :ready},
+  :M-portfolio-inference {:reason :lifecycle/completed, :status :done},
+  :M-prior-mathematics {:reason :needs/none-declared, :status :ready},
+  :M-proof-peripheral {:reason :lifecycle/completed, :status :done},
+  :M-propagators {:reason :needs/none-declared, :status :ready},
+  :M-psr-pur-mesh-peripheral
+  {:reason :lifecycle/completed, :status :done},
+  :M-reachable-from-boot
+  {:reason :needs/none-declared, :status :ready},
+  :M-recommendation-bindings
+  {:reason :needs/none-declared, :status :ready},
+  :M-reflective-discipline
+  {:reason :needs/none-declared, :status :ready},
+  :M-repl-wins-over-cli {:reason :needs/none-declared, :status :ready},
+  :M-run-produces-its-own-brief
+  {:reason :needs/none-declared, :status :ready},
+  :M-sci-detection-pipeline
+  {:reason :lifecycle/completed, :status :done},
+  :M-sci-reproduction {:reason :lifecycle/completed, :status :done},
+  :M-sci-reproduction-replay-ledger
+  {:reason :needs/none-declared, :status :ready},
+  :M-self-improvement-loop {:reason :needs/all-met, :status :ready},
+  :M-self-representing-stack
+  {:reason :lifecycle/completed, :status :done},
+  :M-shared-memory-control-build-test
+  {:reason :needs/none-declared, :status :ready},
+  :M-sigils-reconsidered
+  {:reason :needs/none-declared, :status :ready},
+  :M-simulating-or-training-as-learning-system
+  {:reason :needs/none-declared, :status :ready},
+  :M-single-entry-point {:reason :needs/none-declared, :status :ready},
+  :M-single-locus {:reason :lifecycle/completed, :status :done},
+  :M-sliding-blackboard {:reason :needs/none-declared, :status :ready},
+  :M-smart-emacs-cursor {:reason :needs/none-declared, :status :ready},
+  :M-social-exotype {:reason :lifecycle/completed, :status :done},
+  :M-stack-geometry {:reason :needs/none-declared, :status :ready},
+  :M-stack-hud-refactor {:reason :needs/none-declared, :status :ready},
+  :M-stack-inhabitation
+  {:evidence
+   [{:class :closure,
+     :file "futon3c/holes/missions/M-stack-inhabitation.md",
+     :from :M-stack-inhabitation,
+     :kind :item,
+     :line 125,
+     :quote
+     "| M-repl-wins-over-cli | Prerequisite (TESTING) — entry ceremony for the primary surface |",
+     :source :prose-reading,
+     :to :M-repl-wins-over-cli}],
+   :reason :needs/unmet,
+   :status :not-ready},
+  :M-stack-stereolithography
+  {:reason :needs/none-declared, :status :ready},
+  :M-state-snapshot-witness
+  {:evidence
+   [{:class :closure,
+     :file "futon3c/holes/missions/M-state-snapshot-witness.md",
+     :from :M-state-snapshot-witness,
+     :kind :item,
+     :line 67,
+     :quote
+     "- **Foundation:** depends on M-reachable-from-boot (snapshot creation belongs in the bootstrap construction path).",
+     :source :prose-reading,
+     :to :M-reachable-from-boot}],
+   :reason :needs/unmet,
+   :status :not-ready},
+  :M-stepper-calibration {:reason :lifecycle/completed, :status :done},
+  :M-structural-law {:reason :lifecycle/completed, :status :done},
+  :M-structure-seed-promotion
+  {:reason :needs/none-declared, :status :ready},
+  :M-substrate-metric {:reason :lifecycle/completed, :status :done},
+  :M-superpod-mark2 {:reason :needs/none-declared, :status :ready},
+  :M-superpod-mark3
+  {:component [:M-pattern-application-diagnostic :M-superpod-mark3],
+   :evidence [:M-pattern-application-diagnostic :M-superpod-mark3],
+   :flag :needs-breakdown,
+   :reason :needs/cyclic,
+   :status :undetermined},
+  :M-symbol-grounding {:reason :needs/none-declared, :status :ready},
+  :M-symbol-grounding-scaling-plan
+  {:reason :needs/none-declared, :status :ready},
+  :M-the-futon-stack {:reason :needs/none-declared, :status :ready},
+  :M-the-futon-stack-Q6-r12-design-choices
+  {:reason :needs/none-declared, :status :ready},
+  :M-the-perfect-crime {:reason :needs/all-met, :status :ready},
+  :M-three-column-stack {:reason :lifecycle/completed, :status :done},
+  :M-tickle-overnight {:reason :lifecycle/completed, :status :done},
+  :M-tpg-coupling-evolution
+  {:reason :needs/none-declared, :status :ready},
+  :M-transport-adapters {:reason :lifecycle/completed, :status :done},
+  :M-trip-journal
+  {:alternative-available
+   [{:file "futon5a/holes/missions/M-trip-journal.md",
+     :line 373,
+     :quote
+     "7. **Adoption-ready**: a second mission (candidate: M-daily-scan in futon7) begins maintaining a hinge-log, validating that the",
+     :source :prose-reading,
+     :to :M-daily-scan}],
+   :reason :needs/all-met,
+   :status :ready},
+  :M-turns-first {:reason :needs/none-declared, :status :ready},
+  :M-typed-bells {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-ARGUE {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-DERIVE {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-MAP {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-VERIFY {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-example-first-flights
+  {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-example-mission-head
+  {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-example-scope-query
+  {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-lean-handoffs
+  {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-lean-wave2-design
+  {:reason :lifecycle/completed, :status :done},
+  :M-typed-holes-mathlib-handoff
+  {:reason :needs/none-declared, :status :ready},
+  :M-typed-memories {:reason :needs/none-declared, :status :ready},
+  :M-u88-contextual-preferences
+  {:reason :needs/none-declared, :status :ready},
+  :M-understand-fucodex
+  {:reason :lifecycle/cancelled, :status :cancelled},
+  :M-usage-hacking {:reason :needs/none-declared, :status :ready},
+  :M-value-creation-loop
+  {:reason :needs/none-declared, :status :ready},
+  :M-vsatarcs-invariants-integration
+  {:reason :needs/none-declared, :status :ready},
+  :M-vsatarcs-invariants-integration.witness-vsatarcs-fresh
+  {:reason :needs/none-declared, :status :ready},
+  :M-vsatarcs-writer {:reason :needs/none-declared, :status :ready},
+  :M-walkie-talkie {:reason :lifecycle/completed, :status :done},
+  :M-war-machine {:reason :needs/none-declared, :status :ready},
+  :M-war-machine-first-outing
+  {:reason :lifecycle/completed, :status :done},
+  :M-war-machine-first-outing-expectations
+  {:reason :lifecycle/completed, :status :done},
+  :M-war-machine-pilot {:reason :needs/all-met, :status :ready},
+  :M-war-machine-tuning {:reason :needs/none-declared, :status :ready},
+  :M-war-machine-vsatarcs-interop
+  {:reason :needs/none-declared, :status :ready},
+  :M-war-machine-wiring {:reason :needs/all-met, :status :ready},
+  :M-warrant-limit {:reason :needs/none-declared, :status :ready},
+  :M-web-arxana-missions {:reason :needs/all-met, :status :ready},
+  :M-web-arxana-ui-improvements
+  {:reason :needs/none-declared, :status :ready},
+  :M-webarxana {:reason :needs/none-declared, :status :ready},
+  :M-weird-modernism {:reason :needs/none-declared, :status :ready},
+  :M-wm-aif-policy-grain-compliance
+  {:reason :needs/none-declared, :status :ready},
+  :M-wm-strategic-mission-selection
+  {:reason :needs/all-met, :status :ready},
+  :M-wm-tripwires {:reason :needs/none-declared, :status :ready},
+  :M-wm-wiring {:reason :needs/all-met, :status :ready},
+  :M-writing-ethics {:reason :lifecycle/completed, :status :done},
+  :M-ws-emacs-log-stream {:reason :lifecycle/completed, :status :done},
+  :M-xenotype-its {:reason :needs/all-met, :status :ready},
+  :M-xor-coupling-probe {:reason :needs/none-declared, :status :ready},
+  :M-zai-learning-loop {:reason :needs/none-declared, :status :ready},
+  :M-zaif-harness-v1 {:reason :needs/none-declared, :status :ready},
+  :M-象-2000 {:reason :needs/all-met, :status :ready}},
+ :ready-ignoring-externals
+ [:M-G-wm-wiring
+  :M-NA2026-outreach-debrief
+  :M-action-cost-modelling
+  :M-agents-queue
+  :M-aif-a-matrix-faithfulness
+  :M-aif-gap-epistemic-affordance
+  :M-aif-over-the-operator
+  :M-aif-policy-conditioned-eig
+  :M-aif-tokamak
+  :M-apm-demonstration
+  :M-apm-solutions
+  :M-artificial-stack-exchange
+  :M-arxana-hardening
+  :M-arxana-roundtrip
+  :M-autoclock-in
+  :M-autonomous-pattern-lifecycle
+  :M-becoming-nomad
+  :M-bounded-disposition
+  :M-canon-fingerprint-store
+  :M-case-studies
+  :M-categorical-code
+  :M-chipwitz-corps
+  :M-codex-sorry-loop
+  :M-cyder
+  :M-daily-scan
+  :M-diagramprover
+  :M-differentiable-code
+  :M-differentiable-math
+  :M-differentiable-substrate
+  :M-dionysus-winddown
+  :M-distributed-frontiermath
+  :M-distributed-proofreaders
+  :M-editorial-assistant
+  :M-efe-bge-followon-actions
+  :M-emacs-cursor-peripheral
+  :M-eoi-outbox-management
+  :M-essay-corpus-substrate
+  :M-essays-diachronic-model
+  :M-essays-edit-cycle
+  :M-essays-retraction-visibility
+  :M-exotype-xenotype-eoc
+  :M-expressions-of-interest
+  :M-f11-find-production-successor
+  :M-federated-agency-hardening
+  :M-formal-war-machine
+  :M-fulab-logic
+  :M-fulab-wiring-survey
+  :M-futon-enrichment
+  :M-futon-problems
+  :M-futonzero-generative
+  :M-futonzero-mvp
+  :M-futonzero-prelim-practice
+  :M-giraffe
+  :M-hypergraph-operator
+  :M-hyperreal-dictionary-planning
+  :M-inbox-zero-claim-lifecycle
+  :M-intent-curvature
+  :M-invariant-queue-extend
+  :M-invariant-violations
+  :M-joe-told-me-about-futon
+  :M-kangaroo
+  :M-lab-standard
+  :M-landing-practice
+  :M-landscape-positioning
+  :M-latex-wysiwyg
+  :M-learning-loop
+  :M-librarian
+  :M-memory-retrieval
+  :M-metaca-search
+  :M-metric-harness
+  :M-mission-coherence-patterns
+  :M-mission-scopes-into-substrate-2
+  :M-mission-wiring
+  :M-omni-wm-runner
+  :M-or-training-as-learning-system
+  :M-or-training-as-learning-system.v1
+  :M-paper-reverse-morphogenesis
+  :M-pattern-ingest
+  :M-pattern-mining
+  :M-pattern-posteriors
+  :M-pattern-retrieval-calibration
+  :M-patterns-done-right
+  :M-peeragogy-rewrite
+  :M-pheromone-field
+  :M-populate-substrate-2
+  :M-prior-mathematics
+  :M-propagators
+  :M-reachable-from-boot
+  :M-recommendation-bindings
+  :M-reflective-discipline
+  :M-repl-wins-over-cli
+  :M-run-produces-its-own-brief
+  :M-sci-reproduction-replay-ledger
+  :M-self-improvement-loop
+  :M-shared-memory-control-build-test
+  :M-sigils-reconsidered
+  :M-simulating-or-training-as-learning-system
+  :M-single-entry-point
+  :M-sliding-blackboard
+  :M-smart-emacs-cursor
+  :M-stack-geometry
+  :M-stack-hud-refactor
+  :M-stack-stereolithography
+  :M-structure-seed-promotion
+  :M-superpod-mark2
+  :M-symbol-grounding
+  :M-symbol-grounding-scaling-plan
+  :M-the-futon-stack
+  :M-the-futon-stack-Q6-r12-design-choices
+  :M-the-perfect-crime
+  :M-tpg-coupling-evolution
+  :M-trip-journal
+  :M-turns-first
+  :M-typed-holes-mathlib-handoff
+  :M-typed-memories
+  :M-u88-contextual-preferences
+  :M-usage-hacking
+  :M-value-creation-loop
+  :M-vsatarcs-invariants-integration
+  :M-vsatarcs-invariants-integration.witness-vsatarcs-fresh
+  :M-vsatarcs-writer
+  :M-war-machine
+  :M-war-machine-pilot
+  :M-war-machine-tuning
+  :M-war-machine-vsatarcs-interop
+  :M-war-machine-wiring
+  :M-warrant-limit
+  :M-web-arxana-missions
+  :M-web-arxana-ui-improvements
+  :M-webarxana
+  :M-weird-modernism
+  :M-wm-aif-policy-grain-compliance
+  :M-wm-strategic-mission-selection
+  :M-wm-tripwires
+  :M-wm-wiring
+  :M-xenotype-its
+  :M-xor-coupling-probe
+  :M-zai-learning-loop
+  :M-zaif-harness-v1
+  :M-象-2000],
+ :ready-set
+ [:M-G-wm-wiring
+  :M-NA2026-outreach-debrief
+  :M-action-cost-modelling
+  :M-agents-queue
+  :M-aif-a-matrix-faithfulness
+  :M-aif-gap-epistemic-affordance
+  :M-aif-over-the-operator
+  :M-aif-policy-conditioned-eig
+  :M-aif-tokamak
+  :M-apm-demonstration
+  :M-apm-solutions
+  :M-artificial-stack-exchange
+  :M-arxana-hardening
+  :M-arxana-roundtrip
+  :M-autoclock-in
+  :M-autonomous-pattern-lifecycle
+  :M-becoming-nomad
+  :M-bounded-disposition
+  :M-canon-fingerprint-store
+  :M-case-studies
+  :M-categorical-code
+  :M-chipwitz-corps
+  :M-codex-sorry-loop
+  :M-cyder
+  :M-daily-scan
+  :M-diagramprover
+  :M-differentiable-code
+  :M-differentiable-math
+  :M-differentiable-substrate
+  :M-dionysus-winddown
+  :M-distributed-frontiermath
+  :M-distributed-proofreaders
+  :M-editorial-assistant
+  :M-efe-bge-followon-actions
+  :M-emacs-cursor-peripheral
+  :M-eoi-outbox-management
+  :M-essay-corpus-substrate
+  :M-essays-diachronic-model
+  :M-essays-edit-cycle
+  :M-essays-retraction-visibility
+  :M-exotype-xenotype-eoc
+  :M-expressions-of-interest
+  :M-f11-find-production-successor
+  :M-federated-agency-hardening
+  :M-formal-war-machine
+  :M-fulab-logic
+  :M-fulab-wiring-survey
+  :M-futon-enrichment
+  :M-futon-problems
+  :M-futonzero-generative
+  :M-futonzero-mvp
+  :M-futonzero-prelim-practice
+  :M-giraffe
+  :M-hypergraph-operator
+  :M-hyperreal-dictionary-planning
+  :M-inbox-zero-claim-lifecycle
+  :M-intent-curvature
+  :M-invariant-queue-extend
+  :M-invariant-violations
+  :M-joe-told-me-about-futon
+  :M-kangaroo
+  :M-lab-standard
+  :M-landing-practice
+  :M-landscape-positioning
+  :M-latex-wysiwyg
+  :M-learning-loop
+  :M-librarian
+  :M-memory-retrieval
+  :M-metaca-search
+  :M-metric-harness
+  :M-mission-coherence-patterns
+  :M-mission-scopes-into-substrate-2
+  :M-mission-wiring
+  :M-omni-wm-runner
+  :M-or-training-as-learning-system
+  :M-or-training-as-learning-system.v1
+  :M-paper-reverse-morphogenesis
+  :M-pattern-ingest
+  :M-pattern-mining
+  :M-pattern-posteriors
+  :M-pattern-retrieval-calibration
+  :M-patterns-done-right
+  :M-peeragogy-rewrite
+  :M-pheromone-field
+  :M-populate-substrate-2
+  :M-prior-mathematics
+  :M-propagators
+  :M-reachable-from-boot
+  :M-recommendation-bindings
+  :M-reflective-discipline
+  :M-repl-wins-over-cli
+  :M-run-produces-its-own-brief
+  :M-sci-reproduction-replay-ledger
+  :M-self-improvement-loop
+  :M-shared-memory-control-build-test
+  :M-sigils-reconsidered
+  :M-simulating-or-training-as-learning-system
+  :M-single-entry-point
+  :M-sliding-blackboard
+  :M-smart-emacs-cursor
+  :M-stack-geometry
+  :M-stack-hud-refactor
+  :M-stack-stereolithography
+  :M-structure-seed-promotion
+  :M-superpod-mark2
+  :M-symbol-grounding
+  :M-symbol-grounding-scaling-plan
+  :M-the-futon-stack
+  :M-the-futon-stack-Q6-r12-design-choices
+  :M-the-perfect-crime
+  :M-tpg-coupling-evolution
+  :M-trip-journal
+  :M-turns-first
+  :M-typed-holes-mathlib-handoff
+  :M-typed-memories
+  :M-u88-contextual-preferences
+  :M-usage-hacking
+  :M-value-creation-loop
+  :M-vsatarcs-invariants-integration
+  :M-vsatarcs-invariants-integration.witness-vsatarcs-fresh
+  :M-vsatarcs-writer
+  :M-war-machine
+  :M-war-machine-pilot
+  :M-war-machine-tuning
+  :M-war-machine-vsatarcs-interop
+  :M-war-machine-wiring
+  :M-warrant-limit
+  :M-web-arxana-missions
+  :M-web-arxana-ui-improvements
+  :M-webarxana
+  :M-weird-modernism
+  :M-wm-aif-policy-grain-compliance
+  :M-wm-strategic-mission-selection
+  :M-wm-tripwires
+  :M-wm-wiring
+  :M-xenotype-its
+  :M-xor-coupling-probe
+  :M-zai-learning-loop
+  :M-zaif-harness-v1
+  :M-象-2000],
+ :unblocks
+ {:M-G-wm-wiring [],
+  :M-IRC-stability [],
+  :M-NA2026-outreach-debrief [],
+  :M-P3-rational-reconstruction [],
+  :M-P7-rational-reconstruction [],
+  :M-P8-rational-reconstruction [],
+  :M-a-sorry-enterprise [],
+  :M-action-cost-modelling [],
+  :M-agency-forum [],
+  :M-agency-hardening [],
+  :M-agency-hardening-datapoints [],
+  :M-agency-rebuild [],
+  :M-agency-refactor [],
+  :M-agency-unified-routing [],
+  :M-agents-queue [],
+  :M-aif-a-matrix-faithfulness [],
+  :M-aif-gap-epistemic-affordance [],
+  :M-aif-over-the-operator [],
+  :M-aif-policy-conditioned-eig [],
+  :M-aif-tokamak [],
+  :M-alfworld-pattern-discovery [],
+  :M-apm-capability-ratchet [],
+  :M-apm-demonstration [],
+  :M-apm-solutions [],
+  :M-archaeology-control [],
+  :M-artificial-stack-exchange [],
+  :M-arxana-graph-persistence [],
+  :M-arxana-hardening [],
+  :M-arxana-roundtrip [],
+  :M-autoclock-in [],
+  :M-autonomous-pattern-lifecycle [],
+  :M-bayesian-structure-learning [],
+  :M-becoming-nomad [],
+  :M-bounded-disposition [],
+  :M-bounded-in-flight-state [],
+  :M-canon-fingerprint-store [],
+  :M-capability-star-map [],
+  :M-capability-zones [],
+  :M-capability-zones-S1-coverage [],
+  :M-capability-zones-S1-handoff [],
+  :M-capability-zones-S2a-handoff [],
+  :M-capability-zones-S2b-handoff [],
+  :M-capability-zones-S3-handoff [],
+  :M-case-studies [],
+  :M-categorical-code [],
+  :M-chipwitz-corps [],
+  :M-codex-agent-behaviour [],
+  :M-codex-irc-execution [],
+  :M-codex-parity [],
+  :M-codex-sorry-loop [],
+  :M-coupling-as-constraint [],
+  :M-cyder [],
+  :M-daily-scan [],
+  :M-diagram-composition [],
+  :M-diagramprover [],
+  :M-differentiable-code [],
+  :M-differentiable-math [],
+  :M-differentiable-substrate [],
+  :M-dionysus-winddown [],
+  :M-dispatch-peripheral-bridge [],
+  :M-distributed-frontiermath [],
+  :M-distributed-proofreaders [],
+  :M-drawbridge-multi-agent [],
+  :M-editorial-assistant [],
+  :M-efe-bge-followon-actions [],
+  :M-emacs-cursor-peripheral [],
+  :M-eoi-outbox-management [],
+  :M-essay-corpus-substrate [],
+  :M-essays-diachronic-model [],
+  :M-essays-edit-cycle [],
+  :M-essays-retraction-visibility [],
+  :M-evidence-viewer-refinements [],
+  :M-exotype-xenotype-eoc [],
+  :M-explore-aiqa [],
+  :M-expressions-of-interest [],
+  :M-f11-find-production-successor [],
+  :M-f6-agents [],
+  :M-f6-arxiv [],
+  :M-f6-eval [],
+  :M-f6-ingest [],
+  :M-f6-recursive [],
+  :M-f7-lead-report [],
+  :M-federated-agency-hardening [],
+  :M-first-flights [],
+  :M-formal-war-machine [],
+  :M-forum-organization [],
+  :M-forum-refactor [],
+  :M-fucodex-parity [],
+  :M-fulab-logic [],
+  :M-fulab-wiring-survey [],
+  :M-futon-enrichment [],
+  :M-futon-problems [],
+  :M-futon-seams [],
+  :M-futon1a-evidence [],
+  :M-futon1a-rebuild [],
+  :M-futon1a-rebuild-scoping-review [],
+  :M-futon1a-workplan [],
+  :M-futon3-last-mile [],
+  :M-futon3c-codex [],
+  :M-futon3x-e2e [],
+  :M-futonzero-capability [],
+  :M-futonzero-generative [],
+  :M-futonzero-grounding [],
+  :M-futonzero-mvp [],
+  :M-futonzero-prelim-practice [:M-apm-capability-ratchet],
+  :M-giraffe [],
+  :M-graph-unification [],
+  :M-hypergraph-operator [],
+  :M-hyperreal-dictionary-planning [],
+  :M-improve-irc [],
+  :M-inbox-zero-claim-lifecycle [],
+  :M-intent-curvature [],
+  :M-interest-network-coupling [],
+  :M-interest-network-coupling.aif-wiring [],
+  :M-invariant-queue-extend [],
+  :M-invariant-queue-unstuck [],
+  :M-invariant-violations [],
+  :M-joe-told-me-about-futon [],
+  :M-kangaroo [],
+  :M-lab-standard [],
+  :M-labs-integration [],
+  :M-landing-practice [],
+  :M-landscape-positioning [],
+  :M-latex-wysiwyg [],
+  :M-learning-loop [],
+  :M-librarian [],
+  :M-live-efe-map [],
+  :M-live-geometric-stack [],
+  :M-make-agency-work-properly [],
+  :M-memes-arrows-patterns-diagrams [],
+  :M-memory-retrieval [],
+  :M-metaca-search [],
+  :M-metric-harness [],
+  :M-mission-coherence-patterns [],
+  :M-mission-control [],
+  :M-mission-control-scoping [],
+  :M-mission-peripheral [],
+  :M-mission-scopes-into-substrate-2 [],
+  :M-mission-wiring [],
+  :M-native-plan-coherence [],
+  :M-omni-wm-runner [],
+  :M-operational-readiness [],
+  :M-operational-readiness-traceability [],
+  :M-or-training-as-learning-system [],
+  :M-or-training-as-learning-system.v1 [],
+  :M-paper-reverse-morphogenesis [],
+  :M-par-session-punctuation [],
+  :M-pattern-application-diagnostic [],
+  :M-pattern-exotype-bridge [],
+  :M-pattern-inference-engine [],
+  :M-pattern-inference-engine-scoping-review [],
+  :M-pattern-ingest [],
+  :M-pattern-mining [],
+  :M-pattern-posteriors [],
+  :M-pattern-retrieval-calibration [],
+  :M-patterns-done-right [],
+  :M-peeragogy-rewrite [],
+  :M-peripheral-behavior [],
+  :M-peripheral-gauntlet [],
+  :M-peripheral-model [],
+  :M-peripheral-phenomenology [],
+  :M-pheromone-field [],
+  :M-pilot-appearance [],
+  :M-plan-mermaid-viewer [],
+  :M-populate-substrate-2 [],
+  :M-portfolio-inference [],
+  :M-prior-mathematics [],
+  :M-proof-peripheral [],
+  :M-propagators [],
+  :M-psr-pur-mesh-peripheral [],
+  :M-reachable-from-boot [:M-state-snapshot-witness],
+  :M-recommendation-bindings [],
+  :M-reflective-discipline [],
+  :M-repl-wins-over-cli [:M-a-sorry-enterprise :M-stack-inhabitation],
+  :M-run-produces-its-own-brief [],
+  :M-sci-detection-pipeline [],
+  :M-sci-reproduction [],
+  :M-sci-reproduction-replay-ledger [],
+  :M-self-improvement-loop [],
+  :M-self-representing-stack [],
+  :M-shared-memory-control-build-test [],
+  :M-sigils-reconsidered [],
+  :M-simulating-or-training-as-learning-system [],
+  :M-single-entry-point [],
+  :M-single-locus [],
+  :M-sliding-blackboard [],
+  :M-smart-emacs-cursor [],
+  :M-social-exotype [],
+  :M-stack-geometry [],
+  :M-stack-hud-refactor [],
+  :M-stack-inhabitation [],
+  :M-stack-stereolithography [],
+  :M-state-snapshot-witness [],
+  :M-stepper-calibration [],
+  :M-structural-law [],
+  :M-structure-seed-promotion [],
+  :M-substrate-metric [],
+  :M-superpod-mark2 [],
+  :M-superpod-mark3 [],
+  :M-symbol-grounding [],
+  :M-symbol-grounding-scaling-plan [],
+  :M-the-futon-stack [],
+  :M-the-futon-stack-Q6-r12-design-choices [],
+  :M-the-perfect-crime [],
+  :M-three-column-stack [],
+  :M-tickle-overnight [],
+  :M-tpg-coupling-evolution [],
+  :M-transport-adapters [],
+  :M-trip-journal [],
+  :M-turns-first [],
+  :M-typed-bells [],
+  :M-typed-holes [],
+  :M-typed-holes-ARGUE [],
+  :M-typed-holes-DERIVE [],
+  :M-typed-holes-MAP [],
+  :M-typed-holes-VERIFY [],
+  :M-typed-holes-example-first-flights [],
+  :M-typed-holes-example-mission-head [],
+  :M-typed-holes-example-scope-query [],
+  :M-typed-holes-lean-handoffs [],
+  :M-typed-holes-lean-wave2-design [],
+  :M-typed-holes-mathlib-handoff [],
+  :M-typed-memories [],
+  :M-u88-contextual-preferences [],
+  :M-understand-fucodex [],
+  :M-usage-hacking [],
+  :M-value-creation-loop [],
+  :M-vsatarcs-invariants-integration [],
+  :M-vsatarcs-invariants-integration.witness-vsatarcs-fresh [],
+  :M-vsatarcs-writer [],
+  :M-walkie-talkie [],
+  :M-war-machine [],
+  :M-war-machine-first-outing [],
+  :M-war-machine-first-outing-expectations [],
+  :M-war-machine-pilot [],
+  :M-war-machine-tuning [],
+  :M-war-machine-vsatarcs-interop [],
+  :M-war-machine-wiring [],
+  :M-warrant-limit [],
+  :M-web-arxana-missions [],
+  :M-web-arxana-ui-improvements [],
+  :M-webarxana [],
+  :M-weird-modernism [],
+  :M-wm-aif-policy-grain-compliance [],
+  :M-wm-strategic-mission-selection [],
+  :M-wm-tripwires [],
+  :M-wm-wiring [],
+  :M-writing-ethics [],
+  :M-ws-emacs-log-stream [],
+  :M-xenotype-its [],
+  :M-xor-coupling-probe [],
+  :M-zai-learning-loop [],
+  :M-zaif-harness-v1 [],
+  :M-象-2000 []}}

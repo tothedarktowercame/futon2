@@ -5,7 +5,8 @@
   completed run publications rather than mutable state between clicks."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [futon2.aif.outer-score :as outer-score])
+            [futon2.aif.outer-score :as outer-score]
+            [futon2.aif.action-identity :as identity])
   (:import [java.nio.file Files StandardCopyOption]
            [java.security MessageDigest]
            [java.util UUID]))
@@ -209,6 +210,54 @@
                               (:eta-state makeup) (:omega-state makeup)
                               (:state-counts state) model observed))
         (update :click-count inc))))
+
+(defn consume-observation
+  "Apply one pinned pending observation once. The receipt travels inside the
+  durable state, so counts, consumption identity and replacement pending can
+  be committed together by write-state!. R20Step.step supplies the update."
+  [makeup state pending observation ending]
+  (let [run-id (:run-id pending)
+        input {:run-id run-id :selection (:selection pending) :ending ending
+               :observation (dissoc observation :relation)}
+        input-pin (identity/digest input)
+        prior (get-in state [:outer/consumptions run-id])]
+    (cond
+      (and prior (not= (:sha256 prior) (identity/digest (dissoc prior :sha256))))
+      (refuse! :consumption-receipt-tampered {:run-id run-id})
+      prior
+      (if (= input-pin (:input-sha256 prior))
+        {:status :already-consumed :state state :receipt prior}
+        (refuse! :consumed-observation-conflict {:run-id run-id}))
+      (not= pending (:pending state))
+      (refuse! :pending-observation-mismatch {:run-id run-id})
+      (not (and (string? run-id) (= :ready (:status ending))
+                (= run-id (:run-id ending)) (:record-pin ending)))
+      (refuse! :outer-observation-unverified {:run-id run-id})
+      :else
+      (let [advanced (next-state makeup state (:selection pending) observation ending)
+            receipt {:schema :wm/outer-consumption-v1 :run-id run-id
+                     :makeup-sha256 (:makeup/sha256 makeup)
+                     :input-sha256 input-pin
+                     :selection-sha256 (identity/digest (:selection pending))
+                     :observation-sha256 (identity/digest (:observation input))
+                     :ending ending :selected-relation (:selected-relation (:selection pending))
+                     :click-count-before (:click-count state)
+                     :click-count-after (:click-count advanced)}
+            receipt (assoc receipt :sha256 (identity/digest receipt))]
+        {:status :applied :receipt receipt
+         :state (-> advanced (dissoc :pending)
+                    (assoc-in [:outer/consumptions run-id] receipt))}))))
+
+(defn replace-pending
+  "Stage replacement in the same value as the consumed counts and receipt.
+  An unconsumed different run may not be silently overwritten. A click-local
+  reselection can replace its own selection before that run completes."
+  [state pending]
+  (when (and (:pending state)
+             (not= (get-in state [:pending :run-id]) (:run-id pending))
+             (not (get-in state [:outer/consumptions (get-in state [:pending :run-id])])))
+    (refuse! :pending-observation-unconsumed {:run-id (get-in state [:pending :run-id])}))
+  (assoc state :pending pending))
 
 (defn- valid-state? [state]
   (and (= state-schema (:schema state))
