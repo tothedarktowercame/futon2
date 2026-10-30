@@ -1,0 +1,2375 @@
+[{:file "futon3/holes/missions/M-coordination-rewrite.md",
+  :id :M-coordination-rewrite,
+  :reject :item/duplicate-id,
+  :repo "futon3"}
+ {:file "futon3b/holes/missions/M-coordination-rewrite.md",
+  :id :M-coordination-rewrite,
+  :reject :item/duplicate-id,
+  :repo "futon3b"}
+ {:file "futon0/holes/missions/M-capability-zones-S1.5-acceptance.md",
+  :id :M-capability-zones-S1.5-acceptance,
+  :reject :item/no-status-line,
+  :repo "futon0"}
+ {:file "futon0/holes/missions/M-capability-zones-S1.5-handoff.md",
+  :id :M-capability-zones-S1.5-handoff,
+  :reject :item/no-status-line,
+  :repo "futon0"}
+ {:file
+  "futon3a/holes/missions/M-memes-arrows-patterns-diagrams.BHK-research.md",
+  :id :M-memes-arrows-patterns-diagrams.BHK-research,
+  :reject :item/no-status-line,
+  :repo "futon3a"}
+ {:file
+  "futon3c/holes/missions/M-populate-substrate-2.D3-slice2-design.md",
+  :id :M-populate-substrate-2.D3-slice2-design,
+  :reject :item/no-status-line,
+  :repo "futon3c"}
+ {:file
+  "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md",
+  :id :M-populate-substrate-2.D3-sweep-runbook,
+  :reject :item/no-status-line,
+  :repo "futon3c"}
+ {:file "futon3c/holes/missions/M-substrate-metric.OR-sample.md",
+  :id :M-substrate-metric.OR-sample,
+  :reject :item/no-status-line,
+  :repo "futon3c"}
+ {:file "futon3c/holes/missions/M-substrate-metric.R1-report.md",
+  :id :M-substrate-metric.R1-report,
+  :reject :item/no-status-line,
+  :repo "futon3c"}
+ {:file
+  "futon3c/holes/missions/M-substrate-metric.R2-curvature-full-report.md",
+  :id :M-substrate-metric.R2-curvature-full-report,
+  :reject :item/no-status-line,
+  :repo "futon3c"}
+ {:file
+  "futon3c/holes/missions/M-substrate-metric.R2-curvature-report.md",
+  :id :M-substrate-metric.R2-curvature-report,
+  :reject :item/no-status-line,
+  :repo "futon3c"}
+ {:file "futon3c/holes/missions/M-象-cascade.md",
+  :id :M-象-cascade,
+  :reject :item/no-status-line,
+  :repo "futon3c"}
+ {:file "futon0/holes/missions/M-apm-capability-ratchet.md",
+  :from "M-futonzero-prelim-practice",
+  :line 741,
+  :quote
+  "4. Feed promoted packets into `M-futonzero-prelim-practice` as teaching units",
+  :read_by "zai-2 batch 1",
+  :reason
+  "claude-13 review 2026-10-28: a planned handoff, not a wait; and it contradicts Joe's stated order (ratchet after prelims, M-giraffe line 77), added as its own edge",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-capability-ratchet"}
+ {:file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+  :from "M-a-sorry-enterprise",
+  :line 265,
+  :quote
+  "No further action required from M-action-cost-modelling's side; the predecessor relationship is resolved.",
+  :read_by "zai-2 batch 1",
+  :reason
+  "historical: the tracked predecessor (M-INC step b) is satisfied and the relationship is resolved; nothing awaited",
+  :reject :edge/rejected-at-reading,
+  :to "M-action-cost-modelling"}
+ {:file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+  :from "M-a-sorry-enterprise",
+  :line 153,
+  :quote
+  "| M-hypergraph-operator | Sibling — Clicks/Ticks operate on the same sorry topology |",
+  :read_by "zai-2 batch 1",
+  :reason "sibling",
+  :reject :edge/rejected-at-reading,
+  :to "M-hypergraph-operator"}
+ {:file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+  :from "M-a-sorry-enterprise",
+  :line 8,
+  :quote
+  "observations), M-learning-loop (mines B→A pairs into patterns /",
+  :read_by "zai-2 batch 1",
+  :reason "cross-ref role description, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-learning-loop"}
+ {:file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+  :from "M-a-sorry-enterprise",
+  :line 281,
+  :quote
+  "`M-pattern-application-diagnostic` (the sibling pattern-scoring lift).",
+  :read_by "zai-2 batch 1",
+  :reason "sibling",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-application-diagnostic"}
+ {:file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+  :from "M-a-sorry-enterprise",
+  :line 9,
+  :quote
+  "diagnostics), M-stack-geometry (renders sorry topology with mission",
+  :read_by "zai-2 batch 1",
+  :reason "cross-ref role description, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-geometry"}
+ {:file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+  :from "M-a-sorry-enterprise",
+  :line 152,
+  :quote "| M-stack-inhabitation | Parent — this is a sub-mission |",
+  :read_by "zai-2 batch 1",
+  :reason "parent relation, not a needs-edge",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-inhabitation"}
+ {:file "futon5a/holes/missions/M-a-sorry-enterprise.md",
+  :from "M-a-sorry-enterprise",
+  :line 7,
+  :quote
+  "M-trip-journal (B→A hinge evidence as candidate sorry-discovery",
+  :read_by "zai-2 batch 1",
+  :reason "cross-ref role description, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-trip-journal"}
+ {:file "futon3c/holes/missions/M-action-cost-modelling.md",
+  :from "M-action-cost-modelling",
+  :line 668,
+  :quote
+  "- **T5 DONE** — mining-track unblocked; finding filed at `futon5a/holes/missions/M-a-sorry-enterprise.md` (tail) naming the 3 load-bearing artefacts an agent would consume.",
+  :read_by "zai-2 batch 1",
+  :reason
+  "resolved: the blocking predecessor (M-INC step b) shipped and the mining track is unblocked; nothing awaited",
+  :reject :edge/rejected-at-reading,
+  :to "M-a-sorry-enterprise"}
+ {:file "futon3c/holes/missions/M-action-cost-modelling.md",
+  :from "M-action-cost-modelling",
+  :line 511,
+  :quote
+  "| EOI corpus strength | `futon5a/holes/missions/M-expressions-of-interest.md` | + (where Joe puts value) |",
+  :read_by "zai-2 batch 1",
+  :reason "evaluation-criteria table mention, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-expressions-of-interest"}
+ {:file "futon3c/holes/missions/M-action-cost-modelling.md",
+  :from "M-action-cost-modelling",
+  :line 224,
+  :quote
+  "- `M-the-futon-stack` itself (multi-quarter; multiple sub-missions already authored as M-the-futon-stack-Q6-r12-design-choices etc.)",
+  :read_by "zai-2 batch 1",
+  :reason "scope/context listing",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack"}
+ {:file "futon3c/holes/missions/M-action-cost-modelling.md",
+  :from "M-action-cost-modelling",
+  :line 224,
+  :quote
+  "- `M-the-futon-stack` itself (multi-quarter; multiple sub-missions already authored as M-the-futon-stack-Q6-r12-design-choices etc.)",
+  :read_by "zai-2 batch 1",
+  :reason "named only as an example of authored sub-missions",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack-Q6-r12-design-choices"}
+ {:file "futon3c/holes/missions/M-action-cost-modelling.md",
+  :from "M-action-cost-modelling",
+  :line 776,
+  :quote
+  "- Pattern/corpus scale → `M-the-perfect-crime` (Tornhill+Baudrillard forensic mode, spawned today)",
+  :read_by "zai-2 batch 1",
+  :reason "spawned follow-on (see-also), not a need of A",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-perfect-crime"}
+ {:file "futon3c/holes/missions/M-action-cost-modelling.md",
+  :from "M-action-cost-modelling",
+  :line 771,
+  :quote
+  "**Xenotype = Buddhadharma** as the slowest-moving outside layer",
+  :read_by "zai-2 batch 1",
+  :reason "conceptual/cross-system discussion, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-weird-modernism"}
+ {:file "futon2/holes/missions/M-aif-gap-epistemic-affordance.md",
+  :from "M-aif-gap-epistemic-affordance",
+  :line 8,
+  :quote "`M-populate-substrate-2`, `E-have-want-pairs`",
+  :read_by "zai-2 batch 1",
+  :reason "related-missions list",
+  :reject :edge/rejected-at-reading,
+  :to "M-populate-substrate-2"}
+ {:file "futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+  :from "M-aif-policy-conditioned-eig",
+  :line 8,
+  :quote "`M-aif-a-matrix-faithfulness`, `M-evaluate-policies`",
+  :read_by "zai-2 batch 1",
+  :reason "related-missions list",
+  :reject :edge/rejected-at-reading,
+  :to "M-aif-a-matrix-faithfulness"}
+ {:file "futon0/holes/missions/M-apm-capability-ratchet.md",
+  :from "M-apm-capability-ratchet",
+  :line 115,
+  :quote
+  "| `M-apm-solutions` | Produce expository solutions and formalizations | This mission starts from those proof episodes and tests what transfers |",
+  :read_by "zai-2 batch 1",
+  :reason
+  "sibling-boundary comparison table (scope contrast), not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-solutions"}
+ {:file "futon0/holes/missions/M-apm-capability-ratchet.md",
+  :from "M-apm-capability-ratchet",
+  :line 114,
+  :quote
+  "| `M-futonzero-generative` | Learn stack-wide policy/value from warranted play-outs | This mission is a bounded, domain-specific ratchet with no claim of weight or reward learning |",
+  :read_by "zai-2 batch 1",
+  :reason
+  "sibling-boundary comparison table (scope contrast), not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-futonzero-generative"}
+ {:file "futon0/holes/missions/M-apm-capability-ratchet.md",
+  :from "M-apm-capability-ratchet",
+  :line 116,
+  :quote
+  "| `M-hyperreal-dictionary-planning` | Build a corpus substrate and packetization path | This mission defines and tests one concrete packet class over APM |",
+  :read_by "zai-2 batch 1",
+  :reason
+  "sibling-boundary comparison table (scope contrast); packet flow is A producing for B and no blocking is stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-hyperreal-dictionary-planning"}
+ {:file "futon0/holes/missions/M-apm-capability-ratchet.md",
+  :from "M-apm-capability-ratchet",
+  :line 188,
+  :quote
+  "`M-learning-loop` has separately materialized a capability graph in Futon1b and",
+  :read_by "zai-2 batch 1",
+  :reason
+  "parallel work mentioned for context ('separately materialized'), nothing awaited",
+  :reject :edge/rejected-at-reading,
+  :to "M-learning-loop"}
+ {:file "futon3c/holes/missions/M-apm-demonstration.md",
+  :from "M-apm-demonstration",
+  :line 2891,
+  :quote
+  "**Confirmed, and the concept is already written down** — `M-case-studies.md`",
+  :read_by "zai-2 batch 1",
+  :reason
+  "citation of an already-written concept; nothing awaited from B",
+  :reject :edge/rejected-at-reading,
+  :to "M-case-studies"}
+ {:file "futon3c/holes/missions/M-apm-demonstration.md",
+  :from "M-apm-demonstration",
+  :line 163,
+  :quote
+  "`holes/labs/M-diagramprover/capability-proof-apm.tex`. Operator quotations are",
+  :read_by "zai-2 batch 1",
+  :reason
+  "lab-directory path mentions and a finding attribution, not the mission's work as a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-diagramprover"}
+ {:file "futon3c/holes/missions/M-apm-demonstration.md",
+  :from "M-apm-demonstration",
+  :line 768,
+  :quote
+  "`holes/labs/M-zai-learning-loop/`, `futon6/README-apm-lean-ground-control.md`",
+  :read_by "zai-2 batch 1",
+  :reason
+  "lab-directory path mentions, not the mission as a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-zai-learning-loop"}
+ {:file "futon3c/holes/missions/M-apm-solutions.md",
+  :from "M-apm-solutions",
+  :line 14,
+  :quote
+  "**Cross-ref:** M-walkie-talkie (ArSE endpoints), M-distributed-frontiermath (frame receipts), M-peripheral-behavior (proof peripheral), M-three-column-stack (three-column architecture), CORNELI-thesis.pdf (PlanetMath/Planetary ontology)",
+  :read_by "zai-2 batch 1",
+  :reason "cross-ref list with role glosses, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-distributed-frontiermath"}
+ {:file "futon4/holes/missions/M-arxana-roundtrip.md",
+  :from "M-arxana-roundtrip",
+  :line 220,
+  :quote
+  "- **Builds on:** `M-essays-edit-cycle` for the local essay editing lifecycle.",
+  :read_by "zai-2 batch 1",
+  :reason
+  "conceptual predecessor; A explicitly treats B's edit cycle as already operational and extends it outward — nothing awaited",
+  :reject :edge/rejected-at-reading,
+  :to "M-essays-edit-cycle"}
+ {:file "futon3c/holes/missions/M-autoclock-in.md",
+  :from "M-autoclock-in",
+  :line 344,
+  :quote
+  "durable dispatch receipt latest September 12, 17:34:18.250Z (codex-18, M-f11-find-production-successor)",
+  :read_by "zai-2 batch 1",
+  :reason "mission id appears only as evidence-receipt attribution",
+  :reject :edge/rejected-at-reading,
+  :to "M-f11-find-production-successor"}
+ {:file "futon3c/holes/missions/M-autoclock-in.md",
+  :from "M-autoclock-in",
+  :line 343,
+  :quote
+  "`e-d76158b3-23f3-410d-9d6f-5f08b50b36c7`, M-smart-emacs-cursor.",
+  :read_by "zai-2 batch 1",
+  :reason "mission id appears only as evidence-receipt attribution",
+  :reject :edge/rejected-at-reading,
+  :to "M-smart-emacs-cursor"}
+ {:file "futon3c/holes/missions/M-autoclock-in.md",
+  :from "M-autoclock-in",
+  :line 344,
+  :quote
+  "Durable agent-edit receipt latest 2026-09-14T23:05:37.797Z (claude-19, M-turns-first)",
+  :read_by "zai-2 batch 1",
+  :reason "mission id appears only as evidence-receipt attribution",
+  :reject :edge/rejected-at-reading,
+  :to "M-turns-first"}
+ {:file "futon3c/holes/missions/M-autoclock-in.md",
+  :from "M-autoclock-in",
+  :line 22,
+  :quote
+  "*Risk:* auto-clocking on a fuzzy mention (the exact anti-pattern `M-vsatarcs-invariants-integration` principle #8 warns about",
+  :read_by "zai-2 batch 1",
+  :reason "principle citation (design guidance), not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-vsatarcs-invariants-integration"}
+ {:file "futon7/holes/missions/M-becoming-nomad.md",
+  :from "M-becoming-nomad",
+  :line 58,
+  :quote
+  "`M-daily-scan` §Q5 already states the political form this mission needs, and",
+  :read_by "zai-2 batch 1",
+  :reason
+  "the needed text already exists in B; A grows from it, nothing awaited",
+  :reject :edge/rejected-at-reading,
+  :to "M-daily-scan"}
+ {:file "futon5/holes/missions/M-categorical-code.md",
+  :from "M-categorical-code",
+  :line 6,
+  :quote
+  "**Owner:** claude-6. Sibling / generalization of `M-differentiable-code` (E2); same owner.",
+  :read_by "zai-2 batch 1",
+  :reason "sibling/generalization",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-code"}
+ {:file "futon3c/holes/missions/M-codex-sorry-loop.md",
+  :from "M-codex-sorry-loop",
+  :line 342,
+  :quote
+  "Live ranking changes (M-memory-retrieval Interface 1 unchanged);",
+  :read_by "zai-2 batch 1",
+  :reason
+  "status remark that B's interface is unchanged, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-memory-retrieval"}
+ {:file "futon3c/holes/missions/M-codex-sorry-loop.md",
+  :from "M-codex-sorry-loop",
+  :line 52,
+  :quote
+  "- Receipts as in M-zai-learning-loop; `:recall-system` versioning",
+  :read_by "zai-2 batch 1",
+  :reason "receipt-format convention reuse, not a blocking need",
+  :reject :edge/rejected-at-reading,
+  :to "M-zai-learning-loop"}
+ {:file "futon7/holes/missions/M-daily-scan.md",
+  :from "M-daily-scan",
+  :line 228,
+  :quote
+  "M-war-machine is not just a *consumer* of scan data. It is a *supplier* of interpretive structure to M-daily-scan:",
+  :read_by "zai-3 batch 2",
+  :reason
+  "claude-13 review 2026-10-28: framing ('supplier of interpretive structure'), not a wait (reader unsure)",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon7/holes/missions/M-daily-scan.md",
+  :from "M-daily-scan",
+  :line 339,
+  :quote
+  "Leads: TensorType→M-differentiable-code, bgavran→future contact, Ologs deeper-dive.",
+  :read_by "zai-3 batch 2",
+  :reason
+  "A scan-log 'lead' (future contact pointer), history not dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-code"}
+ {:file "futon7/holes/missions/M-daily-scan.md",
+  :from "M-daily-scan",
+  :line 337,
+  :quote
+  "hinge-log generalised outside M-trip-journal; scoring-blindspot crossed-threshold to standing-task",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Historical frame-log entry describing where a pattern was first adopted.",
+  :reject :edge/rejected-at-reading,
+  :to "M-trip-journal"}
+ {:file "futon7/holes/missions/M-daily-scan.md",
+  :from "M-daily-scan",
+  :line 129,
+  :quote
+  "| M-webarxana | Potential viewer — briefs could be WebArxana entities |",
+  :read_by "zai-3 batch 2",
+  :reason "Speculative 'potential viewer', not a stated need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-webarxana"}
+ {:file "futon3c/holes/missions/M-diagramprover.md",
+  :from "M-diagramprover",
+  :line 1511,
+  :quote "Trigger: M-apm-demonstration built and",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Describes the past incident that triggered adopting WS-E; history, not a forward blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-demonstration"}
+ {:file "futon3c/holes/missions/M-diagramprover.md",
+  :from "M-diagramprover",
+  :line 1283,
+  :quote
+  "1. **The data problem is solved.** M-codex-sorry-loop ran a full campaign",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Records that the dependency was already satisfied; historical credit.",
+  :reject :edge/rejected-at-reading,
+  :to "M-codex-sorry-loop"}
+ {:file "futon3c/holes/missions/M-diagramprover.md",
+  :from "M-diagramprover",
+  :line 9,
+  :quote "M-distributed-frontiermath (superpod, LeanDojo)",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Cross-ref list entry; the related LeanDojo item is explicitly 'non-blocking' (line 172).",
+  :reject :edge/rejected-at-reading,
+  :to "M-distributed-frontiermath"}
+ {:file "futon3c/holes/missions/M-diagramprover.md",
+  :from "M-diagramprover",
+  :line 1433,
+  :quote "are data-dependent (await M-memory-retrieval cohort data);",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Two optional oracle checks are deferred awaiting cohort data; the mission's verification proceeds without them, so no blocking dependency is stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-memory-retrieval"}
+ {:file "futon5/holes/missions/M-differentiable-code.md",
+  :from "M-differentiable-code",
+  :line 1217,
+  :quote
+  "- M-coupling-as-constraint (futon5) — same jax_refine \"constraint satisfaction",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Sibling/related-work note (same tooling), not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-coupling-as-constraint"}
+ {:file "futon5/holes/missions/M-differentiable-code.md",
+  :from "M-differentiable-code",
+  :line 1033,
+  :quote
+  "NB (Joe): compare `futon6/holes/missions/M-differentiable-math.md`.",
+  :read_by "zai-3 batch 2",
+  :reason
+  "'Compare' note; speculative future benefit ('should eventually yield'), not a stated blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-math"}
+ {:file "futon6/holes/missions/M-differentiable-math.md",
+  :from "M-differentiable-math",
+  :line 10,
+  :quote
+  "building the embeddings M-differentiable-code needs; we already HAVE the",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Scout/sibling relation; the embeddings are M-differentiable-code's own swarm's work (its own to-build list), not something differentiable-math waits on.",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-code"}
+ {:file "futon6/holes/missions/M-differentiable-substrate.md",
+  :from "M-differentiable-substrate",
+  :line 9,
+  :quote
+  "- **Follow-on to `M-differentiable-code`** (futon5, E2, MAP — *ownerless* since claude-6",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Declared follow-on/sibling; the convergence goal (line 89) is not stated as a completion precondition.",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-code"}
+ {:file "futon3c/holes/missions/M-dionysus-winddown.md",
+  :from "M-dionysus-winddown",
+  :line 349,
+  :quote
+  "(`futon4/.../M-librarian.md`, `futon7/.../M-becoming-nomad.md`), as are two",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Mere mention in a list of untracked files; no dependency semantics.",
+  :reject :edge/rejected-at-reading,
+  :to "M-becoming-nomad"}
+ {:file "futon3c/holes/missions/M-dionysus-winddown.md",
+  :from "M-dionysus-winddown",
+  :line 349,
+  :quote
+  "(`futon4/.../M-librarian.md`, `futon7/.../M-becoming-nomad.md`), as are two",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Mere mention in a list of untracked files; no dependency semantics.",
+  :reject :edge/rejected-at-reading,
+  :to "M-librarian"}
+ {:file "futon4/holes/missions/M-editorial-assistant.md",
+  :from "M-editorial-assistant",
+  :line 7,
+  :quote
+  "`M-essays-edit-cycle` (the prose-edit-cycle substrate this overlaps with at the annotation layer)",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Companion-mission 'overlap' description; the mission states 'Blocked by: None directly'.",
+  :reject :edge/rejected-at-reading,
+  :to "M-essays-edit-cycle"}
+ {:file "futon4/holes/missions/M-editorial-assistant.md",
+  :from "M-editorial-assistant",
+  :line 7,
+  :quote
+  "`M-the-futon-stack` Q6 (the consent-gate / autopen apparatus the peripheral plugs into when it lands)",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Future integration point listed under companion missions; not stated as needed for this mission's completion ('Blocked by: None directly').",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack"}
+ {:file "futon4/holes/missions/M-editorial-assistant.md",
+  :from "M-editorial-assistant",
+  :line 7,
+  :quote
+  "`M-vsatarcs-writer` (action-class family that `:essay-revise` lives in)",
+  :read_by "zai-3 batch 2",
+  :reason
+  "The action class already exists (v0.5.29, line 5); companion-family attribution, not a pending need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-vsatarcs-writer"}
+ {:file "futon3/holes/missions/M-emacs-cursor-peripheral.md",
+  :from "M-emacs-cursor-peripheral",
+  :line 414,
+  :quote
+  "This mission states how its read-only-v0 boundary relates to the later visible typing-body design in `futon3c/holes/missions/M-smart-emacs-cursor.md`.",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Open documentation checkbox (relate designs on paper), not a 'cannot be done until' dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-smart-emacs-cursor"}
+ {:file "futon4/holes/missions/M-essays-diachronic-model.md",
+  :from "M-essays-diachronic-model",
+  :line 5,
+  :quote "**Parent mission:** `M-essays-edit-cycle.md`",
+  :read_by "zai-3 batch 2",
+  :reason "Parent-mission declaration; excluded by rubric.",
+  :reject :edge/rejected-at-reading,
+  :to "M-essays-edit-cycle"}
+ {:file "futon4/holes/missions/M-essays-edit-cycle.md",
+  :from "M-essays-edit-cycle",
+  :line 122,
+  :quote "`M-essays-diachronic-model.md`.",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Companion/handoff: the needed spec 'now lives' there (already written); no open wait.",
+  :reject :edge/rejected-at-reading,
+  :to "M-essays-diachronic-model"}
+ {:file "futon4/holes/missions/M-essays-edit-cycle.md",
+  :from "M-essays-edit-cycle",
+  :line 94,
+  :quote "`M-essays-retraction-visibility.md`. The older handoff at",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Remaining work was split out to the companion mission (edit-cycle's own work relocated), not a dependency on another mission's output.",
+  :reject :edge/rejected-at-reading,
+  :to "M-essays-retraction-visibility"}
+ {:file "futon4/holes/missions/M-essays-retraction-visibility.md",
+  :from "M-essays-retraction-visibility",
+  :line 5,
+  :quote "**Parent mission:** `M-essays-edit-cycle.md`",
+  :read_by "zai-3 batch 2",
+  :reason "Parent-mission declaration; excluded by rubric.",
+  :reject :edge/rejected-at-reading,
+  :to "M-essays-edit-cycle"}
+ {:file "futon5/holes/missions/M-exotype-xenotype-eoc.md",
+  :from "M-exotype-xenotype-eoc",
+  :line 243,
+  :quote
+  "`M-propagators.md` §1.4 state the gcd(offset,8) classification in OPPOSITE directions.",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Contradiction/comparison note between two documents; no dependency semantics.",
+  :reject :edge/rejected-at-reading,
+  :to "M-propagators"}
+ {:file "futon5a/holes/missions/M-expressions-of-interest.md",
+  :from "M-expressions-of-interest",
+  :line 195,
+  :quote "| M-a-sorry-enterprise | Sibling — Right Concentration;",
+  :read_by "zai-3 batch 2",
+  :reason "Explicitly labelled 'Sibling' in the relationship table.",
+  :reject :edge/rejected-at-reading,
+  :to "M-a-sorry-enterprise"}
+ {:file "futon5a/holes/missions/M-expressions-of-interest.md",
+  :from "M-expressions-of-interest",
+  :line 1125,
+  :quote "argumentation-graph work in `M-essays-edit-cycle.md` is a",
+  :read_by "zai-3 batch 2",
+  :reason
+  "'Cousin and may share substrate' — speculative similarity, not a stated need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-essays-edit-cycle"}
+ {:file "futon5a/holes/missions/M-expressions-of-interest.md",
+  :from "M-expressions-of-interest",
+  :line 196,
+  :quote
+  "| M-landing-practice | One basin (Hyperreal-freelancer) of the phase-space MAP;",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Conditional phase-space description ('if this basin is chosen'), not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-landing-practice"}
+ {:file "futon5a/holes/missions/M-expressions-of-interest.md",
+  :from "M-expressions-of-interest",
+  :line 198,
+  :quote
+  "| M-learning-loop | Capability vocabulary feeds the prior-document;",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Phase-space MAP table row describing an input kinship; no completion criterion requires the vocabulary, so no stated blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-learning-loop"}
+ {:file "futon5a/holes/missions/M-expressions-of-interest.md",
+  :from "M-expressions-of-interest",
+  :line 199,
+  :quote
+  "| M-stack-geometry | Provides the rendering substrate for showing how an EoI artefact relates",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Phase-space MAP table row describing a possible rendering aid; not tied to any completion criterion.",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-geometry"}
+ {:file "futon5a/holes/missions/M-expressions-of-interest.md",
+  :from "M-expressions-of-interest",
+  :line 197,
+  :quote
+  "| M-trip-journal | Apparatus — EoI artefacts are A-side outputs of articulation work; their drafting can be hinge-logged.",
+  :read_by "zai-3 batch 2",
+  :reason
+  "'Can be hinge-logged' — optional apparatus use, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-trip-journal"}
+ {:file "futon5a/holes/missions/M-expressions-of-interest.md",
+  :from "M-expressions-of-interest",
+  :line 1153,
+  :quote
+  "prose: meta-lede dropped; M-self-representing-stack + M-war-machine",
+  :read_by "zai-3 batch 2",
+  :reason "Historical drafting-diary mention of pattern names.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon3c/holes/missions/M-federated-agency-hardening.md",
+  :from "M-federated-agency-hardening",
+  :line 7,
+  :quote "`M-kangaroo` warm-pouch as a deferred successor).",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Named as a deferred successor of a closed sibling; successor/see-also, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-kangaroo"}
+ {:file "futon2/holes/missions/M-formal-war-machine.md",
+  :from "M-formal-war-machine",
+  :line 2038,
+  :quote
+  "It is speculative and frozen. `M-apm-demonstration`, the precedent here, is",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Cited as precedent/inspiration ('the precedent here'); comparison, not a blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-demonstration"}
+ {:file "futon4/holes/missions/M-futon-enrichment.md",
+  :from "M-futon-enrichment",
+  :line 519,
+  :quote
+  "→ 5 missions (M-cyder, M-futon3c-codex, M-improve-irc, M-mission-control,",
+  :read_by "zai-3 batch 2",
+  :reason "Example API output listing missions; mere mention.",
+  :reject :edge/rejected-at-reading,
+  :to "M-cyder"}
+ {:file "futon0/holes/missions/M-futon-problems.md",
+  :from "M-futon-problems",
+  :line 204,
+  :quote
+  "`M-apm-demonstration` across at least three distinct workstreams.",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Measurement of turn-tagging coverage; comparison of attention, not dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-demonstration"}
+ {:file "futon0/holes/missions/M-futon-problems.md",
+  :from "M-futon-problems",
+  :line 827,
+  :quote
+  "attribution from files, commits, and substrate-2, and \"do M-autoclock-in on",
+  :read_by "zai-3 batch 2",
+  :reason
+  "Proposal to reuse autoclock-in's technique; reference to a method, not a stated need for its completion.",
+  :reject :edge/rejected-at-reading,
+  :to "M-autoclock-in"}
+ {:file "futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+  :from "M-apm-solutions",
+  :line 14,
+  :quote "- `futon3c/holes/missions/M-apm-solutions.md`",
+  :read_by "zai-4 batch 3",
+  :reason
+  "claude-13 review 2026-10-28: bare 'downstream consumer' list entry; no need stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-hyperreal-dictionary-planning"}
+ {:file "futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+  :from "M-pattern-application-diagnostic",
+  :line 13,
+  :quote
+  "- `futon3/holes/missions/M-pattern-application-diagnostic.md`",
+  :read_by "zai-4 batch 3",
+  :reason
+  "claude-13 review 2026-10-28: bare 'downstream consumer' list entry; no need stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-hyperreal-dictionary-planning"}
+ {:file "futon0/holes/missions/M-futonzero-generative.md",
+  :from "M-futonzero-generative",
+  :line 11,
+  :quote
+  "- `M-mission-scopes-into-substrate-2` (field / simulator substrate)",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Bare cross-ref list entry under 'Cross-ref:'; no stated need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-mission-scopes-into-substrate-2"}
+ {:file "futon0/holes/missions/M-futonzero-prelim-practice.md",
+  :from "M-futonzero-prelim-practice",
+  :line 209,
+  :quote
+  "`M-apm-demonstration`, which the operator reports is proving more tedious to",
+  :read_by "zai-4 batch 3",
+  :reason
+  "'Underwrites' in the Working-economy position section is an economy/positioning statement (prelims is the human-class control supporting apm-demo's scale), not a stated blocker or produced-artifact need in either direction.",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-demonstration"}
+ {:file "futon3c/holes/missions/M-giraffe.md",
+  :from "M-giraffe",
+  :line 77,
+  :quote
+  "2. **Ordering is the structure (Goguen's 3/2-categories, per Joe.",
+  :read_by "zai-4 batch 3",
+  :reason
+  "The line states a dependency between two third parties (APM ratchet does not make sense before prelims), not between M-giraffe and the ratchet.",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-capability-ratchet"}
+ {:file "futon3c/holes/missions/M-giraffe.md",
+  :from "M-giraffe",
+  :line 270,
+  :quote
+  "**Pieces that are not built yet (M-diagramprover.md:2005–2010), and what DERIVE requires of each.**",
+  :read_by "zai-4 batch 3",
+  :reason
+  "The unbuilt pieces are Giraffe's own DERIVE work (item 1: 'Giraffe's adapter is the miner'); M-diagramprover is cited as the source of the list, not a producer Giraffe waits on.",
+  :reject :edge/rejected-at-reading,
+  :to "M-diagramprover"}
+ {:file "futon3c/holes/missions/M-giraffe.md",
+  :from "M-giraffe",
+  :line 77,
+  :quote
+  "2. **Ordering is the structure (Goguen's 3/2-categories, per Joe.",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Same third-party example: it orders APM-ratchet after prelims; it does not say M-giraffe needs prelims or vice versa.",
+  :reject :edge/rejected-at-reading,
+  :to "M-futonzero-prelim-practice"}
+ {:file "futon3c/holes/missions/M-giraffe.md",
+  :from "M-giraffe",
+  :line 6,
+  :quote
+  "**Follows:** M-kangaroo (warm pouches, i.e. agents that persist; this mission is about the work those agents are given).",
+  :read_by "zai-4 batch 3",
+  :reason "'Follows' is history/provenance, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-kangaroo"}
+ {:file "futon3c/holes/missions/M-giraffe.md",
+  :from "M-giraffe",
+  :line 245,
+  :quote
+  "- An item with no hard needs (e.g. M-self-improvement-loop, \"Blocked by: Nothing\") cannot have a `k-ready` mechanism: the grammar has no constant.",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Illustrative example inside the readiness grammar; no dependency between the missions.",
+  :reject :edge/rejected-at-reading,
+  :to "M-self-improvement-loop"}
+ {:file "futon3c/holes/missions/M-giraffe.md",
+  :from "M-giraffe",
+  :line 109,
+  :quote
+  "- **Specified twice, built never.** `NOTE-task-manager-outer-loop.md` (Joe + zai-7, 2026-09-12): stageable = fresh ∧ owned ∧ no live conflict ∧ prerequisites done; \"urgency is computed, priority is received\".",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Third-party observation (that mission's 'Depends on' block is unread by code); M-giraffe neither needs nor enables M-war-machine-pilot here.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-pilot"}
+ {:file "futon3c/holes/missions/M-giraffe.md",
+  :from "M-giraffe",
+  :line 117,
+  :quote
+  "| M-war-machine-wiring (−3.95602…, chosen by draw) | substrate-2 commit-vertex coverage current for the target futon (V-1, l.1844) | by status line only | `futon3/holes/excursions/E-live-means-live.md` Status: open.",
+  :read_by "zai-4 batch 3",
+  :reason
+  "A survey (H4) row recording M-war-machine-wiring's own needs; not a dependency of M-giraffe.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-wiring"}
+ {:file "futon3c/holes/missions/M-inbox-zero-claim-lifecycle.md",
+  :from "M-inbox-zero-claim-lifecycle",
+  :line 84,
+  :quote
+  "[M-autoclock-in](M-autoclock-in.md) supplies mission attribution context but",
+  :read_by "zai-4 batch 3",
+  :reason
+  "The text explicitly disclaims the need: '...but is not evidence that a particular edit belongs to a seat'.",
+  :reject :edge/rejected-at-reading,
+  :to "M-autoclock-in"}
+ {:file "futon3c/holes/missions/M-invariant-queue-extend.md",
+  :from "M-invariant-queue-extend",
+  :line 18,
+  :quote
+  "- Q-merge-with-violations **ratified by Joe 2026-04-29**: stay separate, keep tight cross-link, revisit when V-1..V-5 in M-invariant-violations resolve.",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Ratified stay-separate with cross-link (sibling ledger vs apparatus); the merge question is a documentation revisit, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-invariant-violations"}
+ {:file "futon3c/holes/missions/M-invariant-violations.md",
+  :from "M-invariant-violations",
+  :line 104,
+  :quote
+  "Per M-fulab-logic, these domains have been identified but not yet implemented:",
+  :read_by "zai-4 batch 3",
+  :reason
+  "The unimplemented domains are this mission's own 'Domains Not Yet Instrumented' plan (its own proposed files); M-fulab-logic is cited as the source of the taxonomy.",
+  :reject :edge/rejected-at-reading,
+  :to "M-fulab-logic"}
+ {:file "futon0/holes/missions/M-joe-told-me-about-futon.md",
+  :from "M-joe-told-me-about-futon",
+  :line 681,
+  :quote "experiments: `futon3c/holes/labs/M-memory-retrieval/` (e.g.",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Pointer to a labs directory as a place where experiments live; mention only.",
+  :reject :edge/rejected-at-reading,
+  :to "M-memory-retrieval"}
+ {:file "futon5/holes/missions/M-lab-standard.md",
+  :from "M-lab-standard",
+  :line 6,
+  :quote "`M-sci-reproduction-replay-ledger.md`) live in the richer",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Context pointer explaining where the Tier-2 replays live; no need stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-sci-reproduction-replay-ledger"}
+ {:file "futon5a/holes/missions/M-landing-practice.md",
+  :from "M-landing-practice",
+  :line 5,
+  :quote
+  "**Cross-ref:** M-futonzero-prelim-practice (futon0, the commutative square),",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Cross-ref plus an 'Analogy to' section (line 8); comparison, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-futonzero-prelim-practice"}
+ {:file "futon0/holes/missions/M-landscape-positioning.md",
+  :from "M-landscape-positioning",
+  :line 1028,
+  :quote
+  "nearest existing mission is `futon3c/holes/missions/M-federated-agency-hardening.md`",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Adjacency note ('nearest existing mission') with an item to carry over — relocation of an overflow item, not a dependency of either mission on the other.",
+  :reject :edge/rejected-at-reading,
+  :to "M-federated-agency-hardening"}
+ {:file "futon0/holes/missions/M-landscape-positioning.md",
+  :from "M-landscape-positioning",
+  :line 525,
+  :quote
+  "**Prior work to reuse:** `M-joe-told-me-about-futon.md` §2c already collected",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Prior work already collected (exists), so reuse does not wait on anything; also cited as evidence elsewhere (§2b demo, a question) — mention, not need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-joe-told-me-about-futon"}
+ {:file "futon0/holes/missions/M-landscape-positioning.md",
+  :from "M-landscape-positioning",
+  :line 684,
+  :quote
+  "- `futon3c/holes/labs/M-wm-wiring/wm-adjacency.edn`: the wiring matrix",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Citation of an existing data artifact for reference; no stated need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-wm-wiring"}
+ {:file "futon3c/holes/missions/M-latex-wysiwyg.md",
+  :from "M-latex-wysiwyg",
+  :line 12,
+  :quote
+  "**Prior art bound by name:** `M-smart-emacs-cursor` (WS actuator),",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Explicitly labeled prior art ('prior art for a WebSockets-based controller', line 22); a reference, not a dependency — no 'depends on' or waiting is stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-smart-emacs-cursor"}
+ {:file "futon5a/holes/missions/M-learning-loop.md",
+  :from "M-learning-loop",
+  :line 619,
+  :quote
+  "assigned four capabilities to all 5 M-daily-scan hinges and six capabilities to",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Analysis-result mentions of M-daily-scan's hinges; comparison data, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-daily-scan"}
+ {:file "futon5a/holes/missions/M-learning-loop.md",
+  :from "M-learning-loop",
+  :line 98,
+  :quote
+  "M-hypergraph-operator's analytic layer. This mission populates; that",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Division of labor ('This mission populates; that mission reads') and scope-out; complementary roles, no stated blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-hypergraph-operator"}
+ {:file "futon5a/holes/missions/M-learning-loop.md",
+  :from "M-learning-loop",
+  :line 15,
+  :quote
+  "`futon6/holes/missions/M-superpod-mark2.md` § Learn As We Go (the source",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Cited as the source pattern / shared-move instance in later analysis; provenance and comparison, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark2"}
+ {:file "futon5a/holes/missions/M-learning-loop.md",
+  :from "M-learning-loop",
+  :line 11,
+  :quote
+  "`futon3c/holes/missions/M-war-machine.md` (visualizer infra; density-over-time",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Ownership note (the demo 'belongs to its INSTANTIATE'; line 93: 'M-learning-loop inherits lessons from it but doesn't own it'); no dependency stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon3c/holes/missions/M-memory-retrieval.md",
+  :from "M-memory-retrieval",
+  :line 239,
+  :quote "`holes/missions/M-typed-memories.md` (substrate) ·",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Cross-ref labeled '(substrate)'; the substantive mention (line 229) marks retroactive mining as out of scope — boundary, not a stated blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-typed-memories"}
+ {:file "futon3c/holes/missions/M-memory-retrieval.md",
+  :from "M-memory-retrieval",
+  :line 32,
+  :quote
+  "Boundary with **M-zai-learning-loop (claude-4)** — the interface contract:",
+  :read_by "zai-4 batch 3",
+  :reason
+  "An interface/ownership contract (who owns the live loop vs retrieval growth); coordination boundary, not a need edge.",
+  :reject :edge/rejected-at-reading,
+  :to "M-zai-learning-loop"}
+ {:file "futon5/holes/missions/M-metaca-search.md",
+  :from "M-metaca-search",
+  :line 45,
+  :quote
+  "operational shadow; see also `M-fulab-wiring-survey.md` for existing MMCA",
+  :read_by "zai-4 batch 3",
+  :reason
+  "'See also' for existing wiring primitives; reference, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-fulab-wiring-survey"}
+ {:file "futon5/holes/missions/M-metaca-search.md",
+  :from "M-metaca-search",
+  :line 220,
+  :quote
+  "`M-lab-standard.md` — the reproduction lab that produced the vocabulary.",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Cross-reference crediting the lab that produced the vocabulary; acknowledgement, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-lab-standard"}
+ {:file "futon5/holes/missions/M-metaca-search.md",
+  :from "M-metaca-search",
+  :line 182,
+  :quote
+  "(see `M-sci-reproduction-replay-ledger.md`) to widen the vocabulary of dynamics.",
+  :read_by "zai-4 batch 3",
+  :reason
+  "'Add more back-catalogue demos' is this mission's own follow-on work item, referencing the ledger as a record; no dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-sci-reproduction-replay-ledger"}
+ {:file "futon3/holes/missions/M-mission-coherence-patterns.md",
+  :from "M-mission-coherence-patterns",
+  :line 437,
+  :quote
+  "| `M-war-machine.md` | `M-stack-inhabitation`, `M-a-sorry-enterprise`, `M-self-representing-stack`, `M-portfolio-inference`, `war-room.md`, `GET /api/alpha/miss",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Row of the aggregation-surface survey table (missions reachable via M-war-machine); survey corpus, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-a-sorry-enterprise"}
+ {:file "futon3/holes/missions/M-mission-coherence-patterns.md",
+  :from "M-mission-coherence-patterns",
+  :line 5,
+  :quote
+  "**Cross-ref:** Excursion of `M-expressions-of-interest.md` (futon5a) — see clarity-gap in HEAD §6",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Parent/excursion relation; the clarity-gap (internal vs external EoI articulation) is this mission's own in-scope work, not something it waits on the parent for.",
+  :reject :edge/rejected-at-reading,
+  :to "M-expressions-of-interest"}
+ {:file "futon3/holes/missions/M-mission-coherence-patterns.md",
+  :from "M-mission-coherence-patterns",
+  :line 438,
+  :quote
+  "| `M-live-geometric-stack.md` | `M-pattern-application-diagnostic`, `M-self-representing-stack`, `M-three-column-stack`, `M-stack-stereolithography`, plus dense",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Survey-table row (reachable surfaces); corpus selection, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-application-diagnostic"}
+ {:file "futon3/holes/missions/M-mission-coherence-patterns.md",
+  :from "M-mission-coherence-patterns",
+  :line 337,
+  :quote "(Joe's \"M-stack-geometry\" reference)",
+  :read_by "zai-4 batch 3",
+  :reason
+  "Alias note inside the initial aggregation-surfaces list; survey target.",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-geometry"}
+ {:file "futon3/holes/missions/M-mission-coherence-patterns.md",
+  :from "M-mission-coherence-patterns",
+  :line 437,
+  :quote
+  "| `M-war-machine.md` | `M-stack-inhabitation`, `M-a-sorry-enterprise`, `M-self-representing-stack`, `M-portfolio-inference`, `war-room.md`, `GET /api/alpha/miss",
+  :read_by "zai-4 batch 3",
+  :reason "Survey-table row; corpus, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-inhabitation"}
+ {:file "futon3/holes/missions/M-mission-coherence-patterns.md",
+  :from "M-mission-coherence-patterns",
+  :line 438,
+  :quote
+  "| `M-live-geometric-stack.md` | `M-pattern-application-diagnostic`, `M-self-representing-stack`, `M-three-column-stack`, `M-stack-stereolithography`, plus dense",
+  :read_by "zai-4 batch 3",
+  :reason "Survey-table row; corpus, not a need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-stereolithography"}
+ {:file "futon3/holes/missions/M-mission-coherence-patterns.md",
+  :from "M-mission-coherence-patterns",
+  :line 363,
+  :quote
+  "`M-war-machine.md` is an aggregation surface in the strategic /",
+  :read_by "zai-4 batch 3",
+  :reason
+  "M-war-machine is an aggregation surface / pilot corpus for this mission's mining pass; survey input, not a stated dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon6/holes/missions/M-paper-reverse-morphogenesis.md",
+  :from "M-apm-solutions",
+  :line 453,
+  :quote
+  "Consumer (M-apm-solutions) receives these records and trains the forward solver.",
+  :read_by "zai-5 batch 4",
+  :reason
+  "claude-13 review 2026-10-28: consumer description; no need stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-paper-reverse-morphogenesis"}
+ {:file "futon3/holes/missions/M-pattern-ingest.md",
+  :from "M-pattern-application-diagnostic",
+  :line 12,
+  :quote
+  "- `futon3/holes/missions/M-pattern-application-diagnostic.md` — consumer.",
+  :read_by "zai-5 batch 4",
+  :reason
+  "claude-13 review 2026-10-28: 'consumer.' list entry; no need stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-ingest"}
+ {:file "futon3c/holes/missions/M-repl-wins-over-cli.md",
+  :from "M-apm-solutions",
+  :line 16,
+  :quote
+  "**Cross-ref:** M-apm-solutions (first consumer), M-walkie-talkie (ArSE endpoints), M-structural-law (invariants), M-peripheral-gauntlet (peripheral contract)",
+  :read_by "zai-5 batch 4",
+  :reason
+  "claude-13 review 2026-10-28: cross-ref '(first consumer)'; no need stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-repl-wins-over-cli"}
+ {:file "futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+  :from "M-mission-scopes-into-substrate-2",
+  :line 148,
+  :quote
+  "- **(c) Hawkins/priming on `(pxr)` → downstream**, routed to `M-autonomous-pattern-lifecycle`",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Topic routed to another mission (scope boundary), not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-autonomous-pattern-lifecycle"}
+ {:file "futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+  :from "M-mission-scopes-into-substrate-2",
+  :line 184,
+  :quote
+  "- **live-filter** — footfall / WM live-state, to drop stale high-C (e.g. `M-reachable-from-boot`, a forgotten",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Used only as an example of a stale mission to filter out; no dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-reachable-from-boot"}
+ {:file "futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+  :from "M-mission-scopes-into-substrate-2",
+  :line 259,
+  :quote
+  "| relates-to | **INGESTED** by codex-1 2026-06-09 — cross-mission relation edges wired |",
+  :read_by "zai-5 batch 4",
+  :reason "History table of an ingestion event; no dependency stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-inhabitation"}
+ {:file "futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+  :from "M-mission-scopes-into-substrate-2",
+  :line 15,
+  :quote
+  "**Predecessor:** M-web-arxana-missions (futon4) Layer-3 — the session of *play* (the mission carpet,",
+  :read_by "zai-5 batch 4",
+  :reason "Predecessor/history relation, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-web-arxana-missions"}
+ {:file "futon3c/holes/missions/M-mission-wiring.md",
+  :from "M-mission-wiring",
+  :line 8,
+  :quote "M-live-geometric-stack, M-hyperreal-dictionary-planning",
+  :read_by "zai-5 batch 4",
+  :reason "Bare cross-ref list entry; no dependency stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-hyperreal-dictionary-planning"}
+ {:file "futon3c/holes/missions/M-mission-wiring.md",
+  :from "M-mission-wiring",
+  :line 7,
+  :quote
+  "**Cross-ref:** M-mission-control, M-war-machine, M-mission-peripheral,",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Cross-reference table (index of mission docs), not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon4/holes/missions/M-or-training-as-learning-system.v1.md",
+  :from "M-or-training-as-learning-system.v1",
+  :line 3,
+  :quote "# M-or-training-as-learning-system",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Same mission id under a versioned filename; title mention only.",
+  :reject :edge/rejected-at-reading,
+  :to "M-or-training-as-learning-system"}
+ {:file "futon6/holes/missions/M-paper-reverse-morphogenesis.md",
+  :from "M-paper-reverse-morphogenesis",
+  :line 521,
+  :quote
+  "| M-artificial-stack-exchange | Future consumer: agents use forward solver |",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Speculative future consumer of the forward solver (itself M-apm-solutions's product), not a stated dependency on or of this mission.",
+  :reject :edge/rejected-at-reading,
+  :to "M-artificial-stack-exchange"}
+ {:file "futon6/holes/missions/M-paper-reverse-morphogenesis.md",
+  :from "M-paper-reverse-morphogenesis",
+  :line 522,
+  :quote
+  "| M-diagramprover | Separate proof-search workflow; may consume forward solver output |",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Hedged ('may consume') indirect relation to the solver's output, not a stated dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-diagramprover"}
+ {:file "futon6/holes/missions/M-paper-reverse-morphogenesis.md",
+  :from "M-paper-reverse-morphogenesis",
+  :line 5,
+  :quote
+  "**Parent mission:** M-superpod-mark2 (Checkpoint — Learn As We Go, 2026-04-15)",
+  :read_by "zai-5 batch 4",
+  :reason "Parent/lineage relation, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark2"}
+ {:file "futon3/holes/missions/M-pattern-application-diagnostic.md",
+  :from "M-pattern-application-diagnostic",
+  :line 615,
+  :quote "### What this means for M-futon-enrichment",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Commentary on how this mission affects M-futon-enrichment's plan; retains-ownership discussion, no dependency stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-futon-enrichment"}
+ {:file "futon3/holes/missions/M-pattern-application-diagnostic.md",
+  :from "M-pattern-application-diagnostic",
+  :line 5,
+  :quote
+  "**Parent:** `holes/missions/M-pattern-mining.md` (the IFR was articulated",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Parent/sibling lineage and inherited IFR, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-mining"}
+ {:file "futon3/holes/missions/M-pattern-ingest.md",
+  :from "M-pattern-ingest",
+  :line 392,
+  :quote "`M-vsatarcs-writer` here. **Joe's call 2026-05-26: sigil",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Rejected draft framing comparison ('floated consent-gate framing à la'); no dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-vsatarcs-writer"}
+ {:file "futon3/holes/missions/M-pattern-ingest.md",
+  :from "M-pattern-ingest",
+  :line 173,
+  :quote "`M-war-machine-wiring` or a sibling.",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Scope boundary (a downstream question is owned elsewhere); not a dependency of A.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-wiring"}
+ {:file "futon3a/holes/missions/M-pattern-posteriors.md",
+  :from "M-pattern-posteriors",
+  :line 160,
+  :quote
+  "| M-differentiable-substrate | Sibling learner: R2 learns move-grain weights; this learns pattern-grain trust; the two must",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Sibling-learner coordination constraint and a lesson citation; no blocking dependency stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-substrate"}
+ {:file "futon3/holes/missions/M-pattern-retrieval-calibration.md",
+  :from "M-pattern-retrieval-calibration",
+  :line 289,
+  :quote
+  "M-pattern-application-diagnostic's typed-slot work will progressively",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Explicitly non-blocking: the text says neither edge needs to wait on it and the shared projection does not block either mission.",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-application-diagnostic"}
+ {:file "futon3/holes/missions/M-pattern-retrieval-calibration.md",
+  :from "M-pattern-retrieval-calibration",
+  :line 854,
+  :quote "Tracked stack-wide in",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Tracking/indexing reference to CCT-1; the mission updates the row, it does not wait on M-the-futon-stack.",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack"}
+ {:file "futon3/holes/missions/M-pattern-retrieval-calibration.md",
+  :from "M-pattern-retrieval-calibration",
+  :line 17,
+  :quote
+  "- `futon5a/holes/missions/M-trip-journal.md` — the B→A complement; this",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Cross-ref describing a design obligation (A→B side should serve the B→A side); no blocking dependency stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-trip-journal"}
+ {:file "futon0/holes/missions/M-patterns-done-right.md",
+  :from "M-patterns-done-right",
+  :line 77,
+  :quote
+  "Today the link is via PSR/PUR notes (`futon3/CLAUDE.md`) plus per-turn evidence-mining (M-pattern-mining, M-pattern-retrieval-calibration); these are *advisory*.",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Descriptive mention of current advisory evidence sources; no dependency stated.",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-mining"}
+ {:file "futon3c/holes/missions/M-populate-substrate-2.md",
+  :from "M-populate-substrate-2",
+  :line 129,
+  :quote
+  "Composes with M-substrate-metric's `d` and the C-substrate-completion consumers (M-aif2 curvature, M-differentiable-code continuity).",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Composition-with note about consumers of the layer; no stated dependency on M-differentiable-code.",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-code"}
+ {:file "futon3c/holes/missions/M-populate-substrate-2.md",
+  :from "M-populate-substrate-2",
+  :line 51,
+  :quote
+  "- **M-mission-scopes-into-substrate-2** (June) landed the mission-scope layer — and is the *only* layer that has seen June.",
+  :read_by "zai-5 batch 4",
+  :reason "Prior-art / success-story citation, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-mission-scopes-into-substrate-2"}
+ {:file "futon6/holes/missions/M-prior-mathematics.md",
+  :from "M-prior-mathematics",
+  :line 181,
+  :quote "Same math, different substrate. Not in scope here.",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Tangential structural analogy, explicitly 'recorded not scoped'.",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-code"}
+ {:file "futon6/holes/missions/M-prior-mathematics.md",
+  :from "M-prior-mathematics",
+  :line 354,
+  :quote
+  "- M-paper-reverse-morphogenesis / M-superpod-mark3 — the Stage 5 pipeline this",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Relevance note naming an intended consumer of the prior; no stated need by or of this mission.",
+  :reject :edge/rejected-at-reading,
+  :to "M-paper-reverse-morphogenesis"}
+ {:file "futon6/holes/missions/M-prior-mathematics.md",
+  :from "M-prior-mathematics",
+  :line 354,
+  :quote
+  "M-paper-reverse-morphogenesis / M-superpod-mark3 — the Stage 5 pipeline this",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Relevance note naming an intended consumer of the prior; no stated need.",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark3"}
+ {:file "futon5/holes/missions/M-propagators.md",
+  :from "M-propagators",
+  :line 70,
+  :quote
+  "- Full report + paired panels: `holes/labs/M-aif-tokamak/baldwin-repro/README.md`;",
+  :read_by "zai-5 batch 4",
+  :reason
+  "File-path references to lab artifacts stored under M-aif-tokamak's directory; no dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-aif-tokamak"}
+ {:file "futon3c/holes/missions/M-reachable-from-boot.md",
+  :from "M-reachable-from-boot",
+  :line 13,
+  :quote
+  "**Sibling missions:** [M-archaeology-control], [M-bounded-disposition], [M-single-locus] — each ships invariants whose live signal silently depends on `!store` being durable",
+  :read_by "zai-5 batch 4",
+  :reason
+  "A hardens shared infrastructure FOR its siblings; A does not need anything from B.",
+  :reject :edge/rejected-at-reading,
+  :to "M-bounded-disposition"}
+ {:file "futon5a/holes/missions/M-recommendation-bindings.md",
+  :from "M-recommendation-bindings",
+  :line 235,
+  :quote
+  "- M-stack-geometry (also in futon5a) — same general project of making",
+  :read_by "zai-5 batch 4",
+  :reason "Sibling / same-project comparison, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-geometry"}
+ {:file "futon5/holes/missions/M-sci-reproduction-replay-ledger.md",
+  :from "M-sci-reproduction-replay-ledger",
+  :line 147,
+  :quote
+  "Cross-check route: **statistical** (per M-lab-standard stochasticity rule).",
+  :read_by "zai-5 batch 4",
+  :reason
+  "Method-rule citation; A conforms to B's standard but does not wait on B.",
+  :reject :edge/rejected-at-reading,
+  :to "M-lab-standard"}
+ {:file "futon3c/holes/missions/M-stack-inhabitation.md",
+  :from "M-stack-inhabitation",
+  :line 126,
+  :quote
+  "| M-hypergraph-operator | Sub-mission — Clicks and Ticks against the sorry topology |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: 'Sub-mission' is a scope split, not a wait (reader unsure)",
+  :reject :edge/rejected-at-reading,
+  :to "M-hypergraph-operator"}
+ {:file "futon6/holes/missions/M-superpod-mark2.md",
+  :from "M-superpod-mark2",
+  :line 407,
+  :quote
+  "**Spec drafted:** `futon6/holes/missions/M-paper-reverse-morphogenesis.md` (2026-04-15) covers all six components — 5c technique-NER, 5d paper hypergraph (classical + LLM arms), stage-6 four-layer rewrite with",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: successor spec absorbing mark2's next action, not a blocker (reader unsure)",
+  :reject :edge/rejected-at-reading,
+  :to "M-paper-reverse-morphogenesis"}
+ {:file "futon0/holes/missions/M-the-futon-stack.md",
+  :from "M-war-machine",
+  :line 167,
+  :quote
+  "- The active-inference layer (M-war-machine + Portfolio Inference) — yet to step against the precision substrate this mission's apparatus prepares.",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: describes future use by the WM, not a need of the WM",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack"}
+ {:file "futon6/holes/missions/M-superpod-mark2.md",
+  :from "M-apm-solutions",
+  :line 214,
+  :quote
+  "| M-apm-solutions | Consumer: uses retrieval for theorem proving |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: consumer-table row: uses retrieval; nothing awaited",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark2"}
+ {:file "futon6/holes/missions/M-superpod-mark2.md",
+  :from "M-artificial-stack-exchange",
+  :line 216,
+  :quote
+  "| M-artificial-stack-exchange | Future consumer of improved retrieval |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: 'future consumer'; no need stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark2"}
+ {:file "futon6/holes/missions/M-superpod-mark2.md",
+  :from "M-distributed-frontiermath",
+  :line 217,
+  :quote
+  "| M-distributed-frontiermath | Future consumer for FrontierMath campaigns |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: 'future consumer'; no need stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark2"}
+ {:file "futon6/holes/missions/M-superpod-mark3.md",
+  :from "M-apm-solutions",
+  :line 189,
+  :quote
+  "| `M-apm-solutions` (futon3c) | Downstream consumer of FAISS retrieval |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: consumer-table row; nothing awaited",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark3"}
+ {:file "futon6/holes/missions/M-superpod-mark3.md",
+  :from "M-trip-journal",
+  :line 190,
+  :quote
+  "| `M-trip-journal` (futon5a) | Future consumer of typed pattern records |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: 'future consumer'; no need stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark3"}
+ {:file "futon5a/holes/missions/M-stack-geometry.md",
+  :from "M-hypergraph-operator",
+  :line 134,
+  :quote
+  "- **Click/Tick machinery** (M-hypergraph-operator). Analytic reads on top of the geometry belong there. This mission *populates* the queryable form.",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: scope split (analytic reads belong there), not a wait",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-geometry"}
+ {:file "futon5a/holes/missions/M-stack-stereolithography.md",
+  :from "M-hypergraph-operator",
+  :line 223,
+  :quote
+  "| `M-hypergraph-operator` | downstream analytic reader over the same substrate |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "claude-13 review 2026-10-28: 'downstream analytic reader'; scope, not a wait",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-stereolithography"}
+ {:file "futon5a/holes/missions/M-self-improvement-loop.md",
+  :from "M-self-improvement-loop",
+  :line 9,
+  :quote
+  "M-futon3-last-mile (futon3c), M-artificial-stack-exchange (futon6)",
+  :read_by "zai-6 batch 5",
+  :reason "Cross-ref list and status note only; no stated dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-artificial-stack-exchange"}
+ {:file "futon3c/holes/missions/M-shared-memory-control-build-test.md",
+  :from "M-shared-memory-control-build-test",
+  :line 75,
+  :quote
+  "`M-typed-memories`. - Dark WM projection tests reject malformed, unattributed, proposed-only, and",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Cites evidence already recorded by M-typed-memories; artifact exists, not a blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-typed-memories"}
+ {:file "futon3c/holes/missions/M-shared-memory-control-build-test.md",
+  :from "M-shared-memory-control-build-test",
+  :line 402,
+  :quote
+  "`M-wm-strategic-mission-selection` with its concrete observation, intervention, memory provenance, and independent checker",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Mission used as a projection example in a live trace; mere mention.",
+  :reject :edge/rejected-at-reading,
+  :to "M-wm-strategic-mission-selection"}
+ {:file "futon3c/holes/missions/M-sigils-reconsidered.md",
+  :from "M-sigils-reconsidered",
+  :line 3,
+  :quote
+  "**Opened 2026-08-17 by claude-2 (Analyst, M-apm-demonstration) at Joe's",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Provenance note (opened by that mission's analyst); no dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-demonstration"}
+ {:file
+  "futon4/holes/missions/M-simulating-or-training-as-learning-system.md",
+  :from "M-simulating-or-training-as-learning-system",
+  :line 170,
+  :quote
+  "- **Parent:** `M-or-training-as-learning-system.md`. This mission's reason to exist is to discharge the verification debt that the parent mission could not fully discharge with the v9 simulation as it stood. - **Sibling:** the deferred `single-seed-results-need-multi-seed-validation` pattern authori",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Parent/companion relation; discharge of parent debt is framing, not a blocking dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-or-training-as-learning-system"}
+ {:file "futon3c/holes/missions/M-single-entry-point.md",
+  :from "M-single-entry-point",
+  :line 14,
+  :quote
+  "**Sibling:** M-reachable-from-boot (boot-time reconstruction discipline)",
+  :read_by "zai-6 batch 5",
+  :reason "Explicitly labeled Sibling.",
+  :reject :edge/rejected-at-reading,
+  :to "M-reachable-from-boot"}
+ {:file "futon3c/holes/missions/M-single-entry-point.md",
+  :from "M-single-entry-point",
+  :line 13,
+  :quote
+  "**Parent:** M-the-futon-stack (Q4 — is the stack set up so the invariants can work?)",
+  :read_by "zai-6 batch 5",
+  :reason "Explicitly labeled Parent.",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack"}
+ {:file "futon3c/holes/missions/M-smart-emacs-cursor.md",
+  :from "M-smart-emacs-cursor",
+  :line 108,
+  :quote
+  "WS-invoked (inhabited-session constraint, M-kangaroo A1); v1 drives the cursor via the external harness path (`emacsclient` / HTTP) which needs no agent WS identity. The full agent-inhabited drive waits on W5",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Cites M-kangaroo A1 as constraint source; the stated wait is on W5 (REPL/agency shared process), not on the mission.",
+  :reject :edge/rejected-at-reading,
+  :to "M-kangaroo"}
+ {:file "futon5a/holes/missions/M-stack-geometry.md",
+  :from "M-stack-geometry",
+  :line 1949,
+  :quote
+  "M-a-sorry-enterprise supplies the target space: typed sorrys, sorry-pattern affinity, and closure trajectories. A hinge whose B→A record names a previously untyped residual unknown is a candidate *new",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Division of responsibility in a bridge excursion; supplies framing, no cannot-be-done-until statement.",
+  :reject :edge/rejected-at-reading,
+  :to "M-a-sorry-enterprise"}
+ {:file "futon5a/holes/missions/M-stack-geometry.md",
+  :from "M-stack-geometry",
+  :line 275,
+  :quote "M-daily-scan, M-learning-loop, and this mission itself are",
+  :read_by "zai-6 batch 5",
+  :reason "Indexing status mention; related work only.",
+  :reject :edge/rejected-at-reading,
+  :to "M-daily-scan"}
+ {:file "futon5a/holes/missions/M-stack-geometry.md",
+  :from "M-stack-geometry",
+  :line 973,
+  :quote
+  "3. **The one mention that does exist** (`M-emacs-cursor-peripheral`",
+  :read_by "zai-6 batch 5",
+  :reason "Counting the one existing mention; mere reference.",
+  :reject :edge/rejected-at-reading,
+  :to "M-emacs-cursor-peripheral"}
+ {:file "futon5a/holes/missions/M-stack-geometry.md",
+  :from "M-stack-geometry",
+  :line 130,
+  :quote
+  "- **B→A pattern mining** (M-learning-loop's territory). This mission produces the geometric substrate that mining can later use as one of its projections; the mining pipeline itself is",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Territory split: mining pipeline is elsewhere; explicitly not this mission's dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-learning-loop"}
+ {:file "futon5a/holes/missions/M-stack-geometry.md",
+  :from "M-stack-geometry",
+  :line 14,
+  :quote
+  "`futon5a/holes/missions/M-trip-journal.md` (hinge-log apparatus,",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Apparatus cross-reference; bridge excursion is related-work, not a blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-trip-journal"}
+ {:file "futon5a/holes/missions/M-stack-geometry.md",
+  :from "M-stack-geometry",
+  :line 579,
+  :quote
+  "| 5 | 2 | **war / machine** | **M-war-machine separates out** |",
+  :read_by "zai-6 batch 5",
+  :reason "Survey clustering table mention.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon0/holes/missions/M-stack-hud-refactor.md",
+  :from "M-stack-hud-refactor",
+  :line 21,
+  :quote
+  "The single trigger for this refactor was the M-repl-wins-over-cli Checkpoint 3 incident: evidence had been silently going to a volatile",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Historical trigger (Checkpoint 3 incident); not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-repl-wins-over-cli"}
+ {:file "futon5a/holes/missions/M-stack-stereolithography.md",
+  :from "M-stack-stereolithography",
+  :line 221,
+  :quote
+  "| `M-a-sorry-enterprise` | sibling; sorry pressure is one input to \"coming out of the bath\" |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Sibling; sorry pressure is an input concept, not a deliverable waited on.",
+  :reject :edge/rejected-at-reading,
+  :to "M-a-sorry-enterprise"}
+ {:file "futon5a/holes/missions/M-stack-stereolithography.md",
+  :from "M-stack-stereolithography",
+  :line 1521,
+  :quote
+  "the missing register at this checkpoint; M-futon-enrichment is the natural methodological home for filling it in.",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Called the natural methodological home; methodology pointer, not a stated blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-futon-enrichment"}
+ {:file "futon5a/holes/missions/M-stack-stereolithography.md",
+  :from "M-stack-stereolithography",
+  :line 219,
+  :quote
+  "| `M-stack-geometry` | sibling and predecessor; gives topology, temporal signal, and the three-surface frame |",
+  :read_by "zai-6 batch 5",
+  :reason "Sibling and predecessor; frame already given.",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-geometry"}
+ {:file "futon5a/holes/missions/M-stack-stereolithography.md",
+  :from "M-stack-stereolithography",
+  :line 222,
+  :quote
+  "| `M-stack-inhabitation` | sibling; inhabited vs uninhabited surfaces are capability-state evidence |",
+  :read_by "zai-6 batch 5",
+  :reason "Sibling; evidence-source framing.",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-inhabitation"}
+ {:file "futon5a/holes/missions/M-stack-stereolithography.md",
+  :from "M-stack-stereolithography",
+  :line 863,
+  :quote
+  "It is also analogous to `M-trip-journal` at a larger scale: there, the",
+  :read_by "zai-6 batch 5",
+  :reason "Analogy only.",
+  :reject :edge/rejected-at-reading,
+  :to "M-trip-journal"}
+ {:file "futon5a/holes/missions/M-stack-stereolithography.md",
+  :from "M-stack-stereolithography",
+  :line 220,
+  :quote
+  "| `M-war-machine` | sibling; consumes the stack state strategically but should not become the detailed capability map |",
+  :read_by "zai-6 batch 5",
+  :reason "Sibling; explicitly should not become the detailed map.",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon3c/holes/missions/M-state-snapshot-witness.md",
+  :from "M-state-snapshot-witness",
+  :line 64,
+  :quote
+  "- **Closes a pipeline-tracer:** track-4-2 from M-invariant-queue-extend. Tests the queue-flow signal.",
+  :read_by "zai-6 batch 5",
+  :reason
+  "This mission closes a tracer originating there; origin/history, not a dependency.",
+  :reject :edge/rejected-at-reading,
+  :to "M-invariant-queue-extend"}
+ {:file "futon6/holes/missions/M-superpod-mark2.md",
+  :from "M-superpod-mark2",
+  :line 215,
+  :quote
+  "| M-diagramprover | Shares superpod, separate workflow (proof search not mining) |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Shares the superpod, separate workflow; explicitly independent.",
+  :reject :edge/rejected-at-reading,
+  :to "M-diagramprover"}
+ {:file "futon6/holes/missions/M-superpod-mark3.md",
+  :from "M-superpod-mark3",
+  :line 188,
+  :quote
+  "| `M-paper-reverse-morphogenesis` | Stage 6 is here; mark3 fixes the slot-collapse + null-coverage issues in its output |",
+  :read_by "zai-6 batch 5",
+  :reason
+  "Mark3 fixes defects in its already-existing output; sibling fix work, not a stated blocker.",
+  :reject :edge/rejected-at-reading,
+  :to "M-paper-reverse-morphogenesis"}
+ {:file "futon6/holes/missions/M-superpod-mark3.md",
+  :from "M-superpod-mark3",
+  :line 186,
+  :quote
+  "| `M-superpod-mark2` | Predecessor; mark3 inherits substrate, mark3 doesn't break mark2's outputs |",
+  :read_by "zai-6 batch 5",
+  :reason "Predecessor; substrate already produced.",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark2"}
+ {:file "futon6/holes/missions/M-symbol-grounding.md",
+  :from "M-symbol-grounding",
+  :line 6,
+  :quote
+  "**Predecessor:** [M-structure-seed-promotion.md](M-structure-seed-promotion.md)",
+  :read_by "zai-6 batch 5",
+  :reason "Predecessor label; history.",
+  :reject :edge/rejected-at-reading,
+  :to "M-structure-seed-promotion"}
+ {:file "futon6/holes/missions/M-symbol-grounding-scaling-plan.md",
+  :from "M-symbol-grounding-scaling-plan",
+  :line 7,
+  :quote
+  "**Predecessor:** [M-symbol-grounding.md](M-symbol-grounding.md)",
+  :read_by "zai-6 batch 5",
+  :reason "Predecessor label; history.",
+  :reject :edge/rejected-at-reading,
+  :to "M-symbol-grounding"}
+ {:file "futon0/holes/missions/M-the-futon-stack.md",
+  :from "M-the-futon-stack",
+  :line 398,
+  :quote
+  "- `bounded-disposition/mission-doc` resolved by adding `Status:` lines to 52 docs: futon3 went from 24 :open to 2 :open (22 :archived added); futon3c went from 35 :open to 5 :open (15 :archived for >60d, 15 :parked for the next-oldest tier). The 5 actively-touched futon3c missions stay :open: M-arch",
+  :read_by "zai-6 batch 5",
+  :reason "Completed-work attribution in a what's-now-true list.",
+  :reject :edge/rejected-at-reading,
+  :to "M-bounded-disposition"}
+ {:file "futon0/holes/missions/M-the-futon-stack.md",
+  :from "M-the-futon-stack",
+  :line 337,
+  :quote
+  "| `.flexiarg` patterns | Canonical parser at `futon3a/src/futon/flexiarg/projection.clj`; delegating callers in `futon3/scripts/build_pattern_index.clj`, `futon3/scripts/build_pattern_index_incremental.clj`, `futon3/scripts/flexiarg_projection.clj`, `futon3/scripts/pattern_sync.clj`, `futon3/src/fut",
+  :read_by "zai-6 batch 5",
+  :reason "Row says P-1 already landed; history.",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-retrieval-calibration"}
+ {:file "futon0/holes/missions/M-the-futon-stack.md",
+  :from "M-the-futon-stack",
+  :line 363,
+  :quote
+  "- Pre-commit hooks across all 14 ~/code/futon* repos enforce structural durability for the apparatus's own state containers (M-reachable-from-boot).",
+  :read_by "zai-6 batch 5",
+  :reason "Descriptive current-state reference to pre-commit hooks.",
+  :reject :edge/rejected-at-reading,
+  :to "M-reachable-from-boot"}
+ {:file "futon0/holes/missions/M-the-futon-stack.md",
+  :from "M-the-futon-stack",
+  :line 217,
+  :quote
+  "**Read this as:** every long-running futon process worth observing is now a child of one launcher and lives inside one JVM. The 2026-05-02 audit found three orphan JVMs (webarxana Ring, two shadow-cljs) running outside this boundary; M-single-entry-point captures the work to bring them in.",
+  :read_by "zai-6 batch 5",
+  :reason "Sibling mention capturing orphan-JVM work; related.",
+  :reject :edge/rejected-at-reading,
+  :to "M-single-entry-point"}
+ {:file "futon0/holes/missions/M-the-futon-stack.md",
+  :from "M-the-futon-stack",
+  :line 398,
+  :quote
+  "- `bounded-disposition/mission-doc` resolved by adding `Status:` lines to 52 docs: futon3 went from 24 :open to 2 :open (22 :archived added); futon3c went from 35 :open to 5 :open (15 :archived for >60d, 15 :parked for the next-oldest tier). The 5 actively-touched futon3c missions stay :open: M-arch",
+  :read_by "zai-6 batch 5",
+  :reason "Named in a stay-open housekeeping list; mention.",
+  :reject :edge/rejected-at-reading,
+  :to "M-state-snapshot-witness"}
+ {:file "futon0/holes/missions/M-the-futon-stack.md",
+  :from "M-the-futon-stack",
+  :line 434,
+  :quote
+  "Design choices: `M-the-futon-stack-Q6-r12-design-choices.md` (sibling file).",
+  :read_by "zai-6 batch 5",
+  :reason "Sibling design-choices file.",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack-Q6-r12-design-choices"}
+ {:file
+  "futon4/holes/missions/M-vsatarcs-invariants-integration.witness-vsatarcs-fresh.md",
+  :from "M-vsatarcs-invariants-integration.witness-vsatarcs-fresh",
+  :line 6,
+  :quote
+  "`M-vsatarcs-invariants-integration`. claude-2 owns this witness; codex-2 owns the queue/projection it plugs into.",
+  :read_by "zai-8 batch 6",
+  :reason
+  "claude-13 review 2026-10-28: from-side is a sub-document of the target (no Status line), i.e. the mission's own parts",
+  :reject :edge/rejected-at-reading,
+  :to "M-vsatarcs-invariants-integration"}
+ {:file
+  "futon0/holes/missions/M-the-futon-stack-Q6-r12-design-choices.md",
+  :from "M-the-futon-stack-Q6-r12-design-choices",
+  :line 5,
+  :quote
+  "**Companion to:** `~/code/futon0/holes/missions/M-the-futon-stack.md` §Q6.",
+  :read_by "zai-8 batch 6",
+  :reason "companion/parent pointer, no stated blocking dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack"}
+ {:file
+  "futon0/holes/missions/M-the-futon-stack-Q6-r12-design-choices.md",
+  :from "M-the-futon-stack-Q6-r12-design-choices",
+  :line 20,
+  :quote
+  "`war-machine-portfolio-vocabulary.edn` under M-war-machine-tuning TI-6 Path A).",
+  :read_by "zai-8 batch 6",
+  :reason
+  "path provenance note about a file location, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-tuning"}
+ {:file "futon3c/holes/missions/M-the-perfect-crime.md",
+  :from "M-the-perfect-crime",
+  :line 545,
+  :quote
+  "- `M-action-cost-modelling.md` §3.8 — the aliveness synthesis paragraph where Mana / Anamnesis / Alexander / Salingaros / EOI / T were unified; one of the four sites where Tornhill-subsumption claims live.",
+  :read_by "zai-8 batch 6",
+  :reason
+  "audit-target list (site to inspect), not a blocking dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-action-cost-modelling"}
+ {:file "futon3c/holes/missions/M-the-perfect-crime.md",
+  :from "M-the-perfect-crime",
+  :line 113,
+  :quote
+  "- Top candidate-density files: `M-bounded-disposition` (8), `M-archaeology-control` (8),",
+  :read_by "zai-8 batch 6",
+  :reason "candidate-density ranking, mere mention",
+  :reject :edge/rejected-at-reading,
+  :to "M-bounded-disposition"}
+ {:file "futon3c/holes/missions/M-the-perfect-crime.md",
+  :from "M-the-perfect-crime",
+  :line 547,
+  :quote
+  "- `M-futon-enrichment.md` (futon4) — original locus of \"Code as a Crime Scene\" citation and \"Tornhill-style hotspots as a free bonus\" framing.",
+  :read_by "zai-8 batch 6",
+  :reason "audit-target / citation locus, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-futon-enrichment"}
+ {:file "futon3c/holes/missions/M-the-perfect-crime.md",
+  :from "M-the-perfect-crime",
+  :line 79,
+  :quote
+  "- A diagnostic mode for M-pattern-application-diagnostic where prose-claims about pattern-subsumption get round-tripped against the live pattern library.",
+  :read_by "zai-8 batch 6",
+  :reason "possible future work named by A itself, not a need on B",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-application-diagnostic"}
+ {:file "futon3c/holes/missions/M-the-perfect-crime.md",
+  :from "M-the-perfect-crime",
+  :line 114,
+  :quote
+  "`M-single-locus` (5), `M-war-machine-wiring` (4), `E-interest-mining` (4).",
+  :read_by "zai-8 batch 6",
+  :reason "candidate-density ranking, mere mention",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-wiring"}
+ {:file "futon5/holes/missions/M-tpg-coupling-evolution.md",
+  :from "M-tpg-coupling-evolution",
+  :line 25,
+  :quote
+  "XOR coupling probe (M-xor-coupling-probe) demonstrated the tradeoff is",
+  :read_by "zai-8 batch 6",
+  :reason
+  "prior-result citation / history, dependency already delivered",
+  :reject :edge/rejected-at-reading,
+  :to "M-xor-coupling-probe"}
+ {:file "futon5a/holes/missions/M-trip-journal.md",
+  :from "M-trip-journal",
+  :line 5,
+  :quote
+  "`M-a-sorry-enterprise` (uses B→A turns as candidate observations for",
+  :read_by "zai-8 batch 6",
+  :reason
+  "cross-ref describing B consuming A's outputs; no stated 'cannot until' either way",
+  :reject :edge/rejected-at-reading,
+  :to "M-a-sorry-enterprise"}
+ {:file "futon5a/holes/missions/M-trip-journal.md",
+  :from "M-trip-journal",
+  :line 204,
+  :quote
+  "*Re-entry condition:* M-hypergraph-operator's Click/Tick machinery",
+  :read_by "zai-8 batch 6",
+  :reason
+  "explicitly deferred out of scope (DR-1); re-entry condition for future migration, not a blocker on A",
+  :reject :edge/rejected-at-reading,
+  :to "M-hypergraph-operator"}
+ {:file "futon5a/holes/missions/M-trip-journal.md",
+  :from "M-trip-journal",
+  :line 4,
+  :quote
+  "**Cross-refs:** `M-learning-loop` (mines this mission's B→A pairs),",
+  :read_by "zai-8 batch 6",
+  :reason
+  "cross-ref describing B consuming A's data; no stated blocking need",
+  :reject :edge/rejected-at-reading,
+  :to "M-learning-loop"}
+ {:file "futon5a/holes/missions/M-trip-journal.md",
+  :from "M-trip-journal",
+  :line 278,
+  :quote
+  "M-paper-reverse-morphogenesis, etc.); question pool grew (seed + 1).",
+  :read_by "zai-8 batch 6",
+  :reason "connection-graph bookkeeping, mere mention",
+  :reject :edge/rejected-at-reading,
+  :to "M-paper-reverse-morphogenesis"}
+ {:file "futon5a/holes/missions/M-trip-journal.md",
+  :from "M-trip-journal",
+  :line 6,
+  :quote
+  "sorry discovery / sorry-proximity), `M-stack-geometry` (renders the",
+  :read_by "zai-8 batch 6",
+  :reason
+  "cross-ref describing B rendering A's bridge; no stated blocking need",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-geometry"}
+ {:file "futon5a/holes/missions/M-trip-journal.md",
+  :from "M-trip-journal",
+  :line 494,
+  :quote
+  "Work on `M-stack-stereolithography` surfaced a useful larger-scale",
+  :read_by "zai-8 batch 6",
+  :reason "history / inspiration, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-stereolithography"}
+ {:file "futon5a/holes/missions/M-trip-journal.md",
+  :from "M-trip-journal",
+  :line 69,
+  :quote "## Porting M-superpod-mark2's learning-loop pattern",
+  :read_by "zai-8 batch 6",
+  :reason
+  "pattern adaptation from a written-up concept, not a wait on B's completion or artifact delivery",
+  :reject :edge/rejected-at-reading,
+  :to "M-superpod-mark2"}
+ {:file "futon3c/holes/missions/M-typed-memories.md",
+  :from "M-typed-memories",
+  :line 897,
+  :quote
+  "M-apm-capability-ratchet; **time-to-fill measurable**. Acceptance: the",
+  :read_by "zai-8 batch 6",
+  :reason
+  "ratchet named as downstream consumer of A's promotion handoff in A's design prose; no stated need of A on B",
+  :reject :edge/rejected-at-reading,
+  :to "M-apm-capability-ratchet"}
+ {:file "futon3c/holes/missions/M-typed-memories.md",
+  :from "M-typed-memories",
+  :line 28,
+  :quote
+  "- `holes/missions/M-shared-memory-control-build-test.md` — authoritative",
+  :read_by "zai-8 batch 6",
+  :reason
+  "evidence/authority pointer for already-passed acceptance items, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-shared-memory-control-build-test"}
+ {:file "futon3c/holes/missions/M-typed-memories.md",
+  :from "M-typed-memories",
+  :line 745,
+  :quote "M-typed-memories and M-war-machine-wiring.",
+  :read_by "zai-8 batch 6",
+  :reason
+  "future 'joint child' librarian charter speculation, not a dependency between these two",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-wiring"}
+ {:file "futon3c/holes/missions/M-typed-memories.md",
+  :from "M-typed-memories",
+  :line 70,
+  :quote
+  "- `futon2/holes/missions/M-wm-strategic-mission-selection.md` — the same",
+  :read_by "zai-8 batch 6",
+  :reason
+  "design observation that they should share a substrate; sibling analogy, no blocking need",
+  :reject :edge/rejected-at-reading,
+  :to "M-wm-strategic-mission-selection"}
+ {:file "futon7/holes/missions/M-value-creation-loop.md",
+  :from "M-value-creation-loop",
+  :line 178,
+  :quote
+  "- [[M-daily-scan]] (the refactor target) · [[M-cold-chain]] (the outreach rungs:",
+  :read_by "zai-8 batch 6",
+  :reason
+  "daily-scan named as A's own refactor target — A's work on B, not a wait on B",
+  :reject :edge/rejected-at-reading,
+  :to "M-daily-scan"}
+ {:file "futon3c/holes/missions/M-war-machine.md",
+  :from "M-war-machine",
+  :line 139,
+  :quote
+  "| M-a-sorry-enterprise | Sibling — sorry proximity is one of the War Machine's signals |",
+  :read_by "zai-8 batch 6",
+  :reason "explicitly labelled sibling",
+  :reject :edge/rejected-at-reading,
+  :to "M-a-sorry-enterprise"}
+ {:file "futon3c/holes/missions/M-war-machine.md",
+  :from "M-war-machine",
+  :line 138,
+  :quote
+  "| M-stack-inhabitation | Parent — the War Machine is an inhabitation surface |",
+  :read_by "zai-8 batch 6",
+  :reason "explicitly labelled parent",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-inhabitation"}
+ {:file "futon3c/holes/missions/M-war-machine.md",
+  :from "M-war-machine",
+  :line 413,
+  :quote
+  "`futon5a/holes/missions/M-stack-stereolithography.md` § Checkpoint 5.",
+  :read_by "zai-8 batch 6",
+  :reason
+  "pointer to where a mechanism lives, no blocking dependency stated",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-stereolithography"}
+ {:file "futon3c/holes/missions/M-war-machine-pilot.md",
+  :from "M-war-machine-pilot",
+  :line 367,
+  :quote
+  "- M-pattern-application-diagnostic's data flow can route through",
+  :read_by "zai-8 batch 6",
+  :reason
+  "future routing possibility ('can route through'), not a stated need of the pilot on B",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-application-diagnostic"}
+ {:file "futon3c/holes/missions/M-war-machine-pilot.md",
+  :from "M-war-machine-pilot",
+  :line 20,
+  :quote
+  "- `~/code/futon4/holes/missions/M-war-machine-vsatarcs-interop.md` — parent coordination thread",
+  :read_by "zai-8 batch 6",
+  :reason "explicitly labelled parent coordination thread",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-vsatarcs-interop"}
+ {:file "futon3c/holes/missions/M-war-machine-tuning.md",
+  :from "M-war-machine-tuning",
+  :line 14,
+  :quote
+  "`futon3c/holes/missions/M-stack-inhabitation.md` (inhabited vs",
+  :read_by "zai-8 batch 6",
+  :reason "cross-ref for a conceptual distinction, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-inhabitation"}
+ {:file "futon3c/holes/missions/M-war-machine-tuning.md",
+  :from "M-war-machine-tuning",
+  :line 184,
+  :quote
+  "- The recurring tick added in `M-stack-stereolithography` Checkpoint 5",
+  :read_by "zai-8 batch 6",
+  :reason
+  "the tick tuning audits already exists and runs (dependency on the artifact is already satisfied; tuning explicitly does not relitigate it)",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-stereolithography"}
+ {:file "futon3c/holes/missions/M-war-machine-tuning.md",
+  :from "M-war-machine-tuning",
+  :line 2710,
+  :quote
+  "| `futon3c/holes/missions/M-war-machine.md` | the underlying mission this one is auditing |",
+  :read_by "zai-8 batch 6",
+  :reason
+  "audit target / subject-matter relation, not a wait on closure",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon4/holes/missions/M-war-machine-vsatarcs-interop.md",
+  :from "M-war-machine-vsatarcs-interop",
+  :line 7,
+  :quote
+  "`M-editorial-assistant` (claude-10's writer-side surface that this mission must NOT break).",
+  :read_by "zai-8 batch 6",
+  :reason
+  "do-no-harm constraint, not a 'cannot finish until' dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-editorial-assistant"}
+ {:file "futon4/holes/missions/M-war-machine-vsatarcs-interop.md",
+  :from "M-war-machine-vsatarcs-interop",
+  :line 36,
+  :quote
+  "- The mission tried to satisfy all of M-the-futon-stack Q6 (kill-switch + full debug surface + reversal protocol) inside its scope. Q6 stays its own broader mission (per `~/code/futon0/holes/handoffs/r12-to-stack-Q6-2026-05-21.md`'s narrow-subset discipline); this mission is *just* the WM ↔ VSATARCs",
+  :read_by "zai-8 batch 6",
+  :reason
+  "scope-narrowing note explicitly keeping Q6 separate; no dependency claimed",
+  :reject :edge/rejected-at-reading,
+  :to "M-the-futon-stack"}
+ {:file "futon4/holes/missions/M-war-machine-vsatarcs-interop.md",
+  :from "M-war-machine-vsatarcs-interop",
+  :line 27,
+  :quote
+  "The bilateral closures stacked across the last several sessions — claude-2's M-vsatarcs-writer L3/L4/L4+ shipping `:mission-doc-sync` + `:aif-edn-revision-entry` + `:story-update`; claude-4's R-axis polish v0.5.13 → v0.5.27 closing R1-R11; claude-9's R12 narrow-take-up apparatus 2026-05-21; claude-4",
+  :read_by "zai-8 batch 6",
+  :reason
+  "history of already-shipped closures, not an open dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-vsatarcs-writer"}
+ {:file "futon5a/holes/missions/M-war-machine-wiring.md",
+  :from "M-war-machine-wiring",
+  :line 1722,
+  :quote
+  "| eb02d6d | M-archaeology-control + M-bounded-disposition | introduce subsumption-witness + bounded-disposition shapes (6 sibling invariants) |",
+  :read_by "zai-8 batch 6",
+  :reason "commit-log history entry",
+  :reject :edge/rejected-at-reading,
+  :to "M-bounded-disposition"}
+ {:file "futon5a/holes/missions/M-war-machine-wiring.md",
+  :from "M-war-machine-wiring",
+  :line 1721,
+  :quote
+  "| bac7422 | M-invariant-queue-extend Track 4.1 + tracer reframe | extend apparatus (load-time check, 6 tracks → typed pipeline-tracer evidence) |",
+  :read_by "zai-8 batch 6",
+  :reason "commit-log history entry",
+  :reject :edge/rejected-at-reading,
+  :to "M-invariant-queue-extend"}
+ {:file "futon5a/holes/missions/M-war-machine-wiring.md",
+  :from "M-war-machine-wiring",
+  :line 16,
+  :quote
+  "- `futon3/holes/missions/M-pattern-application-diagnostic.md` —",
+  :read_by "zai-8 batch 6",
+  :reason
+  "parent endpoint / inspiration canvass ('may already prefigure'), no blocking need",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-application-diagnostic"}
+ {:file "futon5a/holes/missions/M-war-machine-wiring.md",
+  :from "M-war-machine-wiring",
+  :line 1714,
+  :quote
+  "### Checkpoint 1 - 2026-05-01: V-2.4 stepper trial against the M-reachable-from-boot trajectory",
+  :read_by "zai-8 batch 6",
+  :reason
+  "checkpoint history using B's trajectory as test material; already done",
+  :reject :edge/rejected-at-reading,
+  :to "M-reachable-from-boot"}
+ {:file "futon5a/holes/missions/M-war-machine-wiring.md",
+  :from "M-war-machine-wiring",
+  :line 451,
+  :quote
+  "autonomously every 24 h (per Checkpoint 5 of M-stack-stereolithography),",
+  :read_by "zai-8 batch 6",
+  :reason
+  "artifact already exists and runs ('The autonomous loop already exists') — no open dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-stereolithography"}
+ {:file "futon5a/holes/missions/M-war-machine-wiring.md",
+  :from "M-war-machine-wiring",
+  :line 10,
+  :quote
+  "- `futon3c/holes/missions/M-war-machine.md` — the head: move-selection",
+  :read_by "zai-8 batch 6",
+  :reason "parent endpoint label, not a wait on B's closure",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon5a/holes/missions/M-war-machine-wiring.md",
+  :from "M-war-machine-wiring",
+  :line 12,
+  :quote
+  "- `futon3c/holes/missions/M-war-machine-tuning.md` — the head's policy",
+  :read_by "zai-8 batch 6",
+  :reason
+  "parent endpoint label / canvass of what signals could be absorbed, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-tuning"}
+ {:file "futon3c/holes/missions/M-wm-wiring.md",
+  :from "M-wm-wiring",
+  :line 133,
+  :quote
+  "\"I looked at it, I like the idea of using the diagramprover to prove that the map does what it is supposed to do.",
+  :read_by "zai-1 batch 7",
+  :reason
+  "claude-13 review 2026-10-28: a chosen verification instrument ('I like the idea'), not a stated need (reader unsure)",
+  :reject :edge/rejected-at-reading,
+  :to "M-diagramprover"}
+ {:file "futon3c/holes/missions/M-warrant-limit.md",
+  :from "M-warrant-limit",
+  :line 27,
+  :quote
+  "Taken from M-inbox-zero-claim-lifecycle, which has the same parts (detect a condition, queue a request, act, confirm):",
+  :read_by "zai-1 batch 7",
+  :reason
+  "borrowed pattern/checklist, not a dependency on that mission's completion or artifacts",
+  :reject :edge/rejected-at-reading,
+  :to "M-inbox-zero-claim-lifecycle"}
+ {:file "futon4/holes/missions/M-web-arxana-missions.md",
+  :from "M-web-arxana-missions",
+  :line 342,
+  :quote
+  "war-machine-tuning was only rank 93/194, and — decisively — **M-canon-fingerprint-store (the math mission to",
+  :read_by "zai-1 batch 7",
+  :reason
+  "data point in a gap-score scaling history, merely mentioned",
+  :reject :edge/rejected-at-reading,
+  :to "M-canon-fingerprint-store"}
+ {:file "futon4/holes/missions/M-web-arxana-missions.md",
+  :from "M-web-arxana-missions",
+  :line 367,
+  :quote
+  "M-categorical-code / this mission are genuinely both-ish) — it's E-efe-education's core question, not settled",
+  :read_by "zai-1 batch 7",
+  :reason
+  "named as an ambiguous edge case in domain classification, no dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-categorical-code"}
+ {:file "futon4/holes/missions/M-web-arxana-missions.md",
+  :from "M-web-arxana-missions",
+  :line 238,
+  :quote
+  "hyperedge. (And `scope` is a node-type in futon6's hypergraph — M-differentiable-code",
+  :read_by "zai-1 batch 7",
+  :reason
+  "see-also to a section (§scope-grain) for a concept parallel, not a need",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-code"}
+ {:file "futon4/holes/missions/M-web-arxana-missions.md",
+  :from "M-web-arxana-missions",
+  :line 366,
+  :quote
+  "local-vs-math partition is Joe's to ratify** (27 ambiguous flagged; edge cases like M-differentiable-math /",
+  :read_by "zai-1 batch 7",
+  :reason
+  "named as an ambiguous edge case in domain classification, no dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-differentiable-math"}
+ {:file "futon4/holes/missions/M-web-arxana-missions.md",
+  :from "M-web-arxana-missions",
+  :line 341,
+  :quote
+  "stub-FRACTION) was **size-dominated**: tiny stubs scored ~1.0 (M-sliding-blackboard 0.96 @raw6),",
+  :read_by "zai-1 batch 7",
+  :reason
+  "data point in a gap-score scaling history, merely mentioned",
+  :reject :edge/rejected-at-reading,
+  :to "M-sliding-blackboard"}
+ {:file "futon4/holes/missions/M-web-arxana-missions.md",
+  :from "M-web-arxana-missions",
+  :line 221,
+  :quote
+  "**Resolves the §5 open questions:** render lives in WebArxana (coordinate the n-ary extension with M-stack-stereolithography, don't duplicate);",
+  :read_by "zai-1 batch 7",
+  :reason
+  "render-ownership question resolved inside this mission (render lives in WebArxana; coordinate, don't duplicate); coordination, not a blocking dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-stack-stereolithography"}
+ {:file "futon4/holes/missions/M-web-arxana-missions.md",
+  :from "M-web-arxana-missions",
+  :line 17,
+  :quote
+  "`M-web-arxana-ui-improvements.md`, `M-capability-star-map` (futon0),",
+  :read_by "zai-1 batch 7",
+  :reason "sibling mission listing under Related",
+  :reject :edge/rejected-at-reading,
+  :to "M-web-arxana-ui-improvements"}
+ {:file "futon4/holes/missions/M-web-arxana-missions.md",
+  :from "M-web-arxana-missions",
+  :line 16,
+  :quote
+  "[[project_interest_network]]; sibling missions `M-webarxana.md`,",
+  :read_by "zai-1 batch 7",
+  :reason "sibling mission listing under Related",
+  :reject :edge/rejected-at-reading,
+  :to "M-webarxana"}
+ {:file "futon3/holes/missions/M-weird-modernism.md",
+  :from "M-weird-modernism",
+  :line 1036,
+  :quote
+  "- [ ] A written M-war-machine reading maps its sorry kinds, R3 likelihoods, EFE scorecard, and R10 schedule to the Parr–Friston structure.",
+  :read_by "zai-1 batch 7",
+  :reason
+  "this is A's own deliverable (a reading of B's docs), not work that waits on B",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine"}
+ {:file "futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+  :from "M-wm-aif-policy-grain-compliance",
+  :line 58,
+  :quote "landscape and factor semantics are specified separately in",
+  :read_by "zai-1 batch 7",
+  :reason
+  "pointer to where the strategic line's spec lives (division of specification); no stated need for B's completion or output — unsure, so rejected",
+  :reject :edge/rejected-at-reading,
+  :to "M-wm-strategic-mission-selection"}
+ {:file "futon2/holes/missions/M-wm-strategic-mission-selection.md",
+  :from "M-wm-strategic-mission-selection",
+  :line 231,
+  :quote "`holes/labs/M-typed-memories/phase4-wm-corpus.edn`.",
+  :read_by "zai-1 batch 7",
+  :reason
+  "storage location of A's own corpus under B's lab directory; no dependency on B's work",
+  :reject :edge/rejected-at-reading,
+  :to "M-typed-memories"}
+ {:file "futon2/holes/missions/M-wm-strategic-mission-selection.md",
+  :from "M-wm-strategic-mission-selection",
+  :line 15,
+  :quote "**Cross-references:** `M-wm-aif-policy-grain-compliance`,",
+  :read_by "zai-1 batch 7",
+  :reason "cross-reference list only",
+  :reject :edge/rejected-at-reading,
+  :to "M-wm-aif-policy-grain-compliance"}
+ {:file "futon3c/holes/missions/M-wm-wiring.md",
+  :from "M-wm-wiring",
+  :line 123,
+  :quote "futon2 `M-G-wm-wiring` (HEAD) was never work",
+  :read_by "zai-1 batch 7",
+  :reason "prior-rounds history note, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-G-wm-wiring"}
+ {:file "futon3c/holes/missions/M-wm-wiring.md",
+  :from "M-wm-wiring",
+  :line 117,
+  :quote
+  "M-fulab-wiring-survey, the wiring-ladder data and compare scripts)",
+  :read_by "zai-1 batch 7",
+  :reason
+  "named as one of many prior-work sources consulted for the MAP discovery; survey material, not a need",
+  :reject :edge/rejected-at-reading,
+  :to "M-fulab-wiring-survey"}
+ {:file "futon3c/holes/missions/M-wm-wiring.md",
+  :from "M-wm-wiring",
+  :line 377,
+  :quote ":runner-up [\"M-futonzero-generative\" 0.1117]}`",
+  :read_by "zai-1 batch 7",
+  :reason
+  "appears only as an embedding runner-up in a refusal-analysis history",
+  :reject :edge/rejected-at-reading,
+  :to "M-futonzero-generative"}
+ {:file "futon3c/holes/missions/M-wm-wiring.md",
+  :from "M-wm-wiring",
+  :line 123,
+  :quote
+  "futon5a `M-war-machine-wiring` (VERIFY, 2026-05-01, 1,848 lines) stopped at this exact gap,",
+  :read_by "zai-1 batch 7",
+  :reason "prior-rounds history note, not a dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-war-machine-wiring"}
+ {:file "futon3c/holes/missions/M-zai-learning-loop.md",
+  :from "M-zai-learning-loop",
+  :line 5,
+  :quote
+  "M-shared-memory-control-build-test (recall/curation/receipts machinery),",
+  :read_by "zai-1 batch 7",
+  :reason "listed as a Parent (lineage), not a stated dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-shared-memory-control-build-test"}
+ {:file "futon3c/holes/missions/M-zai-learning-loop.md",
+  :from "M-zai-learning-loop",
+  :line 4,
+  :quote
+  "**Parents:** M-typed-memories (the gap, the prototype ladder),",
+  :read_by "zai-1 batch 7",
+  :reason
+  "listed as a Parent (lineage that names the gap), not a stated dependency",
+  :reject :edge/rejected-at-reading,
+  :to "M-typed-memories"}
+ {:file "futon3c/holes/missions/M-象-2000.md",
+  :from "M-象-2000",
+  :line 2806,
+  :quote
+  "connects 象's reading of intent to diagram checking (M-diagramprover) through a",
+  :read_by "zai-1 batch 7",
+  :reason
+  "an excursion plans to connect the two (steps 2-5 not started); other mentions are mining-pool stamps — no stated blocking need",
+  :reject :edge/rejected-at-reading,
+  :to "M-diagramprover"}
+ {:file "futon3c/holes/missions/M-象-2000.md",
+  :from "M-象-2000",
+  :line 2936,
+  :quote
+  "- Pool: 208 unlabelled eligible records stamped with a futon mission (M-landscape-positioning 82, M-futonzero-prelim-practice 57, M-G-over-cascades 55, M-象-2000 12, M-warrant-limit 2); only 24 carry marked reply paragraphs, so thi",
+  :read_by "zai-1 batch 7",
+  :reason
+  "count of records stamped with that mission in a mining-campaign pool; mere mention",
+  :reject :edge/rejected-at-reading,
+  :to "M-futonzero-prelim-practice"}
+ {:file "futon3c/holes/missions/M-象-2000.md",
+  :from "M-象-2000",
+  :line 2936,
+  :quote
+  "- Pool: 208 unlabelled eligible records stamped with a futon mission (M-landscape-positioning 82, M-futonzero-prelim-practice 57, M-G-over-cascades 55, M-象-2000 12, M-warrant-limit 2); only 24 carry marked reply paragraphs, so thi",
+  :read_by "zai-1 batch 7",
+  :reason
+  "count of records stamped with that mission in a mining-campaign pool; mere mention",
+  :reject :edge/rejected-at-reading,
+  :to "M-landscape-positioning"}
+ {:file "futon3c/holes/missions/M-象-2000.md",
+  :from "M-象-2000",
+  :line 2936,
+  :quote
+  "- Pool: 208 unlabelled eligible records stamped with a futon mission (M-landscape-positioning 82, M-futonzero-prelim-practice 57, M-G-over-cascades 55, M-象-2000 12, M-warrant-limit 2); only 24 carry marked reply paragraphs, so thi",
+  :read_by "zai-1 batch 7",
+  :reason
+  "count of records stamped with that mission in a mining-campaign pool; mere mention",
+  :reject :edge/rejected-at-reading,
+  :to "M-warrant-limit"}
+ {:from "M-pattern-mining",
+  :reason
+  "claude-13 review 2026-10-28: direction not decided by the batch reader (checker compared unordered pairs); no edge assumed",
+  :reject :edge/rejected-at-reading,
+  :to "M-pattern-application-diagnostic"}]

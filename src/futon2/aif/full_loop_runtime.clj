@@ -23,6 +23,7 @@
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.outer-pending-observation :as pending-observation]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
@@ -759,32 +760,9 @@
    :reason (or (:kind (ex-data e)) :outer-selection-failed)
    :details (dissoc (ex-data e) :kind)})
 
-(def ^:private terminal-ending-classes
-  #{:focused :related :unrelated :stop-the-line})
-
 (defn- pending-run-ending [opts run-id]
-  ;; full_loop_runner.clj:6853-6890 retains this record-only classification
-  ;; in both the returned result and the durable tick run record.
-  (let [dir (io/file (or (:run-record-dir opts) runner/default-run-record-dir))
-        file (io/file dir (str "tick-run-record-" run-id ".edn"))]
-    (if-not (.isFile file)
-      {:status :deferred :reason :run-record-absent :path (.getAbsolutePath file)}
-      (try
-        (let [record (edn/read-string (slurp file))
-              recorded-run-id (or (:run/id record) (:run-id record))
-              ending (get-in record [:run-ending-classification :class])]
-          (cond
-            (and recorded-run-id (not= run-id recorded-run-id))
-            {:status :deferred :reason :run-record-identity-mismatch}
-
-            (not (contains? terminal-ending-classes ending))
-            {:status :deferred :reason :terminal-ending-class-absent
-             :recorded-class ending}
-
-            :else {:status :ready :ending-class ending}))
-        (catch Exception e
-          {:status :deferred :reason :run-record-unreadable
-           :message (.getMessage e)})))))
+  (pending-observation/observe
+   (or (:run-record-dir opts) runner/default-run-record-dir) run-id))
 
 (defn- previous-giraffe-observation [current-dir makeup pending]
   (let [run-id (:giraffe/run-id pending)
@@ -826,13 +804,11 @@
         (if-let [previous (previous-giraffe-observation current-dir makeup pending)]
           (let [selected-target (get-in pending [:selection :selection :selected :target])
                 gain (ready-gain previous current-observation selected-target)
-                advanced (outer-state/next-state
-                          makeup state (:selection pending)
+                consumed (outer-state/consume-observation
+                          makeup state pending
                           (learning-observation pending previous)
-                          {:ending-class (:ending-class ending)
-                           :observed-gain gain})]
-            {:status :applied :state (dissoc advanced :pending)
-             :ending-class (:ending-class ending) :observed-gain gain})
+                          (assoc ending :observed-gain gain))]
+            (assoc consumed :ending-class (:ending-class ending) :observed-gain gain))
           {:status :deferred :state state :reason :previous-giraffe-run-absent})))
     {:status :none :state state}))
 
@@ -933,14 +909,14 @@
                                        (assoc :outer/learning
                                               (select-keys learning
                                                            [:status :reason :ending-class
-                                                            :observed-gain]))))
+                                                            :observed-gain :receipt]))))
               state-path (or (:outer/state-path opts) outer-state/default-state-path)]
           (if-let [target (get-in selection [:selection :selected :target])]
             (let [run-id (or (:run-id opts) (new-run-id))]
               (when-not (= :deferred (:status learning))
                 (outer-state/write-state!
                  state-path
-                 (assoc state :pending
+                 (outer-state/replace-pending state
                         {:selection retained-selection
                          :run-id run-id
                          :giraffe/run-id (:giraffe/run-id observation)})))
@@ -953,7 +929,7 @@
                               (fn [replacement]
                                 (when-not (= :deferred (:status learning))
                                   (outer-state/write-state!
-                                   state-path (assoc state :pending
+                                   state-path (outer-state/replace-pending state
                                                      {:selection replacement :run-id run-id
                                                       :giraffe/run-id (:giraffe/run-id observation)})))))]
                 (run-ordinary-opportunity-with-task!

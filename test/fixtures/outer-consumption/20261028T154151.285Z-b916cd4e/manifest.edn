@@ -1,0 +1,20 @@
+{:files
+ [{:file "input.edn",
+   :sha256
+   "b916cd4ee2048494a1df9b8ec36643681c99e832e1594bf59f94bd2a9afeef1d"}
+  {:file "rejected.edn",
+   :sha256
+   "c9df2d58f5af6016c0c1f0a2c1ef9413cb36fec590be9b38dcdde1a9af29775b"}
+  {:file "pass.edn",
+   :sha256
+   "8e8e98d116206c0305a6d3fb069d301da549df795714e3224a9129201a4143a5"}
+  {:file "report.md",
+   :sha256
+   "f781ab43a5930ee3d36373295f81b94d418652881612977d5b94af2b276c716d"}],
+ :git-sha "ff0734e1c4631898a2943d6b0430a7be72ff6117",
+ :run-id "20261028T154151.285Z-b916cd4e",
+ :sources
+ {:edges
+  {:path "holes/missions/giraffe-mission-edges.json",
+   :sha256
+   "2c728646aaa9f2b7dd067abdd37fc48df86cdc41baf373900f21cd9cfffa240e"}}}
