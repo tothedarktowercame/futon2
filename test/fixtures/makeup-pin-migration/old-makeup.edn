@@ -1,0 +1,39 @@
+{:schema :wm/outer-makeup-v1
+ ;; Joe's 55/35/5/5 terminal ending-class starter kit; not-yet-evaluated is not terminal.
+ :c-kit {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100
+         :not-yet-evaluated 0}
+ ;; Starter concentration chosen so κ·c-kit begins at counts 55/35/5/5.
+ :kappa 100
+ ;; Starter beliefs to be learned: ready leans doable, not-ready leans blocked, undetermined is even.
+ :state-kit {:ready {:doable 3 :blocked 1}
+             :not-ready {:doable 1 :blocked 3}
+             :undetermined {:doable 1 :blocked 1}}
+ ;; Starter gain preference to be learned; larger values favour more items made ready.
+ :gain-kit {:none 1 :one 2 :several 3}
+ ;; Learning rate η for ending preferences (Smith, Friston & Whyte 2022 §4 Eq. 34); 1 is the value in their worked example (refs smith2022 l.4228).
+ :eta-c 1
+ ;; Forgetting rate ω for ending preferences (Smith, Friston & Whyte 2022 §4 Eqs. 34, 37). 9/10 is our starter choice, not from the paper (their example uses ω = 1 and 0.1, l.4228-4229).
+ :omega-c 9/10
+ ;; Learning rate η for readiness-state counts (Smith, Friston & Whyte 2022 §4 Eq. 34); 1 is the value in their worked example (refs smith2022 l.4228).
+ :eta-state 1
+ ;; Forgetting rate ω for readiness-state counts (Smith, Friston & Whyte 2022 §4 Eqs. 34, 37). 9/10 is our starter choice, not from the paper (their example uses ω = 1 and 0.1, l.4228-4229).
+ :omega-state 9/10
+ ;; Learning rate η for ready-gain counts (Smith, Friston & Whyte 2022 §4 Eq. 34); 1 is the value in their worked example (refs smith2022 l.4228).
+ :eta-gain 1
+ ;; Forgetting rate ω for ready-gain counts (Smith, Friston & Whyte 2022 §4 Eqs. 34, 37). 9/10 is our starter choice, not from the paper (their example uses ω = 1 and 0.1, l.4228-4229).
+ :omega-gain 9/10
+ ;; Runtime task reach is absent; this explicit starter value records that current modelling limit.
+ :default-reach 1/2
+ :cascades
+ [;; futon3/library/task-selection/only-what-can-start-now.flexiarg and what-others-wait-on-first.flexiarg.
+  {:id :what-others-wait-on-first
+   :patterns ["only-what-can-start-now" "what-others-wait-on-first"]
+   :steps [:ready-gate :by-cone :by-unblocks]}
+  ;; futon3/library/task-selection/only-what-can-start-now.flexiarg.
+  {:id :only-what-can-start-now
+   :patterns ["only-what-can-start-now"]
+   :steps [:ready-gate]}
+  ;; futon3/library/task-selection/find-out-before-building.flexiarg.
+  {:id :find-out-before-building
+   :patterns ["find-out-before-building"]
+   :steps [{:gate-status :undetermined} :by-cone]}]}
