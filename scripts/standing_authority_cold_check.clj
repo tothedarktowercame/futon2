@@ -7,7 +7,7 @@
 ;;   clojure -J-Dsa.ledger.path=... -J-Dsa.ledger.sha256=... -M -i scripts/standing_authority_cold_check.clj
 ;;     (ledger input + pin; defaults to the pinned live ledger path/sha recorded below)
 ;;   -J-Dsa.repo.root=...    (repo root stripped from pinned original paths in
-;;     the hide-originals inertness check; default derived from the ledger path)
+;;     the hide-originals inertness check (opt-in, default derived); default derived from the ledger path)
 ;;   -J-Dsa.host.checks=true (machine-specific ordinal-50 absence assertion,
 ;;     meaningful only on the operator host; off by default)
 ;; The ledger is COPIED to a hermetic temp dir and the copy's sha256 must match
@@ -89,19 +89,25 @@
         present (filter #(.isFile (io/file (str (System/getProperty "user.dir")
                                                 (subs % (count repo-root)))))
                         under-root)]
-    ;; Pinned originals that still exist in this tree (tracked repo files whose
-    ;; bytes drifted from the pins) are MOVED ASIDE in this disposable archive;
-    ;; resolution must then still re-derive the identical identity from tracked
-    ;; evidence bytes alone — the strongest proof the originals are inert.
-    (doseq [p present]
-      (Files/move (.toPath (io/file (str (System/getProperty "user.dir") (subs p (count repo-root)))))
-                  (.toPath (io/file (str hermetic "/hidden-" (hash p))))
-                  (into-array [java.nio.file.StandardCopyOption/REPLACE_EXISTING])))
-    (standing/reset-context!)
-    (let [re-ctx (standing/standing-context)]
-      (when-not (= :ready (:status re-ctx)) (fail [:standing-after-hiding-originals (:status re-ctx) (:reason re-ctx)]))
-      (when-not (= ident (:identity re-ctx)) (fail :identity-changed-after-hiding-originals)))
-    (println :originals-hidden (count present))))
+    ;; H1 safety gate: moving tracked files is only safe in a DISPOSABLE
+    ;; archive/clone. Default: report how many pinned originals exist here and
+    ;; SKIP the move. -J-Dsa.hide.originals=true opts in to the destructive
+    ;; inertness witness: originals are moved aside, standing context is reset
+    ;; and re-resolved, and the identical identity must be re-derived from
+    ;; tracked evidence bytes alone.
+    (if (not= "true" (System/getProperty "sa.hide.originals"))
+      (println :originals-present-in-tree (count present)
+               :hide-witness-skipped "(opt in with -J-Dsa.hide.originals=true in a disposable archive)")
+      (do
+        (doseq [p present]
+          (Files/move (.toPath (io/file (str (System/getProperty "user.dir") (subs p (count repo-root)))))
+                      (.toPath (io/file (str hermetic "/hidden-" (hash p))))
+                      (into-array [java.nio.file.StandardCopyOption/REPLACE_EXISTING])))
+        (standing/reset-context!)
+        (let [re-ctx (standing/standing-context)]
+          (when-not (= :ready (:status re-ctx)) (fail [:standing-after-hiding-originals (:status re-ctx) (:reason re-ctx)]))
+          (when-not (= ident (:identity re-ctx)) (fail :identity-changed-after-hiding-originals)))
+        (println :originals-hidden (count present))))))
 ;; machine-specific witness (operator host only, opt-in): the deleted
 ;; ordinal-50 original stays deleted — external runners skip this.
 (when (= "true" (System/getProperty "sa.host.checks"))
