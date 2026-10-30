@@ -6,6 +6,7 @@
             [clojure.string :as str]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.pinned-file-delivery :as delivery]
+            [futon2.aif.reading-refusal-history :as repeat-history]
             [futon2.aif.analysis-cascade :as analysis-cascade]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.target-reading-registry :as registry]))
@@ -293,7 +294,7 @@
   preparation, not a claim that an outer policy has already been selected.
   ANSWER-FN remains the designated author's sole contact port."
   [{:keys [run-id author answer-fn request-root request-builder analysis-validator
-           target-reading-root]
+           target-reading-root run-record-dir reader-configuration]
     :or {request-root default-request-root
          request-builder default-request-builder
          analysis-validator default-analysis-validator}}
@@ -339,8 +340,13 @@
                                 (get-in request [:task :excerpt_sha256]))
                              (= (file-digest (:source-path need))
                                 (get-in request [:task :content_sha256])))
-                request-sha (file-digest request-file)]
-            (cond
+                request-sha (file-digest request-file)
+                reading-inputs (repeat-history/inputs request request-sha acceptance-contract
+                                                      analysis-validator
+                                                      (or reader-configuration (repeat-history/reader-configuration author)))
+                comparison (repeat-history/compare-history run-record-dir reading-inputs)
+                result
+                (cond
               (nil? acceptance-contract)
               (refused need :selected-target-reading-contract-unavailable
                        {:exit (:exit template-result) :stderr (:err template-result)})
@@ -348,6 +354,17 @@
               (not pinned?)
               (refused need :selected-target-reading-pin-mismatch
                        {:request-file (.getPath request-file)})
+
+              (= :unchanged-refused-reading (:status comparison))
+              (refused need :selected-target-reading-unchanged-refusal
+                       {:contacted? false :comparison comparison
+                        :rearm {:condition :reading-inputs-changed
+                                :producer :selected-target-reader
+                                :identity-fields repeat-history/identity-fields}})
+
+              (= :history-pin-mismatch (:status comparison))
+              (refused need :selected-target-reading-history-invalid
+                       {:contacted? false :comparison comparison})
 
               :else
               (let [issued {:target (:target need) :kind :selected-target-reading
@@ -540,7 +557,8 @@
                            :job-id (:job-id exchange)
                            :format-correction (:format-correction formatted)
                            :reader-job-ids (mapv :job-id (:responses formatted))
-                           :validation (:validation publication)})))))))))))))
+                           :validation (:validation publication)})))))))]
+            (assoc result :reading-inputs reading-inputs :reading-repeat-comparison comparison)))))))
 
 (defn repair!
   "Prepare the reading for an already selected target, retaining the legacy

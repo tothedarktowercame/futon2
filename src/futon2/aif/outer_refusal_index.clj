@@ -39,7 +39,7 @@
   [index-file entry]
   (let [file (.getCanonicalFile (io/file index-file))
         lock-file (io/file (.getParentFile file) (str (.getName file) ".lock"))
-        line (str (pr-str entry) "\n")]
+        line (apply str (map #(str (pr-str %) "\n") (if (vector? entry) entry [entry])))]
     (io/make-parents file)
     (when (or (Files/isSymbolicLink (.toPath file))
               (Files/isSymbolicLink (.toPath lock-file)))
@@ -62,9 +62,12 @@
 (defn append-run-record!
   "Append the compact projection of an already-published terminal RECORD."
   [dir record-path record]
-  (let [path (.getCanonicalPath (io/file record-path))]
+  (let [path (.getCanonicalPath (io/file record-path))
+        sha (sha256-file path)
+        terminal (history/index-entry record path sha)]
     (append-entry! (io/file dir history/index-name)
-                   (history/index-entry record path (sha256-file path)))))
+                   (into [terminal] (history/reading-index-entries record path sha)))
+    terminal))
 
 (defn- terminal-files [dir]
   (let [root (io/file dir)]
@@ -97,10 +100,10 @@
           (let [path (.getCanonicalPath file)
                 pin (sha256-file file)
                 row (try
-                      (history/index-entry
-                       (with-open [reader (java.io.PushbackReader. (io/reader file))]
-                         (edn/read reader))
-                       path pin)
+                      (let [record (with-open [reader (java.io.PushbackReader. (io/reader file))]
+                                     (edn/read reader))]
+                        (into [(history/index-entry record path pin)]
+                              (history/reading-index-entries record path pin)))
                       (catch Exception e
                         {:schema :wm/outer-refusal-index-entry-v1
                          :status :unreadable
@@ -108,7 +111,8 @@
                          :record-sha256 pin
                          :error-class (.getName (class e))
                          :error (.getMessage e)}))]
-            (.write writer (str (pr-str row) "\n")))))
+            (doseq [entry (if (vector? row) row [row])]
+              (.write writer (str (pr-str entry) "\n"))))))
       (Files/move (.toPath temporary) (.toPath target)
                   (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
       (.getCanonicalPath target)

@@ -2615,7 +2615,8 @@
   (let [first-result (selected-target-reading-once opts judgement repair-fn redecide)
         refusal (:record first-result)
         reselect (:selected-target-reading-reselect-fn opts)]
-    (if-not (and reselect (= :selected-target-reading-unavailable (:kind refusal)))
+    (if-not (and reselect (contains? #{:selected-target-reading-unavailable :selected-target-reading-unchanged-refusal}
+                                  (:kind refusal)))
       first-result
       (if-let [next-judgement (reselect refusal (:window-days opts))]
         (let [second-result (selected-target-reading-once
