@@ -79,21 +79,33 @@ inbox-zero commit adding `E-argument-game-search.md`, unrelated to the
 mission. The reviewer rejected the claim. The guardrail worked; the author's
 behaviour is the defect.
 
-## Pre-registration: click 51 (the last credit)
+## Pre-registration: click 51 (the last credit), amended 2026-10-30
 
-- **Preconditions** (before issuing; migration done 2026-10-30): Makeup migration live and `read-state`
-  durable; serving JVM reloaded from main; ledger loads (128 entries).
-- **Route**: ordinary selection, Zai seats `zai-1,zai-2,zai-3`.
-- **Prediction**: selection certifies with R20 β (authority
-  `:r20-beta-from-valence`, 16 iterations; posterior ≠ prior if the family has
-  more than one policy). The outer state learns fc2e27e3's pending observation
-  under the migrated pin (no `:pending-makeup-migration-required`).
-- **Success** = a want reached with a new commit made by the author in this
-  run, accepted by the reviewer.
-- **If the author again claims an unrelated existing artifact**: the
-  guardrail refusal stands, and the next fix is upstream in the author route
-  (existing-artifact claims must cite work on the selected want), not another
-  self-heal.
+Changes made before click 51, all reviewed, none spending a click:
+lever 0 (existing-artifact claims must cite the selected target; futon2
+`582451e3b`, Lean `d7e21d0ee`); Q6 refusal reuses click-local reselection
+(`f9d28dc19`, Lean `b5c7da28f4`); outer learning consumes completed runs
+exactly once (`93da58236`). Before that last fix outer learning had never
+taken a step (`:click-count 0`; pending frozen on `f74df9cc` since 2026-10-29,
+deficit OUTER-LEARNING-SKIPPED-RUNS).
+
+A no-charge preview on the live code predicts:
+
+- **Outer learning**: consumes f74df9cc once as `notYetEvaluated` (C decays
+  only, observed gain `:several`); click-count 0 → 1; consumption receipt
+  written; pending replaced by click 51's selection.
+- **Selection**: outer selection picks M-typed-memories; Q6
+  `:repeat-choice-after-refusal` (digest `c1801780…`, unchanged since click 50)
+  empties its one-policy family; click-local reselection excludes it for this
+  click and selects **M-peradam-grounding**.
+- **Reading**: its retained reading is stale, so the click refreshes the
+  reading before decision.
+- **β**: R20 `:r20-beta-from-valence`, 16 iterations.
+- **Success** = a want of M-peradam-grounding reached with a new commit by the
+  author in this run, accepted by the reviewer (3 of its 5 wants were open
+  after click 3589464e).
+- **If the author claims an existing artifact**: lever 0 refuses it before
+  review unless the commit cites M-peradam-grounding.
 - **Any other stop**: one self-heal attempt at most; on failure, fix upstream
   directly and log the self-heal failure for the immune loop.
 - After click 51 the budget is exhausted; a further campaign needs Joe's grant.
