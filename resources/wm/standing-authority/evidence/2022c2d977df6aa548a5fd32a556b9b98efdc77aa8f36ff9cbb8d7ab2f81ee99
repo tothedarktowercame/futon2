@@ -1,0 +1,17 @@
+{:schema :wm/meta-medic-genuine-repair-evaluation-v1
+ :intent-digest "1e23232ee4999e952a32790238e115dc4e87960af4886a0c5bc5aae83e2ee410"
+ :evaluator
+ {:seat "codex-12" :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}
+ :acceptance-contract-pin
+ {:path "/home/joe/code/futon2/test/futon2/aif/wm/injury_94091_acceptance_test.clj"
+  :sha256 "2bce78e2f97c7d2fef53d0092cd8010c286be6d47e2c0dd8b4caba271fe7a43a"}
+ :pre-replay-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/pre-replay.edn"
+  :sha256 "eb8ab646f610a0e8d35a54a8b53a4f168bf013312fff2e0ad844b229cfae55ad"}
+ :post-replay-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/post-replay.edn"
+  :sha256 "2763a5e7f2769fa1248afb3a72eedc384c25fac99b2ef720de53427b3ba29ba7"}
+ :negative-control-pin
+ {:path "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/negative-replay.edn"
+  :sha256 "072742b435fb88c2755d9641ff26e664447db81215c5a1df69594394a445be22"}
+ :verdict :original-acceptance-repaired}

@@ -1,0 +1,7 @@
+{:schema :wm/meta-medic-genuine-repair-authority-v1
+ :intent-digest "c1fc78cd262741589517d713d65d0bf8c709d7979db36a625addfacb86da962b"
+ :evaluation-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/evaluation-receipt.edn" :sha256 "ca0d52ce739fd203ff8b26ab53e19ce3f7e7c55a228fdca2a25c2776943da8f3"}
+ :review-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/review-receipt.edn" :sha256 "ae38925f2c1971877986c99dc7ceb139637b2d8cd44b9544532c38c21296ec7c"}
+ :scope :cfb-four-loop-node-retention-repair
+ :authorizer {:seat "codex-11" :session "01a16136-8ec4-7972-8723-f8afda943b96"}
+ :verdict :qualified}

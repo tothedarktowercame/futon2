@@ -1,0 +1,7 @@
+{:schema :wm/meta-medic-genuine-repair-authority-v1
+ :intent-digest "3eede72bb23c11c8752bfbbd092a0ffbfe043ece0274d465cd3dbca1f14a8d85"
+ :evaluation-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/evaluation-receipt.edn" :sha256 "00fdce5f803b7453c348c487d7f522264e558d2565daafc685bbfeb6cce54163"}
+ :review-pin {:path "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/review-receipt.edn" :sha256 "e205ce4cf7724c82973c721663bd5e90ea25a65dd2c45e9e2ae3c1add1920f1d"}
+ :scope :8467-qualified-mission-observation-accounting-only
+ :authorizer {:seat "codex-11" :session "01a16136-8ec4-7972-8723-f8afda943b96"}
+ :verdict :qualified}

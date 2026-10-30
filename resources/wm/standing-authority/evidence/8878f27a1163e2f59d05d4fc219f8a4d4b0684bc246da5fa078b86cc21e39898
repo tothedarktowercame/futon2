@@ -1,0 +1,6 @@
+{:schema :wm/meta-medic-genuine-repair-replay-v1
+ :acceptance-contract-pin
+ {:path "/home/joe/code/futon2/test/futon2/aif/injury_8467_repair_acceptance_test.clj"
+  :sha256 "4638d90743b9389845051aa00dee7aa4a9c4ec3d64f815adc482056ca005e8e4"}
+ :phase :negative
+ :verdict :negative-control-refused}

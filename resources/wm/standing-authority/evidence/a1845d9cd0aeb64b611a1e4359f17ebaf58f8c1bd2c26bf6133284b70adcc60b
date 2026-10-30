@@ -1,0 +1,6 @@
+{:schema :wm/meta-medic-genuine-repair-replay-v1
+ :acceptance-contract-pin
+ {:path "/home/joe/code/futon2/test/futon2/aif/wm/injury41_function_repair_test.clj"
+  :sha256 "8f6990e647da34fd64dd122d6ca9e42ac8efc33bba1578efbe2569eabadfb3c4"}
+ :phase :post
+ :verdict :original-contract-repaired}

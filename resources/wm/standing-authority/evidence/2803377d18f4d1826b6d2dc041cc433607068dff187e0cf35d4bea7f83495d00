@@ -1,0 +1,45 @@
+# T3 a59c retirement — acceptance boundary
+
+2026-10-28, codex-11. Source/contract review completed; live retirement held.
+No ledger operation, authority installation, click, JVM launch or test execution.
+
+The cc050c0a7 diff calls record-held-resume-stop-line! from the held-resume catch.
+The test invokes that helper directly with a hand-built finding, a hard-coded
+external attempt ID, hermetic binding and a callback that directly evaluates T3.
+It proves real producer/T3 ordering at the helper. It does not exercise the
+catch's actual data flow, emitted event or exception classification.
+
+For the claim that the original acceptance is repaired, retain one path-level
+witness with these pre-fixed expectations:
+1. Drive the real held-open-cascade-resume catch through its supported runner
+   path; do not invoke the new helper as the test entry point.
+2. Capture the actual opportunity/end/incomplete observation and its qualified
+   attempt identity and repair root. Do not replace T3, the producer, or the
+   event emitter with a passing result.
+3. Before the correction (or with only the producer call removed as a negative),
+   the real T3 reread must yield missing-durable-stop-line on that observation.
+4. With the correction, before publishing that same end event, reread the
+   ordinary producer's persisted finding: exact qualified attempt ID, :open,
+   :incomplete-recoverable, expected repair root. T3 must yield no witness.
+5. Retain the held/incomplete result and checkpoint; do not convert it to
+   successful completion. A producer failure must not earn a clear result.
+
+This asks for a focused witness, not another diagnostic package or isolated JVM
+campaign. Use the existing serving JVM under the agreed repository policy.
+The prior helper test and diff remain supporting evidence, not discarded work.
+
+Supported ledger retirement entry point is
+meta-injury-store/transact-medic-disposition!, using the genuine-repair grammar.
+It requires a ledger/ordinal-bound intent; pinned original acceptance contract,
+pre/post/negative replay receipts; evaluation, independent review and authority
+receipts authenticated by the installed authority context. Commit hashes and a
+bell saying reviewed are not substitutes for those exact bound artifacts.
+Existing authority/49-adoption is precedent for the schema, not authorization
+for a59c. Do not reuse its signatures or trust bindings for this injury.
+
+After the witness is retained, assemble the exact-scope genuine-repair packet
+for a59c ordinal 59, preserving historical failure and unrelated injuries;
+obtain review of that packet and extend authority through the supported provider,
+then transact and verify the effective projection. No historical bytes may be
+edited to repair the incident. No original-acceptance-repaired verdict has been
+minted here. source-pins.json records the files inspected and current ledger SHA.

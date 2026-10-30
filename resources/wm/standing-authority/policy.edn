@@ -1,0 +1,1525 @@
+{:schema :wm/standing-recovered-medic-authority-policy-v1,
+ :operator-authorization
+ {:authorized-by "Joe",
+  :authorized-at "2026-10-31",
+  :verbatim
+  "yes, but in addition we must ask where the brittleness came from, and fix that too",
+  :scope
+  "Persistent serving use of the exact prior authority context: the 11 retained medic-adoption approval bundles and their 33 pinned trust tuples enumerated in run001/renewed-click-01b/ledger-operator-decision.json (sha256 b235cc8202cc5fe719e011d3e01b4fa79af3c1502c74c89d79befa4bd860ac1f). No new approvals, no blanket identity trust.",
+  :ledger-pin
+  {:path
+   "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/ledger.edn",
+   :sha256
+   "f7b5a7aac642b35302f30e1254c707805e95188ffd3c8158c51ae6bde56a0074"},
+  :dispatch "codex-11 invoke-1793401129767-8440-ef937b5d"},
+ :resolution-note
+ "All artifact bytes resolve from the sha-addressed retained evidence store in this directory. Original pin paths are inert provenance (needed for tuple/pin equality against the ledger entries); no resolution step reads a mutable source path.",
+ :bundles
+ [{:intent-schema :wm/meta-medic-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/a9-adoption/authorization-receipt.edn",
+    :sha256
+    "e828f719f9841dac0e26093437f79a9a6f0f601619acb554670b8f4e9e96afec"},
+   :evidence
+   [{:path
+     "holes/labs/wm-contract/already-satisfied-terminal-classification-invariant.md",
+     :sha256
+     "7b8788e96ff60cfd1138a5c641ec148d0defd17cf1f3b9a96e3c021552f7b63d",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-d0608eec-cca3-45de-9c19-14d6db26577d.edn",
+     :sha256
+     "6ca9604a70652c6dfb27c834248e5c875816540c285278f5c3918347e8fe9715",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/qualification-review.edn",
+     :sha256
+     "a491540e9033270b57def4133929d9d66ce0f5f5428c6aa34481d418e2259145",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/a9-adoption/authorization-receipt.edn",
+     :sha256
+     "e828f719f9841dac0e26093437f79a9a6f0f601619acb554670b8f4e9e96afec",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/evaluation-receipt.edn",
+     :sha256
+     "32edf04ddffe3296b7993333f36c9e120a1c9f9ca52d799350d3f906eace7385",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/qualification-review.edn",
+    :sha256
+    "a491540e9033270b57def4133929d9d66ce0f5f5428c6aa34481d418e2259145"},
+   :operation-id
+   "4f6885fd88c0b04ae48997ec1be03844b5a4d7e4c9b39d3e153e82d47e2a8607",
+   :ordinal 38,
+   :trusted-tuples
+   #{{:kind :review,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "4c48601953083b0985982d817bd2de381fd16306247d9f200584a282882f6b96",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/qualification-review.edn",
+       :sha256
+       "a491540e9033270b57def4133929d9d66ce0f5f5428c6aa34481d418e2259145"}}
+     {:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "4c48601953083b0985982d817bd2de381fd16306247d9f200584a282882f6b96",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/a9-adoption/authorization-receipt.edn",
+       :sha256
+       "e828f719f9841dac0e26093437f79a9a6f0f601619acb554670b8f4e9e96afec"}}
+     {:kind :evaluation,
+      :identity
+      {:seat "codex-12",
+       :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"},
+      :intent-digest
+      "4c48601953083b0985982d817bd2de381fd16306247d9f200584a282882f6b96",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/evaluation-receipt.edn",
+       :sha256
+       "32edf04ddffe3296b7993333f36c9e120a1c9f9ca52d799350d3f906eace7385"}}},
+   :injury-id "injury/a9b900a41f704673f9d7f35f545f0482b06135ea",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/a9-evaluation/evaluation-receipt.edn",
+    :sha256
+    "32edf04ddffe3296b7993333f36c9e120a1c9f9ca52d799350d3f906eace7385"},
+   :intent
+   {:classifier-revision "7e19d0b19f48bb562e7b9273a863b5cfb20cf1c2",
+    :schema :wm/meta-medic-intent-v1,
+    :predecessor-entry-id nil,
+    :replay :producer-qualified-non-injury,
+    :original-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-d0608eec-cca3-45de-9c19-14d6db26577d.edn",
+     :sha256
+     "6ca9604a70652c6dfb27c834248e5c875816540c285278f5c3918347e8fe9715"},
+    :ordinal 34,
+    :state :open,
+    :scope :a9-historical-misclassification,
+    :patch-revision "36afa9142331fbe99eb99b67ae510322ca543f0c",
+    :injury-id "injury/a9b900a41f704673f9d7f35f545f0482b06135ea",
+    :acceptance-contract-pin
+    {:path
+     "holes/labs/wm-contract/already-satisfied-terminal-classification-invariant.md",
+     :sha256
+     "7b8788e96ff60cfd1138a5c641ec148d0defd17cf1f3b9a96e3c021552f7b63d"},
+    :disposition-kind :historical-misclassification,
+    :reviewer
+    {:seat "codex-11",
+     :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "bdb8f7289f527fc29656048ebdefcd49dba17d0ef0963d749ad649db2ead163c"},
+    :ledger-entry-id
+    "2a2db7b787d3ce3f3238fa904a92f2fe699a67396ff9e531d5dabdf10c0e300e",
+    :evaluator
+    {:seat "codex-12",
+     :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}},
+   :ledger-entry-id
+   "2a2db7b787d3ce3f3238fa904a92f2fe699a67396ff9e531d5dabdf10c0e300e"}
+  {:intent-schema :wm/meta-medic-genuine-repair-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/authorization-receipt.edn",
+    :sha256
+    "1b27528db09a83bdae7bb48100b31fecdbd661e13b06a653b593315df375a0b4"},
+   :evidence
+   [{:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-fb1ff2b0-2012-4ba0-a57a-c5cb0afa46ce.edn",
+     :sha256
+     "13659d51d2e8f6e40780858d5ea79a8726d3f83c3ece41a2c7571f45c41b8ff0",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/meta_selection_retention_acceptance_test.clj",
+     :sha256
+     "5f62bee17c05fc5b0388800ebd6c799d12e0f42bc6cbd41f6e7e23680a81a542",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/pre-replay.edn",
+     :sha256
+     "c5d364e1e980a6d281065ec103873d53d5ab9fa0b7f95493a7aa680db9fe2fc1",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/post-replay.edn",
+     :sha256
+     "52714a9e251ee1f493f39c6096156a2e74ec38ed96e23029e150b6b3a50a6e78",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/negative-replay.edn",
+     :sha256
+     "fd6683b7c6b5a6a53ae450f3fd2052fb9a15293d45b032f9b1ad94d75be8b103",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/evaluation-receipt.edn",
+     :sha256
+     "ca0d52ce739fd203ff8b26ab53e19ce3f7e7c55a228fdca2a25c2776943da8f3",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/review-receipt.edn",
+     :sha256
+     "ae38925f2c1971877986c99dc7ceb139637b2d8cd44b9544532c38c21296ec7c",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/authorization-receipt.edn",
+     :sha256
+     "1b27528db09a83bdae7bb48100b31fecdbd661e13b06a653b593315df375a0b4",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/review-receipt.edn",
+    :sha256
+    "ae38925f2c1971877986c99dc7ceb139637b2d8cd44b9544532c38c21296ec7c"},
+   :operation-id
+   "de442c15cb41a64e9e2de4409f82a93e7b388f9aedb4f02a5ae0ed2cc03fd6ed",
+   :ordinal 39,
+   :trusted-tuples
+   #{{:kind :evaluation,
+      :identity
+      {:seat "codex-12",
+       :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"},
+      :intent-digest
+      "c1fc78cd262741589517d713d65d0bf8c709d7979db36a625addfacb86da962b",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/evaluation-receipt.edn",
+       :sha256
+       "ca0d52ce739fd203ff8b26ab53e19ce3f7e7c55a228fdca2a25c2776943da8f3"}}
+     {:kind :review,
+      :identity
+      {:seat "claude-9",
+       :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+      :intent-digest
+      "c1fc78cd262741589517d713d65d0bf8c709d7979db36a625addfacb86da962b",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/review-receipt.edn",
+       :sha256
+       "ae38925f2c1971877986c99dc7ceb139637b2d8cd44b9544532c38c21296ec7c"}}
+     {:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "c1fc78cd262741589517d713d65d0bf8c709d7979db36a625addfacb86da962b",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/authorization-receipt.edn",
+       :sha256
+       "1b27528db09a83bdae7bb48100b31fecdbd661e13b06a653b593315df375a0b4"}}},
+   :injury-id "injury/cfbcbad062bde07d539c7e2abd97a6a189f910f4",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/evaluation-receipt.edn",
+    :sha256
+    "ca0d52ce739fd203ff8b26ab53e19ce3f7e7c55a228fdca2a25c2776943da8f3"},
+   :intent
+   {:schema :wm/meta-medic-genuine-repair-intent-v1,
+    :predecessor-entry-id "14",
+    :ordinal 17,
+    :state :enacted,
+    :scope :cfb-four-loop-node-retention-repair,
+    :patch-revision "809a7f7ac74b5a4f951c2270cfa856ba06650f17",
+    :negative-control-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/negative-replay.edn",
+     :sha256
+     "fd6683b7c6b5a6a53ae450f3fd2052fb9a15293d45b032f9b1ad94d75be8b103"},
+    :source-revision "ab0e78c7ebc28589c497b9220b05aff3371f4f1e",
+    :injury-id "injury/cfbcbad062bde07d539c7e2abd97a6a189f910f4",
+    :post-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/post-replay.edn",
+     :sha256
+     "52714a9e251ee1f493f39c6096156a2e74ec38ed96e23029e150b6b3a50a6e78"},
+    :cause-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-fb1ff2b0-2012-4ba0-a57a-c5cb0afa46ce.edn",
+     :sha256
+     "13659d51d2e8f6e40780858d5ea79a8726d3f83c3ece41a2c7571f45c41b8ff0"},
+    :acceptance-contract-pin
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/meta_selection_retention_acceptance_test.clj",
+     :sha256
+     "5f62bee17c05fc5b0388800ebd6c799d12e0f42bc6cbd41f6e7e23680a81a542"},
+    :disposition-kind :genuine-repair,
+    :pre-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/pre-replay.edn",
+     :sha256
+     "c5d364e1e980a6d281065ec103873d53d5ab9fa0b7f95493a7aa680db9fe2fc1"},
+    :reviewer
+    {:seat "claude-9",
+     :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "363c3b4fdf9e576503f966afb620d51bbb775f93616a3368ea932305bad0f4be"},
+    :ledger-entry-id
+    "27561c45b36b785cdca17dd53b87ab912bb1bc3eaafeacf5e91463010dd7a594",
+    :evaluator
+    {:seat "codex-12",
+     :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}},
+   :ledger-entry-id
+   "27561c45b36b785cdca17dd53b87ab912bb1bc3eaafeacf5e91463010dd7a594"}
+  {:intent-schema :wm/meta-medic-genuine-repair-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/authorization-receipt.edn",
+    :sha256
+    "1c6e4512b4e1daa9dc0f8d8236989e6c6eb40d7760b723df49e5c0b8cdc53e63"},
+   :evidence
+   [{:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-fd615a2a-5756-46db-8feb-ba3ba033dff8.edn",
+     :sha256
+     "4d601e6424bb53c4bb7da5621c1f4c782462c67be1849e6fda446fdb703b0586",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/wm/injury_94091_acceptance_test.clj",
+     :sha256
+     "2bce78e2f97c7d2fef53d0092cd8010c286be6d47e2c0dd8b4caba271fe7a43a",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/pre-replay.edn",
+     :sha256
+     "eb8ab646f610a0e8d35a54a8b53a4f168bf013312fff2e0ad844b229cfae55ad",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/post-replay.edn",
+     :sha256
+     "2763a5e7f2769fa1248afb3a72eedc384c25fac99b2ef720de53427b3ba29ba7",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/negative-replay.edn",
+     :sha256
+     "072742b435fb88c2755d9641ff26e664447db81215c5a1df69594394a445be22",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/evaluation-receipt.edn",
+     :sha256
+     "2022c2d977df6aa548a5fd32a556b9b98efdc77aa8f36ff9cbb8d7ab2f81ee99",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/authorization-receipt.edn",
+     :sha256
+     "1c6e4512b4e1daa9dc0f8d8236989e6c6eb40d7760b723df49e5c0b8cdc53e63",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/review-receipt.edn",
+     :sha256
+     "0f57cc576c119689fc9268627f3dc3998f3c71b50cf6b126a36f251b99d02006",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/review-receipt.edn",
+    :sha256
+    "0f57cc576c119689fc9268627f3dc3998f3c71b50cf6b126a36f251b99d02006"},
+   :operation-id
+   "1f9072128905fb34381a360edb5665cdf6ac14b848a235ddda412b47781647e4",
+   :ordinal 40,
+   :trusted-tuples
+   #{{:kind :evaluation,
+      :identity
+      {:seat "codex-12",
+       :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"},
+      :intent-digest
+      "1e23232ee4999e952a32790238e115dc4e87960af4886a0c5bc5aae83e2ee410",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/evaluation-receipt.edn",
+       :sha256
+       "2022c2d977df6aa548a5fd32a556b9b98efdc77aa8f36ff9cbb8d7ab2f81ee99"}}
+     {:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "1e23232ee4999e952a32790238e115dc4e87960af4886a0c5bc5aae83e2ee410",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/authorization-receipt.edn",
+       :sha256
+       "1c6e4512b4e1daa9dc0f8d8236989e6c6eb40d7760b723df49e5c0b8cdc53e63"}}
+     {:kind :review,
+      :identity
+      {:seat "claude-9",
+       :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+      :intent-digest
+      "1e23232ee4999e952a32790238e115dc4e87960af4886a0c5bc5aae83e2ee410",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/review-receipt.edn",
+       :sha256
+       "0f57cc576c119689fc9268627f3dc3998f3c71b50cf6b126a36f251b99d02006"}}},
+   :injury-id "injury/94091b05988598abb17ce238088862c5d7f47201",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/evaluation-receipt.edn",
+    :sha256
+    "2022c2d977df6aa548a5fd32a556b9b98efdc77aa8f36ff9cbb8d7ab2f81ee99"},
+   :intent
+   {:schema :wm/meta-medic-genuine-repair-intent-v1,
+    :predecessor-entry-id "24",
+    :ordinal 27,
+    :state :enacted,
+    :scope :940-typed-cascade-resume-error-held-state-retention-only,
+    :patch-revision "d9fb5ffecebf70bb9d392f393bc261b261998df1",
+    :negative-control-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/negative-replay.edn",
+     :sha256
+     "072742b435fb88c2755d9641ff26e664447db81215c5a1df69594394a445be22"},
+    :source-revision "d9fb5ffecebf70bb9d392f393bc261b261998df1",
+    :injury-id "injury/94091b05988598abb17ce238088862c5d7f47201",
+    :post-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/post-replay.edn",
+     :sha256
+     "2763a5e7f2769fa1248afb3a72eedc384c25fac99b2ef720de53427b3ba29ba7"},
+    :cause-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-fd615a2a-5756-46db-8feb-ba3ba033dff8.edn",
+     :sha256
+     "4d601e6424bb53c4bb7da5621c1f4c782462c67be1849e6fda446fdb703b0586"},
+    :acceptance-contract-pin
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/wm/injury_94091_acceptance_test.clj",
+     :sha256
+     "2bce78e2f97c7d2fef53d0092cd8010c286be6d47e2c0dd8b4caba271fe7a43a"},
+    :disposition-kind :genuine-repair,
+    :pre-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/pre-replay.edn",
+     :sha256
+     "eb8ab646f610a0e8d35a54a8b53a4f168bf013312fff2e0ad844b229cfae55ad"},
+    :reviewer
+    {:seat "claude-9",
+     :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "98ce6a80031cef8b98a432960d5a21dadec94a5e210b2013eb3bc72693e62e86"},
+    :ledger-entry-id
+    "bfa2c6d444613919adbb9943eecdd1613ced2b937c8c19110dd17e5afff7a6cf",
+    :evaluator
+    {:seat "codex-12",
+     :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}},
+   :ledger-entry-id
+   "bfa2c6d444613919adbb9943eecdd1613ced2b937c8c19110dd17e5afff7a6cf"}
+  {:intent-schema :wm/meta-medic-genuine-repair-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/authorization-receipt.edn",
+    :sha256
+    "a3ebdfb67dee42e3dd4864ccf10eb82aabea76e327c45238897dcd2b36171d1d"},
+   :evidence
+   [{:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45.edn",
+     :sha256
+     "64b3eff6a27638cc429c7e7046687e3d3258756e90b9cca8a9dc63b0e32db63f",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/injury_04e14314_acceptance_test.clj",
+     :sha256
+     "8e86f34907f73240b5ffd0c9761f0358f079b2ce952893d6742ae91d97232a50",
+     :recovered-from "git 7ca70e10e"}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/pre-replay.edn",
+     :sha256
+     "1157e278321023ab268863cd154babd27a7d000b9f991f971f7fd20ca0d9085b",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/post-replay.edn",
+     :sha256
+     "70ce8c2bb8c5e58d2acb7437b92c9c8e676819b83fb8ce12ec112bd3b17fa4dd",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/negative-replay.edn",
+     :sha256
+     "47c2f1166866677c6676684dd056a2fa3028a93b375c076029ddb0a86d2fff7a",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/authorization-receipt.edn",
+     :sha256
+     "a3ebdfb67dee42e3dd4864ccf10eb82aabea76e327c45238897dcd2b36171d1d",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/review-receipt.edn",
+     :sha256
+     "efddc475240730aeb4113d113277dbeef5691569a4d40b840e6511df81767563",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/evaluation-receipt.edn",
+     :sha256
+     "c98cfc2d98f140e7659823f83c0b1ed8e67818576e179a7b331c22842d3eee63",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/review-receipt.edn",
+    :sha256
+    "efddc475240730aeb4113d113277dbeef5691569a4d40b840e6511df81767563"},
+   :operation-id
+   "b28c9663841e8634dce49ad83fa4d3069ff7a632122a2b24ee6688f6c812f423",
+   :ordinal 41,
+   :trusted-tuples
+   #{{:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "c311e9f0defb09dfb3b103af31c9f0b8f4f7220a8dcc3b4a81dc97d56568e424",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/authorization-receipt.edn",
+       :sha256
+       "a3ebdfb67dee42e3dd4864ccf10eb82aabea76e327c45238897dcd2b36171d1d"}}
+     {:kind :review,
+      :identity
+      {:seat "claude-9",
+       :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+      :intent-digest
+      "c311e9f0defb09dfb3b103af31c9f0b8f4f7220a8dcc3b4a81dc97d56568e424",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/review-receipt.edn",
+       :sha256
+       "efddc475240730aeb4113d113277dbeef5691569a4d40b840e6511df81767563"}}
+     {:kind :evaluation,
+      :identity
+      {:seat "codex-12",
+       :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"},
+      :intent-digest
+      "c311e9f0defb09dfb3b103af31c9f0b8f4f7220a8dcc3b4a81dc97d56568e424",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/evaluation-receipt.edn",
+       :sha256
+       "c98cfc2d98f140e7659823f83c0b1ed8e67818576e179a7b331c22842d3eee63"}}},
+   :injury-id "injury/04e14314a0eec3aab88d8e7044be26f3ae5dfe6d",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/evaluation-receipt.edn",
+    :sha256
+    "c98cfc2d98f140e7659823f83c0b1ed8e67818576e179a7b331c22842d3eee63"},
+   :intent
+   {:schema :wm/meta-medic-genuine-repair-intent-v1,
+    :predecessor-entry-id "8",
+    :ordinal 20,
+    :state :enacted,
+    :scope :04-selected-want-identity-propagation-only,
+    :patch-revision "7ca70e10ea413d94303f4592755fb04433c31021",
+    :negative-control-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/negative-replay.edn",
+     :sha256
+     "47c2f1166866677c6676684dd056a2fa3028a93b375c076029ddb0a86d2fff7a"},
+    :source-revision "ab0e78c7ebc28589c497b9220b05aff3371f4f1e",
+    :injury-id "injury/04e14314a0eec3aab88d8e7044be26f3ae5dfe6d",
+    :post-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/post-replay.edn",
+     :sha256
+     "70ce8c2bb8c5e58d2acb7437b92c9c8e676819b83fb8ce12ec112bd3b17fa4dd"},
+    :cause-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-22-02587641-d615-4a5b-8bc8-a3df48e2ab45.edn",
+     :sha256
+     "64b3eff6a27638cc429c7e7046687e3d3258756e90b9cca8a9dc63b0e32db63f"},
+    :acceptance-contract-pin
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/injury_04e14314_acceptance_test.clj",
+     :sha256
+     "8e86f34907f73240b5ffd0c9761f0358f079b2ce952893d6742ae91d97232a50"},
+    :disposition-kind :genuine-repair,
+    :pre-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/pre-replay.edn",
+     :sha256
+     "1157e278321023ab268863cd154babd27a7d000b9f991f971f7fd20ca0d9085b"},
+    :reviewer
+    {:seat "claude-9",
+     :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "9135e80f814881411bb4566b7d00386d807e58c1a144a66897546d632ac5270c"},
+    :ledger-entry-id
+    "03cb756278559469e7addb60192267fd5b10d32619a25c0a3d39129af0cf456d",
+    :evaluator
+    {:seat "codex-12",
+     :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}},
+   :ledger-entry-id
+   "03cb756278559469e7addb60192267fd5b10d32619a25c0a3d39129af0cf456d"}
+  {:intent-schema :wm/meta-medic-genuine-repair-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/authorization-receipt.edn",
+    :sha256
+    "bbef7960bbe44a32971f088e59257a44fd746556d5285212d14e1ff5d2ccf0ea"},
+   :evidence
+   [{:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-c52d61b9-d268-438c-a204-b944e507a724.edn",
+     :sha256
+     "38ee0703e9bb7ee8b3bcb69f2dc0ded8a7b43c0af239e53f144b1d42061b3a5f",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/wm/injury_9ccf92a2_acceptance_test.clj",
+     :sha256
+     "9b0acbc09684c215a2a8134c99fe3f4b2da1c776c3d169f3d7fe51c6887e766e",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/pre-replay.edn",
+     :sha256
+     "9ae2c1f8b0da32d3e56e9b0f41ae8f22b1c84c70663489f516cea2e32414d265",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/post-replay.edn",
+     :sha256
+     "405629f7cb61f87d497d2d812bf05419c4871f0746daccc89d536ba079ac4c1e",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/negative-replay.edn",
+     :sha256
+     "388095a52f9467daaafeca3ea906dc7c69e57e78260152dce6ea7bb4bc0d269b",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/review-receipt.edn",
+     :sha256
+     "bd8261162d94890de11f2e44eb336ebedd38c3d986999a0728fff285ff57a790",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/authorization-receipt.edn",
+     :sha256
+     "bbef7960bbe44a32971f088e59257a44fd746556d5285212d14e1ff5d2ccf0ea",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/evaluation-receipt.edn",
+     :sha256
+     "7bb41cdbdc9c067f577956d247ee84c22dcefbd8dcab239bca17bba1624aaa85",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/review-receipt.edn",
+    :sha256
+    "bd8261162d94890de11f2e44eb336ebedd38c3d986999a0728fff285ff57a790"},
+   :operation-id
+   "940e555c30b160ed76f4fd4c3208e9a4a47ea174e265882848720610f98e3fa0",
+   :ordinal 42,
+   :trusted-tuples
+   #{{:kind :review,
+      :identity
+      {:seat "claude-9",
+       :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+      :intent-digest
+      "f1ac65241a32396ed92b70d2dc575f645c19d3801bba8e90699c7e6587b1f8a8",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/review-receipt.edn",
+       :sha256
+       "bd8261162d94890de11f2e44eb336ebedd38c3d986999a0728fff285ff57a790"}}
+     {:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "f1ac65241a32396ed92b70d2dc575f645c19d3801bba8e90699c7e6587b1f8a8",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/authorization-receipt.edn",
+       :sha256
+       "bbef7960bbe44a32971f088e59257a44fd746556d5285212d14e1ff5d2ccf0ea"}}
+     {:kind :evaluation,
+      :identity
+      {:seat "codex-12",
+       :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"},
+      :intent-digest
+      "f1ac65241a32396ed92b70d2dc575f645c19d3801bba8e90699c7e6587b1f8a8",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/evaluation-receipt.edn",
+       :sha256
+       "7bb41cdbdc9c067f577956d247ee84c22dcefbd8dcab239bca17bba1624aaa85"}}},
+   :injury-id "injury/9ccf92a21f042bca987d0014ebce3b2b9e3dcd1f",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/evaluation-receipt.edn",
+    :sha256
+    "7bb41cdbdc9c067f577956d247ee84c22dcefbd8dcab239bca17bba1624aaa85"},
+   :intent
+   {:schema :wm/meta-medic-genuine-repair-intent-v1,
+    :predecessor-entry-id nil,
+    :ordinal 28,
+    :state :open,
+    :scope :9cc-bound-same-author-already-satisfied-correction-only,
+    :patch-revision "2c5e2ddb7a1bac14ae4ec764cec1883feefd0c76",
+    :negative-control-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/negative-replay.edn",
+     :sha256
+     "388095a52f9467daaafeca3ea906dc7c69e57e78260152dce6ea7bb4bc0d269b"},
+    :source-revision "9460ccedf163dbe14efbc5eacbf3c2840f84e4df",
+    :injury-id "injury/9ccf92a21f042bca987d0014ebce3b2b9e3dcd1f",
+    :post-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/post-replay.edn",
+     :sha256
+     "405629f7cb61f87d497d2d812bf05419c4871f0746daccc89d536ba079ac4c1e"},
+    :cause-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-c52d61b9-d268-438c-a204-b944e507a724.edn",
+     :sha256
+     "38ee0703e9bb7ee8b3bcb69f2dc0ded8a7b43c0af239e53f144b1d42061b3a5f"},
+    :acceptance-contract-pin
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/wm/injury_9ccf92a2_acceptance_test.clj",
+     :sha256
+     "9b0acbc09684c215a2a8134c99fe3f4b2da1c776c3d169f3d7fe51c6887e766e"},
+    :disposition-kind :genuine-repair,
+    :pre-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/pre-replay.edn",
+     :sha256
+     "9ae2c1f8b0da32d3e56e9b0f41ae8f22b1c84c70663489f516cea2e32414d265"},
+    :reviewer
+    {:seat "claude-9",
+     :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "79880da4ede8bebc364ac2b7dc2523363838fcd9519a04af8b63fcb0126e86d7"},
+    :ledger-entry-id
+    "80b7d0e15246aff28fb86839963e9c61999c9c50d11e114a0617d8dc4f8279ca",
+    :evaluator
+    {:seat "codex-12",
+     :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}},
+   :ledger-entry-id
+   "80b7d0e15246aff28fb86839963e9c61999c9c50d11e114a0617d8dc4f8279ca"}
+  {:intent-schema :wm/meta-medic-genuine-repair-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/authorization-receipt.edn",
+    :sha256
+    "11a1bead72dc3598b49cebb4e12ebabb73a4aa54e73a858a62d7796e6e0a6520"},
+   :evidence
+   [{:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-23-fc464172-4f16-43d9-a055-0296ad4494b5.edn",
+     :sha256
+     "e011288b8ed75b60f154947be582ed986a73832f63f4e57f6af0a2963135d54a",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/wm/injury41_function_repair_test.clj",
+     :sha256
+     "8f6990e647da34fd64dd122d6ca9e42ac8efc33bba1578efbe2569eabadfb3c4",
+     :recovered-from "git ae9e71584"}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/pre-replay.edn",
+     :sha256
+     "afbf9898fed221b5ec17ee5fe18ce4b5c8c8509a36ce12673805bf3eb0d8cd56",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/post-replay.edn",
+     :sha256
+     "a1845d9cd0aeb64b611a1e4359f17ebaf58f8c1bd2c26bf6133284b70adcc60b",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/negative-replay.edn",
+     :sha256
+     "9553109a1d9c021439943c92336f1cdb84ce679bed11a506995ef961aaec4f0d",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/authorization-receipt.edn",
+     :sha256
+     "11a1bead72dc3598b49cebb4e12ebabb73a4aa54e73a858a62d7796e6e0a6520",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/evaluation-receipt.edn",
+     :sha256
+     "f8e028f2e3c8aa0ebf02e7e7d4b7c114e0b1ce7960fb44fa8687373867898ea1",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/review-receipt.edn",
+     :sha256
+     "65df80da5c23abc1595a77ad69dcf2d4fa266d92ead19fb8345b43a46f872017",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/review-receipt.edn",
+    :sha256
+    "65df80da5c23abc1595a77ad69dcf2d4fa266d92ead19fb8345b43a46f872017"},
+   :operation-id
+   "244f64d63a1d7d4a39cc1322add3029d3b07fdb4d86423f9a5b99ecc2daa3e73",
+   :ordinal 43,
+   :trusted-tuples
+   #{{:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "dbbf5a99ebcfd9f9103f21ef456215d588bdca08772fae9f596b9ee11cc2a2d3",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/authorization-receipt.edn",
+       :sha256
+       "11a1bead72dc3598b49cebb4e12ebabb73a4aa54e73a858a62d7796e6e0a6520"}}
+     {:kind :evaluation,
+      :identity
+      {:seat "claude-9",
+       :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+      :intent-digest
+      "dbbf5a99ebcfd9f9103f21ef456215d588bdca08772fae9f596b9ee11cc2a2d3",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/evaluation-receipt.edn",
+       :sha256
+       "f8e028f2e3c8aa0ebf02e7e7d4b7c114e0b1ce7960fb44fa8687373867898ea1"}}
+     {:kind :review,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "dbbf5a99ebcfd9f9103f21ef456215d588bdca08772fae9f596b9ee11cc2a2d3",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/review-receipt.edn",
+       :sha256
+       "65df80da5c23abc1595a77ad69dcf2d4fa266d92ead19fb8345b43a46f872017"}}},
+   :injury-id "injury/41a00c626ed7f9f9d5454e148745c951ec3db80e",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/evaluation-receipt.edn",
+    :sha256
+    "f8e028f2e3c8aa0ebf02e7e7d4b7c114e0b1ce7960fb44fa8687373867898ea1"},
+   :intent
+   {:schema :wm/meta-medic-genuine-repair-intent-v1,
+    :predecessor-entry-id nil,
+    :ordinal 18,
+    :state :open,
+    :scope :41-function-valued-patch-boundary-only,
+    :patch-revision "ae9e715844c49be7ed2110fbdc97b482a2f5a9a7",
+    :negative-control-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/negative-replay.edn",
+     :sha256
+     "9553109a1d9c021439943c92336f1cdb84ce679bed11a506995ef961aaec4f0d"},
+    :source-revision "10f88008ee7fd6b8a6f3e7e0bc70609598250f15",
+    :injury-id "injury/41a00c626ed7f9f9d5454e148745c951ec3db80e",
+    :post-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/post-replay.edn",
+     :sha256
+     "a1845d9cd0aeb64b611a1e4359f17ebaf58f8c1bd2c26bf6133284b70adcc60b"},
+    :cause-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-23-fc464172-4f16-43d9-a055-0296ad4494b5.edn",
+     :sha256
+     "e011288b8ed75b60f154947be582ed986a73832f63f4e57f6af0a2963135d54a"},
+    :acceptance-contract-pin
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/wm/injury41_function_repair_test.clj",
+     :sha256
+     "8f6990e647da34fd64dd122d6ca9e42ac8efc33bba1578efbe2569eabadfb3c4"},
+    :disposition-kind :genuine-repair,
+    :pre-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/pre-replay.edn",
+     :sha256
+     "afbf9898fed221b5ec17ee5fe18ce4b5c8c8509a36ce12673805bf3eb0d8cd56"},
+    :reviewer
+    {:seat "codex-11",
+     :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "335fd6a2bf50cea0c638ea6fcb7f97c94b5f15a5db24071baffd4ed581800439"},
+    :ledger-entry-id
+    "61926d15ca8798629115af970ace8ba432d351b1789b0cfd3e1f68dd9e40f593",
+    :evaluator
+    {:seat "claude-9",
+     :session "d97917be-09d2-416a-95b3-4964f0b0562a"}},
+   :ledger-entry-id
+   "61926d15ca8798629115af970ace8ba432d351b1789b0cfd3e1f68dd9e40f593"}
+  {:intent-schema :wm/meta-medic-genuine-repair-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/authorization-receipt.edn",
+    :sha256
+    "c46d4e2e17d1993d5156455b99f3a331fce75900bb76739017444c1198f0b68e"},
+   :evidence
+   [{:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-25e24e8b-efeb-40e1-a108-232b50b79f88.edn",
+     :sha256
+     "e54b75c71a69105338373dc784732ece7a0b9114807bde3e354cf171aa2afdbc",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/injury_8467_repair_acceptance_test.clj",
+     :sha256
+     "4638d90743b9389845051aa00dee7aa4a9c4ec3d64f815adc482056ca005e8e4",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/pre-replay.edn",
+     :sha256
+     "c12c67d6b0f4cf29f3ee1cc7eb6bbbb04bfb136c35d121a076b2e7bbb45de33f",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/post-replay.edn",
+     :sha256
+     "823fd5379356d82c0de8b24e949ae416ba648c1eb1bb1e13857f8349a6bd97c4",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/negative-replay.edn",
+     :sha256
+     "8878f27a1163e2f59d05d4fc219f8a4d4b0684bc246da5fa078b86cc21e39898",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/evaluation-receipt.edn",
+     :sha256
+     "00fdce5f803b7453c348c487d7f522264e558d2565daafc685bbfeb6cce54163",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/review-receipt.edn",
+     :sha256
+     "e205ce4cf7724c82973c721663bd5e90ea25a65dd2c45e9e2ae3c1add1920f1d",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/authorization-receipt.edn",
+     :sha256
+     "c46d4e2e17d1993d5156455b99f3a331fce75900bb76739017444c1198f0b68e",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/review-receipt.edn",
+    :sha256
+    "e205ce4cf7724c82973c721663bd5e90ea25a65dd2c45e9e2ae3c1add1920f1d"},
+   :operation-id
+   "b73fbd202cb6bca824e7b10edba96fe3268c79d89d282625025844081101f6f8",
+   :ordinal 44,
+   :trusted-tuples
+   #{{:kind :evaluation,
+      :identity
+      {:seat "codex-12",
+       :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"},
+      :intent-digest
+      "3eede72bb23c11c8752bfbbd092a0ffbfe043ece0274d465cd3dbca1f14a8d85",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/evaluation-receipt.edn",
+       :sha256
+       "00fdce5f803b7453c348c487d7f522264e558d2565daafc685bbfeb6cce54163"}}
+     {:kind :review,
+      :identity
+      {:seat "claude-9",
+       :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+      :intent-digest
+      "3eede72bb23c11c8752bfbbd092a0ffbfe043ece0274d465cd3dbca1f14a8d85",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/review-receipt.edn",
+       :sha256
+       "e205ce4cf7724c82973c721663bd5e90ea25a65dd2c45e9e2ae3c1add1920f1d"}}
+     {:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "3eede72bb23c11c8752bfbbd092a0ffbfe043ece0274d465cd3dbca1f14a8d85",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/authorization-receipt.edn",
+       :sha256
+       "c46d4e2e17d1993d5156455b99f3a331fce75900bb76739017444c1198f0b68e"}}},
+   :injury-id "injury/8467a7d5b6b4a3203d9053561c1d0d59f5fa1c1d",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/evaluation-receipt.edn",
+    :sha256
+    "00fdce5f803b7453c348c487d7f522264e558d2565daafc685bbfeb6cce54163"},
+   :intent
+   {:schema :wm/meta-medic-genuine-repair-intent-v1,
+    :predecessor-entry-id "36",
+    :ordinal 37,
+    :state :reopened,
+    :scope :8467-qualified-mission-observation-accounting-only,
+    :patch-revision "49a8c59d45247285f7198e3ed61399700a79ca2a",
+    :negative-control-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/negative-replay.edn",
+     :sha256
+     "8878f27a1163e2f59d05d4fc219f8a4d4b0684bc246da5fa078b86cc21e39898"},
+    :source-revision "efbd586b1a2406cf6f894412d24ebac4a576b7a2",
+    :injury-id "injury/8467a7d5b6b4a3203d9053561c1d0d59f5fa1c1d",
+    :post-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/post-replay.edn",
+     :sha256
+     "823fd5379356d82c0de8b24e949ae416ba648c1eb1bb1e13857f8349a6bd97c4"},
+    :cause-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-24-25e24e8b-efeb-40e1-a108-232b50b79f88.edn",
+     :sha256
+     "e54b75c71a69105338373dc784732ece7a0b9114807bde3e354cf171aa2afdbc"},
+    :acceptance-contract-pin
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/injury_8467_repair_acceptance_test.clj",
+     :sha256
+     "4638d90743b9389845051aa00dee7aa4a9c4ec3d64f815adc482056ca005e8e4"},
+    :disposition-kind :genuine-repair,
+    :pre-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/pre-replay.edn",
+     :sha256
+     "c12c67d6b0f4cf29f3ee1cc7eb6bbbb04bfb136c35d121a076b2e7bbb45de33f"},
+    :reviewer
+    {:seat "claude-9",
+     :session "d97917be-09d2-416a-95b3-4964f0b0562a"},
+    :attempt 2,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "72c1f7be6e6d08abeb422aa23e81016d3dfde8fd7e3bedfad8a6cf682324db9f"},
+    :ledger-entry-id
+    "ddb52c2728d4a9a575d1c3c2ead9ce01c671aa2525de1e14b42e616e9d10225f",
+    :evaluator
+    {:seat "codex-12",
+     :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}},
+   :ledger-entry-id
+   "ddb52c2728d4a9a575d1c3c2ead9ce01c671aa2525de1e14b42e616e9d10225f"}
+  {:intent-schema :wm/meta-medic-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/45-adoption/authorization-receipt.edn",
+    :sha256
+    "7e45765b01a83b4e49b0ccf5e64b9fbfcea1d558e5347d2aa8de1122ef912f7f"},
+   :evidence
+   [{:path
+     "holes/labs/wm-contract/successful-close-terminal-classification-invariant.md",
+     :sha256
+     "ad70d6986ebec90b706523092a02e68ead7e66f10c6c2674f3d10b1159064e40",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-8be8ff03-5009-4f3d-8c12-5b11cfd46d92.edn",
+     :sha256
+     "e9a5eb355f9a6f70b41d5bdbd99e127badcd6d13e6bd7165867fa2bb9477f404",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/45-adoption/authorization-receipt.edn",
+     :sha256
+     "7e45765b01a83b4e49b0ccf5e64b9fbfcea1d558e5347d2aa8de1122ef912f7f",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/evaluation-receipt.edn",
+     :sha256
+     "91e0b60aa8ec982df2b37ef14e69eabed6140a8430a4c85459ace4f4c858da5c",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/qualification-review.edn",
+     :sha256
+     "6af070c34e3648cd79a8361291faf01640d4d50e9f2e833b390c291213a56a66",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/qualification-review.edn",
+    :sha256
+    "6af070c34e3648cd79a8361291faf01640d4d50e9f2e833b390c291213a56a66"},
+   :operation-id
+   "263dcf88333c0a6bf4cf0e53a6201d1d321ad39923657d0138ee4a8d6159082d",
+   :ordinal 46,
+   :trusted-tuples
+   #{{:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "fa8d1cdd86886a58c67593fdd8bad220409ed72fa395140bd607f202bd197644",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/45-adoption/authorization-receipt.edn",
+       :sha256
+       "7e45765b01a83b4e49b0ccf5e64b9fbfcea1d558e5347d2aa8de1122ef912f7f"}}
+     {:kind :evaluation,
+      :identity
+      {:seat "codex-12",
+       :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"},
+      :intent-digest
+      "fa8d1cdd86886a58c67593fdd8bad220409ed72fa395140bd607f202bd197644",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/evaluation-receipt.edn",
+       :sha256
+       "91e0b60aa8ec982df2b37ef14e69eabed6140a8430a4c85459ace4f4c858da5c"}}
+     {:kind :review,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "fa8d1cdd86886a58c67593fdd8bad220409ed72fa395140bd607f202bd197644",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/qualification-review.edn",
+       :sha256
+       "6af070c34e3648cd79a8361291faf01640d4d50e9f2e833b390c291213a56a66"}}},
+   :injury-id "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/45-evaluation/evaluation-receipt.edn",
+    :sha256
+    "91e0b60aa8ec982df2b37ef14e69eabed6140a8430a4c85459ace4f4c858da5c"},
+   :intent
+   {:classifier-revision "7c4b83ff2887d03519d127c9a67e3b3517a64936",
+    :schema :wm/meta-medic-intent-v1,
+    :predecessor-entry-id nil,
+    :replay :successful-close-non-injury,
+    :original-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-8be8ff03-5009-4f3d-8c12-5b11cfd46d92.edn",
+     :sha256
+     "e9a5eb355f9a6f70b41d5bdbd99e127badcd6d13e6bd7165867fa2bb9477f404"},
+    :ordinal 45,
+    :state :open,
+    :scope :entry-45-historical-misclassification,
+    :patch-revision "aa8bf5ed5e38bdc8e097d41f8aac40e5ac049192",
+    :injury-id "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0",
+    :acceptance-contract-pin
+    {:path
+     "holes/labs/wm-contract/successful-close-terminal-classification-invariant.md",
+     :sha256
+     "ad70d6986ebec90b706523092a02e68ead7e66f10c6c2674f3d10b1159064e40"},
+    :disposition-kind :historical-misclassification,
+    :reviewer
+    {:seat "codex-11",
+     :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "8a76b61bfa2ba5021d2e25c3049bd72ecd3d2f565b62f6b3c39b14240897b4fc"},
+    :ledger-entry-id
+    "0f2a04cc54dbe9f89a02e8d9ff0efcd5dfcd41b13f40f0fb8da09d3d66838f45",
+    :evaluator
+    {:seat "codex-12",
+     :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}},
+   :ledger-entry-id
+   "0f2a04cc54dbe9f89a02e8d9ff0efcd5dfcd41b13f40f0fb8da09d3d66838f45"}
+  {:intent-schema :wm/meta-medic-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/47-adoption/authorization-receipt.edn",
+    :sha256
+    "03660ae6afa82fdac42ca1096a0dfa03f7b716620de2703d585c023d11c24e68"},
+   :evidence
+   [{:path
+     "holes/labs/wm-contract/already-satisfied-terminal-classification-invariant.md",
+     :sha256
+     "7b8788e96ff60cfd1138a5c641ec148d0defd17cf1f3b9a96e3c021552f7b63d",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-f444287e-51e6-445b-a85d-25d45cc52a43.edn",
+     :sha256
+     "d36c4a643d642f257cf04e5c99be0c0cd75fb59718ad1c5cb3c44745c64168bf",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/47-adoption/authorization-receipt.edn",
+     :sha256
+     "03660ae6afa82fdac42ca1096a0dfa03f7b716620de2703d585c023d11c24e68",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/qualification-review.edn",
+     :sha256
+     "8f0492304fd16a07eb6fdc2c549c1d442a700710c2e2effd33df9a26e11909d8",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/evaluation-receipt.edn",
+     :sha256
+     "98017c7cb505ae0dccb53f693c166fb4253d9d8c5a411417cac5108a9d0fab78",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/qualification-review.edn",
+    :sha256
+    "8f0492304fd16a07eb6fdc2c549c1d442a700710c2e2effd33df9a26e11909d8"},
+   :operation-id
+   "987e211ae0189af76e21cec5718fffdb4d96d80a081ab12842ea098567c95a63",
+   :ordinal 48,
+   :trusted-tuples
+   #{{:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "ef96364cac60092d3be45512064d1f35121a9cf565f64af7b156a388408f05cf",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/47-adoption/authorization-receipt.edn",
+       :sha256
+       "03660ae6afa82fdac42ca1096a0dfa03f7b716620de2703d585c023d11c24e68"}}
+     {:kind :review,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "ef96364cac60092d3be45512064d1f35121a9cf565f64af7b156a388408f05cf",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/qualification-review.edn",
+       :sha256
+       "8f0492304fd16a07eb6fdc2c549c1d442a700710c2e2effd33df9a26e11909d8"}}
+     {:kind :evaluation,
+      :identity
+      {:seat "codex-12",
+       :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"},
+      :intent-digest
+      "ef96364cac60092d3be45512064d1f35121a9cf565f64af7b156a388408f05cf",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/evaluation-receipt.edn",
+       :sha256
+       "98017c7cb505ae0dccb53f693c166fb4253d9d8c5a411417cac5108a9d0fab78"}}},
+   :injury-id "injury/2aef7e0c0f48a851a781b41642bf30e52e3fa246",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/47-evaluation/evaluation-receipt.edn",
+    :sha256
+    "98017c7cb505ae0dccb53f693c166fb4253d9d8c5a411417cac5108a9d0fab78"},
+   :intent
+   {:classifier-revision "807183b388b70340a04054696d7d34165677f081",
+    :schema :wm/meta-medic-intent-v1,
+    :predecessor-entry-id nil,
+    :replay :producer-qualified-non-injury,
+    :original-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-f444287e-51e6-445b-a85d-25d45cc52a43.edn",
+     :sha256
+     "d36c4a643d642f257cf04e5c99be0c0cd75fb59718ad1c5cb3c44745c64168bf"},
+    :ordinal 47,
+    :state :open,
+    :scope :entry-47-historical-misclassification,
+    :patch-revision "097fd9f4c73edc8d8fe324b5d29bc4183c635f19",
+    :injury-id "injury/2aef7e0c0f48a851a781b41642bf30e52e3fa246",
+    :acceptance-contract-pin
+    {:path
+     "holes/labs/wm-contract/already-satisfied-terminal-classification-invariant.md",
+     :sha256
+     "7b8788e96ff60cfd1138a5c641ec148d0defd17cf1f3b9a96e3c021552f7b63d"},
+    :disposition-kind :historical-misclassification,
+    :reviewer
+    {:seat "codex-11",
+     :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "1ce6e7dc3e895e545bdf1d51a71885c9399ab4fe7301297f76b23e913a10e270"},
+    :ledger-entry-id
+    "7b7125b258505cedcfffcb454e16919ed803ec1cb3cbb2a300dc9c8eb26401ff",
+    :evaluator
+    {:seat "codex-12",
+     :session "01a16fdf-0c77-7ea3-b3ed-0e6b28a900fc"}},
+   :ledger-entry-id
+   "7b7125b258505cedcfffcb454e16919ed803ec1cb3cbb2a300dc9c8eb26401ff"}
+  {:intent-schema :wm/meta-medic-genuine-repair-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/authorization-receipt.edn",
+    :sha256
+    "8e4bae968156e7a8435b1b3d94ab14bdf75fac54aeec03aa961e5fed70276665"},
+   :evidence
+   [{:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-46f8cac7-1541-4f1f-83f5-aa8f6bac2a2a.edn",
+     :sha256
+     "9a2f84ca3fc276c8c64ad144279f08f8579d12d73b2e254a4ff18595a99dea7d",
+     :recovered-from nil}
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/wm/injury49_learning_read_bound_test.clj",
+     :sha256
+     "c484b2fb9c567183edf2a71f69677ea9ee746bc533d504c5b56656ba7bd618e3",
+     :recovered-from "git 86024a594"}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/pre-replay.edn",
+     :sha256
+     "b7ecee811003a7f378e9fe8d3028d6bb109ffb3ad3ebec3fb8104a267c5d4f87",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/post-replay.edn",
+     :sha256
+     "c1b8cd73af9390ae0fd4d7c7249dfa4057ee7c7707a9cb266848e81f866220d0",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/negative-replay.edn",
+     :sha256
+     "a272fe4d3f4e15de02d73f7412e33de564383cb0b7d85b2103a51eac3a38c7b6",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/authorization-receipt.edn",
+     :sha256
+     "8e4bae968156e7a8435b1b3d94ab14bdf75fac54aeec03aa961e5fed70276665",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/review-receipt.edn",
+     :sha256
+     "b635f8b19797f9fc6d9c2816cbb8648e9d3e82709823641053833169bd4ca44c",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/evaluation-receipt.edn",
+     :sha256
+     "7f553408f2dd1c0c12b27c186d0cb24c5c11506cb103d8f3279a01a68534bff0",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/review-receipt.edn",
+    :sha256
+    "b635f8b19797f9fc6d9c2816cbb8648e9d3e82709823641053833169bd4ca44c"},
+   :operation-id
+   "fb82e4b93b6f414f66c00a420117621d8880b239660b9cf4f7797fe202e40ed6",
+   :ordinal 50,
+   :trusted-tuples
+   #{{:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "5c61a572b65686546fe94b4e3d5b34f859bdf471ef085ca4d8fb053a06f8c222",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/authorization-receipt.edn",
+       :sha256
+       "8e4bae968156e7a8435b1b3d94ab14bdf75fac54aeec03aa961e5fed70276665"}}
+     {:kind :review,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "5c61a572b65686546fe94b4e3d5b34f859bdf471ef085ca4d8fb053a06f8c222",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/review-receipt.edn",
+       :sha256
+       "b635f8b19797f9fc6d9c2816cbb8648e9d3e82709823641053833169bd4ca44c"}}
+     {:kind :evaluation,
+      :identity
+      {:seat "codex-14",
+       :session "01a17644-124a-77b0-a517-6a0063574320"},
+      :intent-digest
+      "5c61a572b65686546fe94b4e3d5b34f859bdf471ef085ca4d8fb053a06f8c222",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/evaluation-receipt.edn",
+       :sha256
+       "7f553408f2dd1c0c12b27c186d0cb24c5c11506cb103d8f3279a01a68534bff0"}}},
+   :injury-id "injury/6d673e5de5096788c9784d41e3dc268efd24ed87",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/evaluation-receipt.edn",
+    :sha256
+    "7f553408f2dd1c0c12b27c186d0cb24c5c11506cb103d8f3279a01a68534bff0"},
+   :intent
+   {:schema :wm/meta-medic-genuine-repair-intent-v1,
+    :predecessor-entry-id nil,
+    :ordinal 49,
+    :state :open,
+    :scope :49-learning-read-bound-only,
+    :patch-revision "d6af98923af3b247cd1a6c74306cc4460c797e47",
+    :negative-control-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/negative-replay.edn",
+     :sha256
+     "a272fe4d3f4e15de02d73f7412e33de564383cb0b7d85b2103a51eac3a38c7b6"},
+    :source-revision "f7eacfabfbdaf33214810718cc63fc7dab62957c",
+    :injury-id "injury/6d673e5de5096788c9784d41e3dc268efd24ed87",
+    :post-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/post-replay.edn",
+     :sha256
+     "c1b8cd73af9390ae0fd4d7c7249dfa4057ee7c7707a9cb266848e81f866220d0"},
+    :cause-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-26-46f8cac7-1541-4f1f-83f5-aa8f6bac2a2a.edn",
+     :sha256
+     "9a2f84ca3fc276c8c64ad144279f08f8579d12d73b2e254a4ff18595a99dea7d"},
+    :acceptance-contract-pin
+    {:path
+     "/home/joe/code/futon2/test/futon2/aif/wm/injury49_learning_read_bound_test.clj",
+     :sha256
+     "c484b2fb9c567183edf2a71f69677ea9ee746bc533d504c5b56656ba7bd618e3"},
+    :disposition-kind :genuine-repair,
+    :pre-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/pre-replay.edn",
+     :sha256
+     "b7ecee811003a7f378e9fe8d3028d6bb109ffb3ad3ebec3fb8104a267c5d4f87"},
+    :reviewer
+    {:seat "codex-11",
+     :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "3b89021a472ac21d834b38de10c9a5a239c1506b27f87ec80534fe2610d1b49b"},
+    :ledger-entry-id
+    "d56ec701829d5c71bff4db294b182ed545569f8553944b8ad56b9c72c6c567c8",
+    :evaluator
+    {:seat "codex-14",
+     :session "01a17644-124a-77b0-a517-6a0063574320"}},
+   :ledger-entry-id
+   "d56ec701829d5c71bff4db294b182ed545569f8553944b8ad56b9c72c6c567c8"}
+  {:intent-schema :wm/meta-medic-genuine-repair-intent-v1,
+   :authorization-pin
+   {:path
+    "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/authorization.edn",
+    :sha256
+    "3745e32d65a55aa8af49ea2b50ab404721eb2579ba21c163ce71365390e033d0"},
+   :evidence
+   [{:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-27-c9d132d8-a2be-42b3-8369-fd23e9b9924f.edn",
+     :sha256
+     "5888cb3876182a6655083ec9114c2799e719393eeeb0352e1a6f391f6ed7a900",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/acceptance-contract.md",
+     :sha256
+     "2803377d18f4d1826b6d2dc041cc433607068dff187e0cf35d4bea7f83495d00",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/pre-replay.edn",
+     :sha256
+     "af56f613ec704da8066ad3283fc93a676e15bdc634b1835ca36a82432f4e20ab",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/post-replay.edn",
+     :sha256
+     "71a510afdb3066f3efa769f6031e799e3c2bebc75653efa4360dab515559f27d",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/negative-replay.edn",
+     :sha256
+     "2c17e4fd36e6b6a7a6ace731cc9b59c3ece238a495990f72978cbc5da2ef61cc",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/authorization.edn",
+     :sha256
+     "3745e32d65a55aa8af49ea2b50ab404721eb2579ba21c163ce71365390e033d0",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/review.edn",
+     :sha256
+     "32c111142ccd7f4fdd97bc267e4952f20963acd351521b1dfd29587c3c3ad84e",
+     :recovered-from nil}
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/evaluation.edn",
+     :sha256
+     "76b47ea6d296d7305ddcad64984e21c20cb9db7d80e9309a1ab17c56c0ee83d8",
+     :recovered-from nil}],
+   :review-pin
+   {:path
+    "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/review.edn",
+    :sha256
+    "32c111142ccd7f4fdd97bc267e4952f20963acd351521b1dfd29587c3c3ad84e"},
+   :operation-id
+   "4c9c9406168761e8bc7526ff357410fa39c5e7f33be67502641dc800afe8469b",
+   :ordinal 71,
+   :trusted-tuples
+   #{{:kind :authorization,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "66381d705b2a00e6bad3b12e28d0a1cdf2398f5a8edd2df4ea511e9110546a2b",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/authorization.edn",
+       :sha256
+       "3745e32d65a55aa8af49ea2b50ab404721eb2579ba21c163ce71365390e033d0"}}
+     {:kind :review,
+      :identity
+      {:seat "claude-11",
+       :session "8d4df137-fdc5-42c3-a5dd-ba6bb306959c"},
+      :intent-digest
+      "66381d705b2a00e6bad3b12e28d0a1cdf2398f5a8edd2df4ea511e9110546a2b",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/review.edn",
+       :sha256
+       "32c111142ccd7f4fdd97bc267e4952f20963acd351521b1dfd29587c3c3ad84e"}}
+     {:kind :evaluation,
+      :identity
+      {:seat "codex-11",
+       :session "01a16136-8ec4-7972-8723-f8afda943b96"},
+      :intent-digest
+      "66381d705b2a00e6bad3b12e28d0a1cdf2398f5a8edd2df4ea511e9110546a2b",
+      :receipt-pin
+      {:path
+       "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/evaluation.edn",
+       :sha256
+       "76b47ea6d296d7305ddcad64984e21c20cb9db7d80e9309a1ab17c56c0ee83d8"}}},
+   :injury-id "injury/a59c85a61dadfd80d53fe7abee61d6e6be68ce88",
+   :evaluation-pin
+   {:path
+    "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/evaluation.edn",
+    :sha256
+    "76b47ea6d296d7305ddcad64984e21c20cb9db7d80e9309a1ab17c56c0ee83d8"},
+   :intent
+   {:schema :wm/meta-medic-genuine-repair-intent-v1,
+    :predecessor-entry-id nil,
+    :ordinal 59,
+    :state :open,
+    :scope :a59c-ordinal59-held-resume-stop-line-only,
+    :patch-revision "cc050c0a7447963df967aa535652785a9dcfaff6",
+    :negative-control-pin
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/negative-replay.edn",
+     :sha256
+     "2c17e4fd36e6b6a7a6ace731cc9b59c3ece238a495990f72978cbc5da2ef61cc"},
+    :source-revision "9b1cbba12b2a3cf5f6b68a792b8df980b7461d83",
+    :injury-id "injury/a59c85a61dadfd80d53fe7abee61d6e6be68ce88",
+    :post-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/post-replay.edn",
+     :sha256
+     "71a510afdb3066f3efa769f6031e799e3c2bebc75653efa4360dab515559f27d"},
+    :cause-record-pin
+    {:path
+     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-27-c9d132d8-a2be-42b3-8369-fd23e9b9924f.edn",
+     :sha256
+     "5888cb3876182a6655083ec9114c2799e719393eeeb0352e1a6f391f6ed7a900"},
+    :acceptance-contract-pin
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/acceptance-contract.md",
+     :sha256
+     "2803377d18f4d1826b6d2dc041cc433607068dff187e0cf35d4bea7f83495d00"},
+    :disposition-kind :genuine-repair,
+    :pre-replay-pin
+    {:path
+     "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/pre-replay.edn",
+     :sha256
+     "af56f613ec704da8066ad3283fc93a676e15bdc634b1835ca36a82432f4e20ab"},
+    :reviewer
+    {:seat "claude-11",
+     :session "8d4df137-fdc5-42c3-a5dd-ba6bb306959c"},
+    :attempt 1,
+    :ledger-root
+    {:path "meta-injury-ledger/ledger.edn",
+     :sha256
+     "561aa9a5d411d744ddf3c5da87858cbc0dab4b211913d4d52c64c8db5d5ab132"},
+    :ledger-entry-id
+    "c1ee4cc03461515d5bee8efe688b1bf7195d92ee80af190769bf60e984a74b33",
+    :evaluator
+    {:seat "codex-11",
+     :session "01a16136-8ec4-7972-8723-f8afda943b96"}},
+   :ledger-entry-id
+   "c1ee4cc03461515d5bee8efe688b1bf7195d92ee80af190769bf60e984a74b33"}]}

@@ -252,3 +252,53 @@
         "at least one pinned original path is absent on disk (e.g. the deleted
             ordinal-50 test file) yet the standing context resolves")
     (is (= :ready (:status (standing/standing-context))))))
+
+;; ---------------------------------------------------------------------------
+;; B1 regressions (zai-5 independent review): the standing-authority resource
+;; store MUST be a tracked, clone-delivered substrate, and the default no-opts
+;; path MUST work in a genuinely fresh JVM process (not same-JVM reset).
+;; ---------------------------------------------------------------------------
+
+(defn- git [& args]
+  (let [proc (doto (ProcessBuilder. (into ["git"] args))
+               (.directory (io/file (System/getProperty "user.dir")))
+               (.redirectErrorStream true))
+        p (.start proc)]
+    (slurp (.getInputStream p))))
+
+(deftest standing-substrate-is-git-tracked
+  "An untracked resources/wm/standing-authority/ would ship code without the
+  sealed approved-authority record: a fresh clone would refuse :policy/missing
+  and the 11 recovered ordinals would refuse again (the D2 brittleness class).
+  This test fails before any runtime symptom can hide it."
+  (let [tracked (set (str/split-lines
+                      (str/trim (git "ls-files" "resources/wm/standing-authority"))))]
+    (is (contains? tracked "resources/wm/standing-authority/policy.edn"))
+    (is (= 78 (count (filter #(str/starts-with? % "resources/wm/standing-authority/evidence/")
+                             tracked)))
+        "all 78 sha-addressed evidence blobs are clone-delivered")))
+
+(deftest cold-process-default-no-opts-load
+  "True cold start (zai-5 correction): a FRESH JVM process, no opts, default
+  loader arity, must load the live ledger through the shared standing
+  resolver and stamp its authority identity. Same-JVM reset-context! cannot
+  witness this (B1 review finding)."
+  (when (.isFile (io/file live-path))
+    (let [script
+            (str "(require '[futon2.aif.meta-injury-store :as store])"
+                 "(let [r (store/load-durable-ledger \"" live-path "\")]"
+                 "  (when (and (= :loaded (:status r))"
+                 "             (= 129 (count (:entries (:ledger r))))"
+                 "             (:authority-identity r))"
+                 "    (println :cold-ok)))")
+          proc (doto (ProcessBuilder. ["clojure" "-M" "-e" script])
+                 (.directory (io/file (System/getProperty "user.dir")))
+                 (.redirectErrorStream true))
+          p (.start proc)
+          out (slurp (.getInputStream p))
+          code (.waitFor p)]      (is (zero? code) (str "subprocess exit " code ": "
+                            (apply str (take 600 out))))
+      (is (str/includes? out ":cold-ok")
+          (str "cold process did not produce :cold-ok: "
+               (apply str (take 600 out))))
+      (is (= live-sha (file-sha live-path)) "live bytes untouched"))))

@@ -1,0 +1,6 @@
+{:schema :wm/meta-medic-genuine-repair-review-v1
+ :intent-digest "66381d705b2a00e6bad3b12e28d0a1cdf2398f5a8edd2df4ea511e9110546a2b"
+ :evaluation-pin {:path "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/evaluation.edn"
+                  :sha256 "76b47ea6d296d7305ddcad64984e21c20cb9db7d80e9309a1ab17c56c0ee83d8"}
+ :reviewer {:seat "claude-11" :session "8d4df137-fdc5-42c3-a5dd-ba6bb306959c"}
+ :verdict :genuine-repair-qualified}
