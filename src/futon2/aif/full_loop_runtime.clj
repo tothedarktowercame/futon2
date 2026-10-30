@@ -17,6 +17,7 @@
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.meta-injury-store :as injury-store]
             [futon2.aif.meta-medic-authority :as medic-authority]
+            [futon2.aif.standing-authority :as standing]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-observation :as outer-observation]
@@ -120,16 +121,23 @@
          :verifier (medic-authority/resolution-verifier (:resolution resolved))}
         resolved))
 
-    :else {:status :absent
-           ;; Standing retained authority is the same per-grammar union used
-           ;; by every resolved context (5a1de6f3b): each retained verifier
-           ;; re-derives its own operation/receipt binding and fails closed
-           ;; on any other grammar. Wiring the raw out-of-band verifier here
-           ;; admitted only the genuine-repair grammar and rejected the
-           ;; cause-reattribution and ordinary-author-refusal retained
-           ;; receipts the runtime itself had appended (ordinals 118, 125).
-           :verifier (medic-authority/with-retained-authorities
-                      (fn [_] false))}))
+    :else (let [standing (standing/standing-context)]
+            ;; Standing serving authority (operator-authorized 2026-10-31,
+            ;; recorded verbatim in wm/standing-authority/policy.edn): the
+            ;; recovered prior adoption bundles resolve beside the retained
+            ;; per-grammar union through ONE shared resolution path, so every
+            ;; loader composes the same verifier. Fail-closed: a refused
+            ;; standing context (missing/corrupt policy or evidence, ambiguous
+            ;; scopes) never falls back permissively — the retained union alone
+            ;; remains, the recovered ordinals refuse, and the refusal reason
+            ;; is surfaced on the resolution for diagnosis.
+            (cond-> {:status (if (= :ready (:status standing)) :ready :absent)
+                     :verifier (if (= :ready (:status standing))
+                                 (medic-authority/resolution-verifier (:resolution standing))
+                                 (medic-authority/with-retained-authorities (fn [_] false)))}
+              (= :ready (:status standing)) (assoc :identity (:identity standing))
+              (= :refused (:status standing)) (assoc :standing-authority-refusal
+                                                     (:reason standing))))))
 
 (defn- valid-click-availability? [availability]
   (and (= :wm/ordinary-click-availability-v1 (:schema availability))

@@ -102,7 +102,11 @@
   (let [resolve-fn (var-get #'runtime/resolve-medic-authority)
         resolved (resolve-fn {})
         probe (context-118 (:authority-receipt-pin operation-0))]
-    (is (= :absent (:status resolved)))
+    ;; Since the standing recovered authority landed (operator-authorized
+    ;; 2026-10-31) the default resolution is :ready with the standing context;
+    ;; before it, and whenever the standing policy refuses, it degrades
+    ;; fail-closed to :absent with the retained union only.
+    (is (contains? #{:ready :absent} (:status resolved)))
     (is (ifn? (:verifier resolved)))
     ;; Behavioural identity with the union: same admission, same refusals.
     (is (= (boolean (union probe)) (boolean ((:verifier resolved) probe))))
