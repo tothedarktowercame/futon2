@@ -7213,7 +7213,12 @@
                                             :standing-readback :failure-kind
                                             :grounded-commit]))
                        run-ending-result
-                       (when (and cohort? @action-occurrence)
+                       ;; Record-only classification needs no action
+                       ;; occurrence: a completed dispatch failure before
+                       ;; construction still classifies (typed failure
+                       ;; details preserved; nil occurrence stays nil). The
+                       ;; evidence manifest below keeps its occurrence gate.
+                       (when cohort?
                          (retain-run-ending!
                           (or (:data-root execution-cohort) cohort/default-data-root)
                           (:cohort/id start-event) attempt-id
@@ -7533,7 +7538,14 @@
                                        :sorry {:kind refusal-kind
                                                :refusal-data failure-data}}
                            failure-evidence
-                           (when (and cohort? @action-occurrence)
+                           ;; Same relaxation as the normal close above: the
+                           ;; run-ending receipt is record-only and must be
+                           ;; retained for a completed failure close without
+                           ;; an action occurrence. failure-close-evidence!
+                           ;; passes (:occurrence close-judgment), nil here.
+                           ;; The manifest/retention-inputs blocks below keep
+                           ;; the occurrence gate.
+                           (when cohort?
                              (failure-close-evidence!
                               @checkpoint-events
                               (or (:data-root execution-cohort)
@@ -7549,7 +7561,7 @@
                                                 (:run-ending failure-evidence))
                                          {:kind :full-loop-close-failure
                                           :attempt-id attempt-id})
-                                    failure-evidence
+                                    (and failure-evidence @action-occurrence)
                                     (assoc :retention-inputs
                                            {:occurrence @action-occurrence
                                             :state {:status :absent
