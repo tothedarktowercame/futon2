@@ -1,0 +1,85 @@
+# War Machine recovery: external review handoff
+
+Snapshot: 2026-10-30/31 operational session. This is a coordinator handoff, not a claim that recovery is complete. Read this with [the committed evidence summary](REPORT-wm-recovery-evidence.json) and [the authoritative deficit tracker](criteria-completeness-deficits.tsv). No access to `~/notes` is needed to understand the issue or review the code; raw live-state reproduction still requires the pinned ledger and receipt artifacts described below.
+
+## What Joe wants
+
+A criteria-compliant machine doing useful work, with repairs between individual runs—not an interminable preflight/repair chain. Joe authorized 15 additional credits, sequential clicks, pushing commits for external review, and (most recently) restoring the exact prior authority context **and fixing the cause of its brittleness**. Codex-11 coordinates; Zai agents implement/review to conserve Codex usage.
+
+**Current state: 15 credits available (243 allocated, 228 consumed). Further clicks are held on a demonstrated authority-validation failure.** Six of 24 deficit rows are explicitly CLOSED. The other 18 include historical failures and missing live evidence; they are not 18 launch blockers.
+
+## Concrete progress
+
+- Open-task coverage Q1 reached **608/608** (181 missions, 239 excursions, 188 tickets), zero missing/extras at its pinned snapshot. Scoped graph terms: 556 known, 52 unknown; unknown candidates retain typed exclusions and knowledge-producer requests, never numeric defaults.
+- Latest charged click: `wm-click-3c02ad82-d6fd-45ec-97d7-7b24aa7730de`; run `2026-10-30-3415b671-88f6-4662-a2c1-48e3630f6116`. It reselected M-peradam-grounding after Q6 excluded M-typed-memories and ended **grounded-progress**, not verified task completion. Real work is futon7 `de7bf835`; wants were not shown reached. Do not infer approval/falsifier execution merely from outcome labels or absent keys.
+- Outer learning consumed the old pending run f74df9cc exactly once, count 0→1, and retained the new pending selection. E2's written condition is satisfied and CLOSED in `59f5200c473db302b356658e335363837d2f4400`. Observation SHA: `ff4cc8edd414faa3c3903b63603ee0eb7b9e19933e77e3a9d7c1a2431e447bca`; post-click outer-state SHA: `a6e9b39383c2cfa74da77f8e14c76c9cb12118cd8524078a46dc7a8b29b7a3fd`.
+- E3 reader metadata was restored by recreating stale registered callables through the existing WM cast installer. Implementation readiness is not the outstanding live unchanged/changed-input witness pair.
+- Completed pre-construction failures now retain classification (futon2 merge `577f4aa7f`). Its live dispatch-failure closure witness remains outstanding. Historical records were not backfilled.
+
+## The present blocker, in plain language
+
+The injury ledger is the machine's append-only repair/history record. Reading it checks not only bytes but whether historical medic decisions had valid authority. Current serving validation rejects historical entries because the default authority composition cannot recover their earlier approved context. **The word `tampered` is the validator's refusal label, not evidence that someone altered history.**
+
+The post-click ledger has 129 entries. The earlier 128 entries—including the disputed ones—are unchanged; the last click added one successful-task-outcome observation. Default-option probes were initially confused with actual serving probes; later diagnosis exercised the real serving path and reproduced the refusal. Effective injury count is therefore **not computable through that path**, not zero.
+
+Thirteen medic-repaired observations fail authority checks: ordinals **38–44, 46, 48, 50, 71, 118, 125**. There are two distinct problems:
+
+1. **Missing composition:** the default `resolve-medic-authority` branch in `full_loop_runtime.clj` used only the raw out-of-band verifier. The other resolved-context branches already used `meta-medic-authority/with-retained-authorities`. Existing entry-local verifiers for cause reattribution (118) and ordinary author refusal (125) were omitted by the default.
+2. **Lost process-local context:** the other eleven historical bundle approvals require an explicit trust predicate. Their retained manifests identify **33 exact scope tuples** (evaluation/review/authorization, each bound to identity, intent digest, and receipt pin). There is no supported persistent standing install wired into the ordinary click default. This is not a license to trust all receipts from a named agent.
+
+Three adoption-time evidence files (ordinals 41, 43, 50) changed or disappeared on current disk. Their pinned bytes are recoverable from Git commits `7ca70e10e`, `ae9e71584`, `86024a594`. Receipt/operation/trust checks passing does NOT mean those current mutable artifacts also pass. Recover historical bytes separately and check original pins; never overwrite current source or rewrite old receipts.
+
+The eleven-entry inventory, receipt SHAs, operations, and original coordinator authorization chain are included in REPORT-wm-recovery-evidence.json. Those are identifiers and reported verification results, not substitute raw artifacts. The JSON deliberately distinguishes that evidence boundary.
+
+## Code available for external review
+
+Repositories: `tothedarktowercame/futon2`, `tothedarktowercame/futon3c`, `tothedarktowercame/mathlib4` on GitHub.
+
+| Repository/ref | Pushed snapshot | Meaning |
+|---|---|---|
+| futon2 main | `59f5200c473db302b356658e335363837d2f4400` before this report | Integrated work and E2 closure |
+| futon2 repair/ledger-authority-composition | `039342915fa8a5cb6a3e981d46d8661825c09006` | **Partial** fix, not merged; default uses existing retained-authority union with deny-all external authority |
+| futon3c master | `130b272dba04c775bbcfcb71b81e36df62c73964` | Legacy Giraffe verifier compatibility integrated |
+| mathlib4 darktower | `b5c7da28f46854d74b647d47edba358b007489a9` | Existing Lean model snapshot; no new trust theorem claimed |
+
+Start with the [partial fix comparison](https://github.com/tothedarktowercame/futon2/compare/59f5200c473db302b356658e335363837d2f4400...039342915fa8a5cb6a3e981d46d8661825c09006). It changes one semantic line plus cleanup; **it reduces 13 failures to 11, not to zero**. Independent review approved it as partial: new tests 4/19; neighboring suites 5/23 and 17/82, all reported green. They prove existing entry-local behavior and fail-closed controls, not restoration of all historical trust.
+
+Useful code search targets in futon2: `resolve-medic-authority`, `with-retained-authorities`, `resolve-context`, `verify-historical`, `verify-genuine`, `retained-authority`, `load-durable-ledger`, `effective-active-injuries`, and `carried-bindings-observation`. Relevant history: `5a1de6f3b` authority composition, `f04177cd9` cause reattribution, `1ce1efbea` ordinary-author-refusal retained authority. Inspect definitions at pinned commits rather than relying on shifting line numbers.
+
+## Authorized recovery and brittleness work—in progress, not completed
+
+Joe explicitly approved persistent use of precisely the previous 33 pinned trust entries covering eleven approvals, and required diagnosing/fixing why this became brittle. Zai-4 owns isolated recovery implementation; Zai-5 owns causal diagnosis/prevention design and independent review. New review-branch commits are to be pushed. No live installation, merge, or click is authorized by this REPORT itself.
+
+Required result:
+
+- Reuse existing `resolve-context` and grammar checks; retain exact operation/injury/prefix/receipt binding and unique-match rules. Unknown future scopes, overlaps, missing or changed bytes must fail closed.
+- Retain historical evidence by pin in durable storage, independent of current source files, cwd, or a long-running JVM's memory. Original ledger and receipt bytes stay unchanged.
+- Use one shared authority resolution path for actual ordinary arbitration, all supported loaders, and preflight. A refused load must not be reported as absence of injury.
+- Prove the unchanged 129-entry ledger validates through the four supported consumers in a **fresh JVM**, then after restart; test wrong injury/operation, forged checked status, changed bytes, missing evidence, unsupported future scope and ambiguous overlap.
+- Separate legacy recovery from future-adoption retention obligations. Restoring these approvals must not silently authorize future approvals.
+
+The active diagnosis must distinguish established causes (default composition omission, process-local trust, mutable historical artifacts) from hypotheses. Earlier reports attributed success to old loaded ledger code and an unknown reload; **the exact JVM timeline is not established and is not a premise for the fix**.
+
+## Why we became stuck; lessons reviewers should test
+
+A copied ordinary-path preview bypassed arbitration, while `carried-bindings-observation` mapped any non-computed active set to `no-active-injury`. Neither proved that actual serving authority could load the ledger. The arbitration layer itself fails closed. A correction must preserve this distinction and test the actual entry point, not just validators in isolation.
+
+A separate Giraffe change added `work-clusters.json` to a hard-coded verification baseline, rejecting old manifests pinned by pending learning. Review initially missed that. Repair `1ccf08a4a` (merged `130b272db`) selects the baseline by producer git ancestry and verifies all listed hashes. Limits: it depends on resolving producer history from the repository/cwd; content verification is not authentication. A relabeled manifest is caught only where its external manifest-byte pin is checked. Do not broaden those claims.
+
+Two synthetic test runs once escaped hermetic fixtures because `require :reload` reset a default var inside `with-redefs`. Both were quarantined, strict synthetic tails removed with backups, and data integrity independently verified. The executor's quiescence argument was inadequate; that protocol departure was retained. Tests must set temporary roots before load and must not reload through fixture bindings. No synthetic run earns criterion credit.
+
+## Questions for the external reviewer
+
+1. Is the restored authority genuinely the exact prior approved context, or does any fallback broaden trust?
+2. Can each historical dependency be revalidated by its original pin without restoring old source over current code or editing history?
+3. Does the actual serving default and every loader use the same resolver after a cold start? Do tests exercise arbitration, not only a manually supplied verifier?
+4. Are refusals preserved as typed refusals, and is credit charged only after required preconditions pass?
+5. What minimal future-adoption retention contract prevents recurrence without a broad self-heal redesign?
+
+Please prioritize a bounded recovery recommendation. Reporting polish, Q9 exporter incompleteness, old fixture drift, and skipped-run replay are separate work—not new launch gates unless they cause a concrete execution failure. E4 redesign stays parked. After reviewed recovery and actual-serving validation, resume **one click**, inspect its evidence, then continue; checkpoint after three further charged clicks. Never bypass validation merely to spend credits.
+
+## Evidence availability and confidence
+
+This report and its JSON inventory are Git-tracked. Raw ledger snapshots, process-local probe outputs, and many retained bundles currently live in local notes/data; their absence from an external checkout is a known reproducibility limitation, not proof they validate. The recovery branch must package the necessary pinned evidence or provide a supported reproducible fixture before claiming external reproduction. Do not copy admin tokens, session files, or unrelated private logs into review artifacts.
+
+The committed tracker is authoritative; supplementary notes are not a replacement. Six closed rows are listed in the companion JSON. Q1 equality is snapshot-specific; standing algorithm A entries and broad live A4/B1 claims are not implied by 608/608 M/E/T coverage.

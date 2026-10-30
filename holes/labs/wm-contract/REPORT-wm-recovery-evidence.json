@@ -1,0 +1,277 @@
+{
+  "schema": "wm/external-review-evidence-summary-v1",
+  "created_utc": "2026-10-30T23:03:50.340888+00:00",
+  "limitation": "Curated coordinator summary of local reports, not raw ledger, proof, or authorization installation. Local source hashes identify reports that external reviewers do not necessarily possess.",
+  "source_reports": [
+    {
+      "name": "ledger-validation-discovery.json",
+      "sha256": "74aacd1332a943d6a8969b6d34085099b99a850c8dcb12cef106d34a2da54b96",
+      "availability": "local notes; summarized here, raw report not bundled"
+    },
+    {
+      "name": "ledger-authority-fix.json",
+      "sha256": "5c55aa2a925884e862c551f5bb13fe3f6a07e6c3b2123b27ae6b233e19748597",
+      "availability": "local notes; summarized here, raw report not bundled"
+    },
+    {
+      "name": "ledger-partial-independent-review.json",
+      "sha256": "91e7b5064f907306e39fc7f6f0fa5f49cbc8395b2d13cf4eed550b58b5c93433",
+      "availability": "local notes; summarized here, raw report not bundled"
+    },
+    {
+      "name": "ledger-operator-decision.json",
+      "sha256": "b235cc8202cc5fe719e011d3e01b4fa79af3c1502c74c89d79befa4bd860ac1f",
+      "availability": "local notes; summarized here, raw report not bundled"
+    },
+    {
+      "name": "evidence-review-addendum.json",
+      "sha256": "74c849378eb5a15ba9cae578384227caeb78765af29f9ad90a2655545e67edc7",
+      "availability": "local notes; summarized here, raw report not bundled"
+    }
+  ],
+  "historical_authority_entries": [
+    {
+      "ord": 38,
+      "injury": "injury/a9b900a41f704673f9d7f35f545f0482b06135ea",
+      "ledger-entry": "34",
+      "disposition-kind": ":historical-misclassification",
+      "grammar": "verify-historical (:wm/meta-medic-intent-v1)",
+      "evaluator": "codex-12",
+      "reviewer": "codex-11",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/a9-adoption/authorization-receipt.edn",
+        "sha256": "e828f719f9841dac0e26093437f79a9a6f0f601619acb554670b8f4e9e96afec",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "authority-basis cites Joe 2026-10-25 ~13:27Z instruction + coordinator-record /home/joe/notes/wm-next/offline-repair/current-clearance/coordinator-authorization.md sha 4543b0af4a2dcd6b574fa17e42f9f099a52b49760f803175dae12e9b18b06b4 (byte-verified today) + instruction-job invoke-1792935365143-3571-9dddf9c1",
+      "operation-id": "4f6885fd88c0b04ae48997ec1be03844b5a4d7e4c9b39d3e153e82d47e2a8607",
+      "dry-run": ":verified with manifest trust; :evaluation/untrusted with deny trust \u2014 ONLY trust blocks"
+    },
+    {
+      "ord": 39,
+      "injury": "injury/cfbcbad062bde07d539c7e2abd97a6a189f910f4",
+      "ledger-entry": "17",
+      "disposition-kind": ":genuine-repair",
+      "grammar": "verify-genuine (:wm/meta-medic-genuine-repair-intent-v1)",
+      "evaluator": "codex-12",
+      "reviewer": "claude-9",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/cfb-adoption/authorization-receipt.edn",
+        "sha256": "1b27528db09a83bdae7bb48100b31fecdbd661e13b06a653b593315df375a0b4",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "no embedded authority-basis; chain = dir coordinator-authorization.md/coordinator-*-review.md + dispatch logs",
+      "operation-id": "de442c15cb41a64e9e2de4409f82a93e7b388f9aedb4f02a5ae0ed2cc03fd6ed",
+      "dry-run": ":verified / :evaluation/untrusted \u2014 ONLY trust blocks"
+    },
+    {
+      "ord": 40,
+      "injury": "injury/94091b05988598abb17ce238088862c5d7f47201",
+      "ledger-entry": "27",
+      "disposition-kind": ":genuine-repair",
+      "evaluator": "codex-12",
+      "reviewer": "claude-9",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/940-adoption/authorization-receipt.edn",
+        "sha256": "1c6e4512b4e1daa9dc0f8d8236989e6c6eb40d7760b723df49e5c0b8cdc53e63",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "same dir-level chain, no embedded basis",
+      "operation-id": "1f9072128905fb34381a360edb5665cdf6ac14b848a235ddda412b47781647e4",
+      "dry-run": ":verified / :evaluation/untrusted \u2014 ONLY trust blocks"
+    },
+    {
+      "ord": 41,
+      "injury": "injury/04e14314a0eec3aab88d870cd4be26f3ae5dfe6d",
+      "ledger-entry": "20",
+      "disposition-kind": ":genuine-repair",
+      "evaluator": "codex-12",
+      "reviewer": "claude-9",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/04-adoption/authorization-receipt.edn",
+        "sha256": "a3ebdfb67dee42e3dd4864ccf10eb82aabea76e327c45238897dcd2b36171d1d",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "dir coordinator-*.md chain",
+      "operation-id": "b28c9663841e8634dce49ad83fa4d3069ff7a632122a2b24ee6688f6c812f423",
+      "dry-run": "CURRENT DISK: refuses :artifact/hash-drift \u2014 acceptance-contract test/futon2/aif/injury_04e14314_acceptance_test.clj now 5ac73146\u2026, pinned 8e86f349\u2026. With pinned bytes recovered from git 7ca70e10e: :verified / :evaluation/untrusted \u2014 ONLY trust blocks. NOT clean on current disk."
+    },
+    {
+      "ord": 42,
+      "injury": "injury/9ccf92a21f042bca987d0014ebce3b2b9e3dcd1f",
+      "ledger-entry": "28",
+      "disposition-kind": ":genuine-repair",
+      "evaluator": "codex-12",
+      "reviewer": "claude-9",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/9cc-adoption/authorization-receipt.edn",
+        "sha256": "bbef7960bbe44a32971f08e8e59257a44fd746556d5285212d14e1ff5d2ccf0ea",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "dir-level chain",
+      "operation-id": "940e555c30b160ed7644fd4c320e9e4a47ea174e265882848720610f98e3fa0",
+      "dry-run": ":verified / :evaluation/untrusted \u2014 ONLY trust blocks"
+    },
+    {
+      "ord": 43,
+      "injury": "injury/41a00c626ed7f9f9d5454e148745c951ec3db80e",
+      "ledger-entry": "18",
+      "disposition-kind": ":genuine-repair",
+      "evaluator": "claude-9",
+      "reviewer": "codex-11",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/41-adoption/authorization-receipt.edn",
+        "sha256": "11a1bead72dc3598b49cebb4e12ebabb73a4aa54e73a858a62d7796e6e0a6520",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "dir-level chain",
+      "operation-id": "244f64d63a1d7d4a39cc1322add3029d3b07fdb4d86423f9a5b99ecc2daa3e73",
+      "dry-run": "CURRENT DISK: :artifact/hash-drift \u2014 test/futon2/aif/wm/injury41_function_repair_test.clj now f1b76c00\u2026, pinned 8f6990e6\u2026. Pinned bytes recoverable from git ae9e71584 \u2192 then :verified / untrusted. NOT clean on current disk."
+    },
+    {
+      "ord": 44,
+      "injury": "injury/8467a7d5b6b4a3203d9053561c1d0d59f5fa1c1d",
+      "ledger-entry": "37",
+      "disposition-kind": ":genuine-repair",
+      "evaluator": "codex-12",
+      "reviewer": "claude-9",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/8467-adoption/authorization-receipt.edn",
+        "sha256": "c46d4e2e17d1993d5156455b99f3a331fce75900bb76739017444c1198f0b68e",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "dir-level chain",
+      "operation-id": "b73fbd202cb6bca824e7b10edba96fe3268c79d89d282625025844081101f6f8",
+      "dry-run": ":verified / :evaluation/untrusted \u2014 ONLY trust blocks"
+    },
+    {
+      "ord": 46,
+      "injury": "injury/9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0",
+      "ledger-entry": "45",
+      "disposition-kind": ":historical-misclassification",
+      "evaluator": "codex-12",
+      "reviewer": "codex-11",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/45-adoption/authorization-receipt.edn",
+        "sha256": "7e45765b01a83b4e49b0ccf5e64b9fbfcea1d558e5347d2aa8de1122ef912f7f",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "embedded basis cites Joe 2026-10-25 instruction + 2026-10-26 no-click-while-injured ruling + coordinator-record 45-adoption/coordinator-authorization.md sha 8e4567d3\u2026 (byte-verified today)",
+      "operation-id": "263dcf88333c0a6bf4cf0e53a6201d1d321ad39923657d0138ee4a8d6159082d",
+      "dry-run": ":verified / :evaluation/untrusted \u2014 ONLY trust blocks"
+    },
+    {
+      "ord": 48,
+      "injury": "injury/2aef7e0c0f48a851a781b41642bf30e52e3fa246",
+      "ledger-entry": "47",
+      "disposition-kind": ":historical-misclassification",
+      "evaluator": "codex-12",
+      "reviewer": "codex-11",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/47-adoption/authorization-receipt.edn",
+        "sha256": "03660ae6afa82fdac42ca1096a0dfa03f7b716620de2703d585c023d11c24e68",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "embedded basis cites Joe 2026-10-25 + 2026-10-26 rulings + coordinator-record 47-adoption/coordinator-authorization.md sha 3671177013\u2026 (byte-verified today)",
+      "operation-id": "987e211ae0189af76e21cec5718fffdb4d96d80a081ab12842ea098567c95a63",
+      "dry-run": ":verified / :evaluation/untrusted \u2014 ONLY trust blocks"
+    },
+    {
+      "ord": 50,
+      "injury": "injury/6d673e5de5096788c9784d41e3dc268efd24ed87",
+      "ledger-entry": "49",
+      "disposition-kind": ":genuine-repair",
+      "evaluator": "codex-14",
+      "reviewer": "codex-11",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/offline-repair/authority/49-evaluation/authorization-receipt.edn",
+        "sha256": "8e4bae968156e7a8435b1b3d94ab14bdf75fac54aeec03aa961e5fed70276665",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "no embedded basis; 49-adoption/49-evaluation dir chain",
+      "operation-id": "fb82e4b93b6f414f66c00a420117621d8880b239660b9cf4f7797fe202e40ed6",
+      "dry-run": "CURRENT DISK: :artifact/missing \u2014 acceptance-contract test/futon2/aif/wm/injury49_learning_read_bound_test.clj DELETED from worktree (pinned c484b2fb\u2026). Pinned bytes recoverable from git 86024a594 \u2192 then :verified / untrusted. NOT clean on current disk."
+    },
+    {
+      "ord": 71,
+      "injury": "injury/a59c85a61dadfd80d53fe7abee61d6e6be68ce88",
+      "ledger-entry": "59",
+      "disposition-kind": ":genuine-repair (t3-retirement)",
+      "evaluator": "codex-11",
+      "reviewer": "claude-11 (session 8d4df137\u2026)",
+      "authorizer": {
+        "seat": "codex-11",
+        "session": "01a16136-8ec4-7972-8723-f8afda943b96"
+      },
+      "receipt": {
+        "path": "/home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/authorization.edn",
+        "sha256": "3745e32d65a55aa8af49ea2b50ab404721eb2579ba21c163ce71365390e033d0",
+        "on-disk-sha-matches": true
+      },
+      "coordinator-chain": "t3-retirement/acceptance-boundary.md process + review.edn (claude-11) + provenance.md; NO embedded operator basis in the receipt",
+      "operation-id": "4c9c9406168761e8bc7526ff357410fa39c5e7f33be67502641dc800afe8469b",
+      "dry-run": ":verified / :evaluation/untrusted \u2014 ONLY trust blocks"
+    }
+  ],
+  "trust_contract": "Per bundle, exactly three pinned tuples: {:kind :evaluation :identity <evaluator> :intent-digest <digest> :receipt-pin <pin>}, same for :review and :authorization (kind :authorization, identity = authorizer codex-11 session 01a16136). The retained trusted-manifest.edn in each dir IS this exact set. Docstring: TRUST is independent of artifact bytes and must authenticate exact receipt scope. Nothing in the grammar authenticates a principal generally \u2014 trust is scoped to one intent-digest + one receipt pin per role.",
+  "remaining_evidence_limitations": [
+    "Ordinals 41, 43, 50 are NOT clean as-is on current disk: their acceptance-contract artifacts are mutable repo test files that have drifted (41, 43) or been deleted (50) since adoption. Pinned bytes are recoverable from git (7ca70e10e, ae9e71584, 86024a594) but a naive live re-verification refuses. Any approval must pair the trust ruling with a hermetic re-pin or restore of those three files, or the composed context still fails 3 of 11.",
+    "No receipt is a cryptographic attestation (each says not-a-cryptographic-attestation). Authentication rests on file custody of the notes tree + git history, not signatures.",
+    "Authorizer for 10 of 11 is one identity (codex-11 session 01a16136\u2026); only ordinals 38/46/48 receipts embed the operator basis (Joe instruction + coordinator-record pins). Ordinals 39,40,41,42,43,44,50,71 receipts carry no embedded operator basis \u2014 their chain rests on the directory-level coordinator records and dispatch logs, which live outside the receipts and were not all re-hashed in this packet (38/45/47 coordinator records and the shared current-clearance record WERE byte-verified today).",
+    "Root pins in each intent are the ledger root AT ADOPTION TIME (historical prefixes), not the current root; the grammar checks root-consistency of the sealed entry chain, and this holds \u2014 but approving means approving the historical prefix chain as it was then, which is exactly what the sealed entries attest."
+  ],
+  "supported_context": {
+    "adoption-driver": "Each adoption dir ships adopt.clj: `clojure -M adopt.clj validate` (validation-only: fresh isolated ledger copy + controls, no canonical write) and a coordinator-gated live mode (e.g. A9_LIVE_ADOPTION=coordinated) that ran the ORIGINAL appends. This is the supported operator adoption/trust-install path that was used originally: per-session, per-bundle, manifest-scoped trust.",
+    "composition-boundary": "futon2.aif.meta-medic-authority/resolve-context validates one or more exact-scope bundles and returns an AuthorityResolution whose verifier accepts an operation only when EXACTLY ONE bundle verifies it (overlaps refused as ambiguous). Its identity is a digest-pinned scope list \u2014 no artifact bytes, no executable trust in the identity.",
+    "can-it-express-narrow-trust": "YES, grammatically: resolve-context over the 11 retained bundles (each trust = trust-from its own trusted-manifest, accepting exactly 33 pinned tuples total) accepts ONLY this pinned set \u2014 future unknown entries fail trust and refuse. It is not blanket trust of codex-11 or of any schema.",
+    "can-it-be-installed-without-new-code": "NO. There is no supported standing/persistent trust-install entry. resolve-context is process-local; nothing persists a resolved context across restarts, and the serving click boundary (full_loop_runtime.clj:121-125 :else) builds no bundle context \u2014 that is precisely the composition gap. Wiring resolve-context into the serving default is a code change (design-adjacent), NOT an operator invocation. Per dispatch: not implemented, not invented here. The closest existing artifact is my paused 039342915 (composition of already-retained entry-local verifiers only; it deliberately does NOT touch these 11)."
+  },
+  "closed_tracker_rows": [
+    "B4-OUTER-PREDICTION",
+    "E2-OUTER-LEARNING",
+    "B1-READINESS-PROMPT-LIMIT",
+    "C3-B2-ANSWER-DELIVERY",
+    "D1-SELECTED-WANT-REVISION-EVIDENCE",
+    "B2-SELECTED-TARGET-READING-RESPONSE"
+  ]
+}
