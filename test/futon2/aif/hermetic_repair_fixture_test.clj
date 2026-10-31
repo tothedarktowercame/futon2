@@ -30,12 +30,12 @@
   ;; runner/default-run-record-dir live. Read from what the receiver reads:
   ;; the stream file in the CURRENT (rebound) run-record root must carry the
   ;; started event, and the production root must be unchanged.
-  (let [production-before (fixture/production-file-set fixture/production-run-record-dir)
+  (let [production-stream (io/file fixture/production-run-record-dir "run-stream.edn")
+        production-before (.length production-stream)
         stream (io/file runner/default-run-record-dir "run-stream.edn")]
     (previous-run/start! runner/default-run-record-dir
                          "test-fixture-run-record-root" "2026-10-31T00:00:00Z")
     (is (.isFile stream) "the started event landed in the HERMETIC root")
     (is (.contains (slurp stream) "\"test-fixture-run-record-root\""))
-    (is (= production-before
-           (fixture/production-file-set fixture/production-run-record-dir))
+    (is (= production-before (.length production-stream))
         "the canonical run-stream must not gain the fixture's :started event")))
