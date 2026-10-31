@@ -1,0 +1,355 @@
+{
+  "schema": "wm/criteria-focus-checkpoint-v1",
+  "tracker_sha256": "47e30e12da1e7c340ab02a6007baca10718f74cb0d9538fa39fc9d71edb4ee1f",
+  "grid_sha256": "559795a5366391c01b4cb2ba5d79e5b89c3554c67489213c6d3aed6e489b1bf3",
+  "criterion_count": 20,
+  "deficit_count": 24,
+  "closed_deficit_ids": [
+    "B4-OUTER-PREDICTION",
+    "E2-OUTER-LEARNING",
+    "B1-READINESS-PROMPT-LIMIT",
+    "C3-B2-ANSWER-DELIVERY",
+    "D1-SELECTED-WANT-REVISION-EVIDENCE",
+    "B2-SELECTED-TARGET-READING-RESPONSE"
+  ],
+  "open_rows": [
+    {
+      "id": "B1-TICKETS",
+      "criteria": "B1",
+      "classification": "OPEN SOURCE-SCOPE LIMIT; historical readiness repair retained",
+      "owner": "codex-11",
+      "disposition": "Missions-only experiment conditional; no ticket-coverage credit; old one-click authority consumed Widened-field click f50d1626: 419 M/E enumerated / 606 open; exactly 187 T absent, zero extras. Ticket-scope closure remains unmet. Run ff4b4d5c Q1 violated: 419 enumerated / 607 open; 188 missing. No population closure. 2026-10-30: Q1 publication live: published608=181M+239E+188T, zero missing/extras at pinned snapshot; 556 known / 52 unknown; read-only certified M-typed-memories. M/E/T Q1 equality only; no A4 credit, no live B1 witness. OPEN remains.",
+      "evidence": "GRID v2 B1; proposal 2eadead09; readiness assessment retained in live run 2026-10-27-c9d132d8-a2be-42b3-8369-fd23e9b9924f, not ticket selection; /home/joe/notes/wm-next/criteria-completeness/run001/widened-field-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/reading-reselection-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/zai-coordination/q1-ticket-prep/integration-publication-receipt.json (publication manifest sha256 fb1649fd90ebe319cc5843d3591808f659e781f1ce75ded76832dcf95bf4f27e)",
+      "next_action": "Decide combined missions/tickets field and retain source-specific census; apply run001-v2 disposition before any click",
+      "closure_condition": "Declared intended field includes ticket source with justified per-item admission/exclusion; mission-only success cannot close this row",
+      "checkpoint_category": "NOW: evidence reconciliation",
+      "checkpoint_action": "Compare published608 and charged3415 selection records against the written source/admission condition; propose disposition from existing evidence, not another ticket feature."
+    },
+    {
+      "id": "E3-T12",
+      "criteria": "E3",
+      "classification": "IMPLEMENTED; LIVE OBSERVATION PENDING",
+      "owner": "codex-11",
+      "disposition": "Implemented and loaded; live T12 registry enabled; no automatic-loop completion claim Run001 preflight wires clear, but no qualifying real-streak T12 evaluation retained in this run. Not exercised for closure. Finalized run001 347b9b51 reached construction but has no retained evaluated T12 history over a qualifying streak; closure remains pending. Run001 5ba921b9 reached construction without a stop; no explicit evaluated qualifying T12 streak retained. Closure still pending. Run 376d76ff reaches grounded-progress; qualifying evaluated streak not established, remains pending. Run 4961d278 abstained before construction; no qualifying T12 streak evaluation. Pending. Run ff4b4d5c completes grounded-progress; no qualifying evaluated T12 streak established. Pending.",
+      "evidence": "47f4ebb0e merged as 4fbd436eb; tripwire tests 59/252 passed; /home/joe/notes/wm-next/criteria-completeness/t12-r28-integration/t12-reload.edn; run001 record 894eb696702eb8931b0b1217f1e49f41779313696ccad951c194fd9fc87b20dd; /home/joe/notes/wm-next/criteria-completeness/run001/answer-holes-discovery.md; run001 record babfbb875435f9c08627d93d3d22bee9945377e013b9d989e334c1820884a2de; /home/joe/notes/wm-next/criteria-completeness/run001/answer-delivery-live/finalization-receipt.json; run001 5ba921b9 record sha256 5b53bad4a0c243fec48e928930d708f5729212335a70f6b0a6f73e1d671e0d2b; /home/joe/notes/wm-next/criteria-completeness/run001/routable-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/want-carrier-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/widened-field-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/reading-reselection-live/receipt.json",
+      "next_action": "Retain live firing or non-firing over a real streak with explicit evaluated history.",
+      "closure_condition": "Live firing or live non-firing over a real streak supports the detector decision; implementation and load evidence alone do not close this row",
+      "checkpoint_category": "LATER: qualifying live sequence",
+      "checkpoint_action": "Freeze the qualifying streak and extract explicit detector evaluations from that sequence; do not count silence as non-firing."
+    },
+    {
+      "id": "B2-D4-R28",
+      "criteria": "B2,D4",
+      "classification": "IMPLEMENTED; LIVE OBSERVATION PENDING",
+      "owner": "codex-11",
+      "disposition": "Implemented and loaded; reading-start/result retained across failed redecision; no blanket run exception Run001 selected-target-reading is not-applicable; failure was cascade-resume answer delivery, not failed redecision. R28 closure not exercised. Finalized run001 347b9b51 selected-target-reading is not-applicable/selected-target-reading-not-required. No failed-redecision witness; closure remains pending. Run001 5ba921b9 selected-target-reading remains not-applicable/selected-target-reading-not-required. No failed-redecision witness. Run 376d76ff selected-target-reading not-applicable/selected-target-reading-not-required; no failed-redecision witness. Click b8777274 selects M-pattern-mining and is held at occurrence-square-redecision: inadmissible-decision/empty-refusals with refusals []; reading ran, terminal retention pending; no closure credit. Run 4961d278 retains selected-target-reading refused/selected-target-reading-answer-invalid, target/source/excerpt and job 7916. No redecision occurred; failed-redecision closure remains unmet. Run ff4b4d5c retains two reading attempts and successful redecision; failed-redecision closure remains unexercised.",
+      "evidence": "DEFECTS-reading-era.md R28; d782883b3 merged as 9b5cf0328; selected-target-reading tests 25/102 passed; /home/joe/notes/wm-next/criteria-completeness/t12-r28-integration/r28-reload.edn; run001 record 894eb696702eb8931b0b1217f1e49f41779313696ccad951c194fd9fc87b20dd; /home/joe/notes/wm-next/criteria-completeness/run001/answer-holes-discovery.md; run001 record babfbb875435f9c08627d93d3d22bee9945377e013b9d989e334c1820884a2de; /home/joe/notes/wm-next/criteria-completeness/run001/answer-delivery-live/finalization-receipt.json; run001 5ba921b9 record sha256 5b53bad4a0c243fec48e928930d708f5729212335a70f6b0a6f73e1d671e0d2b; /home/joe/notes/wm-next/criteria-completeness/run001/routable-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/want-carrier-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/after-mission-close/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/widened-field-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/reading-reselection-live/receipt.json",
+      "next_action": "Retain a real failed-redecision reading and corresponding frontier evidence.",
+      "closure_condition": "Real failed-redecision run record retains the reading that ran; no silent not-required fallback; tooling replay and load evidence alone do not close this row",
+      "checkpoint_category": "NOW: retained-record audit",
+      "checkpoint_action": "Audit b8777274 held redecision and its retained reading/frontier; close only if its actual failure record satisfies the condition, otherwise wait for a qualifying branch."
+    },
+    {
+      "id": "E3-OUTER-REPEAT",
+      "criteria": "E3",
+      "classification": "IMPLEMENTED; LIVE CHANGED-INPUT CONTINUATION OBSERVED",
+      "owner": "codex-11",
+      "disposition": "Implemented and loaded; unchanged refused inputs stop before author dispatch; changed inputs continue with comparison retained; absent index is explicit Run001 outer-repeat-comparison and effective-run-comparison are not-reached: cascade-resume ended before construction/author dispatch. Finalized run001 347b9b51 retains inputs-changed with differing identities and reached author dispatch. This is live changed-input evidence; unchanged-input prevention remains pending. Run001 5ba921b9 inputs-changed reached author dispatch; effective-run comparison no-duplicate. Unchanged-input prevention still pending. Run 376d76ff inputs-changed; no unchanged refused-input witness. Run 4961d278 outer-repeat-comparison not-reached; no unchanged-input prevention witness. Run ff4b4d5c comparison no-prior-refusal; no unchanged-input prevention witness. 2026-10-30: callable configuration restored by supported cast refresh; 17/17 hermetic checks; protected state hashes unchanged; no live unchanged/changed pair from this operation - live witness pair still outstanding.",
+      "evidence": "73920ef20 merged as 2092e3f2b; tooling tests 3/13 passed; index 361 rows/224 refusals/0 unreadable; /home/joe/notes/wm-next/criteria-completeness/outer-repeat-integration/receipt.json; run001 record 894eb696702eb8931b0b1217f1e49f41779313696ccad951c194fd9fc87b20dd; /home/joe/notes/wm-next/criteria-completeness/run001/answer-holes-discovery.md; run001 record babfbb875435f9c08627d93d3d22bee9945377e013b9d989e334c1820884a2de; /home/joe/notes/wm-next/criteria-completeness/run001/answer-delivery-live/finalization-receipt.json; run001 5ba921b9 record sha256 5b53bad4a0c243fec48e928930d708f5729212335a70f6b0a6f73e1d671e0d2b; /home/joe/notes/wm-next/criteria-completeness/run001/routable-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/want-carrier-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/widened-field-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/reading-reselection-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/zai-coordination/e3-reader-refresh.json",
+      "next_action": "Retain a live unchanged-input prevention witness; changed-input continuation is now observed.",
+      "closure_condition": "Live cross-run observation demonstrates unchanged refused inputs prevented before author dispatch; changed-input continuation retains differing identities. Implementation, load, and synthetic clone alone do not close this row.",
+      "checkpoint_category": "NOW: retained-record audit",
+      "checkpoint_action": "Compare Q6 refusal/reselection in3415 against this row\u2019s exact identity and pre-dispatch predicates; do not equate Q6 and reading-repeat without the join."
+    },
+    {
+      "id": "B5-INJURIES-HOLD-RUN001",
+      "criteria": "A3,E4",
+      "classification": "CLEARANCE OBSERVED; ZERO EFFECTIVE INJURIES",
+      "owner": "codex-11",
+      "disposition": "a59c retired through genuine repair. On 2026-10-29, 9c622038 discharged at ordinal 106 after authored/reviewed/enacted entries 103-105: fresh file-delivered acceptance, versioned author worktree, exact-SHA review, canonical integration and identical-source replay. ad038c48 discharged at 107 through its enacted acceptance replay, attributed to effective requeue 3. Effective injuries remaining: 2aef7e0c and c5606345 enacted; e43a348c open. run001 remains held. After discharges through ordinal 114, effective injuries are zero at ledger sha 5abf05c6eed46129d8c08cbf19c2f1c01aea8acac5282645eaa520ecab73cc1a. Run001 started ordinary selection without an injury stop. Its answer-holes failure is a distinct B2 boundary. Historical clearance and ordinary start remain observed. Current state after run001 5ba921b9: new injury f7e97cc6653b45dda8b492c7e9c7a288a1289831 opened at121, reviewer-falsifier-failed/reviewer-wait; all four loaders validate. Next route fresh self-heal; no second click. Run 376d76ff starts ordinary and closes grounded-progress; all four loaders validate, zero effective injuries. Medic correction at 125 inactivates 0cb09c47. Run 4961d278 adds observation 126 ordinary-selection-abstention; all four loaders validate and zero effective injuries. A separate repair-obligation finding was published. Run ff4b4d5c adds successful-task-outcome observation 127, no injury, zero effective injuries; four loaders validate.",
+      "evidence": "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-25/receipt.json; /home/joe/notes/wm-next/criteria-completeness/repair-iteration-28/receipt.json; /home/joe/notes/wm-next/criteria-completeness/repair-iteration-28/ledger-after.edn (sha256 d0af77c500746bf74e204004b8aa246dde5abdff7021f3838ff34c2932cb762b); /home/joe/notes/wm-next/criteria-completeness/t3-retirement/genuine-repair/retirement-receipt.md; run001 record 894eb696702eb8931b0b1217f1e49f41779313696ccad951c194fd9fc87b20dd; /home/joe/notes/wm-next/criteria-completeness/run001/answer-holes-discovery.md; run001 5ba921b9 record sha256 5b53bad4a0c243fec48e928930d708f5729212335a70f6b0a6f73e1d671e0d2b; /home/joe/notes/wm-next/criteria-completeness/run001/routable-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/want-carrier-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/widened-field-live/receipt.json; /home/joe/notes/wm-next/criteria-completeness/run001/reading-reselection-live/receipt.json",
+      "next_action": "Ordinary route available; wait for next authorized dispatch.",
+      "closure_condition": "No effective injury remains in the medic-corrected ledger, and the next run001 click starts without an injury stop; retained ledger projection and click record establish both.",
+      "checkpoint_category": "BLOCKED: current effective injury",
+      "checkpoint_action": "Historical clearance is not current clearance: adf04df0 remains effective. Retain supported resolution plus next ordinary-start evidence after recovery."
+    },
+    {
+      "id": "E4-SELF-HEAL-CASCADE",
+      "criteria": "E4",
+      "classification": "MISSING DESIGN; S2, S3, S4-lean, S4a observed; S4b 1/5",
+      "owner": "claude-11",
+      "disposition": "OPEN. Current first reading: the :self-heal arm has one filled policy (A-self-heal), and production follows a fixed repair sequence; check-correct/input-wrong, premise-unproved and never-an-injury dispositions are reached by hand. S2 must check this reading against code. Use normal G over repair cascades, not a new scorer or fixed pipeline. S1 amended (Joe 2026-10-28): drafts stand, corrections come from practice; S5 requires per-step rows that pinpoint a self-repair defect. S2 observed: DISCOVERY-self-heal-pipeline-2026-10-28.md (a7a5a1b8d, review c9cd8a4ce) confirms self-heal is guard-routed before any policy field, with no G, and the :self-heal arm is read by no code. S3 observed: mathlib4 RepairCascadeG.lean (e71872a13, reviewed by claude-11) computes each cascade outcome from ordered pattern guards/effects, scores with existing stepG minus per-pattern novelty, proves order changes G, risk flip on reproduction from preference ordering alone, and the exact novelty threshold; summed novelty can favour a long repair on a never-defect injury, which S4 must address. S4-lean observed: mathlib4 darktower c9b0cc200 (d40cdf0da + witness) adds bounded per-step tokenUse cost (CostModel w, maxLength), honest red-before guard (realDefect only), gap strictly monotone in w, exact flip iff with proved instance example_flip; real-defect flip proved at w=0 only. S4a observed: futon2 4c5502044 repair_cascade_g.clj (pure mirror of RepairCascadeG c9b0cc200) scoring through new finite_step_g.clj (CascadeEFE.stepG finite sums; A recorded as Lean model, not observed estimate, since cascade-g/step-g correctly refuses analytic A); 7 tests/19 assertions incl. equality with outer-score sums. Follow-up debt: migrate outer_score onto finite-step-g. Practice correction: DISCOVERY-self-heal-s4b-misclassification-steps-2026-10-29.md (aa0bb0a84) shows both witnessed misclassifications located the classifier first; historical cascade is locate, reproduce, decide, retire (futon3 b784e44; mathlib4 3b7c08368; futon2 6ba74dff2). Never-defect: genuine 5 steps, historical 4, both closure; real-defect historical ends in useful-blocker-discovery, so the real-defect flip states C(closure) > C(useful-blocker-discovery) as a hypothesis. S4b slice 1 (reproduce) observed: futon2 d94e1f71a repair_reproduce.clj, unwired; reproduces the a9 and entry-45 classifications from the real retained records and ledgers, refuses pin mismatch; classifier revision :unknown because meta_terminal_injury does not register with load-identity (gap: register it so the receipt can pin the loaded classifier source).",
+      "evidence": "E-self-heal-cascade.md (0082ee393, 3d1de42eb), S1-S7; futon3 library/cascades/heal-by-repair-cascades.flexiarg (751d7c4); library/self-heal drafts (8376f57, d8ba197); /home/joe/notes/repair-patterns/witnesses-machine-repairs-2026-10-28.md; /home/joe/notes/repair-patterns/witnesses-intake-and-extension-2026-10-28.md",
+      "next_action": "S4b in slices, one phase per packet with its receipt payload grammar: locate, evaluate (exact medic findings incl. controls), qualification review (distinct seat), retire-correction (resolve-context + transact-medic-disposition!). Then S4c (choice at route! before prepare-repair, sealed in work order), S5-S7.",
+      "closure_condition": "All S1-S7 of E-self-heal-cascade.md observed: applicable repair cascades fill :self-heal as candidate policies scored by existing filled-META-policy G, no new scorer; retain pattern-step effects and closing records; one live injury repaired through the G-selected cascade with per-cascade G in its click record. This does not alone close GRID E4 across-run conservation. 2026-10-29 practice (S1, S5 input): live clicks and read-only preflights found and repaired these self-heal process defects, each with receipts under ~/notes/wm-next/criteria-completeness/: retry bound to the wrong injury, source-blind and static-unchecked acceptance correction, test delivery by escaped string, unbounded and untraced acceptance return, unsatisfiable test admitted, author commits on canonical main (now per-version worktrees and reviewed range cherry-pick with clean reload), receipts read by position, enacted repairs never acknowledged (now enacted-acceptance replay on the retained red admission, PhaseReplayReceipt), retry verdicts lost for other-injury/medic-recurrence retries. Discharged: 9c622038 (end-to-end machine repair, ledger 103-106), ad038c48 (replay, 107), 2aef (replay, 108). Still open for E4: S4b remaining slices, S5 per-step rows, S6, S7; the pattern drafts in futon3/library/self-heal/ should now be corrected from these receipts.",
+      "checkpoint_category": "DEFERRED: design programme",
+      "checkpoint_action": "Keep S1\u2013S7 programme parked; present recovery work does not implement G-selected repair cascades or close E4."
+    },
+    {
+      "id": "A2-RELATIVE-STORE-ROOTS",
+      "criteria": "A2,E2,E4",
+      "classification": "OPEN; flight temporal fallback and historical split remain",
+      "owner": "codex-11",
+      "disposition": "D-task default anchored by f32989318 and verified in serving JVM; prior D-task hold closed. Historical 52-record futon3c split preserved; reads now use futon2. Main selection trace already absolute; separate flight temporal lock fallback remains relative.",
+      "evidence": "/home/joe/notes/wm-next/criteria-completeness/relative-store-paths/decision.md; /home/joe/notes/wm-next/criteria-completeness/relative-store-paths/inventory.json",
+      "next_action": "Assess reachable flight temporal fallback separately; reconcile or explicitly scope historical split only through supported machinery. D-task repair is complete; recheck current injury and retry eligibility before credit.",
+      "closure_condition": "Canonical roots used by reachable writers/readers; historical split explicitly reconciled or scoped without losing evidence.",
+      "checkpoint_category": "DEFERRED: scoped defect",
+      "checkpoint_action": "Check reachable fallback and retained split in a separate packet; not a launch gate absent evidence this run reaches it."
+    },
+    {
+      "id": "E4-ACCEPTANCE-PUBLICATION-ISOLATION",
+      "criteria": "A2,B1,E4",
+      "classification": "SELF-HEAL FAILED; ISOLATION DEFECT",
+      "owner": "codex-11",
+      "disposition": "Iteration 31 c560 out-of-band attribution refused canonical-head-moved: acceptance subprocesses wrote repair-obligation findings and committed four repair tickets to canonical main despite six redirected store roots. Cause-specific current green and counterfactual red retained; no discharge.",
+      "evidence": "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-31/receipt.json; refusal 08a6f6b25e62ccaf2b32d4e8a8017c92837b7c7dffb0041b1121622034227f40; commits ef42d1d2f,d82fef29d,1436a8bc9,b83c0d203",
+      "next_action": "Isolate repair-obligation and ticket-publication roots in acceptance processes; review the publication census before any forward revert or finding quarantine. No click.",
+      "closure_condition": "Real acceptance-process publication leaves canonical HEAD, holes/tickets and repair-obligation store unchanged; retained test evidence and reviewed provenance census.",
+      "checkpoint_category": "NOW: evidence reconciliation",
+      "checkpoint_action": "Inspect merged isolation fix and actual acceptance-process provenance; reuse existing tests/receipts before any new implementation."
+    },
+    {
+      "id": "E4-WORK-ORDER-NIL-RETURN-LIMIT",
+      "criteria": "E4",
+      "classification": "IMPLEMENTED; REVIEW PENDING",
+      "owner": "codex-14",
+      "disposition": "Commit 5319b4b47f made work-order-options include :acceptance-return-limit even when the runtime option was absent; nil then failed the coordinator's existing natural-number validator and refused every non-runtime caller before coordination.",
+      "evidence": "/home/joe/notes/wm-next/immune-loop/old-failures-census.json",
+      "next_action": "Review immune/return-limit-nil; after merge, let the education loop use the ordinary runtime-configured limit and retain evidence from any caller that omits the optional limit.",
+      "closure_condition": "A real self-heal attempt uses the corrected option projection, while absent limits remain absent and explicit nil or negative limits remain refused.",
+      "checkpoint_category": "NOW: integration/evidence audit",
+      "checkpoint_action": "Verify existing branch integration and actual omitted-limit caller witness; tests alone do not meet real-attempt clause."
+    },
+    {
+      "id": "E4-E43-CAUSE-SCOPE",
+      "criteria": "B5,E4",
+      "classification": "SELF-HEAL SCOPE FAILURE; DIRECT UPSTREAM FIX PENDING",
+      "owner": "codex-11",
+      "disposition": "Iteration 33 mechanically discharged e43 at ordinal 114 after a terminal receipt held-phase fix; the acceptance does not test or repair the missing operational clause fields. Effective injuries are zero but run001 remains held on the known producer defect. Discharge ordinal 114 cites fc9375d466 (held-phase receipt); direct cause fix is futon3c 45a6521bf7038df3f2be60920698a9c03116c611 (pending review/merge).",
+      "evidence": "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-33/receipt.json; acceptance 37b6deb4; patch fc9375d466; ledger 5abf05c6eed46129d8c08cbf19c2f1c01aea8acac5282645eaa520ecab73cc1a",
+      "next_action": "Review direct enactment-clauses producer fix using the existing req-f0ba279a operational clauses; no further self-heal attempt or machinery improvement",
+      "closure_condition": "Real retained cascade compiles cascade-ready through the repaired producer; preserve self-heal scope failure evidence for later E4 work",
+      "checkpoint_category": "NOW: retained-record audit",
+      "checkpoint_action": "Check producer fix ancestry and retained cascade-ready record; avoid another self-heal for the historical cause."
+    },
+    {
+      "id": "E4-TERMINAL-INGESTION-IDENTITY",
+      "criteria": "E4",
+      "classification": "IMPLEMENTED; REVIEW PENDING",
+      "owner": "codex-14",
+      "disposition": "A terminal record with absent failure classification hashed the partly nil cause tuple [nil :unknown-stage nil], inheriting historical injury 9c6220388033cbd1fbc888cdf6bb3a5b9a3082c0. Historical note: 9c622038 itself was keyed on that nil tuple; its durable ledger history is unchanged.",
+      "evidence": "run record 38c230330dca99aba2850f4ba9bcb50e1e3d5918859cac48e8c3bd5e9e0ca33d; /home/joe/notes/wm-next/criteria-completeness/run001/hot-load-failed-discovery.md",
+      "next_action": "Review immune/ingestion-identity; then ingest a subsequent typed terminal failure through the corrected classifier.",
+      "closure_condition": "Missing close classification derives typed Q6 evidence; otherwise an unclassified terminal failure is scoped to its run and cannot inherit another injury identity.",
+      "checkpoint_category": "NOW: integration/evidence audit",
+      "checkpoint_action": "Verify corrected classifier ancestry and a subsequent typed terminal identity; preserve original historical nil-tuple record."
+    },
+    {
+      "id": "C3-AUTHOR-REPOSITORY-HISTORY",
+      "criteria": "C3/B2",
+      "classification": "FIXED DIRECTLY; HISTORICAL RUN NOT INGESTED",
+      "owner": "codex-11",
+      "disposition": "Run e0b9aab6 failed :hot-load-failed because the author committed to a sibling worktree; fixed directly by 329b280ac.",
+      "evidence": "run e0b9aab6 SHA 38c230330dca99aba2850f4ba9bcb50e1e3d5918859cac48e8c3bd5e9e0ca33d; run001/hot-load-failed-discovery.md; author-delivery-live/receipt.json",
+      "next_action": "No retrospective ingestion: terminal ingestion takes only the current click record.",
+      "closure_condition": "Canonical delivery gate exercised by fdba6f19d in run 43ec20a7.",
+      "checkpoint_category": "NOW: disposition reconciliation",
+      "checkpoint_action": "Check fdba6f19d/43ec20a7 witness already named by closure condition; reconcile status without retrospective ingestion."
+    },
+    {
+      "id": "E4-F7E97-ACCEPTANCE-SCOPE",
+      "criteria": "E4,D1",
+      "classification": "SELF-HEAL ATTEMPT FAILED; ACCEPTANCE MIS-SCOPED",
+      "owner": "codex-11",
+      "disposition": "Click wm-click-ac544a10-d033-4a9b-8c36-4140ed4e800f diagnosed review tool-event counting, contradicting the retained passing 18-event review gate. Both proposals fabricate verified selected-want outcomes/measurements; no real mission carrier path. Final review identity mismatch refused before repair author/enact. No discharge credit; one attempt spent.",
+      "evidence": "/home/joe/notes/wm-next/criteria-completeness/run001/falsifier-self-heal/receipt.json; diagnosis 77293ec8; proposals 8b5b817a and 962f398d; original run 5b53bad4",
+      "next_action": "Park self-heal defect. Await ordinary reviewed direct fix to mission want/locator construction and typed pre-author missing-contract refusal.",
+      "closure_condition": "Acceptance exercises real reading-policy selection, construction, pre-author baseline and after-observation/falsifier with real selected mission tokens; no fabricated verified outcome.",
+      "checkpoint_category": "NOW: retained-record audit",
+      "checkpoint_action": "Compare real want-carrier acceptance evidence with exact condition; earlier mission success alone is not acceptance-scope proof."
+    },
+    {
+      "id": "C4-FULLY-QUALIFIED-STORE-DETECTION",
+      "criteria": "C4",
+      "classification": "OPEN; REVIEWER-REPORTED PRE-EXISTING LOOPHOLE",
+      "owner": "codex-11",
+      "disposition": "Reviewer of b7ca069d5 reports evidence-store guard regex [a-z./-]*!store misses fully qualified futon3c.evidence.store/!store (digit omitted), while alias-form control refuses. Separate from selected-want failure; no fix in this packet.",
+      "evidence": "/home/joe/notes/wm-next/criteria-completeness/run001/routable-live/task-review.json; invoke-1793307618205-7746-83685c15",
+      "next_action": "Investigate and review separately; do not conflate script detection with review tool-event accounting.",
+      "closure_condition": "Real fully-qualified and alias forbidden-mutation controls refuse; clean tree passes.",
+      "checkpoint_category": "DEFERRED: bounded code defect",
+      "checkpoint_action": "Separate fully-qualified/alias mutation controls and clean-tree control; only promote when C4 validation reaches this guard."
+    },
+    {
+      "id": "D4-MEDIC-ONLY-REPORTING",
+      "criteria": "D4",
+      "classification": "OPEN REPORTING DEFECT",
+      "owner": "codex-11",
+      "disposition": "Medic-only discharge exits launcher 1: absent ordinary run binding; requirements unchecked; no fix in this packet",
+      "evidence": "wm-click-8a818ece-482e-4d89-b504-19eeb2713605; /home/joe/notes/wm-next/criteria-completeness/run001/selected-want-oob/live/receipt.edn; launcher.log",
+      "next_action": "Distinguish medic-only completion from missing ordinary run evidence",
+      "closure_condition": "Medic-only click reports its discharge and explicit requirements applicability without false ownership failure",
+      "checkpoint_category": "DEFERRED: reporting",
+      "checkpoint_action": "Repair medic-only applicability reporting when that branch is selected; never mistake a medic close for a task run."
+    },
+    {
+      "id": "D4-READING-REFUSAL-FINDING-CONTEXT",
+      "criteria": "B2,D4",
+      "classification": "OPEN; SEPARATE FINDING PATH",
+      "owner": "codex-11",
+      "disposition": "Reading refusal 7916 becomes generic environmental-hold/abstained finding with no target; independent close-core writer left unchanged in format/reselection packet.",
+      "evidence": "run 4961d278; finding repair-occ-3e36e894edb0357df57476b01bef9a9a0eb4a77e38eee3838534c8bfb413877c; publication 60f87b90b; /home/joe/notes/wm-next/criteria-completeness/run001/reading-invalid-discovery.md",
+      "next_action": "Carry selected target, typed reading reason and reader-response pins into close-core findings; reconcile existing generic ticket separately.",
+      "closure_condition": "A real reading refusal finding retains target and typed cause with source/job evidence; no generic environmental precondition substitutes for that cause.",
+      "checkpoint_category": "DEFERRED: reporting",
+      "checkpoint_action": "Carry target/reason/source/job into finding producer; not a gate to unrelated criterion evidence."
+    },
+    {
+      "id": "OUTER-LEARNING-SKIPPED-RUNS",
+      "criteria": "E2",
+      "classification": "OPEN",
+      "owner": "codex-11",
+      "disposition": "Outer learning consumed no observations from 2026-10-29 pending f74df9cc through fix commit 7ec89be6a; live click-count stayed 0. The fix restores future consumption, not skipped history.",
+      "evidence": "run f74df9cc-c27b-420b-91ec-7a32db708c41; outer-state sha e23abc814a948964e3f73e84b2f20322f13a8098e3d1dbe097be69b72be2b988; /home/joe/notes/wm-next/criteria-completeness/run001/outer-learning-deferral-discovery.md; fix 7ec89be6a",
+      "next_action": "Separate recovery decision: audit and replay retained (selection, ending, Giraffe) triples in run order. Do not silently skip, overwrite or claim recovery.",
+      "closure_condition": "Approved recovery accounts for each skipped run with pinned input triples, ordering, and exactly-once consumption evidence.",
+      "checkpoint_category": "DEFERRED: historical recovery decision",
+      "checkpoint_action": "Inventory pinned triples first; no replay or mutation without the separate recovery decision."
+    },
+    {
+      "id": "OUTER-DISPATCH-CLASSIFICATION-ABSENT",
+      "criteria": "E2;D4",
+      "classification": "OPEN",
+      "owner": "codex-11",
+      "disposition": "Completed readiness-dispatch failures can publish a run without a classification receipt because classification requires an action occurrence. This upstream producer is not fixed in 7ec89be6a. 2026-10-30: close-path producer now fixed - f6d7c3220 integrated as 577f4aa7f and reloaded from canonical (loaded content sha256 eea7442f9b49f2e462fcb1062fff162984a3c34bdcb09d580bcea35f4bd7c74a); actual-path hermetic tests; completed pre-construction failures now retain classification; known-typed-failure still maps not-yet-evaluated. Historical 'not fixed in 7ec89be6a' stands as history, now superseded. OPEN pending qualifying live dispatch-failure close; no synthetic-run credit.",
+      "evidence": "f74df9cc record sha 5d4e75b3462b096235f8b39d9710c84fc60937e960110c24f809d4bea7813e33; failure dispatch-failed at ticket-readiness-refresh; full_loop_runner.clj:7215; /home/joe/notes/wm-next/criteria-completeness/run001/outer-learning-deferral-discovery.md; /home/joe/notes/wm-next/criteria-completeness/zai-coordination/classification-producer-integration.json; classification-producer-build.json; classification-independent-review.json",
+      "next_action": "Later direct fix: supply the appropriate verified ending classification for completed dispatch failures, without requiring construction to have produced an action occurrence.",
+      "closure_condition": "Real completed dispatch-failure record carries a verified classification receipt through the normal publication path.",
+      "checkpoint_category": "LATER: live witness",
+      "checkpoint_action": "Producer fix is integrated; retain next real completed dispatch-failure classification. Do not manufacture failure or spend a click solely to trigger it."
+    }
+  ],
+  "criteria_assessments": [
+    {
+      "id": "A1",
+      "assessment": "Evidence available; not re-certified here",
+      "evidence_limit": "eaa9 charged once with binding, budget229/243.",
+      "next_evidence_action": "Join request/binding/charge in retained record."
+    },
+    {
+      "id": "A2",
+      "assessment": "Supporting restoration evidence; full envelope UNKNOWN",
+      "evidence_limit": "Cold restart, composition and heap verified; unregistered components remain a coverage caveat.",
+      "next_evidence_action": "Populate exact declared envelope, including unknown components."
+    },
+    {
+      "id": "A3",
+      "assessment": "Current blocker accounted for",
+      "evidence_limit": "One effective injury adf04df0; no clearance claim.",
+      "next_evidence_action": "Resolve through supported one-attempt route or report its explicit stop."
+    },
+    {
+      "id": "A4",
+      "assessment": "NOT-EXERCISED at task author boundary",
+      "evidence_limit": "Latest run stopped in cascade delivery; no new task baseline witness.",
+      "next_evidence_action": "Reuse earlier selected-want baselines; retain next applicable pre-author baseline."
+    },
+    {
+      "id": "B1",
+      "assessment": "Strong scoped evidence; row reconciliation due",
+      "evidence_limit": "Published608 and3415 Q1 equality; ticket admission/exclusion receipts.",
+      "next_evidence_action": "Audit existing evidence against B1-TICKETS before requesting new work."
+    },
+    {
+      "id": "B2",
+      "assessment": "Historical witness; latest failed delivery",
+      "evidence_limit": "Reading/reselection closure exists; failed-redecision retention remains separate.",
+      "next_evidence_action": "Audit b8777274 reading retention for R28."
+    },
+    {
+      "id": "B3",
+      "assessment": "UNKNOWN for latest full choice",
+      "evidence_limit": "Latest route-check ordinary-selection-not-established; no unique-minimum claim.",
+      "next_evidence_action": "Extract actual score/input identities from retained selection, not phase label."
+    },
+    {
+      "id": "B4",
+      "assessment": "Outer-only observed historically",
+      "evidence_limit": "Closed B4-OUTER-PREDICTION does not cover inner obligations.",
+      "next_evidence_action": "Retain inner prediction where exercised; no rerun for outer-only row."
+    },
+    {
+      "id": "C1",
+      "assessment": "UNKNOWN for latest joins",
+      "evidence_limit": "Cascade requisition exists; whole task-to-author chain not demonstrated.",
+      "next_evidence_action": "Join selected identity, construction and dispatch from retained record."
+    },
+    {
+      "id": "C2",
+      "assessment": "UNKNOWN as whole criterion",
+      "evidence_limit": "Retained response exists; that alone does not prove pre-effect checkpoint.",
+      "next_evidence_action": "Audit checkpoint chronology and continuation origin."
+    },
+    {
+      "id": "C3",
+      "assessment": "Latest descriptor VIOLATION; artifact exists",
+      "evidence_limit": "9-char commit violates source full-SHA contract; artifact canonical.",
+      "next_evidence_action": "Obtain valid delivery through supported route; labeling fix is not delivery."
+    },
+    {
+      "id": "C4",
+      "assessment": "NOT-EXERCISED for latest task",
+      "evidence_limit": "No task approval/falsifier close established.",
+      "next_evidence_action": "Review same selected artifact/contract when task execution reaches it."
+    },
+    {
+      "id": "D1",
+      "assessment": "NOT-EXERCISED latest; historical deficit closed",
+      "evidence_limit": "No wants measured in eaa9; earlier reviewed-revision evidence exists.",
+      "next_evidence_action": "Retain actual before/after at reviewed revision, never count repair success."
+    },
+    {
+      "id": "D2",
+      "assessment": "UNKNOWN latest",
+      "evidence_limit": "No checked pattern/mission completion measurements established.",
+      "next_evidence_action": "Extract actual token checks and learning writes separately."
+    },
+    {
+      "id": "D3",
+      "assessment": "VIOLATED diagnosis on latest run",
+      "evidence_limit": "Wrong-repository label for abbreviated descriptor; original record preserved.",
+      "next_evidence_action": "Use corrected producer on future occurrence; retain historical disagreement."
+    },
+    {
+      "id": "D4",
+      "assessment": "Partial account; unmet requirements explicit",
+      "evidence_limit": "Pushed REPORT/receipt; route-check not-checked, prior Q9 unverifiable.",
+      "next_evidence_action": "Publish per-criterion values and branch explanations, not conformance shortcut."
+    },
+    {
+      "id": "E1",
+      "assessment": "Explicit terminal observed latest",
+      "evidence_limit": "Incomplete terminal after about180s; earlier launcher refusals separately recorded.",
+      "next_evidence_action": "Pin final state/durations and distinguish safe stop from useful delivery."
+    },
+    {
+      "id": "E2",
+      "assessment": "Outer update observed; scope limited",
+      "evidence_limit": "3415 consumes f74 exactly once0->1; skipped history not recovered.",
+      "next_evidence_action": "Preserve closure; audit inner successor separately if applicable."
+    },
+    {
+      "id": "E3",
+      "assessment": "NOT DEMONSTRATED as sustained capability",
+      "evidence_limit": "Q6 reselection evidence; no qualifying streak or full repeat witness certified.",
+      "next_evidence_action": "Freeze sequence expectations; reconcile existing repeat evidence first."
+    },
+    {
+      "id": "E4",
+      "assessment": "NOT DEMONSTRATED",
+      "evidence_limit": "Repeated manual code/reload/restart intervention between attempts.",
+      "next_evidence_action": "Only count a declared consecutive sequence with no corrective intervention."
+    }
+  ]
+}
