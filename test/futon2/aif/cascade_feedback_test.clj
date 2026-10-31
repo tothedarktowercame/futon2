@@ -175,8 +175,22 @@
      :outcome :grounded-change
      :accepted-increment {:accepted? :no-acceptance-declared
                           :criterion-step {:id step :source :recorded-decision}}
-     :want-outcome-accounting (want-outcome/receipt {:selected-action action
-                                                     :token-comparison comparison})
+     :want-outcome-accounting (want-outcome/receipt
+                               (cond->
+                                {:selected-action action
+                                 :token-comparison comparison}
+                                 ;; The recorded action's want locators are C4
+                                 ;; checkbox locators, so the two-instrument
+                                 ;; rule applies: this fixture's grounded run
+                                 ;; retains a demo receipt whose pointer names
+                                 ;; the measured revision (artifact-sha), which
+                                 ;; is what lets an observed want reach.
+                                 (= :C4 (:class (val (first
+                                                      (:observation-locators action)))))
+                                 (assoc :demo-receipt
+                                        {:schema :wm/run-output-v1 :status :present
+                                         :demo {:pointer {:sha artifact-sha}
+                                                :replay ["demo -> ok"]}})))
      :d-task-enactment admitted-enactment
      :artifact {:repo "/repo" :commit "abc1234"}}))
 

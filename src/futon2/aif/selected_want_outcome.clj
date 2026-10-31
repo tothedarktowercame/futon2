@@ -7,7 +7,31 @@
 (load-identity/register! *ns* *file*)
 
 (def schema :wm/selected-want-outcome-v1)
-(def classes #{:reached :progressed :blocked :untouched})
+(def classes #{:reached :progressed :blocked :untouched :checkbox-only})
+
+(defn- checkbox-locator?
+  "A C4 declaration over a file: the mission checkbox class. This is the
+  affirmation-shaped instrument whose observed truth says only that the
+  owner ticked a box (MISSION-TEXT-ONLY-WANT-LOCATORS, 2026-10-31)."
+  [locator]
+  (= :C4 (:class locator)))
+
+(defn- c8-locator-retained?
+  "A C8 locator (registered passing run / named command) retained anywhere
+  in the want's own locator set is itself a second instrument."
+  [expected declared after]
+  (boolean (some #(= :C8 (:class %)) [expected declared after])))
+
+(defn- demo-corroborates?
+  "The run's own :run-output demo receipt is a second instrument when it is
+  present and its sha-pinned pointer names the same revision the checkbox
+  was measured at. The demo pointer is the grounded commit, so this binds
+  corroboration to the measured revision, not to any demo anywhere."
+  [demo-receipt after-locator]
+  (and (map? demo-receipt)
+       (= :present (:status demo-receipt))
+       (= (:sha after-locator)
+          (get-in demo-receipt [:demo :pointer :sha]))))
 
 (defn- refuse [reason details]
   {:schema schema :status :refused :reason reason :details details})
@@ -18,7 +42,8 @@
          (= sha256 (field/sha256 (.getBytes (slurp path) "UTF-8"))))
     (catch Throwable _ false)))
 
-(defn receipt [{:keys [selected-action token-comparison mission-observation progress-evidence blockers]
+(defn receipt [{:keys [selected-action token-comparison mission-observation
+                       progress-evidence blockers demo-receipt]
                 :as input}]
   (if (and (contains? input :mission-observation)
            (not= :admitted (:status mission-observation)))
@@ -100,7 +125,24 @@
                                              (Math/abs (- (double (:terminal progress-row))
                                                           (double (:before progress-row))))))
                      blocker-row (first blocker-rows)
+                     ;; Two-instrument rule at measurement (never at
+                     ;; admission): a want measured only by a C4 mission-file
+                     ;; checkbox is promoted to :reached only when the same
+                     ;; run retains a second instrument — the run's sha-pinned
+                     ;; demo receipt at the measured revision, or a C8
+                     ;; locator. Uncorroborated, the observation stays
+                     ;; recorded (:after, as now) but the want is not
+                     ;; promoted: it stays open and selectable.
+                     checkbox? (checkbox-locator? declared-locator)
+                     corroborated?
+                     (or (c8-locator-retained? expected-locator declared-locator
+                                               after-locator)
+                         (demo-corroborates? demo-receipt after-locator))
+                     instrument (when (and observed checkbox?)
+                                  (if corroborated? :corroborated :checkbox-only))
                      classification (cond problem nil
+                                          (and observed checkbox? (not corroborated?))
+                                          :checkbox-only
                                           observed :reached
                                           progress-row (if progress-valid? :progressed :invalid-progress)
                                           blocker-row (if (and (keyword? (:kind blocker-row))
@@ -114,6 +156,7 @@
                                                 :selected-initial-belief)}
                           :after {:observed observed :measurement measurement}
                           :classification classification}
+                   instrument (assoc :instrument instrument)
                    progress-row (assoc :progress-evidence progress-row)
                    blocker-row (assoc :blocker blocker-row)
                    problem (assoc :error problem))))
