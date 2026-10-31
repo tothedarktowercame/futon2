@@ -118,3 +118,205 @@ tie is explained." The tie is explained (mechanism, frequency, and separating
 evidence all demonstrated from retained data). No live witness is owed for
 the explanation; the two one-line retention changes above are the proposed
 smallest follow-ups, owned by whoever takes the row forward.
+
+## Implementation addendum (zai-2, 2026-10-31, same row)
+
+**Correction to the discovery report above.** The ":selected-relation
+:associated" I quoted for adc46631 belongs to the record's *learning*
+section (the pending f74df9cc consumption). The `:outer/selection` map's own
+`:selected-relation` is **`:unknown`** — there is no scoring-time vs
+retention-time divergence. The scoring relation and the retained relation
+agree: the relation class of the picked target was unknown. The cause is
+upstream of the scorer: `focus-receipt/classify-target` returned
+`{:class :unknown, :reason :embedding-node-not-retained}` for
+M-peradam-grounding (stated relation absent, `:no-stated-path-to-a-classified-target`,
+and the futon6 mission-embed corpus — pinned 2026-06-25 — does not contain
+the newer missions). Measured over the pinned field at the record's decision
+time: **501/501 ready targets classify :unknown**.
+
+**Fix (at the cause, not a tie-break).** `known-term-field` now admits the
+relation term on the same rule as the graph terms: a candidate whose relation
+class is not `:focus`/`:associated`/`:useful-elsewhere` is excluded before
+scoring with `:kind :outer-score/relation-unavailable` and a knowledge
+request to `:focus-receipt-classify-target`, mirroring the graph-term
+requests. A pick therefore always has a known ending class, so its kernel can
+never silently degenerate to the stop-the-line kernel. `select` also retains
+`:cascade-picks` (per-cascade pick target or `:no-pick`) beside
+`:cascade-scores`, and an emptied field whose exclusions are relation-only
+refuses `:outer-score/no-known-relation-members` instead of the graph-members
+kind. `outer_score.clj` is untouched.
+
+**Terms now contributing vs still zero.** With a relation-known pick the
+landing is a valued outcome class (`[:related :several]` in the test), push
+mass leaves `[:stop-the-line :none]` (0.625), risk/ambiguity see that mass,
+and Fisher novelty is strictly positive (it was identically 0.0 in every
+degenerate tie). Still zero by design: preference mass on
+`:not-yet-evaluated` (c-kit 0; not terminal), and all non-stopped outcomes
+for a gate-emptied cascade (spec'd no-pick fallback).
+
+**Live consequence (owed witness).** On the current real field every ready
+target classifies :unknown, so the next live click will refuse
+`:outer-score/no-known-relation-members` with 501+ relation knowledge
+requests naming `:focus-receipt-classify-target`. That refusal is the honest
+surface Joe's rule demands; unblocking ordinary clicks needs the relation
+evidence (refresh the futon6 mission embedding corpus or declare relations),
+not a scoring workaround.
+
+**Tests.** New namespace `futon2.aif.outer-relation-admission-test` (4
+tests, 20 assertions): the adc46631 bad case (all-:unknown field from the
+retained record's values) now refuses typed; the separating case (real
+retained :associated for M-pattern-retrieval-calibration, as runs
+d5b9b513/e71c7380 actually classified) picks it, retains picks, separates
+scores and shows positive novelty; mixed-field admission and request
+retention. The bad case was watched failing open on pre-fix code: three-way
+score tie, live pick scored with `[:stop-the-line :none]` mass 1.0.
+`reading-format-reselect-test`'s frozen-field expectations encoded the old
+degenerate behaviour (first ready candidate with :unknown relation selected)
+and were updated to the relation-known picks the fix yields
+(M-pattern-retrieval-calibration, replacement
+M-interim-director-proxy-metric-inventory) — 4 tests, 37 assertions green.
+Pre-existing failures outside this row, named and left:
+`outer-select-test`'s `real-giraffe-selection-demonstration` (pinned 2026-10-28
+Giraffe run no longer verifies) and `outer-selection-wiring-test` (7
+assertions, fixture targets M-selected/M-unknown absent from the live
+registry; identical on origin/main), plus `m2l-outer-selection-ask-test`
+(identical failure on origin/main).
+
+## Addendum 2 (2026-10-31, follow-up requisition): the 501/501 claim is RETRACTED — probe artifact
+
+Claude-1 challenged the "501/501 ready targets classify :unknown" claim. The
+challenge is correct. The earlier probe ran without `resources/` on the
+Clojure `:paths`, so `focus-receipt/read-inputs` returned `:absent` and every
+target classified :unknown for want of any relation rows or embedding pins.
+Re-run read-only with the resource on the classpath (`clojure -Sdeps '{:paths
+["src" "resources" "/home/joe/code/futon3c/src"]}'`, `FUTON_WM_RUN_RECORD_DIR`
+temp), real `classify-target`:
+
+- Newest canonical field (`storage/giraffe/20261031T201627.802Z-2c37678e`,
+  594 admitted targets): **121 :associated, 7 :focus, 466 :unknown**
+  (reasons: 239 :relation-not-declared [mostly E- targets, no channel],
+  100 :repair-target-absent, 79 :embedding-node-not-retained,
+  38 :no-parent-relation, 10 :repaired-target-unknown).
+- adc46631's own retained admitted list (552 targets): **103 :associated,
+  5 :focus, 444 :unknown**.
+
+So the next live click does NOT face a wholesale refusal; the fix's
+`:outer-score/no-known-relation-members` refusal applies only to a field with
+zero relation-known members, which the real field is not. The tie mechanism
+itself stands unchanged: adc46631's picks were relation-unknown targets
+(its selected `M-peradam-grounding` is :unknown :embedding-node-not-retained
+— its stem is absent from the pinned 198-stem corpus), and every degenerate
+kernel scored bit-identically.
+
+**Why d5b9b513/e71c7380 retained `:selected-relation :associated`.** Their
+selected target `M-pattern-retrieval-calibration` classifies :associated
+through the **embedding-neighbour channel**: its stem IS in the pinned
+2026-06-25 `mission-structure-embed` corpus, and the only relations rows
+whose stems are also in that embedding (`M-action-cost-modelling`,
+`M-aif4iad`, `M-futonzero-generative` — all "associated") supply the row.
+No cosine floor is declared (`:floor {:absent :no-floor-declared}`), so even
+cosine −0.014 (nearest neighbour `M-action-cost-modelling`) yields
+:associated. The deciding input is the **pinned embedding corpus membership**
+plus the row∩embedding intersection — nothing changed between 17:14Z and
+18:54Z; the two runs simply picked a retained-stem target while adc46631's
+degenerate menu picks landed on unretained-stem targets.
+
+## Supply: what refreshes relation evidence
+
+Chain (all read-only except the two writes named):
+
+1. `futon6/scripts/diffsub_scope_dump.py` — bounded per-binder queries
+   against the substrate-2 Reads service on **localhost:7071**; writes
+   `futon6/data/diffsub-scopes.json`. No model calls; seconds. **This file is
+   the stale link: mtime 2026-06-09, 198 missions.** The service is DOWN
+   right now (7070/7072/7073 up, 7071 connection refused), so the refresh
+   could not be exercised end-to-end this session.
+2. `futon6/scripts/mission_structure_embed.py --out DIR` — deterministic
+   feature-vector build (numpy, zero model calls; MiniLM text vectors are a
+   read-only baseline). Rebuilt to a temp root in **0.25 s**. On the current
+   (stale) scope census it reproduces exactly 198 stems, so the classify
+   counts are unchanged (121/7/466): refreshing the embedding alone adds
+   nothing; the scope census is the bottleneck, and only missions present in
+   substrate-2 gain stems at all.
+3. `futon2/resources/wm/focus/commit-facets-v1.json` pins both corpus files
+   by sha256, re-hashed at read time. **Writing the canonical corpus without
+   a same-commit re-pin breaks the next click** (`:embedding-pin-mismatch`),
+   so a canonical refresh is one futon2 commit: corpus rebuild + resource
+   re-pin, atomically. Between clicks, only temp-root rebuilds are safe.
+
+## Honest interim: unknown-as-ignorance in outer-score
+
+`outer_score.clj` can already express it: the endings vocabulary includes
+`:not-yet-evaluated`. Mapping an unknown relation class to a
+`:not-yet-evaluated` landing (instead of `ending-class`'s current nil →
+`[:stop-the-line :none]`) yields a non-degenerate kernel — real ambiguity,
+positive novelty, and `r + ambiguity − novelty` information gain that
+separates unknown-relation picks from deliberate stops and from each other.
+It is a one-clause policy change in `ending-class` plus tests, not a
+structural change; it contradicts no current exclusion (candidates would
+score rather than be excluded, so it is an alternative to 0513d1ea8's
+exclusion, to be chosen by policy). Untouched here: outer_score.clj is
+frozen by other rows this round.
+
+## Addendum 3 (2026-10-31, decision round): exclusion removed; :not-yet-evaluated landing measured inadmissible — Lean mismatch named
+
+Per claude-1's decision the relation exclusion and the
+`:outer-score/no-known-relation-members` refusal are REMOVED (commit on this
+branch): a relation-unknown candidate stays in the field, and `select`
+retains `:cascade-pick-relations` — per cascade pick `{:target, :relation,
+:relation-known?}` — so a scored stop resting on an unknown relation reads as
+ignorance in the record.
+
+**The mathematics, measured on the real fields before coding.** With the
+c-kit as canonical (`:not-yet-evaluated 0`, κ=100 → counts 55/35/5/5/0,
+matching DarkTower `R20Step.kit`; `addEnding` never increments
+notYetEvaluated), mapping an unknown relation onto a `:not-yet-evaluated`
+landing gives every pick with reach > 0 **risk ⊤ (`:inadmissible`)**: the
+prediction has positive mass on `[:not-yet-evaluated g]` where preference
+mass is exactly 0, so `Σ q·ln(q/c)` diverges. Measured on the real
+20261031T201627 field, unknown-relation picks (M-peradam-grounding, reach
+1/2): scores `[:inadmissible :inadmissible 3.3245]` — and `select` refuses
+`:cascade-score-inadmissible` if ANY cascade is inadmissible, i.e. a
+wholesale menu refusal, exactly what Joe's rule forbids. Zero preference
+does not silently dominate; it is ⊤. With a counterfactual waiting count of
+5 (NOT in the kit), the score is finite (3.4119) but WORSE than the
+relation-known pick (2.9163) and worse than the degenerate stop (3.3245):
+risk ln(q/c) penalises ignorance, so the mapping would not make selection
+favour ignorance — novelty is landing-label-invariant, so it never prefers
+ignorance per se. But the counterfactual is not the theory.
+
+**The Lean mismatch, named.** DarkTower states the ending map and it does
+NOT send unknown to notYetEvaluated: `CTauClassPreference.scorerClass`
+(.focus→focused, .associated→related, .useful-elsewhere→unrelated,
+**.other→none**, CTauClassPreference.lean:133-137);
+`R15StrategicTarget.outcomeClass` maps scorerClass none → the
+`.stopTheLine` landing (R15StrategicTarget.lean:89-92); `R20Step.outerModel`
+/ `outerNovelty` then use `(.stopTheLine, .none)` (R20Step.lean:405+).
+`R20Step.kit` puts 0 mass on notYetEvaluated by design ("no mass on
+notYetEvaluated") and `addEnding` never adds any; `outerPreferenceKernel`
+requires strictly positive counts (`outerPreferenceKernel_mass_pos` needs
+C_pos for ALL endings). The theory's own use of notYetEvaluated is the
+pre-horizon *waiting* preference (`CTauClassPreference.classPreference` =
+waitingPreference for tau < horizon), not a scoreable landing for unknown
+relations. So the current Clojure `ending-class` (unknown → nil → stop
+landing) IS Lean-aligned, and the requisitioned mapping would diverge from
+DarkTower and refuse the menu. To score ignorance as ignorance *and* select,
+the theory must change first (a waiting-mass kit amendment or a scoreable
+unknown ending in scorerClass) — above this row.
+
+**Real-field result with the decision applied** (both fields,
+learned-state kits): full field admitted (adc46631 field: 552, current
+field: 547; 47 graph-excluded); every cascade's pick is M-peradam-grounding
+(relation :unknown, `:relation-known? false` retained); three-way score tie
+at 3.3245 (degenerate stop kernel, as the Lean dictates for unknown
+relations); `:tie? false` (same-pick tie, not a choice tie). Ignorance is
+now visible as ignorance; the tie itself returns whenever the field head is
+relation-unknown — removing it needs relation evidence (scope census
+refresh, addendum 2) or the theory change above, not a scoring workaround.
+
+Tests: `outer-relation-admission-test` rewritten for the decision (4 tests,
+21 assertions green; watched failing on the pre-change code: 1 failure,
+2 errors); `reading-format-reselect-test` expectations updated from the real
+frozen-field behaviour (first choice M-typed-memories relation-unknown,
+replacement M-peradam-grounding) — 4 tests, 37 assertions green.
+clj-kondo clean; check-parens OK.

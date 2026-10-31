@@ -68,7 +68,7 @@
         observation (assoc observation :relation (fn [_ t] (get relation-classes t)))
         makeup (outer-state/load-makeup)
         first-choice (outer-select/select makeup state observation)
-        selection-state (atom {:task {:id "M-typed-memories"} :outer/selection first-choice})
+        selection-state (atom {:task {:id "M-pattern-retrieval-calibration"} :outer/selection first-choice})
         persisted (atom [])
         opts {:reading-reselection/state selection-state}
         port (runtime/reading-reselection-port makeup state observation first-choice
@@ -78,6 +78,13 @@
         replacement (port refusal)
         retained (:outer/selection @selection-state)
         target (get-in retained [:selection :selected :target])]
+    ;; TIED-OUTER-CASCADES (2026-10-31, decision round): a relation-unknown
+    ;; candidate is admitted, so the frozen field's first choice is
+    ;; M-typed-memories (relation :unknown -- its stop landing is retained
+    ;; with :relation-known? false in :cascade-pick-relations); after the
+    ;; reading refusal the replacement is the next ready candidate
+    ;; M-peradam-grounding (also relation-unknown here: scored as the stop
+    ;; landing with :relation-known? false -- ignorance as ignorance).
     (is (= "M-typed-memories" (get-in first-choice [:selection :selected :target])))
     (is (= "M-peradam-grounding" target))
     (is (= target (:target replacement)))

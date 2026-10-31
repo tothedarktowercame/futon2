@@ -41,33 +41,64 @@
                          :matched-run-ids (mapv :run-id matched)}))))
             candidates))))
 
+(defn- relation-class
+  "The relation class the scorer would see for TARGET, or ::no-relation-fn
+  when the observation carries no relation function at all (pure unit
+  fixtures; the production scoring path always supplies one, and a nil
+  function cannot be scored -- `ending-class` would throw)."
+  [observation target]
+  (let [relation (:relation observation)]
+    (if (fn? relation)
+      (relation (:focus observation) target)
+      ::no-relation-fn)))
+
+(defn- known-relation?
+  [class]
+  (contains? #{:focus :associated :useful-elsewhere} class))
+
 (defn known-term-field
-  "Supply R20Step.applySelectionStep only the known-term subset; retain the
-  excluded population and its knowledge requests separately, without zeroes."
+  "Supply R20Step.applySelectionStep the known-term subset; retain the
+  excluded population and its knowledge requests separately, without zeroes.
+
+  TIED-OUTER-CASCADES (2026-10-31, rev per claude-1 decision): the relation
+  term is NOT an admission gate -- a relation-unknown candidate stays in the
+  field (Joe's rule: the machine must not abstain, and a small field is a
+  failure).  Ignorance is retained beside each pick instead: `select`
+  records `:cascade-pick-relations`, so a scored stop that rests on an
+  unknown relation reads as ignorance in the record, not as a deliberate
+  stop.  The earlier revision's `:outer-score/relation-unavailable`
+  exclusion and the `:outer-score/no-known-relation-members` refusal are
+  removed; mapping an unknown relation onto a `:not-yet-evaluated` landing
+  was measured on the real fields and is inadmissible (c-kit preference 0
+  gives risk ⊤ for every pick with reach > 0), which would refuse the whole
+  menu -- see the row report, addendum 3."
   [{:keys [field facts]}]
-  (reduce
-   (fn [result candidate]
-     (let [target (:target candidate)
-           fact (if (fn? facts) (facts target) (get facts target))
-           graph (:graph-terms fact)
-           terms (filterv #(or (= :unknown (:status graph))
-                               (not (nat-int? (get fact %)))) [:cone :unblocks])]
-       (if (empty? terms)
-         (update result :field conj candidate)
-         (let [reason (or (:reason graph) :graph-term-not-observed)
-               request {:kind :outer-score/graph-term-knowledge-request
-                        :target target :producer (or (:producer graph) :dependency-reader-reviewer)
-                        :terms terms :reason reason
-                        :prerequisites (:prerequisites graph)
-                        :scope (select-keys graph [:scope :population-sha :coverage])}]
-           (-> result
-               (update :excluded conj
-                       {:kind :outer-score/graph-term-unavailable :target target
-                        :terms (mapv (fn [term] {:term term :reason reason
-                                                :prerequisites (:prerequisites graph)}) terms)
-                        :graph-terms graph :knowledge-producer-request request})
-               (update :requests conj request))))))
-   {:field [] :excluded [] :requests []} field))
+  (let [graph-exclusion
+        (fn [result target _fact graph terms]
+          (let [reason (or (:reason graph) :graph-term-not-observed)
+                request {:kind :outer-score/graph-term-knowledge-request
+                         :target target :producer (or (:producer graph) :dependency-reader-reviewer)
+                         :terms terms :reason reason
+                         :prerequisites (:prerequisites graph)
+                         :scope (select-keys graph [:scope :population-sha :coverage])}]
+            (-> result
+                (update :excluded conj
+                        {:kind :outer-score/graph-term-unavailable :target target
+                         :terms (mapv (fn [term] {:term term :reason reason
+                                                  :prerequisites (:prerequisites graph)}) terms)
+                         :graph-terms graph :knowledge-producer-request request})
+                (update :requests conj request))))]
+    (reduce
+     (fn [result candidate]
+       (let [target (:target candidate)
+             fact (if (fn? facts) (facts target) (get facts target))
+             graph (:graph-terms fact)
+             terms (filterv #(or (= :unknown (:status graph))
+                                 (not (nat-int? (get fact %)))) [:cone :unblocks])]
+         (if (seq terms)
+           (graph-exclusion result target fact graph terms)
+           (update result :field conj candidate))))
+     {:field [] :excluded [] :requests []} field)))
 
 (defn select
   "Score the makeup's cascade menu and return Lean `step` selection fields.
@@ -127,6 +158,31 @@
          :cascade-index index
          :cascade-id (:id chosen)
          :cascade-scores scores
+         ;; TIED-OUTER-CASCADES: retain each cascade's pick beside its score,
+         ;; so a tied score reads as same-pick, degenerate, or genuine
+         ;; without replaying the field.
+         :cascade-picks (mapv (fn [{:keys [steps]}]
+                                (let [p (outer-score/cascade-pick
+                                         steps (:facts observation) (:field observation))]
+                                  (if p (:target p) :no-pick)))
+                              menu)
+         ;; TIED-OUTER-CASCADES (claude-1 decision): retain beside each pick
+         ;; whether its relation was known, so a scored stop resting on an
+         ;; unknown relation reads as ignorance in the record.  ::no-relation-fn
+         ;; observations (pure fixtures with no relation producer) retain
+         ;; {:relation ::no-relation-fn}.
+         :cascade-pick-relations
+         (mapv (fn [pick]
+                 {:target pick
+                  :relation (if (= :no-pick pick) :no-pick
+                                (relation-class observation pick))
+                  :relation-known? (if (= :no-pick pick) nil
+                                       (known-relation? (relation-class observation pick)))})
+               (mapv (fn [{:keys [steps]}]
+                       (let [p (outer-score/cascade-pick
+                                steps (:facts observation) (:field observation))]
+                         (if p (:target p) :no-pick)))
+                     menu))
          :selection (when picked {:candidates (:field observation)
                                   :selected picked})
          :prediction (when picked
