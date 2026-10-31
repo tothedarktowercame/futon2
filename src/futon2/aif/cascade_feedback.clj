@@ -206,6 +206,65 @@
           :path (.getPath file)
           :receipt/id (:receipt/id receipt)})))))
 
+(def revision-projection-schema :wm/retained-cascade-revision-v1)
+
+(defn- revision-pattern-ids
+  [precedence]
+  (vec (for [p precedence] (if (map? p) (:id p) p))))
+
+(defn- revised-cascade-projection
+  "Project ONE close receipt's :cascade-revision into the compact form a
+   later construction reads. Only a :revised revision projects; a :refused
+   or absent revision never becomes a candidate. The full original/revised
+   candidates stay in the event; the projection carries just the pattern
+   order, the delta against the parent, and the provenance a later run
+   retains to show it considered and used the revision."
+  [event]
+  (let [rev (:cascade-revision event)]
+    (when (and (map? rev) (= :revised (:status rev)))
+      (let [history (:history rev)
+            parent (first history)
+            child (second history)
+            parent-patterns (set (:patterns parent))
+            child-patterns (set (:patterns child))]
+        ;; A content no-op (same pattern set as the parent, packet 1's
+        ;; revise-time refusal) is never projected even if such a record
+        ;; exists: it is not a way out of anything.
+        (when (not= parent-patterns child-patterns)
+          {:schema revision-projection-schema
+         :receipt/id (:receipt/id event)
+         :run/id (:run/id event)
+         :target (:target event)
+         :blocker-kind (get-in rev [:blocker :kind])
+         :parent {:identity (:identity parent)
+                  :patterns (:patterns parent)}
+         :patterns (:patterns child)
+         :precedence (revision-pattern-ids
+                      (get-in rev [:revised :precedence]))
+         :delta (:delta rev)})))))
+
+(defn retained-revision-candidates
+  "Revised cascades a later construction for TARGET may consider. METADATA
+   is the target's construction-metadata entry (as cascade-problems holds
+   it under [:pattern-feedback target]); the full by-target map also
+   works. The per-target entry is authoritative
+   and there is no global fallback, because a revision is target-local.
+   The newest revision per distinct pattern set wins; an older revision of
+   the same set is superseded, never both."
+  [metadata target]
+  (let [entries (or (:revised-cascades metadata)
+                    ;; tolerate the full by-target map too
+                    (get-in metadata [target :revised-cascades]))]
+    (vec
+     (for [[_ group] (group-by (comp set :patterns) (reverse entries))]
+       (let [newest (first group)]
+         {:precedence (:precedence newest)
+          :patterns (:patterns newest)
+          :delta (:delta newest)
+          :provenance (select-keys newest
+                                   [:schema :receipt/id :run/id :target
+                                    :blocker-kind :parent :delta])})))))
+
 (defn construction-metadata
   "Project retained close receipts into target-local construction metadata.
    Counts separate successful, incomplete, no-want-effect, and selected-only
@@ -248,7 +307,8 @@
                  :global-patterns global
                  :latest (select-keys (last events)
                                       [:receipt/id :run/id :mission-state :blocker
-                                       :cascade-revision :artifact])}]))
+                                       :cascade-revision :artifact])
+                 :revised-cascades (vec (keep revised-cascade-projection events))}]))
         (seq global)
         (assoc :wm/global
                {:schema metadata-schema :scope :global

@@ -105,6 +105,38 @@
      :precedence (mapv :pattern nodes)
      :alternatives (vec (keep :rejected-alternative reading))}))
 
+(defn retained-cascade
+  "Arrange the reading's validated nodes in a RETAINED REVISION's pattern
+   order (DIFFICULTY-REVISES-CASCADE consumption). Precedence ids may be
+   keywords or strings; reading refs are strings. Returns
+   {:status :constructed :cascade c} with the retained order, or
+   {:status :refused :kind :pattern-not-in-reading :patterns [...]} naming
+   the ids the CURRENT analysis does not validate. Never invents a node:
+   a pattern the current reading did not cite cannot enter the cascade."
+  [analysis precedence-ids]
+  (let [fragments (fragment-records analysis)
+        node-by-pattern
+        (reduce
+         (fn [acc [i fragment ref]]
+           (if (and (validated-ref? ref) (not (contains? acc (:id ref))))
+             (assoc acc (:id ref) (node i fragment ref))
+             acc))
+         {}
+         (for [[i fragment] (map-indexed vector fragments)
+               ref (:pattern_refs fragment)]
+           [i fragment ref]))
+        wanted (vec (map #(if (keyword? %) (subs (str %) 1) %) precedence-ids))
+        missing (vec (sort (remove #(contains? node-by-pattern %) wanted)))]
+    (if (seq missing)
+      {:status :refused :kind :pattern-not-in-reading :patterns missing}
+      (let [nodes (mapv node-by-pattern wanted)
+            edges (mapv role-edge nodes (rest nodes))]
+        {:status :constructed
+         :cascade {:nodes nodes
+                   :edges edges
+                   :precedence (mapv :pattern nodes)
+                   :alternatives []}}))))
+
 (defn analysis->cascades
   "Return every cascade supported by ANALYSIS and counted conversion failures.
    MODE is :alternatives (default) or :overlap. Zero validated refs is a

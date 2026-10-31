@@ -4,7 +4,8 @@
   placeholder policy. Habit E is attached by the selector from the enactment
   fold under each policy's structural reading-policy key (cascade-habit-store
   policy-view); a ranked entry carries no E of its own before that."
-  (:require [futon2.aif.cascade-shape-g :as shape-g]
+  (:require [futon2.aif.cascade-feedback :as cascade-feedback]
+            [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.selected-mission-contract :as mission-contract]
             [futon2.aif.occurrence-index :as occurrence-index]
             [futon2.aif.wm.family-canonical-g :as canonical-g]
@@ -85,7 +86,12 @@
                :certificate certificate))
       (= :canonical-coapply (:g-law score))
       (assoc :g-law :canonical-coapply :legacy-g (:legacy-g score)
-             :horizon-choice (:horizon-choice score)))))
+             :horizon-choice (:horizon-choice score))
+      ;; DIFFICULTY-REVISES-CASCADE consumption: what selection reads names
+      ;; the retained revision a candidate policy came from, only when it
+      ;; did.
+      (:retained-revision policy)
+      (assoc :retained-revision (:retained-revision policy)))))
 
 (defn constructed-key
   "The structural key of a family policy as constructed: the scored
@@ -159,7 +165,7 @@
   no graph path every target fails :graph-path-not-supplied."
   [{:keys [target-sources reading-root graph-path retraction
            occurrence-square-root pattern-texts pattern-library-root
-           require-occurrence-squares?]}]
+           require-occurrence-squares? pattern-feedback]}]
   (let [loaded (if (some? graph-path)
                  (graph-pin/load-pinned graph-path)
                  {:status :refused :kind :graph-path-not-supplied})
@@ -208,7 +214,17 @@
                          (update (target-family/policy-family
                                   {:reading reading :graph (:graph loaded)
                                    :occurrence-squares (or squares {:entries {}})
-                                   :retraction retraction})
+                                   :retraction retraction
+                                   ;; DIFFICULTY-REVISES-CASCADE
+                                   ;; consumption: the target's retained
+                                   ;; :revised cascades become candidate
+                                   ;; policies on this, the production
+                                   ;; reading-policy route. Target-local;
+                                   ;; no global fallback.
+                                   :retained-revisions
+                                   (when pattern-feedback
+                                     (cascade-feedback/retained-revision-candidates
+                                      (get pattern-feedback target-id) target-id))})
                                  :policies (fn [policies]
                                              (mapv #(cond-> % contract
                                                       (assoc :mission-want-contract contract))
@@ -247,7 +263,8 @@
                 :pattern-texts occurrence-square-pattern-texts
                 :pattern-library-root pattern-library-root
                 :require-occurrence-squares? require-occurrence-squares?
-                :retraction target-policy-retraction})
+                :retraction target-policy-retraction
+                :pattern-feedback (:pattern-feedback config)})
         config-view (select-keys config
                                  [:target-reading-root :pattern-graph-path
                                   :occurrence-square-root :pattern-library-root

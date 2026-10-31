@@ -28,7 +28,8 @@
     5 :beta-not-declared            no declared β for the target's context
 
   A missing :horizon-steps refuses ALL targets (:horizon-not-declared)."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.aif.cascade-feedback :as cascade-feedback]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.live-c :as live-c]))
 
@@ -144,7 +145,17 @@
                               ;; current problem.  Prior runs are evidence
                               ;; about pattern use, never a canonical
                               ;; declaration or a replacement candidate.
-                              feedback (assoc :pattern-feedback feedback)))]
+                              feedback (assoc :pattern-feedback feedback)
+                              ;; DIFFICULTY-REVISES-CASCADE consumption: the
+                              ;; retained :revised cascades for THIS target
+                              ;; join construction as candidates (compiled
+                              ;; from current interpretations, competing
+                              ;; under the same G).
+                              (seq (cascade-feedback/retained-revision-candidates
+                                    feedback target))
+                              (assoc :retained-revisions
+                                     (cascade-feedback/retained-revision-candidates
+                                      feedback target))))]
       (if (= :constructed (:status result))
         {:candidates (mapv #(cond-> (assoc-in %
                                               [:construction-receipt :unknown-read-as-not-established]
