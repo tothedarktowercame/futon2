@@ -2,7 +2,17 @@
 
 This is a coordination checkpoint, not a new spec, runtime gate, or certification. It corrects the earlier use of deficit-row counts as though they measured whole-machine criteria compliance.
 
-## Accounting and direction
+## Current update after evidence reconciliation
+
+At tracker commit `fffe320bf`, **8 of 24 deficit rows are closed; 16 remain non-closed**. B1-TICKETS and E3-OUTER-REPEAT closed on existing live evidence. This does not establish eight whole criteria or an intervention-free loop. The sections below retain the original six-closed snapshot as history; this update supersedes its accounting and pending B1/E3 reconciliation actions.
+
+[Closure decision and corrected evidence](reconciliation/CLOSURE-decision-B1-E3-2026-10-31.md) distinguish the exact 608 field (544 admitted / 64 excluded / all 188 live tickets admitted) from census exclusions, and the two E3 run pairs and predicates.
+
+R28 remains an evidence judgment, not an authorization to build another retention field. A retry did occur. The selection-route `not-applicable` field does not establish loss of the occurrence-square reading. Judge the retained record against the written condition before proposing a repair.
+
+Priority 2 is dispatched to Kimi 象-2 as `invoke-1793414052868-8579-a7748c85`, with requisition M-war-machine: review the one-attempt cap, integrate if approved, and return recovery readiness. Accepted/queued is the last observed dispatch state, not proof of implementation. That packet authorizes no live click. Last reported budget is 14, with no fresh live budget assertion here.
+
+## Accounting and direction (original snapshot)
 
 - The adopted checklist has **20 criteria, A1–E4**. No full twenty-row passing run or intervention-free loop is established here.
 - The deficit tracker has **24 rows: 6 explicitly CLOSED, 18 not CLOSED**. These are subproblems, not the twenty criteria. Several remaining rows have historical or stale dispositions.

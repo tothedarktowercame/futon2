@@ -59,7 +59,7 @@
       "next_action": "Retain a live unchanged-input prevention witness; changed-input continuation is now observed.",
       "closure_condition": "Live cross-run observation demonstrates unchanged refused inputs prevented before author dispatch; changed-input continuation retains differing identities. Implementation, load, and synthetic clone alone do not close this row.",
       "checkpoint_category": "NOW: retained-record audit",
-      "checkpoint_action": "Compare Q6 refusal/reselection in3415 against this row\u2019s exact identity and pre-dispatch predicates; do not equate Q6 and reading-repeat without the join."
+      "checkpoint_action": "Compare Q6 refusal/reselection in3415 against this row’s exact identity and pre-dispatch predicates; do not equate Q6 and reading-repeat without the join."
     },
     {
       "id": "B5-INJURIES-HOLD-RUN001",
@@ -83,7 +83,7 @@
       "next_action": "S4b in slices, one phase per packet with its receipt payload grammar: locate, evaluate (exact medic findings incl. controls), qualification review (distinct seat), retire-correction (resolve-context + transact-medic-disposition!). Then S4c (choice at route! before prepare-repair, sealed in work order), S5-S7.",
       "closure_condition": "All S1-S7 of E-self-heal-cascade.md observed: applicable repair cascades fill :self-heal as candidate policies scored by existing filled-META-policy G, no new scorer; retain pattern-step effects and closing records; one live injury repaired through the G-selected cascade with per-cascade G in its click record. This does not alone close GRID E4 across-run conservation. 2026-10-29 practice (S1, S5 input): live clicks and read-only preflights found and repaired these self-heal process defects, each with receipts under ~/notes/wm-next/criteria-completeness/: retry bound to the wrong injury, source-blind and static-unchecked acceptance correction, test delivery by escaped string, unbounded and untraced acceptance return, unsatisfiable test admitted, author commits on canonical main (now per-version worktrees and reviewed range cherry-pick with clean reload), receipts read by position, enacted repairs never acknowledged (now enacted-acceptance replay on the retained red admission, PhaseReplayReceipt), retry verdicts lost for other-injury/medic-recurrence retries. Discharged: 9c622038 (end-to-end machine repair, ledger 103-106), ad038c48 (replay, 107), 2aef (replay, 108). Still open for E4: S4b remaining slices, S5 per-step rows, S6, S7; the pattern drafts in futon3/library/self-heal/ should now be corrected from these receipts.",
       "checkpoint_category": "DEFERRED: design programme",
-      "checkpoint_action": "Keep S1\u2013S7 programme parked; present recovery work does not implement G-selected repair cascades or close E4."
+      "checkpoint_action": "Keep S1–S7 programme parked; present recovery work does not implement G-selected repair cascades or close E4."
     },
     {
       "id": "A2-RELATIVE-STORE-ROOTS",
@@ -351,5 +351,48 @@
       "evidence_limit": "Repeated manual code/reload/restart intervention between attempts.",
       "next_evidence_action": "Only count a declared consecutive sequence with no corrective intervention."
     }
-  ]
+  ],
+  "latest_status": {
+    "as_of_commit": "fffe320bf",
+    "tracker_sha256": "ad0c1af7874e6efedf0307e55aa4c9b0e793e4d9163e2ae81588142ca121e0dc",
+    "closed_deficit_ids": [
+      "B1-TICKETS",
+      "B4-OUTER-PREDICTION",
+      "E2-OUTER-LEARNING",
+      "E3-OUTER-REPEAT",
+      "B1-READINESS-PROMPT-LIMIT",
+      "C3-B2-ANSWER-DELIVERY",
+      "D1-SELECTED-WANT-REVISION-EVIDENCE",
+      "B2-SELECTED-TARGET-READING-RESPONSE"
+    ],
+    "nonclosed_deficit_ids": [
+      "E3-T12",
+      "B2-D4-R28",
+      "B5-INJURIES-HOLD-RUN001",
+      "E4-SELF-HEAL-CASCADE",
+      "A2-RELATIVE-STORE-ROOTS",
+      "E4-ACCEPTANCE-PUBLICATION-ISOLATION",
+      "E4-WORK-ORDER-NIL-RETURN-LIMIT",
+      "E4-E43-CAUSE-SCOPE",
+      "E4-TERMINAL-INGESTION-IDENTITY",
+      "C3-AUTHOR-REPOSITORY-HISTORY",
+      "E4-F7E97-ACCEPTANCE-SCOPE",
+      "C4-FULLY-QUALIFIED-STORE-DETECTION",
+      "D4-MEDIC-ONLY-REPORTING",
+      "D4-READING-REFUSAL-FINDING-CONTEXT",
+      "OUTER-LEARNING-SKIPPED-RUNS",
+      "OUTER-DISPATCH-CLASSIFICATION-ABSENT"
+    ],
+    "criterion_count": 20,
+    "whole_criterion_pass_count": "not established",
+    "recovery_dispatch": {
+      "agent": "象-2",
+      "job": "invoke-1793414052868-8579-a7748c85",
+      "state_at_dispatch": "accepted/queued",
+      "scope": "Review cap, integrate if approved, establish recovery readiness; no live POST authorized in this packet"
+    },
+    "r28_judgment": "OPEN pending written-condition evidence judgment. Retry occurred; selected-target-reading is a distinct producer. No new field-specific requirement adopted.",
+    "decision": "reconciliation/CLOSURE-decision-B1-E3-2026-10-31.md",
+    "historical_snapshot_note": "Top-level snapshot retained unchanged; latest_status supersedes its current accounting."
+  }
 }
