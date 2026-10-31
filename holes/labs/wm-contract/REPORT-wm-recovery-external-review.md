@@ -172,3 +172,50 @@ Probe readiness never established admission readiness; the reconciliation's
   the click; no reload performed. Review boundary: the service entry
   `runner-service/click!`, not the HTTP transport.
 
+## Update 2026-10-31 (later): descriptor typing fix merged + reloaded; review corrections
+
+- **Corrections to the direct-repair packet, per zai-5's independent review**
+  (`run001/renewed-click-02-admission-fixed/descriptor-typing-review-2026-10-31.md`,
+  dispatch codex-11 8531; approval of `c96bd9871` relayed in 8533):
+  - The author contract requiring the **full 40-hex SHA was already explicit
+    in the pre-fix prompt** (`open-cascade-author-prompt`, main `9d43b702b`);
+    the 9-char `8561ecdc7` was a violation of a written contract. The
+    machine's `:author-delivery-wrong-repository` classification remains
+    **false** (bytes were on canonical main ~19.5 h pre-click). We do **not**
+    claim the actually dispatched author prompt was retained or re-examined;
+    the contract statement is cited from source at the pinned revision.
+  - Red-count correction: on unpatched base `9d43b702b` the descriptor test
+    fails **8 assertions, not 6** (reviewer's isolated rerun; the two
+    `:supplied-commit`-retention / no-location-scan control assertions at
+    lines 65–66 also fail pre-fix). Green on fix: 4 tests / 22 assertions.
+    The reviewer's earlier "2 effective injuries" is **retracted** — it
+    counted the two top-level map keys of the accessor result; the correct
+    effective active count is **1** (`injury/adf04df0…`), matching the
+    serving resolution.
+- **Merge + serving reload (dispatch codex-11 8533):** approved exact SHA
+  `c96bd9871a7f9af95f35d73528dd67dacc8b52e8` merged `--no-ff` to futon2 main
+  as `f9d40b6e8`, pushed; concurrent untracked evidence files preserved
+  (merge touched only the three committed paths). Under the actual serving
+  acceptance-lock/idleness guard (`:running? false`, `:phase nil`,
+  provider `{generation 0, provider nil}`) the two changed production
+  namespaces were reloaded from canonical (`(require 'ns :reload)` via the
+  drawbridge loader; JVM classpath resolves `futon2.aif.*` to
+  `/home/joe/code/futon2/src` at `f9d40b6e8`): `futon2.aif.wm.cascade-patch-delivery`
+  and `futon2.aif.full-loop-runtime`. Neither namespace holds top-level
+  mutable state or `defonce` (all atoms are function-local), so the reload is
+  state-neutral. Live code identity verified: `commit-descriptor-error` present
+  with the adf04df0 docstring; the emitting check contains
+  `:author-delivery-invalid-descriptor`; the loaded author prompt states the
+  full-SHA rule.
+- **Protected bytes:** no ledger mutation, POST, credit spend or repair
+  attempt in this packet. Ledger re-read after reload: `:status :loaded`,
+  130 entries, sha256 `ca73914f0c26fb1435a0497398a191302c46da705dc09da7724b4f4998371a44`
+  (identical to the post-click pin). Budget unchanged 243/229/14.
+- **Terminal-classification followup stays separate:** the reviewer's typed
+  abstention proposal (`:outcome :abstained` for descriptor misses) conflicts
+  with the Joe rule that WM must not abstain, and is **not implemented**.
+  The existing bounded correction mechanism (exact `[injury-id ordinal]`
+  medic corrections) remains the supported relabeling path; nothing widened
+  here. A future descriptor miss will mint a new typed injury
+  (`:author-delivery-invalid-descriptor`) rather than a false wrong-repo one.
+
