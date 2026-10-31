@@ -195,7 +195,8 @@
   or interpreter is called. Receipts report :token-set-not-supplied to the existing
   construction policy: supplying observation locators/check policies is later work."
   [{:keys [target want observation interpretations interpretation-receipts
-           budget horizon move-cost evaluate-g pattern-feedback] :as input}]
+           budget horizon move-cost evaluate-g pattern-feedback
+           retained-revisions] :as input}]
   (cond
     (not (and (map? budget) (integer? (:max-moves budget)) (<= 0 (:max-moves budget))
               (pos-int? (:max-expansions budget)))) (refuse :budget-required)
@@ -210,6 +211,68 @@
       (if (not= :supported (:status supported))
         supported
         (let [{:keys [findings compiled search tokens established]} supported
+              ;; DIFFICULTY-REVISES-CASCADE (consumption): a retained
+              ;; :revised cascade from a prior run's difficulty enters the
+              ;; family as one more candidate. The revision contributes its
+              ;; ORDER; the candidate itself is compiled from the CURRENT
+              ;; interpretations, so it competes under the same G rather
+              ;; than arriving as a declaration.  Unlike native plans it is
+              ;; NOT subject to the minimality filter: the prior difficulty
+              ;; is exactly evidence that a smaller plan was not enough.  A
+              ;; revision naming a pattern with no admitted interpretation,
+              ;; or one whose order no longer compiles, is recorded as
+              ;; unusable and never enters the family.
+              retained-accounting
+              (vec
+               (for [r (vec retained-revisions)
+                     :let [ids (:precedence r)
+                           compiled-retained
+                           (when (and (vector? ids) (seq ids)
+                                      (every? #(contains? interpretations %) ids))
+                             (compile-plan interpretations established want
+                                           horizon ids move-cost))
+                           same-set-member
+                           (some (fn [c] (when (= (set ids) (set (:precedence c))) c))
+                                 (:family supported))]]
+                 {:precedence ids
+                  :delta (:delta r)
+                  :provenance (:provenance r)
+                  :status (cond
+                            (not (and (vector? ids) (seq ids)))
+                            :invalid-retained-precedence
+                            (not (every? #(contains? interpretations %) ids))
+                            :pattern-not-interpreted
+                            same-set-member
+                            ;; Run B already constructs this exact plan;
+                            ;; the revision backs it rather than adding a
+                            ;; duplicate candidate.
+                            :already-constructed
+                            (:finding compiled-retained)
+                            :order-not-compilable
+                            :else :injected)
+                  :candidate
+                  (cond
+                    ;; The natively-constructed same-set plan carries the
+                    ;; retained-revision provenance, so selection sees that
+                    ;; a prior difficulty revised exactly this cascade.
+                    same-set-member
+                    (assoc same-set-member
+                           :retained-revision (select-keys r [:precedence :delta :provenance]))
+                    (and (map? compiled-retained) (:candidate compiled-retained)
+                         (nil? (:finding compiled-retained)))
+                    (assoc (:candidate compiled-retained)
+                           :retained-revision (select-keys r [:precedence :delta :provenance])))}))
+              retained-in-family
+              (vec (keep (fn [a] (when (#{:injected :already-constructed} (:status a))
+                                   (:candidate a)))
+                         retained-accounting))
+              ;; Same-set members are REPLACED by their provenance-carrying
+              ;; twins so the family holds each plan once.
+              family-base
+              (let [replaced (set (map (comp set :precedence) retained-in-family))]
+                (into (vec (remove #(contains? replaced (set (:precedence %)))
+                                   (:family supported)))
+                      retained-in-family))
               ;; NONFINITE-G-I (owner's decision, claude-10, 2026-09-25, on
               ;; REFUSAL-REGISTER-D row 12): a candidate whose G is NaN, an
               ;; infinity or not a number is LEFT OUT of the comparison and
@@ -224,17 +287,20 @@
               ;; candidate under :left-out (not :candidates, which in a
               ;; refusal means the constructed ones and stays []).
               g-raw (memoize (fn [c] (let [r (evaluate-g c)] {:r r :g (if (map? r) (:value r) r)})))
-              left-out (vec (for [c (:family supported)
+              left-out (vec (for [c family-base
                                   :let [{:keys [r g]} (g-raw c)]
                                   :when (not (finite? g))]
-                              (assoc (select-keys c [:precedence :need-edges])
-                                     :kind :cascade-candidate :target target :want (vec want)
-                                     :g {:absent :nonfinite-g
-                                         :value (if (or (number? g) (keyword? g)) g r)}
-                                     :unreached-wants (:unreached-wants c)
-                                     :interpretation-receipts
-                                     (select-keys interpretation-receipts (:precedence c)))))
-              family (vec (filter #(finite? (:g (g-raw %))) (:family supported)))
+                              (cond-> (assoc (select-keys c [:precedence :need-edges])
+                                             :kind :cascade-candidate :target target
+                                             :want (vec want)
+                                             :g {:absent :nonfinite-g
+                                                 :value (if (or (number? g) (keyword? g)) g r)}
+                                             :unreached-wants (:unreached-wants c)
+                                             :interpretation-receipts
+                                             (select-keys interpretation-receipts (:precedence c)))
+                                (:retained-revision c)
+                                (assoc :retained-revision (:retained-revision c)))))
+              family (vec (filter #(finite? (:g (g-raw %))) family-base))
               feedback-prior
               (memoize #(cascade-feedback/pattern-evidence-prior
                          pattern-feedback %))
@@ -340,7 +406,7 @@
                      ;; want set is the judge's job; each candidate carries
                      ;; the target's full :want so it can.
                      :candidates (mapv (fn [c]
-                                         (assoc (select-keys c [:precedence :need-edges])
+                                         (cond-> (assoc (select-keys c [:precedence :need-edges])
                                                 :kind :cascade-candidate :target target
                                                 :want (vec want)
                                                 :construction-receipt
@@ -366,7 +432,11 @@
                                                     (assoc :pattern-feedback-prior
                                                            (feedback-prior c))))
                                                 :interpretation-receipts
-                                                (select-keys interpretation-receipts (:precedence c))))
+                                                (select-keys interpretation-receipts (:precedence c)))
+                                           (:retained-revision c)
+                                           (assoc :retained-revision (:retained-revision c))))
                                        (sort-by (fn [c] (if (seq (:unreached-wants c)) 1 0))
                                                 (:family result)))})
+                    (seq retained-accounting)
+                    (assoc :retained-revisions retained-accounting)
                     (seq left-out) (assoc :left-out left-out)))))))
