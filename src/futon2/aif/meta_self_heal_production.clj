@@ -10,6 +10,8 @@
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-repair-coordinator :as coordinator]
+            [futon2.aif.medic-ticket-closure :as medic-ticket-closure]
+            [futon2.aif.finding-ticket :as finding-ticket]
             [futon2.aif.standing-authority :as standing])
   (:import [java.nio.file Files StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))
@@ -1814,7 +1816,8 @@
                         (first (sort (keys (:injuries active-injuries)))))
           entry (some-> (get-in active-injuries [:injuries injury-id])
                         (assoc :injury-id injury-id))
-          root (or (:meta-acceptance-root opts) default-acceptance-root)]
+          root (or (:meta-acceptance-root opts) default-acceptance-root)
+          repair-root (or (:meta-repair-store-root opts) finding-ticket/canonical-store)]
       (when (and (= :loaded (:status durable-ledger)) (= :open (:state entry)))
         (when-let [{:keys [pin]} (out-of-band/artifact-for root injury-id)]
           (let [subject {:injury-id injury-id
@@ -1842,12 +1845,22 @@
                              (:meta-injury-ledger-path opts)
                              receipt-pin operation attribution authority)]
                 (if (= :appended (:status written))
-                  {:status :discharged :route :open-out-of-band-medic
+                  (let [ticket-closure
+                        (medic-ticket-closure/close-cause-ticket!
+                         repair-root
+                         {:injury-id injury-id
+                          :entry (merge (select-keys entry [:cause-record-pin])
+                                        (:entry written))
+                          :fixed-by (:fixed-by evidence)
+                          :receipt-pin receipt-pin
+                          :at (.toString (java.time.LocalDate/now java.time.ZoneOffset/UTC))})]
+                    {:status :discharged :route :open-out-of-band-medic
                    :injury-id injury-id :fixed-by (:fixed-by evidence)
                    :out-of-band-receipt-pin receipt-pin
                    :medic-stamp (:medic-stamp attribution)
                    :ledger-write (select-keys written [:status :durability :entry])
-                   :ordinary-selection-called? false}
+                   :ticket-closure ticket-closure
+                   :ordinary-selection-called? false})
                   {:status :held :reason (:reason written)
                    :phase :open-out-of-band :medic-write written
                    :out-of-band-receipt-pin receipt-pin
