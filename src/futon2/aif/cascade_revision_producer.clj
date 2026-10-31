@@ -9,7 +9,8 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.want-interpretation :as want-interpretation]
-            [futon2.aif.wm.cascade-decision :as cascade-decision])
+            [futon2.aif.wm.cascade-decision :as cascade-decision]
+            [futon2.aif.wm.construction-inputs :as wm-inputs])
   (:import [java.nio.file Files StandardOpenOption]
            [java.util UUID]))
 
@@ -21,6 +22,19 @@
   (first (filter #(= target (:target %))
                  (get-in judgment [:cascade-problems :problems]))))
 
+(defn- construction-port
+  "The constructor seam with explicit bounds. No judgment on the production
+   path records :construction-parameters (only the flight PLAN carries that
+   key, and it is not the judgment), so the bounds come from
+   wm.construction-inputs with their recorded authority rather than from a
+   key nothing writes."
+  []
+  {:construct construction/construct
+   :budget (:value (wm-inputs/construction-budget nil))
+   :move-cost (:value wm-inputs/construction-move-cost)
+   :evaluate-g (fn [problem candidate]
+                 (cascade-decision/constructed-candidate-g problem candidate))})
+
 (defn sources-from-judgment
   "Reconstitute the selected target's already-admitted construction inputs.
    Functions are installed by this composition seam, never persisted in the
@@ -29,8 +43,9 @@
   (when-let [row (problem-row judgment target)]
     (let [p (:cascade-problem row)
           budget (get-in judgment [:construction-parameters :budget :value])
-          move-cost (get-in judgment [:construction-parameters :move-cost :value])]
-      (when (and (map? budget) (number? move-cost))
+          move-cost (get-in judgment [:construction-parameters :move-cost :value])
+          port (construction-port)]
+      (when (number? move-cost)
         {:universes {target (:facts p)}
          :wants {target (:want p)}
          :locators {target (:locators p)}
@@ -42,12 +57,76 @@
          :context-of (constantly :revision)
          :pattern-feedback (when-let [feedback (:pattern-feedback p)]
                              {target feedback})
-         :construction
-         {:construct construction/construct
-          :budget budget
-          :move-cost move-cost
-          :evaluate-g (fn [problem candidate]
-                        (cascade-decision/constructed-candidate-g problem candidate))}}))))
+         :construction (assoc port :budget (or budget (:budget port))
+                              :move-cost move-cost)}))))
+
+(defn- interpretation-of
+  "One precedence entry of a selected action, translated to the
+   constructor's grammar. Reading-route candidates carry guards as
+   conjunction clauses ({:present #{tok} :absent #{}}); the constructor
+   reads :needs/:forbids. The two grammars say the same thing about which
+   tokens a pattern requires, so both translate; neither is guessed when a
+   guard is absent."
+  [entry]
+  (let [g (:guard entry)
+        guard (cond
+                (and (map? g) (seq (:clauses g)))
+                {:needs (into #{} (mapcat :present) (:clauses g))
+                 :forbids (into #{} (mapcat :absent) (:clauses g))}
+
+                (map? g)
+                {:needs (set (:needs g)) :forbids (set (:forbids g))}
+
+                :else {:needs #{} :forbids #{}})]
+    {:guard guard :produces (set (:produces entry))}))
+
+(defn sources-from-candidate
+  "Reconstitute the revision construction view from the ORIGINAL selected
+   action itself, when the judgment's interpreted assembly has no row for
+   the target. On the production reading-policy route it never has one —
+   the tick's trace records :cascade-problems {:problems []} because the
+   interpreted-construction route is retired — and no judgment writer
+   records :construction-parameters, so both legs sources-from-judgment
+   needs are absent and every production revision attempt refused
+   :revision-construction-inputs-unavailable (measured 2026-10-31, run
+   2026-10-31-0be4fc7d-70db-4e96-8beb-ea24a1867896, click
+   wm-click-f56a06af: the answer was corrected by the revision round and
+   the cascade never was).
+
+   The snapshot is the post-construction state the blocker interrupted:
+   every token the original precedence produces or guards on is
+   established, the target's wants are not (the run stopped at review, not
+   at a satisfied want). β is the judgment's declared beta for the target —
+   no declaration refuses, no default is invented."
+  [judgment original]
+  (when (and (map? original)
+             (= :cascade-candidate (:kind original))
+             (string? (:target original)))
+    (let [target (:target original)
+          entries (filter map? (:precedence original))
+          patterns (into {}
+                         (map (fn [e] [(or (:id e) (:pattern-id e))
+                                       (interpretation-of e)]))
+                         entries)
+          established (set (concat (mapcat :produces (vals patterns))
+                                   (mapcat #(-> % :guard :needs) (vals patterns))))
+          wants (vec (:want original))
+          facts (merge (zipmap established (repeat true))
+                       (zipmap wants (repeat false)))
+          beta (get-in judgment [:cascade-problems :declared-betas target])]
+      (when (and (seq wants) (number? beta))
+        {:universes {target facts}
+         :wants {target wants}
+         ;; the candidate's locators are keyed by the same target-qualified
+         ;; tokens its guards and produces use, and R5's rate coverage keys
+         ;; them the same way, so they pass through unmodified
+         :locators {target (:observation-locators original)}
+         :interpretations {target {:patterns patterns
+                                   :receipts (or (:interpretation-receipts original) {})}}
+         :horizon-steps (inc (max (count patterns) 1))
+         :beta-by-context {:revision {:beta beta}}
+         :context-of (constantly :revision)
+         :construction (construction-port)}))))
 
 (defn- write-query-source! [root whole-mission blocker]
   (let [dir (io/file root (str "request-" (UUID/randomUUID)))
@@ -120,9 +199,13 @@
     :or {sources-fn sources-from-judgment
          request-fn default-request!
          code-root "/home/joe/code"}}]
-  (fn [{:keys [target blocker whole-mission ask! evidence-root]}]
+  (fn [{:keys [target blocker whole-mission ask! evidence-root original]}]
     (let [judgment (when judgment-fn (judgment-fn))
-          sources (sources-fn judgment target)
+          sources (or (sources-fn judgment target)
+                      ;; The production reading-policy judgment carries no
+                      ;; interpreted problem row; the original selected
+                      ;; action is then the only real construction input.
+                      (sources-from-candidate judgment original))
           wants (get-in sources [:wants target])
           facts (get-in sources [:universes target])
           want (first (remove #(true? (get facts %)) wants))]
@@ -206,4 +289,5 @@
              :exception-class (.getName (class e)) :message (.getMessage e)
              :data (select-keys (ex-data e)
                                 [:interpretation/refusal :interpretation-evidence/refusal
-                                 :construction/refusal])}))))))
+                                 :construction/refusal :constructor/refusal
+                                 :refusal :stopped-at])}))))))
