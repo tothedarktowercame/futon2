@@ -2,6 +2,7 @@
   "Exact pre/post selected-mission observations. This namespace performs the
    C3/C4 reads; labels supplied by callers are never authority."
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.interpretation-evidence :as evidence]
@@ -112,11 +113,36 @@
 
 (defn project
   "Admit the exact retained before baseline and post-build reader rows.
-   Before=true is a typed refusal under the current selected-want policy."
-  [{:keys [baseline dispatch repository after-revision after-rows]}]
+   Before=true is a typed refusal under the current selected-want policy.
+
+   Claim mode (opts :claim {:mission-source-path p}) exists for
+   already-satisfied claims, where the selection's pre-author baseline is
+   compared against the CLAIMED existing commit. There a want that was
+   already true before is the claim's own assertion, so
+   :selected-want-true-before is admitted instead of refused — but a want
+   whose only locator is the mission's own text (the completion definition
+   itself) is explicitly refused :claim-mission-text-not-an-artifact:
+   the definition cannot be its own artifact (run 4955b6e6, 2026-10-31:
+   the reviewer approved a claim whose sole evidence was the mission
+   markdown's own check strings)."
+  [{:keys [baseline dispatch repository after-revision after-rows claim]}]
   (let [action (get-in dispatch [:occurrence :action/value])
         occurrence-id (get-in dispatch [:occurrence :action/id])
         wants (qualified-wants action)
+        claim? (some? claim)
+        mission-source-path (:mission-source-path claim)
+        mission-text-locator?
+        (fn [row]
+          ;; baseline rows carry the locator under :locator; after rows under
+          ;; :declared-locator
+          (let [loc (or (:declared-locator row) (:locator row))
+                p (cond (string? loc) loc
+                        (and (map? loc) (string? (:path loc))) (:path loc))]
+            (and claim? (string? mission-source-path) (string? p)
+                 (or (= (canonical mission-source-path) (canonical p))
+                     ;; locators are repository-relative; the mission source
+                     ;; pin is absolute
+                     (str/ends-with? (canonical mission-source-path) p)))))
         trusted-before (capture-before {:dispatch dispatch :repository repository
                                         :revision (get-in dispatch [:before :head])})
         trusted-after (capture-after {:dispatch dispatch :repository repository
@@ -169,7 +195,15 @@
                       (not= (:observed after) (get-in after [:result :observed]))
                       :after-payload-result-mismatch
                       (not (boolean? (:observed before))) :before-observation-missing
-                      (true? (:observed before)) :selected-want-true-before
+                      (and (not claim?) (true? (:observed before)))
+                      :selected-want-true-before
+                      ;; claim mode: the mission text can ground neither the
+                      ;; before nor the after side of a want's measurement
+                      (and claim? (mission-text-locator? before))
+                      {:reason :claim-mission-text-not-an-artifact
+                       :token (:token before)
+                       :locator (let [loc (or (:declared-locator before) (:locator before))]
+                                  (if (map? loc) (:path loc) loc))}
                       (not (boolean? (:observed after))) :after-observation-missing))
                   pairs)]
         (if problem
