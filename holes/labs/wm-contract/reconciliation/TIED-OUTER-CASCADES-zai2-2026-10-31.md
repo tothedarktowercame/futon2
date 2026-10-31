@@ -181,3 +181,79 @@ Giraffe run no longer verifies) and `outer-selection-wiring-test` (7
 assertions, fixture targets M-selected/M-unknown absent from the live
 registry; identical on origin/main), plus `m2l-outer-selection-ask-test`
 (identical failure on origin/main).
+
+## Addendum 2 (2026-10-31, follow-up requisition): the 501/501 claim is RETRACTED — probe artifact
+
+Claude-1 challenged the "501/501 ready targets classify :unknown" claim. The
+challenge is correct. The earlier probe ran without `resources/` on the
+Clojure `:paths`, so `focus-receipt/read-inputs` returned `:absent` and every
+target classified :unknown for want of any relation rows or embedding pins.
+Re-run read-only with the resource on the classpath (`clojure -Sdeps '{:paths
+["src" "resources" "/home/joe/code/futon3c/src"]}'`, `FUTON_WM_RUN_RECORD_DIR`
+temp), real `classify-target`:
+
+- Newest canonical field (`storage/giraffe/20261031T201627.802Z-2c37678e`,
+  594 admitted targets): **121 :associated, 7 :focus, 466 :unknown**
+  (reasons: 239 :relation-not-declared [mostly E- targets, no channel],
+  100 :repair-target-absent, 79 :embedding-node-not-retained,
+  38 :no-parent-relation, 10 :repaired-target-unknown).
+- adc46631's own retained admitted list (552 targets): **103 :associated,
+  5 :focus, 444 :unknown**.
+
+So the next live click does NOT face a wholesale refusal; the fix's
+`:outer-score/no-known-relation-members` refusal applies only to a field with
+zero relation-known members, which the real field is not. The tie mechanism
+itself stands unchanged: adc46631's picks were relation-unknown targets
+(its selected `M-peradam-grounding` is :unknown :embedding-node-not-retained
+— its stem is absent from the pinned 198-stem corpus), and every degenerate
+kernel scored bit-identically.
+
+**Why d5b9b513/e71c7380 retained `:selected-relation :associated`.** Their
+selected target `M-pattern-retrieval-calibration` classifies :associated
+through the **embedding-neighbour channel**: its stem IS in the pinned
+2026-06-25 `mission-structure-embed` corpus, and the only relations rows
+whose stems are also in that embedding (`M-action-cost-modelling`,
+`M-aif4iad`, `M-futonzero-generative` — all "associated") supply the row.
+No cosine floor is declared (`:floor {:absent :no-floor-declared}`), so even
+cosine −0.014 (nearest neighbour `M-action-cost-modelling`) yields
+:associated. The deciding input is the **pinned embedding corpus membership**
+plus the row∩embedding intersection — nothing changed between 17:14Z and
+18:54Z; the two runs simply picked a retained-stem target while adc46631's
+degenerate menu picks landed on unretained-stem targets.
+
+## Supply: what refreshes relation evidence
+
+Chain (all read-only except the two writes named):
+
+1. `futon6/scripts/diffsub_scope_dump.py` — bounded per-binder queries
+   against the substrate-2 Reads service on **localhost:7071**; writes
+   `futon6/data/diffsub-scopes.json`. No model calls; seconds. **This file is
+   the stale link: mtime 2026-06-09, 198 missions.** The service is DOWN
+   right now (7070/7072/7073 up, 7071 connection refused), so the refresh
+   could not be exercised end-to-end this session.
+2. `futon6/scripts/mission_structure_embed.py --out DIR` — deterministic
+   feature-vector build (numpy, zero model calls; MiniLM text vectors are a
+   read-only baseline). Rebuilt to a temp root in **0.25 s**. On the current
+   (stale) scope census it reproduces exactly 198 stems, so the classify
+   counts are unchanged (121/7/466): refreshing the embedding alone adds
+   nothing; the scope census is the bottleneck, and only missions present in
+   substrate-2 gain stems at all.
+3. `futon2/resources/wm/focus/commit-facets-v1.json` pins both corpus files
+   by sha256, re-hashed at read time. **Writing the canonical corpus without
+   a same-commit re-pin breaks the next click** (`:embedding-pin-mismatch`),
+   so a canonical refresh is one futon2 commit: corpus rebuild + resource
+   re-pin, atomically. Between clicks, only temp-root rebuilds are safe.
+
+## Honest interim: unknown-as-ignorance in outer-score
+
+`outer_score.clj` can already express it: the endings vocabulary includes
+`:not-yet-evaluated`. Mapping an unknown relation class to a
+`:not-yet-evaluated` landing (instead of `ending-class`'s current nil →
+`[:stop-the-line :none]`) yields a non-degenerate kernel — real ambiguity,
+positive novelty, and `r + ambiguity − novelty` information gain that
+separates unknown-relation picks from deliberate stops and from each other.
+It is a one-clause policy change in `ending-class` plus tests, not a
+structural change; it contradicts no current exclusion (candidates would
+score rather than be excluded, so it is an alternative to 0513d1ea8's
+exclusion, to be chosen by policy). Untouched here: outer_score.clj is
+frozen by other rows this round.
