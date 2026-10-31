@@ -17,7 +17,15 @@
    :abstained :ordinary-selection-abstention
    :operator-cancelled :operator-cancelled
    :declared-no-work :declared-no-work
-   :diagnostic-only :diagnostic-only})
+   :diagnostic-only :diagnostic-only
+   ;; Typed guard refusals.  The guards did their job; the attempt closes
+   ;; :guardrail-refusal and there is nothing to repair.  Run 0ba3370c
+   ;; (injury a67d3e49, ordinal 133) is the retained counterexample: the
+   ;; duplicate-effective-run guard refused correctly and the terminal
+   ;; classifier still opened an injury because no non-injury kind existed.
+   :outer/duplicate-effective-run :duplicate-effective-run
+   :outer/unchanged-refused-repeat :unchanged-refused-repeat
+   :selected-want-contract-missing :selected-want-contract-missing})
 (def successful-outcomes #{:success :closed :grounded-change :cohort-complete})
 (def close-outcome-image
   "Transcribes `DarkTower/WarMachine/CloseOutcomeImage.lean` `image`,
