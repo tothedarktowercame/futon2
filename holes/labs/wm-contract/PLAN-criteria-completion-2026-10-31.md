@@ -91,3 +91,10 @@ Do not promise all20 rows will pass on every branch: NOT-EXERCISED must name why
 codex-11 reports milestones in this form: packet and agent; last concrete artifact/test/run; current step; next completion condition; blocker and cost. Distinguish queued, running, source-approved, merged, loaded, live-witnessed and closed. An accepted dispatch is not completed work. Check active jobs when responding to status questions and during extended work; ask agents for updates at review, merge, live verification and terminal outcome. Do not imply unattended polling or completion deadlines that have not been scheduled.
 
 Outputs live in Git under holes/labs/wm-contract, with exact commit/run/hash references and raw local evidence paths where necessary. Each evidence audit must produce a portable summary; no external reviewer should have to reconstruct its conclusions from a notes-only conversation. Keep the original GRID and closure conditions unchanged unless Joe explicitly revises them.
+
+## Dispatch register
+
+- P1 Kimi 象-2: `invoke-1793414052868-8579-a7748c85`, running at last status read; cap merged as5197d9f6c, serving readiness still pending coordinator receipt.
+- P2 zai-6: `invoke-1793414889578-8599-885160fe`, accepted/queued. Two20-row live-run evidence matrices, then bounded R28 witness search; no runtime changes.
+- P3 zai-5: `invoke-1793414890003-8600-ffa34c0b`, accepted/queued. Six-row historical evidence audit; no source fixes or tracker mutation.
+- P4–P7: assigned owners in the plan, **not yet dispatched**. This distinction prevents a proposed work sequence from being reported as running work.
