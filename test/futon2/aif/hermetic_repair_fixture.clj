@@ -18,6 +18,7 @@
 (def production-meta-injury-ledger-path meta-self-heal/default-ledger-path)
 (def production-meta-injury-transaction-path meta-self-heal/default-transaction-path)
 (def production-learning-manifest-path outer-learning-manifest/default-path)
+(def production-run-record-dir runner/default-run-record-dir)
 
 (defn- temp-root [prefix]
   (.getPath (.toFile (Files/createTempDirectory
@@ -50,6 +51,8 @@
         transaction-before (production-file-set production-meta-injury-transaction-path)
         learning-manifest-before (production-file-set production-learning-manifest-path)
         repair-root (temp-root "wm-repair-suite-")
+        run-record-root (temp-root "wm-runner-record-suite-")
+        run-records-before (file-set production-run-record-dir)
         trip-root (temp-root "wm-trip-suite-")
         injury-root (str (io/file repair-root "wm-meta-injuries"))
         ledger-path (str (io/file injury-root "ledger.edn"))
@@ -58,6 +61,7 @@
         phase-log (str (io/file repair-root "wm-full-loop-phases.edn.log"))]
     (with-redefs [repair/default-root repair-root
                   tripwire/default-trip-root trip-root
+                  runner/default-run-record-dir run-record-root
                   meta-injury-store/default-root injury-root
                   meta-self-heal/default-ledger-path ledger-path
                   meta-self-heal/default-transaction-path transaction-path
@@ -78,7 +82,14 @@
       (is (= learning-manifest-before (production-file-set production-learning-manifest-path))
           "the production outer-learning manifest (outer-learning-manifest/default-path)
            must stay byte-for-byte untouched: a test close must publish only into
-           the rebound suite manifest or the fixture's explicit temp manifest"))))
+           the rebound suite manifest or the fixture's explicit temp manifest")
+      (is (= run-records-before (file-set production-run-record-dir))
+          "the production run-record stream (runner/default-run-record-dir,
+           run-stream.edn and tick records) must stay untouched: run 7712b197
+           (2026-10-31 14:49Z, started, never closed) reached the canonical
+           stream from t3-held-resume-stop-line-test because this fixture left
+           the run-record root live. file-set is path+content, so an unclosed
+           :started append fails this assertion."))))
 
 (defn runner-repair-options
   "Explicit temporary store callbacks also protect direct REPL/debug callers,
