@@ -24,6 +24,80 @@
    :facts {"M-ready" {:status :ready :unblocks 1 :cone 2}
            "M-unknown" {:status :undetermined :unblocks 0 :cone 1}}})
 
+;; ---------------------------------------------------------------------------
+;; Pre-selection duplicate exclusion (DUPLICATE-TARGET-STILL-SELECTED, 2026-10-31)
+;; ---------------------------------------------------------------------------
+
+(def manifest-a "5cf3904e9906a5ac881337606d0efb34198da8ec6d9fab26c63a725cc06e4cbc")
+
+(defn- index-row
+  [target manifest finished-work? run-id]
+  {:schema :wm/outer-refusal-index-entry-v1 :status :indexed
+   :run-id run-id :target target :finished-work? finished-work?
+   :failure {:kind (if finished-work? :already-satisfied
+                     :outer/duplicate-effective-run)}
+   :effective-run-identity
+   {:schema :wm/effective-run-identity-v1 :target target
+    :giraffe-manifest-sha256 manifest
+    :policy-id (str target "/policy-x")
+    :compiled-check-set-sha256 "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    :mission-source-sha256 "fa9566fbf6c1adc5299530ef3d0c9caf50f4831cb154ed11b059a06229d8044a"
+    :base-head "d5adbceb05068ce518c1d7f59fb7a84e0cc2aa98"}})
+
+;; The exact shape of the finding: run 0ba3370c selected M-typed-memories
+;; although 4955b6e6's blocking row already recorded it on the same Giraffe
+;; field; the duplicate guard refused only ~40 s later. Here the blocking row
+;; is EARLIER than a newer non-blocking row for the same target -- the guard
+;; refuses on any blocking row, so admission must too.
+(def finding-rows
+  [(index-row "M-ready" manifest-a true "2026-10-31-4955b6e6")
+   (index-row "M-ready" manifest-a false "2026-10-31-0ba3370c")])
+
+(deftest blocking-history-target-is-excluded-before-scoring
+  (testing "the bad case still selects the target when selection has no
+            history view (demonstrates the finding), and is excluded once it does"
+    ;; Without the index view the bad case reproduces: M-ready is selectable.
+    (let [without-history (outer-select/select
+                           base-makeup base-state
+                           (assoc base-observation :giraffe/manifest-sha256 manifest-a))]
+      (is (contains? (set (map :target (get-in without-history [:selection :candidates])))
+                     "M-ready")))
+    ;; With the view, the guard's target never reaches scoring.
+    (let [result (outer-select/select
+                  base-makeup base-state
+                  (assoc base-observation
+                         :giraffe/manifest-sha256 manifest-a
+                         :effective-run-index-rows finding-rows))
+          exclusion (some #(when (= "M-ready" (:target %)) %)
+                          (:outer-score/excluded result))]
+      (is (= ["M-unknown"] (:outer-score/admitted result)))
+      (is (= ["2026-10-31-4955b6e6"] (:matched-run-ids exclusion)))
+      (is (= :outer-score/duplicate-effective-run (:kind exclusion)))
+      (is (= :blocking-effective-run-on-same-giraffe-field (:reason exclusion)))
+      (is (not (contains? (set (map :target (get-in result [:selection :candidates])))
+                          "M-ready"))))))
+
+(deftest changed-giraffe-field-readmits-the-target
+  (let [result (outer-select/select
+                base-makeup base-state
+                (assoc base-observation
+                       :giraffe-manifest-sha256 "a-new-giraffe-run-changed-the-field"
+                       :effective-run-index-rows finding-rows))]
+    (is (= ["M-ready" "M-unknown"] (:outer-score/admitted result)))
+    (is (nil? (some #(= :outer-score/duplicate-effective-run (:kind %))
+                    (:outer-score/excluded result))))))
+
+(deftest wholly-blocked-field-is-a-typed-refusal
+  (let [observation (assoc base-observation
+                           :field [{:target "M-ready" :reach 1/2}]
+                           :giraffe/manifest-sha256 manifest-a
+                           :effective-run-index-rows finding-rows)
+        refusal (try (outer-select/select base-makeup base-state observation)
+                     nil (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= :outer-score/duplicate-effective-run-field-emptied (:kind refusal)))
+    (is (= ["M-ready"] (mapv :target (:duplicate-effective-run refusal))))
+    (is (= 1 (count (get-in refusal [:duplicate-effective-run 0 :matched-run-ids]))))))
+
 (deftest chosen-score-is-minimal
   (testing "Lean chosenCascade_score_le"
     (let [result (outer-select/select base-makeup base-state base-observation)

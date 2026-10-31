@@ -10,6 +10,7 @@
             [clojure.string :as str]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
+            [futon2.aif.effective-run-history :as effective-run-history]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.focus-receipt :as focus-receipt]
@@ -910,6 +911,17 @@
                              (or (:code-root opts) "/home/joe/code"))})
               learning (resolve-pending-learning opts makeup state giraffe-dir observation)
               state (:state learning)
+              ;; Pre-selection duplicate view (DUPLICATE-TARGET-STILL-SELECTED):
+              ;; the same index rows the post-construction guard reads, given
+              ;; to admission so a target the guard would refuse is excluded
+              ;; before scoring. Absent index = no rows = no exclusions.
+              effective-index-rows (effective-run-history/index-rows
+                                    (or (:run-record-dir opts)
+                                        runner/default-run-record-dir))
+              observation (if (nil? effective-index-rows)
+                           observation
+                           (assoc observation
+                                  :effective-run-index-rows effective-index-rows))
               selection (outer-select/select makeup state observation)
               retained-selection (-> selection
                                      (assoc :outer-field/admitted

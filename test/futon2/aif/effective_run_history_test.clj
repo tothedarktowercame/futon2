@@ -1,5 +1,6 @@
 (ns futon2.aif.effective-run-history-test
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.effective-run-history :as history]
             [futon2.aif.meta-terminal-injury :as terminal-injury]
@@ -43,6 +44,31 @@
    :failure {:kind failure-kind}
    :finished-work? finished-work?
    :effective-run-identity id})
+
+(deftest index-rows-reads-what-the-guard-reads
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "effective-run-index"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        row (fn [target finished-work? run-id]
+              {:schema :wm/outer-refusal-index-entry-v1 :status :indexed
+               :run-id run-id :target target :finished-work? finished-work?
+               :effective-run-identity
+               {:schema :wm/effective-run-identity-v1 :target target
+                :giraffe-manifest-sha256 "manifest-1" :policy-id "p"
+                :compiled-check-set-sha256 "c" :mission-source-sha256 "m"
+                :base-head "h"}})
+        rows [(row "M-a" true "run-1") (row "M-a" false "run-2")
+              (row "M-b" false "run-3")]
+        write-row (fn [r] (spit (io/file dir "outer-refusal-index.ednl")
+                                (str (pr-str r) "\n") :append true))]
+    (is (nil? (history/index-rows (io/file dir "absent"))))
+    (doseq [r rows] (write-row r))
+    (is (= rows (history/index-rows dir)))
+    ;; blocking-rows-for-target keeps the guard's own rule: any blocking row
+    ;; blocks, and a newer non-blocking row does not unblock the target.
+    (is (= ["run-1"] (mapv :run-id (history/blocking-rows-for-target rows "M-a"))))
+    (is (= [] (history/blocking-rows-for-target rows "M-b")))
+    (is (= [] (history/blocking-rows-for-target rows "M-untargeted")))))
 
 (deftest retained-qualified-close-blocks-equal-next-run
   (let [record (edn/read-string (slurp prior-path))
