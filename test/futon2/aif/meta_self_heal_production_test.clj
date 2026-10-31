@@ -1719,6 +1719,12 @@
         active-b {:status :computed :injuries {"injury-b" {:injury-id "injury-b"}}}
         run-route (fn [active transaction]
                     (with-redefs [store/load-durable-ledger (constantly {:status :loaded :ledger {}})
+                                  ;; 16b53709b threads the medic authority: with a
+                                  ;; verifier, effective-active calls
+                                  ;; ledger/effective-active-injuries, not
+                                  ;; ledger/active-injuries. Stub the seam the
+                                  ;; receiver reads.
+                                  ledger/effective-active-injuries (fn [& _] active)
                                   ledger/active-injuries (constantly active)
                                   coordinator/prepare (constantly {:transaction transaction})
                                   coordinator/coordinate (fn [& _] (swap! effects inc)
@@ -1739,6 +1745,9 @@
       (is (= :coordinated positive))
       (is (= 1 @effects)))
     (let [resumed (with-redefs [store/load-durable-ledger (constantly {:status :loaded :ledger {}})
+                                ledger/effective-active-injuries
+                                (fn [& _] {:status :computed
+                                           :injuries {"injury-a" {:injury-id "injury-a"}}})
                                 ledger/active-injuries
                                 (constantly {:status :computed
                                              :injuries {"injury-a" {:injury-id "injury-a"}}})
@@ -1911,6 +1920,12 @@
                     :source-record-pin source-a :diagnosis-evidence-pin diagnosis-a}}
         result (with-redefs [store/load-durable-ledger
                              (constantly {:status :loaded :ledger {}})
+                             ;; See route-binds-... above: with a medic
+                             ;; authority verifier the active set comes from
+                             ;; ledger/effective-active-injuries.
+                             ledger/effective-active-injuries
+                             (fn [& _] {:status :computed
+                                        :injuries {"injury-a" {:injury-id "injury-a"}}})
                              ledger/active-injuries
                              (constantly {:status :computed
                                           :injuries {"injury-a" {:injury-id "injury-a"}}})
@@ -2184,8 +2199,10 @@
                  {#'production/diagnosis-transaction-binding (fn [& _] {:status :valid})
                   #'production/acceptance-transaction-binding (fn [& _] {:status :valid})
                   #'store/load-durable-ledger
-                  (fn [path]
-                    (let [durable (real-load path)]
+                  ;; load-durable calls the store with (path verifier) since
+                  ;; 16b53709b; accept and forward both arities.
+                  (fn [path & args]
+                    (let [durable (apply real-load path args)]
                       (if (some #(= :reopened (:state %))
                                 (get-in durable [:ledger :entries]))
                         (do (swap! unloaded-reads inc)
