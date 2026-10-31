@@ -2795,32 +2795,62 @@
 (defn- no-entry-failure-data
   "Classify the terminal exception when selection produced no enactable entry.
   A selected reading policy stopped at the explicit execution-semantics
-  boundary is a typed refusal, not an absence of selection."
-  [judgement downstream-refusal]
-  (cond
-    (:open-cascade downstream-refusal)
-    {:outcome :incomplete
-     :failure-kind (:kind downstream-refusal)
-     :held-phase (:phase downstream-refusal)
-     :repairable true}
-    (= :error (:status downstream-refusal))
-    {:outcome :incomplete
-     :failure-kind (:kind downstream-refusal)
-     :held-phase (:phase downstream-refusal)
-     :repairable (not= false (:repairable downstream-refusal))
-     :failure-detail downstream-refusal}
-    downstream-refusal
-    ;; A typed downstream refusal abstains from enactment; :refused is not in
-    ;; cohort/outcome-kinds, so closing on it throws invalid-close-outcome
-    ;; (occ-2613ce61, 2026-10-17: an :identity-forged cascade refusal on
-    ;; M-recommendation-bindings degraded the whole click to :build-failed).
-    ;; The refusal's own kind survives in :failure-kind.
-    {:outcome :abstained
-     :failure-kind (:kind downstream-refusal)}
-    :else
-    {:outcome (if (= :abstained (get-in judgement [:decision :status]))
-                :abstained
-                :no-selection)}))
+  boundary is a typed refusal, not an absence of selection.
+
+  D4-READING-REFUSAL-FINDING-CONTEXT (2026-10-31): READING-RECORD is the
+  selected-target-reading record retained on the selection checkpoint.  When
+  the tick abstains because that reading was refused, the refusal's typed
+  kind, target and reader-response pins must ride the failure data -- the
+  close-core finding writer copies :failure-kind, :target and :error-data
+  from here, and without them a real reading refusal (run 4961d278, job
+  invoke-1793315962107-7916-14ee8762) was filed as a generic causeless
+  environmental hold with no target."
+  ([judgement downstream-refusal]
+   (no-entry-failure-data judgement downstream-refusal nil))
+  ([judgement downstream-refusal reading-record]
+   (let [reading-refusal? (and (map? reading-record)
+                               (= :refused (:status reading-record))
+                               (keyword? (:kind reading-record)))
+         refused-data
+         (when reading-refusal?
+           {:failure-kind (:kind reading-record)
+            :failure-stage :selected-target-reading
+            :target (:target reading-record)
+            :error-data {:selected-target-reading reading-record}})]
+     (cond
+       (:open-cascade downstream-refusal)
+       (merge {:outcome :incomplete
+               :failure-kind (:kind downstream-refusal)
+               :held-phase (:phase downstream-refusal)
+               :repairable true}
+              refused-data)
+       (= :error (:status downstream-refusal))
+       (merge {:outcome :incomplete
+               :failure-kind (:kind downstream-refusal)
+               :held-phase (:phase downstream-refusal)
+               :repairable (not= false (:repairable downstream-refusal))
+               :failure-detail downstream-refusal}
+              refused-data)
+       downstream-refusal
+       ;; A typed downstream refusal abstains from enactment; :refused is not in
+       ;; cohort/outcome-kinds, so closing on it throws invalid-close-outcome
+       ;; (occ-2613ce61, 2026-10-17: an :identity-forged cascade refusal on
+       ;; M-recommendation-bindings degraded the whole click to :build-failed).
+       ;; The refusal's own kind survives in :failure-kind; a refused reading
+       ;; underneath it is the more specific cause, so it wins (merge order).
+       (merge {:outcome :abstained
+               :failure-kind (:kind downstream-refusal)}
+              refused-data)
+       reading-refusal?
+       ;; No downstream refusal: the reading refusal IS why the tick abstained.
+       (merge {:outcome (if (= :abstained (get-in judgement [:decision :status]))
+                          :abstained
+                          :no-selection)}
+              refused-data)
+       :else
+       {:outcome (if (= :abstained (get-in judgement [:decision :status]))
+                   :abstained
+                   :no-selection)}))))
 
 (defn selection-terminal-condition
   "Return the debugger condition for a completed selection result that chose
@@ -6323,6 +6353,19 @@
      failure-kind)
     :environmental-hold
 
+    ;; D4-READING-REFUSAL-FINDING-CONTEXT: a refused selected-target reading
+    ;; is a reader/provider response failure against a clear representation
+    ;; contract -- the machine's own code did not break, and the precondition
+    ;; that clears it is a valid published reading.  Keep the environmental
+    ;; discharge but never the generic cause: no-entry-failure-data now
+    ;; carries the refusal's typed kind, target and reader-response pins into
+    ;; the finding, so this hold names its cause (run 4961d278, job 7916).
+    (#{:selected-target-reading-answer-invalid
+       :selected-target-reading-unavailable
+       :selected-target-reading-unchanged-refusal}
+     failure-kind)
+    :environmental-hold
+
     (#{:agent-budget-expired :agent-job-stalled} failure-kind)
     :incomplete-recoverable
 
@@ -8442,7 +8485,8 @@
                                                  [:selection :sorry :held-phase])
                              :downstream-refusal persisted-cascade-execution}
                             (no-entry-failure-data judgement
-                                                   persisted-cascade-execution)))))
+                                                   persisted-cascade-execution
+                                                   selected-target-reading-record)))))
         (when-let [uncast (seq (for [[role seat] [[:author author] [:reviewer reviewer]]
                                      :when (nil? seat)] role))]
           (throw (ex-info "Selected an action, but no cast was given for it"
