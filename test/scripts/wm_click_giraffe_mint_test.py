@@ -195,6 +195,7 @@ if state == "stale":
         "mint-bad" if os.environ.get("MINT_STAYS_STALE") else "minted")
 print("run dir: .../run-new")
 print("run id: run-new")
+print("input-sha256: " + ("cc" if os.environ.get("MINT_STAYS_STALE") else "aa"))
 sys.exit(0)
 ''')
             executable(f3c / "scripts/proof-eval.sh",
@@ -236,7 +237,8 @@ sys.exit(0)
     def test_fresh_field_mints_nothing_and_fires(self):
         result, calls, posted = self.run_case("medic", "fresh")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertEqual(["PROBE", "PROBE"], calls)
+        # the pre-POST preparation pass must not probe or mint again
+        self.assertEqual(["PROBE"], calls)
         self.assertIn("giraffe field", result.stdout)
         self.assertIn("fresh (run-old)", result.stdout)
         self.assertIn("giraffe field id       run-old", result.stdout)
@@ -245,18 +247,22 @@ sys.exit(0)
     def test_stale_field_mints_one_run_then_fires(self):
         result, calls, posted = self.run_case("medic", "stale")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertEqual(["PROBE", "MINT", "PROBE", "PROBE"], calls)
-        self.assertIn("minted run-new", result.stdout)
+        # exactly one mint per launch and no third JVM: the mint prints
+        # the input sha of the run it wrote, the gate compares it with the
+        # probe's adapter sha, and the pre-POST pass re-reports the field
+        # id without running clojure again
+        self.assertEqual(["PROBE", "MINT"], calls)
+        self.assertIn("minted run-new (input sha matched the probe; no re-probe)", result.stdout)
         self.assertIn("giraffe field id       run-new", result.stdout)
+        self.assertIn("already checked this launch", result.stdout)
         self.assertEqual(["post"], posted)
 
     def test_failing_mint_is_a_finding_and_the_click_fires_on_the_stale_field(self):
         result, calls, posted = self.run_case("medic", "stale", mint_fail=True)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        # both gate passes probe, attempt the mint, and fail: two mints are
-        # ATTEMPTED but neither writes a run (the stub fails before writing
-        # and the field id stays the pre-mint one)
-        self.assertEqual(["PROBE", "MINT", "PROBE", "MINT"], calls)
+        # one mint attempt per launch; the stub fails before writing and
+        # the field id stays the pre-mint one
+        self.assertEqual(["PROBE", "MINT"], calls)
         self.assertIn("FINDING", result.stdout)
         self.assertIn("mint failed", result.stdout)
         self.assertIn("firing on the newest verified field run-old", result.stdout)
@@ -268,7 +274,7 @@ sys.exit(0)
     def test_failing_probe_is_a_finding_and_the_click_fires(self):
         result, calls, posted = self.run_case("medic", "probe-fail")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertEqual(["PROBE", "PROBE"], calls)
+        self.assertEqual(["PROBE"], calls)
         self.assertIn("FINDING", result.stdout)
         self.assertIn("freshness probe failed", result.stdout)
         self.assertIn("giraffe field id       (unknown -- probe failed)", result.stdout)
@@ -278,8 +284,9 @@ sys.exit(0)
         result, calls, posted = self.run_case("running", "stale")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         # pass 1: probe, finding, no mint.  pass 2 (immediately before
-        # POST): the other click has finished, so the gate mints
-        self.assertEqual(["PROBE", "PROBE", "MINT", "PROBE"], calls)
+        # POST) is locked out by the once-per-launch guard: no second
+        # mint attempt in one launch
+        self.assertEqual(["PROBE"], calls)
         self.assertIn("FINDING", result.stdout)
         self.assertIn("a click is running", result.stdout)
         self.assertIn("firing on it", result.stdout)
@@ -289,7 +296,7 @@ sys.exit(0)
     def test_mint_refused_from_a_dirty_checkout_is_a_finding_and_the_click_fires(self):
         result, calls, posted = self.run_case("medic", "stale", dirty=True)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertEqual(["PROBE", "PROBE"], calls)
+        self.assertEqual(["PROBE"], calls)
         self.assertIn("FINDING", result.stdout)
         self.assertIn("futon3c checkout is dirty", result.stdout)
         self.assertIn("firing on it", result.stdout)
@@ -299,9 +306,9 @@ sys.exit(0)
     def test_minted_run_not_verified_is_a_finding_and_the_click_fires_on_the_old_field(self):
         result, calls, posted = self.run_case("medic", "stale", mint_stays_stale=True)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        # both passes attempt the mint; neither leaves a verified newer
-        # field run, so both record the pre-mint field id
-        self.assertEqual(["PROBE", "MINT", "PROBE", "PROBE", "MINT", "PROBE"], calls)
+        # one mint attempt per launch; the sha it prints does not match
+        # the probe's, so the full re-probe runs and still reports stale
+        self.assertEqual(["PROBE", "MINT", "PROBE"], calls)
         self.assertIn("FINDING", result.stdout)
         self.assertIn("did not verify as the newest field run", result.stdout)
         self.assertIn("giraffe field id       run-old", result.stdout)

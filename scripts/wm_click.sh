@@ -118,8 +118,35 @@ fi
 # never reaches here: prepare_sources runs only for --run.  Env overrides
 # exist for hermetic tests: GIRAFFE_ROOT, GIRAFFE_EDGES,
 # GIRAFFE_READINGS_ROOT, GIRAFFE_MINT=0 skips the gate entirely.
+#
+# The gate runs AT MOST ONCE per launch (2026-10-31, claude-1 requisition:
+# a single launch minted twice -- 2a8ead5c then 3afa57c7 -- and the two
+# preparation passes cost over five minutes).  prepare_sources runs twice
+# in one launcher process (once at launch, once immediately before the
+# POST); a mint takes about 75 s and a probe is another JVM start, so the
+# second pass must not probe or mint again.  The field id cannot change
+# between the two passes of one launch: it names the same newest verified
+# run the first pass already recorded.
+GIRAFFE_GATE_DONE=0
+GIRAFFE_FIELD_ID=""
+
+# Record the field id once so the once-per-launch guard (below) can repeat
+# it on the pre-POST preparation pass without probing again.
+giraffe_field_id() {
+  GIRAFFE_FIELD_ID="$1"
+  say "giraffe field id" "$1"
+}
+
 giraffe_field_freshness() {
   local root edges readings probe rc fresh newest minted probe2 fresh2 newest2 running
+  if [ "${GIRAFFE_GATE_DONE}" = "1" ]; then
+    say "giraffe field" "already checked this launch -- not probing or minting again"
+    if [ -n "$GIRAFFE_FIELD_ID" ]; then
+      say "giraffe field id" "$GIRAFFE_FIELD_ID"
+    fi
+    return 0
+  fi
+  GIRAFFE_GATE_DONE=1
   root="${GIRAFFE_ROOT:-/home/joe/code/storage/giraffe}"
   edges="${GIRAFFE_EDGES:-$F3C/holes/missions/giraffe-mission-edges.json}"
   readings="${GIRAFFE_READINGS_ROOT:-/home/joe/notes/wm-next/giraffe-excursions-2026-10-31}"
@@ -137,17 +164,18 @@ giraffe_field_freshness() {
     # The click continues on the newest verified field, whose id the probe
     # could not name -- so record that explicitly.
     finding "giraffe field" "freshness probe failed (exit $rc); firing on the newest verified field, id unknown: $probe"
-    say "giraffe field id" "(unknown -- probe failed)"
+    giraffe_field_id "(unknown -- probe failed)"
     return 0
   fi
   fresh=$(printf '%s\n' "$probe" | sed -n 's/^fresh: //p')
   newest=$(printf '%s\n' "$probe" | sed -n 's/^newest-verified-run-id: //p')
+  adapter_sha=$(printf '%s\n' "$probe" | sed -n 's/^adapter-input-sha256: //p')
   if [ "$fresh" = "true" ]; then
     say "giraffe field" "fresh ($newest)"
-    say "giraffe field id" "$newest"
+    giraffe_field_id "$newest"
     return 0
   fi
-  say "giraffe field id" "$newest"
+  giraffe_field_id "$newest"
   # A mint is a real write: no click may be running, and the futon3c checkout
   # must be clean so the minted run's manifest :git-sha resolves later
   # (wm_click_prepare.py asserted the same conditions moments ago; a mint
@@ -176,6 +204,19 @@ except Exception:
     finding "giraffe field" "mint failed (exit $rc); firing on the newest verified field $newest: $minted"
     return 0
   fi
+  # Fast path, no third JVM: the mint prints the input sha of the run it
+  # wrote.  If it equals the sha the probe computed AND the run id embeds
+  # that sha (the id is minted from the input digest), the write is the
+  # field the probe demanded -- re-probing would spend ~50 s to learn the
+  # same thing.  On any mismatch (the sources moved under the mint, the
+  # writer lied) fall back to the full re-probe below.
+  minted_sha=$(printf '%s\n' "$minted" | sed -n 's/^input-sha256: //p')
+  minted_id=$(printf '%s\n' "$minted" | sed -n 's/^run id: //p')
+  if [ -n "$minted_sha" ] && [ "$minted_sha" = "$adapter_sha" ]; then
+    say "giraffe field" "minted $minted_id (input sha matched the probe; no re-probe)"
+    giraffe_field_id "$minted_id"
+    return 0
+  fi
   # The minted run must actually BE the newest verified field run; if not,
   # record what the field actually is and continue on it.
   probe2=$( (cd "$F3C" && clojure -M -m futon3c.giraffe.run \
@@ -186,11 +227,11 @@ except Exception:
   newest2=$(printf '%s\n' "$probe2" | sed -n 's/^newest-verified-run-id: //p')
   if [ "$rc" -ne 0 ] || [ "$fresh2" != "true" ]; then
     finding "giraffe field" "minted run did not verify as the newest field run; firing on ${newest2:-$newest}: $minted / $probe2"
-    say "giraffe field id" "${newest2:-$newest}"
+    giraffe_field_id "${newest2:-$newest}"
     return 0
   fi
   say "giraffe field" "minted $newest2"
-  say "giraffe field id" "$newest2"
+  giraffe_field_id "$newest2"
 }
 
 # Source preparation is not an informational tripwire. No campaign/abort loop.
