@@ -400,6 +400,7 @@
     record))
 
 (declare selection-terminal-condition)
+(declare claim-mode-observation)
 
 (defn run-phase!
   "Run thunk with start/end telemetry; errors are logged and rethrown."
@@ -950,20 +951,26 @@
        (= :resume-protocol-violation (:kind value))))
 
 (defn- corrected-author-job-detail?
-  "True only for an author job that has passed through the narrow correction
-  loop.  The terminal needs that bounded identity chain when a later, unchanged
+  "True only for an author job that has passed through a narrow correction
+  loop (base-head response correction or unmeasured-claim correction).  The
+  terminal needs that bounded identity chain when a later, unchanged
   author gate refuses the corrected reply."
   [value]
   (and (map? value)
-       (vector? (:author-response-corrections value))))
+       (or (vector? (:author-response-corrections value))
+           (map? (:unmeasured-claim-correction value)))))
 
 (defn- bounded-corrected-author-job [job]
   "Keep the ordinary job identity plus the bounded correction evidence, rather
   than serialising an arbitrary Agency response tree."
-  (assoc (select-keys job [:job-id :agent-id :state :artifact-ref
-                           :repo-observed-artifact-ref :result-summary])
-         :author-response-corrections
-         (bounded-failure-value (:author-response-corrections job) 6)))
+  (cond-> (select-keys job [:job-id :agent-id :state :artifact-ref
+                            :repo-observed-artifact-ref :result-summary])
+    (vector? (:author-response-corrections job))
+    (assoc :author-response-corrections
+           (bounded-failure-value (:author-response-corrections job) 6))
+    (map? (:unmeasured-claim-correction job))
+    (assoc :unmeasured-claim-correction
+           (:unmeasured-claim-correction job))))
 
 (defn- failure-detail [error-data]
   (let [scalar? (fn [v]
@@ -3663,7 +3670,8 @@
   contradictory or unsupported claim stays :invalid-author-refusal."
   [author-job target stage]
   (let [correction-repository
-        (get-in author-job [:author-response-corrections 0 :binding :repository])
+        (or (get-in author-job [:author-response-corrections 0 :binding :repository])
+            (get-in author-job [:unmeasured-claim-correction :binding :repository]))
         ;; A correction carries the repository it was dispatched to in its
         ;; immutable binding.  Do not let its refusal search another primary
         ;; repository: that would turn an existing but unrelated artifact into
@@ -4189,6 +4197,11 @@
        "   SELECTED target: its message names the target id, or it touches the\n"
        "   target's mission file or a path carrying the target id. A commit that\n"
        "   does none of these is refused mechanically before any reviewer reads it.\n"
+       "   The mission's own text is NEVER that existing artifact: a claim whose\n"
+       "   only evidence is that the acceptance-criteria strings appear in the\n"
+       "   mission/completion markdown is refused\n"
+       "   :claim-mission-text-not-an-artifact, whatever its checkboxes say, and\n"
+       "   gets one correction round to build a real artifact instead.\n"
        "If no safe substantive parcel is possible, make no commit and finish with "
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>.")))
 
@@ -4296,7 +4309,10 @@
        "If the selected construction was already satisfied at an existing "
        "commit, provide the current valid feature card, name that existing "
        "commit as its artifact reference, and end exactly "
-       "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head. Otherwise "
+       "FULL_LOOP_AUTHOR: REFUSE :already-satisfied-at-base-head. That commit "
+       "must carry real work: the mission's own text is never the artifact, "
+       "and a claim whose only evidence is the mission markdown is refused "
+       ":claim-mission-text-not-an-artifact. Otherwise "
        "make a real fresh artifact in the target repository and end "
        "FULL_LOOP_AUTHOR: DONE <fresh-commit-sha>. The unchanged author, "
        "feature-card, and artifact-binding gates evaluate this response."))
@@ -4411,6 +4427,212 @@
                   [(assoc correction-before-gate :status :corrected)])
            :author-response-corrections
            [(assoc correction-before-gate :status :corrected)]})))))
+
+(def ^:private default-unmeasured-claim-corrections 1)
+
+(defn- unmeasured-claim-correction-failure!
+  [message reason correction]
+  (throw (ex-info message
+                  {:outcome :build-failed
+                   :failure-kind :unmeasured-claim-correction-refused
+                   :failure-stage :author-wait
+                   :unmeasured-claim-correction
+                   (assoc correction :status :refused :reason reason)})))
+
+(defn- unmeasured-claim-terminal-refusal!
+  "The existing typed refusal for an unmeasured already-satisfied claim,
+   now carrying the correction round that preceded it. No injury: the
+   author's answer failed, not the apparatus."
+  [target author-job claim-observation correction]
+  (throw (ex-info
+          "Unmeasured already-satisfied claim refused after one correction round"
+          {:outcome :guardrail-refusal
+           :failure-kind :already-satisfied-wants-unmeasured
+           :failure-stage :author-wait
+           :target target
+           :author-job author-job
+           :mission-observation claim-observation
+           :unmeasured-claim-correction correction
+           :refusal-reason
+           (str "Claim not accepted: selected wants are unmeasured because their "
+                "only locator is the mission's own text, and after one correction "
+                "round naming those wants and the mission-text rule the author "
+                "repeated the already-satisfied claim. There is no third contact.")
+           :reviewed-claim-refused? true})))
+
+(defn- unmeasured-claim-correction-prompt
+  [author target repo mission-text-wants claim-observation binding original-job]
+  (str author ": FULL-LOOP UNMEASURED CLAIM CORRECTION. Your already-satisfied "
+       "claim for selected target " (pr-str target) " was refused: "
+       ":claim-mission-text-not-an-artifact. The mission's own text is the "
+       "completion definition; it cannot be its own artifact, so the selected "
+       "wants below are UNMEASURED.\n\n"
+       "UNMEASURED SELECTED WANTS (only locator is the mission text):\n"
+       (str/join "\n" (for [[want locator] (sort-by str mission-text-wants)]
+                        (str "  " (pr-str want) " -> " (pr-str (:path locator)))))
+       "\nREFUSAL DETAIL: "
+       (pr-str (select-keys claim-observation [:status :reason :details]))
+       "\n\nYou get ONE correction, in this same click. Either:\n"
+       "(a) build a real artifact for at least one of these wants in " repo
+       " — a substantive commit, never an edit of the mission/completion "
+       "text — and end FULL_LOOP_AUTHOR: DONE <fresh-commit-sha>; the normal "
+       "review and measurement then apply to that commit; or\n"
+       "(b) answer FULL_LOOP_AUTHOR: REFUSE <typed reason why a real artifact "
+       "cannot be built>.\n"
+       "Repeating the already-satisfied claim ends the attempt with the typed "
+       "refusal; there is no third contact.\n\n"
+       "SELECTED TARGET: " (pr-str target) "\n"
+       "TARGET REPOSITORY: " repo "\n"
+       "IMMUTABLE CORRECTION BINDING: " (pr-str binding) "\n"
+       "ORIGINAL AUTHOR JOB (RETAINED): "
+       (pr-str (retained-author-job original-job))))
+
+(defn unmeasured-claim-correction-loop
+  "UNMEASURED-CLAIM-NO-WAY-OUT (runs 4955b6e6, e71c7380, f4b95abf): an
+   already-satisfied claim whose claim-mode measurement refused
+   :claim-mission-text-not-an-artifact gets exactly one round back to the
+   author, in the same click, before the typed refusal lands. The author is
+   told exactly which selected wants are unmeasured and why the mission text
+   cannot count, and must either build a real artifact for at least one want
+   or answer with a typed reason it cannot.
+
+   The corrected response is returned as {:author-job ..} and continues
+   through the unchanged author, feature-card, and artifact-binding gates,
+   so the normal measurement applies to the new commit; a typed-reason
+   refusal is closed by the unchanged throw-if-author-refused!. A repeat of
+   the claim throws the existing typed refusal
+   (:already-satisfied-wants-unmeasured, no injury, no third contact).
+   Allowance 0 (opts :unmeasured-claim-corrections) restores the legacy
+   no-round behavior by returning nil."
+  [opts phase-context author target repository mission claim-context author-job
+   dispatched-turns claim-observation]
+  (let [raw-allowance (get opts :unmeasured-claim-corrections
+                           default-unmeasured-claim-corrections)]
+    (if-not (contains? #{0 1} raw-allowance)
+      (throw (ex-info "Unmeasured claim correction allowance must be 0 or 1"
+                      {:outcome :build-failed
+                       :failure-kind :unmeasured-claim-correction-config-invalid
+                       :failure-stage :author-wait
+                       :unmeasured-claim-corrections raw-allowance}))
+      (when (pos? raw-allowance)
+        (let [mission-text-wants
+              (mission-observation/mission-text-locators
+               (:dispatch claim-context) (get-in mission [:source :path]))
+              binding {:target target :author author :repository repository
+                       :original-request-id (:job-id author-job)
+                       :claim-observation-sha256 (sha256 claim-observation)}
+              base-record {:schema :wm/unmeasured-claim-correction-v1
+                           :allowance raw-allowance
+                           :binding binding
+                           :unmeasured-wants mission-text-wants
+                           :claim-observation
+                           (select-keys claim-observation [:status :reason :details])
+                           :original {:request (select-keys author-job [:job-id])
+                                      :job (retained-author-job author-job)}}
+              prompt (unmeasured-claim-correction-prompt
+                      author target repository mission-text-wants
+                      claim-observation binding author-job)
+              dispatch-result (atom nil)
+              dispatch-once
+              (fn []
+                (locking dispatch-result
+                  (case (:status @dispatch-result)
+                    :returned (:value @dispatch-result)
+                    :threw (throw (:throwable @dispatch-result))
+                    (try
+                      (swap! dispatched-turns inc)
+                      (let [response ((or (:dispatch-fn opts) dispatch!)
+                                      opts author "wm-full-loop" target prompt)]
+                        (reset! dispatch-result {:status :returned :value response})
+                        response)
+                      (catch Throwable t
+                        ;; A debugger retry reuses the retained transport
+                        ;; result; it never sends a second correction request.
+                        (reset! dispatch-result {:status :threw :throwable t})
+                        (throw t))))))
+              response (run-phase! opts phase-context
+                                   :unmeasured-claim-correction-dispatch
+                                   dispatch-once)
+              correction-id (:job-id response)
+              corrected-job
+              (run-phase! opts phase-context :unmeasured-claim-correction-wait
+                          #((or (:poll-fn opts) poll-job!) opts correction-id))
+              correction-before-gate
+              (assoc base-record
+                     :request {:job-id correction-id
+                               :prompt prompt
+                               :prompt-sha256 (sha256 prompt)}
+                     :corrected {:job (retained-author-job corrected-job)}
+                     :remaining-allowance 0)]
+          (when (= "cancelled" (:state corrected-job))
+            (unmeasured-claim-correction-failure!
+             "Unmeasured claim correction job was cancelled"
+             :correction-job-cancelled correction-before-gate))
+          (when-not (and (string? correction-id)
+                         (= correction-id (:job-id corrected-job))
+                         (= author (:agent-id corrected-job)))
+            (unmeasured-claim-correction-failure!
+             "Unmeasured claim correction reply provenance did not match dispatch"
+             :reply-provenance-mismatch correction-before-gate))
+          (when-not (= "done" (:state corrected-job))
+            (unmeasured-claim-correction-failure!
+             "Unmeasured claim correction did not complete"
+             :correction-job-not-done correction-before-gate))
+          (let [{:keys [verdict reason]} (author-verdict corrected-job)]
+            (when (= :unverifiable verdict)
+              (unmeasured-claim-correction-failure!
+               "Unmeasured claim correction did not contain a typed terminal reply"
+               :corrected-author-response-malformed correction-before-gate))
+            (when (= :refuse verdict)
+              (let [card (raw-feature-card corrected-job)
+                    repeated? (or (and card (already-satisfied-card? card))
+                                  (already-satisfied-report? reason))]
+                (when repeated?
+                  ;; the bad case: the author repeats the claim. One round,
+                  ;; then the existing typed refusal; no injury, no third
+                  ;; contact.
+                  (unmeasured-claim-terminal-refusal!
+                   target author-job claim-observation
+                   (assoc correction-before-gate :status :repeated-claim)))))
+            {:author-job
+             (assoc corrected-job :unmeasured-claim-correction
+                    (assoc correction-before-gate
+                           :status (if (= :done verdict) :real-work :typed-reason)))
+             :unmeasured-claim-correction
+             (assoc correction-before-gate
+                    :status (if (= :done verdict) :real-work :typed-reason))}))))))
+
+(defn unmeasured-claim-correction-state
+  "Runs before the ordinary refusal/claim handling. When the author's
+   completed job is an already-satisfied claim whose claim-mode measurement
+   refused because the only artifact is the mission text, one correction
+   round is offered in the same click (unmeasured-claim-correction-loop).
+   Any other author response returns nil and is handled unchanged."
+  [opts phase-context prompt-opts target mission mission-baseline dispatch
+   dispatched-turns author-job author-repo]
+  (let [correction-repository
+        (or (get-in author-job [:author-response-corrections 0 :binding :repository])
+            (get-in author-job [:unmeasured-claim-correction :binding :repository]))
+        classification (author-refusal-classification
+                        author-job
+                        (or correction-repository
+                            (get-in author-job [:artifact-binding :repo]) author-repo)
+                        nil (some? correction-repository))]
+    (when (= :already-satisfied (:outcome classification))
+      (let [grounded (:grounded-commit classification)
+            repository (some (fn [r] (when (and (= (:repo grounded) (.getName (io/file r)))
+                                                (.isDirectory (io/file (str r) ".git"))) r))
+                             (primary-repos))
+            claim-context {:mission-baseline mission-baseline :dispatch dispatch}
+            claim-observation (when repository
+                                (claim-mode-observation claim-context repository
+                                                        (:sha grounded) mission))]
+        (when (and claim-observation
+                   (= :refused (:status claim-observation))
+                   (= :claim-mission-text-not-an-artifact (:reason claim-observation)))
+          (unmeasured-claim-correction-loop
+           opts phase-context (:author prompt-opts) target repository mission
+           claim-context author-job dispatched-turns claim-observation))))))
 
 (defn- review-evidence-correction-prompt
   [reviewer target author repo commit binding review-job review-gate]
@@ -5065,6 +5287,26 @@
     (or (nil? claim-observation)
         (= :admitted (:status claim-observation)))))
 
+(defn- claim-mode-observation
+  "Claim-mode selected-want measurement, shared verbatim by the claim review
+  and the UNMEASURED-CLAIM-NO-WAY-OUT correction gate so the two paths can
+  never disagree about which wants are unmeasured. Measurement semantics are
+  unchanged: this is one composition site for the projection the claim
+  review already ran."
+  [claim-context repo commit mission]
+  (when (and (map? claim-context)
+             (:dispatch claim-context)
+             (:mission-baseline claim-context))
+    (mission-observation/project
+     {:baseline (:mission-baseline claim-context)
+      :dispatch (:dispatch claim-context)
+      :repository repo :after-revision commit
+      :after-rows
+      (mission-observation/capture-after
+       {:dispatch (:dispatch claim-context)
+        :repository repo :revision commit})
+      :claim {:mission-source-path (get-in mission [:source :path])}})))
+
 (defn- review-cited-already-satisfied-claim!
   "The reviewer dispatch for an existing-artifact claim whose commit cites
   the selected target. Split from `review-already-satisfied-claim!` so the
@@ -5079,21 +5321,14 @@
         ;; never an artifact). No admitted measurement -> the claim is NOT
         ;; accepted; the honest refusal stands.
         claim-observation
-        (when (and (map? claim-context)
-                   (:dispatch claim-context)
-                   (:mission-baseline claim-context))
-          (mission-observation/project
-           {:baseline (:mission-baseline claim-context)
-            :dispatch (:dispatch claim-context)
-            :repository repo :after-revision commit
-            :after-rows
-            (mission-observation/capture-after
-             {:dispatch (:dispatch claim-context)
-              :repository repo :revision commit})
-            :claim {:mission-source-path (get-in mission [:source :path])}}))
+        (claim-mode-observation claim-context repo commit mission)
         prompt (str (reviewer-prompt prompt-opts target construction repo commit author-job [])
                     "\nALREADY-SATISFIED CLAIM: no new implementation is claimed. Judge whether "
                     "this exact existing commit satisfies the selected task, not merely whether it exists.\n"
+                    "MISSION TEXT IS NOT AN ARTIFACT: the mission's own completion definition "
+                    "(its markdown and check strings) can never be the existing artifact for this "
+                    "claim, whatever its checkboxes say. A claim whose only evidence is the mission "
+                    "text must not be approved.\n"
                     "SELECTED TASK COMPLETION DEFINITION / RETAINED MISSION:\n" (pr-str mission) "\n" completion-text
                     "\nA task-satisfaction refusal is ordinary; if the apparatus itself is defective, "
                     "also return FULL_LOOP_APPARATUS_DEFECT: <specific reason>.\n")
@@ -9085,7 +9320,19 @@
                    (if retry-author? retry-response author-response)
                    (if retry-author? retry-author-prompt-text author-prompt-text)
                    author-job)
-                  author-job (:author-job author-correction-state)]
+                  author-job (:author-job author-correction-state)
+                  ;; UNMEASURED-CLAIM-NO-WAY-OUT: an already-satisfied claim
+                  ;; refused as mission-text-unmeasured gets one correction
+                  ;; round here, before the claim review, so a DONE reply
+                  ;; continues through the unchanged author gates below and
+                  ;; the normal measurement applies to the new commit.
+                  unmeasured-claim-correction-state
+                  (unmeasured-claim-correction-state
+                   opts @phase-context prompt-opts target mission mission-baseline
+                   (get-in @d-task-dispatch [:dispatch])
+                   dispatched-turns author-job author-repo)
+                  author-job (or (:author-job unmeasured-claim-correction-state)
+                                 author-job)]
               (throw-if-cancelled! author-job :author-wait)
               (when-not (= "done" (:state author-job))
                 (throw (ex-info "Author job did not complete"

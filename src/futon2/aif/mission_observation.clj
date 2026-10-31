@@ -111,6 +111,24 @@
     (when (and (string? repository) (string? revision))
       (read-selected dispatch wants repository revision))))
 
+(defn mission-text-locators
+  "The selected wants whose observation locator is the mission's own text —
+   exactly the wants an already-satisfied claim cannot measure, because the
+   completion definition can never be its own artifact. Returns a map of
+   want -> locator for the dispatch's locators that resolve to the mission
+   source path. UNMEASURED-CLAIM-NO-WAY-OUT (runs 4955b6e6, e71c7380,
+   f4b95abf): this is the list the author is told about in the one
+   correction round."
+  [dispatch mission-source-path]
+  (let [locators (get-in dispatch [:occurrence :action/value :observation-locators])]
+    (into {}
+          (filter (fn [[_ locator]]
+                    (let [p (:path locator)]
+                      (and (string? p) (string? mission-source-path)
+                           (or (= (canonical mission-source-path) (canonical p))
+                               (str/ends-with? (canonical mission-source-path) p)))))
+                  locators))))
+
 (defn project
   "Admit the exact retained before baseline and post-build reader rows.
    Before=true is a typed refusal under the current selected-want policy.
