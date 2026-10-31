@@ -1,0 +1,88 @@
+{
+  "schema": "wm/criteria-p3-stale-deficit-audit-v1",
+  "date": "2026-10-31",
+  "author": "zai-5",
+  "dispatch": "codex-11 invoke-1793414890003-8600-ffa34c0b",
+  "plan": "P3 of futon2 holes/labs/wm-contract/PLAN-criteria-completion-2026-10-31.md",
+  "branch_base": "origin/main 4afa80e68",
+  "mode": "evidence-only, one bounded pass; no tracker changes/code/tests/live-writes/repair/contact/click/delegation",
+
+  "rows": {
+    "C3-AUTHOR-REPOSITORY-HISTORY": {
+      "closure_condition": "Canonical delivery gate exercised by fdba6f19d in run 43ec20a7.",
+      "verdict": "CLOSED-WARRANTED",
+      "evidence": [
+        {"path": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-43ec20a7-c3ba-4726-a43c-a827b2b3e66d.edn", "key": ":answer-delivery", "value": "{:source :reviewed-patch-function, :patch {:namespace futon2.aif.wm.authored.req-aab759a8, :var decisions, :source-digest c7339cca4c123fc7fe3994541db206917e668b774b20d38f48d9cd522ef11498, :commit fdba6f19db389db788e8569bc7c037481c099687}, :requisition-id aab759a850cbf03fdda5c253c1ccb7c0bd71df81c29ac946cb74c3a2d78747de}"},
+        {"path": "same record", "key": "run-output sha", "value": "38c230330dca99aba2850f4ba9bcb50e1e3d5918859cac48e8c3bd5e9e0ca33d"},
+        {"path": "/home/joe/notes/wm-next/criteria-completeness/run001/author-delivery-live/receipt.json", "key": "corroborating receipt", "value": "same commit/digest/requisition pins"},
+        {"path": "futon2 git", "key": "direct fix ancestry", "value": "329b280ac in main"}
+      ],
+      "missing_evidence": [],
+      "notes": "delivery exercised; run's own :resume-protocol-violation terminal is downstream/unrelated; e0b9aab6 historical record preserved; no retrospective ingestion"
+    },
+
+    "E4-WORK-ORDER-NIL-RETURN-LIMIT": {
+      "closure_condition": "A real self-heal attempt uses the corrected option projection, while absent limits remain absent and explicit nil or negative limits remain refused.",
+      "verdict": "LIVE-WITNESS-OWED",
+      "evidence": [
+        {"path": "futon2 git", "key": "regression", "value": "5319b4b47f 2026-10-29T12:47Z in main; nil limit refused non-runtime callers"},
+        {"path": "/home/joe/notes/wm-next/immune-loop/old-failures-census.json", "key": "class-b failures", "value": "two tests pinned to 5319b4b47f"},
+        {"path": "futon2 git", "key": "fix ancestry", "value": "e0cecacca (2026-10-29T17:45Z) and 0a6f09116 both ancestors of main"},
+        {"path": "src/futon2/aif/meta_self_heal_production.clj:1766-1767", "key": "corrected projection", "value": "(contains? opts :meta-acceptance-return-limit) (assoc :acceptance-return-limit …) — key present only when opts carry it; natural-number validator unchanged"},
+        {"path": "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/ledger.edn", "sha256": "ca73914f0c26fb1435a0497398a191302c46da705dc09da7724b4f4998371a44", "key": "ordinal 130", "value": "adf04df0 real post-fix attempt armed, reached cascade_patch_delivery"}
+      ],
+      "missing_evidence": ["retained work-order/preparation receipt from a post-fix real attempt showing :acceptance-return-limit absent in emitted options"],
+      "notes": "no guessed absence: traversal alone not counted as the witness"
+    },
+
+    "E4-TERMINAL-INGESTION-IDENTITY": {
+      "closure_condition": "Missing close classification derives typed Q6 evidence; otherwise an unclassified terminal failure is scoped to its run and cannot inherit another injury identity.",
+      "verdict": "CLOSED-WARRANTED",
+      "evidence": [
+        {"path": "futon2 git", "key": "classifier ancestry", "value": "fa2fa8fd5 (2026-10-29T20:23Z) ancestor of main"},
+        {"path": "/home/joe/notes/wm-next/immune-loop/ingestion-identity/receipt.json", "key": "reload + preserved history", "value": "reloaded meta-terminal-injury/open-cascade-resume/full-loop-runner; historical nil-tuple cause/0304437e… preserved; 9c622038 ledger history unchanged"},
+        {"path": "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/ledger.edn", "sha256": "ca73914f0c26fb1435a0497398a191302c46da705dc09da7724b4f4998371a44", "key": "post-fix typed identities", "value": "f7e97cc665 at ordinal 121 (reviewer-falsifier-failed) and adf04df0f31 at ordinal 130 (author-delivery-wrong-repository) — fresh cause-ids, no inheritance"}
+      ],
+      "missing_evidence": [],
+      "caveat": "positive post-fix instance of an unclassified terminal being scoped is unwitnessed (all examined post-fix terminals carried classifications); protection evidenced by fresh typed identities"
+    },
+
+    "E4-E43-CAUSE-SCOPE": {
+      "closure_condition": "Real retained cascade compiles cascade-ready through the repaired producer; preserve self-heal scope failure evidence for later E4 work",
+      "verdict": "LIVE-WITNESS-OWED",
+      "evidence": [
+        {"path": "futon3c git", "key": "producer fix ancestry", "value": "45a6521bf7038df3f2be60920698a9c03116c611 (2026-10-29T17:55Z) ancestor of futon3c master (checkpoint said pending — now advanced)"},
+        {"path": "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-33/receipt.json", "key": "scope-failure evidence preserved", "value": "mechanical discharge e43 ordinal 114; acceptance 37b6deb4; patch fc9375d466; ledger 5abf05c6eed46129d8c08cbf19c2f1c01aea8acac5282645eaa520ecab73cc1a"},
+        {"path": "wm-runs records 3415 / eaa9(f805ca4b) / e5f08d91", "key": "cascade-ready witness search", "value": "zero ':status :resumed'/':cascade-ready' occurrences post-fix; clause needs a real retained cascade through the repaired producer"}
+      ],
+      "missing_evidence": ["one retained post-fix open-cascade-resume success with {:status :resumed :result {:status :cascade-ready …}}"],
+      "notes": "no source blocker"
+    },
+
+    "A2-RELATIVE-STORE-ROOTS": {
+      "closure_condition": "Canonical roots used by reachable writers/readers; historical split explicitly reconciled or scoped without losing evidence.",
+      "verdict": "SOURCE-BLOCKER (clause 1); clause 2 satisfied",
+      "evidence": [
+        {"path": "src/futon2/aif/flight_driver.clj:273", "key": "first divergence", "value": "enact-fn constructed without :trace-dir"},
+        {"path": "src/futon2/aif/flight_runner.clj:1074", "key": "propagation", "value": "nil trace-dir passed to temporal-update/publish!"},
+        {"path": "src/futon2/aif/temporal_update.clj:181", "key": "fallback", "value": "(or trace-dir lane/default-trace-dir)"},
+        {"path": "src/futon2/aif/lane_futility.clj:15", "key": "relative root", "value": "(def default-trace-dir \"data/wm-trace\") — cwd-relative, not canonical /home/joe/code/futon2/data/wm-trace (trace.clj:64, selection_authoring_coupling.clj:15 absolute)"},
+        {"path": "/home/joe/notes/wm-next/criteria-completeness/relative-store-paths/inventory.json + decision.md", "key": "clause 2", "value": "historical 52-record futon3c split pinned per-file sha256, scoped, reads now futon2; no records moved"}
+      ],
+      "missing_evidence": ["bounded fix anchoring the flight temporal fallback (four-step path above) — not attempted under this packet per DEFERRED classification"]
+    },
+
+    "B5-INJURIES-HOLD-RUN001": {
+      "closure_condition": "No effective injury remains in the medic-corrected ledger, and the next run001 click starts without an injury stop; retained ledger projection and click record establish both.",
+      "verdict": "LIVE-WITNESS-OWED",
+      "evidence": [
+        {"path": "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/ledger.edn", "sha256": "ca73914f0c26fb1435a0497398a191302c46da705dc09da7724b4f4998371a44", "key": "live state", "value": "ordinal 130 injury/adf04df0f31b8727ac57d9c7f2496d8fa28598c :state :open; structurally counted effective injuries = 1"},
+        {"path": "ledger 5abf05c6… (historical)", "key": "prior clearance", "value": "zero effective through ordinal 114 — historical, not current"}
+      ],
+      "missing_evidence": ["effective clearance of adf04df0 via supported P4 route", "subsequent run001 click starting without an injury stop, retained"],
+      "notes": "blocked on P4 recovery; no source blocker; no new requirement invented"
+    }
+  },
+
+  "actions_taken": "none beyond this packet — no tracker changes, no closures performed, no code, no clicks, budget 14"
+}
