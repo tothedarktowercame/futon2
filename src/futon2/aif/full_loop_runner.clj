@@ -7064,7 +7064,17 @@
                            {:selected-action (if mission-close? mission-action selected-action)
                             :token-comparison (:receipt token-comparison)
                             :progress-evidence (:want-progress-evidence data)
-                            :blockers (:want-blockers data)}
+                            :blockers (:want-blockers data)
+                            ;; Second instrument for the two-instrument rule:
+                            ;; the run's own demo receipt at the grounded
+                            ;; commit, computed exactly as the run record's
+                            ;; :run-output projection computes it (MISSION-
+                            ;; TEXT-ONLY-WANT-LOCATORS). Nil-handled: its
+                            ;; absence can only demote to :checkbox-only,
+                            ;; never refuse.
+                            :demo-receipt
+                            (run-output/receipt {:outcome outcome :data data}
+                                                (grounded-commit-for {:data data}))}
                             mission-close? (assoc :mission-observation mission-receipt))))
                        route-account
                        (route-attestation/retain!
