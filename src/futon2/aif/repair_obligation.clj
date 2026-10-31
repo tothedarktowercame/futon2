@@ -539,6 +539,10 @@
                  :opened-at (or (:opened-at finding)
                                 (:observed-at observation)
                                 (str (Instant/now)))}
+                  ;; DISCHARGED-INJURY-TICKETS-LEFT-OPEN: see the system
+                  ;; failure mint; kept when the writer supplied one.
+                  (contains? finding :origin-run/id)
+                  (assoc :origin-run/id (:origin-run/id finding))
                   occurrence (assoc :repair/occurrence occurrence))]
      (write-new-or-identical! root id record)
      (with-contended-store-lock root #(finding-ticket/publish! root id publication))
@@ -619,7 +623,12 @@
                   ;; WM-CAUSE-ON-RECORD-I: the cause chain beneath the
                   ;; failure, kept when the writer supplied one
                   (contains? finding :failure-cause)
-                  (assoc :failure-cause (:failure-cause finding)))]
+                  (assoc :failure-cause (:failure-cause finding))
+                  ;; DISCHARGED-INJURY-TICKETS-LEFT-OPEN: the run whose tick
+                  ;; record later pins this failure as an injury cause; the
+                  ;; medic route joins on it exactly, never on failure-kind.
+                  (contains? finding :origin-run/id)
+                  (assoc :origin-run/id (:origin-run/id finding)))]
      (write-new-or-identical! root id record)
      (with-contended-store-lock root #(finding-ticket/publish! root id publication))
      (when occurrence
