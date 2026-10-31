@@ -296,7 +296,7 @@
        :counts (into (sorted-map)
                      (map (fn [class]
                             [class (count (get by-class class []))]))
-                     [:reached :progressed :blocked :untouched])
+                     [:reached :progressed :blocked :untouched :checkbox-only])
        :selected-wants (vec (:selected-wants accounting))}
       {:status :absent
        :reason (if (map? accounting)
