@@ -1091,7 +1091,7 @@
   record. run-record-failure's bounded projection (failure-detail) is the
   same projection for every case: scalars survive, :delivery-evidence keeps
   its nested pin, oversized values are dropped with :omitted naming them."
-  [:status :kind :reason :expected :accepted-by :requisition-id :cascade-digest
+  [:status :kind :reason :repair :requisition-id :cascade-digest
    :author-job :review-job :patch :answer :delivery-evidence])
 
 (defn- held-resume-data

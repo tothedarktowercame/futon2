@@ -98,10 +98,7 @@
   of {:absent :no-error-data}."
   (let [refusal {:status :error
                  :kind :answer-reviewer-mismatch
-                 :expected "wm-reviewer"
-                 :accepted-by "someone-else"
-                 :requisition-id "req-adc46631"
-                 :cascade-digest "digest-adc46631"}
+                 :repair {:expected "wm-reviewer" :accepted-by nil}}
         data (#'runner/held-resume-data
               {:failure-kind :answer-reviewer-mismatch
                :downstream-refusal refusal}
@@ -111,8 +108,7 @@
         "the typed refusal fields ride the close map for every held refusal")
     (is (not= {:absent :no-error-data} (:detail failure)))
     (is (= {:status :error :kind :answer-reviewer-mismatch
-            :expected "wm-reviewer" :accepted-by "someone-else"
-            :requisition-id "req-adc46631" :cascade-digest "digest-adc46631"}
+            :repair {:expected "wm-reviewer" :accepted-by nil}}
            (:detail failure))
         "the bounded projection keeps the typed refusal fields diagnosis reads")
     (is (= 1 (get-in failure [:causes :total-count]))
