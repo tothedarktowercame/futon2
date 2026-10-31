@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: P5 click 1 unmeasured (2026-10-31)
+
+Click wm-click-6be313d8 (run 4955b6e6) started with no injury stop and ended :already-satisfied, but the selected wants were not measured, so it is not task completion ([matrix](reconciliation/MATRIX-A1-E4-4955b6e6-2026-10-31.md)). Budget 10. The next click holds until ALREADY-SATISFIED-WANTS-UNMEASURED is fixed, because another would repeat this result.
+
 ## Latest execution checkpoint: adf04df0 discharged (2026-10-31 15:16Z)
 
 Medic click wm-click-327e995a discharged adf04df0 through open-out-of-band-medic (ledger ordinal 131, fixed-by c96bd9871; compute! :checked, current green, counterfactual 2 failures 0 errors). Launcher exit 0. Budget reads 243 allocated / 232 consumed / 11 available: the click was charged at issue, see MEDIC-CLICK-CHARGED-AT-ISSUE. P5 is released under the plan's freeze rule. The section below is history.
