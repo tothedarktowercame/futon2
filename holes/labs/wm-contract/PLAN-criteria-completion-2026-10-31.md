@@ -2,6 +2,10 @@
 
 Owner: codex-11. Date: 2026-10-31. This is an execution plan against GRID-wm-criteria-completeness-v2.md, not a replacement specification or evidence that its criteria already pass.
 
+## Latest execution checkpoint: P4 held
+
+P2 is complete as a scoped evidence account; P3 produced one additional deficit closure (now9closed/15non-closed). Two P4 parent clicks,0930ccf1 and023dde8b, consumed two credits; neither claimed a repair attempt. Latest receipt-backed balance is **12 available**. P4 is held on the producer's `:cause-scope-unretained` refusal. **No automatic third parent; P5/P6 are not released.** [Hold and evidence question](P4-HOLD-after-023dde8b-2026-10-31.md). Earlier starting figures and conditional assignments below are preserved as history.
+
 ## Starting position
 
 - Twenty whole-machine criteria A1–E4; 24 subsidiary deficit rows. Eight deficit rows closed, sixteen non-closed. These are different counts.
