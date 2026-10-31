@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Criteria rollup (2026-10-31)
+
+Across the seven ordinary clicks of P5 ([rollup](reconciliation/ROLLUP-P5-criteria-2026-10-31.md)): 10 clean observed, 7 observed with limits, 2 unknown (A2, C2), 1 violated (E4). This is best status per criterion across runs, not a run that passed all twenty. B3 is under review: zai-2 found outer scoring degenerate on the traced run, with ties on 10 of 10 retained runs.
+
 ## Latest execution checkpoint: click 7, cascade revision door refused (2026-10-31)
 
 Click wm-click-f56a06af (run 0be4fc7d) closed :grounded-progress on M-peradam-grounding, futon7 aa90d97ca, no injury, wants unreached. The reviewer requested changes, the ordinary revision round resolved them, and the cascade revision door was reached and refused :revision-construction-inputs-unavailable. Q1 held and Q9 stayed unverifiable. Budget 2. Credits hold until a difficulty can revise the cascade.
@@ -28,7 +32,7 @@ Click 6's stop was a real reviewer refusal erased by the handler. Fixed by 75b07
 
 ## Latest execution checkpoint: click 6, injury c309d796 (2026-10-31)
 
-The gate minted the first partial field and Q1 held live at 617/617. Click wm-click-f11ea1c8 (run adc46631) reached author and review on M-aif-policy-conditioned-eig, then stopped :incomplete at cascade-resume with :answer-reviewer-mismatch, opening injury c309d796 (ordinal 138). Budget 4. Next click holds on ANSWER-REVIEWER-MISMATCH-NIL.
+The gate minted the first partial field and Q1 held live at 617/617. Click wm-click-f11ea1c8 (run adc46631) reached author and review on M-peradam-grounding, then stopped :incomplete at cascade-resume with :answer-reviewer-mismatch, opening injury c309d796 (ordinal 138). Budget 4. Next click holds on ANSWER-REVIEWER-MISMATCH-NIL.
 
 ## Latest execution checkpoint: click 5, clicks held for field refresh (2026-10-31)
 
