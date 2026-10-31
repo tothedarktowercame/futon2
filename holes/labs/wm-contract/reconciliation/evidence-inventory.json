@@ -1,0 +1,101 @@
+{
+  "schema": "wm/criteria-evidence-reconciliation-v1",
+  "date": "2026-10-31",
+  "author": "zai-5",
+  "dispatch": "codex-11 invoke-1793412747718-8549-10ec5544",
+  "controlling_checkpoint": "futon2 4774d8671d2c74797b3f286341ca3ceb095daa82 (CHECKPOINT-criteria-focus-2026-10-31)",
+  "mode": "evidence-only; no source edits, tests, reloads, clicks, credit, contacts, delegation",
+  "budget": 14,
+
+  "rows": {
+    "B1-TICKETS": {
+      "closure_condition": "Declared intended field includes ticket source with justified per-item admission/exclusion; mission-only success cannot close this row",
+      "clauses": {
+        "field_includes_ticket_source": {
+          "status": "satisfied",
+          "evidence": [
+            {"path": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-30-3415b671-88f6-4662-a2c1-48e3630f6116.edn", "sha256": "0af126fec89e95980508f64ed381e5694d172d6dc37f7d7d8b6f384ce363aa36", "key": ":outer/selection :scope", "value": "{:scope :population/missions-excursions-tickets, :population-sha 5bd66c7572a49a2ddba6a88cec428c49e315b08ad78f9b039a8f6af34fd8eaf2, :coverage {:checker-sha 08f6b5d6011f43d6b26f640acde9db7038ab4bb8dbce3e0fe62f12a8ea64468e, :counts {:read 608}, :status :complete}}"},
+            {"path": "/home/joe/notes/wm-next/criteria-completeness/zai-coordination/q1-ticket-prep/members-608.json", "sha256": "5bd66c7572a49a2ddba6a88cec428c49e315b08ad78f9b039a8f6af34fd8eaf2", "key": "population", "value": "M181/E239/T188 = 608, zero missing/extras"},
+            {"path": "/home/joe/notes/wm-next/criteria-completeness/zai-coordination/q1-ticket-prep/coverage-608.json", "sha256": "a6d8509756db7b4e957778c74039673ec8c057a7b8e7e46650ff06fdeb1eea7d", "key": "certificate", "value": "per-member record-pins, status complete, 608 read"},
+            {"path": "/home/joe/notes/wm-next/criteria-completeness/zai-coordination/q1-ticket-prep/integration-publication-receipt.json", "sha256": "6a65de1f49217e3019929d5e0333e7bf2050cb4a2b0f8d57267da2cc1b4efed6", "key": "published_manifest_sha256", "value": "fb1649fd90ebe319cc5843d3591808f659e781f1ce75ded76832dcf95bf4f27e"}
+          ]
+        },
+        "per_item_admission_exclusion_justified": {
+          "status": "satisfied",
+          "evidence": [
+            {"path": "q1-ticket-prep/exclusions-608.json", "sha256": "8dd1fa34d893d12f69d71c9bdca85d60247a477a4e3bbfe04d04b2ad52c0fd92", "key": "exclusions", "value": "412: complete 361, inactive 30, operator-gated 13, not-actionable 5, draft 3"},
+            {"path": "tick-run-record-2026-10-30-3415b671...edn", "sha256": "0af126fe...aa36", "key": ":outer-field/excluded", "value": "per-target :reason + status-line/record-pins; reason kinds incl. prerequisite-unresolved 470, previous-choice-refused-on-same-inputs, repeat-choice-after-refusal, all-policies-already-satisfied, open, active, identify, focus-not-retained, ordinary-pattern-enactment-not-observed, classification-receipt-absent, no-mid-run-cascade-revision, fold-not-passed-to-runner"}
+          ],
+          "nuance": "admitted items justified by pin-joined census membership (population-sha byte-identical), not separate per-item receipts; selection field cardinality (2579 admitted, ~230 unique excluded) is the substrate candidate layer, joined to the 608 reading population by population-sha, not 1:1"
+        }
+      },
+      "open_text_stale": "partly — disposition reasons from ff4b4d5c and predates the 3415 charged-click selection consuming the published ticket-inclusive population",
+      "missing_evidence": [],
+      "tracker_only_closure_warranted": true,
+      "no_extra_requirement_invented": "no live-winner requirement added"
+    },
+
+    "E3-OUTER-REPEAT": {
+      "closure_condition": "Live cross-run observation demonstrates unchanged refused inputs prevented before author dispatch; changed-input continuation retains differing identities. Implementation, load, and synthetic clone alone do not close this row.",
+      "clauses": {
+        "unchanged_refused_inputs_prevented_pre_dispatch": {
+          "status": "satisfied",
+          "evidence": [
+            {"path": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-30-e5f08d91-2fb0-40e2-b367-5c4ed436c3dc.edn", "sha256": "ebd2b9699a6dae717b00477502a1e986b70041294f00500e162279df21a9bf25", "key": "prior refusal", "value": "target M-typed-memories, terminal-outcome :guardrail-refusal, kind :selected-want-mission-observation-refused, publication :refused"},
+            {"path": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-30-3415b671-88f6-4662-a2c1-48e3630f6116.edn", "sha256": "0af126fec89e95980508f64ed381e5694d172d6dc37f7d7d8b6f384ce363aa36", "key": ":outer/selection :refusals[0] / q6", "value": "{:target M-typed-memories, :kind :repeat-choice-after-refusal, :scope :this-click, :predecessor-run-id 2026-10-30-e5f08d91-2fb0-40e2-b367-5c4ed436c3dc, :digest c1801780489bea4ed72638a53cca7b1e0d55c0b1d97357c00b9659f41eb6d315, :q6 {:schema :wm/q6-exclusion-v1, :reason :previous-choice-refused-on-same-inputs, :status :refused, :predecessor {:sha256 d9063e194ddccc097c70811b8f8f9032efe5155e62e0f5e6849b50ffb8461f00}, :rearm {:condition :selection-inputs-change, :input-digest c1801780...6315, :excluded-key [:wm/reading-policy-v1 M-typed-memories M-typed-memories/policy-ed6ff8783a9a9b045f59 {policy-node-set}]}}}; 3415 author dispatch went to M-peradam-grounding"}
+          ],
+          "identity_fields": "policy id M-typed-memories/policy-ed6ff8783a9a9b045f59 + node set (reading-policy identity, not bare reading identity); match on input-digest equality with pinned predecessor record"
+        },
+        "changed_input_continuation_differing_identities": {
+          "status": "satisfied",
+          "evidence": [
+            {"path": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-347b9b51-637d-4291-9448-f2dcecedd748.edn", "sha256": "babfbb875435f9c08627d93d3d22bee9945377e013b9d989e334c1820884a2de", "key": ":outer-repeat-comparison", "value": "{:status :inputs-changed, :matched-refusal nil, :comparisons [{:record-sha256 0d11787aff478942a451d153665a67834688c3f754e5a7d84ee58b3f637def68, :run-id 2026-10-29-b1a049d7-d4f8-4f63-be69-6872d86e8827, :failure {:kind :already-satisfied, :stage :author-wait}}], selection-input-digest 975c0b31db911112cdd8afbb205fbdbd5445e1629cb3b2df3795eaae7840e019}; reached author dispatch"},
+            {"path": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-ff4b4d5c-0193-4162-9075-3ff1591b150d.edn", "sha256": "11d7070c03ab3dcadd1b9f1854d6446ef8a9a46f3fd023d5f2e4cb0ba5207a5e", "key": ":selected-target-reading :reselection/reading-attempts", "value": "refused attempt M-typed-memories (response-invalid, format-correction + response pins 1b1bd507/548d2780 retained) then published attempt M-peradam-grounding (validation valid)"}
+          ],
+          "caveat": "two clauses witnessed by different run pairs; condition does not require a single pair"
+        }
+      },
+      "open_text_stale": "yes — latest line still says unchanged-input prevention pending / live witness pair outstanding; the 3415 q6 exclusion is that witness",
+      "missing_evidence": [],
+      "tracker_only_closure_warranted": true,
+      "scope_note": "closes the E3-OUTER-REPEAT deficit row only; criterion E3 (E3-T12 detector streak) unaffected"
+    },
+
+    "B2-D4-R28": {
+      "closure_condition": "Real failed-redecision run record retains the reading that ran; no silent not-required fallback; tooling replay and load evidence alone do not close this row",
+      "clauses": {
+        "real_failed_redecision_record": {
+          "status": "satisfied",
+          "evidence": [
+            {"path": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-39a845a3-496a-4bce-888c-e8b0ca2835ab.edn", "sha256": "591c5505e2a155663e9f5e676e8dccc28c7bacef3bb53cc2a195dd0f846601dd", "key": "debugger-dwell-receipts[0]", "value": "{:phase :occurrence-square-redecision, :condition-kind :inadmissible-decision, :restart-choice :retry, :disposition :fixed, :duration-ms 811062}"},
+            {"path": "/home/joe/notes/wm-next/criteria-completeness/run001/empty-refusals/held.edn", "sha256": "f3123cb809d8c417f1e8e77f7bbdf2ccfec00355538cfca35c3708d13edd786a", "key": "live exception", "value": "retained separately"}
+          ]
+        },
+        "retains_reading_that_ran_no_silent_not_required_fallback": {
+          "status": "unmet",
+          "evidence": [
+            {"path": "tick-run-record-2026-10-29-39a845a3...edn", "sha256": "591c5505...01dd", "key": ":selected-target-reading", "value": "{:status :not-applicable, :reason :selected-target-reading-not-required} — the silent not-required fallback named by the condition"},
+            {"path": "same record", "key": ":consumption interpretation-debt", "value": "reading recoverable downstream only: analysis-digest 74781ee501a62e59e8e774023953e5cc152cd7adf70275e8641450f2ef2d8d6f, excerpt-digest eea856f6f8dea3042a5851b031f930c55ba862666aff5fe0f749b58b8a6028c0"},
+            {"path": "wm-occurrence-squares registry", "key": "frontier", "value": "digest f9d2f590435d806f3e2073d169e8b0d9ca9cb59bcfe80048c5fdcf2c09420159, file byte-sha 09f27d8ced413677921ca3ae1cdac08404d7a3934551f9d5ac549253c3cb2f87, 6 squares / 4 voids"},
+            {"path": "/home/joe/notes/wm-next/criteria-completeness/run001/empty-refusals/reproduction.edn", "sha256": "b947cb47abd6c2903ead255403a2d636dced8a3cf2c8de3fcbe1511dc41f65f3", "key": "tooling reproduction", "value": "excluded from closure evidence by the condition itself"}
+          ]
+        },
+        "through_later_retry": {
+          "status": "unmet",
+          "evidence": [{"path": "/home/joe/notes/wm-next/criteria-completeness/run001/empty-refusals-discovery.md", "sha256": "c0171d40041166fbfa7d500af587a727d6d85001d51aa37878b121a53ffdcfed", "key": "retry state", "value": "no restart applied; run remains held; no second redecision attempt outcome in record; ff4b4d5c reselection is a successful redecision on a different click, not this failure's retry"}]
+        }
+      },
+      "open_text_stale": "no — IMPLEMENTED; LIVE OBSERVATION PENDING is accurate",
+      "missing_evidence": ["failed-redecision run record whose :selected-target-reading field itself retains the reading that ran (not :not-applicable), plus retained frontier, through the supported retry"],
+      "tracker_only_closure_warranted": false,
+      "note": "defect is run-record reporting shape (reading field vs consumption path), a failure-record taxonomy item, not new machine work"
+    }
+  },
+
+  "dispositions_proposed": {
+    "B1-TICKETS": "tracker-only closure warranted",
+    "E3-OUTER-REPEAT": "tracker-only closure warranted",
+    "B2-D4-R28": "closure not warranted; row stays open"
+  },
+  "actions_taken": "none beyond this packet — no gate/spec revision, no automatic closure, no credit"
+}
