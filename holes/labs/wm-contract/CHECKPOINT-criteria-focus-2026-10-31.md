@@ -2,6 +2,10 @@
 
 This is a coordination checkpoint, not a new spec, runtime gate, or certification. It corrects the earlier use of deficit-row counts as though they measured whole-machine criteria compliance.
 
+## Latest P3 update
+
+Nine deficit rows are now closed and fifteen remain non-closed. C3-AUTHOR-REPOSITORY-HISTORY closed on its named gate witness; terminal-ingestion identity remains open because its relevant unclassified branch was not witnessed. [Coordinator disposition](reconciliation/P3-coordinator-disposition-2026-10-31.md). Earlier counts below are historical snapshots, not current totals.
+
 ## Current update after evidence reconciliation
 
 At tracker commit `fffe320bf`, **8 of 24 deficit rows are closed; 16 remain non-closed**. B1-TICKETS and E3-OUTER-REPEAT closed on existing live evidence. This does not establish eight whole criteria or an intervention-free loop. The sections below retain the original six-closed snapshot as history; this update supersedes its accounting and pending B1/E3 reconciliation actions.

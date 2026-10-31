@@ -353,8 +353,8 @@
     }
   ],
   "latest_status": {
-    "as_of_commit": "fffe320bf",
-    "tracker_sha256": "ad0c1af7874e6efedf0307e55aa4c9b0e793e4d9163e2ae81588142ca121e0dc",
+    "as_of_commit": "see P3 coordinator disposition in this commit",
+    "tracker_sha256": "56a418294aec08c97ec3cb790920b431703036cb4f8ac1f2e3261c3f41009ce8",
     "closed_deficit_ids": [
       "B1-TICKETS",
       "B4-OUTER-PREDICTION",
@@ -362,6 +362,7 @@
       "E3-OUTER-REPEAT",
       "B1-READINESS-PROMPT-LIMIT",
       "C3-B2-ANSWER-DELIVERY",
+      "C3-AUTHOR-REPOSITORY-HISTORY",
       "D1-SELECTED-WANT-REVISION-EVIDENCE",
       "B2-SELECTED-TARGET-READING-RESPONSE"
     ],
@@ -375,7 +376,6 @@
       "E4-WORK-ORDER-NIL-RETURN-LIMIT",
       "E4-E43-CAUSE-SCOPE",
       "E4-TERMINAL-INGESTION-IDENTITY",
-      "C3-AUTHOR-REPOSITORY-HISTORY",
       "E4-F7E97-ACCEPTANCE-SCOPE",
       "C4-FULLY-QUALIFIED-STORE-DETECTION",
       "D4-MEDIC-ONLY-REPORTING",
@@ -393,6 +393,7 @@
     },
     "r28_judgment": "OPEN pending written-condition evidence judgment. Retry occurred; selected-target-reading is a distinct producer. No new field-specific requirement adopted.",
     "decision": "reconciliation/CLOSURE-decision-B1-E3-2026-10-31.md",
-    "historical_snapshot_note": "Top-level snapshot retained unchanged; latest_status supersedes its current accounting."
+    "historical_snapshot_note": "Top-level snapshot retained unchanged; latest_status supersedes its current accounting.",
+    "p3_decision": "reconciliation/P3-coordinator-disposition-2026-10-31.md"
   }
 }
