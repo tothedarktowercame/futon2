@@ -5647,15 +5647,6 @@
       ;; A pin refusal is a guardrail outcome, not a new disposition carrier.
       ;; Its exact subtype stays in failure-kind/detail and durable finding data.
       (= :pinned-selection-refused raw) :guardrail-refusal
-      ;; Typed guard refusals (require-novel!, require-new-inputs!,
-      ;; require-before-author!) throw {:outcome :refused ...}.  The refusal
-      ;; is the guard doing its job, not a build failure: close it as the
-      ;; typed refusal outcome the cohort schema already knows.  Run
-      ;; 0ba3370c (injury a67d3e49) is the retained counterexample: :refused
-      ;; passed through here untouched, the close refused it with
-      ;; :unknown-outcome, and the last-resort fallback re-closed the attempt
-      ;; as :build-failed and the meta-terminal classifier opened an injury.
-      (= :refused raw) :guardrail-refusal
       (#{:agent-job-stalled :construction-failed :grounding-failed
          :policy-nondiscrimination :selection-validation-failed :incomplete} raw) :incomplete
       :else raw)))
