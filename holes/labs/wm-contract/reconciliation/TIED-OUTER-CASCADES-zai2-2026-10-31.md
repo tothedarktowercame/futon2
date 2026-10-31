@@ -118,3 +118,66 @@ tie is explained." The tie is explained (mechanism, frequency, and separating
 evidence all demonstrated from retained data). No live witness is owed for
 the explanation; the two one-line retention changes above are the proposed
 smallest follow-ups, owned by whoever takes the row forward.
+
+## Implementation addendum (zai-2, 2026-10-31, same row)
+
+**Correction to the discovery report above.** The ":selected-relation
+:associated" I quoted for adc46631 belongs to the record's *learning*
+section (the pending f74df9cc consumption). The `:outer/selection` map's own
+`:selected-relation` is **`:unknown`** — there is no scoring-time vs
+retention-time divergence. The scoring relation and the retained relation
+agree: the relation class of the picked target was unknown. The cause is
+upstream of the scorer: `focus-receipt/classify-target` returned
+`{:class :unknown, :reason :embedding-node-not-retained}` for
+M-peradam-grounding (stated relation absent, `:no-stated-path-to-a-classified-target`,
+and the futon6 mission-embed corpus — pinned 2026-06-25 — does not contain
+the newer missions). Measured over the pinned field at the record's decision
+time: **501/501 ready targets classify :unknown**.
+
+**Fix (at the cause, not a tie-break).** `known-term-field` now admits the
+relation term on the same rule as the graph terms: a candidate whose relation
+class is not `:focus`/`:associated`/`:useful-elsewhere` is excluded before
+scoring with `:kind :outer-score/relation-unavailable` and a knowledge
+request to `:focus-receipt-classify-target`, mirroring the graph-term
+requests. A pick therefore always has a known ending class, so its kernel can
+never silently degenerate to the stop-the-line kernel. `select` also retains
+`:cascade-picks` (per-cascade pick target or `:no-pick`) beside
+`:cascade-scores`, and an emptied field whose exclusions are relation-only
+refuses `:outer-score/no-known-relation-members` instead of the graph-members
+kind. `outer_score.clj` is untouched.
+
+**Terms now contributing vs still zero.** With a relation-known pick the
+landing is a valued outcome class (`[:related :several]` in the test), push
+mass leaves `[:stop-the-line :none]` (0.625), risk/ambiguity see that mass,
+and Fisher novelty is strictly positive (it was identically 0.0 in every
+degenerate tie). Still zero by design: preference mass on
+`:not-yet-evaluated` (c-kit 0; not terminal), and all non-stopped outcomes
+for a gate-emptied cascade (spec'd no-pick fallback).
+
+**Live consequence (owed witness).** On the current real field every ready
+target classifies :unknown, so the next live click will refuse
+`:outer-score/no-known-relation-members` with 501+ relation knowledge
+requests naming `:focus-receipt-classify-target`. That refusal is the honest
+surface Joe's rule demands; unblocking ordinary clicks needs the relation
+evidence (refresh the futon6 mission embedding corpus or declare relations),
+not a scoring workaround.
+
+**Tests.** New namespace `futon2.aif.outer-relation-admission-test` (4
+tests, 20 assertions): the adc46631 bad case (all-:unknown field from the
+retained record's values) now refuses typed; the separating case (real
+retained :associated for M-pattern-retrieval-calibration, as runs
+d5b9b513/e71c7380 actually classified) picks it, retains picks, separates
+scores and shows positive novelty; mixed-field admission and request
+retention. The bad case was watched failing open on pre-fix code: three-way
+score tie, live pick scored with `[:stop-the-line :none]` mass 1.0.
+`reading-format-reselect-test`'s frozen-field expectations encoded the old
+degenerate behaviour (first ready candidate with :unknown relation selected)
+and were updated to the relation-known picks the fix yields
+(M-pattern-retrieval-calibration, replacement
+M-interim-director-proxy-metric-inventory) — 4 tests, 37 assertions green.
+Pre-existing failures outside this row, named and left:
+`outer-select-test`'s `real-giraffe-selection-demonstration` (pinned 2026-10-28
+Giraffe run no longer verifies) and `outer-selection-wiring-test` (7
+assertions, fixture targets M-selected/M-unknown absent from the live
+registry; identical on origin/main), plus `m2l-outer-selection-ask-test`
+(identical failure on origin/main).

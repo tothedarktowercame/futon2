@@ -41,33 +41,84 @@
                          :matched-run-ids (mapv :run-id matched)}))))
             candidates))))
 
+(defn- relation-class
+  "The relation class the scorer would see for TARGET, or ::no-relation-fn
+  when the observation carries no relation function at all (pure unit
+  fixtures; the production scoring path always supplies one, and a nil
+  function cannot be scored -- `ending-class` would throw)."
+  [observation target]
+  (let [relation (:relation observation)]
+    (if (fn? relation)
+      (relation (:focus observation) target)
+      ::no-relation-fn)))
+
+(defn- known-relation?
+  [class]
+  (contains? #{:focus :associated :useful-elsewhere} class))
+
 (defn known-term-field
   "Supply R20Step.applySelectionStep only the known-term subset; retain the
-  excluded population and its knowledge requests separately, without zeroes."
-  [{:keys [field facts]}]
-  (reduce
-   (fn [result candidate]
-     (let [target (:target candidate)
-           fact (if (fn? facts) (facts target) (get facts target))
-           graph (:graph-terms fact)
-           terms (filterv #(or (= :unknown (:status graph))
-                               (not (nat-int? (get fact %)))) [:cone :unblocks])]
-       (if (empty? terms)
-         (update result :field conj candidate)
-         (let [reason (or (:reason graph) :graph-term-not-observed)
-               request {:kind :outer-score/graph-term-knowledge-request
-                        :target target :producer (or (:producer graph) :dependency-reader-reviewer)
-                        :terms terms :reason reason
-                        :prerequisites (:prerequisites graph)
-                        :scope (select-keys graph [:scope :population-sha :coverage])}]
-           (-> result
-               (update :excluded conj
-                       {:kind :outer-score/graph-term-unavailable :target target
-                        :terms (mapv (fn [term] {:term term :reason reason
-                                                :prerequisites (:prerequisites graph)}) terms)
-                        :graph-terms graph :knowledge-producer-request request})
-               (update :requests conj request))))))
-   {:field [] :excluded [] :requests []} field))
+  excluded population and its knowledge requests separately, without zeroes.
+
+  TIED-OUTER-CASCADES (2026-10-31, run adc46631): the relation term is
+  admitted on the same rule as the graph terms.  A candidate whose relation
+  class is unknown must not reach scoring, because `ending-class` maps every
+  unknown class to nil and the picked kernel then degenerates to the
+  stop-the-line kernel -- every cascade scores bit-identically (the
+  three-way tie at 3.3781368587563056) and the score silently reads as a
+  deliberate stop when it is ignorance.  Excluded here instead, with a
+  knowledge request to the relation producer, the same shape as the graph
+  terms.  An observation with no relation function keeps the previous
+  behaviour (nothing to classify)."
+  [{:keys [field facts] :as observation}]
+  (let [graph-exclusion
+        (fn [result target _fact graph terms]
+          (let [reason (or (:reason graph) :graph-term-not-observed)
+                request {:kind :outer-score/graph-term-knowledge-request
+                         :target target :producer (or (:producer graph) :dependency-reader-reviewer)
+                         :terms terms :reason reason
+                         :prerequisites (:prerequisites graph)
+                         :scope (select-keys graph [:scope :population-sha :coverage])}]
+            (-> result
+                (update :excluded conj
+                        {:kind :outer-score/graph-term-unavailable :target target
+                         :terms (mapv (fn [term] {:term term :reason reason
+                                                  :prerequisites (:prerequisites graph)}) terms)
+                         :graph-terms graph :knowledge-producer-request request})
+                (update :requests conj request))))
+        relation-exclusion
+        (fn [result target rclass]
+          (let [request {:kind :outer-score/relation-knowledge-request
+                         :target target :producer :focus-receipt-classify-target
+                         :terms [:relation] :reason :relation-class-unknown
+                         :class rclass}]
+            (-> result
+                (update :excluded conj
+                        {:kind :outer-score/relation-unavailable :target target
+                         :terms [{:term :relation :reason :relation-class-unknown
+                                  :class rclass}]
+                         :knowledge-producer-request request})
+                (update :requests conj request))))]
+    (reduce
+     (fn [result candidate]
+       (let [target (:target candidate)
+             fact (if (fn? facts) (facts target) (get facts target))
+             graph (:graph-terms fact)
+             terms (filterv #(or (= :unknown (:status graph))
+                                 (not (nat-int? (get fact %)))) [:cone :unblocks])
+             rclass (relation-class observation target)
+             relation-unknown? (and (not= ::no-relation-fn rclass)
+                                    (not (known-relation? rclass)))
+             result (if (seq terms)
+                      (graph-exclusion result target fact graph terms)
+                      result)
+             result (if relation-unknown?
+                      (relation-exclusion result target rclass)
+                      result)]
+         (if (and (empty? terms) (not relation-unknown?))
+           (update result :field conj candidate)
+           result)))
+     {:field [] :excluded [] :requests []} field)))
 
 (defn select
   "Score the makeup's cascade menu and return Lean `step` selection fields.
@@ -97,7 +148,10 @@
                  {:outer-score/excluded (:excluded partition)
                   :duplicate-effective-run duplicate-excluded
                   :knowledge-producer-requests (:requests partition)})
-        (refuse! :outer-score/no-known-graph-members
+        (refuse! (if (some #(= :outer-score/relation-unavailable (:kind %))
+                           (:excluded partition))
+                   :outer-score/no-known-relation-members
+                   :outer-score/no-known-graph-members)
                  {:outer-score/excluded (:excluded partition)
                   :knowledge-producer-requests (:requests partition)})))
     (when-not (seq menu)
@@ -127,6 +181,14 @@
          :cascade-index index
          :cascade-id (:id chosen)
          :cascade-scores scores
+         ;; TIED-OUTER-CASCADES: retain each cascade's pick beside its score,
+         ;; so a tied score reads as same-pick, degenerate, or genuine
+         ;; without replaying the field.
+         :cascade-picks (mapv (fn [{:keys [steps]}]
+                                (let [p (outer-score/cascade-pick
+                                         steps (:facts observation) (:field observation))]
+                                  (if p (:target p) :no-pick)))
+                              menu)
          :selection (when picked {:candidates (:field observation)
                                   :selected picked})
          :prediction (when picked
