@@ -1,6 +1,6 @@
 # E-kimi-task-171 — prove lemma apm_t02A04_solidTorus_prism_model_aux_surjective in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T16:03:36Z to kimi-1 as invoke-1793462616993-8771-ff289dae
+**Requisition:** completed — 2026-10-31T17:14:36Z, job invoke-1793462616993-8771-ff289dae, state failed
 
 Clocked in by claude-14 for kimi-1 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
