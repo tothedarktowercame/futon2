@@ -126,10 +126,31 @@
                                     (map (fn [{:keys [target declaration]}]
                                            (excluded-candidate target declaration
                                                                (get registry-by-id target)))))
-                              entries)]
+                              entries)
+               ;; Q1-ENUMERATION-DUPLICATE-DROP (2026-10-31): a ticket can be
+               ;; open in the registry while the retained verified Giraffe
+               ;; field predates it (T-repair-ea1-19929445...attempt-002 was
+               ;; minted 2026-10-31 01:13Z; the field the click consumed was
+               ;; the 2026-10-30 21:39Z run).  Such a ticket is not a row in
+               ;; the pass, so before this fix it vanished from the outer
+               ;; population with no typed account while the census counted
+               ;; it (Q1 read 608/609).  Every registry-open ticket the field
+               ;; never saw is now carried as an explicit exclusion: the
+               ;; selector did not admit it, and the record names why.  No
+               ;; graph facts are invented for it.
+               field-targets (set (map :target entries))
+               unseen-open-tickets (->> (get-in authority [:loaded-tickets :tickets])
+                                        (filter mission-registry/live-ticket?)
+                                        (remove #(contains? field-targets (:id %))))
+               absent-excluded (mapv (fn [ticket]
+                                       {:target (:id ticket)
+                                        :reason :registry-open-not-in-giraffe-field
+                                        :status-line (:status-line ticket)
+                                        :registry-path (:path ticket)})
+                                     unseen-open-tickets)]
            {:field (mapv :candidate admitted)
             :facts (into {} (map (juxt :target :fact)) admitted)
-            :outer-field/excluded excluded
+            :outer-field/excluded (vec (concat excluded absent-excluded))
             :giraffe/run-id (:run-id manifest)
             :giraffe/manifest-sha256 (sha256 manifest-bytes)}))))))
 

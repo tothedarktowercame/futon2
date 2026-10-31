@@ -18,6 +18,7 @@
 (def production-meta-injury-ledger-path meta-self-heal/default-ledger-path)
 (def production-meta-injury-transaction-path meta-self-heal/default-transaction-path)
 (def production-learning-manifest-path outer-learning-manifest/default-path)
+(def production-run-record-dir runner/default-run-record-dir)
 
 (defn- temp-root [prefix]
   (.getPath (.toFile (Files/createTempDirectory
@@ -37,6 +38,12 @@
              [(.toString (.relativize (.toPath (io/file root)) (.toPath file)))
               [(.length file) (slurp file)]])))
 
+(defn- run-stream-length
+  "The stream only ever grows, so its length catches an appended :started.
+  file-set would not: it compares paths, and the stream's path never changes."
+  [root]
+  (.length (io/file root "run-stream.edn")))
+
 (defn with-hermetic-stores
   "Run a test namespace against temporary default stores and prove that the
   production file sets did not change. This catches any path that accidentally
@@ -50,6 +57,8 @@
         transaction-before (production-file-set production-meta-injury-transaction-path)
         learning-manifest-before (production-file-set production-learning-manifest-path)
         repair-root (temp-root "wm-repair-suite-")
+        run-record-root (temp-root "wm-runner-record-suite-")
+        run-stream-before (run-stream-length production-run-record-dir)
         trip-root (temp-root "wm-trip-suite-")
         injury-root (str (io/file repair-root "wm-meta-injuries"))
         ledger-path (str (io/file injury-root "ledger.edn"))
@@ -58,6 +67,7 @@
         phase-log (str (io/file repair-root "wm-full-loop-phases.edn.log"))]
     (with-redefs [repair/default-root repair-root
                   tripwire/default-trip-root trip-root
+                  runner/default-run-record-dir run-record-root
                   meta-injury-store/default-root injury-root
                   meta-self-heal/default-ledger-path ledger-path
                   meta-self-heal/default-transaction-path transaction-path
@@ -78,7 +88,13 @@
       (is (= learning-manifest-before (production-file-set production-learning-manifest-path))
           "the production outer-learning manifest (outer-learning-manifest/default-path)
            must stay byte-for-byte untouched: a test close must publish only into
-           the rebound suite manifest or the fixture's explicit temp manifest"))))
+           the rebound suite manifest or the fixture's explicit temp manifest")
+      (is (= run-stream-before (run-stream-length production-run-record-dir))
+          "the production run-stream must not grow: run 7712b197 (2026-10-31
+           14:49Z, started, never closed) reached it from
+           t3-held-resume-stop-line-test because this fixture left the
+           run-record root live. A live click running beside the tests also
+           appends here, so run these between clicks."))))
 
 (defn runner-repair-options
   "Explicit temporary store callbacks also protect direct REPL/debug callers,
