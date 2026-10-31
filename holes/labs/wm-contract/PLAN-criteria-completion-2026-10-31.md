@@ -12,6 +12,7 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 4. **Queue rule.** Every dispatch names its row and closing condition. A new defect gets a row and an answer to "does it block the next dispatch?"; if not, it waits.
 5. **Handoff tests read what the receiver reads.** A test ending at the producer's return value does not establish delivery.
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
+7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
 ## Latest execution checkpoint: P4 held
 
