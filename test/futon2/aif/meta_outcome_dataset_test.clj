@@ -100,7 +100,7 @@
            (:token-use one)))
     (is (= {:status :absent :reason :not-explicitly-recorded} (:elapsed two)))
     (is (= {:status :absent :reason :not-explicitly-recorded} (:token-use two)))
-    (is (= {:reached 0 :progressed 0 :blocked 0 :untouched 1}
+    (is (= {:reached 0 :progressed 0 :blocked 0 :untouched 1 :checkbox-only 0}
            (get-in two [:selected-want-effects :counts])))
     (is (= :grounded-collateral-progress
            (get-in two [:collateral-progress :kind])))
