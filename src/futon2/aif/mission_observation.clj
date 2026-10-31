@@ -204,7 +204,12 @@
                        :token (:token before)
                        :locator (let [loc (or (:declared-locator before) (:locator before))]
                                   (if (map? loc) (:path loc) loc))}
-                      (not (boolean? (:observed after))) :after-observation-missing))
+                      (not (boolean? (:observed after))) :after-observation-missing
+                      ;; a claim says the want already holds, so a false
+                      ;; measurement at the claimed commit refutes it
+                      (and claim? (false? (:observed after)))
+                      {:reason :claim-want-false-at-reviewed-commit
+                       :token (:token before)}))
                   pairs)]
         (if problem
           (refusal (if (map? problem) (:reason problem) problem)

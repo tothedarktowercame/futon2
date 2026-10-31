@@ -52,7 +52,10 @@
 (deftest retained-click14-closes-only-after-review
   (let [author (assoc (dissoc (edn/read-string (slurp "test/resources/wm/already-satisfied-review/click14-author.edn")) :result-summary)
                       :result prior/click-14-reply)
-        {:keys [result contacts]} (exercise author "M-self-documenting-stack" "FULL_LOOP_REVIEW: APPROVE")]
+        ;; This test pins the review gate; the want measurement a mission
+        ;; claim now also needs is pinned in already-satisfied-want-measurement-test.
+        {:keys [result contacts]} (with-redefs-fn {#'runner/claim-measured? (constantly true)}
+                                    #(exercise author "M-self-documenting-stack" "FULL_LOOP_REVIEW: APPROVE"))]
     (is (= :already-satisfied (:outcome result)))
     (is (= "891001d08d8b37eaf50e13f985dee30c8d34340a" (get-in result [:grounded-commit :sha])))
     (is (= 1 (count contacts)))

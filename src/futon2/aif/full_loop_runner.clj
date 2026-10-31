@@ -5006,6 +5006,16 @@
        opts phase-context prompt-opts target mission construction author-job
        charge! grounded commit repo files completion-text citation claim-context)))))
 
+(defn- claim-measured?
+  "A mission claim needs an admitted measurement of its selected wants. Only a
+  non-mission target, which selects no wants, may close without one, so a
+  missing baseline or dispatch cannot pass a mission claim unmeasured."
+  [target claim-observation]
+  (if (str/starts-with? (str target) "M-")
+    (= :admitted (:status claim-observation))
+    (or (nil? claim-observation)
+        (= :admitted (:status claim-observation)))))
+
 (defn- review-cited-already-satisfied-claim!
   "The reviewer dispatch for an existing-artifact claim whose commit cites
   the selected target. Split from `review-already-satisfied-claim!` so the
@@ -5052,16 +5062,19 @@
         verdict (review-verdict job)
         gate (review-execution-gate files job)
         apparatus (second (re-find #"(?m)^FULL_LOOP_APPARATUS_DEFECT:\s*(.+)$" (job-text job)))
-        measured? (or (nil? claim-observation)
-                      (= :admitted (:status claim-observation)))
+        measured? (claim-measured? target claim-observation)
+        unmeasured? (and (= :approve verdict) (not measured?))
         accepted? (and (= :approve verdict) (:passed? gate) (:executed? gate)
                        (pos? (or (:tool-events gate) 0))
                        measured?)
-        refused? (and (#{:reject :request-changes} verdict) (not apparatus))
+        ;; An unmeasured claim is the author's answer failing, not the
+        ;; apparatus, so it refuses the claim without opening an injury.
+        refused? (and (or (#{:reject :request-changes} verdict) unmeasured?)
+                      (not apparatus))
         outcome (cond accepted? :already-satisfied refused? :guardrail-refusal :else :build-failed)
-        kind (cond accepted? :already-satisfied refused? :reviewed-claim-refused
-                   (and (= :approve verdict) claim-observation (not measured?))
-                   :already-satisfied-wants-unmeasured
+        kind (cond accepted? :already-satisfied
+                   (and refused? unmeasured?) :already-satisfied-wants-unmeasured
+                   refused? :reviewed-claim-refused
                    apparatus :reviewer-apparatus-defect :else :review-execution-evidence-missing)]
     {:outcome outcome :failure-kind kind :failure-stage :author-wait
      :target target :commit commit :grounded-commit grounded
@@ -5071,7 +5084,7 @@
      :refusal-reason
      (when-not accepted?
        (or apparatus
-           (when (and claim-observation (not measured?))
+           (when unmeasured?
              (str "Claim not accepted: selected wants are not admitted by "
                   "claim-mode measurement at the reviewed commit "
                   commit ": " (pr-str (select-keys claim-observation

@@ -8,8 +8,12 @@
   futon3c repository (no writes, no runner, no canonical store access
   beyond reading the run record and git objects)."
   (:require [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.d-predecessor-task-authority-test :as fixture]
+            [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.meta-terminal-injury :as terminal]
             [futon2.aif.mission-observation :as mission]
             [futon2.aif.observation-checks :as observation]))
 
@@ -98,7 +102,47 @@
               (is (= :refused (:status r1)) (pr-str want))
               (is (= :claim-mission-text-not-an-artifact (:reason r1))
                   (pr-str want))
-              (is (= want (get-in r1 [:details :token])))))))))
+              (is (= want (get-in r1 [:details :token]))))))))))
+
+(deftest a-claim-refuted-at-its-own-commit-is-not-admitted
+  (fixture/with-artifact
+   {:before-files {"created.clj" "pre-existing content\n"}
+    :action {:kind :cascade-candidate :id :C0 :target "target"
+             :want [:artifact]
+             :precedence [{:id :make-file :theta 1
+                           :produces #{["target" :artifact]}}]}}
+   (fn [{:keys [inputs repo]}]
+     (with-redefs [observation/repo-root (.getParent (java.io.File. (str repo)))]
+       (let [dispatch (:dispatch inputs)
+             git #(apply shell/sh "git" "-C" (str repo) %&)
+             _ (git "rm" "-q" "created.clj")
+             _ (git "-c" "user.name=t" "-c" "user.email=t@t" "commit" "-q" "-m" "remove")
+             removed (str/trim (:out (git "rev-parse" "HEAD")))
+             baseline (mission/capture-before
+                       {:dispatch dispatch :repository (str repo)
+                        :revision (get-in dispatch [:before :head])})
+             after-rows (mission/capture-after
+                         {:dispatch dispatch :repository (str repo) :revision removed})
+             claim (mission/project
+                    {:baseline baseline :dispatch dispatch :repository (str repo)
+                     :after-revision removed :after-rows after-rows
+                     :claim {:mission-source-path "/elsewhere/mission.md"}})]
+         (is (false? (get-in (first after-rows) [:result :observed])) (pr-str after-rows))
+         (is (= :refused (:status claim)) (pr-str claim))
+         (is (= :claim-want-false-at-reviewed-commit (:reason claim))))))))
+
+(deftest a-mission-claim-without-a-measurement-is-not-measured
+  (let [measured? #'runner/claim-measured?]
+    (is (false? (measured? "M-typed-memories" nil))
+        "a missing baseline or dispatch cannot pass a mission claim")
+    (is (false? (measured? "M-typed-memories" {:status :refused})))
+    (is (true? (measured? "M-typed-memories" {:status :admitted})))
+    (is (true? (measured? "T-some-ticket" nil)))
+    (is (false? (measured? "T-some-ticket" {:status :refused})))))
+
+(deftest an-unmeasured-claim-is-not-an-injury
+  (is (= :already-satisfied-wants-unmeasured
+         (:already-satisfied-wants-unmeasured terminal/explicit-non-injury-kinds))))
 
 (deftest claim-mode-measures-a-real-artifact-and-keeps-the-normal-refusal
   (fixture/with-artifact
@@ -129,4 +173,4 @@
              (is (true? (get-in claim [:rows 0 :after :observed])))))
          (testing "claim mode refuses when the only artifact IS the mission text"
            (is (= :claim-mission-text-not-an-artifact
-                  (:reason (run {:mission-source-path (str (io/file repo "created.clj"))})))))))))))
+                  (:reason (run {:mission-source-path (str (io/file repo "created.clj"))}))))))))))
