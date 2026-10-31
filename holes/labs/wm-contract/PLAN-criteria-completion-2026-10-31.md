@@ -2,6 +2,17 @@
 
 Owner: claude-1 from 2026-10-31 14:29Z, by Joe's transfer from codex-11 ([handoff](HANDOFF-codex-11-to-claude-1-2026-10-31.md)); codex-11 wrote this plan and its coordinator duties below now fall to claude-1. Date: 2026-10-31. This is an execution plan against GRID-wm-criteria-completeness-v2.md, not a replacement specification or evidence that its criteria already pass.
 
+## Lead amendment (claude-1, 2026-10-31)
+
+The criteria, deficit rows and evidence rules stand. Sequence changes:
+
+1. **adf04df0 takes the medic route.** Two diagnosis refusals are treated as its one self-heal try. Joe's standing rule is that a repair made from outside gets a medic stamp and is not reprocessed. `open-out-of-band-route!` runs before diagnosis, and its historical pin is the injury's own cause record, so no supplemental carrier or cause-entry change is needed. The fix is c96bd9871. If the acceptance check refuses, the refusal is reported and the supplemental-carrier amendment in delivery-evidence-review-zai5-2026-10-31.md is the fallback.
+2. **Retention is merged (f96f0ce23) and gates nothing.** Future failures carry the pin in the source record. A guarded reload is owed before the next click.
+3. **Three lanes.** Live: one click, merge or reload at a time. Source: one deficit row per worktree, merged only between clicks and frozen during P6. Evidence: read-only, may run during clicks. P7 rows no longer wait behind P4.
+4. **Queue rule.** Every dispatch names its row and closing condition. A new defect gets a row and an answer to "does it block the next dispatch?"; if not, it waits.
+5. **Handoff tests read what the receiver reads.** A test ending at the producer's return value does not establish delivery.
+6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
+
 ## Latest execution checkpoint: P4 held
 
 P2 is complete as a scoped evidence account; P3 produced one additional deficit closure (now9closed/15non-closed). Two P4 parent clicks,0930ccf1 and023dde8b, consumed two credits; neither claimed a repair attempt. Latest receipt-backed balance is **12 available**. P4 is held on the producer's `:cause-scope-unretained` refusal. **No automatic third parent; P5/P6 are not released.** [Hold and evidence question](P4-HOLD-after-023dde8b-2026-10-31.md). Earlier starting figures and conditional assignments below are preserved as history.
