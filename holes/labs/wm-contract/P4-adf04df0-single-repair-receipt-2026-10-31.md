@@ -19,6 +19,14 @@ no child.** Stopped per dispatch rule (precharge/refusal → exact cause, no ret
    The QUARANTINED verdict is an in-memory classification printed to *err*
    (prompt-reconstruction gap in the Jul 13 deposit), not a file mutation —
    consistent with 象-2's supplemental job 8590 findings.
+   **Incident wording correction (codex-11 8624):** the 8590 main report's
+   "No broad suite" claim is FALSE — job 8579 event39 did accidentally run the
+   broad suite; the source no-write proof (`fold_escrow.clj` QUARANTINED arm
+   prints to stderr + in-memory map only) resolves THIS quarantine concern,
+   and is not a claim that arbitrary broad-suite effects are impossible.
+   Kimi's report doc must carry that correction; it is not an execution
+   blocker. Result record:
+   `GET /api/alpha/invoke/jobs/invoke-1793414500779-8590-a96d8e4d`.
 2. **Fresh supported readiness (serving JVM, standing verifier — not a proxy).**
    Ledger `:loaded`, 130 entries, 0 defects; effective active injuries exactly
    `injury/adf04df0f31ab8727ac57d9c7f2496d8fa28598c`; `spent-author-attempts = []`;
