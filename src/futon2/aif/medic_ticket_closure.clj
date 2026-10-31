@@ -29,28 +29,61 @@
                                (.toPath (io/file (:path pin))))))
           (catch Throwable _ nil)))))
 
+(defn cause-record-own-run-id
+  "The pinned cause record's own run identity, read STRUCTURALLY at
+   [:q6 :terminal :run/id] (schema :wm/q6-terminal-v1). The :previous block
+   beside it names the PRIOR run and is never read for identity. The read id
+   must also equal the id embedded in the pinned path
+   (tick-run-record-<id>.edn), so a misfiled record cannot lend its identity.
+   Returns nil when the record carries no single verifiable own-run identity.
+   No text search of the record: zai-6 showed that gives false positives."
+  [pin]
+  (when (cause-pin-verified? pin)
+    (try
+      (let [terminal (get-in (edn/read-string (slurp (:path pin))) [:q6 :terminal])
+            run-id (:run/id terminal)]
+        (when (and (= :wm/q6-terminal-v1 (:schema terminal))
+                   (string? run-id)
+                   (.endsWith ^String (:path pin)
+                              (str "tick-run-record-" run-id ".edn")))
+          run-id))
+      (catch Throwable _ nil))))
+
 (defn own-cause-findings
-  "All finding records in the repair store whose recorded :cause-record-pin is
-   byte-equal (path and sha256) to this injury entry's cause pin, with the
-   cause bytes re-verified. Failure-kind/stage are never read. Returns [] when
-   no verifiable link exists."
+  "All finding records in the repair store that are this injury entry's own
+   cause, joined exactly by one of:
+   :cause-pin  — the finding records the injury's :cause-record-pin
+                 (path and sha256, cause bytes re-hashed);
+   :run-id     — the finding records :origin-run/id equal to the cause
+                 record's own terminal run id (see cause-record-own-run-id).
+   Failure-kind/stage are never read. Returns [] when no verifiable link
+   exists."
   [repair-root injury-entry]
   (if-not (cause-pin-verified? (:cause-record-pin injury-entry))
     []
     (let [pin (select-keys (:cause-record-pin injury-entry) [:path :sha256])
+          own-run-id (cause-record-own-run-id pin)
           dir (io/file repair-root "findings")]
       (if-not (.isDirectory dir)
         []
         (->> (.listFiles dir)
              (keep (fn [^java.io.File f]
                      (when (and (.isFile f) (.endsWith (.getName f) ".edn"))
-                       (let [finding (read-edn f)]
-                         (when (and (map? finding)
-                                    (= pin (select-keys (:cause-record-pin finding)
-                                                        [:path :sha256])))
+                       (let [finding (read-edn f)
+                             join (cond
+                                    (and (map? finding)
+                                         (= pin (select-keys (:cause-record-pin finding)
+                                                             [:path :sha256])))
+                                    :cause-pin
+                                    (and own-run-id (map? finding)
+                                         (= own-run-id (:origin-run/id finding)))
+                                    :run-id
+                                    :else nil)]
+                         (when join
                            {:id (:repair/id finding)
                             :path (.getCanonicalPath f)
-                            :finding finding})))))
+                            :finding finding
+                            :join join})))))
              (vec))))))
 
 (defn- ticket-link [repair-root finding-id]

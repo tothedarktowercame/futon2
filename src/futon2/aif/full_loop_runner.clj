@@ -6857,6 +6857,11 @@
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
                               {:attempt-id external-attempt-id
+                               ;; DISCHARGED-INJURY-TICKETS-LEFT-OPEN:
+                               ;; the tick run this attempt failed inside;
+                               ;; the injury ledger pins this run's record as
+                               ;; the cause, and the medic route joins on it.
+                               :origin-run/id (:run-id opts)
                                :occurrence
                                (occurrence-for (:repair/occurrence data)
                                                external-attempt-id

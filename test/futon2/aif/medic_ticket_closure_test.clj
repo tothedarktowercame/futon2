@@ -2,8 +2,10 @@
   "Receiver-side checks: they read the ticket FILE the receiver reads, not a
    return value. Fixtures come from the real producer (finding-ticket/publish!)
    plus the real finding shape retained from run 2026-10-31 (adf04df0)."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.repair-obligation :as repair]
             [futon2.aif.finding-ticket :as finding-ticket]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.load-identity :as load-identity]
@@ -15,6 +17,29 @@
   (.getCanonicalPath
    (.toFile (java.nio.file.Files/createTempDirectory
              prefix (make-array java.nio.file.attribute.FileAttribute 0)))))
+
+(defn- tick-record-pin
+  "A cause record in the REAL tick-run-record shape (retained from the two
+   2026-10-31 production records f805ca4b and adc46631): :q6 :terminal names
+   the record's OWN run, :q6 :previous names the prior run."
+  [root run-id & {:keys [kind]}]
+  (let [path (io/file root (str "tick-run-record-" run-id ".edn"))
+        record {:pattern-graph-diff {:status :absent :reason :no-selected-action}
+                :q6 {:previous {:schema :wm/q6-terminal-v1
+                                :run/id "2026-10-30-prior-run-0000"
+                                :outcome {:status :present :outcome :changed}}
+                     :terminal {:schema :wm/q6-terminal-v1
+                                :run/id run-id
+                                :outcome {:status :present :outcome :refused
+                                          :kind (or kind :author-delivery-wrong-repository)}}}}]
+    (io/make-parents path)
+    (spit path (str (pr-str record) "\n"))
+    {:path (.getCanonicalPath path)
+     :sha256 (load-identity/sha256
+              (java.nio.file.Files/readAllBytes (.toPath path)))}))
+
+(defn- own-run-id [pin]
+  (closure/cause-record-own-run-id pin))
 
 (defn- real-finding
   "Shape retained from the production finding
@@ -65,6 +90,71 @@
                                  :path "test/futon2/aif/meta_selection_contract_acceptance_test.clj"
                                  :text "(ns futon2.aif.meta-selection-contract-acceptance-test\n  (:require [clojure.test :refer [deftest is]]))\n(deftest acceptance-control (is true))\n"}}})]
         {:artifact-pin artifact-pin :acceptance-root acceptance-root}))
+
+(deftest cause-record-own-run-id-reads-the-terminal-block-not-previous
+  (let [root (temp-dir "wm-cause-record")
+        pin (tick-record-pin root "2026-10-31-f805ca4b-0000")]
+    (is (= "2026-10-31-f805ca4b-0000" (own-run-id pin)))
+    ;; A record misfiled under another run's name lends no identity.
+    (is (nil? (own-run-id (assoc pin :path (str (.getParentFile (io/file (:path pin)))
+                                                 "/tick-run-record-someone-else.edn"))))
+        "misfiled record refuses")))
+
+(deftest run-id-join-closes-and-kind-twin-stays-open
+  (let [cause-dir (temp-dir "wm-cause-record")
+        run-id "2026-10-31-adc46631-0000"
+        pin (tick-record-pin cause-dir run-id :kind :answer-reviewer-mismatch)
+        own-id "repair-ea1-route-runid--attempt-002-answer-reviewer-mismatch"
+        twin-id "repair-ea1-kind-twin-runid--attempt-002-answer-reviewer-mismatch"
+        root (repair-store
+              [(assoc (dissoc (real-finding own-id nil) :cause-record-pin)
+                      :origin-run/id run-id)
+               (assoc (dissoc (real-finding twin-id nil) :cause-record-pin)
+                      :origin-run/id "2026-10-31-someone-else")])
+        own-ticket (ticket-file root own-id)
+        twin-ticket (ticket-file root twin-id)
+        injury {:injury-id "injury/runid-join" :cause-record-pin pin}
+        joined (closure/own-cause-findings root injury)]
+    (is (= [own-id] (mapv :id joined)) (pr-str joined))
+    (is (= :run-id (:join (first joined))))
+    (let [result (closure/close-cause-ticket!
+                  root {:injury-id "injury/runid-join"
+                        :entry {:ordinal 9 :cause-record-pin pin}
+                        :fixed-by (apply str (repeat 40 "b"))
+                        :receipt-pin {:sha256 (apply str (repeat 64 "d"))}})]
+      (is (= :closed (:status result)) (pr-str result))
+      (is (re-find #"(?m)^\*\*Status:\*\* DONE$" (slurp own-ticket)))
+      (is (re-find (re-pattern "discharged at ledger ordinal 9") (slurp own-ticket)))
+      ;; The kind twin: same failure-kind and stage, different run. Stays OPEN.
+      (is (re-find #"(?m)^\*\*Status:\*\* OPEN$" (slurp twin-ticket))
+          "kind twin with a different origin run stays OPEN"))))
+
+(deftest minting-retains-the-origin-run-id
+  "The minting side of the join: record-system-failure! keeps :origin-run/id
+   on the durable finding, so a later injury pinning that run's tick record
+   closes the ticket exactly. Read back from the store file."
+  (let [cause-dir (temp-dir "wm-cause-record")
+        run-id "2026-10-31-minted-run-0000"
+        pin (tick-record-pin cause-dir run-id)
+        repair-root (temp-dir "wm-repair-store-mint")
+        finding (repair/record-system-failure!
+                 repair-root
+                 {:attempt-id "ea1-minted-0000000000000000000000000000000000000000--attempt-001"
+                  :repair-class :incomplete-recoverable
+                  :failure-stage :cascade-resume
+                  :outcome :incomplete
+                  :failure-kind :author-delivery-wrong-repository
+                  :error "Selected cascade held in open-cascade phase"
+                  :origin-run/id run-id})
+        retained (edn/read-string
+                  (slurp (io/file repair-root "findings"
+                                  (str (:repair/id finding) ".edn"))))]
+    (is (= run-id (:origin-run/id retained)))
+    (is (= [(:repair/id retained)]
+           (mapv :id (closure/own-cause-findings
+                      repair-root {:injury-id "injury/minted"
+                                   :cause-record-pin pin})))
+        "the minted finding joins the injury that pins its run's record")))
 
 (deftest medic-discharge-closes-own-cause-ticket-by-cause-pin
   (let [env (harness/prepare-environment! (temp-dir "wm-production-repair"))
