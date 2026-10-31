@@ -26,6 +26,7 @@
   until the index grows a cross-repo convention."
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.handoff-site-index :as site-index]
@@ -55,6 +56,48 @@
         "format validation stays the decoder's job, distinct from retention")
     (let [audit (site-index/audit repo)]
       (is (= :verified (:status audit)) (pr-str (:problems audit))))))
+
+(deftest the-diagnosis-receiver-gets-the-pin-through-the-run-record
+  ;; Diagnosis reads the pinned tick record's :failure, not the repair finding
+  ;; or the handler's return value. A pin that stops at either leaves the next
+  ;; injury refusing :cause-scope-unretained exactly as adf04df0 did.
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "dfe-consumer" (make-array java.nio.file.attribute.FileAttribute 0)))
+        retained (dfe/retain-delivery-failure!
+                  (str root)
+                  {:requisition-id (:requisition-id adf04df0-shaped-answer)
+                   :cascade-digest (:cascade-digest adf04df0-shaped-answer)
+                   :author-job "invoke-seam-test"
+                   :answer adf04df0-shaped-answer
+                   :check {:status :error :reason :abbreviated-commit-descriptor}})
+        refusal {:status :error :kind :author-delivery-invalid-descriptor
+                 :reason :abbreviated-commit-descriptor
+                 :author-job "invoke-seam-test"
+                 :delivery-evidence retained}
+        failure (#'runner/run-record-failure
+                 {:data (#'runner/held-resume-data
+                         {:failure-kind (:kind refusal)
+                          :held-phase {:open-cascade true}
+                          :downstream-refusal refusal}
+                         "Selected cascade held in open-cascade phase"
+                         {:repair/id "finding"})})
+        carried (get-in failure [:detail :delivery-evidence])]
+    (is (= :retained (:status carried)))
+    (is (= (:pin retained) (:pin carried))
+        "the complete pin survives the bounded failure projection")
+    (is (= "8561ecdc7"
+           (get-in (dfe/read-pin (:pin carried)) [:record :check-input :patch :commit]))
+        "the receiver can reach the exact refused input from the run record")))
+
+(deftest a-held-refusal-without-retention-keeps-its-existing-record-shape
+  (let [data (#'runner/held-resume-data
+              {:failure-kind :open-cascade-author-answer-invalid
+               :downstream-refusal {:status :error
+                                    :kind :open-cascade-author-answer-invalid}}
+              "held" {:repair/id "finding"})]
+    (is (not (contains? data :error-data)))
+    (is (= {:absent :no-error-data}
+           (:detail (#'runner/run-record-failure {:data data}))))))
 
 (deftest the-real-resume-handler-retains-what-it-refuses
   (let [root (.toFile (java.nio.file.Files/createTempDirectory

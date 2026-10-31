@@ -993,6 +993,11 @@
                  ;; only its stable job identity and bounded correction chain.
                  (and (= :author-job k) (corrected-author-job-detail? v))
                  {:kept (assoc kept k (bounded-corrected-author-job v)) :omitted omitted}
+                 ;; The pin is nested, and it is the receiver's only route to
+                 ;; the retained input, so the scalar-only rule below would
+                 ;; keep :status and lose the evidence.
+                 (and (= :delivery-evidence k) (map? v))
+                 {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
                  (scalar? v) {:kept (assoc kept k v) :omitted omitted}
                  (and (vector? v) (<= (count v) 32) (every? scalar? v))
                  {:kept (assoc kept k v) :omitted omitted}
@@ -1080,6 +1085,27 @@
                      {:status :absent :reason :cause-overflow-persistence-failed}))
                  {:status :absent
                   :reason :cause-overflow-artifact-not-persisted})))))
+
+(defn- held-resume-data
+  "The close data of a held open-cascade resume. A retained delivery failure's
+  pin rides :error-data into the run record's :failure, because that record is
+  the source diagnosis is pinned to (injury adf04df0: the failure reached the
+  repair finding but not the source record, and diagnosis refused
+  :cause-scope-unretained)."
+  [failure-data message finding]
+  (let [refusal (:downstream-refusal failure-data)]
+    (cond-> {:outcome :incomplete
+             :failure-kind (or (:failure-kind failure-data)
+                               :open-cascade-resume-held)
+             :failure-stage :cascade-resume
+             :error (or (:error refusal) message)
+             :cause (select-keys refusal [:kind :cause :throwable])
+             :held-phase (:held-phase failure-data)
+             :downstream-refusal refusal
+             :repair-obligation finding}
+      (:delivery-evidence refusal)
+      (assoc :error-data (select-keys refusal [:delivery-evidence :author-job
+                                               :reason])))))
 
 (defn- run-record-failure
   "WM-CLICK-REASON-I: the failure a click closed on, for its run record, so
@@ -9521,19 +9547,7 @@
                :opportunity-id opportunity-id
                :outcome :incomplete
                :checkpoints @checkpoints
-               :data {:outcome :incomplete
-                      :failure-kind (or (:failure-kind failure-data)
-                                        :open-cascade-resume-held)
-                      :failure-stage :cascade-resume
-                      :error (or (get-in failure-data
-                                         [:downstream-refusal :error])
-                                 (.getMessage e))
-                      :cause (select-keys
-                              (:downstream-refusal failure-data)
-                              [:kind :cause :throwable])
-                      :held-phase (:held-phase failure-data)
-                      :downstream-refusal (:downstream-refusal failure-data)
-                      :repair-obligation finding}})
+               :data (held-resume-data failure-data (.getMessage e) finding)})
             (if (identical? historical-verification-completion-token
                           (:historical-verification-completion-token (ex-data e)))
             (let [completion (ex-data e)]
