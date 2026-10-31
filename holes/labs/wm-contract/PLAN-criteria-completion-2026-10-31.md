@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: P5 first measured task (2026-10-31)
+
+Click wm-click-9028a8a7 (run ebbbe42a) closed :grounded-progress on M-typed-memories with no injury and no fix between it and the previous reload: author commit futon3c 4fd00fa63, review, selected-want outcomes :verified, one of four wants reached. Note the measurement reads the mission locator (see MISSION-TEXT-ONLY-WANT-LOCATORS). Budget 7.
+
 ## Latest execution checkpoint: a67d3e49 discharged, P5 click 3 running (2026-10-31)
 
 Medic click wm-click-630f0b74 discharged a67d3e49 at ordinal 134, fixed by 79755af7c. Budget 8 before click 3. Evidence merge 89b15a9a9 removed that fix on main for a few minutes because 22c845732 committed its counterfactual; 8b833eed9 restored it, and the serving JVM never loaded the removal.
