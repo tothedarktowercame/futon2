@@ -1,0 +1,39 @@
+{
+  "schema": "wm/p4-diagnosis-evidence-correction-v1",
+  "date": "2026-10-31",
+  "author": "zai-5",
+  "dispatch": "codex-11 invoke-1793416406993-8638-3839b94c",
+  "corrects": "futon2 8f887ba20 P4 receipt (additive; original preserved; charge 243/230/13 and typed refusal preserved)",
+  "mode": "read-only; original artifacts only; no rerun, no contact, no POST, no fix, no ledger/tracker change, no click",
+
+  "source_facts": {
+    "cause_entry_defect": "futon2 src/futon2/aif/meta_self_heal_production.clj:187-201; clause 6 (line 198-199) is the refusal: (not (cause-scope/predicate? (:healthy-predicate entry))) -> :cause-scope/predicate-not-result-derived; validates the diagnosis RESPONSE, not the injury source record",
+    "predicate_grammar": "futon2 src/futon2/aif/cause_scope.clj:7-13: map {:op in #{:result-path-equals :result-path-present :result-path-absent}, :path vector, :value required for equals}",
+    "prompt": "futon3c src/futon3c/wm/meta_self_heal_adapters.clj:402 asks ':healthy-predicate <closed result predicate>' with NO grammar stated; retained request (click state) carries no grammar either",
+    "diagnosis_route": "meta_self_heal_adapters.clj:1103 :meta-diagnosis-fn -> producer-invoke! on (:author cast) seat"
+  },
+
+  "original_artifacts": {
+    "contact": "/tmp/invoke-trace.log line 11344: at=2026-10-31T03:08:51.794Z agent=wm-author thread=wm-runner-click prompt='Dedicated META diagnosis…' — a diagnosis producer invoke DID occur; receipt's 'no contact occurred at all' is wrong",
+    "response_evidence_store": "futon1b :7073 GET /api/alpha/evidence?author=wm-author&since=2026-10-31T03:08:00Z — turn-round zai-turn-b849b8c6-76ed-4cb1-bad7-980a366c0d2a, session zai-9b8a9121-8e51-44ab-a0a1-6298051dc096, round 14, final, 1446 output tokens; copy capped (ends '…[+62 chars]' at the predicate)",
+    "response_full": "wm-author seat in-memory invoke history, read-only reflection on the serving JVM; saved pin ~/notes/wm-next/criteria-completeness/run001/adf04df0-single-repair/p4/diagnosis-response-full.txt sha256 d42b93459d7108c34fca26cdbeda7a2cd8589197043ecb638af93eda8de9f3a1",
+    "returned_healthy_predicate": "\"(fn [record] (nil? (:failure record)))\" — Clojure fn literal string, not the op-map grammar",
+    "cause_entry_other_clauses": "all passed: var futon2.aif.full-loop-runner/run-opportunity!, file src/futon2/aif/full_loop_runner.clj, input.record-pin == request source-record-pin (tick-run-record-2026-10-31-f805ca4b… sha ba359b5e9f5d6b5a56adaa6f5c23339738110350bc13eb55647f3cdf33b81bea), input.path [:q6 :terminal :outcome]",
+    "response_status": ":succeeded, :classification :misclassified-author-delivery-descriptor"
+  },
+
+  "classification": "missing prompt grammar -> predictably non-conforming output; not seat malformation in a vacuum, not an implementation defect in the check, not an injury-record deficiency, not unobservable",
+
+  "receipt_corrections": [
+    "blocker mechanism: unsupported that the injury cause record 'lacks a predicate'; producer returned a diagnosis; refusal is the response-grammar clause; injury record's only role (input-pin equality) passed",
+    "'no author contact': one diagnosis producer invoke on wm-author cast seat occurred; no repair author/review/enact/retry-child remains true",
+    "C2 overclaim: protected hashes are store-conservation snapshots, not task pre-effect baseline; no task existed on the refused repair route; exactly-once 'no contact' form moot",
+    "A1: charge and refusal real; binding-status absent + no run record => acknowledgement partial",
+    "P3 natural-witness overclaim: absent-terms [:diagnosis-evidence :acceptance-test] is not the optional acceptance-return-limit witness; E4-WORK-ORDER-NIL-RETURN-LIMIT stays LIVE-WITNESS-OWED"
+  ],
+  "preserved_correct": ["one parent charge 243/230/13", "typed refusal before author dispatch", "attempt unspent spent=[]", "ledger ca73914f…1a44 unchanged", "honest held state"],
+
+  "owner_observation_not_applied": "seat intent '(fn [record] (nil? (:failure record)))' would map to {:op :result-path-absent :path [:failure]}; conversion is a new decision, not evidence",
+
+  "smallest_next_action": "one-line prompt-grammar inline at futon3c wm/meta_self_heal_adapters.clj:402 (optionally echoed in the request), reviewed+merged as usual, then normally-dispatched P4 re-release (attempt unspent, budget 13); no gate weakening, no coercion, no fabrication; this packet authorizes no spend"
+}
