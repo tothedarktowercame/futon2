@@ -1,6 +1,6 @@
 # E-kimi-task-175 — prove lemma apm_t02A04_quotientComplex_model_aux_cone_inj in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T18:02:13Z to kimi-1 as invoke-1793469733877-8852-4168d1b0
+**Requisition:** completed — 2026-10-31T18:09:50Z, job invoke-1793469733877-8852-4168d1b0, state done
 
 Clocked in by claude-14 for kimi-1 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
