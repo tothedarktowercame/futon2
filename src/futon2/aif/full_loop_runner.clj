@@ -100,6 +100,7 @@
             [futon2.aif.terminal-publication-receipt :as terminal-publication]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
             [futon2.aif.selection-world :as selection-world]
+            [futon2.aif.serving-envelope :as serving-envelope]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.stop-line :as stop-line]
             [futon2.aif.repair-obligation :as repair]
@@ -1414,6 +1415,11 @@
                          (some-> (:habit-reads/state raw-opts) deref))
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
+                    ;; A2: what the machine was serving on when the run
+                    ;; started; an explicit absence when the run began
+                    ;; without a capture (pre-envelope callers).
+                    :serving-envelope (or (:serving-envelope raw-opts)
+                                          serving-envelope/absent-receipt)
                     :participants participants-record
                     :habit-reads habit-reads
                     ;; The report's locally built fold is not returned to
@@ -9804,6 +9810,14 @@
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.
         source-check (check-runner-source-phase! (assoc raw-opts :run-id run-id))
+        ;; A2-ENVELOPE-RECEIPT-ABSENT: the serving envelope is captured at
+        ;; run start, BEFORE author dispatch (run-opportunity-core! below),
+        ;; and retained on the record by persist-run-record!. Capture never
+        ;; throws; unobservable components are declared unknown.
+        serving-envelope ((or (:serving-envelope-fn raw-opts)
+                              (fn [o] (serving-envelope/capture o (config o))))
+                          (assoc raw-opts :run-id run-id))
+        raw-opts (assoc raw-opts :serving-envelope serving-envelope)
         publication (discharge-receipt/catch-up!
                      (or (:repair-root raw-opts) repair/default-root)
                      (or (:discharge-receipt-repo raw-opts) "/home/joe/code/futon2"))
