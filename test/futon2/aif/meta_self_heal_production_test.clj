@@ -741,6 +741,30 @@
     (is (nil? (:diagnosis-evidence-pin bad)))
     (is (false? (:repair-claimed? bad)))))
 
+(deftest producer-refusal-kind-travels-through-the-wrapper
+  ;; P4-2 (click wm-click-023dde8b): the diagnosis seat refused with
+  ;; {:status :failed :kind :cause-scope-unretained}; the wrapper read only
+  ;; :reason and recorded :diagnosis-not-succeeded, dropping the precise
+  ;; cause. The kind must survive; an envelope :payload error surfaces as
+  ;; detail instead of vanishing.
+  (let [dir (root)
+        pin (recorded-injury-source! dir)
+        {:keys [ledger active]} (durable-with-active-source pin)
+        kind (production/produce-diagnosis!
+              {:meta-diagnosis-fn (constantly {:status :failed
+                                               :kind :cause-scope-unretained})}
+              {:ledger ledger} active)
+        payload (production/produce-diagnosis!
+                 {:meta-diagnosis-fn (constantly {:status :failed
+                                                  :payload {:reason :agency-invoke-failed
+                                                            :error "429 burst"}})}
+                 {:ledger ledger} active)]
+    (is (= :meta-self-heal/diagnosis-unavailable (:reason kind)))
+    (is (= :cause-scope-unretained (:diagnosis-reason kind)))
+    (is (= :meta-self-heal/diagnosis-not-succeeded (:diagnosis-reason payload)))
+    (is (= "429 burst" (:diagnosis-detail payload)))
+    (is (false? (:repair-claimed? kind)))))
+
 (deftest diagnosis-persistence-failure-is-not-a-durable-diagnosis
   (let [dir (root)
         pin (recorded-injury-source! dir)

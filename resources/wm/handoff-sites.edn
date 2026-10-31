@@ -87,17 +87,32 @@
   {:id :execution/open-cascade-author
    :producer :held-open-cascade :consumer :author
    :kind :agent-reply :source "src/futon2/aif/full_loop_runtime.clj"
-   :anchor "author-answer (handoff/response-map"
+   :anchor "(handoff/contact-with-format-correction"
    :contract :wm/open-cascade-authoring-requisition-v1
    :transport :handoff/response-map :representation :json-object
    :decoder :handoff/response-json-object :status :verified-shared}
   {:id :execution/open-cascade-reviewer
    :producer :open-cascade-author-answer :consumer :reviewer
    :kind :agent-reply :source "src/futon2/aif/full_loop_runtime.clj"
-   :anchor "reviewed (when author-answer"
+   :anchor "reviewed (when reviewer-response"
    :contract :wm/open-cascade-reviewed-answer-v1
    :transport :handoff/response-map :representation :json-object
    :decoder :handoff/response-json-object :status :verified-shared}
+  {:id :execution/open-cascade-delivery-check
+   :producer :open-cascade-author-answer :consumer :patch-delivery-check
+   :kind :agent-reply :source "src/futon2/aif/full_loop_runtime.clj"
+   :anchor "delivery-evidence/retain-delivery-failure!"
+   :contract :wm/open-cascade-authoring-requisition-v1
+   :transport :handoff/response-payload :representation :patch-descriptor
+   :decoder :cascade-patch-delivery/check-delivery
+   ;; Format validation and replay-input sufficiency are distinct obligations
+   ;; at this seam. The decoder refuses a malformed patch descriptor; the
+   ;; retention schema keeps the exact refused input, typed result and
+   ;; linkage replayable after the refusal (injury adf04df0, 2026-10-31:
+   ;; the abbreviated commit descriptor was consumed by check-delivery and
+   ;; retained nowhere, so diagnosis refused :cause-scope-unretained).
+   :retention :wm/delivery-failure-evidence-v1
+   :status :verified-adapter}
   {:id :repair/loop-worker
    :producer :wm-click-repair-loop :consumer :repair-reviewer
    :kind :agent-reply :source "scripts/wm_click_repair_loop.py"

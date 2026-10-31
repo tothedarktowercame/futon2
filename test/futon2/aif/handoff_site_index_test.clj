@@ -11,7 +11,7 @@
         sites (:sites index)
         audit (sut/audit repo)]
     (is (= :verified (:status audit)) (pr-str (:problems audit)))
-    (is (= 19 (:site-count audit)))
+    (is (= 20 (:site-count audit)))
     (is (= (count sites) (count (set (map :id sites)))))
     (is (every? #(and (:contract %) (:transport %) (:status %)) sites))
     (is (every? #(or (not= :agent-reply (:kind %))
@@ -57,6 +57,12 @@
                            :let [relative (str (.relativize (.toPath (io/file repo))
                                                            (.toPath file)))]
                            :when (and (not= relative "src/futon2/aif/handoff_contract.clj")
+                                      ;; ordinary_author_refusal re-validates
+                                      ;; a RETAINED job with the shared reader
+                                      ;; as a predicate; it consumes no live
+                                      ;; handoff response, so it is not a
+                                      ;; producer/consumer site.
+                                      (not= relative "src/futon2/aif/ordinary_author_refusal.clj")
                                       (str/includes? (slurp file) "handoff/response-map"))]
                        relative))]
     (is (= #{"src/futon2/aif/full_loop_runtime.clj"} callers))

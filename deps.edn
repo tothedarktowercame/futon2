@@ -35,6 +35,7 @@
   :test-slow {:extra-paths ["test-slow"]
               :main-opts ["-m" "cognitect.test-runner" "-d" "test-slow"]}
   :test {:extra-paths ["test"]
+         :jvm-opts ["-Dfuton2.test-run=true"]
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                       babashka/fs {:mvn/version "0.5.25"}
                       babashka/process {:mvn/version "0.5.22"}
