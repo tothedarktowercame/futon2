@@ -10,10 +10,20 @@
 (defn comparable? [identity]
   (every? #(some? (get identity %)) required-keys))
 
+(defn- measured-finished-work? [row]
+  (if (contains? row :satisfaction)
+    (true? (get-in row [:satisfaction :wants-measured]))
+    ;; Legacy rows predate the satisfaction record and cannot be rewritten.
+    ;; Only an already-satisfied close could qualify on declaration presence
+    ;; (run 4955b6e6); every other finished-work row is grounded work and
+    ;; still blocks.
+    (not= :already-satisfied (get-in row [:failure :kind]))))
+
 (defn blocking-row? [row]
   (and (= :indexed (:status row))
        (comparable? (:effective-run-identity row))
-       (true? (:finished-work? row))))
+       (true? (:finished-work? row))
+       (measured-finished-work? row)))
 
 (defn compare-rows [identity rows]
   (if-not (comparable? identity)
