@@ -75,6 +75,27 @@
          {:target target :mission target :kind kind :cascade (attach-squares cascade squares)
           :analysis analysis-map})))
 
+(defn- retained-revision-policies
+  "DIFFICULTY-REVISES-CASCADE consumption: each retained :revised cascade
+   for this target becomes one more policy, arranged over the CURRENT
+   reading's validated nodes in the retained order and carrying the
+   revision's provenance. A revision naming a pattern the current reading
+   does not validate is a counted failure, never a policy."
+  [target analysis-map squares retained]
+  (vec
+   (for [r retained
+         :let [result (analysis/retained-cascade analysis-map (:precedence r))]]
+     (if (= :constructed (:status result))
+       (let [policy {:target target :mission target :kind :retained-revision
+                     :cascade (attach-squares (:cascade result) squares)
+                     :analysis analysis-map
+                     :retained-revision {:precedence (get-in result [:cascade :precedence])
+                                         :delta (:delta r)
+                                         :provenance (:provenance r)}}]
+         (assoc policy
+                :structural-identity (shape-g/structural-identity policy)))
+       {:retained/failure (select-keys result [:kind :patterns])}))))
+
 (defn- retraction-policies [target analysis-map result]
   (mapv (fn [r]
           {:target target :mission target :kind :retraction :analysis analysis-map
@@ -98,7 +119,7 @@
 (defn policy-family
   "Return canonical reading policies, preserving retraction computation as
   excluded provenance and preserving every counted failure."
-  [{:keys [reading graph retraction occurrence-squares]}]
+  [{:keys [reading graph retraction occurrence-squares retained-revisions]}]
   (let [target (:target-id reading)]
     (if (= :absent (:status reading))
       {:status :failed :target-id target :policies []
@@ -129,14 +150,46 @@
                                                    :seeds (vec (sort seeds))}]})
             reported (reading-policies target analysis-map
                                        (square-registry/squares occurrence-squares))
+            retained-results (retained-revision-policies
+                              target analysis-map (square-registry/squares occurrence-squares)
+                              (or retained-revisions []))
+            retained-policies (vec (filter :retained-revision retained-results))
+            retained-failures (vec (keep :retained/failure retained-results))
             computed-retractions (retraction-policies target analysis-map retract)
             old-route-policies (deduplicate (vec (concat reported computed-retractions)))
             excluded-policy-ids (mapv :policy-id
                                       (filter #(= :retraction (:kind %))
                                               old-route-policies))
-            policies (deduplicate reported)
+            ;; A retained revision is never a duplicate: when its arrangement
+            ;; is structurally identical to a reading policy, the READING
+            ;; policy carries the revision's provenance (the twin keeps its
+            ;; own kind and id); otherwise it enters as its own
+            ;; :retained-revision policy with a fresh stable id.
+            base (deduplicate reported)
+            retained-identities (set (map :structural-identity retained-policies))
+            base (mapv (fn [p]
+                         (if-let [twin (some (fn [rp]
+                                               (when (and (contains? retained-identities
+                                                                     (shape-g/structural-identity p))
+                                                          (= (:structural-identity rp)
+                                                             (shape-g/structural-identity p)))
+                                                 rp))
+                                             retained-policies)]
+                           (assoc p :retained-revision (:retained-revision twin))
+                           p))
+                       base)
+            new-retained (vec (for [rp retained-policies
+                                    :when (not (contains?
+                                                (set (map shape-g/structural-identity base))
+                                                (:structural-identity rp)))]
+                                (dissoc rp :structural-identity)))
+            policies (deduplicate (vec (concat base new-retained)))
             failures (vec (concat (for [oid (sort-by pr-str voids)]
                                     {:kind :void-pattern-citation :occurrence-id oid})
+                                  (for [f retained-failures]
+                                    (merge {:kind (:kind f)
+                                            :target-id target}
+                                           (select-keys f [:patterns])))
                                   seed-failures (:failures retract)))
             failures (cond-> failures
                        (empty? policies) (conj {:kind :empty-policy-family
@@ -145,6 +198,13 @@
          :target-id target :policies policies
          :reported-count (count reported) :distinct-count (count policies)
          :failures failures :failure-count (count failures)
+         ;; What the family did with the target's retained revisions: every
+         ;; candidate, each one's disposition, and the provenance carried.
+         :retained-revisions
+         {:candidates (count retained-results)
+          :as-policy (count new-retained)
+          :provenance-attached (- (count retained-policies) (count new-retained))
+          :refused (count retained-failures)}
          :provenance {:excerpt-digest (:excerpt-digest reading)
                       :analysis-digest (:analysis-digest reading)
                       :graph-digest (identity/sha256 (.getBytes (pr-str graph) "UTF-8"))
