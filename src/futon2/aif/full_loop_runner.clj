@@ -4954,8 +4954,14 @@
   A claimed commit that does not cite the selected target
   (`claimed-commit-cites-target`) is refused here, before any reviewer is
   dispatched or charged, as `:claimed-artifact-not-on-selected-target`."
-  [opts phase-context prompt-opts target mission construction author-job classification charge!]
-  (let [grounded (:grounded-commit classification)
+  ([opts phase-context prompt-opts target mission construction author-job
+    classification charge!]
+   (review-already-satisfied-claim! opts phase-context prompt-opts target
+                                    mission construction author-job classification
+                                    charge! nil))
+  ([opts phase-context prompt-opts target mission construction author-job
+    classification charge! claim-context]
+   (let [grounded (:grounded-commit classification)
         commit (:sha grounded)
         repository (some (fn [r] (when (and (= (:repo grounded) (.getName (io/file r)))
                                             (.isDirectory (io/file r ".git"))) r))
@@ -4998,15 +5004,45 @@
        :claim-refused-before-review? true}
       (review-cited-already-satisfied-claim!
        opts phase-context prompt-opts target mission construction author-job
-       charge! grounded commit repo files completion-text citation))))
+       charge! grounded commit repo files completion-text citation claim-context)))))
+
+(defn- claim-measured?
+  "A mission claim needs an admitted measurement of its selected wants. Only a
+  non-mission target, which selects no wants, may close without one, so a
+  missing baseline or dispatch cannot pass a mission claim unmeasured."
+  [target claim-observation]
+  (if (str/starts-with? (str target) "M-")
+    (= :admitted (:status claim-observation))
+    (or (nil? claim-observation)
+        (= :admitted (:status claim-observation)))))
 
 (defn- review-cited-already-satisfied-claim!
   "The reviewer dispatch for an existing-artifact claim whose commit cites
   the selected target. Split from `review-already-satisfied-claim!` so the
   mechanical citation refusal sits before the first charge."
   [opts phase-context prompt-opts target mission construction author-job
-   charge! grounded commit repo files completion-text citation]
-  (let [prompt (str (reviewer-prompt prompt-opts target construction repo commit author-job [])
+   charge! grounded commit repo files completion-text citation claim-context]
+  (let [;; ALREADY-SATISFIED-WANTS-UNMEASURED (run 4955b6e6): existence and a
+        ;; reviewer verdict are not a measurement. When the caller supplies
+        ;; the retained pre-author baseline and the selected dispatch, every
+        ;; selected want is measured at the REVIEWED commit in claim mode
+        ;; (true-before is the claim's own assertion; the mission text is
+        ;; never an artifact). No admitted measurement -> the claim is NOT
+        ;; accepted; the honest refusal stands.
+        claim-observation
+        (when (and (map? claim-context)
+                   (:dispatch claim-context)
+                   (:mission-baseline claim-context))
+          (mission-observation/project
+           {:baseline (:mission-baseline claim-context)
+            :dispatch (:dispatch claim-context)
+            :repository repo :after-revision commit
+            :after-rows
+            (mission-observation/capture-after
+             {:dispatch (:dispatch claim-context)
+              :repository repo :revision commit})
+            :claim {:mission-source-path (get-in mission [:source :path])}}))
+        prompt (str (reviewer-prompt prompt-opts target construction repo commit author-job [])
                     "\nALREADY-SATISFIED CLAIM: no new implementation is claimed. Judge whether "
                     "this exact existing commit satisfies the selected task, not merely whether it exists.\n"
                     "SELECTED TASK COMPLETION DEFINITION / RETAINED MISSION:\n" (pr-str mission) "\n" completion-text
@@ -5026,17 +5062,34 @@
         verdict (review-verdict job)
         gate (review-execution-gate files job)
         apparatus (second (re-find #"(?m)^FULL_LOOP_APPARATUS_DEFECT:\s*(.+)$" (job-text job)))
+        measured? (claim-measured? target claim-observation)
+        unmeasured? (and (= :approve verdict) (not measured?))
         accepted? (and (= :approve verdict) (:passed? gate) (:executed? gate)
-                       (pos? (or (:tool-events gate) 0)))
-        refused? (and (#{:reject :request-changes} verdict) (not apparatus))
+                       (pos? (or (:tool-events gate) 0))
+                       measured?)
+        ;; An unmeasured claim is the author's answer failing, not the
+        ;; apparatus, so it refuses the claim without opening an injury.
+        refused? (and (or (#{:reject :request-changes} verdict) unmeasured?)
+                      (not apparatus))
         outcome (cond accepted? :already-satisfied refused? :guardrail-refusal :else :build-failed)
-        kind (cond accepted? :already-satisfied refused? :reviewed-claim-refused
+        kind (cond accepted? :already-satisfied
+                   (and refused? unmeasured?) :already-satisfied-wants-unmeasured
+                   refused? :reviewed-claim-refused
                    apparatus :reviewer-apparatus-defect :else :review-execution-evidence-missing)]
     {:outcome outcome :failure-kind kind :failure-stage :author-wait
      :target target :commit commit :grounded-commit grounded
      :author-job author-job :review-job job :review-verdict verdict :review-gate gate
+     :mission-observation claim-observation
      :claim-citation citation
-     :refusal-reason (when-not accepted? (or apparatus (job-text job)))
+     :refusal-reason
+     (when-not accepted?
+       (or apparatus
+           (when unmeasured?
+             (str "Claim not accepted: selected wants are not admitted by "
+                  "claim-mode measurement at the reviewed commit "
+                  commit ": " (pr-str (select-keys claim-observation
+                                                   [:status :reason :token]))))
+           (job-text job)))
      :reviewed-claim-refused? (boolean refused?)}))
 
 (defn- reviewed-mission-entry
@@ -6750,8 +6803,12 @@
                        mission-close? (and (str/starts-with? (str (:target mission-action)) "M-")
                                            (seq (:want mission-action))
                                            (not= :repair-machine-failure (:type mission-action)))
-                       mission-receipt (get-in @checkpoints
-                                               [:build :judgment :validation :mission-observation])
+                       mission-receipt (or (get-in @checkpoints
+                                                   [:build :judgment :validation :mission-observation])
+                                           ;; an already-satisfied claim never runs the
+                                           ;; build validation; its claim-mode measurement
+                                           ;; rides on the terminal data itself
+                                           (:mission-observation data))
                        mission-view (when mission-close?
                                       (reviewed-mission-observation mission-action mission-receipt))
                        ;; The caller knows that a reviewed commit was grounded;
@@ -8958,7 +9015,9 @@
                   (let [reviewed (review-already-satisfied-claim!
                                    opts @phase-context (assoc prompt-opts :reviewer reviewer)
                                    target mission construction author-job classification
-                                   #(swap! dispatched-turns inc))]
+                                   #(swap! dispatched-turns inc)
+                                   {:mission-baseline mission-baseline
+                                    :dispatch (get-in @d-task-dispatch [:dispatch])})]
                     ;; The existing close handler retains the reviewed artifact and job.
                     (throw (ex-info "Existing-artifact claim independently reviewed" reviewed)))))
               (throw-if-author-refused! author-job target :author-wait)
