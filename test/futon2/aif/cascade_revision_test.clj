@@ -47,6 +47,34 @@
                     {:selected-action original :shown [":patterns/a"]}
                     result))))))
 
+(deftest content-noop-with-fresh-receipts-is-not-a-revision
+  ;; The 2026-10-02-1790901017 shape: the whole-mission skim re-admitted the
+  ;; SAME pattern set with fresh receipts, so candidate-identity differed
+  ;; while :added/:removed stayed empty. That is a corrected nothing, not a
+  ;; way out, and must refuse like any other non-proposal.
+  (let [noop (assoc (candidate :C9 [:patterns/a])
+                    :construction-receipt
+                    {:kind :machine-constructed :moves-taken 7})
+        reordered-original (candidate :C1 [:patterns/a :patterns/b])
+        reorder-noop (candidate :C10 [:patterns/b :patterns/a])
+        refuse (fn [original proposal]
+                 (revision/revise
+                  {:original original
+                   :head-context (revision/head-seed original)
+                   :whole-context {:schema revision/context-schema
+                                   :scope :whole-mission :target "M-current"
+                                   :path "/mission.md" :sha256 "whole"}
+                   :blocker blocker
+                   :proposals [proposal]
+                   :pattern-feedback metadata}))]
+    (is (not= (revision/candidate-identity original)
+              (revision/candidate-identity noop))
+        "identity alone must not distinguish these two — that is the bug")
+    (is (= :refused (:status (refuse original noop))))
+    (is (= :no-distinct-whole-mission-proposal (:kind (refuse original noop))))
+    (is (= :refused (:status (refuse reordered-original reorder-noop)))
+        "a pure reorder changes no pattern content")))
+
 (deftest failed-extension-is-typed-repair-evidence
   (let [result (revision/revise
                 {:original original

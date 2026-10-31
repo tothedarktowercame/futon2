@@ -453,6 +453,15 @@
   the retriever did not surface is still reachable (H-INTERP-D §3, gap 3)."
   ([issued] (prompt issued nil))
   ([issued {:keys [library-root] :or {library-root ireq/library-root}}]
+   (let [;; A request that never passed through issue! (the cascade-revision
+     ;; producer's request-fn composes `request`, not `request!`) carried no
+     ;; acceptance contract, and prompt-block threw "Invalid handoff
+     ;; contract" for it — on the production path, before any agent was
+     ;; asked anything. Attach the contract issue! would have attached:
+     ;; the validator imposes it either way.
+     issued (if (contains? issued :acceptance-contract)
+              issued
+              (assoc issued :acceptance-contract (acceptance-contract issued)))]
    (str "The War Machine asks for one interpretation (D11). Request "
         (:request-id issued) ":\n\n```edn\n" (with-out-str (pp/pprint (dissoc issued :retrieval)))
         "```\n\nLibrary retrieval candidates (unjudged): "
@@ -470,7 +479,7 @@
         "{:schema " response-schema " :pattern … :guard {:needs #{…} :forbids #{…}} :produces #{…} "
         ":receipt {:source {:path … :sha256 …} :reading … :scope-limit … :by …}} "
         "(:retrieval {:runs [...]} optional, for agent-search runs as above) or "
-        "{:schema " response-schema " :decline {:reason …}}; anything else is unparseable.\n")))
+        "{:schema " response-schema " :decline {:reason …}}; anything else is unparseable.\n"))))
 
 (defn parse-reply
   "The single response form in reply TEXT: {:response m}, {:decline d}, or

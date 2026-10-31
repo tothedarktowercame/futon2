@@ -85,6 +85,16 @@
                       (filter map?)
                       (filter #(= (:target original) (:target %)))
                       (remove #(= original-id (candidate-identity %)))
+                      ;; A content no-op is not a way out. candidate-identity
+                      ;; digests receipts too, so re-admitting the SAME
+                      ;; pattern set (fresh receipts, or reordered) counts as
+                      ;; a distinct candidate while changing nothing the
+                      ;; cascade thinks with — exactly the one "successful"
+                      ;; revision before this (2026-10-02-1790901017: same
+                      ;; four patterns, empty :added/:removed). The pattern
+                      ;; SET must differ for a revision to count.
+                      (remove #(= (set (pattern-ids original))
+                                  (set (pattern-ids %))))
                       vec))]
     (if (or invalid (empty? viable))
       {:schema revision-schema :status :refused
