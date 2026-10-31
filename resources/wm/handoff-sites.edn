@@ -148,4 +148,17 @@
    :kind :service :source "scripts/wm_click.sh"
    :anchor "requirements NOT CHECKED"
    :contract :wm/requirements-check-terminal
-   :transport :checked-publication :status :verified-fail-closed}]}
+   :transport :checked-publication :status :verified-fail-closed}
+  {:id :self-heal/producer-invoke
+   :producer :meta-self-heal-adapters :consumer :diagnosis-producer-seat
+   :kind :agent-reply :repo "futon3c"
+   :source "src/futon3c/wm/meta_self_heal_adapters.clj"
+   :anchor "(defn- producer-invoke!"
+   :contract :wm/meta-self-heal-producer-request-v1
+   :transport :agency/invoke-with-rate-limit-retry :representation :single-edn-map
+   :decoder :meta-self-heal/one-edn-map :status :registered-exception
+   ;; Cross-repo serving adapter: futon3c's meta-self-heal invokes the
+   ;; diagnosis/acceptance seats for the futon2 producer. Injury adf04df0
+   ;; (2026-10-31) broke on this path. Reply decode is one EDN map with one
+   ;; gated read-retry; it does not pass through futon2's handoff/exchange.
+   :exception "Cross-repo futon3c adapter; one-EDN-map decode and read-retry are locally gated, verified against the futon2 producer contract."}]}

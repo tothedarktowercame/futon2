@@ -6,17 +6,56 @@
 
 (def repo (.getCanonicalPath (io/file ".")))
 
+(def futon3c-repo
+  (some #(when (.isDirectory (io/file % "src/futon3c/wm"))
+           (.getCanonicalPath (io/file %)))
+        [(str repo "/../futon3c")
+         (str (System/getProperty "user.home") "/code/futon3c")]))
+
 (deftest every-known-production-handoff-has-one-live-index-entry
+  (is (some? futon3c-repo)
+      "the cross-repo index row requires a futon3c checkout beside futon2 or at ~/code/futon3c")
   (let [index (sut/read-index)
         sites (:sites index)
-        audit (sut/audit repo)]
+        audit (sut/audit repo {"futon3c" futon3c-repo})]
     (is (= :verified (:status audit)) (pr-str (:problems audit)))
-    (is (= 20 (:site-count audit)))
+    (is (= 21 (:site-count audit)))
     (is (= (count sites) (count (set (map :id sites)))))
     (is (every? #(and (:contract %) (:transport %) (:status %)) sites))
     (is (every? #(or (not= :agent-reply (:kind %))
                      (and (:representation %) (:decoder %)))
                 sites))))
+
+(deftest cross-repo-anchor-is-required-for-verification
+  (let [real (io/file futon3c-repo "src/futon3c/wm/meta_self_heal_adapters.clj")
+        text (slurp real)
+        anchor "(defn- producer-invoke!"
+        tmp (io/file (System/getProperty "java.io.tmpdir")
+                     (str "handoff-index-cross-repo-" (System/nanoTime)))
+        staged (io/file tmp "src/futon3c/wm/meta_self_heal_adapters.clj")]
+    (.mkdirs (.getParentFile staged))
+    (try
+      (spit staged text)
+      (let [verified (sut/audit repo {"futon3c" (.getCanonicalPath tmp)})]
+        (is (= :verified (:status verified)) (pr-str (:problems verified))))
+      (spit staged (str/replace text anchor "(defn- producer-invoke-RENAMED"))
+      (let [refused (sut/audit repo {"futon3c" (.getCanonicalPath tmp)})]
+        (is (= :refused (:status refused)))
+        (is (some #(and (= :anchor-missing (:reason %))
+                        (= :self-heal/producer-invoke (:site %)))
+                  (:problems refused))
+            (pr-str (:problems refused))))
+      (let [unresolved (sut/audit repo {"futon3c" nil})]
+        (is (= :refused (:status unresolved)))
+        (is (some #(= :repo-unresolved (:reason %)) (:problems unresolved))
+            (pr-str (:problems unresolved))))
+      (finally
+        (.delete staged)
+        (.delete (.getParentFile staged))
+        (.delete (io/file tmp "src/futon3c/wm"))
+        (.delete (io/file tmp "src/futon3c"))
+        (.delete (io/file tmp "src"))
+        (.delete tmp)))))
 
 (deftest shared-exchange-callers-cannot-appear-outside-the-index
   (let [indexed (set (map :source (:sites (sut/read-index))))
