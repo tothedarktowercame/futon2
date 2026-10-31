@@ -11,9 +11,9 @@
    :requirements/sha256 "a57c7bfce1006cf5aa1d236e66fc4152ad39075f44b778e2b51c4babce2ff837"
    :terminal :grounded-progress :wall-clock-ms 566972
    :rows {A1 :observed
-          A2 :observed            ;; heap retention gap; non-current ns enumerated
-          A3 :observed            ;; in-record injury-set join :unknown
-          A4 :observed
+          A2 :observed            ;; heap retention gap; non-current ns enumerated — NOT clean
+          A3 :observed            ;; in-record injury-set join :unknown — NOT clean
+          A4 :observed            ;; receipts: baseline ad922f96, pre-author-head 8b46822b
           B1 :observed            ;; scope: pinned 608 missions-only population
           B2 :observed            ;; R28 failure-retention path not exercised
           B3 :observed
@@ -21,15 +21,15 @@
           C1 :observed            ;; author-response/decisions-mismatch defect retained
           C2 :observed
           C3 :observed
-          C4 :observed
-          D1 :observed
-          D2 :observed            ;; pattern selection empty by branch
+          C4 :observed            ;; receipt: reviewer-run falsifier + 7/7 replay at de7bf835
+          D1 :observed            ;; receipt 4104abd5; tension with earlier no-measurements claim flagged
+          D2 :observed            ;; receipts b1e78e0c / observation-labels; pattern selection empty by branch
           D3 :observed
           D4 :observed            ;; outer-task-selection receipt-not-retained gap (R28 family)
           E1 :observed
           E2 :observed            ;; observed in successor f805ca4b
           E3 :observed            ;; pair vs e5f08d91; T12-history separate open row
-          E4 :not-exercised}      ;; restart + source change between runs
+          E4 :not-exercised}      ;; contrary evidence recorded: restart + source changes between runs
    :q-verdicts {:Q1 :holds :Q3 :holds :Q4 :holds :Q5 :holds :Q6 :holds :Q7 :holds :Q9 :unverifiable
                 :conforms false}}
   "2026-10-31-f805ca4b-6c35-45cf-accc-f95dd54b0fc8"
@@ -37,7 +37,7 @@
    :record/sha256 "ba359b5e9f5d6b5a56adaa6f5c23339738110350bc13eb55647f3cdf33b81bea"
    :requirements/sha256 "d7b5bcf1d3d8ddad998b9faf80242b69068ee66c63187e9c5e6699069f523325"
    :terminal :failure :failure-kind :author-delivery-wrong-repository :wall-clock-ms 140697
-   :first-divergence [:cascade-resume :author-delivery-wrong-repository]
+   :first-divergence [:cascade-resume :author-delivery-wrong-repository :c3-descriptor-violation]
    :rows {A1 :observed
           A2 :observed            ;; heap retention gap
           A3 :observed            ;; in-record injury-set join :unknown
@@ -46,18 +46,18 @@
           B2 :not-exercised       ;; selection-route not-required; R28 path not exercised
           B3 :observed
           B4 :observed
-          C1 :violated            ;; first divergence
-          C2 :not-exercised       ;; blocked by C1
-          C3 :violated            ;; wrong-repository delivery
+          C1 :unknown             ;; identity continuity not disproven; failure is C3-family descriptor defect
+          C2 :not-exercised       ;; blocked by the C3 divergence
+          C3 :violated            ;; delivery descriptor / repository-binding contract violated
           C4 :not-exercised       ;; blocked by C3
           D1 :not-exercised       ;; blocked
-          D2 :not-exercised       ;; failure-shaped learning retained, no completion credit
+          D2 :not-exercised       ;; failure-shaped learning receipts retained, no completion credit
           D3 :observed
           D4 :observed            ;; gaps explicit: traceWritten false, repeat-comparison not-reached
           E1 :observed            ;; safe explicit stop; not useful completion
           E2 :not-exercised       ;; successor owed
           E3 :unknown             ;; M-typed-memories re-picked but outer-repeat-comparison :not-reached
-          E4 :not-exercised}
+          E4 :not-exercised}      ;; contrary evidence recorded: restart 00:01Z + source changes preceded run
    :q-verdicts {:Q1 :holds :Q3 :holds :Q4 :holds :Q5 :holds :Q6 :holds :Q7 :holds :Q9 :unverifiable
                 :conforms false}}}
  :r28-search {:verdict :live-witness-owed
