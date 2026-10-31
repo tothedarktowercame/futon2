@@ -19,7 +19,8 @@
     repo
     (or (get repos site-repo)
         (let [sibling (io/file repo ".." site-repo)]
-          (when (.isDirectory sibling)
+          ;; ~/worktrees/<repo> is a directory of worktrees, not a checkout.
+          (when (.exists (io/file sibling ".git"))
             (.getCanonicalPath sibling))))))
 
 (defn audit
