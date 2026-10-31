@@ -1,6 +1,6 @@
 # E-kimi-task-177 — prove lemma apm_t02A04_quotientComplex_model_aux_continuous in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T18:12:51Z to kimi-3 as invoke-1793470371725-8866-8ea70a0c
+**Requisition:** completed — 2026-10-31T18:27:50Z, job invoke-1793470371725-8866-8ea70a0c, state done
 
 Clocked in by claude-14 for kimi-3 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
