@@ -1,0 +1,11 @@
+# D1 receipt verification for 3415 — 2026-10-31
+
+Correction: the earlier blanket statement that run3415 retained no selected-want measurements is false. The coordinator directly parsed `[:cascade-feedback :mission-state :execution-outcomes]` in the pinned raw run. Receipt `4104abd529cbd2b26740bac20082a439e0f75d12fcb8f973ce60ca1253e54b25` is `:wm/selected-want-outcome-v1`, `:verified`, and covers the same three tokens as cascade-feedback's selected-wants (normalized as target/token pairs). It pins all after locators to futon7 commit `de7bf8351e223eb4a39fbbeeda80ab04089d44a4`, matching the retained grounded artifact.
+
+Independent read-only git-show checks at baseline8b46822b and afterde7bf835 reproduce false→false for h0a34e3946ffb and hb0d779d21b3a, and false→true for hfbcd8a18ced5. Exact declarations/results and record SHA are in the accompanying JSON. No after-state recensus was used for this recomputation.
+
+Producer trace in current source: full_loop_runner constructs selected-want-outcome/receipt using the mission observation; cascade_feedback retains it as mission-state/execution-outcomes. selected_want_outcome checks census equality, selected locator equality, boolean observations and resolved after revision before marking verified. This is a source trace plus retained evidence, not a claim to have rerun the historical JVM.
+
+Measurement scope matters: observation_checks/check-decl-in-file (C4) uses git show at the resolved commit and checks anchored declaration text. The locators here are mission Markdown checkbox lines. These checks measure presence of the declared checked lines, not execution of certificate emission, CH2 consumption or an anti-laundering guard. The single reached result must not be promoted into independent operational proof of its prose claim. C4 here is the observation-check class, distinct from GRID criterion C4 (review).
+
+Disposition: D1 has positive selected-token, revision-bound measurement evidence at the declared locator level. The prior “no measurements” account is retracted; wider baseline timing/review-contract joins remain separate claims to substantiate in the matrix. No whole-task completion, executable behavioral witness or blanket A1–E3 pass follows from this receipt.

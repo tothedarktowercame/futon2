@@ -1,0 +1,42 @@
+{
+  "receipt_id": "4104abd529cbd2b26740bac20082a439e0f75d12fcb8f973ce60ca1253e54b25",
+  "record_path": "data/wm-runs/tick-run-record-2026-10-30-3415b671-88f6-4662-a2c1-48e3630f6116.edn",
+  "record_sha256": "0af126fec89e95980508f64ed381e5694d172d6dc37f7d7d8b6f384ce363aa36",
+  "method": "Read retained receipt; independently recompute anchored C4 declaration presence with git show at before8b46822b and afterde7bf835. No runtime execution or stored observation rewrite.",
+  "results": [
+    {
+      "token": [
+        "M-peradam-grounding",
+        "hole/h0a34e3946ffb"
+      ],
+      "before": false,
+      "after": false,
+      "classification": "untouched",
+      "declaration": "- [x] A real discharge emits a persisted peradam certificate or typed non-certificate joined to its `:move/id`.",
+      "after_revision": "de7bf8351e223eb4a39fbbeeda80ab04089d44a4"
+    },
+    {
+      "token": [
+        "M-peradam-grounding",
+        "hole/hb0d779d21b3a"
+      ],
+      "before": false,
+      "after": false,
+      "classification": "untouched",
+      "declaration": "- [x] CH2 delivers at least one realized record that the producer side consumes.",
+      "after_revision": "de7bf8351e223eb4a39fbbeeda80ab04089d44a4"
+    },
+    {
+      "token": [
+        "M-peradam-grounding",
+        "hole/hfbcd8a18ced5"
+      ],
+      "before": false,
+      "after": true,
+      "classification": "reached",
+      "declaration": "- [x] A deliberate attempt to promote `:q-best`, `:q-mean`, or build-via evidence is rejected by the anti-laundering guard.",
+      "after_revision": "de7bf8351e223eb4a39fbbeeda80ab04089d44a4"
+    }
+  ],
+  "scope": "Declaration-presence observations; not execution of described behaviors."
+}
