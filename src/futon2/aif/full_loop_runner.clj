@@ -1092,7 +1092,8 @@
   same projection for every case: scalars survive, :delivery-evidence keeps
   its nested pin, oversized values are dropped with :omitted naming them."
   [:status :kind :reason :repair :requisition-id :cascade-digest
-   :author-job :review-job :patch :answer :delivery-evidence])
+   :author-job :review-job :reviewer :reviewer-job :patch :answer
+   :delivery-evidence])
 
 (defn- held-resume-data
   "The close data of a held open-cascade resume. A retained delivery failure's

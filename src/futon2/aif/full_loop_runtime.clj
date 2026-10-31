@@ -547,6 +547,24 @@
                                                        :author-answer author-answer}))
                 reviewed (when reviewer-response
                            (handoff/response-map reviewer-response))
+                ;; An explicit reviewer refusal is a review outcome, not a
+                ;; format defect: run adc46631 (2026-10-31) replied with
+                ;; {"accepted": false, "accepted-by": null, ...reason}, the
+                ;; pin merge copied the nil accepted-by onto the author answer,
+                ;; and validate-answer closed it as :answer-reviewer-mismatch.
+                ;; The refusal reaches the ledger typed as a review refusal
+                ;; with the reviewer's reason preserved.
+                review-refusal (when (and (map? reviewed)
+                                          (contains? reviewed :accepted)
+                                          (not (:accepted reviewed)))
+                                 {:status :error
+                                  :kind :open-cascade-review-refused
+                                  :reviewer reviewer
+                                  :reviewer-job (contact-job reviewer-response)
+                                  :reason (:reason reviewed)
+                                  :requisition-id (:requisition-id req)
+                                  :cascade-digest (:cascade-digest req)
+                                  :reviewed-reply reviewed})
                 ;; Review accepts the author's decisions; it does not author
                 ;; a second copy. Mismatched pins retain the original validator
                 ;; path, and reviewer identity is still checked there.
@@ -602,6 +620,9 @@
                :kind :open-cascade-review-answer-invalid
                :reviewer reviewer
                :reviewer-job (contact-job reviewer-response)}
+
+              (some? review-refusal)
+              review-refusal
 
               :else
               (open-resume/handle-error!
