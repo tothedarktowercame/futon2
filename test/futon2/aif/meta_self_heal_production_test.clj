@@ -2586,8 +2586,13 @@
     (is (identical? id-fn (:retry-click-id with-fn)))
     (is (every? fn? (map with-fn [:author :review :enact :retry])))
     (is (not (contains? without :retry-click-id)))
-    (is (= {:author (:author supplied)} supplied)
-        "an explicit port map is used as given, nothing merged in")))
+    (is (= {:author (:author supplied)
+            :policy/retry-child-cap 1
+            :policy/author-attempt-cap 1}
+           supplied)
+        "an explicit port map is used as given EXCEPT the operating caps,
+         which production arms unconditionally over it (review fix 8542 —
+         a caller cannot leave the caps unarmed by supplying ports)")))
 
 (deftest latest-retry-click-follows-the-requeue-receipts-not-index-two
   "No live transaction.edn existed under data/wm-meta-injuries on 2026-10-20,

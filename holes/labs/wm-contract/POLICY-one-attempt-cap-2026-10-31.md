@@ -6,6 +6,14 @@ codex-11 (8538), after blocker receipt
 **Isolated packet: no merge, no serving reload, no click, no ledger mutation,
 no author contact.**
 
+Update (2026-10-31, codex-11 dispatch 8542): zai-5's independent review
+(one-attempt-cap-review-2026-10-31.md) approved `1bd7428d2` except the
+unauthorized production override. Successor commit (this commit, atop
+`1bd7428d2`) removes the opts override at BOTH production arming sites,
+unconditional default caps of 1, and adds tampering/coordinator-seam tests.
+See "Enforcement wiring", "Tests" and unresolved 4–5 below for the corrected
+truth: **no production override or grant is supported.**
+
 ## Policy authority
 
 Joe's binding rule: **one self-heal attempt per injury** (not the raw ledger's
@@ -69,15 +77,21 @@ two policy fns; boundaries read them from their opts/ports:
   created.
 - `coordinate-queued-retry` checks the child policy in the pending-requeue
   branch before minting `new-id`.
-- `meta_self_heal_production.clj` arms both caps by default in ONE place:
-  `work-order-options` merges `coordinator/default-repair-policy` (overridable
-  only by an explicit `:policy/*-cap` in opts, which carries its own grant
-  authority — none exists today), and `effect-ports` passes
-  `:policy/author-attempt-cap`/`:policy/retry-child-cap` to the coordinator.
-  Nothing silently resets an allowance: once an attempt is spent it stays
-  spent unless an explicit grant raises the cap.
+- `meta_self_heal_production.clj` arms both caps by default and ONLY the
+  default — **no production override exists** (review fix 2026-10-31,
+  codex-11 dispatch 8542, after zai-5's independent review flagged the prior
+  opts override as an unauthorized grant channel): `work-order-options` uses
+  `coordinator/default-repair-policy` unconditionally and ignores any
+  `:policy/*-cap` in opts; `effect-ports` assoc's the default caps over ANY
+  port source — including an externally supplied `:meta-repair-ports` map
+  (a caller cannot leave the caps unarmed or tamper them by supplying ports;
+  when no port source exists the result stays nil so the readiness
+  `:repair-ports` defect is unchanged). Raised caps remain reachable only at
+  the coordinator explicit-opts test seam (behavioral negative controls);
+  no grant mechanism or grant receipt exists in this packet. Nothing silently
+  resets an allowance: once an attempt is spent it stays spent.
 
-## Tests (`futon2.aif.meta-repair-attempt-policy-test`, 6 tests / 38 asserts)
+## Tests (`futon2.aif.meta-repair-attempt-policy-test`, 8 tests / 58 asserts)
 
 - `first-unspent-injury-is-allowed-and-discharges-normally` — success path
   unchanged (1 author / 1 review / 1 enact, discharged).
@@ -88,10 +102,20 @@ two policy fns; boundaries read them from their opts/ports:
 - `repeated-clicks-and-restarts-cannot-invoke-a-second-author` — a second
   full run (everything reloaded from disk) refuses the policy with **zero**
   author contacts.
-- `negative-control-raised-cap-exposes-the-excess-author-contacts` — with the
-  explicit grant shape (cap 3 = the raw ledger allowance) the SAME inputs
-  dispatch author attempts 1–3: the guard, not a status keyword, is what
-  suppresses them.
+- `negative-control-raised-cap-exposes-the-excess-author-contacts` — replaced
+  (8542) by the two tests below.
+- `tampered-cap-opts-cannot-disable-production-guard` — passing raised (3),
+  nil, and nonpositive (0/-1) caps — and tampered caps INSIDE a supplied
+  `:meta-repair-ports` map — through the real production preparation paths
+  (`work-order-options` and `effect-ports`) always yields the effective
+  default cap of **1**.
+- `production-path-with-tampered-cap-three-still-spends-exactly-one-attempt`
+  — cap 3 passed through a full production click is inert: exactly **1**
+  author contact, typed policy refusal.
+- `negative-control-coordinator-seam-raised-cap-exposes-the-excess` — at the
+  COORDINATOR explicit-opts test seam (not a grant; production never reads
+  `:policy/*-cap`), cap 3 with the SAME spent evidence allows a new claim:
+  the cap value, not a status keyword, is the guard.
 - `inconclusive-retry-child-gets-no-second-child-across-resume` — armed
   coordinator holds `:coordinator/policy-retry-child-cap`, no port call,
   nothing appended; resume on the same state keeps holding; the unarmed
@@ -101,7 +125,9 @@ two policy fns; boundaries read them from their opts/ports:
   ledger exhaustion; an unarmed boundary stays legacy-unlimited (this is why
   the legacy coordinator unit suite is unchanged).
 
-Existing suites: `meta-repair-coordinator-test` 35/204 green (unchanged);
+Existing suites: `meta-repair-coordinator-test` 35/204 green (unchanged; the
+policy + coordinator suites together run 43 tests / 262 assertions, 0
+failures);
 `meta-self-heal-production-test` on the branch fails exactly its pre-existing
 baseline set (12 failures / 1 error, byte-identical list on main); five
 click-7 continuation tests asserting the superseded 3-attempt behavior were
@@ -125,14 +151,25 @@ Live ledger `data/wm-meta-injuries-live-2026-10-22/ledger.edn`:
 1. The Lean model does not yet describe the two new typed stop paths; a future
    Lean packet should anchor them (and the policy caps) alongside
    `AbandonReason`.
-2. Crash-recovery re-dispatch within the SAME attempt: a resumed transaction
-   whose author receipt was never recorded may re-invoke the author port
-   (pre-existing recovery semantics). The cap counts attempts, not dispatch
-   retries of one attempt; if the ruling wants one *dispatch* per attempt even
-   across crashes, that is a further change.
+2. Crash-recovery re-dispatch within the SAME attempt: **author attempts ≤ 1
+   across all persisted history; this is not exactly-once external contact.**
+   A crash between author-port invocation and receipt persistence may
+   re-dispatch the same attempt on resume (pre-existing recovery semantics).
+   The cap counts attempts, not dispatch retries of one attempt, so this
+   limitation does not violate the attempt-number bound; no crash-recovery
+   redesign (receipt-first/append-before-invoke) is requested here.
 3. Serving arming: futon3c passes no policy keys; futon2's production defaults
    arm the caps, so the serving JVM enforces them only after this branch is
    merged and the namespaces reloaded (separate dispatch; nothing done here).
-4. Grants: `:policy/*-cap` opts are honored at the futon2 boundary but no
-   production caller supplies them; any future grant should carry explicit
-   operator authority in its own receipt.
+4. Grants: **no production override is supported** (8542 fix). `:policy/*-cap`
+   opts are read only at the coordinator boundary as a test seam; production
+   never supplies or honors them, tampered values are inert, and no grant
+   mechanism or grant receipt exists in this packet. Any future grant must
+   carry explicit operator authority in its own receipt — designed then, not
+   now. No new ledger exhaustion states, no history edits, no future policy
+   grants.
+5. One production-test assertion was re-anchored (8542):
+   `effect-ports-carry-the-adapter-click-minting-function` now asserts the
+   caps are armed over an explicit port map ("used as given" no longer holds
+   for `:policy/*-cap`). Production suite stays at its pre-existing 12/1
+   baseline (identical failure-name distribution, verified on this branch).

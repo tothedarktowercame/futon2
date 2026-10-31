@@ -99,10 +99,13 @@
 ;;; the counted evidence. Evidence is persisted ledger transitions only, so the
 ;;; bound survives restarts and repeated clicks; a per-click counter would not.
 ;;; Raising a cap is an explicit opt-in key (`:policy/author-attempt-cap` /
-;;; `:policy/retry-child-cap`, positive int) that no production path supplies
-;;; today; absence means the default cap of 1. Nothing silently resets an
-;;; allowance: once an attempt is spent it stays spent unless an explicit grant
-;;; with its own authority raises the cap.
+;;; `:policy/retry-child-cap`, positive int) supplied directly to the
+;;; coordinator opts — a test seam for behavioral negative controls only.
+;;; PRODUCTION NEVER SUPPLIES IT: meta-self-heal-production arms the default
+;;; cap of 1 unconditionally and ignores any `:policy/*-cap` in its own opts
+;;; (review fix 2026-10-31, codex-11 8542); there is no grant mechanism.
+;;; Absence means the default cap of 1. Nothing silently resets an
+;;; allowance: once an attempt is spent it stays spent.
 ;;; ---------------------------------------------------------------------------
 
 (def default-author-attempt-cap 1)

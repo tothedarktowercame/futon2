@@ -5,9 +5,11 @@
 
   The raw ledger attempt limit (3) stays untouched history; the caps are
   enforced from sealed ledger evidence at the coordinator boundaries, so they
-  survive restarts and repeated clicks. Negative controls with the cap raised
-  (the documented explicit-grant shape) expose the excess author contacts and
-  the second retry child the guard suppresses."
+  survive restarts and repeated clicks. Production arms the default caps (1)
+  unconditionally — opts cannot raise, lower or disable them; raised caps are
+  exercised only at the explicit coordinator opts test seam, whose negative
+  controls expose the excess author contacts and the second retry child the
+  guard suppresses."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.meta-injury-ledger :as ledger]
@@ -88,18 +90,51 @@
       (is (zero? (or (:author @counters2) 0))
           "no second author contact on the later click"))))
 
-(deftest negative-control-raised-cap-exposes-the-excess-author-contacts
-  ;; The guard is the cap: with the documented explicit-grant shape (cap 3,
-  ;; i.e. the raw ledger allowance) the SAME inputs dispatch author attempts
-  ;; 2 and 3 that the default cap suppresses.
+(deftest tampered-cap-opts-cannot-disable-production-guard
+  ;; Review fix 8542: production ignores :policy/*-cap opts entirely. Passing
+  ;; a raised (3), nil and nonpositive caps through the REAL production
+  ;; preparation paths always yields the effective default cap of 1.
+  (let [env (harness/prepare-environment! (root))
+        base (opts env (harness/fake-ports (:repo env) (atom {}) :success))
+        work-order-options @#'production/work-order-options
+        effect-ports @#'production/effect-ports
+        tampers [{:policy/author-attempt-cap 3
+                  :policy/retry-child-cap 3}
+                 {:policy/author-attempt-cap nil
+                  :policy/retry-child-cap nil}
+                 {:policy/author-attempt-cap 0
+                  :policy/retry-child-cap -1}
+                 ;; tampering the caps INSIDE the supplied ports map is
+                 ;; equally inert:
+                 {:meta-repair-ports
+                  (assoc (:meta-repair-ports base)
+                    :policy/author-attempt-cap 3
+                    :policy/retry-child-cap 3
+                    :policy/author-attempt-cap 0)}]]
+    (doseq [tampered tampers]
+      (let [opts' (merge base tampered)
+            wo (work-order-options opts')
+            ep (effect-ports opts')]
+        (is (= 1 (:policy/author-attempt-cap wo)) (pr-str tampered))
+        (is (= 1 (:policy/retry-child-cap wo)) (pr-str tampered))
+        (is (= 1 (:policy/author-attempt-cap ep)) (pr-str tampered))
+        (is (= 1 (:policy/retry-child-cap ep)) (pr-str tampered))))))
+
+(deftest production-path-with-tampered-cap-three-still-spends-exactly-one-attempt
+  ;; cap 3 passed through the real production click path (runtime opts and
+  ;; effect ports) is inert: the effective cap stays 1 and the whole
+  ;; author-failure click makes exactly one actual author contact.
   (let [env (harness/prepare-environment! (root))
         counters (atom {})
         ports (harness/fake-ports (:repo env) counters :author-failure)
         result (runtime/run-opportunity! (assoc (opts env ports)
-                                         :policy/author-attempt-cap 3))]
-    (is (contains? #{:held :refused} (:status result)) (pr-str result))
-    (is (= 3 (:author @counters))
-        "without the operating cap the click itself spends attempts 1-3")))
+                                         :policy/author-attempt-cap 3
+                                         :policy/retry-child-cap 3))]
+    (is (= :refused (:status result)) (pr-str result))
+    (is (= :coordinator/policy-author-attempt-cap
+           (get-in result [:prepare :policy-attempt :reason])))
+    (is (= 1 (:author @counters))
+        "a raised cap in opts is NOT a grant: production caps at 1")))
 
 ;;; ---------------------------------------------------------------------------
 ;;; Retry-child cap (coordinator boundary; production arms the same default)
@@ -241,3 +276,21 @@
     (testing "an unarmed boundary (no explicit cap key) stays legacy-unlimited"
       (is (= :allowed (:status (coordinator/author-attempt-policy
                                 history injury-id nil)))))))
+
+(deftest negative-control-coordinator-seam-raised-cap-exposes-the-excess
+  ;; Behavioral negative control at the COORDINATOR explicit-opts test seam
+  ;; (not an authorized grant: production never reads :policy/*-cap — see
+  ;; tampered-cap-opts-cannot-disable-production-guard). With cap 3 armed
+  ;; directly at that seam, the SAME spent evidence no longer stops a new
+  ;; author claim — proving the cap value, not a status keyword, is the
+  ;; guard that production arms by default.
+  (let [history (:ledger (awaiting-retry (opened-ledger)))
+        injury-id "injury/2026-10-19/reload"]
+    (is (= [1] (coordinator/spent-author-attempts history injury-id)))
+    (is (= :refused (:status (coordinator/author-attempt-policy
+                              history injury-id
+                              {:policy/author-attempt-cap 1}))))
+    (is (= :allowed (:status (coordinator/author-attempt-policy
+                              history injury-id
+                              {:policy/author-attempt-cap 3})))
+        "without the cap the spent evidence alone permits attempts 2-3")))
