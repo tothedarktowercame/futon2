@@ -39,7 +39,7 @@ class ClickServer:
             def do_GET(self):
                 if self.path.startswith("/api/alpha/agents"):
                     agents = {seat: {"status": "idle", "invoke-ready?": True}
-                              for seat in ["zai-2", "zai-3", "zai-8",
+                              for seat in ["wm-author", "wm-reviewer", "wm-repair-reviewer", "zai-2", "zai-3", "zai-8",
                                            "zai-4", "zai-5", "zai-6"]}
                     self.reply(200, {"agents": agents})
                     return

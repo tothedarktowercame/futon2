@@ -602,6 +602,19 @@ if record.exists():
 binding = pathlib.Path(binding_path)
 if binding.exists():
     text = binding.read_text(encoding="utf-8")
+    # D4-MEDIC-ONLY-REPORTING: a medic-only discharge (open-out-of-band
+    # route) never starts an ordinary run -- :ordinary-selection-called?
+    # false -- so no run record and no run-id binding exist by design.  The
+    # binding the server retained for this click is itself the durable
+    # evidence: same click id, discharged through the medic route.  Report
+    # that outcome; do not invent an ordinary run, and do not read it as an
+    # ownership failure.
+    if (value(text, ":click/id") == expected_click
+            and re.search(r':runtime-disposition\s*\{[^}]*:status\s+:discharged', text)
+            and re.search(r':runtime-disposition\s*\{[^}]*:route\s+:open-out-of-band-medic\b', text)
+            and re.search(r':runtime-disposition\s*\{[^}]*:ordinary-selection-called\?\s+false', text)):
+        print("medic-only-discharge")
+        raise SystemExit(0)
     actual_click = value(text, ":click/id")
     observed = re.search(r':run-id-observation\s+\{[^}]*:value\s+"([^"]+)"', text)
     actual_run = observed.group(1) if observed else value(text, ":run/id")
@@ -622,6 +635,17 @@ PY
   echo "requirements NOT CHECKED: recovered click ownership not established"
   exit 1
 fi
+# A medic-only discharge is a terminal, reported outcome of its own: no
+# ordinary run was attempted, so the Q1--Q10 requirements checker has no run
+# record to read and it is explicitly not applicable here.
+case "$ownership" in
+  medic-only-discharge)
+    echo "medic-only discharge: no ordinary run was attempted (ordinary selection not called)"
+    echo "requirements not applicable: ordinary Q1--Q10 check needs an ordinary run record; none exists by design on this route"
+    echo "medic evidence: click-run-binding $binding_file (runtime-disposition discharged/open-out-of-band-medic)"
+    exit 0
+    ;;
+esac
 echo "click ownership confirmed by $ownership"
 case "$ownership" in
   "self-heal-child "*) run_record="${ownership#self-heal-child }" ;;
