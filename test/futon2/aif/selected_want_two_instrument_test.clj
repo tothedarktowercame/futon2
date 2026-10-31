@@ -1,7 +1,6 @@
 (ns futon2.aif.selected-want-two-instrument-test
   "MISSION-TEXT-ONLY-WANT-LOCATORS: the two-instrument rule at measurement."
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.selected-want-outcome :as outcome]))
 
@@ -85,10 +84,10 @@
         tweak (fn [row]
                 (if (= p2 (:token row))
                   (assoc-in row [:after :measurement :after-locator] c8)
-                  row))]
-    (let [receipt (outcome/receipt
-                   (update-in input [:mission-observation :rows] #(mapv tweak %)))
-          p2-outcome (some #(when (= p2 (:want %)) %) (:outcomes receipt))]
-      (is (= :verified (:status receipt)) (pr-str receipt))
-      (is (= :reached (:classification p2-outcome)))
-      (is (= :corroborated (:instrument p2-outcome))))))
+                  row))
+        receipt (outcome/receipt
+                 (update-in input [:mission-observation :rows] #(mapv tweak %)))
+        p2-outcome (some #(when (= p2 (:want %)) %) (:outcomes receipt))]
+    (is (= :verified (:status receipt)) (pr-str receipt))
+    (is (= :reached (:classification p2-outcome)))
+    (is (= :corroborated (:instrument p2-outcome)))))
