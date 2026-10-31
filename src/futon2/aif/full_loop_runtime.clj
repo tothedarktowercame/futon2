@@ -9,6 +9,7 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.cascade-feedback :as cascade-feedback]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.effective-run-history :as effective-run-history]
             [futon2.aif.full-loop-runner :as runner]
@@ -401,6 +402,38 @@
        "\n\nAUTHOR ANSWER:\n"
        (json/generate-string author-answer)))
 
+(defn- open-cascade-objection-revision-prompt
+  "One bounded revision round after an explicit reviewer refusal; the objection returns to the author verbatim."
+  [{:keys [requisition objection]}]
+  (str "The reviewer REFUSED your previous answer for this held-cascade "
+       "repair. Their objection is quoted VERBATIM below. Amend your answer "
+       "(or the committed source) so this objection is resolved: same "
+       "requisition-id, same cascade-digest, same patch contract, one "
+       "revision only. An unchanged resubmission is refused without review. "
+       "Reply with one valid JSON object in the same answer shape.\n\n"
+       "OBJECTION (VERBATIM):\n" objection
+       "\n\nREQUISITION:\n"
+       (json/generate-string requisition)))
+
+(defn- open-cascade-revision-review-prompt
+  "Second review of an objection round; the reviewer checks only that its own first-review findings are resolved."
+  [{:keys [requisition author-answer first-review]}]
+  (str "You are the same independent reviewer who previously REFUSED this "
+       "held-cascade repair; your first review is quoted VERBATIM below. "
+       "Review only whether the REVISED author answer resolves every "
+       "objection you raised, without regression. For each original finding, "
+       "state its resolution. Do not give a fresh opinion on unchanged "
+       "aspects. Reply with one JSON object containing the author's "
+       "requisition-id, cascade-digest, patch {source-digest} naming the "
+       "source you verified, and accepted-by set to your own seat id if and "
+       "only if every original finding is resolved; otherwise accepted false "
+       "with a reason naming the finding that remains.\n\n"
+       "FIRST REVIEW (VERBATIM):\n" first-review
+       "\n\nREQUISITION:\n"
+       (json/generate-string requisition)
+       "\n\nREVISED AUTHOR ANSWER:\n"
+       (json/generate-string author-answer)))
+
 (defn- cascade-effect-author-prompt [request]
   (str "Execute exactly this certified cascade occurrence through the ordinary "
        "build/review/close work discipline. Ground any claimed effect in durable "
@@ -519,6 +552,14 @@
             reviewer-contact (or (:open-cascade-reviewer-answer-fn opts)
                                  (designated-agent-answer-fn
                                   opts reviewer open-cascade-review-prompt "work"))
+            revision-author-contact (or (:open-cascade-author-answer-fn opts)
+                                        (designated-agent-answer-fn
+                                         opts author
+                                         open-cascade-objection-revision-prompt "work"))
+            revision-reviewer-contact (or (:open-cascade-reviewer-answer-fn opts)
+                                          (designated-agent-answer-fn
+                                           opts reviewer
+                                           open-cascade-revision-review-prompt "work"))
             ctx (open-resume/recognize error)
             req (when (= :held (:status ctx))
                   (assoc (open-resume/authoring-requisition ctx author reviewer)
@@ -575,6 +616,167 @@
                             (get-in reviewed [:patch :source-digest])))
                   (assoc author-answer :accepted-by (:accepted-by reviewed))
                   reviewed)
+                ;; One bounded objection round (REVIEW-REFUSAL-NO-FORMATIVE-
+                ;; LOOP): when the reviewer's explicit refusal carries a
+                ;; nonblank reason, the same author gets the same requisition
+                ;; back with the objection verbatim, then the same reviewer
+                ;; re-reviews with its first review verbatim — checking only
+                ;; that the objection is answered, not a fresh opinion. One
+                ;; round at zero click credit (the resume protocol asserts the
+                ;; click budget and selection counter are unchanged); a second
+                ;; refusal closes the existing typed :open-cascade-review-
+                ;; refused carrying {:objection :revision :verdict}. No third
+                ;; contact. An explicit refusal WITHOUT a reason keeps the
+                ;; direct typed close above.
+                objection-round
+                (when (and review-refusal (:reason reviewed)
+                           (seq (str/trim (str (:reason reviewed)))))
+                  (let [objection (:reason reviewed)
+                        loader (or (:open-cascade-patch-loader opts) patch-loader)
+                        revision-response
+                        (revision-author-contact
+                         {:requisition req :objection objection :round 1})
+                        revision-answer (handoff/response-map revision-response)
+                        revision-binding (when revision-answer
+                                           (open-resume/validate-author-binding
+                                            req revision-answer))
+                        revision-delivery (when (= :bound (:status revision-binding))
+                                            (patch-delivery/check-delivery
+                                             revision-answer))
+                        revision-loaded (when (= :delivered (:status revision-delivery))
+                                          (open-resume/hot-load! ledger req
+                                                                 revision-answer loader))
+                        revision-product
+                        (when revision-loaded
+                          (if (= :error (:status revision-loaded)) revision-loaded
+                            (open-resume/validate-product req revision-answer
+                                                          (:product revision-loaded) opts)))
+                        unchanged? (and (map? revision-answer)
+                                        (= (dissoc author-answer :format-correction)
+                                           (dissoc revision-answer :format-correction)))
+                        revision-ready? (and (not unchanged?)
+                                             (= :accepted (:status revision-product)))
+                        verdict-response
+                        (when revision-ready?
+                          (revision-reviewer-contact
+                           {:requisition req
+                            :author-answer revision-answer
+                            :first-review (json/generate-string reviewed)}))
+                        verdict (when verdict-response
+                                  (handoff/response-map verdict-response))
+                        verdict-refusal? (and (map? verdict)
+                                              (contains? verdict :accepted)
+                                              (not (:accepted verdict)))
+                        pins-match? (fn [answer review]
+                                      (and (= (:requisition-id answer)
+                                              (:requisition-id review))
+                                           (= (:cascade-digest answer)
+                                              (:cascade-digest review))
+                                           (= (get-in answer [:patch :source-digest])
+                                              (get-in review [:patch :source-digest]))))
+                        verdict-accepts? (and (map? verdict) (:accepted verdict)
+                                              (string? (:accepted-by verdict))
+                                              (pins-match? revision-answer verdict))
+                        refused
+                        {:status :error
+                         :kind :open-cascade-review-refused
+                         :reviewer reviewer
+                         :reviewer-job (contact-job (or verdict-response
+                                                        reviewer-response))
+                         :reason (or (:reason verdict) objection)
+                         :requisition-id (:requisition-id req)
+                         :cascade-digest (:cascade-digest req)
+                         :objection {:reason objection
+                                     :review (dissoc reviewed :reason)}
+                         :revision (cond
+                                     unchanged?
+                                     {:status :unchanged
+                                      :reason :revision-unchanged
+                                      :author-job (contact-job revision-response)}
+                                     (= :accepted (:status revision-product))
+                                     {:status :submitted
+                                      :answer revision-answer
+                                      :author-job (contact-job revision-response)}
+                                     :else
+                                     {:status :invalid
+                                      :reason (or (:kind revision-product) :no-answer)
+                                      :author-job (contact-job revision-response)})
+                         :verdict (cond
+                                    unchanged?
+                                    {:status :absent :reason :revision-unchanged}
+                                    (nil? verdict)
+                                    {:status :absent :reason :unparseable-second-review}
+                                    :else verdict)
+                         :verdict-refused? verdict-refusal?}]
+                    {:accepted? verdict-accepts?
+                     :objection objection
+                     :revision-answer revision-answer
+                     :verdict verdict
+                     :first-refusal review-refusal
+                     :result (if verdict-accepts?
+                               (open-resume/handle-error!
+                                ledger error author reviewer
+                                (assoc revision-answer :accepted-by (:accepted-by verdict))
+                                {:cascade-capability-routes (capability-dispatch/routes opts)
+                                 :click-budget (:click-budget opts)
+                                 :selection-counter (:selection-counter opts)
+                                 :patch-loader loader})
+                               refused)}))
+              ;; One cascade-feedback event for the objection round's
+              ;; outcome, through the existing event path (cascade-feedback/
+              ;; record!), so the existing pattern-evidence prior readers see
+              ;; it: cascade-feedback/pattern-evidence-prior (used by
+              ;; cascade-revision's revision scoring and policy's
+              ;; attach-pattern-evidence-menu on the selection menu, both via
+              ;; construction-metadata's counts). The patterns of the held
+              ;; requisition's holes each record one :incomplete application —
+              ;; the round authored but never enacted them. Retention trouble
+              ;; is reported on the result, never thrown.
+              feedback-event
+              (when (and objection-round (:cascade-feedback-path opts))
+                (try
+                  (let [accepted? (:accepted? objection-round)
+                        outcome (if accepted? :objection-resolved
+                                    :open-cascade-review-refused)
+                        applications
+                        (mapv (fn [h]
+                                {:pattern (:hole-id h)
+                                 :status :incomplete
+                                 :evidence {:objection-round {:round 1 :outcome outcome}}
+                                 :reinforcement :none})
+                              (:holes req))
+                        base {:schema cascade-feedback/receipt-schema
+                              :status (if accepted? :verified :refused)
+                              :reason (when-not accepted? :open-cascade-review-refused)
+                              :run/id (or (:run-id opts) "held-click")
+                              :target (:target opts)
+                              :cascade-status :provisional-per-run
+                              :mission-state {:terminal-outcome outcome}
+                              :patterns {:selected (mapv :hole-id (:holes req))
+                                         :applications applications
+                                         :selected-only []
+                                         :positive-reinforcement []}
+                              :objection-round
+                              {:schema :wm/open-cascade-objection-round-v1
+                               :round 1 :limit 1 :outcome outcome
+                               :objection (:objection objection-round)}
+                              :cascade-revision {:status :absent
+                                                 :reason :no-mid-run-cascade-revision}
+                              :blocker (if accepted?
+                                         {:status :absent :reason :objection-resolved}
+                                         {:status :present
+                                          :kind :open-cascade-review-refused
+                                          :stage :cascade-resume
+                                          :repair-evidence applications})
+                              :artifact {:status :absent
+                                         :reason :no-grounded-artifact}}
+                        written (cascade-feedback/record!
+                                 (:cascade-feedback-path opts)
+                                 (assoc base :receipt/id (action-identity/digest base)))]
+                    {:status (:status written) :path (:path written)
+                     :receipt/id (:receipt/id written) :outcome outcome})
+                  (catch Throwable t
+                    {:status :retention-failed :error (ex-message t)})))
                 result (cond
               (nil? author-answer)
               {:status :error
@@ -622,7 +824,9 @@
                :reviewer-job (contact-job reviewer-response)}
 
               (some? review-refusal)
-              review-refusal
+              (if-let [round objection-round]
+                (:result round)
+                review-refusal)
 
               :else
               (open-resume/handle-error!
@@ -633,6 +837,12 @@
                 :patch-loader (or (:open-cascade-patch-loader opts)
                                   patch-loader)}))]
               (cond-> result
+                (and objection-round (:accepted? objection-round))
+                (assoc :objection-round
+                       {:round 1
+                        :objection (:objection objection-round)
+                        :verdict (:verdict objection-round)})
+                feedback-event (assoc :cascade-feedback-event feedback-event)
                 correction (assoc :author-format-correction correction)
                 (and correction (:answer-delivery result))
                 (assoc-in [:answer-delivery :format-correction] correction)

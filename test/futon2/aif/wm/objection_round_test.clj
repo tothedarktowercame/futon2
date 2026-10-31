@@ -67,7 +67,7 @@
   {:state "done" :job-id "reviewer-job-adc46631"
    :result (real-first-review-text req)})
 
-(defn acceptance-response [req answer]
+(defn acceptance-response [_req answer]
   {:state "done" :job-id "reviewer-job-accept"
    :result (str "Every original finding is resolved without regression:\n\n"
                 "```json\n"
@@ -145,7 +145,7 @@
          :selection-counter selection-counter}))))
 
 (deftest second-author-prompt-carries-the-objection-verbatim
-  (let [{:keys [result author-requests reviewer-requests]}
+  (let [{:keys [author-requests reviewer-requests]}
         (exercise {:second-review :accept})]
     (is (= 2 (count author-requests)) "first answer + one revision")
     (let [revision-request (second author-requests)]
