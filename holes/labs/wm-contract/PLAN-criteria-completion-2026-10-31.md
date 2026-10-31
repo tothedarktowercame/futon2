@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: exclusion and claim refusal live (2026-10-31)
+
+Click wm-click-33120e02 (run e71c7380) excluded M-typed-memories before scoring and selected M-pattern-retrieval-calibration. The author claimed already satisfied, the reviewer approved, and the machine refused :claim-mission-text-not-an-artifact as a guardrail refusal with no injury. Two-instrument rule merged and loaded. Budget 6. Next click waits for zai-7's Giraffe mint, so it runs on a field that has seen current work. Reached wants before the rule rested on the mission checkbox alone.
+
 ## Latest execution checkpoint: P5 first measured task (2026-10-31)
 
 Click wm-click-9028a8a7 (run ebbbe42a) closed :grounded-progress on M-typed-memories with no injury and no fix between it and the previous reload: author commit futon3c 4fd00fa63, review, selected-want outcomes :verified, one of four wants reached. Note the measurement reads the mission locator (see MISSION-TEXT-ONLY-WANT-LOCATORS). Budget 7.
