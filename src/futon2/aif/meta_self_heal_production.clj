@@ -1689,32 +1689,51 @@
          (ordinary request))))))
 
 (defn- effect-ports [opts]
-  (or (:meta-repair-ports opts)
-      (when (and (:agency-invoke-fn opts) (:repair-enact-fn opts)
-                 (:repair-retry-fn opts))
-        (cond-> {:author (agency-port (:agency-invoke-fn opts) :author
-                                     (:repair-worktree-fn opts))
-                 :review (agency-port (:agency-invoke-fn opts) :reviewer)
-                 :enact (endpoint-port (:repair-enact-fn opts) "wm-repair-reviewer")
-                 :retry (endpoint-port (:repair-retry-fn opts) "wm-retry")
-                 :acceptance-replay
-                 (acceptance-replay-port (:meta-acceptance-run-fn opts))}
-          ;; M10b-3 (2026-10-20): the futon3c adapter exposes its pure click
-          ;; minting function as :retry-click-id-fn; the coordinator reads it
-          ;; as :retry-click-id when it re-queues an inconclusive retry. Its
-          ;; absence is not a port defect here: the coordinator refuses
-          ;; :coordinator/retry-click-id-unavailable only at the requeue.
-          (fn? (:retry-click-id-fn opts))
-          (assoc :retry-click-id (:retry-click-id-fn opts))
-          (fn? (:repair-integration-equivalent-fn opts))
-          (assoc :integration-equivalent?
-                 (:repair-integration-equivalent-fn opts))
-          ;; One-click frontier (2026-10-22): the coordinator reads this
-          ;; read-only port to observe a meta-retry child that failed
-          ;; service-side before any run record existed. Absence is not a
-          ;; defect: without it such a child simply stays :awaiting-retry.
-          (fn? (:retry-click-status-fn opts))
-          (assoc :retry-click-status-fn (:retry-click-status-fn opts))))))
+  (let [ported (or (:meta-repair-ports opts)
+                   (when (and (:agency-invoke-fn opts) (:repair-enact-fn opts)
+                              (:repair-retry-fn opts))
+                     (cond-> {:author (agency-port (:agency-invoke-fn opts) :author
+                                                   (:repair-worktree-fn opts))
+                              :review (agency-port (:agency-invoke-fn opts) :reviewer)
+                              :enact (endpoint-port (:repair-enact-fn opts) "wm-repair-reviewer")
+                              :retry (endpoint-port (:repair-retry-fn opts) "wm-retry")
+                              :acceptance-replay
+                              (acceptance-replay-port (:meta-acceptance-run-fn opts))}
+                       ;; M10b-3 (2026-10-20): the futon3c adapter exposes its
+                       ;; pure click minting function as :retry-click-id-fn; the
+                       ;; coordinator reads it as :retry-click-id when it
+                       ;; re-queues an inconclusive retry. Its absence is not a
+                       ;; port defect here: the coordinator refuses
+                       ;; :coordinator/retry-click-id-unavailable only at the
+                       ;; requeue.
+                       (fn? (:retry-click-id-fn opts))
+                       (assoc :retry-click-id (:retry-click-id-fn opts))
+                       (fn? (:repair-integration-equivalent-fn opts))
+                       (assoc :integration-equivalent?
+                              (:repair-integration-equivalent-fn opts))
+                       ;; One-click frontier (2026-10-22): the coordinator reads
+                       ;; this read-only port to observe a meta-retry child that
+                       ;; failed service-side before any run record existed.
+                       ;; Absence is not a defect: without it such a child
+                       ;; simply stays :awaiting-retry.
+                       (fn? (:retry-click-status-fn opts))
+                       (assoc :retry-click-status-fn (:retry-click-status-fn opts)))))]
+    ;; Shared policy decision (2026-10-31; review fix 8542): arm the
+    ;; retry-child cap for the requeue loop and the author-attempt cap for
+    ;; the claim boundary over ANY port source — including an externally
+    ;; supplied :meta-repair-ports map (a caller cannot leave the caps
+    ;; unarmed by supplying ports). Production arms the defaults
+    ;; UNCONDITIONALLY: opts cannot raise, lower or disable either cap (no
+    ;; grant mechanism exists; raised caps are exercised only at the
+    ;; coordinator test seam). Tampered nil/nonpositive :policy/*-cap values
+    ;; — including ones inside :meta-repair-ports — are ignored here by
+    ;; construction. When NO port source exists the result stays nil: the
+    ;; readiness :repair-ports defect is unchanged (nothing to arm).
+    (if (nil? ported)
+      nil
+      (assoc ported
+             :policy/retry-child-cap coordinator/default-retry-child-cap
+             :policy/author-attempt-cap coordinator/default-author-attempt-cap))))
 (defn latest-retry-click
   "The retry click the transaction currently names. Receipts are keyed by
    phase, not by index: after author, review, enact and retry, each requeue
@@ -1731,10 +1750,19 @@
         (get-in (coordinator/current-receipt-for transaction :enact)
                 [:payload :retry-click]))))
 (defn- work-order-options [opts]
-  (cond-> (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
+  (cond-> (merge (select-keys opts [:diagnosis-evidence-pin :acceptance-test :author :reviewer
                              :repair-reviewer :author-session :reviewer-session
                              :repair-reviewer-session :target-repository :target-worktree
                              :target-worktree-root :canonical-base-sha])
+                 ;; One shared policy decision (2026-10-31, codex-11 8538;
+                 ;; review fix 8542): the production route arms the
+                 ;; one-author-attempt / one-retry-child operating caps by
+                 ;; default and ONLY the default — opts cannot override,
+                 ;; disable or tamper either cap (no production grant
+                 ;; mechanism exists). Raised caps remain reachable only at
+                 ;; the explicit coordinator opts test seam; nothing resets a
+                 ;; spent attempt.
+                 coordinator/default-repair-policy)
     (contains? opts :meta-acceptance-return-limit)
     (assoc :acceptance-return-limit (:meta-acceptance-return-limit opts))
     (or (:acceptance-admission-pin opts)
@@ -2105,7 +2133,8 @@
                                         (refusal :meta-self-heal/preparation-refused
                                                  {:prepare (select-keys prepared
                                                                         [:status :reason
-                                                                         :defects :detail])})
+                                                                         :defects :detail
+                                                                         :policy-attempt])})
                                         (diagnosis-transaction-binding opts transaction))
                     acceptance-binding (when (= :valid (:status diagnosis-binding))
                                          (acceptance-transaction-binding opts transaction))
@@ -2261,7 +2290,8 @@
                                                      (diagnosis-transaction-binding opts next-transaction)
                                                      (refusal :meta-self-heal/preparation-refused
                                                               {:prepare (select-keys prepared
-                                                                                     [:status :reason :defects :detail])}))
+                                                                                     [:status :reason :defects :detail
+                                                                                      :policy-attempt])}))
                                     next-acceptance (when (= :valid (:status next-diagnosis))
                                                       (acceptance-transaction-binding opts next-transaction))
                                     next-transaction (or (:transaction next-acceptance)
