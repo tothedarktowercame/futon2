@@ -12,7 +12,15 @@
   (:import (java.io RandomAccessFile)
            (java.nio.file Files StandardCopyOption)))
 
-(def default-trace-dir "data/wm-trace")
+(def default-trace-dir
+  "Canonical trace corpus root. Identical resolution to
+   futon2.aif.trace/default-trace-dir (FUTON_WM_TRACE_DIR, else the absolute
+   production path): the temporal publisher's fallback lock
+   (temporal-update/publish!) must exclude the selection publisher, which a
+   cwd-relative root never does. Cannot require trace.clj — it requires this
+   namespace."
+  (or (System/getenv "FUTON_WM_TRACE_DIR")
+      (str (System/getProperty "user.home") "/code/futon2/data/wm-trace")))
 (def default-expected-coverage-dg -0.25)
 (def default-futility-threshold 5)
 
