@@ -112,4 +112,6 @@ Outputs live in Git under holes/labs/wm-contract, with exact commit/run/hash ref
 - P1 Kimi 象-2: `invoke-1793414052868-8579-a7748c85`, running at last status read; cap merged as5197d9f6c, serving readiness still pending coordinator receipt.
 - P2 zai-6: `invoke-1793414889578-8599-885160fe`, accepted/queued. Two20-row live-run evidence matrices, then bounded R28 witness search; no runtime changes.
 - P3 zai-5: `invoke-1793414890003-8600-ffa34c0b`, accepted/queued. Six-row historical evidence audit; no source fixes or tracker mutation.
+- Retention: zai-4 8669/8674/8684, reviewed by zai-5 8699 (APPROVE f8cf53827), merged f96f0ce23 by claude-1; not reloaded.
+- Lanes, claude-1, running at last status read: zai-4 8707 (adf04df0 medic evidence), zai-6 8709 (acceptance isolation), zai-7 8708 (D4-MEDIC-ONLY-REPORTING), zai-5 8710 (C4 store guard), 象-2 8715 (handoff index, resend of refused 8711).
 - P4–P7: assigned owners in the plan, **not yet dispatched**. This distinction prevents a proposed work sequence from being reported as running work.
