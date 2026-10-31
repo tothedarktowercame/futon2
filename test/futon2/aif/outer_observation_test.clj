@@ -197,3 +197,14 @@
       (is (nil? (get-in result [:facts "M-repl-wins-over-cli"])))
       (is (contains? targets "M-futonzero-prelim-practice"))
       (is (some? (get-in result [:facts "M-futonzero-prelim-practice"]))))))
+
+(deftest reading-drift-reaches-the-excluded-population
+  (let [manifest {:reading-drift {:drift {:unread-new [:E-kimi-task-171 :T-seen]
+                                          :reading-source-changed [:M-changed]
+                                          :members-not-open [:E-closed]}}}
+        rows (#'observation/drift-exclusions manifest #{"T-seen"})]
+    (is (= #{{:target "E-kimi-task-171" :reason :unread-new}
+             {:target "M-changed" :reason :reading-source-changed}}
+           (set rows))
+        "drifted open items are typed once; a closed member is not an exclusion")
+    (is (= [] (#'observation/drift-exclusions {} #{})))))

@@ -61,6 +61,18 @@
                        :source-unavailable)}
     (:status-line registry-entry) (assoc :status-line (:status-line registry-entry))))
 
+(defn- drift-exclusions
+  "Open items the run left out of its graph (typed in the manifest's
+  :reading-drift), as outer exclusions, so Q1 can account for each. SEEN holds
+  targets already admitted or excluded, so no item is counted twice."
+  [manifest seen]
+  (vec (for [[reason ids] (select-keys (get-in manifest [:reading-drift :drift])
+                                       [:unread-new :reading-source-changed])
+             id ids
+             :let [target (name id)]
+             :when (not (contains? seen target))]
+         {:target target :reason reason})))
+
 (defn- declaration-sha [declaration]
   (or (:source-sha256 declaration)
       (when-let [path (:source-path declaration)]
@@ -150,7 +162,11 @@
                                      unseen-open-tickets)]
            {:field (mapv :candidate admitted)
             :facts (into {} (map (juxt :target :fact)) admitted)
-            :outer-field/excluded (vec (concat excluded absent-excluded))
+            :outer-field/excluded
+            (let [named (vec (concat excluded absent-excluded))]
+              (into named
+                    (drift-exclusions manifest
+                                      (into field-targets (map :target) named))))
             :giraffe/run-id (:run-id manifest)
             :giraffe/manifest-sha256 (sha256 manifest-bytes)}))))))
 
