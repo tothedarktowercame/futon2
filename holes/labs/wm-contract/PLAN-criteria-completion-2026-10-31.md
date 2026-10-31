@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: c309d796 discharged, click 7 running (2026-10-31)
+
+Click 6's stop was a real reviewer refusal erased by the handler. Fixed by 75b074801 and loaded. Medic click wm-click-2c528c44 discharged c309d796 at ordinal 139. Budget 3 before click 7. Preparation minted twice and took over five minutes; zai-7 has it.
+
 ## Latest execution checkpoint: click 6, injury c309d796 (2026-10-31)
 
 The gate minted the first partial field and Q1 held live at 617/617. Click wm-click-f11ea1c8 (run adc46631) reached author and review on M-aif-policy-conditioned-eig, then stopped :incomplete at cascade-resume with :answer-reviewer-mismatch, opening injury c309d796 (ordinal 138). Budget 4. Next click holds on ANSWER-REVIEWER-MISMATCH-NIL.
