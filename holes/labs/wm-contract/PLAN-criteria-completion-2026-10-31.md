@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: click 7, cascade revision door refused (2026-10-31)
+
+Click wm-click-f56a06af (run 0be4fc7d) closed :grounded-progress on M-peradam-grounding, futon7 aa90d97ca, no injury, wants unreached. The reviewer requested changes, the ordinary revision round resolved them, and the cascade revision door was reached and refused :revision-construction-inputs-unavailable. Q1 held and Q9 stayed unverifiable. Budget 2. Credits hold until a difficulty can revise the cascade.
+
 ## Latest execution checkpoint: formative round loaded, click 7 running (2026-10-31)
 
 A first launch of click 7 was stopped before issue, at no credit, because the gate minted on every pass; fixed by futon3c a9356c20a and futon2 729a02e54. One objection round merged and loaded as a5b9bbd91 at Joe's request. Budget 3 before click 7.
