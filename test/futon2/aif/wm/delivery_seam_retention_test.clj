@@ -54,7 +54,8 @@
         "declared retention schema matches the retention module's constant")
     (is (= :cascade-patch-delivery/check-delivery (:decoder site))
         "format validation stays the decoder's job, distinct from retention")
-    (let [audit (site-index/audit repo)]
+    (let [audit (site-index/audit
+                 repo {"futon3c" (str (System/getProperty "user.home") "/code/futon3c")})]
       (is (= :verified (:status audit)) (pr-str (:problems audit))))))
 
 (deftest the-diagnosis-receiver-gets-the-pin-through-the-run-record
