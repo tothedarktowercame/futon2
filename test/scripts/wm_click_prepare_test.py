@@ -145,7 +145,9 @@ else: print(json.dumps({{"running?":False,"ordinary-click-budget":{{"available":
                 executable(bin_dir / "sleep", "#!/bin/sh\nexit 0\n")
                 executable(home / "code/futon3c/scripts/proof-eval.sh", '#!/bin/sh\nprintf "eval\\n" >> "$EVENTS"\necho "{:tripping [] :will-defer [] :stop-lines-queued 0}"\n')
                 result = subprocess.run(["bash", str(ROOT / "scripts/wm_click.sh"), *(["--run"] if run else []), "--ask-seats", "zai-4,zai-5,zai-6"],
-                    env={**os.environ, "HOME": td, "TMPDIR": td, "EVENTS": str(event_path), "MODE": mode, "PATH": str(bin_dir) + ":" + os.environ["PATH"]},
+                    env={**os.environ, "HOME": td, "TMPDIR": td, "EVENTS": str(event_path), "MODE": mode,
+                         "GIRAFFE_MINT": "0",  # fixture F3C: the staleness gate has its own test (wm_click_giraffe_mint_test.py)
+                         "PATH": str(bin_dir) + ":" + os.environ["PATH"]},
                     capture_output=True, text=True, timeout=15)
                 events = event_path.read_text().splitlines()
                 if mode == "refused":

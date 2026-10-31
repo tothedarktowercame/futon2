@@ -161,6 +161,7 @@ os.execv({sys.executable!r}, [{sys.executable!r}] + sys.argv[1:])
                          "TMPDIR": str(temp_dir),
                          "PATH": str(bin_dir) + ":" + os.environ["PATH"],
                          "WM_CLICK_POST_TIMEOUT_S": "0.1",
+                         "GIRAFFE_MINT": "0",  # fixture F3C: the staleness gate has its own test (wm_click_giraffe_mint_test.py)
                          "WM_CLICK_POST_RECOVERY_MAX_S": "5",
                          "WM_CLICK_POST_RECOVERY_POLL_S": "0"},
                     capture_output=True, text=True, timeout=20)

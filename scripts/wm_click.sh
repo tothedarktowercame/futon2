@@ -102,6 +102,84 @@ else
   say "click budget" "$budget available"
 fi
 
+# Staleness-gated Giraffe mint (deficits row Q1-GIRAFFE-FIELD-STALENESS,
+# proposal 6 of the 2026-10-31 finding): the field a click consumes must not
+# be older than the click itself, and the freshest verified run must not be an
+# accident of who last ran the writer.  At click preparation -- the one
+# per-click moment before firing, already single-flight -- compare the newest
+# verified run's adapter-input digest with a freshly computed one and write
+# one run through the supported -main ONLY when they differ.  No timer, no
+# daemon.  Refuses (exit 3, no POST) rather than firing on a stale field when
+# the probe or the mint fails.  Dry-run preflight never reaches here:
+# prepare_sources runs only for --run.  Env overrides exist for hermetic
+# tests: GIRAFFE_ROOT, GIRAFFE_EDGES, GIRAFFE_READINGS_ROOT, GIRAFFE_MINT=0
+# skips the gate entirely.
+giraffe_field_freshness() {
+  local root edges readings probe rc fresh newest minted probe2 fresh2 newest2 running
+  root="${GIRAFFE_ROOT:-/home/joe/code/storage/giraffe}"
+  edges="${GIRAFFE_EDGES:-$F3C/holes/missions/giraffe-mission-edges.json}"
+  readings="${GIRAFFE_READINGS_ROOT:-/home/joe/notes/wm-next/giraffe-excursions}"
+  if [ "${GIRAFFE_MINT:-1}" != "1" ]; then
+    say "giraffe field" "staleness gate skipped (GIRAFFE_MINT=0)"
+    return 0
+  fi
+  probe=$( (cd "$F3C" && clojure -M -m futon3c.giraffe.run \
+              --edges "$edges" --source missions-excursions \
+              --readings-root "$readings" --root "$root" --check-fresh) 2>&1)
+  rc=$?
+  if [ "$rc" -ne 0 ]; then
+    cannot "giraffe field" "freshness probe failed (exit $rc): $probe"
+    return 3
+  fi
+  fresh=$(printf '%s\n' "$probe" | sed -n 's/^fresh: //p')
+  newest=$(printf '%s\n' "$probe" | sed -n 's/^newest-verified-run-id: //p')
+  if [ "$fresh" = "true" ]; then
+    say "giraffe field" "fresh ($newest)"
+    return 0
+  fi
+  # A mint is a real write: no click may be running, and the futon3c checkout
+  # must be clean so the minted run's manifest :git-sha resolves later
+  # (wm_click_prepare.py asserted the same conditions moments ago; a mint
+  # takes minutes, so assert again at the write).
+  running=$(curl -s -m 10 "$BASE/api/alpha/wm/click" | python3 -c '
+import json,sys
+try:
+    print(json.load(sys.stdin).get("running?"))
+except Exception:
+    print("unknown")
+' 2>/dev/null)
+  if [ "$running" != "False" ]; then
+    cannot "giraffe field" "a click is running ($running); refusing to mint"
+    return 3
+  fi
+  if [ -n "$(git -C "$F3C" status --porcelain --untracked-files=no 2>/dev/null)" ]; then
+    cannot "giraffe field" "futon3c checkout is dirty; a minted run's git-sha must resolve"
+    return 3
+  fi
+  say "giraffe field" "stale (newest ${newest:--}) -- minting one run through the supported -main"
+  minted=$( (cd "$F3C" && clojure -M -m futon3c.giraffe.run \
+               --edges "$edges" --source missions-excursions \
+               --readings-root "$readings" --root "$root") 2>&1)
+  rc=$?
+  if [ "$rc" -ne 0 ]; then
+    cannot "giraffe field" "mint failed (exit $rc); refusing to fire on a stale field: $minted"
+    return 3
+  fi
+  # The minted run must actually BE the newest verified field run, or the
+  # click would still fire on the stale field.
+  probe2=$( (cd "$F3C" && clojure -M -m futon3c.giraffe.run \
+               --edges "$edges" --source missions-excursions \
+               --readings-root "$readings" --root "$root" --check-fresh) 2>&1)
+  rc=$?
+  fresh2=$(printf '%s\n' "$probe2" | sed -n 's/^fresh: //p')
+  newest2=$(printf '%s\n' "$probe2" | sed -n 's/^newest-verified-run-id: //p')
+  if [ "$rc" -ne 0 ] || [ "$fresh2" != "true" ]; then
+    cannot "giraffe field" "minted run did not verify as the newest field run ($minted / $probe2)"
+    return 3
+  fi
+  say "giraffe field" "minted $newest2"
+}
+
 # Source preparation is not an informational tripwire. No campaign/abort loop.
 # Check before preflight JVM reads and again immediately before each POST.
 prepare_sources() {
@@ -109,6 +187,7 @@ prepare_sources() {
     cannot "source composition" "idle canonical preparation did not verify; no click posted"
     return 3
   fi
+  giraffe_field_freshness || return 3
 }
 
 probe_heap() {
