@@ -102,6 +102,97 @@ else
   say "click budget" "$budget available"
 fi
 
+# Staleness-gated Giraffe mint (deficits row Q1-GIRAFFE-FIELD-STALENESS,
+# proposal 6 of the 2026-10-31 finding): the field a click consumes must not
+# be older than the click itself, and the freshest verified run must not be an
+# accident of who last ran the writer.  At click preparation -- the one
+# per-click moment before firing, already single-flight -- compare the newest
+# verified run's adapter-input digest with a freshly computed one and write
+# one run through the supported -main ONLY when they differ.  No timer, no
+# daemon.  A failing probe or mint is a FINDING, not a stop (claude-1,
+# 2026-10-31): the probe's population equality check throws
+# :reading/adapter-population-mismatch whenever one corpus member drifts, and
+# members drift daily -- refusing would stop every click.  A stale field
+# already carries typed exclusions, so the click continues on the newest
+# verified field and the launcher records that field id.  Dry-run preflight
+# never reaches here: prepare_sources runs only for --run.  Env overrides
+# exist for hermetic tests: GIRAFFE_ROOT, GIRAFFE_EDGES,
+# GIRAFFE_READINGS_ROOT, GIRAFFE_MINT=0 skips the gate entirely.
+giraffe_field_freshness() {
+  local root edges readings probe rc fresh newest minted probe2 fresh2 newest2 running
+  root="${GIRAFFE_ROOT:-/home/joe/code/storage/giraffe}"
+  edges="${GIRAFFE_EDGES:-$F3C/holes/missions/giraffe-mission-edges.json}"
+  readings="${GIRAFFE_READINGS_ROOT:-/home/joe/notes/wm-next/giraffe-excursions}"
+  if [ "${GIRAFFE_MINT:-1}" != "1" ]; then
+    say "giraffe field" "staleness gate skipped (GIRAFFE_MINT=0)"
+    return 0
+  fi
+  probe=$( (cd "$F3C" && clojure -M -m futon3c.giraffe.run \
+              --edges "$edges" --source missions-excursions \
+              --readings-root "$readings" --root "$root" --check-fresh) 2>&1)
+  rc=$?
+  if [ "$rc" -ne 0 ]; then
+    # A FINDING, not a stop (claude-1, 2026-10-31): the probe's population
+    # equality check throws on any corpus drift, and members drift daily.
+    # The click continues on the newest verified field, whose id the probe
+    # could not name -- so record that explicitly.
+    finding "giraffe field" "freshness probe failed (exit $rc); firing on the newest verified field, id unknown: $probe"
+    say "giraffe field id" "(unknown -- probe failed)"
+    return 0
+  fi
+  fresh=$(printf '%s\n' "$probe" | sed -n 's/^fresh: //p')
+  newest=$(printf '%s\n' "$probe" | sed -n 's/^newest-verified-run-id: //p')
+  if [ "$fresh" = "true" ]; then
+    say "giraffe field" "fresh ($newest)"
+    say "giraffe field id" "$newest"
+    return 0
+  fi
+  say "giraffe field id" "$newest"
+  # A mint is a real write: no click may be running, and the futon3c checkout
+  # must be clean so the minted run's manifest :git-sha resolves later
+  # (wm_click_prepare.py asserted the same conditions moments ago; a mint
+  # takes minutes, so assert again at the write).
+  running=$(curl -s -m 10 "$BASE/api/alpha/wm/click" | python3 -c '
+import json,sys
+try:
+    print(json.load(sys.stdin).get("running?"))
+except Exception:
+    print("unknown")
+' 2>/dev/null)
+  if [ "$running" != "False" ]; then
+    finding "giraffe field" "a click is running ($running); stale field $newest not refreshed, firing on it"
+    return 0
+  fi
+  if [ -n "$(git -C "$F3C" status --porcelain --untracked-files=no 2>/dev/null)" ]; then
+    finding "giraffe field" "futon3c checkout is dirty, so a minted run's git-sha would not resolve; stale field $newest not refreshed, firing on it"
+    return 0
+  fi
+  say "giraffe field" "stale (newest ${newest:--}) -- minting one run through the supported -main"
+  minted=$( (cd "$F3C" && clojure -M -m futon3c.giraffe.run \
+               --edges "$edges" --source missions-excursions \
+               --readings-root "$readings" --root "$root") 2>&1)
+  rc=$?
+  if [ "$rc" -ne 0 ]; then
+    finding "giraffe field" "mint failed (exit $rc); firing on the newest verified field $newest: $minted"
+    return 0
+  fi
+  # The minted run must actually BE the newest verified field run; if not,
+  # record what the field actually is and continue on it.
+  probe2=$( (cd "$F3C" && clojure -M -m futon3c.giraffe.run \
+               --edges "$edges" --source missions-excursions \
+               --readings-root "$readings" --root "$root" --check-fresh) 2>&1)
+  rc=$?
+  fresh2=$(printf '%s\n' "$probe2" | sed -n 's/^fresh: //p')
+  newest2=$(printf '%s\n' "$probe2" | sed -n 's/^newest-verified-run-id: //p')
+  if [ "$rc" -ne 0 ] || [ "$fresh2" != "true" ]; then
+    finding "giraffe field" "minted run did not verify as the newest field run; firing on ${newest2:-$newest}: $minted / $probe2"
+    say "giraffe field id" "${newest2:-$newest}"
+    return 0
+  fi
+  say "giraffe field" "minted $newest2"
+  say "giraffe field id" "$newest2"
+}
+
 # Source preparation is not an informational tripwire. No campaign/abort loop.
 # Check before preflight JVM reads and again immediately before each POST.
 prepare_sources() {
@@ -109,6 +200,7 @@ prepare_sources() {
     cannot "source composition" "idle canonical preparation did not verify; no click posted"
     return 3
   fi
+  giraffe_field_freshness || return 3
 }
 
 probe_heap() {
