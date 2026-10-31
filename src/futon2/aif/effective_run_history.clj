@@ -42,6 +42,25 @@
       (with-open [reader (io/reader file)]
         (compare-rows identity (mapv edn/read-string (line-seq reader)))))))
 
+(defn index-rows
+  "Every parsed row of the effective-run index, or nil when the index is
+  absent. Pre-selection admission (outer-select) reads the same rows the
+  post-construction guard (compare-index) reads; both call blocking-row?,
+  which zai-5's concurrent work owns."
+  [dir]
+  (let [file (io/file dir "outer-refusal-index.ednl")]
+    (when (.isFile file)
+      (with-open [reader (io/reader file)]
+        (vec (map edn/read-string (line-seq reader)))))))
+
+(defn blocking-rows-for-target
+  "Index rows whose own rule (blocking-row?) makes TARGET unrepeatable.
+  A newer non-blocking row does not unblock the target: the duplicate
+  guard refuses on any blocking row, and pre-selection exclusion must not
+  offer a target the guard would refuse."
+  [rows target]
+  (filterv (fn [row] (and (= target (:target row)) (blocking-row? row))) rows))
+
 (defn require-novel! [comparison]
   (when (= :duplicate-effective-run (:status comparison))
     (throw (ex-info "Effective run identity already has a terminal close"
