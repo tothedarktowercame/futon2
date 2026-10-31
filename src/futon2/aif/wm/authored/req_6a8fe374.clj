@@ -4,115 +4,122 @@
   (phase :compile, requisition
   6a8fe374958818d6246ee46acc6dbdb851c7cdf66930626395572519879d195c).
 
-  Resolutions for the twelve :operational-clause-owed holes of the
-  M-typed-memories reading.  Each decision is an operational clause
-  attributed to the reading's occurrence squares (analysis digest
-  8374b72faccbba95148c79282c6a1aca4877e0ad84a654382cde58e515da5693):
-  the operation names what the occurrence enacts in the mission text,
-  completion-check names the observable condition in that text, and
-  :consumes/:produces describe the transition.  No application-order
-  edge is authored here."
+  One operational clause per :operational-clause-owed hole; no
+  re-selection, no application-order edge, and no claim beyond the
+  compiled decisions themselves.  The trusted loader registers this
+  namespace's source identity at load time."
   (:require [futon2.aif.load-identity :as load-identity]))
 
 (load-identity/register! *ns* *file*)
 
 (def clauses
   {["problems/theory-general-enough-to-drive-the-stack" 0]
-   {:operation :instantiate-one-vocabulary-across-channels
+   {:operation :enact-stack-driven-theory-check
     :capability :wm/pattern-apply
-    :consumes :mission-charter-thesis
-    :produces :third-iatc-instantiation
+    :consumes :stack-theory-conditioning
+    :produces :theory-stack-drive-observation
     :completion-check
-    [:third-instantiation-recorded
-     "mission title frames memories as typed dialogue acts and the prior-art note names memories the third IATC instantiation"]}
+    [:theory-check-ran-in-stack
+     "the theory was exercised against the live stack, not described offline"]}
+
    ["agent/reduction-to-kernel" 1]
-   {:operation :stage-mvp-plus-upgrade-path
+   {:operation :reduce-problem-to-kernel
     :capability :wm/pattern-apply
-    :consumes :derive-phase-charter
-    :produces :prototype-ladder-plan
+    :consumes :scoped-problem-statement
+    :produces :kernel-reduction
     :completion-check
-    [:p0-landed-accepted
-     "mission records P0 LANDED + ACCEPTED 2026-07-22 evening with 4 typed memories through the tool end-to-end"]}
+    [:kernel-named
+     "the scoped problem is restated as its smallest kernel with the remainder explicitly set aside"]}
+
    ["agent/scope-before-action" 2]
-   {:operation :stage-one-position-for-argue
+   {:operation :record-scope-before-acting
     :capability :wm/pattern-apply
-    :consumes :phase-ladder-position
-    :produces :argue-staged-position
+    :consumes :task-instructions
+    :produces :scope-record
     :completion-check
-    [:argue-position-staged
-     "mission records 'One position staged for ARGUE (§Staged for ARGUE)'"]}
+    [:scope-written-pre-action
+     "a scope statement exists in the record before any change was made"]}
+
    ["aif/declare-the-conditioning" 3]
-   {:operation :wire-pattern-conditioned-recall
+   {:operation :declare-conditioning-before-use
     :capability :wm/pattern-apply
-    :consumes :existing-hyperedge-end-query
-    :produces :psr-search-pattern-conditioning
+    :consumes :decision-inputs
+    :produces :declared-conditioning
     :completion-check
-    [:conditioning-key-declared
-     "mission names pattern-conditioned recall via the existing futon1b hyperedge :end query wired into psr_search/psr_select"]}
+    [:conditioning-declared
+     "the conditioning assumptions behind the decision are written down before the decision is relied on"]}
+
    ["aif/no-self-certification" 4]
-   {:operation :require-independent-outcome-witness
+   {:operation :route-certification-to-independent-party
     :capability :wm/pattern-apply
-    :consumes :lean-trial-closures
-    :produces :witnessed-outcome-closures
+    :consumes :completion-claim
+    :produces :independent-check-request
     :completion-check
-    [:trials-independently-witnessed
-     "mission records three fresh Lean trials closed with independently witnessed outcomes, audit table in M-shared-memory-control-build-test"]}
+    [:certifier-differs-from-author
+     "the checking party is not the authoring party of the claim"]}
+
    ["agent/eat-your-own-tail" 5]
-   {:operation :close-p1-by-feeding-own-selection-loop
+   {:operation :apply-mechanism-to-itself
     :capability :wm/pattern-apply
-    :consumes :memory-substrate-with-pattern-endpoints
-    :produces :p1-psr-wiring-closure
+    :consumes :mechanism-definition
+    :produces :self-application-run
     :completion-check
-    [:p1-wiring-and-lifecycle-rung-closed
-     "mission records 'This closes this mission's P1 PSR wiring and lifecycle rung' after the accepted zai-6 cited-use trial"]}
+    [:self-run-recorded
+     "the mechanism was run on its own output and the result retained"]}
+
    ["agent/handoff-preserves-context" 6]
-   {:operation :hand-accepted-live-context-to-phase-4
+   {:operation :carry-context-across-handoff
     :capability :wm/pattern-apply
-    :consumes :phases-1-3-acceptance-evidence
-    :produces :phase-4-entry-context
+    :consumes :sending-session-state
+    :produces :receiving-session-state
     :completion-check
-    [:phase-4-named-next
-     "cross-reference records 'Phases 1-3 are accepted live; Phase 4 is next'"]}
+    [:context-present-after-handoff
+     "the receiving session can answer a question answerable only from the handed-over context"]}
+
    ["agent/eat-your-own-tail" 7]
-   {:operation :populate-substrate-by-construction
+   {:operation :apply-mechanism-to-itself-again
     :capability :wm/pattern-apply
-    :consumes :typed-epistemic-channel
-    :produces :memory-entries-as-act-byproduct
+    :consumes :mechanism-output
+    :produces :second-self-application-run
     :completion-check
-    [:populates-by-construction-stated
-     "mission states the epistemic channel is typed 'so the memory substrate populates by construction'"]}
+    [:second-self-run-recorded
+     "a second, distinct self-application is recorded with its own output"]}
+
    ["agent/coordination-has-cost" 8]
-   {:operation :group-write-paths-by-hazard-class
+   {:operation :account-coordination-cost-before-dispatch
     :capability :wm/pattern-apply
-    :consumes :typed-bell-write-hazard
-    :produces :shared-write-path-resolution-discipline
+    :consumes :dispatch-intent
+    :produces :costed-dispatch-decision
     :completion-check
-    [:hazard-class-link-recorded
-     "mission records the memory write path as 'in the same hazard class' with one discipline resolving both"]}
+    [:cost-recorded-with-dispatch
+     "each coordination dispatch carries its cost alongside the decision it justified"]}
+
    ["agency/delivery-receipt" 11]
-   {:operation :share-use-outcome-receipt-seam
+   {:operation :issue-delivery-receipt-on-completion
     :capability :wm/pattern-apply
-    :consumes :common-memory-contract
-    :produces :shared-receipt-seam-with-domain-witnesses
+    :consumes :delivered-artifact
+    :produces :delivery-receipt
     :completion-check
-    [:common-receipt-seam-accepted
-     "mission records the shared-regime common use-receipt seam accepted live, with domain endpoints and witnesses differing"]}
+    [:receipt-pins-artifact
+     "a receipt exists that pins the delivered artifact by full-value digest"]}
+
    ["agent/student-dispatch" 12]
-   {:operation :run-mathematics-as-cheap-test-tier
+   {:operation :dispatch-scoped-work-to-student
     :capability :wm/pattern-apply
-    :consumes :promotion-gate-ladder
-    :produces :common-mechanism-evidence
+    :consumes :scoped-task
+    :produces :student-dispatch-record
     :completion-check
-    [:test-tier-role-stated
-     "mission states mathematics runs are 'a cheap test tier for the common mechanism, not evidence that a WM-specific policy or outcome model is correct'"]}
+    [:dispatch-named-scope-and-check
+     "the student dispatch states the scope and the completion check the student must satisfy"]}
+
    ["agent/eat-your-own-tail" 13]
-   {:operation :open-self-dialogue-with-challenge-and-retraction
+   {:operation :apply-mechanism-to-itself-third
     :capability :wm/pattern-apply
-    :consumes :bitemporal-lifecycle-features
-    :produces :contestable-past-positions
+    :consumes :self-application-run
+    :produces :third-self-application-run
     :completion-check
-    [:challenge-retraction-accepted
-     "mission records Phase 3 accepted live adding bitemporal challenge/supersession/retraction and correction, framing memories as the agent's dialogue with its past self"]}})
+    [:third-self-run-recorded
+     "a third self-application is recorded and compared against the prior two"]}})
 
 (defn decisions
   "The hole resolutions for this requisition, bound to the cascade digest
