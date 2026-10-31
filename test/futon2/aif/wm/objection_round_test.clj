@@ -124,6 +124,11 @@
                           :unchanged (first-author-answer req)
                           (revised-author-answer req))
                         (first-author-answer req))))
+                  ;; The real hole-0 divergence is also a claim defect, so the
+                  ;; claim round runs first; here it leaves the claim
+                  ;; unresolved, which is how this objection reached a reviewer.
+                  :open-cascade-claim-correction-answer-fn
+                  (fn [issued] (first-author-answer (:requisition issued)))
                   :open-cascade-reviewer-answer-fn
                   (fn [issued]
                     (swap! reviewer-requests conj issued)
