@@ -124,17 +124,28 @@
                          (str/includes? finding short)
                          (str/includes? finding full))
                     "repair finding does not independently pin the job, requisition, cascade and commit")
+          ;; TWO distinct results, never conflated:
+          ;; - historical: at failure time (pre-c96bd9871, 2026-10-31
+          ;;   ~01:11Z) check-delivery mislabeled the 9-char abbreviation as
+          ;;   :commit-not-on-canonical-head under
+          ;;   :author-delivery-wrong-repository — recorded from the repair
+          ;;   finding, NOT re-executed (no old-code checkout, no run
+          ;;   reconstruction).
+          ;; - fixed: the CURRENT classifier re-run on the exact same input,
+          ;;   in this fresh process, before any git access (descriptor
+          ;;   refusal precedes the location scan).
           check {:status :error
-                 :kind :author-delivery-invalid-descriptor
-                 :reason :abbreviated-commit-descriptor
-                 :supplied-commit short
-                 ;; post-fix classification (c96bd9871) reproduced on the
-                 ;; recovered input: check-delivery of this exact answer now.
-                 :verified-now
-                 (let [r ((requiring-resolve
-                            'futon2.aif.wm.cascade-patch-delivery/check-delivery)
-                          repo (constantly nil) answer)]
-                   (select-keys r [:status :kind :reason :supplied-commit]))}
+                 :replay
+                 {:historical-classifier
+                  {:source :repair-finding-attempt-002
+                   :kind :author-delivery-wrong-repository
+                   :reason :commit-not-on-canonical-head
+                   :note "pre-c96bd9871 mislabel of the abbreviated descriptor; recorded, not re-executed"}
+                  :fixed-classifier-now
+                  (let [r ((requiring-resolve
+                             'futon2.aif.wm.cascade-patch-delivery/check-delivery)
+                           repo (constantly nil) answer)]
+                    (select-keys r [:status :kind :reason :supplied-commit]))}}
           pin (dfe/retain-record!
                 store-root
                 (assoc (dfe/delivery-failure-record
