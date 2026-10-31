@@ -4,11 +4,11 @@
   Injury adf04df0 (ordinal 130, click wm-click-eaa9bc3a, 2026-10-31) proved
   the recurrence class this namespace closes: check-delivery consumed the
   author's exact patch descriptor, typed a refusal, and the failure
-  publication retained only the classified :failure summary — the exact
-  check input (the abbreviated commit descriptor) was left in the volatile
-  Agency job ledger (/tmp journal; terminal transcripts compact to
-  tombstones after a day). The P4-2 diagnosis (click wm-click-023dde8b)
-  therefore refused :cause-scope-unretained: no retained carrier exists.
+  publication kept only the classified :failure summary in the source
+  record. The repair finding held the commit and job, but diagnosis is
+  pinned to the source record, from which that input could not be reached.
+  The P4-2 diagnosis (click wm-click-023dde8b) therefore refused
+  :cause-scope-unretained: no carrier was reachable from the pinned record.
 
   Contract, deliberately narrow:
 

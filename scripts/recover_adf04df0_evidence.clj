@@ -1,5 +1,5 @@
 ;; Recover injury adf04df0's exact delivery-failure check input from the
-;; durable Agency invoke-jobs journal, verify every linkage, and retain it
+;; Agency invoke-jobs journal (under /tmp by default, gone after a reboot), verify every linkage, and retain it
 ;; content-addressed. Run from the repo root (see recover-adf04df0-evidence.sh).
 ;;
 ;; Linkage chain verified here, every step typed:

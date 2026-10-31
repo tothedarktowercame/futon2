@@ -574,8 +574,8 @@
               (assoc delivery :author-job (contact-job author-response)
                     ;; Injury adf04df0 (2026-10-31): the exact check input
                     ;; (an abbreviated commit descriptor) was consumed by
-                    ;; check-delivery and never retained, so the later
-                    ;; diagnosis refused :cause-scope-unretained. Retain the
+                    ;; check-delivery and not reachable from the pinned source
+                    ;; record, so the later diagnosis refused :cause-scope-unretained. Retain the
                     ;; exact input, typed result and linkage durably at this
                     ;; boundary, content-addressed and append-only. Retention
                     ;; trouble is reported, never thrown into the failure.

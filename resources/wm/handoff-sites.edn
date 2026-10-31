@@ -110,7 +110,8 @@
    ;; retention schema keeps the exact refused input, typed result and
    ;; linkage replayable after the refusal (injury adf04df0, 2026-10-31:
    ;; the abbreviated commit descriptor was consumed by check-delivery and
-   ;; retained nowhere, so diagnosis refused :cause-scope-unretained).
+   ;; not reachable from the pinned source record, so diagnosis refused
+   ;; :cause-scope-unretained).
    :retention :wm/delivery-failure-evidence-v1
    :status :verified-adapter}
   {:id :repair/loop-worker

@@ -3,7 +3,7 @@
 
   Real shape under test: injury adf04df0 — an author answer whose patch
   descriptor carried a well-formed-but-abbreviated commit (\"8561ecdc7\"),
-  consumed by check-delivery and previously retained nowhere. Every test
+  consumed by check-delivery and previously unreachable from the source record. Every test
   root is a fresh temp directory; no canonical path is touched."
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.java.io :as io]

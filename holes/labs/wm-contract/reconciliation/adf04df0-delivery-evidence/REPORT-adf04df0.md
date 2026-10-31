@@ -51,7 +51,7 @@ durable replay-input retention as a cheap debugging witness, not a platform.
 ## 1. Recovery (fresh process, verified)
 
 `scripts/recover-adf04df0-evidence.sh` → `scripts/recover_adf04df0_evidence.clj`
-reads the durable Agency invoke-jobs journal, verifies every linkage step
+reads the Agency invoke-jobs journal (under /tmp by default, so the command is not repeatable after a reboot; the record committed beside this report is), verifies every linkage step
 typed, and retains the exact failing check input content-addressed:
 
 - **Retained pin** `6601c31e45e9d29e747ea645ed9383f7c2ad0db6b074044837e91b3c73faa739`
@@ -137,7 +137,7 @@ reason propagation), not by an index row.
   updated 19 → 20).
 - `futon2.aif.meta-self-heal-production-test` — wrapper fidelity test added;
   pre-existing baseline failures unchanged.
-- Recovery script: fresh JVM, no session/`/tmp` dependency, idempotent
+- Recovery script: fresh JVM, no session or notes dependency (it does read the /tmp journal), idempotent
   (re-run re-retains at the same content address).
 
 ## 4. Open decisions for review
