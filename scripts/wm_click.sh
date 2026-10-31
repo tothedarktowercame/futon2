@@ -122,7 +122,7 @@ giraffe_field_freshness() {
   local root edges readings probe rc fresh newest minted probe2 fresh2 newest2 running
   root="${GIRAFFE_ROOT:-/home/joe/code/storage/giraffe}"
   edges="${GIRAFFE_EDGES:-$F3C/holes/missions/giraffe-mission-edges.json}"
-  readings="${GIRAFFE_READINGS_ROOT:-/home/joe/notes/wm-next/giraffe-excursions}"
+  readings="${GIRAFFE_READINGS_ROOT:-/home/joe/notes/wm-next/giraffe-excursions-2026-10-31}"
   if [ "${GIRAFFE_MINT:-1}" != "1" ]; then
     say "giraffe field" "staleness gate skipped (GIRAFFE_MINT=0)"
     return 0
