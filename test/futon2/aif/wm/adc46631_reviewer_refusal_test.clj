@@ -122,3 +122,19 @@
     (is (= "invoke-review" (get-in failure [:detail :reviewer-job])))
     (is (= :open-cascade-review-refused
            (get terminal/explicit-non-injury-kinds (:kind failure))))))
+
+(deftest a-second-refusal-carries-all-three-legs-into-the-record
+  (let [refusal {:status :error :kind :open-cascade-review-refused
+                 :reason refusal-reason
+                 :objection {:reason refusal-reason :review {:accepted false}}
+                 :revision {:status :unchanged :reason :revision-unchanged}
+                 :verdict {:status :absent :reason :revision-unchanged}}
+        detail (:detail (#'runner/run-record-failure
+                         {:data (#'runner/held-resume-data
+                                 {:failure-kind :open-cascade-review-refused
+                                  :downstream-refusal refusal}
+                                 "held" {:repair/id "finding"})}))]
+    (is (= :revision-unchanged (get-in detail [:revision :reason])))
+    (is (= :revision-unchanged (get-in detail [:verdict :reason])))
+    (is (string? (get-in detail [:objection :reason]))
+        "the objection reaches the record diagnosis reads")))

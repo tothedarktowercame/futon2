@@ -728,9 +728,9 @@
               ;; it: cascade-feedback/pattern-evidence-prior (used by
               ;; cascade-revision's revision scoring and policy's
               ;; attach-pattern-evidence-menu on the selection menu, both via
-              ;; construction-metadata's counts). The patterns of the held
-              ;; requisition's holes each record one :incomplete application —
-              ;; the round authored but never enacted them. Retention trouble
+              ;; construction-metadata's counts). On a second refusal the
+              ;; patterns of the held requisition's holes each record one
+              ;; :incomplete application. Retention trouble
               ;; is reported on the result, never thrown.
               feedback-event
               (when (and objection-round (:cascade-feedback-path opts))
@@ -738,13 +738,17 @@
                   (let [accepted? (:accepted? objection-round)
                         outcome (if accepted? :objection-resolved
                                     :open-cascade-review-refused)
+                        ;; A resolved objection penalises no pattern: the
+                        ;; work continues to its own close, which reports it.
                         applications
-                        (mapv (fn [h]
-                                {:pattern (:hole-id h)
-                                 :status :incomplete
-                                 :evidence {:objection-round {:round 1 :outcome outcome}}
-                                 :reinforcement :none})
-                              (:holes req))
+                        (if accepted?
+                          []
+                          (mapv (fn [h]
+                                  {:pattern (:hole-id h)
+                                   :status :incomplete
+                                   :evidence {:objection-round {:round 1 :outcome outcome}}
+                                   :reinforcement :none})
+                                (:holes req)))
                         base {:schema cascade-feedback/receipt-schema
                               :status (if accepted? :verified :refused)
                               :reason (when-not accepted? :open-cascade-review-refused)
@@ -752,7 +756,7 @@
                               :target (:target opts)
                               :cascade-status :provisional-per-run
                               :mission-state {:terminal-outcome outcome}
-                              :patterns {:selected (mapv :hole-id (:holes req))
+                              :patterns {:selected (mapv :pattern applications)
                                          :applications applications
                                          :selected-only []
                                          :positive-reinforcement []}

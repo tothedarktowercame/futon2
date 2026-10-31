@@ -245,3 +245,15 @@
       (is (= 1 (:incomplete row)) (pr-str row))
       (is (= 0 (:successful row)))
       (is (< (:factor global) 1.0) "the refusal evidence lowers the prior"))))
+
+(deftest a-resolved-objection-penalises-no-pattern
+  (let [path (str (java.nio.file.Files/createTempDirectory "objection-resolved"
+                   (make-array java.nio.file.attribute.FileAttribute 0))
+                  "/events.edn")
+        {:keys [result]} (exercise {:second-review :accept
+                                    :cascade-feedback-path path})
+        event (:cascade-feedback-event result)
+        patterns (:patterns (first (:events (cascade-feedback/read-snapshot path))))]
+    (is (= :recorded (:status event)) (pr-str event))
+    (is (= [] (:applications patterns) (:selected patterns))
+        "only a second refusal counts against the patterns")))

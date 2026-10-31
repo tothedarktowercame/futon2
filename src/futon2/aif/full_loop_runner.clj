@@ -996,7 +996,8 @@
                  ;; The pin is nested, and it is the receiver's only route to
                  ;; the retained input, so the scalar-only rule below would
                  ;; keep :status and lose the evidence.
-                 (and (= :delivery-evidence k) (map? v))
+                 (and (contains? #{:delivery-evidence :objection :revision :verdict} k)
+                      (map? v))
                  {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
                  (scalar? v) {:kept (assoc kept k v) :omitted omitted}
                  (and (vector? v) (<= (count v) 32) (every? scalar? v))
@@ -1093,7 +1094,7 @@
   its nested pin, oversized values are dropped with :omitted naming them."
   [:status :kind :reason :repair :requisition-id :cascade-digest
    :author-job :review-job :reviewer :reviewer-job :patch :answer
-   :delivery-evidence])
+   :delivery-evidence :objection :revision :verdict])
 
 (defn- held-resume-data
   "The close data of a held open-cascade resume. A retained delivery failure's
