@@ -257,3 +257,66 @@ structural change; it contradicts no current exclusion (candidates would
 score rather than be excluded, so it is an alternative to 0513d1ea8's
 exclusion, to be chosen by policy). Untouched here: outer_score.clj is
 frozen by other rows this round.
+
+## Addendum 3 (2026-10-31, decision round): exclusion removed; :not-yet-evaluated landing measured inadmissible — Lean mismatch named
+
+Per claude-1's decision the relation exclusion and the
+`:outer-score/no-known-relation-members` refusal are REMOVED (commit on this
+branch): a relation-unknown candidate stays in the field, and `select`
+retains `:cascade-pick-relations` — per cascade pick `{:target, :relation,
+:relation-known?}` — so a scored stop resting on an unknown relation reads as
+ignorance in the record.
+
+**The mathematics, measured on the real fields before coding.** With the
+c-kit as canonical (`:not-yet-evaluated 0`, κ=100 → counts 55/35/5/5/0,
+matching DarkTower `R20Step.kit`; `addEnding` never increments
+notYetEvaluated), mapping an unknown relation onto a `:not-yet-evaluated`
+landing gives every pick with reach > 0 **risk ⊤ (`:inadmissible`)**: the
+prediction has positive mass on `[:not-yet-evaluated g]` where preference
+mass is exactly 0, so `Σ q·ln(q/c)` diverges. Measured on the real
+20261031T201627 field, unknown-relation picks (M-peradam-grounding, reach
+1/2): scores `[:inadmissible :inadmissible 3.3245]` — and `select` refuses
+`:cascade-score-inadmissible` if ANY cascade is inadmissible, i.e. a
+wholesale menu refusal, exactly what Joe's rule forbids. Zero preference
+does not silently dominate; it is ⊤. With a counterfactual waiting count of
+5 (NOT in the kit), the score is finite (3.4119) but WORSE than the
+relation-known pick (2.9163) and worse than the degenerate stop (3.3245):
+risk ln(q/c) penalises ignorance, so the mapping would not make selection
+favour ignorance — novelty is landing-label-invariant, so it never prefers
+ignorance per se. But the counterfactual is not the theory.
+
+**The Lean mismatch, named.** DarkTower states the ending map and it does
+NOT send unknown to notYetEvaluated: `CTauClassPreference.scorerClass`
+(.focus→focused, .associated→related, .useful-elsewhere→unrelated,
+**.other→none**, CTauClassPreference.lean:133-137);
+`R15StrategicTarget.outcomeClass` maps scorerClass none → the
+`.stopTheLine` landing (R15StrategicTarget.lean:89-92); `R20Step.outerModel`
+/ `outerNovelty` then use `(.stopTheLine, .none)` (R20Step.lean:405+).
+`R20Step.kit` puts 0 mass on notYetEvaluated by design ("no mass on
+notYetEvaluated") and `addEnding` never adds any; `outerPreferenceKernel`
+requires strictly positive counts (`outerPreferenceKernel_mass_pos` needs
+C_pos for ALL endings). The theory's own use of notYetEvaluated is the
+pre-horizon *waiting* preference (`CTauClassPreference.classPreference` =
+waitingPreference for tau < horizon), not a scoreable landing for unknown
+relations. So the current Clojure `ending-class` (unknown → nil → stop
+landing) IS Lean-aligned, and the requisitioned mapping would diverge from
+DarkTower and refuse the menu. To score ignorance as ignorance *and* select,
+the theory must change first (a waiting-mass kit amendment or a scoreable
+unknown ending in scorerClass) — above this row.
+
+**Real-field result with the decision applied** (both fields,
+learned-state kits): full field admitted (adc46631 field: 552, current
+field: 547; 47 graph-excluded); every cascade's pick is M-peradam-grounding
+(relation :unknown, `:relation-known? false` retained); three-way score tie
+at 3.3245 (degenerate stop kernel, as the Lean dictates for unknown
+relations); `:tie? false` (same-pick tie, not a choice tie). Ignorance is
+now visible as ignorance; the tie itself returns whenever the field head is
+relation-unknown — removing it needs relation evidence (scope census
+refresh, addendum 2) or the theory change above, not a scoring workaround.
+
+Tests: `outer-relation-admission-test` rewritten for the decision (4 tests,
+21 assertions green; watched failing on the pre-change code: 1 failure,
+2 errors); `reading-format-reselect-test` expectations updated from the real
+frozen-field behaviour (first choice M-typed-memories relation-unknown,
+replacement M-peradam-grounding) — 4 tests, 37 assertions green.
+clj-kondo clean; check-parens OK.

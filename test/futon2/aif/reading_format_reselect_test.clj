@@ -73,25 +73,28 @@
         opts {:reading-reselection/state selection-state}
         port (runtime/reading-reselection-port makeup state observation first-choice
                                                selection-state #(swap! persisted conj %))
-        refusal {:target "M-pattern-retrieval-calibration" :kind :selected-target-reading-unavailable
+        refusal {:target "M-typed-memories" :kind :selected-target-reading-unavailable
                  :detail {:reader-job-ids ["7916" "correction"]}}
         replacement (port refusal)
         retained (:outer/selection @selection-state)
         target (get-in retained [:selection :selected :target])]
-    ;; TIED-OUTER-CASCADES relation admission (2026-10-31): the frozen field's
-    ;; first ready candidate M-typed-memories carries an :unknown relation
-    ;; class and is no longer scored; the first choice and the replacement
-    ;; are the field-order relation-known ready targets.
-    (is (= "M-pattern-retrieval-calibration" (get-in first-choice [:selection :selected :target])))
-    (is (= "M-interim-director-proxy-metric-inventory" target))
+    ;; TIED-OUTER-CASCADES (2026-10-31, decision round): a relation-unknown
+    ;; candidate is admitted, so the frozen field's first choice is
+    ;; M-typed-memories (relation :unknown -- its stop landing is retained
+    ;; with :relation-known? false in :cascade-pick-relations); after the
+    ;; reading refusal the replacement is the next ready candidate
+    ;; M-peradam-grounding (also relation-unknown here: scored as the stop
+    ;; landing with :relation-known? false -- ignorance as ignorance).
+    (is (= "M-typed-memories" (get-in first-choice [:selection :selected :target])))
+    (is (= "M-peradam-grounding" target))
     (is (= target (:target replacement)))
     (is (= target (get-in (reading/current-options opts) [:task :id])))
     (is (= retained (first @persisted)))
     (is (= retained (:outer/selection (reading/current-options opts))))
-    (is (some #(and (= "M-pattern-retrieval-calibration" (:target %))
+    (is (some #(and (= "M-typed-memories" (:target %))
                     (= :selected-target-reading-unavailable (:reason %)))
               (:outer-field/excluded retained)))
-    (is (not (some #{"M-pattern-retrieval-calibration"} (:outer-field/admitted retained))))
+    (is (not (some #{"M-typed-memories"} (:outer-field/admitted retained))))
     (is (= first-choice (get-in retained [:reading-reselection :previous-selection])))
     (is (nil? (port refusal)))
     (is (= 1 (count @persisted)))
