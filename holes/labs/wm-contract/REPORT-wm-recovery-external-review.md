@@ -119,3 +119,52 @@ The recovery branch now tracks all 79 authority resources: policy plus 78 eviden
 The remaining review verdict at `bb735c405` is **code-correct where it runs; external reproduction insufficient**. Its added cold-check script hard-codes Joe's ledger path, does not assert the expected ledger SHA, and sends four loader checks to the original rather than its temporary copy. Its original-path check uses a phantom `/tmp/sa-archive` prefix, and its ordinal-50 absence check depends on this host. The reviewer source-read this script but did not execute it against the live ledger; earlier author-reported archive runs must be understood with these limits.
 
 The bounded correction is already assigned: accept an explicit ledger input and expected SHA, verify before use, run every loader against the verified temporary copy, remove vacuous/host-specific assertions, and document how an external reviewer obtains the pinned fixture and required sibling dependencies. These are verification-script corrections, not new trust semantics. A corrected archive/fresh-process witness and independent review remain the release gate. No merge, serving reload, ledger mutation or click has been authorized by this review; 15 credits remain.
+
+## Update 2026-10-31: admission (not probe) path fixed; one click executed
+
+**Correction of an earlier false completion implication.** The live probes
+(verifier-less `:ready` twice) exercised opts *without* an installed verifier
+and so could not see the admission defect: with no medic-authority provider
+installed, `futon3c` `acquire-medic-authority` injected a deny-all verifier
+into the **admission** opts, and `meta-self-heal-preflight!` runs *before* the
+runtime dissolves caller verifiers. Live run `2026-10-31-bc036e43…` refused
+`:meta-self-heal/ledger-unreadable` pre-ration on valid pinned bytes.
+Probe readiness never established admission readiness; the reconciliation's
+"safe by construction" claim was wrong at this ordering.
+
+- Root cause and fix: futon3c `fix/preflight-standing-verifier`
+  `b132d287875fd0ce1b13d39a20169334fd24fbc9` — install **no** verifier when no
+  provider exists (standing resolver composes downstream, still fail-closed);
+  provider path unchanged. Independently approved; merged `--no-ff` to
+  futon3c master as `657aa7d1e` (+ reload record `9ca62572e`), pushed. The
+  serving namespace was reloaded from canonical via the recorded loader
+  (`apm-reload.sh`, condition C-20 @ `657aa7d1e`); all `defonce` state
+  (status, completion, acceptance-lock, provider atom) preserved.
+- Live admission witness before clicking: actual `acquire-medic-authority`
+  output on ordinary-route opts with the real `{generation 0, provider nil}`
+  state — **no verifier injected**, `:authority {:status :absent}` — fed to
+  the real `meta-self-heal-preflight!`: passed, no refusal. Standing context
+  `:ready`, 11 scopes; all four ledger loaders `:loaded` 129/0 on the pinned
+  ledger; effective injuries `:computed`, 0 active; code composition
+  `:current`.
+- **The click**: `wm-click-eaa9bc3a-9689-4f6c-8fd7-3bacdc47814a`
+  (2026-10-31T01:10:40Z, caller codex-11, ask-seats zai-1/2/3). Charged:
+  budget 243/229/**14**. Ran selection → cascade-resume →
+  meta-terminal-injury-ingest and reached **terminal `outcome: incomplete`**
+  (no retry). It opened a new injury `injury/adf04df0f31ab8727ac57d9c7f2496d8fa28598c`
+  (`:author-delivery-wrong-repository`, stage `:cascade-resume`, attempt 1,
+  ordinal 130). Post-click ledger validates `:loaded` 130 entries under the
+  standing verifier. Run record
+  `data/wm-runs/tick-run-record-2026-10-31-f805ca4b-6c35-45cf-accc-f95dd54b0fc8.edn`;
+  run binding `wm-click-run-bindings/click-run-binding-wm-click-eaa9bc3a….edn`.
+  Route-check producer verdict: `:not-checked` (`ordinary-selection-not-established`).
+- Protected-bytes note: ledger.edn (129→130 append), outer-state.edn and
+  consumption.jsonl changed as **legitimate run writes** (charge + learning
+  observation); outer-makeup.edn unchanged. Pre-click all four matched their
+  pins exactly.
+- Deficit-row closure: none claimed here; each closure still requires its own
+  written condition review. The pre-ration refusal class itself
+  (`:meta-self-heal/ledger-unreadable` on valid no-provider admission) is
+  demonstrated fixed by the paired cold-boot witness
+  (`test/f4a-cold-boot-no-provider` red `df714ad4d` / green `3b6dbc5cf`).
+
