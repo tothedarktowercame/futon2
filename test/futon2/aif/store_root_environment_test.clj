@@ -1,6 +1,7 @@
 (ns futon2.aif.store-root-environment-test
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.lane-futility :as lane]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.meta-injury-store :as meta-injury]
             [futon2.aif.morning-brief :as morning-brief]
@@ -13,6 +14,7 @@
                    "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT"
                    "FUTON_WM_MORNING_BRIEF_ROOT" "FUTON_WM_META_INJURY_ROOT"])
     (is (= "/home/joe/code/futon2/data/wm-trace" trace/default-trace-dir))
+    (is (= "/home/joe/code/futon2/data/wm-trace" lane/default-trace-dir))
     (is (= "/home/joe/code/futon2/data/wm-runs" runner/default-run-record-dir))
     (is (= "/home/joe/code/futon2/data/wm-phase-replay-inputs"
            runner/default-phase-replay-input-root))

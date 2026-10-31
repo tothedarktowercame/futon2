@@ -15,7 +15,8 @@
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.lane-futility :as lane]
             [futon2.aif.temporal-input-test :as fixture]
-            [futon2.aif.temporal-update :as temporal])
+            [futon2.aif.temporal-update :as temporal]
+            [futon2.aif.trace :as trace])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -62,6 +63,21 @@
   (let [root (.toFile (Files/createTempDirectory "temporal-update-" (make-array FileAttribute 0)))]
     (try (with-redefs [checks/repo-root (str root)] (f root))
          (finally (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
+
+(deftest publish-without-trace-dir-locks-the-canonical-trace-root
+  (testing "the lane fallback root is the selection publisher's canonical absolute root"
+    (is (.isAbsolute (io/file lane/default-trace-dir)))
+    (is (= trace/default-trace-dir lane/default-trace-dir)))
+  (testing "publish! with a previous and no :trace-dir takes the cross-process lock in that root"
+    (isolated
+     (fn [root]
+       (let [seen (atom nil)]
+         (with-redefs [lane/with-index-lock (fn [dir _f] (reset! seen (str dir)) :locked)]
+           (is (= :locked (temporal/publish! (io/file root "published" "fallback.edn")
+                                             {:flight "fixture"}
+                                             {:previous true}
+                                             nil))))
+         (is (= (str trace/default-trace-dir) @seen)))))))
 
 (deftest ^:slow publish-three-executions-and-refuse-replay-and-stale-cursors
   (isolated
