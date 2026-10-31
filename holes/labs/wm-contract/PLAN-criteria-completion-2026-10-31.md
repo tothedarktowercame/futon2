@@ -20,7 +20,7 @@ Click wm-click-0385d9a0 (run f4b95abf), the first with every fix loaded, selecte
 
 ## Criteria rollup (2026-10-31)
 
-Across the seven ordinary clicks of P5 ([rollup](reconciliation/ROLLUP-P5-criteria-2026-10-31.md)): 10 clean observed, 7 observed with limits, 2 unknown (A2, C2), 1 violated (E4). This is best status per criterion across runs, not a run that passed all twenty. B3 is under review: zai-2 found outer scoring degenerate on the traced run, with ties on 10 of 10 retained runs.
+Across the eight ordinary clicks of P5 ([rollup](reconciliation/ROLLUP-P5-criteria-2026-10-31.md)): zai-6 counts 12 clean observed, 7 with limits, 0 unknown, 1 violated (E4). The lead reads C4 as with limits, 11 and 8, because the reviewer approved three mission-text claims the machine then refused. This is best status per criterion across runs, not a run that passed all twenty.
 
 ## Latest execution checkpoint: click 7, cascade revision door refused (2026-10-31)
 
