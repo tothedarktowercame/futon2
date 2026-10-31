@@ -22,11 +22,32 @@
            {:repository dir :path (.getCanonicalPath file)
             :source-commit (str/trim (:out (git dir "log" "-1" "--format=%H" "HEAD" "--" relative)))}))))
 
+(defn- commit-descriptor-error
+  "Classify a SUPPLIED patch.commit against the author descriptor contract.
+  The written contract (open-cascade-author-prompt) requires the FULL 40-hex
+  commit SHA in patch.commit. Abbreviated hex object ids and malformed values
+  are refused here with a typed descriptor reason — never folded into
+  :commit-not-on-canonical-head under :author-delivery-wrong-repository, which
+  mislabeled a well-formed-but-abbreviated descriptor as a wrong-repository
+  delivery (injury adf04df0, click wm-click-eaa9bc3a, ordinal 130). A
+  supplied malformed commit is never silently replaced by the history-derived
+  fallback. The value never reaches git unless it is exactly 40 lowercase hex
+  characters (argv element, no shell interpolation)."
+  [commit]
+  (cond
+    (nil? commit) nil
+    (and (string? commit) (re-matches #"[a-f0-9]{40}" commit)) nil
+    (and (string? commit) (re-matches #"[a-f0-9]{4,39}" commit))
+    {:reason :abbreviated-commit-descriptor}
+    :else {:reason :invalid-commit-descriptor}))
+
 (defn check-delivery
   "Prove the exact reviewed bytes are committed on canonical HEAD and visible
   from its serving resource. Legacy descriptors resolve their source commit
-  from file history; a supplied commit is checked explicitly. Never integrates
-  a sibling worktree, loads a namespace, or contacts a reviewer."
+  from file history; a supplied commit must be the full 40-hex SHA and is
+  checked explicitly. A supplied abbreviated or malformed commit descriptor
+  is refused with a typed descriptor reason before any git call. Never
+  integrates a sibling worktree, loads a namespace, or contacts a reviewer."
   ([answer] (check-delivery canonical-repository io/resource answer))
   ([root resource-fn answer]
    (let [{:keys [namespace source-digest commit]} (:patch answer)
@@ -34,10 +55,13 @@
                      (re-matches #"[A-Za-z0-9_.-]+" namespace)
                      (string? source-digest)
                      (re-matches #"[a-f0-9]{64}" source-digest))
+         descriptor-error (when valid? (commit-descriptor-error commit))
          resource-name (when valid? (str (-> namespace (str/replace "." "/")
                                                            (str/replace "-" "_")) ".clj"))
          relative (when valid? (str "src/" resource-name))
-         found (if valid? (locations root relative source-digest) [])
+         found (if (and valid? (nil? descriptor-error))
+                 (locations root relative source-digest)
+                 [])
          canonical (first (filter #(= (.getCanonicalPath (io/file root)) (:repository %)) found))
          source-commit (or commit (:source-commit canonical))
          commit-valid? (and (string? source-commit) (re-matches #"[a-f0-9]{40}" source-commit))
@@ -52,6 +76,7 @@
                          (= (:path canonical) resource-path)
                          (= source-digest (digest resource)))
          reason (cond (not valid?) :invalid-patch-descriptor
+                      descriptor-error (:reason descriptor-error)
                       (nil? canonical) :source-not-in-canonical-repository
                       (not reachable?) :commit-not-on-canonical-head
                       (not committed?) :committed-source-mismatch
@@ -61,4 +86,8 @@
               :canonical-repository root :namespace namespace
               :source-digest source-digest :source-commit source-commit
               :found-locations found :serving-source resource-path}
-       (not delivered?) (assoc :kind :author-delivery-wrong-repository :reason reason)))))
+       (and (not delivered?) descriptor-error)
+       (assoc :kind :author-delivery-invalid-descriptor
+              :reason reason :supplied-commit commit)
+       (and (not delivered?) (nil? descriptor-error))
+       (assoc :kind :author-delivery-wrong-repository :reason reason)))))
