@@ -1,6 +1,6 @@
 # E-kimi-task-173 — prove lemma apm_t02A04_quotientComplex_model_aux_lift_edge in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T17:52:40Z to kimi-2 as invoke-1793469160221-8839-f780d4b2
+**Requisition:** completed — 2026-10-31T18:03:57Z, job invoke-1793469160221-8839-f780d4b2, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
