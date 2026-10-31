@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: P5 click 2 refused, injury a67d3e49 (2026-10-31)
+
+Click wm-click-502a5b4d (run 0ba3370c) repeated M-typed-memories. The duplicate-run guard refused it before any author contact, the close rejected :refused, and the fallback closed :build-failed, opening injury a67d3e49 (ordinal 133). Close fix 79755af7c and pre-selection exclusion f6fa625cf are merged, not loaded. Budget 9. Next: zai-5's finished-work fix, reload, medic a67d3e49, then the next click.
+
 ## Latest execution checkpoint: P5 click 1 unmeasured (2026-10-31)
 
 Click wm-click-6be313d8 (run 4955b6e6) started with no injury stop and ended :already-satisfied, but the selected wants were not measured, so it is not task completion ([matrix](reconciliation/MATRIX-A1-E4-4955b6e6-2026-10-31.md)). Budget 10. The next click holds until ALREADY-SATISFIED-WANTS-UNMEASURED is fixed, because another would repeat this result.
