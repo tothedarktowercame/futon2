@@ -90,15 +90,35 @@
            (get-in (dfe/read-pin (:pin carried)) [:record :check-input :patch :commit]))
         "the receiver can reach the exact refused input from the run record")))
 
-(deftest a-held-refusal-without-retention-keeps-its-existing-record-shape
-  (let [data (#'runner/held-resume-data
-              {:failure-kind :open-cascade-author-answer-invalid
-               :downstream-refusal {:status :error
-                                    :kind :open-cascade-author-answer-invalid}}
-              "held" {:repair/id "finding"})]
-    (is (not (contains? data :error-data)))
-    (is (= {:absent :no-error-data}
-           (:detail (#'runner/run-record-failure {:data data}))))))
+(deftest a-held-refusal-without-retention-carries-its-typed-detail
+  "Row HELD-RESUME-DETAIL-NOT-IN-SOURCE (record adc46631): a held refusal
+  with no delivery evidence still has typed fields diagnosis needs. The
+  close map must carry them into :error-data so run-record-failure's
+  bounded projection puts them in :detail where diagnosis reads, instead
+  of {:absent :no-error-data}."
+  (let [refusal {:status :error
+                 :kind :answer-reviewer-mismatch
+                 :expected "wm-reviewer"
+                 :accepted-by "someone-else"
+                 :requisition-id "req-adc46631"
+                 :cascade-digest "digest-adc46631"}
+        data (#'runner/held-resume-data
+              {:failure-kind :answer-reviewer-mismatch
+               :downstream-refusal refusal}
+              "held" {:repair/id "finding"})
+        failure (#'runner/run-record-failure {:data data})]
+    (is (= refusal (:error-data data))
+        "the typed refusal fields ride the close map for every held refusal")
+    (is (not= {:absent :no-error-data} (:detail failure)))
+    (is (= {:status :error :kind :answer-reviewer-mismatch
+            :expected "wm-reviewer" :accepted-by "someone-else"
+            :requisition-id "req-adc46631" :cascade-digest "digest-adc46631"}
+           (:detail failure))
+        "the bounded projection keeps the typed refusal fields diagnosis reads")
+    (is (= 1 (get-in failure [:causes :total-count]))
+        "the refusal's own kind becomes a retained cause candidate")
+    (is (= {:kind :answer-reviewer-mismatch}
+           (first (get-in failure [:causes :causes]))))))
 
 (deftest the-real-resume-handler-retains-what-it-refuses
   (let [root (.toFile (java.nio.file.Files/createTempDirectory

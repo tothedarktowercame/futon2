@@ -1086,12 +1086,24 @@
                  {:status :absent
                   :reason :cause-overflow-artifact-not-persisted})))))
 
+(def held-refusal-retained-keys
+  "The typed refusal fields a held downstream refusal carries into the run
+  record. run-record-failure's bounded projection (failure-detail) is the
+  same projection for every case: scalars survive, :delivery-evidence keeps
+  its nested pin, oversized values are dropped with :omitted naming them."
+  [:status :kind :reason :expected :accepted-by :requisition-id :cascade-digest
+   :author-job :review-job :patch :answer :delivery-evidence])
+
 (defn- held-resume-data
   "The close data of a held open-cascade resume. A retained delivery failure's
   pin rides :error-data into the run record's :failure, because that record is
   the source diagnosis is pinned to (injury adf04df0: the failure reached the
   repair finding but not the source record, and diagnosis refused
-  :cause-scope-unretained)."
+  :cause-scope-unretained). Every OTHER held refusal carries its typed fields
+  the same way (row HELD-RESUME-DETAIL-NOT-IN-SOURCE, record adc46631: an
+  :answer-reviewer-mismatch close reached the record as
+  :detail {:absent :no-error-data}); without them diagnosis of any non-delivery
+  held refusal would refuse :cause-scope-unretained the same way."
   [failure-data message finding]
   (let [refusal (:downstream-refusal failure-data)]
     (cond-> {:outcome :incomplete
@@ -1103,9 +1115,8 @@
              :held-phase (:held-phase failure-data)
              :downstream-refusal refusal
              :repair-obligation finding}
-      (:delivery-evidence refusal)
-      (assoc :error-data (select-keys refusal [:delivery-evidence :author-job
-                                               :reason])))))
+      (seq (select-keys refusal held-refusal-retained-keys))
+      (assoc :error-data (select-keys refusal held-refusal-retained-keys)))))
 
 (defn- run-record-failure
   "WM-CLICK-REASON-I: the failure a click closed on, for its run record, so
