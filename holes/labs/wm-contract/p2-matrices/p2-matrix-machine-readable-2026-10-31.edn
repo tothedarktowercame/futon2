@@ -1,0 +1,72 @@
+;; P2 machine-readable criteria matrix — 2026-10-31, zai-6. Rev 4 (adjudication ec15959e8 + D1 verification 727db74ab applied). Final account.
+;; status vocabulary: :observed :violated :unknown :not-exercised
+;; :observed rows may carry unresolved subclauses noted in comments; "clean" observations are unqualified.
+{:schema :wm/p2-criteria-matrix-v1
+ :revision 4
+ :generated-at "2026-10-31"
+ :author "zai-6"
+ :corrections "CORRECTIONS-zai6-2026-10-31.md"
+ :runs
+ {"2026-10-30-3415b671-88f6-4662-a2c1-48e3630f6116"
+  {:click/id "wm-click-3c02ad82-d6fd-45ec-97d7-7b24aa7730de"
+   :record/sha256 "0af126fec89e95980508f64ed381e5694d172d6dc37f7d7d8b6f384ce363aa36"
+   :requirements/sha256 "a57c7bfce1006cf5aa1d236e66fc4152ad39075f44b778e2b51c4babce2ff837"
+   :terminal :grounded-progress :wall-clock-ms 566972
+   :rows {A1 :observed
+          A2 :unknown             ;; ns census + stop-lines observed; heap/envelope join not retained
+          A3 :unknown             ;; stop-lines + job-liveness observed; injury join not in-record
+          A4 :observed            ;; receipts ad922f96 / 8b46822b / 3-want census
+          B1 :observed            ;; scope: adopted missions-excursions-tickets population (M181/E239/T188)
+          B2 :observed            ;; R28 failure-retention path NOT exercised
+          B3 :unknown             ;; target-identity question; contradiction withdrawn (ec15959e8: tied-cascades=all minima, tie?=distinct targets); no recomputation claimed
+          B4 :observed            ;; outer only; inner prediction clause unresolved
+          C1 :observed            ;; author-response/decisions-mismatch defect retained
+          C2 :unknown             ;; manifest-before-dispatch observed; pre-send durability unproven
+          C3 :observed
+          C4 :observed            ;; boundary: reviewer falsifier+replay; prose alone insufficient
+          D1 :observed            ;; receipt 4104abd5; coordinator-verified 727db74ab (1 reached/2 untouched); scope: class-C4 declaration presence in mission Markdown, not behavioral execution
+          D2 :observed            ;; receipts b1e78e0c/0c7a1c00; patterns empty by branch
+          D3 :observed
+          D4 :observed            ;; retention gaps incl. unrelated outer-task-selection receipt gap
+          E1 :observed
+          E2 :observed            ;; in successor f805ca4b
+          E3 :observed            ;; pair vs e5f08d91; T12-history separate
+          E4 :violated}           ;; actual pair e5f08d91->3415: e90fe14bb landed between (21:38Z)
+   :q-verdicts {:Q1 :holds :Q3 :holds :Q4 :holds :Q5 :holds :Q6 :holds :Q7 :holds :Q9 :unverifiable
+                :conforms false}}
+  "2026-10-31-f805ca4b-6c35-45cf-accc-f95dd54b0fc8"
+  {:click/id "wm-click-eaa9bc3a-9689-4f6c-8fd7-3bacdc47814a"
+   :record/sha256 "ba359b5e9f5d6b5a56adaa6f5c23339738110350bc13eb55647f3cdf33b81bea"
+   :requirements/sha256 "d7b5bcf1d3d8ddad998b9faf80242b69068ee66c63187e9c5e6699069f523325"
+   :terminal :incomplete :machine-label :author-delivery-wrong-repository :machine-label/false true
+   :wall-clock-ms 140697 :injury "injury/adf04df0f31ab8727ac57d9c7f2496d8fa28598c"
+   :first-divergence [:cascade-resume :descriptor-contract-violation :c3]
+   :rows {A1 :observed
+          A2 :unknown
+          A3 :unknown
+          A4 :not-exercised       ;; failed before pre-author boundary
+          B1 :observed            ;; 544->545 diff = M-typed-memories Q6 rearm (inputs c0441de6 != c1801780); not drift
+          B2 :not-exercised       ;; selection-route not-required; R28 path not exercised
+          B3 :unknown             ;; target-identity question; contradiction withdrawn per ec15959e8; no recomputation claimed
+          B4 :observed            ;; outer only; inner unresolved
+          C1 :unknown             ;; cascade author job existed; identity continuity unobserved
+          C2 :unknown             ;; external author contact occurred; no pre-send checkpoint pin retained
+          C3 :violated            ;; 9-char 8561ecdc7 vs explicit full-SHA contract (prompt at main 9d43b702b)
+          C4 :not-exercised       ;; blocked by C3
+          D1 :not-exercised       ;; blocked
+          D2 :not-exercised       ;; failure-shaped receipts retained, no completion credit
+          D3 :violated            ;; mechanically consistent but classification FALSE; typing fix f9d40b6e8 post-run
+          D4 :observed            ;; gaps explicit incl. route-check :not-checked
+          E1 :observed            ;; explicit manageable stop; not useful completion
+          E2 :not-exercised       ;; successor owed
+          E3 :unknown             ;; own-pair inputs differ (c0441de6 vs c1801780, rearm legitimate) but outer-repeat-comparison :not-reached
+          E4 :violated}           ;; actual pair 3415->f805: restart 00:01Z + admission fix between
+   :q-verdicts {:Q1 :holds :Q3 :holds :Q4 :holds :Q5 :holds :Q6 :holds :Q7 :holds :Q9 :unverifiable
+                :conforms false}}}  ;; closes q-verdicts, run entry, and the :runs map (brace imbalance fixed in rev 4)
+ :r28-search {:verdict :live-witness-owed
+              :scope "selected-target-reading redecision (not occurrence-square)"
+              :population "24 retained tick-run-records containing the phase name (bounded, 2026-10-16..31)"
+              :shapes-found [:published-success :pending-batch-limit :not-applicable-selection-route]
+              :open-repair-obligation "repair-occ-e62431354b9285c3a249e7331b8582475b1dc426123a35a0432c156ba813844f"
+              :repair-finding/sha256 "828297514f01f52d06ada36b83fb21efabb361d97ad07a307711290dfe7c353e"
+              :new-field-requirement-proposed false}}
