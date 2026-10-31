@@ -37,16 +37,19 @@
         handler (runtime/open-cascade-resume-handler
                  {:author "wm-author" :reviewer "wm-reviewer"
                   :open-cascade-author-answer-fn
-                  (fn [req]
-                    (reset! seen-req req)
-                    {:requisition-id (:requisition-id req)
-                     :cascade-digest (:cascade-digest req)
-                     :by "wm-author"
-                     :decisions (into {} (map (fn [h] [(:hole-id h) (clause h)])
-                                              (:holes requisition)))
-                     :patch {:namespace "futon2.aif.wm.authored.req-b9e453fd"
-                             :var "decisions"
-                             :source-digest (apply str (repeat 64 "7"))}})
+                  (fn [issued]
+                    (let [req (or (:requisition issued) issued)]
+                      (reset! seen-req req)
+                      (cond-> {:requisition-id (:requisition-id req)
+                               :cascade-digest (:cascade-digest req)
+                               :by "wm-author"
+                               :decisions (into {} (map (fn [h] [(:hole-id h) (clause h)])
+                                                        (:holes requisition)))
+                               :patch {:namespace "futon2.aif.wm.authored.req-b9e453fd"
+                                       :var "decisions"
+                                       :source-digest (apply str (repeat 64 "7"))}}
+                        ;; the revision round resubmits a CHANGED answer
+                        (:objection issued) (assoc :revision "round-1"))))
                   :open-cascade-reviewer-answer-fn (fn [_] (reviewer-fn @seen-req))
                   :open-cascade-patch-loader (fn [_] (fn [_] clauses))})]
     (with-redefs [delivery/check-delivery (fn [_] {:status :delivered})]
@@ -65,6 +68,9 @@
             :reason refusal-reason}})
 
 (deftest explicit-reviewer-refusal-closes-typed-not-as-mismatch
+  ;; With a reason the refusal now runs ONE objection round: the same
+  ;; reviewer refuses the revision too, and the second refusal closes the
+  ;; existing typed kind carrying {:objection :revision :verdict}.
   (let [{:keys [req result]}
         (exercise (fn [req] (refusal-reviewer-response req)))]
     (is (= :error (:status result)) (pr-str result))
@@ -73,8 +79,11 @@
     (is (= "reviewer-job-adc46631" (:reviewer-job result)))
     (is (= refusal-reason (:reason result)))
     (is (= (:requisition-id req) (:requisition-id result)))
-    ;; the reviewer's whole decoded reply is retained as evidence
-    (is (= false (get-in result [:reviewed-reply :accepted])))))
+    ;; all three legs of the round are retained
+    (is (= refusal-reason (get-in result [:objection :reason])))
+    (is (= false (get-in result [:objection :review :accepted])))
+    (is (= :submitted (:status (:revision result))) (pr-str (:revision result)))
+    (is (= false (get-in result [:verdict :accepted])))))
 
 (deftest refusal-without-reason-still-typed
   ;; accepted false with no reason key is still an explicit refusal; the
