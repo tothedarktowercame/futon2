@@ -23,7 +23,7 @@
            [{:reason :duplicate-site-id}])
          (mapcat
           (fn [{:keys [id source anchor kind contract transport status exception
-                       representation decoder]}]
+                       representation decoder retention]}]
             (let [file (io/file repo source)
                   text (when (.isFile file) (slurp file))]
               (cond-> []
@@ -37,7 +37,14 @@
                      (not (and representation decoder)))
                 (conj {:site id :reason :representation-contract-missing})
                 (and (= :registered-exception status) (str/blank? exception))
-                (conj {:site id :reason :exception-unexplained}))))
+                (conj {:site id :reason :exception-unexplained})
+                ;; A declared retention schema must name one durable
+                ;; replay-input store, the same shape as :contract. Declaring
+                ;; retention is a claim the site's failure boundary retains
+                ;; the exact refused input, not a response-format rule.
+                (and retention (not (keyword? retention)))
+                (conj {:site id :reason :retention-schema-invalid
+                       :retention retention}))))
           sites))]
     {:schema :wm/handoff-site-audit-v1
      :status (if (seq problems) :refused :verified)

@@ -2,6 +2,7 @@
   "Production composition root for the full-loop runner."
   (:require [cheshire.core :as json]
             [futon2.aif.wm.cascade-patch-delivery :as patch-delivery]
+            [futon2.aif.wm.delivery-failure-evidence :as delivery-evidence]
             [futon2.aif.wm.cascade-capability-dispatch :as capability-dispatch]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -570,7 +571,27 @@
               (assoc author-binding :author-job (contact-job author-response))
 
               (not= :delivered (:status delivery))
-              (assoc delivery :author-job (contact-job author-response))
+              (assoc delivery :author-job (contact-job author-response)
+                    ;; Injury adf04df0 (2026-10-31): the exact check input
+                    ;; (an abbreviated commit descriptor) was consumed by
+                    ;; check-delivery and not reachable from the pinned source
+                    ;; record, so the later diagnosis refused :cause-scope-unretained. Retain the
+                    ;; exact input, typed result and linkage durably at this
+                    ;; boundary, content-addressed and append-only. Retention
+                    ;; trouble is reported, never thrown into the failure.
+                    ;; The canonical store is used only outside test JVMs
+                    ;; (-Dfuton2.test-run=true, set by the :test alias); a
+                    ;; test passes its own :delivery-failure-evidence-root.
+                    :delivery-evidence
+                    (delivery-evidence/retain-delivery-failure!
+                      (or (:delivery-failure-evidence-root opts)
+                          (when-not (= "true" (System/getProperty "futon2.test-run"))
+                            delivery-evidence/default-store-root))
+                      {:requisition-id (:requisition-id req)
+                       :cascade-digest (:cascade-digest req)
+                       :author-job (contact-job author-response)
+                       :answer author-answer
+                       :check delivery}))
 
               (not= :accepted (:status product-check))
               (assoc product-check :author-job (contact-job author-response))

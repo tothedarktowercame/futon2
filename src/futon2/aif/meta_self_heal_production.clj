@@ -308,11 +308,18 @@
                 (refusal :meta-self-heal/diagnosis-unavailable
                          {:injury-id injury-id :request request
                           :diagnosis-status (:status response)
-                          :diagnosis-reason (or (:reason response)
+                          ;; P4-2 (click wm-click-023dde8b, 2026-10-31): the
+                          ;; producer's typed refusal keyword travels under
+                          ;; :kind (e.g. :cause-scope-unretained), not
+                          ;; :reason; reading only :reason recorded
+                          ;; :diagnosis-not-succeeded and dropped the precise
+                          ;; cause. Preserve whichever the producer used.
+                          :diagnosis-reason (or (:reason response) (:kind response)
                                                 :meta-self-heal/diagnosis-not-succeeded)
                           ;; F9: the producer port's own detail (e.g. the
                           ;; transport's 429 text) travels onto the record.
-                          :diagnosis-detail (:detail response)
+                          :diagnosis-detail (or (:detail response)
+                                                (:error (:payload response)))
                           :repair-claimed? false})
 
                 (not (map? (:diagnosis response)))
