@@ -34,6 +34,9 @@
   [target manifest finished-work? run-id]
   {:schema :wm/outer-refusal-index-entry-v1 :status :indexed
    :run-id run-id :target target :finished-work? finished-work?
+   :satisfaction {:schema :wm/satisfaction-evidence-v1
+                  :evidence :claim-mode-observation
+                  :wants-measured finished-work?}
    :failure {:kind (if finished-work? :already-satisfied
                      :outer/duplicate-effective-run)}
    :effective-run-identity

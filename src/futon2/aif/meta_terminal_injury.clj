@@ -124,13 +124,54 @@
            :failure-kind (:failure-kind detail)
            :grounded-commit grounded}))))
 
-(defn finished-work?
-  "True only when the existing terminal semantics establish finished work."
+(defn satisfaction-evidence
+  "Record whether a terminal close established that its selected wants were
+  measured, mirroring the claim-mode measurement gate in the runner
+  (`full-loop-runner/claim-measured?`, added for run 4955b6e6): a mission
+  target needs an admitted retained mission-observation; a non-mission
+  target selects no wants. A changed close is grounded work by its own
+  commit. Declaration presence alone is not a measurement."
   [record]
   (let [image (close-outcome-image (outcome record))]
-    (or (= :changed image)
-        (and (= :already-satisfied image)
-             (producer-qualified-already-satisfied? record)))))
+    (cond
+      (= :changed image)
+      {:schema :wm/satisfaction-evidence-v1
+       :evidence :grounded-change
+       :wants-measured true}
+
+      (= :already-satisfied image)
+      (let [target (or (get-in record [:failure :target])
+                       (get-in record [:failure :detail :target]))
+            observation (get-in record [:failure :detail :mission-observation])
+            mission? (str/starts-with? (str target) "M-")
+            ;; An unknown target is read as a mission: absence must not pass.
+            measured? (if (or mission? (nil? target))
+                        (= :admitted (:status observation))
+                        (or (nil? observation)
+                            (= :admitted (:status observation))))]
+        {:schema :wm/satisfaction-evidence-v1
+         :evidence (if measured? :claim-mode-observation :declaration-presence)
+         :wants-measured (boolean measured?)
+         :observation-status (when (map? observation) (:status observation))})
+
+      :else
+      {:schema :wm/satisfaction-evidence-v1
+       :evidence :close-image
+       :close-image image
+       :wants-measured false})))
+
+(defn finished-work?
+  "True only when the existing terminal semantics establish finished work,
+  and only when the selected wants were measured: an already-satisfied
+  close qualifying on declaration presence (run 4955b6e6) is evidence to
+  verify, not finished work."
+  [record]
+  (let [image (close-outcome-image (outcome record))
+        measured? (:wants-measured (satisfaction-evidence record))]
+    (and measured?
+         (or (= :changed image)
+             (and (= :already-satisfied image)
+                  (producer-qualified-already-satisfied? record))))))
 (defn- target [record]
   (let [candidate (or (get-in record [:failure :target])
                       (get-in record [:failure :detail :target]))]

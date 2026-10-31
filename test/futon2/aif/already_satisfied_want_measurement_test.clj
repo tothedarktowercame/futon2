@@ -174,3 +174,11 @@
          (testing "claim mode refuses when the only artifact IS the mission text"
            (is (= :claim-mission-text-not-an-artifact
                   (:reason (run {:mission-source-path (str (io/file repo "created.clj"))}))))))))))
+
+(deftest an-admitted-measurement-reaches-the-record-satisfaction-reads
+  (let [detail (#'runner/failure-detail
+                {:mission-observation {:status :admitted :rows [{:token :a}]}})
+        record {:failure {:kind :already-satisfied :target "M-x" :detail detail}
+                :outcome :already-satisfied}]
+    (is (= :admitted (get-in record [:failure :detail :mission-observation :status])))
+    (is (true? (:wants-measured (terminal/satisfaction-evidence record))))))

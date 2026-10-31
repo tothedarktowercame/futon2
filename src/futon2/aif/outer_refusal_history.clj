@@ -55,6 +55,7 @@
    :target (record-target record)
    :failure (select-keys (:failure record) [:kind :stage])
    :finished-work? (terminal-injury/finished-work? record)
+   :satisfaction (terminal-injury/satisfaction-evidence record)
    :inputs (record-inputs record)
    :effective-run-identity (:effective-run-identity record)})
 
