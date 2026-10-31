@@ -1905,7 +1905,13 @@
     (is (false? (:ordinary-selection-called? result)))
     (is (zero? @effects))))
 
-(deftest click-7-author-failures-continue-through-the-ledger-attempt-limit
+(deftest click-7-author-failure-stops-at-the-policy-attempt-cap
+  ;; Policy change 2026-10-31 (Joe ruling, codex-11 8538): ONE self-heal
+  ;; author attempt per injury. The click-7 fixture's attempt 1 is already
+  ;; spent, so after its failed author receipt replays and reopens attempt 2,
+  ;; the continuation prepare must refuse with the typed policy reason — no
+  ;; attempt-2 author contact, no attempt 3, and the ledger keeps its own
+  ;; [:reopened 2] state (the stop is policy, not ledger exhaustion).
   (let [dir (root)
         ledger-path (str dir "/ledger.edn")
         transaction-path (str dir "/transaction.edn")
@@ -1948,25 +1954,27 @@
                   #'production/acceptance-transaction-binding (fn [& _] {:status :valid})}
                  #(production/route! options))
         retired (str transaction-path ".attempt-1.retired.edn")]
-    (is (= :held (:status result)))
-    (is (= :author-failed (:reason result)))
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/preparation-refused (:reason result)))
+    (is (= :coordinator/preparation-refused (get-in result [:prepare :reason])))
+    (is (= [:policy/author-attempt-cap] (get-in result [:prepare :defects])))
+    (is (= :coordinator/policy-author-attempt-cap
+           (get-in result [:prepare :policy-attempt :reason])))
+    (is (= [1] (get-in result [:prepare :policy-attempt :attempts-spent])))
+    (is (= :dedicated-meta-self-heal (:route result)))
+    (is (false? (:ordinary-selection-called? result)))
     (is (= [{:attempt 1 :reason :author-failed
-             :transaction-retired {:path retired :attempt 1}}
-            {:attempt 2 :reason :author-failed
-             :transaction-retired {:path (str transaction-path ".attempt-2.retired.edn")
-                                   :attempt 2}}]
+             :transaction-retired {:path retired :attempt 1}}]
            (:continued-from result)))
     (is (.isFile (java.io.File. retired)))
-    (is (.isFile (java.io.File. (str transaction-path ".attempt-2.retired.edn"))))
-    (is (= [2 3] (mapv :attempt @author-orders)))
-    (is (= (:injury-id order) (get-in (first @author-orders) [:injury-id])))
-    (is (= [:abandoned 3 :attempt-limit-exhausted]
+    (is (not (.isFile (java.io.File. (str transaction-path ".attempt-2.retired.edn")))))
+    ;; exactly one author attempt's evidence exists and NO new author contact:
+    (is (= [] (mapv :attempt @author-orders)))
+    (is (= [:reopened 2 :author-failed]
            (-> (store/load-durable-ledger ledger-path) :ledger :entries last
                ((juxt :state :attempt :reason)))))
-    ;; F32 wake fix: the ledger's own stop is named on the result.
-    (is (= {:status :not-continued :reason :injury-not-active
-            :entry {:state :abandoned :attempt 3 :reason :attempt-limit-exhausted}}
-           (:continuation result)))))
+    ;; the stop is not reported as ledger exhaustion:
+    (is (nil? (:continuation result)))))
 
 (deftest author-failed-continuation-remains-bound-to-the-reopened-injury
   (let [dir (root)
@@ -2027,15 +2035,22 @@
         result (production/route! options)]
     (is (not= :meta-self-heal/diagnosis-transaction-mismatch (:reason result))
         (pr-str result))
-    (is (= (:injury-id order) (get-in (first @author-orders) [:injury-id])))
-    (is (= 2 (get-in (first @author-orders) [:attempt])))))
+    ;; Policy cap 2026-10-31: attempt 1 is spent, so no attempt-2 author
+    ;; contact; the refusal names the reopened injury it stopped for.
+    (is (= :refused (:status result)))
+    (is (= :coordinator/policy-author-attempt-cap
+           (get-in result [:prepare :policy-attempt :reason])))
+    (is (= (:injury-id order)
+           (get-in result [:prepare :policy-attempt :injury-id])))
+    (is (= [] @author-orders))))
 
 (deftest click-7-refused-retirement-at-attempt-two-keeps-the-record
-  ;; F32 wake fix (claude-5, 2026-10-20). Attempt 1 replays its failed author
-  ;; receipt and attempt 2 authors and fails; the ledger reopens attempt 3, but
-  ;; attempt 2's transaction cannot be retired because a directory already sits
-  ;; at its retired path (rename onto a directory fails). Before the fix the
-  ;; click reported only the refusal; the record of attempts 1 and 2 was lost.
+  ;; F32 wake fix (claude-5, 2026-10-20), re-anchored to the 2026-10-31
+  ;; one-attempt policy: attempt 1 replays its failed author receipt, reopens
+  ;; attempt 2, and the continuation stops at the policy cap. Attempt 1's
+  ;; transaction cannot be retired because a directory already sits at its
+  ;; retired path (rename onto a directory fails). Before the fix the click
+  ;; reported only the refusal; the record of attempt 1 was lost.
   (let [dir (root)
         ledger-path (str dir "/ledger.edn")
         transaction-path (str dir "/transaction.edn")
@@ -2046,7 +2061,7 @@
                            :sha256 (apply str (repeat 64 "f"))}
         _ (spit ledger-path (str (pr-str history) "\n"))
         _ (spit transaction-path (str (pr-str transaction) "\n"))
-        blocked-path (str transaction-path ".attempt-2.retired.edn")
+        blocked-path (str transaction-path ".attempt-1.retired.edn")
         _ (.mkdirs (java.io.File. blocked-path))
         author-orders (atom [])
         sealed (fn [request]
@@ -2082,20 +2097,16 @@
         retired-1 (str transaction-path ".attempt-1.retired.edn")]
     (is (= :refused (:status result)))
     (is (= :meta-self-heal/transaction-retire-failed (:reason result)))
-    (is (= 2 (:attempt result)))
     (is (= :dedicated-meta-self-heal (:route result)))
     (is (= [{:attempt 1 :reason :author-failed
-             :transaction-retired {:path retired-1 :attempt 1}}
-            {:attempt 2 :reason :author-failed
              :transaction-retired {:status :refused
                                    :reason :meta-self-heal/transaction-retire-failed
-                                   :path transaction-path :attempt 2}}]
+                                   :path transaction-path :attempt 1}}]
            (:continued-from result)))
-    (is (= [2] (mapv :attempt @author-orders)))
-    (is (.isFile (java.io.File. retired-1)))
+    (is (= [] (mapv :attempt @author-orders)))
     (is (.isFile (java.io.File. transaction-path)))
-    (is (= 2 (-> (slurp transaction-path) edn/read-string :work-order :attempt)))
-    (is (= [:reopened 3]
+    (is (= 1 (-> (slurp transaction-path) edn/read-string :work-order :attempt)))
+    (is (= [:reopened 2]
            (-> (store/load-durable-ledger ledger-path) :ledger :entries last
                ((juxt :state :attempt)))))))
 
@@ -2215,10 +2226,14 @@
                  {#'production/diagnosis-transaction-binding (fn [& _] {:status :valid})
                   #'production/acceptance-transaction-binding (fn [& _] {:status :valid})}
                  #(production/route! options))]
-    (is (= :held (:status result)))
-    (is (= :review-rejected (:reason result)))
-    (is (= 2 (:attempt result)))
-    (is (= [2] (mapv :attempt @author-orders)))
+    ;; Policy cap 2026-10-31: attempt 1 is already spent, so the continuation
+    ;; never dispatches attempt 2's author; the stop is the typed policy
+    ;; refusal, not a non-author hold at attempt 2.
+    (is (= :refused (:status result)))
+    (is (= :meta-self-heal/preparation-refused (:reason result)))
+    (is (= :coordinator/policy-author-attempt-cap
+           (get-in result [:prepare :policy-attempt :reason])))
+    (is (= [] (mapv :attempt @author-orders)))
     (is (= [{:attempt 1 :reason :author-failed
              :transaction-retired {:path (str transaction-path ".attempt-1.retired.edn")
                                    :attempt 1}}]

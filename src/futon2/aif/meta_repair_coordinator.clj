@@ -86,6 +86,110 @@
     (catch Throwable t
       (refusal :work-order/malformed {:detail (ex-message t)}))))
 
+;;; ---------------------------------------------------------------------------
+;;; One-author-attempt / one-retry-child operating caps (2026-10-31).
+;;;
+;;; Operator ruling (Joe, relayed by codex-11 dispatch 8538 after blocker
+;;; receipt run001/adf04df0-single-repair/BLOCKER-no-start-one-attempt-bound.md):
+;;; ONE self-heal author/review/enact attempt per injury and at most ONE retry
+;;; child per enacted attempt are the binding operating caps. The raw ledger
+;;; `:attempt-limit` (e.g. 3) and `:retry-limit` remain untouched history; these
+;;; gates never report ledger exhaustion (`:attempt-limit-exhausted`,
+;;; `:retry-budget-spent`) — they stop with their own typed reasons and retain
+;;; the counted evidence. Evidence is persisted ledger transitions only, so the
+;;; bound survives restarts and repeated clicks; a per-click counter would not.
+;;; Raising a cap is an explicit opt-in key (`:policy/author-attempt-cap` /
+;;; `:policy/retry-child-cap`, positive int) that no production path supplies
+;;; today; absence means the default cap of 1. Nothing silently resets an
+;;; allowance: once an attempt is spent it stays spent unless an explicit grant
+;;; with its own authority raises the cap.
+;;; ---------------------------------------------------------------------------
+
+(def default-author-attempt-cap 1)
+(def default-retry-child-cap 1)
+(def default-repair-policy
+  "The policy the production route arms by default (2026-10-31). One author
+   attempt per injury, one retry child per enacted attempt. Raises require an
+   explicit `:policy/*-cap` with their own operator authority; nothing resets
+   a spent attempt silently."
+  {:policy/author-attempt-cap default-author-attempt-cap
+   :policy/retry-child-cap default-retry-child-cap})
+(def policy-authority
+  "operator ruling 2026-10-31 (codex-11 dispatch 8538; one selfheal attempt per injury)")
+
+(defn- policy-cap
+  "Explicit cap from opts, or nil when the key is absent. A nil cap means the
+   gate is not armed at this boundary (legacy coordinator-only callers); the
+   production route arms both caps by default — see
+   `default-repair-policy`."
+  [opts key]
+  (let [v (get opts key)]
+    (when (and (integer? v) (pos? v)) v)))
+
+(defn spent-author-attempts
+  "Attempt numbers this injury has already consumed, read only from sealed
+   ledger transitions: a `:claimed` entry spends its attempt, and so does any
+   later state of that attempt (`:authored :reviewed :enacted :discharged
+   :abandoned`). A `:reopened` entry records the NEXT (fresh) attempt and is
+   deliberately not counted. An injury still `:open` has spent nothing."
+  [history injury-id]
+  (->> (:entries history)
+       (filter #(and (= injury-id (:injury-id %))
+                     (contains? #{:claimed :authored :reviewed :enacted
+                                  :discharged :abandoned}
+                                (:state %))
+                     (integer? (:attempt %)) (pos? (:attempt %))))
+       (map :attempt)
+       (distinct)
+       (sort)
+       (vec)))
+
+(defn author-attempt-policy
+  "Shared boundary decision for every site that could start (or continue into)
+  a NEW author attempt for an injury: fresh `prepare`, the parent's
+  author-failed continuation, and preparation on a later click. Refuses with
+  `:coordinator/policy-author-attempt-cap` once `cap` attempts are spent."
+  ([history injury-id] (author-attempt-policy history injury-id nil))
+  ([history injury-id opts]
+   (let [cap (policy-cap opts :policy/author-attempt-cap)
+         spent (spent-author-attempts history injury-id)]
+     (if (and cap (>= (count spent) cap))
+       (refusal :coordinator/policy-author-attempt-cap
+                {:injury-id injury-id :cap cap :attempts-spent spent
+                 :policy :one-author-attempt-per-injury
+                 :authority policy-authority})
+       {:status :allowed :cap (or cap :unlimited) :attempts-spent spent}))))
+
+(defn recorded-retry-child-clicks
+  "Distinct retry-child click ids the ledger has already recorded for this
+   injury at this attempt (`:enacted` entries carry `:retry-click`)."
+  [history injury-id attempt]
+  (->> (:entries history)
+       (filter #(and (= injury-id (:injury-id %))
+                     (= attempt (:attempt %))
+                     (string? (:retry-click %))))
+       (map :retry-click)
+       (distinct)
+       (vec)))
+
+(defn retry-child-policy
+  "Shared boundary decision for the inconclusive-retry requeue loop. Allows the
+   first retry child of an enacted attempt; refuses any further child with
+   `:coordinator/policy-retry-child-cap` (a typed hold, never the ledger's own
+   `:retry-budget-spent` exhaustion state)."
+  ([history injury-id attempt] (retry-child-policy history injury-id attempt nil))
+  ([history injury-id attempt opts]
+   (let [cap (policy-cap opts :policy/retry-child-cap)
+         clicks (recorded-retry-child-clicks history injury-id attempt)]
+     (if (and cap (>= (count clicks) cap))
+       (refusal :coordinator/policy-retry-child-cap
+                {:injury-id injury-id :attempt attempt :cap cap
+                 :recorded-retry-clicks clicks
+                 :policy :one-retry-child-per-enacted-attempt
+                 :authority policy-authority})
+       {:status :allowed :cap (or cap :unlimited)
+        :recorded-retry-clicks clicks}))))
+
 (defn seal-port-receipt
   "Seal a deterministic fake/real port response. Payload is phase-specific."
   [receipt]
@@ -272,6 +376,7 @@
           active-result (ledger/effective-active-injuries history authority-verifier)
           active (:injuries active-result)
           injury-id (or (:injury-id options) (first (sort (keys active))))
+          attempt-policy (author-attempt-policy history injury-id options)
           entry (get active injury-id)
           attempt (:attempt entry)
           repair-id (or (:repair-id entry)
@@ -310,10 +415,15 @@
                     (not= :computed (:status active-result)) (conj :active-set/invalid)
                     (empty? active) (conj :active-injury/required)
                     (nil? entry) (conj :active-injury/not-found)
+                    (= :refused (:status attempt-policy))
+                    (conj :policy/author-attempt-cap)
                     (not= :valid (:status (verify-work-order order)))
                     (conj :work-order/invalid))]
       (if (seq defects)
-        (refusal :coordinator/preparation-refused {:defects defects})
+        (refusal :coordinator/preparation-refused
+                 (cond-> {:defects defects}
+                   (= :refused (:status attempt-policy))
+                   (assoc :policy-attempt attempt-policy)))
         {:status :prepared :work-order order
          :transaction (seal-transaction {:status :active :work-order order
                                          :receipts []})}))
@@ -606,23 +716,37 @@
          :ledger history
          :transaction transaction
          :retry-click (:retry-click latest)}
-        (let [next-n (inc n)
-              retry-click-id (:retry-click-id ports)
-              _ (when-not (fn? retry-click-id)
-                  (stop! (refusal :coordinator/retry-click-id-unavailable
-                                  {:ledger history :transaction transaction})))
-              new-id (retry-click-id repair-id attempt next-n patch-sha)
-              requeued (accepted! (ledger/append-requeue history injury-id new-id
-                                                         authority-verifier))
-              history' (:ledger requeued)]
-          (if (= :abandoned (get-in requeued [:entry :state]))
-            {:status :abandoned :reason :retry-budget-spent
-             :ledger history' :transaction transaction}
-            ;; Persist the ledger entry before calling the retry port. A resume
-            ;; queues an appended entry that lacks a receipt; if the port ran but
-            ;; transaction persistence failed, its stable click id names the same
-            ;; meta-retry child on the repeated call.
-            (recur history' transaction)))))))
+        (let [child-policy (retry-child-policy history injury-id attempt ports)]
+          (if (= :refused (:status child-policy))
+            ;; Operator cap (2026-10-31): the enacted attempt's one retry child
+            ;; is already recorded; do not mint or dispatch another. A typed
+            ;; hold with the counted evidence — never the ledger's own
+            ;; :retry-budget-spent exhaustion state.
+            {:status :held
+             :reason :coordinator/policy-retry-child-cap
+             :phase :retry
+             :ledger history
+             :transaction transaction
+             :retry-click (:retry-click latest)
+             :retry-child-policy child-policy}
+            (let [next-n (inc n)
+                  retry-click-id (:retry-click-id ports)
+                  _ (when-not (fn? retry-click-id)
+                      (stop! (refusal :coordinator/retry-click-id-unavailable
+                                      {:ledger history :transaction transaction})))
+                  new-id (retry-click-id repair-id attempt next-n patch-sha)
+                  requeued (accepted!
+                            (ledger/append-requeue history injury-id new-id
+                                                   authority-verifier))
+                  history' (:ledger requeued)]
+              (if (= :abandoned (get-in requeued [:entry :state]))
+                {:status :abandoned :reason :retry-budget-spent
+                 :ledger history' :transaction transaction}
+                ;; Persist the ledger entry before calling the retry port. A resume
+                ;; queues an appended entry that lacks a receipt; if the port ran but
+                ;; transaction persistence failed, its stable click id names the same
+                ;; meta-retry child on the repeated call.
+                (recur history' transaction)))))))))
 
 (defn coordinate
   "Run or resume one dedicated transaction. Every effect receipt is retained,
@@ -649,19 +773,30 @@
         (stop! (refusal :coordinator/input-refused {:defects defects})))
 
       ;; Claim is the only coordinator-created boundary without a port receipt.
+      ;; The one-author-attempt cap (2026-10-31) is checked exactly when a NEW
+      ;; claim would be created: a resumed transaction whose claim already
+      ;; exists continues its own attempt; no fresh attempt may be claimed
+      ;; once the cap is spent. Evidence is the sealed ledger, so the bound
+      ;; holds across clicks and restarts.
       (let [latest0 (latest-transition history0 injury-id)
             claim (if (#{:open :reopened} (:state latest0))
-                    (accepted!
-                     (append-transition!
-                      history0 {:injury-id injury-id :state :claimed
-                                :attempt attempt :repair-id repair-id
-                                :algorithm "dedicated-meta-self-heal"
-                                :author-session (:author-session order)
-                                :reviewer-session (:reviewer-session order)
-                                :repair-reviewer-session
-                                (:repair-reviewer-session order)
-                                :work-order-pin (:work-order-pin order)}
-                      authority-verifier))
+                    (let [attempt-policy (author-attempt-policy history0 injury-id
+                                                                ports)]
+                      (if (= :refused (:status attempt-policy))
+                        (stop! (assoc attempt-policy
+                                      :would-claim-attempt attempt
+                                      :transaction transaction))
+                        (accepted!
+                         (append-transition!
+                          history0 {:injury-id injury-id :state :claimed
+                                    :attempt attempt :repair-id repair-id
+                                    :algorithm "dedicated-meta-self-heal"
+                                    :author-session (:author-session order)
+                                    :reviewer-session (:reviewer-session order)
+                                    :repair-reviewer-session
+                                    (:repair-reviewer-session order)
+                                    :work-order-pin (:work-order-pin order)}
+                          authority-verifier))))
                     {:ledger history0})
             history1 (:ledger claim)
             claim-entry (latest-transition history1 injury-id)
