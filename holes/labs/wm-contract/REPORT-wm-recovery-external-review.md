@@ -167,4 +167,8 @@ Probe readiness never established admission readiness; the reconciliation's
   (`:meta-self-heal/ledger-unreadable` on valid no-provider admission) is
   demonstrated fixed by the paired cold-boot witness
   (`test/f4a-cold-boot-no-provider` red `df714ad4d` / green `3b6dbc5cf`).
+  The reviewed test-only delta was merged to futon3c master as `7eaaa635f`
+  (one new 177-line test file, no source changes) at the idle boundary after
+  the click; no reload performed. Review boundary: the service entry
+  `runner-service/click!`, not the HTTP transport.
 
