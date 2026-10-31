@@ -30,9 +30,47 @@
    "previousOutcome" "previousInputDigest" "currentChoice"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
+   "factorizedPreference" "calibrationAuthorizations"
+   "factorizationAuthorizations"
 ])
 
 (defn not-recomputable [s] {"not-recomputable" s})
+
+(defn- calibration-json [cal]
+  (when (map? cal)
+    {"identity" (:identity cal) "version" (:version cal)
+     "authority" (:authority cal)
+     "registration-token" (:registration-token cal)
+     "focused-cost" (:focused-cost cal)
+     "related-cost" (:related-cost cal)
+     "unrelated-cost" (:unrelated-cost cal)}))
+
+(defn factorized-preference-record
+  "The retained :wm/factorized-preference-v1 carrier of RECORD, or nil. The
+  sole producer (futon2.aif.factorized-preference-sut) is deliberately absent
+  from the serving composition, so absence is a fact about the run, not a
+  missing export. Values are never guessed: no carrier means nil."
+  [record]
+  (some #(when (and (map? %) (= :wm/factorized-preference-v1 (:schema %))) %)
+        [(get-in record [:factorized-preference])
+         (get-in record [:decision :factorized-preference])
+         (get-in record [:decision :selection-certificate :factorized-preference])
+         (get-in record [:close :factorized-preference])]))
+
+(defn factorized-preference
+  "Q9's deciding carrier in the JSON shape wm-check-run-facts reads: nil (the
+  verified negative) when the record carries none."
+  [record]
+  (when-let [carrier (factorized-preference-record record)]
+    (let [cert (:certificate carrier)]
+      (when (map? cert)
+        {"calibration" (calibration-json (:calibration cert))
+         "selector-authority" (:selector-authority cert)
+         "factorization-identity" (:factorization-identity cert)
+         "factorization-version" (:factorization-version cert)
+         "factorization-authority" (:factorization-authority cert)
+         "calibration-authorization" (:calibration-authorization cert)
+         "factorization-authorization" (:factorization-authorization cert)}))))
 (defn- sorted-ids [xs] (vec (sort (map str xs))))
 (defn- present? [x] (not (and (map? x) (contains? x "not-recomputable"))))
 
@@ -557,8 +595,33 @@
                                       (nr "Agency roster snapshot unavailable")))
                "seatsUsed" (if (seq used) (sorted-ids used)
                                (nr "participant seat ids absent"))
-               "completionPreferencePairs" (nr "reachable completion-preference pairs absent")
-               "completionPairsStrictlyPreferred" (nr "strict completion-preference comparisons absent")
+               "completionPreferencePairs"
+               (nr "no runtime completion-preference census producer: legacy habit store retired, Q9 SUT absent from serving")
+               "completionPairsStrictlyPreferred"
+               (nr "no runtime strict-preference census producer: legacy habit store retired, Q9 SUT absent from serving")
+               ;; Q9's deciding carriers (Requirements.lean Q9 reads only the
+               ;; factorized-preference certificate and its authorization
+               ;; registries; the pair censuses above are unread carriers).
+               ;; A record carrying no :wm/factorized-preference-v1 carrier
+               ;; supplies a VERIFIED NEGATIVE (nil), which the generated
+               ;; checker renders as `factorizedPreference := none` and Lean
+               ;; evaluates Q9 := false -- a decided verdict, never a guess.
+               ;; nil is only correct because the sole producer
+               ;; (futon2.aif.factorized-preference-sut) is deliberately
+               ;; absent from the serving composition, so a carrier cannot
+               ;; exist outside the record.
+               "factorizedPreference" (factorized-preference record)
+               "calibrationAuthorizations"
+               (vec (for [e (get-in (factorized-preference-record record)
+                                    [:registries :calibration] [])]
+                      {"receipt" (:receipt e)
+                       "calibration" (calibration-json (:calibration e))
+                       "authorized-by" (:authorized-by e)}))
+               "factorizationAuthorizations"
+               (vec (for [e (get-in (factorized-preference-record record)
+                                    [:registries :factorization] [])]
+                      {"receipt" (:receipt e) "identity" (:identity e)
+                       "version" (:version e) "authority" (:authority e)}))
                }
         ;; a reading-family record's Q4 comes from its carrier alone
         facts (merge facts q4)
