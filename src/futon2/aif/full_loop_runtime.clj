@@ -388,7 +388,8 @@
               "Keep this requisition and committed patch; no new selection.\n"))
        (pr-str req)))
 
-(defn- open-cascade-review-prompt [{:keys [requisition author-answer]}]
+(defn- open-cascade-review-prompt
+  [{:keys [requisition author-answer claim-defects]}]
   (str "Independently review this held-cascade repair. Verify the committed "
        "source and every hole decision. Confirm that patch.var names a function "
        "of the context map {:cascade-digest :phase}, not a data var; a data var "
@@ -397,10 +398,44 @@
        "the author's requisition-id, cascade-digest, patch {source-digest} "
        "naming the committed source you verified, and accepted-by set to your "
        "own seat id. Do not restate decisions; acceptance binds the author's "
-       "decisions to that verified source digest.\n\nREQUISITION:\n"
+       "decisions to that verified source digest."
+       (when (seq claim-defects)
+         (str "\n\nCLAIM/SOURCE DEFECTS THE REVIEWER MUST ACKNOWLEDGE: this "
+              "author's JSON decisions claim already diverged from the "
+              "verified function output — the author had one correction "
+              "round and did not resolve it. The defects are: "
+              (json/generate-string (mapv :kind claim-defects))
+              ". Your reply must additionally include acknowledged-defects: "
+              "an array naming every defect kind above (as strings); an "
+              "acceptance that does not name every kind is not a valid "
+              "acceptance."))
+       "\n\nREQUISITION:\n"
        (json/generate-string requisition)
        "\n\nAUTHOR ANSWER:\n"
        (json/generate-string author-answer)))
+
+(defn- open-cascade-claim-correction-prompt
+  "One bounded claim-correction round BEFORE any reviewer contact (row
+  CLAIM-MATCHES-FALSE-UNCONSUMED): on run ebbbe42a a retained
+  :author-response/decisions-mismatch grounded because nothing read
+  validate-product's :author-response-defects, and on run adc46631 the same
+  divergence cost a full reviewer turn before the reviewer refused it by
+  hand. The author gets one round to make the JSON claim match what the
+  committed function verifiably returns."
+  [{:keys [requisition defects delivered-decisions]}]
+  (str "Your previous answer's decisions claim diverged from what your "
+       "committed patch function actually returns. Amend your answer so the "
+       "JSON decisions claim matches the verified function output exactly: "
+       "same requisition-id, same cascade-digest, same patch contract, one "
+       "correction round only. An unchanged or still-diverging resubmission "
+       "is not corrected; the defect then reaches the reviewer as a defect "
+       "the reviewer must acknowledge.\n\n"
+       "DEFECTS (CLAIMED-THEN-FOUND):\n"
+       (json/generate-string defects)
+       "\n\nTHE FUNCTION'S VERIFIED DECISIONS (match this):\n"
+       (json/generate-string delivered-decisions)
+       "\n\nREQUISITION:\n"
+       (json/generate-string requisition)))
 
 (defn- open-cascade-objection-revision-prompt
   "One bounded revision round after an explicit reviewer refusal; the objection returns to the author verbatim."
@@ -583,9 +618,85 @@
                                 (if (= :error (:status loaded)) loaded
                                   (open-resume/validate-product req author-answer
                                                                (:product loaded) opts)))
-                reviewer-response (when (= :accepted (:status product-check))
-                                    (reviewer-contact {:requisition req
-                                                       :author-answer author-answer}))
+                ;; CLAIM-MATCHES-FALSE-UNCONSUMED: a claim/source divergence
+                ;; computed by validate-product is consumed HERE, before any
+                ;; reviewer is contacted. One correction round goes back to
+                ;; the author; if it does not resolve, the defect reaches the
+                ;; reviewer stated as a defect the reviewer must acknowledge.
+                claim-defects (when (= :accepted (:status product-check))
+                                (seq (get-in product-check
+                                             [:answer-delivery
+                                              :author-response-defects])))
+                claim-correction-contact
+                (or (:open-cascade-claim-correction-answer-fn opts)
+                    (:open-cascade-author-answer-fn opts)
+                    (designated-agent-answer-fn
+                     opts author open-cascade-claim-correction-prompt "work"))
+                claim-round
+                (when claim-defects
+                  (let [response (claim-correction-contact
+                                  {:requisition req :defects (vec claim-defects)
+                                   :delivered-decisions (:decisions product-check)
+                                   :round 1 :limit 1})
+                        answer (handoff/response-map response)
+                        binding (when answer
+                                  (open-resume/validate-author-binding req answer))
+                        delivery* (when (= :bound (:status binding))
+                                    (patch-delivery/check-delivery answer))
+                        loaded* (when (= :delivered (:status delivery*))
+                                  (open-resume/hot-load!
+                                   ledger req answer
+                                   (or (:open-cascade-patch-loader opts) patch-loader)))
+                        check (when loaded*
+                                (if (= :error (:status loaded*)) loaded*
+                                  (open-resume/validate-product req answer
+                                                               (:product loaded*) opts)))
+                        resolved? (and (map? answer)
+                                       (= :accepted (:status check))
+                                       (empty? (get-in check
+                                               [:answer-delivery
+                                                :author-response-defects]))
+                                       ;; an unchanged resubmission is not a
+                                       ;; correction
+                                       (not= (dissoc answer :format-correction)
+                                             (dissoc author-answer
+                                                     :format-correction)))
+                        usable? (and (map? answer)
+                                     (= :accepted (:status check)))]
+                    {:response response :author-job (contact-job response)
+                     :answer answer :check check
+                     :resolved? resolved? :usable? usable?}))
+                ;; The answer under review: the correction when it resolved
+                ;; (or at least produced a valid alternative), else the
+                ;; original, whose product-check already accepted.
+                review-answer
+                (cond
+                  (and claim-round (:resolved? claim-round))
+                  (:answer claim-round)
+                  (and claim-round (:usable? claim-round))
+                  (:answer claim-round)
+                  :else author-answer)
+                review-product-check
+                (cond
+                  (and claim-round (or (:resolved? claim-round)
+                                       (:usable? claim-round)))
+                  (:check claim-round)
+                  :else product-check)
+                review-claim-defects
+                (if (and claim-round (:resolved? claim-round))
+                  nil
+                  (or (and claim-round (:usable? claim-round)
+                           (seq (get-in (:check claim-round)
+                                        [:answer-delivery
+                                         :author-response-defects])))
+                      claim-defects))
+                reviewer-response (when (= :accepted (:status review-product-check))
+                                    (reviewer-contact
+                                     (cond-> {:requisition req
+                                              :author-answer review-answer}
+                                       (seq review-claim-defects)
+                                       (assoc :claim-defects
+                                              (vec review-claim-defects)))))
                 reviewed (when reviewer-response
                            (handoff/response-map reviewer-response))
                 ;; An explicit reviewer refusal is a review outcome, not a
@@ -610,12 +721,56 @@
                 ;; a second copy. Mismatched pins retain the original validator
                 ;; path, and reviewer identity is still checked there.
                 accepted-answer
-                (if (and (= (:requisition-id author-answer) (:requisition-id reviewed))
-                         (= (:cascade-digest author-answer) (:cascade-digest reviewed))
-                         (= (get-in author-answer [:patch :source-digest])
+                (if (and (= (:requisition-id review-answer) (:requisition-id reviewed))
+                         (= (:cascade-digest review-answer) (:cascade-digest reviewed))
+                         (= (get-in review-answer [:patch :source-digest])
                             (get-in reviewed [:patch :source-digest])))
-                  (assoc author-answer :accepted-by (:accepted-by reviewed))
+                  (assoc review-answer :accepted-by (:accepted-by reviewed))
                   reviewed)
+                ;; The reviewer of record must acknowledge every stated
+                ;; claim defect kind before acceptance counts (row
+                ;; CLAIM-MATCHES-FALSE-UNCONSUMED). The acknowledgment is
+                ;; retained on the accepted answer and in the delivery
+                ;; record; an accepting reply that does not name every kind
+                ;; is a typed close, not a ground.
+                defect-kinds (vec (distinct (map :kind review-claim-defects)))
+                acknowledged
+                (when (seq defect-kinds)
+                  (vec (distinct
+                        (keep (fn [v] (cond (keyword? v) v
+                                            (string? v) (keyword v)))
+                              (:acknowledged-defects reviewed)))))
+                unacknowledged (vec (remove (set acknowledged) defect-kinds))
+                defect-acknowledgment
+                (when (and (seq defect-kinds)
+                           (nil? review-refusal)
+                           (map? reviewed)
+                           (empty? unacknowledged))
+                  {:defects (vec review-claim-defects)
+                   :acknowledged-by (:accepted-by reviewed)
+                   :acknowledged defect-kinds
+                   :claim-correction
+                   (when claim-round
+                     {:round 1 :limit 1
+                      :outcome (if (:resolved? claim-round) :resolved :unresolved)
+                      :author-job (:author-job claim-round)})})
+                unacknowledged-refusal
+                (when (and (seq defect-kinds)
+                           (nil? review-refusal)
+                           (map? reviewed)
+                           (seq unacknowledged))
+                  {:status :error
+                   :kind :open-cascade-review-defect-unacknowledged
+                   :reviewer reviewer
+                   :reviewer-job (contact-job reviewer-response)
+                   :defects (vec review-claim-defects)
+                   :unacknowledged unacknowledged
+                   :requisition-id (:requisition-id req)
+                   :cascade-digest (:cascade-digest req)
+                   :claim-correction
+                   (when claim-round
+                     {:round 1 :limit 1 :outcome :unresolved
+                      :author-job (:author-job claim-round)})})
                 ;; One bounded objection round (REVIEW-REFUSAL-NO-FORMATIVE-
                 ;; LOOP): when the reviewer's explicit refusal carries a
                 ;; nonblank reason, the same author gets the same requisition
@@ -832,9 +987,15 @@
                 (:result round)
                 review-refusal)
 
+              (some? unacknowledged-refusal)
+              unacknowledged-refusal
+
               :else
               (open-resume/handle-error!
-               ledger error author reviewer accepted-answer
+               ledger error author reviewer
+               (cond-> accepted-answer
+                 defect-acknowledgment
+                 (assoc :claim-defects-acknowledgment defect-acknowledgment))
                {:cascade-capability-routes (capability-dispatch/routes opts)
                 :click-budget (:click-budget opts)
                 :selection-counter (:selection-counter opts)
@@ -851,7 +1012,23 @@
                 (and correction (:answer-delivery result))
                 (assoc-in [:answer-delivery :format-correction] correction)
                 (and correction (get-in result [:result :answer-delivery]))
-                (assoc-in [:result :answer-delivery :format-correction] correction))))))))
+                (assoc-in [:result :answer-delivery :format-correction] correction)
+                (and claim-round (:answer-delivery result))
+                (assoc-in [:answer-delivery :claim-correction]
+                          {:round 1 :limit 1
+                           :outcome (if (:resolved? claim-round) :resolved :unresolved)
+                           :author-job (:author-job claim-round)})
+                (and claim-round (get-in result [:result :answer-delivery]))
+                (assoc-in [:result :answer-delivery :claim-correction]
+                          {:round 1 :limit 1
+                           :outcome (if (:resolved? claim-round) :resolved :unresolved)
+                           :author-job (:author-job claim-round)})
+                (and defect-acknowledgment (:answer-delivery result))
+                (assoc-in [:answer-delivery :claim-defects-acknowledgment]
+                          defect-acknowledgment)
+                (and defect-acknowledgment (get-in result [:result :answer-delivery]))
+                (assoc-in [:result :answer-delivery :claim-defects-acknowledgment]
+                          defect-acknowledgment))))))))
 
 (defn reselect-q6-refusal
   "Run the inner judge, reusing the single click-local reading reselection port
