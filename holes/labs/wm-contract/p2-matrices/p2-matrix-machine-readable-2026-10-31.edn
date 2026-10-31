@@ -1,8 +1,8 @@
-;; P2 machine-readable criteria matrix — 2026-10-31, zai-6. Rev 3 (correction table applied).
+;; P2 machine-readable criteria matrix — 2026-10-31, zai-6. Rev 4 (adjudication ec15959e8 + D1 verification 727db74ab applied). Final account.
 ;; status vocabulary: :observed :violated :unknown :not-exercised
 ;; :observed rows may carry unresolved subclauses noted in comments; "clean" observations are unqualified.
 {:schema :wm/p2-criteria-matrix-v1
- :revision 3
+ :revision 4
  :generated-at "2026-10-31"
  :author "zai-6"
  :corrections "CORRECTIONS-zai6-2026-10-31.md"
@@ -18,13 +18,13 @@
           A4 :observed            ;; receipts ad922f96 / 8b46822b / 3-want census
           B1 :observed            ;; scope: adopted missions-excursions-tickets population (M181/E239/T188)
           B2 :observed            ;; R28 failure-retention path NOT exercised
-          B3 :unknown             ;; identical x3 scores with tie? false — contradiction disclosed
+          B3 :unknown             ;; target-identity question; contradiction withdrawn (ec15959e8: tied-cascades=all minima, tie?=distinct targets); no recomputation claimed
           B4 :observed            ;; outer only; inner prediction clause unresolved
           C1 :observed            ;; author-response/decisions-mismatch defect retained
           C2 :unknown             ;; manifest-before-dispatch observed; pre-send durability unproven
           C3 :observed
           C4 :observed            ;; boundary: reviewer falsifier+replay; prose alone insufficient
-          D1 :observed            ;; receipt 4104abd5; PRIOR 'no measurements' claim corrected
+          D1 :observed            ;; receipt 4104abd5; coordinator-verified 727db74ab (1 reached/2 untouched); scope: class-C4 declaration presence in mission Markdown, not behavioral execution
           D2 :observed            ;; receipts b1e78e0c/0c7a1c00; patterns empty by branch
           D3 :observed
           D4 :observed            ;; retention gaps incl. unrelated outer-task-selection receipt gap
@@ -47,7 +47,7 @@
           A4 :not-exercised       ;; failed before pre-author boundary
           B1 :observed            ;; 544->545 diff = M-typed-memories Q6 rearm (inputs c0441de6 != c1801780); not drift
           B2 :not-exercised       ;; selection-route not-required; R28 path not exercised
-          B3 :unknown             ;; identical x3 scores, tie? false — same contradiction
+          B3 :unknown             ;; target-identity question; contradiction withdrawn per ec15959e8; no recomputation claimed
           B4 :observed            ;; outer only; inner unresolved
           C1 :unknown             ;; cascade author job existed; identity continuity unobserved
           C2 :unknown             ;; external author contact occurred; no pre-send checkpoint pin retained
@@ -62,7 +62,7 @@
           E3 :unknown             ;; own-pair inputs differ (c0441de6 vs c1801780, rearm legitimate) but outer-repeat-comparison :not-reached
           E4 :violated}           ;; actual pair 3415->f805: restart 00:01Z + admission fix between
    :q-verdicts {:Q1 :holds :Q3 :holds :Q4 :holds :Q5 :holds :Q6 :holds :Q7 :holds :Q9 :unverifiable
-                :conforms false}}
+                :conforms false}}}  ;; closes q-verdicts, run entry, and the :runs map (brace imbalance fixed in rev 4)
  :r28-search {:verdict :live-witness-owed
               :scope "selected-target-reading redecision (not occurrence-square)"
               :population "24 retained tick-run-records containing the phase name (bounded, 2026-10-16..31)"
