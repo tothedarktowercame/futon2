@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: a67d3e49 discharged, P5 click 3 running (2026-10-31)
+
+Medic click wm-click-630f0b74 discharged a67d3e49 at ordinal 134, fixed by 79755af7c. Budget 8 before click 3. Evidence merge 89b15a9a9 removed that fix on main for a few minutes because 22c845732 committed its counterfactual; 8b833eed9 restored it, and the serving JVM never loaded the removal.
+
 ## Latest execution checkpoint: P5 click 2 refused, injury a67d3e49 (2026-10-31)
 
 Click wm-click-502a5b4d (run 0ba3370c) repeated M-typed-memories. The duplicate-run guard refused it before any author contact, the close rejected :refused, and the fallback closed :build-failed, opening injury a67d3e49 (ordinal 133). Close fix 79755af7c and pre-selection exclusion f6fa625cf are merged, not loaded. Budget 9. Next: zai-5's finished-work fix, reload, medic a67d3e49, then the next click.
