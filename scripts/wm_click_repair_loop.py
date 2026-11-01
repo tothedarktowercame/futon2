@@ -78,6 +78,11 @@ LEDGER = STATE / "ledger.jsonl"
 LOGFILE = STATE / "loop.log"
 STOP_FILE = STATE / "STOP"
 ALERTS = STATE / "alerts.jsonl"
+# Standing signature rows the owner has acknowledged in writing, each with the
+# reason and the open packet. They stay in every verdict and alert record; they
+# are excluded only from the repeat comparison, so a known gap awaiting a
+# decision cannot pause the loop while other defects are being found.
+ACKNOWLEDGED = STATE / "acknowledged.json"
 AGENCY = "http://localhost:7070"
 SEND = F3C / "scripts" / "agency_send.py"
 EVAL = F3C / "scripts" / "proof-eval.sh"
@@ -434,6 +439,25 @@ def click_record(lr: dict, click_id: str | None) -> str | None:
 def click_alert(verdict: dict | None) -> list[str] | None:
     """None when the click conforms; otherwise its alert signature."""
     return None if verdict and verdict["conforms"] else alert_signature(verdict)
+
+
+def acknowledged_rows() -> dict[str, dict]:
+    """row -> {why, ref} from ACKNOWLEDGED; read at every click so an entry
+    added while the loop runs counts from the next click. Malformed file: none
+    acknowledged (the loop then pauses sooner, never later)."""
+    try:
+        rows = json.loads(ACKNOWLEDGED.read_text()) if ACKNOWLEDGED.is_file() else []
+        return {r["row"]: r for r in rows if isinstance(r, dict) and r.get("row") and r.get("why")}
+    except (ValueError, TypeError, KeyError):
+        return {}
+
+
+def unacknowledged(signature: list[str] | None, acknowledged: dict[str, dict]) -> list[str] | None:
+    """The part of a signature that is not acknowledged; None when nothing is left."""
+    if signature is None:
+        return None
+    rest = [row for row in signature if row not in acknowledged]
+    return rest or None
 
 
 def alert_block(log_path: str | None) -> str:
@@ -988,22 +1012,27 @@ def run(args) -> int:
         if c["rc"] == 3 and not c["spent"]:
             return stop(args, "wm_click.sh could not launch (exit 3: seats or single-flight held 30 min)", 1)
         if args.continuous:
+            acknowledged = acknowledged_rows()
+            open_rows = unacknowledged(c["alert"], acknowledged)
             record({"event": "verdict", "click-id": c["click-id"], "run-id": c["run-id"],
-                    "conforms": c["alert"] is None, "signature": c["alert"]})
-            if c["alert"] is None:
-                previous_alert = None
-            else:
-                repeated = previous_alert == c["alert"]
+                    "conforms": c["alert"] is None, "signature": c["alert"],
+                    "acknowledged": [r for r in (c["alert"] or []) if r in acknowledged],
+                    "open": open_rows})
+            if c["alert"] is not None:
+                repeated = open_rows is not None and previous_alert == open_rows
                 queue_alert(c, repeated)
                 if repeated:
                     return stop(args, "paused: the same requirements failed on two consecutive clicks "
-                                      f"({'; '.join(c['alert'])}); fix, then restart. Queue: {ALERTS}", 1)
-                notify_alert(args, c)
-                previous_alert = c["alert"]
+                                      f"({'; '.join(open_rows)}); fix, then restart. Queue: {ALERTS}", 1)
+                if open_rows is not None:
+                    notify_alert(args, c)
+                else:
+                    log(f"click {c['n']}: only acknowledged rows failed ({'; '.join(c['alert'])}); no bell")
+            previous_alert = open_rows
         if c["carried"]:
             quiet, fault_repairs = 0, []
             continue
-        lawful_stop = args.continuous and c["alert"] is None and c["outcome"] in DEBUG
+        lawful_stop = args.continuous and open_rows is None and c["outcome"] in DEBUG
         if c["outcome"] in DECIDED or c["outcome"] in WAIT or lawful_stop:
             quiet += 1
             if quiet >= args.stall:

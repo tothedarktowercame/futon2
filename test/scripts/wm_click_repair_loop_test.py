@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import contextlib
 import io
 import subprocess
@@ -311,7 +312,7 @@ class ContinuousModeTest(unittest.TestCase):
             self.assertIsNone(loop.read_verdict(str(Path(td) / "no-such-record.edn")))
         self.assertEqual(["verdict absent"], loop.click_alert(None))
 
-    def run_continuous(self, clicks):
+    def run_continuous(self, clicks, acknowledged=None):
         loop = load_loop()
         args = loop.parse_args([
             "run", "--clicks", str(len(clicks)), "--continuous", "--owner", "claude-2",
@@ -332,6 +333,7 @@ class ContinuousModeTest(unittest.TestCase):
              mock.patch.object(loop, "LOGFILE", Path(td) / "loop.log"), \
              mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
              mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
+             mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "acknowledged.json"), \
              mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
              mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)) as reload, \
              mock.patch.object(loop, "fire", side_effect=fire), \
@@ -339,6 +341,8 @@ class ContinuousModeTest(unittest.TestCase):
              mock.patch.object(loop, "notify_alert") as notify_alert, \
              mock.patch.object(loop, "repair") as repair, \
              mock.patch.object(loop, "log"):
+            if acknowledged is not None:
+                (Path(td) / "acknowledged.json").write_text(json.dumps(acknowledged))
             code = loop.run(args)
             alerts = [l for l in (Path(td) / "alerts.jsonl").read_text().splitlines()] \
                 if (Path(td) / "alerts.jsonl").exists() else []
@@ -370,6 +374,25 @@ class ContinuousModeTest(unittest.TestCase):
         self.assertEqual(0, r["repairs"], "a lawful abstention and alerts dispatch no repair seat")
         self.assertEqual(4, r["events"].count("verdict"))
         self.assertEqual(1 + 3, r["reloads"], "one reload at start, then one before each later click")
+
+    def test_acknowledged_rows_are_recorded_but_never_pause(self):
+        ack = [{"row": "work Q9 violated", "why": "factorized-preference producer absent from serving",
+                "ref": "packets/L5-7-D-q9-factorized-preference-into-serving.md"}]
+        r = self.run_continuous([{"alert": ["work Q9 violated"]},
+                                 {"alert": ["work Q9 violated"]},
+                                 {"alert": ["work Q9 violated"]}], acknowledged=ack)
+        self.assertEqual(0, r["code"])
+        self.assertTrue(r["stop"].startswith("done: 3 clicks spent"))
+        self.assertEqual(3, len(r["alerts"]), "every failing verdict is still queued")
+        self.assertEqual(0, r["belled"], "an acknowledged standing row does not bell the owner")
+        unacked = self.run_continuous([{"alert": ["work Q7 violated", "work Q9 violated"]},
+                                       {"alert": ["work Q7 violated", "work Q9 violated"]}], acknowledged=ack)
+        self.assertEqual(1, unacked["code"])
+        self.assertIn("work Q7 violated", unacked["stop"])
+        self.assertNotIn("Q9", unacked["stop"], "the pause names only the open rows")
+        malformed = self.run_continuous([{"alert": ["work Q9 violated"]},
+                                         {"alert": ["work Q9 violated"]}], acknowledged={"row": "x"})
+        self.assertEqual(1, malformed["code"], "a malformed acknowledgement file acknowledges nothing")
 
 
 if __name__ == "__main__":
