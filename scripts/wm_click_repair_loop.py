@@ -468,6 +468,28 @@ def click_alert(verdict: dict | None) -> list[str] | None:
     return None if verdict and verdict["conforms"] else alert_signature(verdict)
 
 
+def launch_failure_text(log_path) -> str:
+    """Name the preflight's own reason for an exit-3 launch failure when the click
+    log carries one (wm_click_prepare prints a launch-unavailable JSON line);
+    otherwise the seat/single-flight wait is the only remaining cause."""
+    generic = "wm_click.sh could not launch (exit 3: seats or single-flight held 30 min)"
+    if not log_path:
+        return generic
+    try:
+        for line in Path(log_path).read_text().splitlines():
+            line = line.strip()
+            if line.startswith("{") and '"launch-unavailable"' in line:
+                try:
+                    reason = json.loads(line).get("reason")
+                except json.JSONDecodeError:
+                    reason = None
+                if reason:
+                    return f"wm_click.sh could not launch (exit 3: preflight launch-unavailable: {reason})"
+    except OSError:
+        pass
+    return generic
+
+
 def acknowledged_rows() -> dict[str, dict]:
     """row -> {why, ref} from ACKNOWLEDGED; read at every click so an entry
     added while the loop runs counts from the next click. Malformed file: none
@@ -1042,7 +1064,7 @@ def run(args) -> int:
         if c["outcome"] == "preflight-refused":
             return stop(args, c["last-result"]["reason"], 1)
         if c["rc"] == 3 and not c["spent"]:
-            return stop(args, "wm_click.sh could not launch (exit 3: seats or single-flight held 30 min)", 1)
+            return stop(args, launch_failure_text(c.get("log")), 1)
         if args.continuous:
             acknowledged = acknowledged_rows()
             open_rows = unacknowledged(c["alert"], acknowledged)
