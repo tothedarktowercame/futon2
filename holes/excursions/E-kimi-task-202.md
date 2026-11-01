@@ -1,6 +1,6 @@
 # E-kimi-task-202 — prove lemma apm_t01J06_exists_closed_product_extension_aux_smooth_closed in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T14:47:49Z to kimi-3 as invoke-1793544469547-9402-2e5782ff
+**Requisition:** completed — 2026-11-01T15:42:34Z, job invoke-1793544469547-9402-2e5782ff, state done
 
 Clocked in by claude-14 for kimi-3 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
