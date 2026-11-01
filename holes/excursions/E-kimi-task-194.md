@@ -1,6 +1,6 @@
 # E-kimi-task-194 — prove lemma compactConvex_taylor_remainder_bound in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T07:36:47Z to kimi-2 as invoke-1793518608015-9225-8d9386ea
+**Requisition:** completed — 2026-11-01T08:32:49Z, job invoke-1793518608015-9225-8d9386ea, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
