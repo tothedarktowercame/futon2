@@ -77,8 +77,8 @@
 
 (deftest unknown-relations-are-retained-but-no-longer-select-by-menu-order
   (let [r (selection-result adc46631-observation)
-        e (:selection-evidence r)]
-    (is (= :pick-not-below-abstention (:kind r)))
+        e r]
+    (is (= {:status :abstained :case :all-policies-predict-stopping} (:outcome r)))
     (is (= (mapv :target field) (:outer-score/admitted e)))
     (is (empty? (:outer-score/excluded e)))
     (is (= ["M-peradam-grounding" "M-peradam-grounding" :no-pick] (:cascade-picks e)))

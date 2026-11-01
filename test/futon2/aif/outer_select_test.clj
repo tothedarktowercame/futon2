@@ -2,7 +2,10 @@
   (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-score :as outer-score]
-            [futon2.aif.outer-select :as outer-select]))
+            [futon2.aif.outer-select :as outer-select]
+            [futon2.aif.action-identity :as identity]
+            [wm-run-facts :as facts]
+            [wm-check-run-facts :as checker]))
 
 (clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
@@ -81,9 +84,9 @@
                               :steps [{:gate-status :not-ready}]}]}
           refusal (try (outer-select/select makeup base-state base-observation)
                        (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-      (is (= :pick-not-below-abstention (:kind refusal)))
-      (is (= (:G refusal) (:abstention-G refusal)))
-      (is (= :no-pick (get-in refusal [:selection-evidence :cascades 0 :pick]))))))
+      (is (= {:status :abstained :case :all-policies-predict-stopping} (:outcome refusal)))
+      (is (empty? (:classes refusal)))
+      (is (= :no-pick (get-in refusal [:cascades 0 :pick]))))))
 
 (deftest chosen-prediction-is-the-chosen-model-push
   (let [result (outer-select/select base-makeup base-state base-observation)
@@ -160,9 +163,10 @@
   (let [r (try (outer-select/select (update base-makeup :cascades #(vec (take 1 %))) base-state
                                     (assoc base-observation :relation (fn [_ _] :unknown)))
                (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-    (is (= :pick-not-below-abstention (:kind r)))
-    (is (= :unknown (get-in r [:selection-evidence :cascades 0 :relation :class])))
-    (is (= (:G r) (:abstention-G r)))))
+    (is (= {:status :abstained :case :all-policies-predict-stopping} (:outcome r)))
+    (is (= :unknown (get-in r [:cascades 0 :relation :class])))
+    (is (nil? (:selection r)))
+    (is (= :predicts-stopping (get-in r [:stopping-equivalent 0 :reason])))))
 
 (deftest absent-relation-receipt-is-not-a-hash-of-the-class
   (let [r (outer-select/select base-makeup base-state base-observation)]
@@ -220,3 +224,42 @@
   (is (thrown? clojure.lang.ExceptionInfo
                (outer-select/select base-makeup base-state
                                     (assoc base-observation :forbidden #{"M-ready"})))))
+
+(deftest stopping-equivalent-is-retained-but-never-compared
+  (let [obs (assoc base-observation :relation (fn [_ target]
+                                              (if (= target "M-ready") :focus :unknown)))
+        r (outer-select/select base-makeup base-state obs)]
+    (is (= 1 (count (:classes r))))
+    (is (= 1 (get-in r [:construction :policy-count])))
+    (is (= [:second] (get-in r [:stopping-equivalent 0 :members])))
+    (is (= :predicts-stopping (get-in r [:stopping-equivalent 0 :reason])))
+    (is (= [:stop-the-line :none] (get-in r [:stopping-equivalent 0 :landing])))
+    (is (= :first (:cascade-id r)))
+    (is (= ["M-ready" "M-unknown"] (:outer-score/admitted r)))
+    (is (= 2 (count (:cascades r))))
+    (is (< (get-in r [:classes 0 :G]) (get-in r [:abstention :G])))
+    (is (every? #(not= (get-in % [:prediction :outcomes])
+                      (get-in r [:abstention :prediction :outcomes])) (:classes r)))))
+
+
+(deftest filtered-comparison-projects-without-the-stopping-policy
+  (let [obs (assoc base-observation :relation (fn [_ t] (if (= t "M-ready") :focus :unknown))
+                  :field-facts {:enumerated ["M-ready" "M-unknown"]
+                                :admitted (:facts base-observation) :excluded []}
+                  :previous-selection {:status :present :chosen-class "previous" :pick "M-old"
+                                       :outcome :changed :choice-input-digest "old-input"})
+        r (assoc (outer-select/select base-makeup base-state obs)
+                 :q6 {:refusal-history []})
+        export (facts/selection-facts-for-record {:outer/selection r} "fixture" {} {})
+        f (:facts export)
+        old (facts/selection-facts-for-record
+             {:outer/selection (dissoc r :stopping-equivalent)} "fixture" {} {})]
+    (is (= (f "comparedPolicies") (f "constructedCascades")
+           (get-in f ["targetConstruction" 0 "policies"])))
+    (is (= 1 (count (f "policyG")) (count (f "policyPrediction"))))
+    (is (every? #(not= (get % "digest") (f "abstentionPrediction")) (f "policyPrediction")))
+    (is (= (identity/digest (get-in r [:abstention :prediction :outcomes])) (f "abstentionPrediction")))
+    (is (= (:stopping-equivalent r) (get-in export [:diagnostics :stoppingEquivalent])))
+    (is (.startsWith (checker/evidence f :q11) ".known"))
+    (is (= 2 (count (get-in old [:facts "constructedCascades"])))
+        "Historical projection uses all retained arrangement classes")))

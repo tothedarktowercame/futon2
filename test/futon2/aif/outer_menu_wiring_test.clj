@@ -30,8 +30,9 @@
         poisoned (select/select (assoc m :cascades [{:id :poison :steps [:invalid]}]) s observation)
         construction (menu/construct pins/library-root m observation)]
     (is (= r poisoned))
-    (is (= 3 (count (:cascades r)) (get-in r [:construction :policy-count])))
-    (is (= construction (-> (:construction r) (update :cascades #(mapv (fn [c] (dissoc c :class)) %)))))
+    (is (= 3 (count (:cascades r))))
+    (is (= 2 (get-in r [:construction :policy-count])))
+    (is (= (assoc construction :policy-count 2) (-> (:construction r) (update :cascades #(mapv (fn [c] (dissoc c :class)) %)))))
     (is (= :giraffe-order (:cascade-id r)))
     (is (= "M-large" (get-in r [:selection :selected :target])))
     (is (= (mapv :digest (:cascades construction)) (mapv :digest (:cascades r))))
