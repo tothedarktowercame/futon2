@@ -1339,6 +1339,30 @@
       (select-keys preparation [:schema :status :reason :deadline-ms :field-source-pin
                                 :frontier :records :pending :other-failures])})))
 
+(defn- terminal-run-ending-classification
+  "Use the receipt produced at cohort close when that boundary was reached.
+   Terminal paths that close earlier still run the same total classifier from
+   the evidence available at record publication; its typed refusal is data,
+   never a reason to omit the receipt."
+  [raw-opts result decision]
+  (or (:run-ending-classification result)
+      (run-ending/classify
+       {:close {:outcome (:outcome result)
+                :grounded? (boolean (#{:grounded-change :grounded-progress}
+                                      (:outcome result)))
+                :artifact-only? (= :artifact-only (:outcome result))
+                :failure-kind (get-in result [:data :failure-kind])
+                :occurrence (or (get-in result [:data :repair/occurrence])
+                                (get-in result [:data :occurrence]))
+                :route-attestation (:route-attestation result)
+                :route-attestation-ref (:route-attestation-ref result)}
+        :occurrence (or (get-in result [:data :repair/occurrence])
+                        (get-in result [:data :occurrence]))
+        :route-attestation (:route-attestation result)
+        :focus-receipt (get-in decision [:selection-certificate :focus-receipt])
+        :outer-selection (:outer/selection
+                          (selected-target-reading/current-options raw-opts))})))
+
 (defn persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -1399,6 +1423,8 @@
             retained-decision (or decision
                                   (when (map? (get-in selection-sorry [:decision :action]))
                                     (:decision selection-sorry)))
+            run-ending-classification
+            (terminal-run-ending-classification raw-opts result retained-decision)
             answer-delivery (or (get-in result [:checkpoints :selection :judgment
                                                 :answer-delivery])
                                 (get-in selection-sorry [:downstream-refusal :answer-delivery]))
@@ -1569,6 +1595,7 @@
                     :repair/publication (:repair/publication result)
                     :d-task-enactment (:d-task-enactment result)
                     :route-attestation-ref (:route-attestation-ref result)
+                    :run-ending-classification run-ending-classification
                     :job-liveness (vec (some-> (:job-liveness/state raw-opts) deref))
                     ;; WM-PHASE-SWALLOW-I: the preference refresh's outcome
                      :refresh (or (some-> (:preference-refresh/state raw-opts) deref)
