@@ -70,7 +70,12 @@
      #'runtime/resolve-pending-learning (fn [& _] {:status :none :state {}})
      #'observation/outer-observation (fn [_] {:giraffe/run-id "pinned-pass" :focus "M-focus" :relation (fn [& _] :associated)})
      #'select/select selector
-     #'runtime/run-ordinary-opportunity-with-task! inner}
+     #'runtime/run-ordinary-opportunity-with-task!
+     (fn [o]
+       (let [ref (when-let [retain! (:selection-record/retain-fn o)]
+                   (retain! {:kind :runner-execution
+                             :id "ea1-fixture--attempt-001"}))]
+         (inner (cond-> o ref (assoc :selection-record ref)))))}
     #(#'runtime/run-ordinary-opportunity! (assoc opts :run-record-dir dir))))
 
 (deftest refusal-retained-and-success-retained-before-inner-entry

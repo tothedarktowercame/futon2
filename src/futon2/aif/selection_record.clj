@@ -59,7 +59,8 @@
       (finally (Files/deleteIfExists (.toPath tmp))))))
 
 (defn write-decision!
-  [dir {:keys [run-id startedAt click-id selection-predecessor selection-cause]} section outcome]
+  [dir {:keys [run-id startedAt click-id selection-predecessor selection-cause
+               runner-execution/identity]} section outcome]
   (when-not (and (string? run-id) (re-matches #"[A-Za-z0-9._-]+" run-id)
                  (or (nil? click-id) (and (string? click-id) (re-matches #"[A-Za-z0-9._-]+" click-id))))
     (throw (ex-info "Unsafe selection run identity" {:kind :selection-record/run-id-invalid})))
@@ -74,6 +75,7 @@
                 :startedAt at :outer/selection section :selection-outcome outcome
                 :pins (select-keys section [:giraffe/run-id :giraffe/manifest-sha256 :makeup/sha256])
                 :focus (:focus section) :chain-index chain-index}
+                 identity (assoc :runner-execution/identity identity)
                  parent (assoc :supersedes (:sha256 selection-predecessor)
                                :supersedes-record selection-predecessor :cause selection-cause))
         ref (write-new! file record)]

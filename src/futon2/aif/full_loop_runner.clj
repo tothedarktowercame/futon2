@@ -1588,8 +1588,12 @@
                      ;; seven independent certificates from the record.
                      (:controlled-sut result)
                      (assoc :controlled-sut (:controlled-sut result))
-                     (:selection-record raw-opts)
-                     (assoc :selection-record (:selection-record (selected-target-reading/current-options raw-opts)))
+                     (or (:selection-record raw-opts)
+                         (some-> (:selection-record/state raw-opts) deref))
+                     (assoc :selection-record
+                            (or (:selection-record
+                                 (selected-target-reading/current-options raw-opts))
+                                (some-> (:selection-record/state raw-opts) deref)))
                      (contains? raw-opts :outer/selection)
                      (assoc :outer/selection (:outer/selection (selected-target-reading/current-options raw-opts)))
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
@@ -7033,6 +7037,13 @@
                              (cohort/execution-identity execution-authority attempt-id))
         execution-provenance (when execution-authority
                                (cohort/execution-provenance execution-authority attempt-id))
+        ;; Retain the outer decision after authoritative cohort allocation and
+        ;; before this runner's selection phase, so its immutable record and the
+        ;; eventual tick carry the identical execution identity.
+        selection-record-ref (when-let [retain! (:selection-record/retain-fn opts)]
+                               (retain! execution-identity))
+        opts (cond-> opts selection-record-ref
+               (assoc :selection-record selection-record-ref))
         external-attempt-id (or (:id execution-identity) attempt-id)
         occurrence-origin (str (or (:repo code-state) "wm-runner") "::"
                                (:run-id opts))
