@@ -7,7 +7,8 @@
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.policy :as policy]
-            [futon2.aif.full-loop-runner]))
+            [futon2.aif.full-loop-runner]
+            [futon2.aif.selection-record :as selection-record]))
 
 (def snap {:open-missions #{"M-x"} :open-excursions #{} :open-tickets #{}
            :patterns #{"p1" "p2"} :seats #{"author"}
@@ -902,3 +903,46 @@
       (is (contains? exported "refusalHistoryUnsealed"))
       (is (contains? (get exported "refusalHistorySealedBeforeR18") "not-recomputable"))
       (is (contains? (get exported "refusalHistoryUnsealed") "not-recomputable")))))
+
+
+(deftest work-roster-follows-verified-selection-reference
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "work-roster" (make-array java.nio.file.attribute.FileAttribute 0)))
+        opts {:run-id "roster-test" :startedAt "2026-11-01T00:00:00Z"}
+        root (selection-record/write-decision!
+              dir opts {:field-facts {:open-tasks {:missions ["M-stale"]}}} {:status :chosen})
+        ref (selection-record/write-decision!
+             dir (assoc opts :selection-predecessor root)
+             {:field-facts {:open-tasks {:missions ["M-retained"] :excursions [] :tickets ["T-retained"]}}}
+             {:status :chosen})
+        tick {:selection-record ref
+              :world-at-selection {:enumerated-tasks {:ids ["M-different"]}}}
+        project #(facts/facts-for-record % "tick.edn" snap)
+        actual (project tick)
+        override (assoc-in tick [:world-at-selection :open-tasks]
+                           {:missions {:ids []} :excursions {:ids ["E-world"]}
+                            :tickets {:ids ["T-world"]}})
+        legacy (project (dissoc tick :selection-record))]
+    (is (= ["M-retained"] (get-in actual [:facts "openMissions"])))
+    (is (= [] (get-in actual [:facts "openExcursions"])))
+    (is (= ["T-retained"] (get-in actual [:facts "openTickets"])))
+    (is (= ["M-different"] (get-in actual [:facts "enumeratedTasks"]))
+        "Do not repair disagreement with the enumeration")
+    (is (= (str (:path ref) " [:outer/selection :field-facts :open-tasks :missions]")
+           (get-in actual [:sources "openMissions"])))
+    (is (= [] (get-in (project override) [:facts "openMissions"]))
+        "An explicitly empty world roster has precedence")
+    (is (= ["E-world"] (get-in (project override) [:facts "openExcursions"])))
+    (is (= ["T-world"] (get-in (project override) [:facts "openTickets"])))
+    (is (= "tick.edn [:world-at-selection :open-tasks :missions :ids]"
+           (get-in (project override) [:sources "openMissions"])))
+    (is (= ["M-x"] (get-in legacy [:facts "openMissions"])))
+    (is (= (:pins snap) (get-in legacy [:sources "openMissions"])))
+    (let [old-ref (selection-record/write-decision!
+                   dir (assoc opts :run-id "old-roster") {} {:status :chosen})]
+      (is (= legacy (project (assoc tick :selection-record old-ref)))
+          "An old selection record without a roster preserves the full export"))
+    (spit (:path ref) "{}")
+    (is (= :selection-record/reference-invalid
+           (try (project tick) nil
+                (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))
