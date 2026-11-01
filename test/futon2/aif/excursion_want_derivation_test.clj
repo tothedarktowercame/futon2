@@ -17,9 +17,8 @@
   (:require [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.action-identity :as action-identity]
-            [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.mission-observation :as mission-observation]
             [futon2.aif.observation-checks :as observation]
             [futon2.aif.selected-mission-contract :as contract])
@@ -84,9 +83,9 @@
       (finally
         (doseq [file (reverse (file-seq root))] (.delete file))))))
 
+;; The ac5bc477 selected-action shape: a cascade-candidate reading action for
+;; the excursion target with the empty want set the run record retained.
 (defn- ac5bc477-selected-action []
-  "The ac5bc477 selected-action shape: a cascade-candidate reading action for
-  the excursion target with the empty want set the run record retained."
   {:kind :cascade-candidate :id :C0 :target target-id :want []})
 
 (deftest real-excursion-source-derives-wants-on-the-fly
