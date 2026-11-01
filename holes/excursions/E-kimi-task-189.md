@@ -1,6 +1,6 @@
 # E-kimi-task-189 — prove lemma iteratedFDeriv_taylorPolynomial_exact in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T06:14:26Z to kimi-3 as invoke-1793513666499-9176-a2547d62
+**Requisition:** completed — 2026-11-01T07:10:01Z, job invoke-1793513666499-9176-a2547d62, state done
 
 Clocked in by claude-14 for kimi-3 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
