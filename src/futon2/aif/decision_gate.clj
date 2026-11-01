@@ -71,7 +71,8 @@
     ;; Requirements Q11: no strict minimum exists (cascade-selection)
     :tie-at-minimum
     :no-admissible-class
-    :pick-not-below-abstention})
+    :pick-not-below-abstention
+    :computed-kernel-not-consumed})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this

@@ -70,15 +70,30 @@
        :calibration-authorizations normalized-calibrations
        :factorization-authorizations normalized-factorizations})))
 
+(defn terminal-distribution!
+  "Pure authorization check: the carried kernel must equal the kernel derived
+   from the authorized calibration. No registry IO and no legacy fallback."
+  [carrier]
+  (preference/validate-certificate! carrier)
+  (let [expected (:probabilities
+                  (preference/kernel (get-in carrier [:certificate :calibration])))]
+    (when-not (= expected (:terminal-distribution carrier))
+      (throw (ex-info "authorized kernel mismatch"
+                      {:kind :computed-kernel-not-consumed})))
+    expected))
+
 (defn load!
   "Load and validate the shipped registry. PATH, when supplied, is a filesystem
    override used by hermetic tests. Returns one normalized carrier shape."
   ([] (load! nil))
   ([path]
    (try
-     (-> (read-registry path)
-         normalized-carrier
-         preference/validate-certificate!)
+     (let [carrier (-> (read-registry path)
+                       normalized-carrier
+                       preference/validate-certificate!)]
+       (assoc carrier :terminal-distribution
+              (:probabilities (preference/kernel
+                               (get-in carrier [:certificate :calibration])))))
      (catch clojure.lang.ExceptionInfo e
        (if (contains? #{:preference-registry-unconfigured
                         :preference-registry-invalid}

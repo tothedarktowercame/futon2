@@ -18,6 +18,7 @@
             [clojure.set :as cset]
             [clojure.string :as str]
             [futon2.aif.analysis-cascade :as analysis]
+            [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.cascade-selection :as selection]
@@ -44,6 +45,9 @@
                          {:status :synthetic
                           :source "reading-policy terminal class emission default"}))
   ([target universe acceptance horizon target-class provenance]
+   (class-emission-model target universe acceptance horizon target-class provenance
+                         terminal-class-preference))
+  ([target universe acceptance horizon target-class provenance terminal-distribution]
   {:schema :wm/observation-model-v1
    :backend :exact-enumeration
    :kind :class-emission
@@ -55,7 +59,7 @@
    :class-preference
    (into {} (for [tau (range 1 (inc horizon))]
               [tau (if (= tau horizon)
-                     terminal-class-preference
+                     terminal-distribution
                      {:ending/not-yet-evaluated 1})]))
    :provenance
    (assoc provenance :calibrated false)}))
@@ -337,7 +341,10 @@
                                            (or (:scorer-class class-context) :focused)
                                            (or (:provenance class-context)
                                                {:status :synthetic
-                                                :source "score-arranged default class"}))
+                                                :source "score-arranged default class"})
+                                           (if (contains? class-context :terminal-distribution)
+                                             (:terminal-distribution class-context)
+                                             terminal-class-preference))
          class-ranked (scorer/rank-cascade-actions
                        {:cascade-belief {#{} 1}} [candidate]
                        {:horizon-steps horizon
@@ -567,6 +574,11 @@
       :else
   (let [base (score-arranged (:target policy) (:policy-id policy) (:cascade policy)
                              nil {:scorer-class (:scorer-class target-class)
+                                  :terminal-distribution
+                                  (if (contains? policy :factorized-preference)
+                                    (preference-registry/terminal-distribution!
+                                     (:factorized-preference policy))
+                                    terminal-class-preference)
                                   :provenance {:status :synthetic
                                                :source "frozen focus target class"
                                                :focus (:provenance target-class)}})]

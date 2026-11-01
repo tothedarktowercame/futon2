@@ -1215,6 +1215,23 @@
 (defn- abstain [refusals]
   (decision-gate/emit! {:status :abstained :refusals refusals}))
 
+(defn- authorized-c-schedule [h terminal]
+  (mapv (fn [tau]
+          {:tau tau :distribution (if (= tau h) terminal
+                                    {:ending/not-yet-evaluated 1})})
+        (range 1 (inc h))))
+
+(defn- authorized-kernel-consumed?
+  [ranked terminal]
+  (and (seq ranked)
+       (every? (fn [entry]
+                 (= (authorized-c-schedule
+                     (get-in entry [:class-emission :model :horizon]) terminal)
+                    ;; The default path retains progress C at the top level;
+                    ;; class C is the separate, actually consumed channel.
+                    (get-in entry [:class-emission :certificate :consumed-g :C :steps])))
+               ranked)))
+
 (defn- reading-family-decision
   "Q5: the one G selection over the reading policy families of the field
   (NOTE-wiring-reading-to-decision §6 item 6, §7.1). Every computed family's
@@ -1271,6 +1288,7 @@
                      :policy-history-pin pin
                      :enactment-fold (:enactment-fold opts)
                      :pattern-feedback (:pattern-feedback opts)
+                     :factorized-preference (:factorized-preference opts)
                      :ticket-queue queue
                      :ticket-queue-refusals (family-refusals families)
                      ;; Packet D3: the reading route opts into the canonical
@@ -1283,12 +1301,21 @@
                             (fn [entry]
                               (occurrence-readings entry (:reading-pin entry)))}))
                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))]
+        (if (and (:factorized-preference opts)
+                 (seq (:ranked result))
+                 (not (authorized-kernel-consumed?
+                       (:ranked result)
+                       (get-in opts [:factorized-preference :terminal-distribution]))))
+          {:decision (abstain [{:target nil :stage :factorized-preference
+                                :kind :computed-kernel-not-consumed}])}
         (case (:status result)
           :stopped
           {:decision (decision-gate/emit!
                        (-> (:decision result)
                            (assoc-in [:selection-certificate :selection-route] :wm/reading-policy-family-v1)
-                           (assoc-in [:selection-certificate :q6] (:q6 result))))}
+                           (assoc-in [:selection-certificate :q6] (:q6 result))
+                           (assoc-in [:selection-certificate :factorized-preference]
+                                     (:factorized-preference opts))))}
           :repeat-refused
           ;; Q6: every admissible policy is the previous run's refused
           ;; choice on the same inputs; nothing is selected or interpreted
@@ -1348,6 +1375,8 @@
                                        :wm/proof2-certificate-v1)
                              (assoc-in [:selection-certificate :selected-reading-pin]
                                        (:reading-pin selected-ranked))
+                             (assoc-in [:selection-certificate :factorized-preference]
+                                       (:factorized-preference opts))
                              ;; Requirements Q4: horizon, steps, grading and
                              ;; G terms of the compared policies, from their
                              ;; certified preference receipts
@@ -1358,7 +1387,7 @@
                            (assoc-in [:selection-certificate :canonical-g] (:canonical-g result)))
                 authorized (controller-authority/authorize decision (:ranked result))]
             {:decision (decision-gate/emit! authorized)
-             :ranked (:ranked result)}))))))
+             :ranked (:ranked result)})))))))
 
 (defn cascade-decision
   "Q5: one G selection over every target's reading policy family. The field
