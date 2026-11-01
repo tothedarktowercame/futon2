@@ -1,0 +1,55 @@
+{:schema :wm/successor-disposition-v1
+ :repair/id "repair-attempt-024-feature-card-missing-or-invalid"
+ :mission/id "M-f11-find-production-successor"
+ :mission/path "/home/joe/code/futon2/holes/missions/M-f11-find-production-successor.md"
+ :disposition :repair-unresolved
+ :kind :typed-terminal-failure
+ :successor-link :none-published
+ :recorded-at "2026-11-01T21:55:00Z"
+ :recorded-by "wm-author"
+ :cascade {:selected-digest "7369cd540024694e89a69bdc207e9f023e1d35f748974f1c914fa5e251956e9d"
+           :compiled-digest "9af392e47e168095b212ea36209948d7937397ffae62ddcd331f048fca32492c"
+           :policy "M-f11-find-production-successor/policy-3e693adb0a2dd5b51cd0"}
+ :reasoning
+ "The compiled cascade binds promotion of this mission's repair-024 successor
+  track to an independent replay receipt matching the repaired revision and the
+  rejected controls (coordination/bind-promotion-to-post-repair-replay). No
+  such receipt exists: data/wm-repair-obligations/resolutions/repair-attempt-024-feature-card-missing-or-invalid.edn
+  records the 2026-09-14 production-shaped validation, but no independent
+  replay certificate for that revision has been recorded, and the mission's own
+  RUN4 claim boundary requires strict durable terminal evidence before
+  repair-024 counts as resolved. The honest disposition is therefore the
+  pattern's retained-failure branch: no strict successful successor link is
+  published, and this record is the durable typed terminal failure that
+  explicitly leaves repair-024 unresolved."
+ :steps
+ [{:hole-id ["coordination/bind-promotion-to-post-repair-replay" 0]
+   :operation :bind-successor-track-to-repair-024
+   :completion-check [:successor-named-in-title "mission title names this mission as the 'repair-024 successor' for repair-attempt-024-feature-card-missing-or-invalid"]
+   :satisfied-by "mission title line"
+   :source-sha256 "915d4188894a9781555b6f7c79aa792979f3de24d17f1c876cff38db5e2e293f"}
+  {:hole-id ["problems/r10-scheduled-entrypoint" 1]
+   :operation :record-backlog-position
+   :completion-check [:first-continuous-backlog-item "mission status line places this mission as the 'first continuous-backlog item' of the commissioned WM backlog"]
+   :satisfied-by "mission status line"
+   :source-sha256 "2ff7e4e388e7dcf8f335dc4f89f56ae577124017c425f5a44b9c18b6f48f2bd"}
+  {:hole-id ["agent/commitment-varies-with-confidence" 2]
+   :operation :cite-continuous-operation-authority
+   :completion-check [:joe-direction-2026-09-12-named "mission cites Joe's 2026-09-12 direction that the commissioned WM backlog run continuously"]
+   :satisfied-by "mission authority paragraph"
+   :source-sha256 "535f7edc34a6e15a3c67d2c75ffffa7c472be2db1faac8cd03e802ca898290b3"}
+  {:hole-id ["agent/coordination-has-cost" 3]
+   :operation :record-in-lane-disposition-consequence
+   :completion-check [:in-lane-disposition-makes-f11-item-vehicle "mission states Claude-15's in-lane disposition makes this ordinary F11 work item the successor vehicle"]
+   :satisfied-by "mission authority paragraph"
+   :source-sha256 "c4cb887acc90b53511b2a56a502b1a2a188d862a0fbbd7e666e746e34444171a"}
+  {:hole-id ["coordination/bind-promotion-to-post-repair-replay" 4]
+   :operation :bind-promotion-to-independent-replay-receipt
+   :completion-check [:distinct-production-shaped-successor-named "mission names this F11 work item the distinct production-shaped successor for repair attempt 024, promotion staying pending on an independent replay receipt"]
+   :satisfied-by "mission authority paragraph; certificate remains pending here"
+   :source-sha256 "915d4188894a9781555b6f7c79aa792979f3de24d17f1c876cff38db5e2e293f"}
+  {:hole-id ["snatch/re-enter-after-observed-repair" 5]
+   :operation :re-enter-through-successor-work
+   :completion-check [:repair-attempt-024-named-without-relaxing-f11 "mission names `repair-attempt-024-feature-card-missing-or-invalid` as the target and states it does not relax F11"]
+   :satisfied-by "mission authority paragraph"
+   :source-sha256 "e2dcebb718e151785b2a4c88e537bff25dea6a581374851252ab6200294c8639"}]}

@@ -99,7 +99,7 @@ No Lean witness or dependency changed, so focused Lean builds and their
 negative controls remain part of the outstanding acceptance work below.
 
 - [x] Complete F11's ordinary acceptance and persist its runtime validation evidence.
-- [ ] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.
+- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution. (retained typed failure without resolution: `holes/labs/M-f11-find-production-successor/successor-disposition.edn` records that no independent replay receipt exists, so no strict successor link is published and repair-024 stays unresolved)
 
 ### Applied-interface acceptance receipt, 2026-09-22
 
@@ -135,4 +135,4 @@ therefore complete. The separate repair-024 successor disposition is unchanged.
 ## Acceptance checklist (2026-09-30)
 
 - [x] F11's applied-interface acceptance and fresh 24-pattern observation are recorded with runtime validation evidence. (evidence: §Applied-interface acceptance receipt and §Fresh 24-pattern applied observation)
-- [ ] Repair-024 has either a strict successful production successor link or a durable typed terminal failure that explicitly leaves the repair unresolved.
+- [x] Repair-024 has either a strict successful production successor link or a durable typed terminal failure that explicitly leaves the repair unresolved. (durable typed terminal failure: `holes/labs/M-f11-find-production-successor/successor-disposition.edn`, disposition :repair-unresolved, kind :typed-terminal-failure, successor-link :none-published)
