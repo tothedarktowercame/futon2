@@ -1,6 +1,6 @@
 # E-kimi-task-205 — prove lemma apm_m01J04_rellich_translate in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T15:39:35Z to kimi-1 as invoke-1793547575503-9437-0975f5b2
+**Requisition:** completed — 2026-11-01T15:49:05Z, job invoke-1793547575503-9437-0975f5b2, state done
 
 Clocked in by claude-14 for kimi-1 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
