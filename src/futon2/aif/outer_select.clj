@@ -52,6 +52,29 @@
                         :source (if candidate (or (:reach-source candidate)
                                                   :reach-source-unavailable) :no-pick)})})))
 
+(defn g-units
+  "Same six-place HALF_EVEN quantization as the run-facts exporter. The inner
+  cascade-selection namespace at this base exposes no g-units helper."
+  [g]
+  (-> (BigDecimal. (double g))
+      (.setScale 6 java.math.RoundingMode/HALF_EVEN)
+      (.movePointRight 6) .longValueExact))
+
+(defn prediction-classes
+  "Prediction outcomes (canonical digest) and quantized G identify one policy.
+  Preserve menu order only to choose an arrangement within that policy."
+  [cascades]
+  (let [key-of #(vector (identity/digest (get-in % [:prediction :outcomes])) (g-units (:G %)))
+        groups (group-by key-of cascades)]
+    (mapv (fn [k]
+            (let [members (get groups k) representative (first members)]
+              (assert (every? #(= (second k) (g-units (:G %))) members))
+              (merge (select-keys representative [:pick :G :terms :prediction])
+                     {:id (identity/sha256 (pr-str k)) :prediction-digest (first k)
+                      :g-units (second k) :members (mapv :id members)
+                      :representative (:id representative)})))
+          (distinct (map key-of cascades)))))
+
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection."
@@ -125,23 +148,36 @@
         (refuse! :cascade-score-inadmissible (merge evidence bad)))
       (when-not (finite? (:G abstention))
         (refuse! :abstention-score-inadmissible evidence))
-      (let [admissible (vec (keep-indexed (fn [i c] (when-not (contains? forbidden (:pick c)) i)) cascades))
+      (let [classes (prediction-classes cascades)
+            class-of (into {} (for [c classes member (:members c)] [member (:id c)]))
+            evidence (-> evidence
+                         (assoc :classes classes
+                                :representative-rule :first-in-menu-order-within-one-prediction-class)
+                         (assoc-in [:construction :policy-count] (count classes))
+                         (update-in [:construction :cascades]
+                                    #(mapv (fn [c] (assoc c :class (class-of (:id c)))) %)))
+            ;; Never choose a forbidden representative. Every arrangement remains
+            ;; scored and retained; refusal cannot disappear through grouping.
+            admissible (filterv #(not (contains? forbidden (:pick %))) classes)
             _ (when (empty? admissible)
                 (refuse! :no-admissible-pick
                          {:cascades (mapv :id cascades) :forbidden forbidden-evidence
                           :selection-evidence evidence}))
-            minimum (reduce min (map #(nth scores %) admissible))
-            indices (filterv #(= minimum (nth scores %)) admissible)
-            tied (mapv #(:id (nth menu %)) indices)]
-        (when (< 1 (count indices))
-          (refuse! :tie-at-minimum {:cascades tied :G minimum :tied-cascades tied
+            minimum (reduce min (map :G admissible))
+            tied (filterv #(= minimum (:G %)) admissible)]
+        (when (< 1 (count tied))
+          (refuse! :tie-at-minimum {:classes (mapv :id tied) :G minimum
+                                   :cascades (mapv :representative tied)
+                                   :tied-cascades (mapv :representative tied)
                                    :selection-evidence evidence}))
-        (let [index (first indices) chosen (nth cascades index) picked (:pick (nth models index))]
+        (let [chosen-class (first tied)
+              index (first (keep-indexed #(when (= (:representative chosen-class) (:id %2)) %1) cascades))
+              chosen (nth cascades index) picked (:pick (nth models index))]
           (when-not (< minimum (:G abstention))
             (refuse! :pick-not-below-abstention {:cascade (:id chosen) :G minimum
                                                :abstention-G (:G abstention)
                                                :selection-evidence evidence}))
-          (let [result (assoc evidence :cascade-index index :cascade-id (:id chosen) :cascade-digest (:digest chosen)
+          (let [result (assoc evidence :chosen-class (:id chosen-class) :cascade-index index :cascade-id (:id chosen) :cascade-digest (:digest chosen)
                              :selection (when picked {:candidates (:field observation) :selected picked})
                              :prediction (:prediction chosen))]
             (assert (and (= (:cascade-scores result) (mapv :G (:cascades result)))

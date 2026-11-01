@@ -1,0 +1,94 @@
+{
+  "base": "3c6add76d",
+  "baseline": {
+    "counts": [
+      "Ran 155 tests containing 626 assertions.",
+      "20 failures, 3 errors."
+    ],
+    "failures": {
+      "ERROR retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "ERROR no-menu-makeup-and-menu-only-migration": 1,
+      "ERROR real-giraffe-run-shape": 1,
+      "FAIL real-giraffe-selection-demonstration": 3,
+      "FAIL missing-task-selects-and-enters-existing-path": 5,
+      "FAIL selection-pends-and-next-selection-learns": 7,
+      "FAIL retained-qualified-already-satisfied-advances-c": 4,
+      "FAIL missing-run-record-defers-without-replacing-pending": 1
+    },
+    "before": 45737,
+    "after": 45737,
+    "namespaces": [
+      "futon2.aif.outer-consumption-test",
+      "futon2.aif.outer-learning-manifest-test",
+      "futon2.aif.outer-menu-test",
+      "futon2.aif.outer-menu-wiring-test",
+      "futon2.aif.outer-observation-test",
+      "futon2.aif.outer-refusal-census-test",
+      "futon2.aif.outer-refusal-history-test",
+      "futon2.aif.outer-relation-admission-test",
+      "futon2.aif.outer-score-test",
+      "futon2.aif.outer-select-test",
+      "futon2.aif.outer-selection-wiring-test",
+      "futon2.aif.outer-state-test",
+      "futon2.aif.outer-state-update-test",
+      "futon2.aif.outer-state-wiring-test",
+      "futon2.aif.wm-run-facts-test",
+      "wm-check-run-facts-test"
+    ]
+  },
+  "branch": {
+    "counts": [
+      "Ran 156 tests containing 631 assertions.",
+      "20 failures, 3 errors."
+    ],
+    "failures": {
+      "ERROR retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "ERROR no-menu-makeup-and-menu-only-migration": 1,
+      "ERROR real-giraffe-run-shape": 1,
+      "FAIL real-giraffe-selection-demonstration": 3,
+      "FAIL missing-task-selects-and-enters-existing-path": 5,
+      "FAIL selection-pends-and-next-selection-learns": 7,
+      "FAIL retained-qualified-already-satisfied-advances-c": 4,
+      "FAIL missing-run-record-defers-without-replacing-pending": 1
+    },
+    "before": 45737,
+    "after": 45737,
+    "namespaces": [
+      "futon2.aif.outer-consumption-test",
+      "futon2.aif.outer-learning-manifest-test",
+      "futon2.aif.outer-menu-test",
+      "futon2.aif.outer-menu-wiring-test",
+      "futon2.aif.outer-observation-test",
+      "futon2.aif.outer-refusal-census-test",
+      "futon2.aif.outer-refusal-history-test",
+      "futon2.aif.outer-relation-admission-test",
+      "futon2.aif.outer-score-test",
+      "futon2.aif.outer-select-test",
+      "futon2.aif.outer-selection-wiring-test",
+      "futon2.aif.outer-state-test",
+      "futon2.aif.outer-state-update-test",
+      "futon2.aif.outer-state-wiring-test",
+      "futon2.aif.wm-run-facts-test",
+      "wm-check-run-facts-test"
+    ]
+  },
+  "same_failure_distribution": true,
+  "notes": "/home/joe/notes/l5-4d-5",
+  "sha256": {
+    "real-selection.clj": "4d23e64bee0a665a6053ab722e84573f5b019104a44c4e9b6d8bfc776d382260",
+    "inputs.edn": "c9fdd764457dbeadb8dc06f422c7def1f5240ca644c9f647913a2360d5a20b09",
+    "summary.edn": "85343ddb33cf9f185a36d292e3d6cebc9be4091a8fb32ba15a4126d2bce40545",
+    "selection-result.edn": "a29018ae388b6d840c52894414d85f330a61864231d542508d1fad4961b6cef8",
+    "relation-receipts.edn": "7a6bd0c5beb25ad93f2191f8576cec866c7c1af88769ddee58115855603dac65",
+    "record-copy.edn": "0c6c279b3539e9c0bb97f9374346f756e2acb00afee7b9d1ffe063ae6f427bf4",
+    "selection.json": "3e67c01cc7738af3da0dd93f0985c767c916340414de1074961937f5ec452db7",
+    "work.json": "e120c4dd462ee7facb63ac4787fb9d71cc581ae43d1eefdfc63138fbfc29dadd",
+    "selection.lean": "1a9ba18e15f21cd628045c46aad5fe3fd414ea7c827daea5c48231cea9f85531",
+    "work.lean": "3617bcbd042b4f7d6bb8449d897f3df5e0b98ad4f07f632b8ebed742e6abef9d",
+    "selection-lean.log": "1d702e440a2de1d1dc03843e15d721c3ced9f1fbbbb3e8bf9f522f1fc4f7fe38",
+    "work-lean.log": "b164abedee5221049c443677a7b8404036a1c8f35f76487c68943f9494da2951",
+    "baseline.log": "51c24758db48ad7f2257747561837668c2886c472122dafdd429b0f477920ea4",
+    "final2.log": "0e58ed44769e165aab61cf27aa6b6aa24c763ada35c332abc30cfff4505eb2c2",
+    "focused.log": "b7dd367c69328d96f3aa6c8ffa3c2eeab442e6e79fed3160ee22bc93f5d41c15"
+  }
+}

@@ -78,18 +78,18 @@
 (deftest unknown-relations-are-retained-but-no-longer-select-by-menu-order
   (let [r (selection-result adc46631-observation)
         e (:selection-evidence r)]
-    (is (= :tie-at-minimum (:kind r)))
+    (is (= :pick-not-below-abstention (:kind r)))
     (is (= (mapv :target field) (:outer-score/admitted e)))
     (is (empty? (:outer-score/excluded e)))
     (is (= ["M-peradam-grounding" "M-peradam-grounding" :no-pick] (:cascade-picks e)))
     (is (= [:unknown :unknown :no-pick] (mapv :relation (:cascade-pick-relations e))))
     (is (= 1.0 (get-in e [:cascades 0 :prediction :outcomes [:stop-the-line :none]])))))
 
-(deftest known-relations-score-below-stop-but-same-pick-minimum-still-refuses
+(deftest known-relations-score-below-stop-with-one-prediction-class
   (let [observation (assoc adc46631-observation :relation (fn [_ _] :associated))
-        r (selection-result observation) e (:selection-evidence r)]
-    (is (= :tie-at-minimum (:kind r)))
-    (is (= [:what-others-wait-on-first :only-what-can-start-now] (:tied-cascades r)))
+        r (selection-result observation) e r]
+    (is (nil? (:kind r)))
+    (is (= [:what-others-wait-on-first :only-what-can-start-now] (:members (first (:classes r)))))
     (is (= [:associated :associated :no-pick] (mapv :relation (:cascade-pick-relations e))))
     (is (< (first (:cascade-scores e)) (get-in e [:abstention :G])))
     (is (pos? (get-in e [:cascades 0 :terms :novelty])))

@@ -31,7 +31,7 @@
         construction (menu/construct pins/library-root m observation)]
     (is (= r poisoned))
     (is (= 3 (count (:cascades r)) (get-in r [:construction :policy-count])))
-    (is (= construction (:construction r)))
+    (is (= construction (-> (:construction r) (update :cascades #(mapv (fn [c] (dissoc c :class)) %)))))
     (is (= :giraffe-order (:cascade-id r)))
     (is (= "M-large" (get-in r [:selection :selected :target])))
     (is (= (mapv :digest (:cascades construction)) (mapv :digest (:cascades r))))
@@ -97,10 +97,13 @@
              :facts (into {} (map #(vector (name (:id %)) %) rows))}
         result (try (select/select m (state/init-state m) obs)
                     (catch clojure.lang.ExceptionInfo e
-                      (is (= :tie-at-minimum (:kind (ex-data e))))
+                      (is false (str "Unexpected refusal " (:kind (ex-data e))))
                       (:selection-evidence (ex-data e))))
         discovery (first (filter #(= :find-out-before-building (:id %)) (:cascades result)))]
-    (is (= 3 (get-in result [:construction :policy-count])))
+    (is (= 2 (get-in result [:construction :policy-count]) (count (:classes result))))
+    (is (= 2768528 (:g-units (first (:classes result)))))
+    (is (= [:only-what-can-start-now :giraffe-order] (:members (first (:classes result)))))
+    (is (= "M-pattern-retrieval-calibration" (get-in result [:selection :selected :target])))
     (is (= :discovery-yields-no-ready (:gain-source discovery)))
     (is (= [:related :none] (get-in discovery [:prediction :landing])))
     (is (= :undetermined (get-in discovery [:prediction :status])))
