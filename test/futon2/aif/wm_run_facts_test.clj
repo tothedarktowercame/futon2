@@ -3,6 +3,8 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [wm-run-facts :as facts]
+            [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.policy :as policy]
             [futon2.aif.full-loop-runner]))
 
@@ -78,8 +80,8 @@
     (is (= "work" (exported "kind")))
     (is (not (contains? exported "selectionPath")))))
 
-;; The construction and G paths of the 2026-11-01 record ac5bc477, verbatim, cut
-;; down by keeping only those paths: the record itself is 5.9 MB.
+;; The construction, G and selection paths of the 2026-11-01 record ac5bc477,
+;; verbatim, cut down by keeping only those paths: the record itself is 5.9 MB.
 (def live-record (facts/read-edn "test/fixtures/wm-run-facts/ac5bc477-carriers.edn"))
 (def live-facts (:facts (facts/facts-for-record live-record "r" snap)))
 ;; `scripts/wm_run_facts.clj --run` on the whole record, for the fields that need
@@ -539,3 +541,155 @@
     (is (contains? (set (exported "constructedCascades")) (first without))
         "a cascade named as lacking G is one of the constructed cascades, by the same id")
     (is (= [] (live-facts "cascadesWithoutG")))))
+
+;; -- the selection run -----------------------------------------------------------
+
+;; `data/wm-learning/outer-makeup.edn` at the sha the record pins.
+(def makeup-path "test/fixtures/wm-run-facts/outer-makeup-f3125835.edn")
+
+(defn- selection-of
+  ([r] (selection-of r makeup-path))
+  ([r path] (:facts (facts/selection-facts-for-record r "r" snap {:makeup-path path}))))
+
+(def selection-live (selection-of live-record))
+
+(defn- with-selection [& kvs]
+  (reduce (fn [r [path value]] (assoc-in r (into [:outer/selection] path) value))
+          live-record (partition 2 kvs)))
+
+(defn- temp-makeup [text]
+  (let [file (java.io.File/createTempFile "outer-makeup" ".edn")]
+    (.deleteOnExit file)
+    (spit file text)
+    (.getPath file)))
+
+(defn- sha-of [path] (load-identity/sha256 (.getBytes ^String (slurp path) "UTF-8")))
+
+(def menu-ids
+  (set (map action-identity/digest
+            [:what-others-wait-on-first :only-what-can-start-now :find-out-before-building])))
+
+(deftest the-projector-labels-a-selection-run
+  (is (= "selection" (selection-live "kind")))
+  (is (= (set facts/run-fact-fields)
+         (disj (set (keys selection-live)) "selectionPath"))))
+
+(deftest the-field-is-admitted-and-excluded
+  (is (= 626 (count (selection-live "enumeratedTasks")))))
+
+(deftest the-menu-comes-from-the-pinned-makeup
+  (is (= menu-ids (set (selection-live "comparedPolicies"))
+         (set (selection-live "constructedCascades"))))
+  (is (= [] (selection-live "cascadesWithoutG"))))
+
+(deftest selection-g-is-exact-by-menu-position
+  (let [rows (selection-live "policyG")]
+    (is (= [3212121 3212121 3212121] (map #(get-in % ["g" "numerator"]) rows)))
+    (is (every? #(= 1000000 (get-in % ["g" "denominator"])) rows))
+    (is (= menu-ids (set (map #(% "policy") rows))))))
+
+(deftest the-chosen-cascade-is-on-the-menu
+  (is (= "E-comprehension-foundation" (get-in selection-live ["currentChoice" "target"])))
+  (is (contains? (set (selection-live "comparedPolicies"))
+                 (get-in selection-live ["currentChoice" "cascade"]))))
+
+(deftest a-makeup-at-another-sha-says-nothing-about-this-run
+  (let [path (temp-makeup (str (slurp makeup-path) "\n"))
+        changed (selection-of live-record path)
+        pin (get-in live-record [:outer/selection :makeup/sha256])]
+    (doseq [field ["comparedPolicies" "constructedCascades" "policyG" "cascadesWithoutG"]]
+      (is (= (str "outer-makeup.edn at pinned sha " pin " not available")
+             (reason (changed field)))))
+    (is (str/includes? (reason ((selection-of live-record "/no/such/file") "policyG")) pin))))
+
+(deftest a-score-count-off-the-menu-names-both-counts
+  (let [changed (selection-of (with-selection [:cascade-scores] [1.0 2.0]))]
+    (is (= "2 scores for 3 menu cascades" (reason (changed "policyG"))))
+    (is (= 1 (count (changed "cascadesWithoutG"))))))
+
+(deftest a-chosen-cascade-that-picked-nothing-is-the-empty-field-decision
+  (is (= "abstain-empty-field"
+         ((selection-of (with-selection [:cascade-picks] [:no-pick :no-pick :no-pick]))
+          "currentChoice")))
+  (is (= "abstain-empty-field"
+         ((selection-of (with-selection [:selection] {})) "currentChoice"))))
+
+(deftest the-pick-relation-is-observed-only-when-its-class-is-known
+  (let [path (fn [relation]
+               (get-in (selection-of (with-selection [:selected-relation] relation))
+                       ["selectionPath" "pickRelation"]))]
+    (is (= "absent" (get-in selection-live ["selectionPath" "pickRelation"])))
+    (is (= "absent" (path :something-else)))
+    (is (contains? (path :associated) "observed"))))
+
+(deftest pick-reach-compares-the-record-with-the-pinned-makeup
+  (is (= "defaulted" (get-in selection-live ["selectionPath" "pickReach"])))
+  (let [path (temp-makeup (str/replace (slurp makeup-path) ":default-reach 1/2" ":default-reach 1/3"))
+        other (selection-of (with-selection [:makeup/sha256] (sha-of path)) path)]
+    ;; the rule: a reach that is neither measured nor the default is absent
+    (is (= "absent" (get-in other ["selectionPath" "pickReach"]))))
+  (is (= "absent" (get-in (selection-of (with-selection [:selection :selected :reach] nil))
+                          ["selectionPath" "pickReach"])))
+  (is (contains? (get-in (selection-of (with-selection [:reach-receipt] {:measured 2/4}))
+                         ["selectionPath" "pickReach"])
+                 "observed")))
+
+(deftest learning-is-applied-from-its-receipt
+  (let [path (selection-live "selectionPath")
+        run "2026-11-01-c5590f95-a22e-4f21-a5e2-2cf47f393803"]
+    (is (true? (path "learningApplied")))
+    (is (= [[run "absent"]] (path "consumedRuns")))
+    (is (= [run "absent"] (path "pendingRun")))))
+
+(deftest a-classified-ending-is-observed
+  (let [ending [:outer/learning :receipt :ending]
+        classified (update-in live-record (into [:outer/selection] ending)
+                              #(-> % (dissoc :classification-absence) (assoc :ending-class :focused)))
+        [[_ provenance]] (get-in (selection-of classified) ["selectionPath" "consumedRuns"])]
+    (is (contains? provenance "observed"))))
+
+(deftest a-deferral-has-no-run-id-and-nothing-consumed
+  (let [path ((selection-of (with-selection [:outer/learning]
+                              {:status :deferred :reason :terminal-ending-class-absent}))
+              "selectionPath")]
+    (is (= [0 "absent"] (path "pendingRun")))
+    (is (= [] (path "consumedRuns")))
+    (is (false? (path "learningApplied")))))
+
+(deftest learning-absent-leaves-the-path-not-recomputable
+  (is (contains? ((selection-of (with-selection [:outer/learning] nil)) "selectionPath")
+                 "not-recomputable")))
+
+(deftest selection-absences-count-the-receipt-and-the-stub
+  (is (= 2 (selection-live "pathAbsenceCount")))
+  (is (= ["[:outer/selection :outer/learning :receipt :ending :classification-absence]"
+          "[:outer-task-selection]"]
+         (get-in (facts/selection-facts-for-record live-record "r" snap {:makeup-path makeup-path})
+                 [:diagnostics :absencePaths]))))
+
+(deftest population-wide-exclusions-are-not-path-absences
+  (let [crowded (with-selection [:outer-field/excluded] [{:target "t" :status :absent}])]
+    (is (= 2 ((selection-of crowded) "pathAbsenceCount")))))
+
+(deftest unavailable-selection-carriers-say-why
+  (doseq [[field text] {"targetConstruction" "L4b row 11"
+                        "policyPrediction" "L4b row 9"
+                        "abstentionG" "L4b row 10"
+                        "abstentionPrediction" "L4b row 10"
+                        "previousChoice" "L4b row 13"
+                        "currentInputDigest" "L4b row 13"
+                        "gTerms" "L4b row 9"
+                        "interpretationOrder" "no interpretation step"}]
+    (is (str/includes? (reason (selection-live field)) text))))
+
+(deftest a-record-with-no-section-has-no-selection-carriers
+  (let [bare (selection-of (dissoc live-record :outer/selection))]
+    (is (= "selection" (bare "kind")))
+    (doseq [field ["enumeratedTasks" "comparedPolicies" "currentChoice" "selectionPath"
+                   "policyPrediction" "abstentionG"]]
+      (is (= "no :outer/selection section" (reason (bare field)))))))
+
+(deftest the-default-export-is-the-work-export
+  (let [text #(json/generate-string (facts/export-for-kind live-record "r" snap %))
+        direct (json/generate-string (facts/facts-for-record live-record "r" snap))]
+    (is (= direct (text {}) (text {:kind nil}) (text {:kind "work"})))))
