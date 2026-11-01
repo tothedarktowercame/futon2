@@ -800,6 +800,9 @@
 ;; -- the selection run -----------------------------------------------------------
 
 (def ^:private default-makeup-path "data/wm-learning/outer-makeup.edn")
+;; The runtime's phase log; the alert passes no path, so the canonical default
+;; is read like the makeup's (L5-4h review).
+(def ^:private default-phase-log-path "data/wm-full-loop-phases.edn.log")
 
 (def ^:private no-section "no :outer/selection section")
 (def ^:private no-library-pin
@@ -1076,7 +1079,8 @@
   "The selection run in a tick record's `:outer/selection`, as its own RunFacts.
   The projector labels the kind; nothing in the record does."
   [record record-path snap {:keys [makeup-path phase-log-path]
-                            :or {makeup-path default-makeup-path}}]
+                            :or {makeup-path default-makeup-path
+                                 phase-log-path default-phase-log-path}}]
   (let [work (facts-for-record record record-path snap)
         selection (:outer/selection record)
         section? (seq selection)
