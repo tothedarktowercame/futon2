@@ -33,7 +33,7 @@
    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
    "interpretationOrder" "pathAbsenceCount" "previousChoice"
    "previousOutcome" "previousInputDigest" "currentChoice" "refusalHistory"
-   "refusalHistorySource"
+   "refusalHistorySource" "refusalHistoryUnsealed"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
    "factorizedPreference" "calibrationAuthorizations"
@@ -751,6 +751,12 @@
                                         :else []))
                "refusalHistorySource" (if (vector? (get-in cert [:q6 :refusal-history]))
                                         "retained" "predecessor-only")
+               ;; L5-2L-3: the producer's count of unverifiable terminals; absent on
+               ;; records written before the carrier, which then read Q6 unverifiable.
+               "refusalHistoryUnsealed" (let [u (get-in cert [:q6 :refusal-history-unsealed] ::absent)]
+                                          (cond (nat-int? u) u
+                                                (= ::absent u) (nr "[:decision :selection-certificate :q6 :refusal-history-unsealed] absent (pre-L5-2L-3 record)")
+                                                :else (nr (str "refusal-history-unsealed is not a count: " (pr-str u)))))
                "currentInputDigest" (q6 "currentInputDigest")
                "seatsAvailable" (if (map? (:seat-roster world))
                                   (sorted-ids (mapcat :ids (vals (:seat-roster world))))

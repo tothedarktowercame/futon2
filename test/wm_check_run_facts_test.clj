@@ -31,6 +31,7 @@
    "previousChoice" {"target" "t1" "cascade" "c2"} "previousOutcome" "refused"
    "previousInputDigest" "in" "currentInputDigest" "in"
    "refusalHistory" [{"cascade" "c2" "input-digest" "in"}]
+   "refusalHistoryUnsealed" 0
    "pathAbsenceCount" 0
    "selectionPath" {"receipt" {"observed" "h1"} "pickRelation" {"observed" 0}
                     "pickReach" "defaulted" "pendingRun" ["run0" "absent"]
@@ -162,3 +163,8 @@
             [_ cur] (re-find #"currentInputDigest := (\d+)" q6)
             [_ _ hist] (re-find #"refusalHistory := \[\((\d+), (\d+)\)\]" q6)]
         (is (= cur hist))))))
+
+(deftest q6-carries-the-unsealed-count
+  (testing "L5-2L-3: Q6 reads the producer's count of unverifiable terminals"
+    (is (str/includes? (sut/evidence selection-facts :q6) "refusalHistoryUnsealed := 0"))
+    (is (str/starts-with? (sut/evidence (dissoc selection-facts "refusalHistoryUnsealed") :q6) ".nr"))))

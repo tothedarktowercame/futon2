@@ -389,7 +389,12 @@
                                                            [:status :reason :sha256
                                                             :previous-run/id])
                                  :menu (count ranked)
-                                 :refusal-history history}
+                                 :refusal-history history
+                                 ;; L5-2L-3: terminals in the stream that could not be
+                                 ;; verified, as the predecessor carrier counted them;
+                                 ;; Lean Q6 requires 0 (a corrupt line is an absence on
+                                 ;; the path, not a smaller history).
+                                 :refusal-history-unsealed (get-in predecessor [:refusal-history :unsealed])}
                                 (dissoc decided :excluded-keys))
                    barring? (assoc :status :forbidden
                                    :forbidden-keys refused-keys

@@ -867,3 +867,9 @@
         (is (= base (count-of (plant other))) "an absence on another member does not count")
         (is (= (inc base) (count-of (plant pick))) "an absence on the chosen pick's fact counts"))
       (is (< base 50) "the live 11-01 section's path count is small, not the whole field"))))
+
+(deftest unsealed-count-is-typed-absent-on-records-before-the-carrier
+  (clojure.test/testing "L5-2L-3: an old record has no count; it must not read as 0"
+    (let [exported (:facts (facts/facts-for-record live-record "r" snap))]
+      (is (contains? exported "refusalHistoryUnsealed"))
+      (is (contains? (get exported "refusalHistoryUnsealed") "not-recomputable")))))

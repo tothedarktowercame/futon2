@@ -173,7 +173,8 @@
    ;; L5-2L: Q6 forbids the refused cascade's prediction class, read from the
    ;; compared policies' prediction digests.
    :q6 ["previousChoice" "previousOutcome" "previousInputDigest"
-        "currentChoice" "currentInputDigest" "comparedPolicies" "policyPrediction" "refusalHistory"]
+        "currentChoice" "currentInputDigest" "comparedPolicies" "policyPrediction" "refusalHistory"
+        "refusalHistoryUnsealed"]
    :q7 ["pathAbsenceCount" "kind" "selectionPath"]
    :q9 ["factorizedPreference" "calibrationAuthorizations"
         "factorizationAuthorizations"]
@@ -238,13 +239,14 @@
                                 (facts "policiesWithInformationTerm")
                                 (fs (facts "comparedPolicies")))))
         :q5 (ev-known (str "interpretationOrder := ." (facts "interpretationOrder")))
-        :q6 (ev-known (format "previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentDecision := %s, currentInputDigest := %d, comparedPolicies := %s, policyPrediction := %s, refusalHistory := %s"
+        :q6 (ev-known (format "previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentDecision := %s, currentInputDigest := %d, comparedPolicies := %s, policyPrediction := %s, refusalHistory := %s, refusalHistoryUnsealed := %d"
                               (decision (facts "previousChoice")) (outcomes (facts "previousOutcome"))
                               (id (facts "previousInputDigest")) (decision (facts "currentChoice"))
                               (id (facts "currentInputDigest"))
                               (fs (facts "comparedPolicies"))
                               (policy-prediction (facts "policyPrediction"))
-                              (refusal-history (facts "refusalHistory"))))
+                              (refusal-history (facts "refusalHistory"))
+                              (facts "refusalHistoryUnsealed")))
         :q7 (ev-known (format "pathAbsenceCount := %s, kind := %s, selectionPath := %s"
                               (facts "pathAbsenceCount") (kind-term (facts "kind"))
                               (if-let [path (facts "selectionPath")]
