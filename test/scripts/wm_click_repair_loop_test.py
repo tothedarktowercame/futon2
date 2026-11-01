@@ -305,6 +305,34 @@ class ContinuousModeTest(unittest.TestCase):
             tick = runs / "tick-run-record-run-7.edn"; tick.write_text("{}")
             self.assertEqual(str(tick), loop.click_record({"run-id-observation": {"value": "run-7"}}, "wm-click-abc"))
 
+    def test_a_click_that_never_launched_owns_no_earlier_result(self):
+        """18:02:46Z: the relaunch hit the single-flight hold (exit 3, no click id)
+        and the loop read click 5's last-result as its own, counting a tick."""
+        loop = load_loop()
+        args = loop.parse_args([
+            "run", "--clicks", "1", "--continuous", "--owner", "claude-2",
+            "--issuing-caller", "claude-2", "--author", "wm-author",
+            "--reviewer", "wm-reviewer", "--repair-reviewer", "wm-repair-reviewer"])
+        earlier = {"click-id": "wm-click-earlier", "outcome": "grounded-progress",
+                   "run-record": "/nowhere/tick.edn",
+                   "run-id-observation": {"status": "present", "value": "run-earlier"}}
+        proc = mock.Mock(); proc.poll.return_value = 3; proc.returncode = 3
+        with tempfile.TemporaryDirectory() as td, \
+             mock.patch.object(loop, "STATE", Path(td)), \
+             mock.patch.object(loop, "reset_cast_sessions"), \
+             mock.patch.object(loop, "budget_lines", return_value=0), \
+             mock.patch.object(loop.subprocess, "Popen", return_value=proc), \
+             mock.patch.object(loop, "get_json", return_value={"last-result": earlier}), \
+             mock.patch.object(loop, "carried", side_effect=lambda run_id: run_id is not None), \
+             mock.patch.object(loop, "log"):
+            c = loop.fire(1, args, 123)
+        self.assertIsNone(c["click-id"])
+        self.assertEqual(3, c["rc"])
+        self.assertEqual("not-launched", c["outcome"])
+        self.assertIsNone(c["run-id"])
+        self.assertFalse(c["carried"])
+        self.assertIsNone(c["run-record"])
+
     def test_absent_verdict_is_an_alert_not_conformance(self):
         loop = load_loop()
         self.assertIsNone(loop.read_verdict(None))

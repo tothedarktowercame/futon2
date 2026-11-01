@@ -606,7 +606,11 @@ def fire(n: int, args, since_epoch: int) -> dict:
         lr = get_json("/api/alpha/wm/click").get("last-result") or {}
     except Exception as e:
         log(f"click {n}: status read failed: {e}")
-    if click_id and lr.get("click-id") != click_id:
+    if not click_id:
+        # The script exited before admission (exit 3: seats or single-flight
+        # held); last-result belongs to an earlier click and is not ours.
+        lr = {"outcome": "not-launched", "note": f"no click id; last-result is for {lr.get('click-id')}"}
+    elif lr.get("click-id") != click_id:
         lr = {"outcome": "unknown", "note": f"last-result is for {lr.get('click-id')}, not {click_id}"}
     run_id = (lr.get("run-id-observation") or {}).get("value")
     record_path = click_record(lr, click_id)
