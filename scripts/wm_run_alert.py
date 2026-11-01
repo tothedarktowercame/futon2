@@ -133,7 +133,7 @@ def evaluate_run(kind, source, requirements, td, f2, ml, reader, record):
       raise RuntimeError(f"{kind} export is labelled {facts.get('kind')!r}")
     found={int(q): outcome for q,outcome in re.findall(r"Requirement\.q(\d+),\s+[^)]*?Outcome\.(\w+)", checked)}
     outcomes={q: found.get(q,"not-checked") for q in requirements}
-    return {"facts":facts,"outcomes":outcomes,
+    return {"facts":facts,"outcomes":outcomes, "diagnostics":export.get("diagnostics",{}),
             "bad":{q:v for q,v in outcomes.items() if v != "holds"},
             "verdicts":{f":Q{q}":f":{v}" for q,v in outcomes.items()},
             "parameters":{f":Q{q}":numbers(q,facts) for q in requirements},
@@ -161,16 +161,20 @@ def main(argv=None):
       reader=ml/"DarkTower/WarMachine/RequirementsReader.lean"
       with tempfile.TemporaryDirectory(prefix="wm-requirements-") as td:
         td=Path(td)
-        work=evaluate_run("work",a.facts_json,requirements,td,f2,ml,reader,record)
         selection=evaluate_run("selection",a.selection_facts_json,requirements,td,f2,ml,reader,record)
+        work_not_run=selection["diagnostics"].get("workRunStatus") == "not-run"
+        work=({"facts":{},"bad":{},"verdicts":{},"parameters":{},"not-recomputable":[]}
+              if work_not_run else evaluate_run("work",a.facts_json,requirements,td,f2,ml,reader,
+                                Path(selection["diagnostics"].get("workRecord") or record)))
       work_scale=work["facts"].get("policyGScale"); selection_scale=selection["facts"].get("policyGScale")
-      scale_differs=work_scale != selection_scale
-      conforms=not (work["bad"] or selection["bad"] or scale_differs)
-      lines=["CONFORMS" if conforms else "ALERT FOR JOE"]+run_lines("work",work)+run_lines("selection",selection)
+      scale_differs=not work_not_run and work_scale != selection_scale
+      conforms=not (work_not_run or work["bad"] or selection["bad"] or scale_differs)
+      lines=["CONFORMS" if conforms else "ALERT FOR JOE"]+(["work run: not-run"] if work_not_run else run_lines("work",work))+run_lines("selection",selection)
       if scale_differs: lines.append(f"policyGScale differs: work {work_scale} / selection {selection_scale}")
       block="\n".join(lines); print(block, flush=True)
       result={":run-record":str(record),":checked-at":started.isoformat(),":conforms":conforms,
               ":runs":[":work",":selection"],
+              ":work-status":":not-run" if work_not_run else ":evaluated",
               ":verdicts":work["verdicts"],
               ":critical-parameters":work["parameters"],
               ":not-recomputable":work["not-recomputable"],

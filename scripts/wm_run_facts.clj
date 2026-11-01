@@ -15,6 +15,7 @@
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.selection-record :as selection-record]
             [futon2.aif.q4-preference :as q4]
             )
   (:import [java.nio.file Files]))
@@ -1026,7 +1027,18 @@
   "The selection run in a tick record's `:outer/selection`, as its own RunFacts.
   The projector labels the kind; nothing in the record does."
   [record record-path snap {:keys [makeup-path] :or {makeup-path default-makeup-path}}]
-  (let [work (facts-for-record record record-path snap)
+  (let [reference (:selection-record record)
+        standalone? (= selection-record/schema (:schema record))
+        completion (when (and standalone? (.isFile (io/file record-path)))
+                     (selection-record/read-completion {:path (.getCanonicalPath (io/file record-path)) :sha256 (selection-record/file-sha record-path)}))
+        terminal-ref (or reference (:selection-record completion))
+        chain (when terminal-ref (selection-record/read-chain terminal-ref))
+        source (if chain (:record (last (:entries chain))) record)
+        disagreement? (and reference (contains? record :outer/selection)
+                           (not= (:outer/selection record) (:outer/selection source)))
+        record-path (or (:path terminal-ref) record-path)
+        record (if reference (assoc source :decision (:decision record)) source)
+        work (facts-for-record record record-path snap)
         selection (:outer/selection record)
         section? (seq selection)
         makeup (pinned-makeup makeup-path (:makeup/sha256 selection))
@@ -1069,10 +1081,23 @@
                    "selectionPath" (selection-path selection makeup)})
                  (zipmap ["comparedPolicies" "constructedCascades" "policyG" "cascadesWithoutG"
                           "enumeratedTasks" "currentChoice" "pathAbsenceCount" "selectionPath"]
-                         (repeat (nr no-section)))))]
+                         (repeat (nr no-section)))))
+        facts (if disagreement?
+                (into {} (map (fn [[k v]] [k (if (#{"kind" "policyGScale"} k) v
+                                                (nr "selection-reselected-after-decision"))]) facts))
+                facts)]
     {:facts facts
      :sources (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
-     :diagnostics {:taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
+     :diagnostics {:recordKind (if (= selection-record/schema (:schema source)) "selection-record" "tick-record")
+                   :selectionOutcome (:selection-outcome source)
+                   :selectionChainLength (or (:length chain) (:chain-index source))
+                   :selectionRecordDisagreement (when disagreement? :selection-reselected-after-decision)
+                   :workRecord (get-in completion [:tick-record :path])
+                   :workRunStatus (when (and (nil? reference)
+                                             (= selection-record/schema (:schema source))
+                                             (#{:refused :abstained} (get-in source [:selection-outcome :status])))
+                                    "not-run")
+                   :taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
                    :absencePaths (mapv pr-str (selection-absence-paths record))
                    :notRecomputable (vec (for [[k v] facts
                                                :when (and (map? v) (contains? v "not-recomputable"))]
