@@ -1,0 +1,569 @@
+{
+  "base": "3c0d41bf8",
+  "branch": "codex11/l5-4c-stub-and-forbidden",
+  "reader_scan": {
+    "roots": [
+      "src/",
+      "scripts/",
+      "test/",
+      "futon3c/src/"
+    ],
+    "pattern": ":outer-task-selection",
+    "files": [
+      {
+        "path": "scripts/operator_load.clj",
+        "matching_lines": [
+          183,
+          184
+        ],
+        "disposition": "Exempt: analysis explicitly pinned to the 107-item ranking in 2026-10-05-c9d25d6a; changing it would reinterpret historical data."
+      },
+      {
+        "path": "test/fixtures/outer-canonical-g/b5-input-fc464172.edn",
+        "matching_lines": [
+          1
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "scripts/wm_run_facts.clj",
+        "matching_lines": [
+          917
+        ],
+        "disposition": "Exempt/change unnecessary: selection-absence-paths already visits only non-nil roots. Old recorded stub remains counted; new key omission drops exactly one. Both pinned by tests."
+      },
+      {
+        "path": "scripts/wm_report_card.clj",
+        "matching_lines": [
+          424
+        ],
+        "disposition": "Exempt: this slot reports the historical outer-learning certificate and otherwise typed absence. Modern learning presentation remains separate; no old certificate is manufactured."
+      },
+      {
+        "path": "test/futon2/report/war_machine_accumulation_test.clj",
+        "matching_lines": [
+          206
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/fixtures/wm-run-facts/ac5bc477-carriers.edn",
+        "matching_lines": [
+          1
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "src/futon2/aif/meta_outcome_dataset.clj",
+        "matching_lines": [
+          46,
+          52,
+          53,
+          178,
+          444
+        ],
+        "disposition": "Exempt: versioned historical receipt/policy outcome dataset, including its canonical-outer versus legacy-inner target-source provenance. This packet does not translate modern learning into its old policy-provider contract."
+      },
+      {
+        "path": "scripts/cheat_sheets.clj",
+        "matching_lines": [
+          240,
+          242
+        ],
+        "disposition": "Exempt: analysis explicitly pinned to the 107-item ranking in 2026-10-05-c9d25d6a; changing it would reinterpret historical data."
+      },
+      {
+        "path": "scripts/unblocks_relation.clj",
+        "matching_lines": [
+          165,
+          166
+        ],
+        "disposition": "Exempt: analysis explicitly pinned to the 107-item ranking in 2026-10-05-c9d25d6a; changing it would reinterpret historical data."
+      },
+      {
+        "path": "scripts/revealed_attention.clj",
+        "matching_lines": [
+          152
+        ],
+        "disposition": "Exempt: analysis explicitly pinned to the 107-item ranking in 2026-10-05-c9d25d6a; changing it would reinterpret historical data."
+      },
+      {
+        "path": "scripts/centrality_tokens.clj",
+        "matching_lines": [
+          91
+        ],
+        "disposition": "Exempt: analysis explicitly pinned to the 107-item ranking in 2026-10-05-c9d25d6a; changing it would reinterpret historical data."
+      },
+      {
+        "path": "src/futon2/aif/meta_injury_observation.clj",
+        "matching_lines": [
+          42,
+          92
+        ],
+        "disposition": "Exempt: immutable historical injury evidence projection/revalidation. Rewriting its expected projection would change historical evidence bindings. Missing legacy receipt projects empty metadata, not a fabricated successful selector."
+      },
+      {
+        "path": "src/futon2/aif/decision_gate.clj",
+        "matching_lines": [
+          32,
+          58
+        ],
+        "disposition": "Exempt: matches the :outer-task-selection-refused failure KIND, not the deleted receipt key."
+      },
+      {
+        "path": "src/futon2/aif/full_loop_runner.clj",
+        "matching_lines": [
+          1003,
+          1257,
+          1408,
+          1410,
+          1574,
+          2906,
+          2907,
+          7073,
+          8491,
+          8519,
+          8532,
+          8785
+        ],
+        "disposition": "Changed: missing legacy receipt now returns nil; record writer omits the key unless an actual historical receipt was supplied. Other occurrences preserve explicit legacy checkpoints/refusal evidence; no synthetic stub remains."
+      },
+      {
+        "path": "src/futon2/aif/trace.clj",
+        "matching_lines": [
+          473,
+          474
+        ],
+        "disposition": "Exempt: conditional copy of an explicitly supplied judgement receipt. It creates no missing-receipt stub."
+      },
+      {
+        "path": "test/futon2/aif/selection_refusal_record_test.clj",
+        "matching_lines": [
+          12,
+          14,
+          25,
+          46,
+          48,
+          60
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "src/futon2/aif/full_loop_cli.clj",
+        "matching_lines": [
+          80
+        ],
+        "disposition": "Exempt: learned-repeat-authorized? requires the old live-consumed certificate and explicit repeat-authorized bit. Modern applied learning must not be silently treated as a repeat authorization."
+      },
+      {
+        "path": "test/fixtures/outer-consumption/tick-run-record-2026-10-29-f74df9cc-c27b-420b-91ec-7a32db708c41.edn",
+        "matching_lines": [
+          1
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/run_debugger_test.clj",
+        "matching_lines": [
+          51,
+          576
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/trace_test.clj",
+        "matching_lines": [
+          121,
+          123,
+          124
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "src/futon2/aif/reading_preparation_outcome.clj",
+        "matching_lines": [
+          31,
+          33
+        ],
+        "disposition": "Exempt: legacy judgement receipt metadata for the existing reading-preparation outcome shape. No new selection/learning certificate is inferred from a missing receipt."
+      },
+      {
+        "path": "test/futon2/aif/outer_selection_wiring_test.clj",
+        "matching_lines": [
+          184,
+          185,
+          188
+        ],
+        "disposition": "Changed: tests modern writer/carrier/absence semantics while preserving historical cases."
+      },
+      {
+        "path": "src/futon2/aif/wm/recorded_flight.clj",
+        "matching_lines": [
+          77,
+          102
+        ],
+        "disposition": "Exempt: explicitly pinned historical checkpoint replay restores the source receipt; not the modern live selection producer."
+      },
+      {
+        "path": "src/futon2/aif/wm/cascade_decision.clj",
+        "matching_lines": [
+          1246,
+          1423
+        ],
+        "disposition": "Exempt: matches legacy refusal KIND, not a read of the deleted receipt key."
+      },
+      {
+        "path": "test/futon2/aif/c5_habit_identity_test.clj",
+        "matching_lines": [
+          30
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "src/futon2/aif/meta_terminal_injury.clj",
+        "matching_lines": [
+          196,
+          197,
+          198,
+          199
+        ],
+        "disposition": "Exempt: supported legacy terminal cause locations. This is not a selector or modern-learning reader; removing it would lose historical refusal causes."
+      },
+      {
+        "path": "futon3c/src/futon3c/wm/meta_latest.clj",
+        "matching_lines": [
+          9,
+          13,
+          112,
+          120
+        ],
+        "disposition": "Exempt (futon3c): historical checkpoint receipt scanner explicitly requires :wm/outer-task-selection-v1 and rejects absent receipts. Not a modern :outer/selection exporter."
+      },
+      {
+        "path": "test/futon2/aif/wm_report_card_test.clj",
+        "matching_lines": [
+          80
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/full_loop_cli_test.clj",
+        "matching_lines": [
+          102
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/meta_diagnosis_request_test.clj",
+        "matching_lines": [
+          29
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "src/futon2/aif/construction_receipt_lean_adapter.clj",
+        "matching_lines": [
+          573,
+          574,
+          577,
+          613
+        ],
+        "disposition": "Changed: public selection-carrier derives chosen CASCADE, action TASK, exact learning from :outer/selection. Strict historical certificate adaptation stays historical; modern or absent input gets typed certificate-unavailable carrying that projection (coordinator job 9320)."
+      },
+      {
+        "path": "test/futon2/aif/loop_node_exercise_test.clj",
+        "matching_lines": [
+          55
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/reading_preparation_outcome_test.clj",
+        "matching_lines": [
+          8,
+          11,
+          22
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/selection_failure_retention_test.clj",
+        "matching_lines": [
+          21,
+          42
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/meta_outcome_dataset_test.clj",
+        "matching_lines": [
+          14,
+          32,
+          159
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/task_selection_absence_test.clj",
+        "matching_lines": [
+          21
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/p02b_no_choice_square_carrier_test.clj",
+        "matching_lines": [
+          30,
+          31
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/decision_gate_test.clj",
+        "matching_lines": [
+          113,
+          114
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/full_loop_runtime_test.clj",
+        "matching_lines": [
+          449,
+          473,
+          508
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/meta_algorithm_runtime_route_test.clj",
+        "matching_lines": [
+          7,
+          15,
+          33
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/wm_run_facts_test.clj",
+        "matching_lines": [
+          666,
+          719
+        ],
+        "disposition": "Changed: tests modern writer/carrier/absence semantics while preserving historical cases."
+      },
+      {
+        "path": "test/futon2/aif/construction_receipt_lean_adapter_test.clj",
+        "matching_lines": [
+          259,
+          274,
+          373,
+          375,
+          382,
+          395,
+          403,
+          406,
+          414,
+          422
+        ],
+        "disposition": "Changed: tests modern writer/carrier/absence semantics while preserving historical cases."
+      },
+      {
+        "path": "test/futon2/aif/meta_field_observation_test.clj",
+        "matching_lines": [
+          42,
+          59
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/futon2/aif/meta_injury_store_test.clj",
+        "matching_lines": [
+          16
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/fixtures/immune-loop/terminal-hot-load-failed-e0b9aab6.edn",
+        "matching_lines": [
+          1
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      },
+      {
+        "path": "test/resources/wm/misattribution-117/run.edn",
+        "matching_lines": [
+          1
+        ],
+        "disposition": "Exempt: retained historical fixture or test of explicit legacy receipt/failure-kind compatibility; not a modern stub producer."
+      }
+    ]
+  },
+  "behavior": {
+    "stub": "No missing-receipt stub on newly produced records. Explicit historical receipts still preserved.",
+    "forbidden": "All cascades scored and retained, including forbidden picks. Minimum/tie/floor use only admissible indices. Invalid or unbound forbidden evidence refuses.",
+    "reselection": "One port invocation. Refusal digest pins retained full refusal. Successful replacement preserves field and learning context and persists pending once. Exhausted menu retains typed no-admissible-pick and no pending write.",
+    "adapter": "Modern selection-carrier keeps cascade and task separate; no-section is typed absence. Historical R8/KL adapter refuses modern input with projected carrier. Modern Lean learning adapter deferred explicitly to L5-4L-4 per job 9320."
+  },
+  "scope_limits": [
+    "No modern Lean learning adapter fabricated.",
+    "Historical reporting/dataset/replay exemptions are explicit; this is not a whole-system migration of every legacy consumer.",
+    "Live makeup unavailable-cone ordering remains L5-4d; no makeup/scorer change.",
+    "No reload, click, merge, or canonical data publication."
+  ],
+  "tests": {
+    "baseline": {
+      "log": "/home/joe/notes/l5-4c/baseline.log",
+      "sha256": "10a4d3632d7e2e6b388cb5e4134d70bc950426268d39e915d638ff52a21241d5",
+      "summary": [
+        "Ran 155 tests containing 575 assertions.",
+        "17 failures, 10 errors."
+      ],
+      "failure_names": {
+        "controlled-record-renders-target-local-aqc-certificate": 1,
+        "controlled-record-renders-p0-admission-certificate": 1,
+        "controlled-record-renders-complete-singleton-selection-certificate": 1,
+        "controlled-record-renders-enactment-grounding-certificate": 1,
+        "admission-certificate-refuses-admission-and-identity-mutations": 1,
+        "enactment-grounding-certificate-refuses-runtime-mutations": 1,
+        "aqc-certificate-refuses-identity-and-correspondence-mutations": 1,
+        "selection-certificate-refuses-identity-order-and-coverage-mutations": 1,
+        "retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+        "real-giraffe-run-shape": 1,
+        "missing-task-selects-and-enters-existing-path": 5,
+        "selection-pends-and-next-selection-learns": 7,
+        "retained-qualified-already-satisfied-advances-c": 4,
+        "missing-run-record-defers-without-replacing-pending": 1
+      },
+      "run": {
+        "env": {
+          "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4c-baseline/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+          "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4c-baseline/FUTON_WM_META_INJURY_ROOT",
+          "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4c-baseline/FUTON_WM_MORNING_BRIEF_ROOT",
+          "FUTON_WM_PHASE_LOG": "/tmp/l5-4c-baseline/FUTON_WM_PHASE_LOG",
+          "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4c-baseline/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+          "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4c-baseline/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+          "FUTON_WM_RUN_CONFIG": "/tmp/l5-4c-baseline/FUTON_WM_RUN_CONFIG",
+          "FUTON_WM_RUN_LOCK": "/tmp/l5-4c-baseline/FUTON_WM_RUN_LOCK",
+          "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4c-baseline/FUTON_WM_RUN_RECORD_DIR",
+          "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4c-baseline/FUTON_WM_TICKET_PUBLICATION_ROOT",
+          "FUTON_WM_TRACE_DIR": "/tmp/l5-4c-baseline/FUTON_WM_TRACE_DIR"
+        },
+        "namespaces": [
+          "futon2.aif.outer-consumption-test",
+          "futon2.aif.outer-learning-manifest-test",
+          "futon2.aif.outer-observation-test",
+          "futon2.aif.outer-refusal-census-test",
+          "futon2.aif.outer-refusal-history-test",
+          "futon2.aif.outer-relation-admission-test",
+          "futon2.aif.outer-score-test",
+          "futon2.aif.outer-select-test",
+          "futon2.aif.outer-selection-wiring-test",
+          "futon2.aif.outer-state-test",
+          "futon2.aif.outer-state-update-test",
+          "futon2.aif.outer-state-wiring-test",
+          "futon2.aif.wm-run-facts-test",
+          "wm-check-run-facts-test",
+          "futon2.aif.construction-receipt-lean-adapter-test"
+        ],
+        "before": 45737,
+        "after": 45737,
+        "exit": 1
+      }
+    },
+    "final-verified": {
+      "log": "/home/joe/notes/l5-4c/final-verified.log",
+      "sha256": "edd4c7fd04bdd188a8cf8efad0079a2d961e68098fbd62ade2709e24b34ddbc0",
+      "summary": [
+        "Ran 160 tests containing 600 assertions.",
+        "17 failures, 10 errors."
+      ],
+      "failure_names": {
+        "controlled-record-renders-target-local-aqc-certificate": 1,
+        "controlled-record-renders-p0-admission-certificate": 1,
+        "controlled-record-renders-complete-singleton-selection-certificate": 1,
+        "controlled-record-renders-enactment-grounding-certificate": 1,
+        "admission-certificate-refuses-admission-and-identity-mutations": 1,
+        "enactment-grounding-certificate-refuses-runtime-mutations": 1,
+        "aqc-certificate-refuses-identity-and-correspondence-mutations": 1,
+        "selection-certificate-refuses-identity-order-and-coverage-mutations": 1,
+        "retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+        "real-giraffe-run-shape": 1,
+        "missing-task-selects-and-enters-existing-path": 5,
+        "selection-pends-and-next-selection-learns": 7,
+        "retained-qualified-already-satisfied-advances-c": 4,
+        "missing-run-record-defers-without-replacing-pending": 1
+      },
+      "run": {
+        "env": {
+          "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4c-final-verified/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+          "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4c-final-verified/FUTON_WM_META_INJURY_ROOT",
+          "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4c-final-verified/FUTON_WM_MORNING_BRIEF_ROOT",
+          "FUTON_WM_PHASE_LOG": "/tmp/l5-4c-final-verified/FUTON_WM_PHASE_LOG",
+          "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4c-final-verified/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+          "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4c-final-verified/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+          "FUTON_WM_RUN_CONFIG": "/tmp/l5-4c-final-verified/FUTON_WM_RUN_CONFIG",
+          "FUTON_WM_RUN_LOCK": "/tmp/l5-4c-final-verified/FUTON_WM_RUN_LOCK",
+          "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4c-final-verified/FUTON_WM_RUN_RECORD_DIR",
+          "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4c-final-verified/FUTON_WM_TICKET_PUBLICATION_ROOT",
+          "FUTON_WM_TRACE_DIR": "/tmp/l5-4c-final-verified/FUTON_WM_TRACE_DIR"
+        },
+        "namespaces": [
+          "futon2.aif.outer-consumption-test",
+          "futon2.aif.outer-learning-manifest-test",
+          "futon2.aif.outer-observation-test",
+          "futon2.aif.outer-refusal-census-test",
+          "futon2.aif.outer-refusal-history-test",
+          "futon2.aif.outer-relation-admission-test",
+          "futon2.aif.outer-score-test",
+          "futon2.aif.outer-select-test",
+          "futon2.aif.outer-selection-wiring-test",
+          "futon2.aif.outer-state-test",
+          "futon2.aif.outer-state-update-test",
+          "futon2.aif.outer-state-wiring-test",
+          "futon2.aif.wm-run-facts-test",
+          "wm-check-run-facts-test",
+          "futon2.aif.construction-receipt-lean-adapter-test"
+        ],
+        "before": 45737,
+        "after": 45737,
+        "exit": 1
+      }
+    },
+    "focused-vars": {
+      "log": "/home/joe/notes/l5-4c/focused-vars.log",
+      "sha256": "154d9590379552c15de53aae8fe9d8c604d020007cd5f95e4465f10e73e88036",
+      "summary": [
+        "Ran 9 tests containing 57 assertions.",
+        "0 failures, 0 errors."
+      ],
+      "failure_names": {},
+      "run": {
+        "command": [
+          "clojure",
+          "-X:test",
+          ":nses",
+          "[futon2.aif.construction-receipt-lean-adapter-test futon2.aif.outer-select-test futon2.aif.outer-selection-wiring-test futon2.aif.wm-run-facts-test]",
+          ":vars",
+          "[futon2.aif.outer-select-test/forbidden-picks-stay-scored-but-cannot-win futon2.aif.outer-select-test/forbidden-evidence-must-bind-the-forbidden-targets futon2.aif.outer-selection-wiring-test/reading-refusal-forbids-without-changing-the-field futon2.aif.outer-selection-wiring-test/exhausted-forbidden-menu-retains-refusal-without-pending-write futon2.aif.outer-selection-wiring-test/runner-persists-only-supplied-outer-selection futon2.aif.wm-run-facts-test/removed-stub-drops-only-the-new-record-absence futon2.aif.construction-receipt-lean-adapter-test/modern-selection-carrier-is-not-a-historical-learning-certificate futon2.aif.construction-receipt-lean-adapter-test/outer-learning-certificate-joins-consumption-selection-and-publication futon2.aif.construction-receipt-lean-adapter-test/outer-learning-certificate-refuses-broken-temporal-joins]"
+        ],
+        "exit": 0,
+        "before": 45737,
+        "after": 45737
+      }
+    }
+  },
+  "same_failure_distribution": true,
+  "baseline_errors": "Eight adapter tests lack the historical 2026-10-01 run fixture in the isolated worktree; two outer tests have historical Giraffe verification errors. The 17 prior wiring/learning assertion failures retain the same name multiplicities.",
+  "lint": {
+    "kondo": "src/futon2/aif/full_loop_runner.clj:982:3: warning: Misplaced docstring.\nsrc/futon2/aif/full_loop_runner.clj:3853:19: info: Single argument to str already is a string\nsrc/futon2/aif/full_loop_runner.clj:4358:3: warning: Misplaced docstring.\nsrc/futon2/aif/full_loop_runner.clj:5185:9: warning: Redundant let expression.\nsrc/futon2/aif/full_loop_runner.clj:5292:29: info: Redundant boolean coercion: expression already has type boolean\nsrc/futon2/aif/full_loop_runner.clj:5454:31: info: Redundant boolean coercion: expression already has type boolean\nsrc/futon2/aif/full_loop_runner.clj:8525:13: warning: unused binding on-prod-history-checkpoint\nlinting took 377ms, errors: 0, warnings: 4\n",
+    "base-kondo": "/tmp/l54c-baseline/src/futon2/aif/full_loop_runner.clj:982:3: warning: Misplaced docstring.\n/tmp/l54c-baseline/src/futon2/aif/full_loop_runner.clj:3852:19: info: Single argument to str already is a string\n/tmp/l54c-baseline/src/futon2/aif/full_loop_runner.clj:4357:3: warning: Misplaced docstring.\n/tmp/l54c-baseline/src/futon2/aif/full_loop_runner.clj:5184:9: warning: Redundant let expression.\n/tmp/l54c-baseline/src/futon2/aif/full_loop_runner.clj:5291:29: info: Redundant boolean coercion: expression already has type boolean\n/tmp/l54c-baseline/src/futon2/aif/full_loop_runner.clj:5453:31: info: Redundant boolean coercion: expression already has type boolean\n/tmp/l54c-baseline/src/futon2/aif/full_loop_runner.clj:8524:13: warning: unused binding on-prod-history-checkpoint\nlinting took 279ms, errors: 0, warnings: 4\n",
+    "parens": "OK\n"
+  },
+  "incidents": [
+    "Initial new selector test had a missing closing parenthesis; the first changed run stopped at read/compile time. Fixed and rerun.",
+    "Initial modern-adapter test inspected :kind instead of the adapters established :refusal key; corrected the assertion, not the adapter contract.",
+    "Initial baseline linter scratch filename caused a namespace-name mismatch; repeated at matching futon2/aif/full_loop_runner.clj path. Four runner warnings reproduce unchanged at base."
+  ],
+  "data_count_scope": "File counts before/after, not a complete byte audit. All discovered FUTON_WM path/store overrides redirected to scratch (exact environment included)."
+}

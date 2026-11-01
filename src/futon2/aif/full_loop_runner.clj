@@ -1209,8 +1209,10 @@
 
 (defn outer-task-selection-record
   "Validate and return the exact outer selection receipt retained at selection.
-  Missing or identity-inconsistent receipts become typed absences; this
-  projection never recomputes the population, seed, draw, or choice."
+  Only explicitly supplied historical receipts are validated. Missing receipts
+  return nil: modern selection is retained at :outer/selection, not a deleted
+  selector's synthetic absence. Identity-inconsistent supplied receipts still
+  become typed absences; no population, seed, draw or choice is recomputed."
   [receipt decision]
   (let [chosen-target (get-in receipt [:chosen :id])
         action-target (get-in receipt [:action :target])
@@ -1222,9 +1224,7 @@
                               (nil? (:action receipt))
                               (empty? decision-targets))]
     (cond
-      (nil? receipt)
-      {:schema :wm/outer-task-selection-v1
-       :status :absent :reason :receipt-not-retained}
+      (nil? receipt) nil
 
       (not= :wm/outer-task-selection-v1 (:schema receipt))
       {:schema :wm/outer-task-selection-v1
@@ -1553,7 +1553,6 @@
                     :effective-run-comparison
                     (or (some-> (:effective-run-comparison/state raw-opts) deref)
                         {:schema :wm/effective-run-comparison-v1 :status :not-reached})
-                    :outer-task-selection outer-task-selection
                     :answer-delivery answer-delivery
                     :world-at-selection world-at-selection
                     :q6 {:predecessor (:q6/predecessor raw-opts)
@@ -1571,6 +1570,8 @@
                     ;; WM-PHASE-SWALLOW-I: the preference refresh's outcome
                      :refresh (or (some-> (:preference-refresh/state raw-opts) deref)
                                  {:absent :refresh-not-reached})}
+                     outer-task-selection
+                     (assoc :outer-task-selection outer-task-selection)
                      ;; F2a: service preflight observed unavailable dedicated
                      ;; self-heal machinery on an ordinary route. Retain only
                      ;; the caller's typed observation; no observation is not

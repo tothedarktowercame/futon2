@@ -86,7 +86,16 @@
   (let [menu (:cascades makeup)
         partition (known-term-field observation)
         observation (assoc observation :field (:field partition))
-        field-facts (:field-facts observation)]
+        field-facts (:field-facts observation)
+        forbidden (or (:forbidden observation) #{})
+        forbidden-evidence (vec (:forbidden-evidence observation))]
+    (when-not (and (set? forbidden)
+                   (= forbidden (set (map :target forbidden-evidence)))
+                   (= (count forbidden) (count forbidden-evidence))
+                   (every? #(and (contains? (set (map :target (:field observation))) (:target %))
+                                 (keyword? (:reason %)) (string? (:pin %)) (seq (:pin %)))
+                           forbidden-evidence))
+      (refuse! :invalid-forbidden-evidence {:forbidden forbidden-evidence}))
     (when field-facts
       (observation/validate-field! (:enumerated field-facts)
                                    (mapv :target (:field observation))
@@ -128,6 +137,7 @@
                     :outer-score/excluded (:excluded partition)
                     :knowledge-producer-requests (:requests partition)
                     :library library :cascades cascades :abstention abstention
+                    :forbidden forbidden-evidence
                     :cascade-scores scores :cascade-picks (mapv :pick cascades)
                     :cascade-pick-relations legacy-relations}
                      field-facts (assoc :field-facts field-facts
@@ -138,8 +148,13 @@
         (refuse! :cascade-score-inadmissible (merge evidence bad)))
       (when-not (finite? (:G abstention))
         (refuse! :abstention-score-inadmissible evidence))
-      (let [minimum (reduce min scores)
-            indices (vec (keep-indexed #(when (= minimum %2) %1) scores))
+      (let [admissible (vec (keep-indexed (fn [i c] (when-not (contains? forbidden (:pick c)) i)) cascades))
+            _ (when (empty? admissible)
+                (refuse! :no-admissible-pick
+                         {:cascades (mapv :id cascades) :forbidden forbidden-evidence
+                          :selection-evidence evidence}))
+            minimum (reduce min (map #(nth scores %) admissible))
+            indices (filterv #(= minimum (nth scores %)) admissible)
             tied (mapv #(:id (nth menu %)) indices)]
         (when (< 1 (count indices))
           (refuse! :tie-at-minimum {:cascades tied :G minimum :tied-cascades tied

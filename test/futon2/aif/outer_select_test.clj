@@ -206,3 +206,26 @@
                 base-state obs)]
     (is (= 2 @calls))
     (is (= "M-ready" (get-in result [:selection :selected :target])))))
+
+(deftest forbidden-picks-stay-scored-but-cannot-win
+  (let [before (outer-select/select base-makeup base-state base-observation)
+        target (get-in before [:selection :selected :target])
+        row {:target target :reason :reader-refused :pin "refusal-pin"}
+        after (outer-select/select base-makeup base-state
+                                   (assoc base-observation :forbidden #{target} :forbidden-evidence [row]))]
+    (is (not= target (get-in after [:selection :selected :target])))
+    (is (= (:cascades before) (:cascades after)))
+    (is (= (:outer-score/admitted before) (:outer-score/admitted after)))
+    (is (= [row] (:forbidden after)))
+    (let [rows (mapv #(hash-map :target % :reason :reader-refused :pin "p") (:cascade-picks before))
+          failure (try (outer-select/select base-makeup base-state
+                                            (assoc base-observation :forbidden (set (:cascade-picks before))
+                                                   :forbidden-evidence rows))
+                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :no-admissible-pick (:kind failure)))
+      (is (= (:cascades before) (get-in failure [:selection-evidence :cascades]))))))
+
+(deftest forbidden-evidence-must-bind-the-forbidden-targets
+  (is (thrown? clojure.lang.ExceptionInfo
+               (outer-select/select base-makeup base-state
+                                    (assoc base-observation :forbidden #{"M-ready"})))))
