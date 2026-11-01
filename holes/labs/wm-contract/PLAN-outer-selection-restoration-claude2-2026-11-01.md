@@ -269,3 +269,25 @@ chain; futon2/CLAUDE.md bars a Claude session from writing run data without Joe'
 correct, and the need had vanished. The two pre-R18 refusals carry no input digest and so forbid
 nothing under any route. The medic route for a genuinely tampered terminal remains undefined and
 is not needed today.
+
+## L5-5 order (from claude-3's discovery, futon2 `b4e279b53`, 2026-11-01 19:40Z)
+
+- **L5-5a (now):** the not-exercised records project and alert as what they are. D1 a not-exercised
+  selection projects as a typed non-selection, not as an empty-field abstention; D2 the alert prints
+  no work block for a run that did not exist; D3 the previous-selection reader skips not-exercised
+  records (they are not selections) and records how many it skipped, so the next selection run's Q6
+  carriers stay recomputable; D4 authority refusals and arbitration exceptions get their own path
+  labels; D5 the direct-task record names the task. A click without an exercised selection does not
+  conform, by name.
+- **L5-5b (discovery):** the direct task entry as a selection: the operator's instruction is an
+  observation with a declared source (who, when, the words) entering G through the relation; one
+  added cascade on the same field, winning only by G; the blocker is that same-prediction classes are
+  broken by menu order, so an operator-recognition outcome factor (kernel version change) is needed
+  first. Urgency low: 0 of 290 acceptances carried a task.
+- **L5-5c (self-heal into selection, in order):** publish a ticket when an injury opens with the join
+  key on the finding (today 0 of 299 findings carry the pin, so no injury reaches the field); then
+  the obligation fact and the `repair-goes-to-the-front` step; row 3 of the README as a compared
+  cascade; then arbitration ("an injury on the next candidate's path fires the gate", with "on the
+  path" to be defined). The route stays reachable when selection itself is injured, as a typed
+  non-selection that alerts.
+- **D6, outside:** flights are a third operator-named entry whose runner writes no selection record.
