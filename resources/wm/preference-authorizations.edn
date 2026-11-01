@@ -1,0 +1,14 @@
+{:schema :wm/preference-authorizations-v1
+ :authority "holes/labs/wm-contract/AUTH-q9-factorized-preference-2026-11-01.md"
+ :authorized-by {:name "Joe" :identity 3001 :at "2026-11-01T17:55Z"}
+ :selector-authority 1001
+ :calibration-authorizations
+ [{:receipt 4001
+   :calibration {:identity 2001 :version 1 :authority 3001 :registration-token 3101
+                 :focused-cost 0 :related-cost 1 :unrelated-cost 2}
+   :authorized-by 3001
+   :implementation :futon2/ordinal-relevance-cost-v1}]
+ :factorization-authorizations
+ [{:receipt 4002 :identity 2002 :version 1 :authority 3001
+   :law :completion-then-conditional-relevance
+   :implementation :futon2/completion-first-softmax-v1}]}
