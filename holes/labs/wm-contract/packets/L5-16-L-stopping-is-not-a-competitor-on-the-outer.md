@@ -24,13 +24,18 @@ build).
 
 ## futon2
 
-5. `outer_select.clj`: remove the `:pick-not-below-abstention` refusal on the outer (~line 206);
-   compare every admissible class including L5-11's stopping-equivalent ones (undo the exclusion
-   from the comparison; keep `:stopping-equivalent` as a diagnostic list of classes whose prediction
-   equals the abstention's, and add `:every-class-predicts-stopping? true/false`). Remove the
-   `:all-policies-predict-stopping` abstention: on a non-empty field with admissible classes the
-   outer always picks the minimum (ties still refuse `:tie-at-minimum`; `:no-admissible-pick`
-   still refuses when every class is forbidden). Abstention G stays computed and on the record.
+5. `outer_select.clj` (**corrected 2026-11-01 ~20:50Z after codex-5 found the contradiction**):
+   remove the `:pick-not-below-abstention` refusal on the outer (~line 206). Keep L5-11's rule:
+   classes whose prediction equals the abstention's are **not** compared, because a policy that
+   predicts only stopping is not progress and "order by worth" means order among policies that
+   predict progress; `:stopping-equivalent` stays as the diagnostic list. **Fallback:** when every
+   class predicts stopping on a non-empty field, compare all of them and pick the strict minimum
+   anyway, with `:every-class-predicts-stopping? true` on the record (never stop on a non-empty
+   field; this is the curiosity signal). Ties still refuse `:tie-at-minimum`; `:no-admissible-pick`
+   still refuses when every class is forbidden. Abstention G stays computed and on the record.
+   Click 12's acceptance therefore stands: the pick is M-interim-director-proxy-metric-inventory
+   (G 3.3896), the strict minimum among the non-stopping classes, with the abstention's 3.2782
+   recorded as information.
 6. `decision_gate.clj`: `:pick-not-below-abstention` stays in the closed set for the inner.
 7. Projector: `comparedPolicies`/`policyG`/`policyPrediction` are all classes again on the outer;
    `:stopping-equivalent` remains a diagnostic. Checker: no rendering change beyond what Lean needs.
