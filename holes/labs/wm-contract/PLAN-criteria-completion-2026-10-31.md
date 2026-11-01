@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: medic refunds, clicks resume (2026-11-01)
+
+Joe ruled that medic clicks do not take credits. All seven charged were refunded through the ledger's refund path: 243 allocated, 235 consumed, 8 available. Unknown relations remain Joe's call and do not block ordinary clicks. Click 9 is the first live chance for the way out, objection round and cascade revision.
+
 ## Latest execution checkpoint: holding for Joe (2026-10-31)
 
 All lanes landed and loaded at 58129611a, no active injury, no job running. Budget 1, held: a click that opens an injury with 0 credits left could not reach the medic route, because medic clicks are charged at issue. Waiting on Joe for medic charges and for unknown relations.
