@@ -34,6 +34,13 @@
         (and (map? x) (contains? x "target") (contains? x "cascade"))
         (format "(.pick %d %d)" (id (x "target")) (id (x "cascade")))
         :else ".unknownDecision"))
+(defn previous-decision
+  "The predecessor's optional decision.  A refused-before-choice carrier is a
+  known `none`; every actual decision is wrapped in `some`."
+  [x]
+  (if (and (map? x) (= true (x "refused")))
+    "none"
+    (str "some " (decision x))))
 (defn target-construction
   "An absent pin or digest renders 0 (id of the empty string), which Q2
   refuses."
@@ -182,7 +189,7 @@
    ;; the previous run's refusal and the input digests too.
    :q11 ["currentChoice" "comparedPolicies" "constructedCascades" "targetConstruction" "abstentionPrediction"
          "enumeratedTasks" "kind" "policyG" "abstentionG" "policyPrediction"
-         "previousChoice" "previousOutcome" "previousInputDigest" "currentInputDigest" "refusalHistory"]})
+         "previousOutcome" "previousInputDigest" "currentInputDigest" "refusalHistory"]})
 
 (defn required-keys
   "A work run has no selection path to export, so Q7 does not wait on one.  A
@@ -247,7 +254,7 @@
                                 (fs (facts "comparedPolicies")))))
         :q5 (ev-known (str "interpretationOrder := ." (facts "interpretationOrder")))
         :q6 (ev-known (format "previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentDecision := %s, currentInputDigest := %d, comparedPolicies := %s, policyPrediction := %s, refusalHistory := %s, refusalHistoryUnsealed := %d"
-                              (decision (facts "previousChoice")) (outcomes (facts "previousOutcome"))
+                              (previous-decision (facts "previousChoice")) (outcomes (facts "previousOutcome"))
                               (id (facts "previousInputDigest")) (decision (facts "currentChoice"))
                               (id (facts "currentInputDigest"))
                               (fs (facts "comparedPolicies"))
@@ -259,7 +266,7 @@
                               (if-let [path (facts "selectionPath")]
                                 (selection-path-term path)
                                 "none")))
-        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s, previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d, refusalHistory := %s"
+        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d, refusalHistory := %s"
                                (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
                                (decision (facts "currentChoice"))
                                (target-construction (facts "targetConstruction"))
@@ -267,7 +274,7 @@
                                (policy-g (facts "policyG")) (rational-term (facts "abstentionG"))
                                (policy-prediction (facts "policyPrediction"))
                                (digest-term (facts "abstentionPrediction"))
-                               (decision (facts "previousChoice")) (outcomes (facts "previousOutcome"))
+                               (outcomes (facts "previousOutcome"))
                                (id (facts "previousInputDigest")) (id (facts "currentInputDigest"))
                                (refusal-history (facts "refusalHistory"))))
         :q9 (let [certificate (facts "factorizedPreference")

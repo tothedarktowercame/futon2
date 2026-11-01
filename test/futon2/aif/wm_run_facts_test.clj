@@ -836,7 +836,7 @@
     (is (true? (c "sliceFromWholeLibrary")))
     (is (= 2 (c "policyCount") (count (f "policyPrediction"))))
     (is (str/starts-with? ((requiring-resolve 'wm-check-run-facts/evidence) f :q2) ".known"))
-    (is (= ".nr \"not recomputable: previousChoice,previousOutcome,previousInputDigest,refusalHistory\""
+    (is (= ".nr \"not recomputable: previousOutcome,previousInputDigest,refusalHistory\""
            ((requiring-resolve 'wm-check-run-facts/evidence) f :q11)))
     (is (= (sort (map :id (:classes s))) (f "comparedPolicies") (f "constructedCascades")))
     (is (= (set (f "comparedPolicies")) (set (map #(get % "policy") (f "policyG")))))
@@ -912,8 +912,14 @@
 (deftest predecessor-refusal-detail-is-not-on-the-current-selection-path
   (let [record (edn/read-string (slurp click-1-selection-record))
         export (facts/selection-facts-for-record record click-1-selection-record snap {})
+        projected (:facts export)
         paths (get-in export [:diagnostics :absencePaths])]
     (is (<= (get-in export [:facts "pathAbsenceCount"]) 3))
+    (is (= {"refused" true} (projected "previousChoice")))
+    (is (str/starts-with? ((requiring-resolve 'wm-check-run-facts/evidence) projected :q6)
+                          ".known"))
+    (is (not (str/includes? ((requiring-resolve 'wm-check-run-facts/evidence) projected :q11)
+                            "previousChoice")))
     (is (not-any? #(and (str/includes? % ":previous")
                         (str/includes? % ":detail"))
                   paths))
