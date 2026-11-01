@@ -123,6 +123,25 @@
              (score/outer-novelty (score/outer-model unknown))))
       (is (< (score/outer-score unknown) (score/outer-score known))))))
 
+(deftest unknown-relation-uses-the-declared-retraction-prior
+  (let [base {:focus :focus :facts {:task {:status :ready :unblocks 2}}
+              :field [{:target :task :reach 1/2}]
+              :state-counts uniform-state-counts :cascade []}
+        known (score/outer-model (assoc base :relation (fn [_ _] :focus)))
+        unknown (score/outer-model (assoc base :relation (fn [_ _] :unknown)))
+        outcomes (score/push unknown)]
+    (is (= {:form :prior-over-retraction-endings
+            :prior {:focused 11/19 :related 7/19 :unrelated 1/19}}
+           (:unknown-relation score/kernel-definition)))
+    (is (= :prior (:relation-basis unknown)))
+    (is (< (Math/abs (- (double 11/76) (get outcomes [:focused :several]))) 1e-12))
+    (is (< (Math/abs (- (double 7/76) (get outcomes [:related :several]))) 1e-12))
+    (is (< (Math/abs (- (double 1/76) (get outcomes [:unrelated :several]))) 1e-12))
+    (is (= 0.75 (get outcomes [:stop-the-line :none])))
+    (is (= (score/push known)
+           (score/push (dissoc known :relation-basis)))
+        "known-relation prediction is byte-identical")))
+
 (deftest typed-steps-and-rank-match-the-interpreter
   (is (= [:ready-gate :by-cone :by-unblocks]
          (mapv score/typed-step [:ready-gate :by-cone :by-unblocks])))

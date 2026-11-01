@@ -159,14 +159,13 @@
     (is (< (nth (:cascade-scores r) (:cascade-index r)) (get-in r [:abstention :G])))
     (is (= :pinned (get-in r [:library :status])))))
 
-(deftest single-unknown-relation-pick-cannot-beat-stopping
-  (let [r (try (outer-select/select (update base-makeup :cascades #(vec (take 1 %))) base-state
-                                    (assoc base-observation :relation (fn [_ _] :unknown)))
-               (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-    (is (= {:status :abstained :case :all-policies-predict-stopping} (:outcome r)))
+(deftest single-unknown-relation-pick-is-a-prior-not-stopping
+  (let [r (outer-select/select (update base-makeup :cascades #(vec (take 1 %))) base-state
+                               (assoc base-observation :relation (fn [_ _] :unknown)))]
+    (is (= :chosen (get-in r [:outcome :status])))
     (is (= :unknown (get-in r [:cascades 0 :relation :class])))
-    (is (nil? (:selection r)))
-    (is (= :predicts-stopping (get-in r [:stopping-equivalent 0 :reason])))))
+    (is (= :prior (get-in r [:classes 0 :relation-basis])))
+    (is (empty? (:stopping-equivalent r)))))
 
 (deftest absent-relation-receipt-is-not-a-hash-of-the-class
   (let [r (outer-select/select base-makeup base-state base-observation)]
@@ -229,11 +228,10 @@
   (let [obs (assoc base-observation :relation (fn [_ target]
                                               (if (= target "M-ready") :focus :unknown)))
         r (outer-select/select base-makeup base-state obs)]
-    (is (= 1 (count (:classes r))))
-    (is (= 1 (get-in r [:construction :policy-count])))
-    (is (= [:second] (get-in r [:stopping-equivalent 0 :members])))
-    (is (= :predicts-stopping (get-in r [:stopping-equivalent 0 :reason])))
-    (is (= [:stop-the-line :none] (get-in r [:stopping-equivalent 0 :landing])))
+    (is (= 2 (count (:classes r))))
+    (is (= 2 (get-in r [:construction :policy-count])))
+    (is (empty? (:stopping-equivalent r)))
+    (is (= :prior (some :relation-basis (:classes r))))
     (is (= :first (:cascade-id r)))
     (is (= ["M-ready" "M-unknown"] (:outer-score/admitted r)))
     (is (= 2 (count (:cascades r))))
@@ -256,7 +254,7 @@
              {:outer/selection (dissoc r :stopping-equivalent)} "fixture" {} {})]
     (is (= (f "comparedPolicies") (f "constructedCascades")
            (get-in f ["targetConstruction" 0 "policies"])))
-    (is (= 1 (count (f "policyG")) (count (f "policyPrediction"))))
+    (is (= 2 (count (f "policyG")) (count (f "policyPrediction"))))
     (is (every? #(not= (get % "digest") (f "abstentionPrediction")) (f "policyPrediction")))
     (is (= (identity/digest (get-in r [:abstention :prediction :outcomes])) (f "abstentionPrediction")))
     (is (= (:stopping-equivalent r) (get-in export [:diagnostics :stoppingEquivalent])))

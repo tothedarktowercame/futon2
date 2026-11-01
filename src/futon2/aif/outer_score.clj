@@ -62,6 +62,12 @@
   {:schema :wm/outer-kernel-parameters-v1 :version 1
    :endings endings :gains gains :states states
    :retraction {:focus :focused :associated :related :useful-elsewhere :unrelated}
+   :unknown-relation
+   {:form :prior-over-retraction-endings
+    ;; Normalised restriction of Joe's c-kit (11/20, 7/20, 1/20) to the
+    ;; three retraction endings. This is a pinned kernel parameter, not a
+    ;; per-click posterior.
+    :prior {:focused 11/19 :related 7/19 :unrelated 1/19}}
    :transition-kernel {:form :reach-on-landing-remainder-on-stopped
                        :stopped [:stop-the-line :none] :stopped-mass 1.0
                        :reach-bounds [0.0 1.0]}
@@ -150,9 +156,6 @@
 (defn- ready-gain [unblocks]
   (cond (zero? unblocks) :none (= 1 unblocks) :one :else :several))
 
-(defn- ending-class [relation focus target]
-  (get (:retraction kernel-definition) (relation focus target)))
-
 (defn- stopped-kernel []
   (into {} (for [state states]
              [state (assoc (zipmap outcomes (repeat 0.0))
@@ -167,6 +170,17 @@
         doable (if (= landing stopped)
                  blocked
                  (assoc row0 landing reach stopped (- 1.0 reach)))]
+    {:doable doable :blocked blocked}))
+
+(defn- unknown-relation-kernel [gain raw-reach]
+  (let [reach (bounded-reach raw-reach)
+        stopped (get-in kernel-definition [:transition-kernel :stopped])
+        prior (get-in kernel-definition [:unknown-relation :prior])
+        row0 (zipmap outcomes (repeat 0.0))
+        doable (reduce-kv (fn [row ending mass]
+                            (assoc row [ending gain] (* reach (double mass))))
+                          (assoc row0 stopped (- 1.0 reach)) prior)
+        blocked (assoc row0 stopped 1.0)]
     {:doable doable :blocked blocked}))
 
 (defn stopped-model
@@ -199,21 +213,29 @@
   (if-let [candidate (cascade-pick cascade facts field)]
     (let [fact (value-of facts (:target candidate))
           status (:status fact)
-          ending (ending-class relation focus (:target candidate))
+          relation-class (relation focus (:target candidate))
+          ending (get (:retraction kernel-definition) relation-class)
+          prior? (= :unknown relation-class)
           discovery? (= status (get-in kernel-definition [:discovery-gain :status]))
-          gain (when ending (if discovery?
-                              (get-in kernel-definition [:discovery-gain :gain])
-                              (ready-gain (graph-term facts (:target candidate) :unblocks))))
-          landing (if ending [ending gain]
-                      (get-in kernel-definition [:transition-kernel :stopped]))]
-      {:pick candidate
+          gain (when (or ending prior?)
+                 (if discovery?
+                   (get-in kernel-definition [:discovery-gain :gain])
+                   (ready-gain (graph-term facts (:target candidate) :unblocks))))
+          landing (cond
+                    ending [ending gain]
+                    prior? (assoc (get kernel-definition :unknown-relation) :gain gain)
+                    :else (get-in kernel-definition [:transition-kernel :stopped]))]
+      (cond-> {:pick candidate
        :status status
        :gain-source (if discovery? (get-in kernel-definition [:discovery-gain :source])
                         :giraffe-unblocks)
        :counts (value-of state-counts status)
        :q (normalize (value-of state-counts status) states)
-       :kernel (picked-kernel landing (:reach candidate))
-       :landing landing})
+       :kernel (if prior?
+                 (unknown-relation-kernel gain (:reach candidate))
+                 (picked-kernel landing (:reach candidate)))
+       :landing landing}
+        prior? (assoc :relation-basis :prior)))
     (stopped-model)))
 
 (defn outer-preference
@@ -282,12 +304,18 @@
         stopping? (= prediction (push (stopped-model)))
         altitude-source (when stopping? (abstention-altitude))
         altitude (or (:nats altitude-source) 0)]
-    {:terms (cond-> {:risk r :ambiguity a :novelty n}
+    (cond-> {:terms (cond-> {:risk r :ambiguity a :novelty n}
               stopping? (assoc :altitude altitude))
      :altitude-source altitude-source
      :G (if (= :inadmissible r) :inadmissible (+ (- (+ r a) n) altitude))
      :gain-source (:gain-source model)
-     :prediction (assoc (select-keys model [:q :landing :status :gain-source]) :outcomes prediction)}))
+     :prediction (assoc (select-keys model [:q :landing :status :gain-source])
+                        :outcomes prediction)}
+      (:relation-basis model)
+      (assoc :relation-basis (:relation-basis model)
+             :prediction (assoc (select-keys model [:q :landing :status :gain-source
+                                                     :relation-basis])
+                                :outcomes prediction)))))
 
 (defn abstention-score
   "Score stopping separately over the same preference and ruled altitude;

@@ -71,7 +71,7 @@
     (mapv (fn [k]
             (let [members (get groups k) representative (first members)]
               (assert (every? #(= (second k) (g-units (:G %))) members))
-              (merge (select-keys representative [:pick :G :terms :prediction])
+              (merge (select-keys representative [:pick :G :terms :prediction :relation-basis])
                      {:id (identity/sha256 (pr-str k)) :prediction-digest (first k)
                       :g-units (second k) :members (mapv :id members)
                       :representative (:id representative)})))
