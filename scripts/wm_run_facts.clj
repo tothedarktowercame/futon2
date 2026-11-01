@@ -32,6 +32,7 @@
    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
    "interpretationOrder" "pathAbsenceCount" "previousChoice"
    "previousOutcome" "previousInputDigest" "currentChoice" "refusalHistory"
+   "refusalHistorySource"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
    "factorizedPreference" "calibrationAuthorizations"
@@ -735,14 +736,20 @@
                "previousInputDigest" (q6 "previousInputDigest")
                "currentChoice" (q6 "currentChoice")
                ;; L5-2L-2: the refusal history as far as the record knows it:
-               ;; the predecessor's refusal on its input digest, or nothing.
-               ;; A deeper history (every refusal retained per task) is
-               ;; L5-2C-c; until then this is the one step the record carries.
-               "refusalHistory" (let [pc (q6 "previousChoice") po (q6 "previousOutcome") pd (q6 "previousInputDigest")]
-                                  (cond (some #(and (map? %) (contains? % "not-recomputable")) [pc po pd])
-                                        (nr "refusal history needs the predecessor's choice, outcome and input digest")
+               ;; every refusal retained for this task. A record from before
+               ;; retention carries only its predecessor's, and says so.
+               "refusalHistory" (let [retained (get-in cert [:q6 :refusal-history])
+                                      pc (q6 "previousChoice") po (q6 "previousOutcome") pd (q6 "previousInputDigest")]
+                                  (cond (vector? retained)
+                                        (mapv (fn [{:keys [cascade input-digest]}]
+                                                {"cascade" cascade "input-digest" input-digest})
+                                              retained)
+                                        (some #(and (map? %) (contains? % "not-recomputable")) [pc po pd])
+                                        (nr "refusal history needs the predecessor's choice, outcome and digest")
                                         (= "refused" po) [{"cascade" (get pc "cascade") "input-digest" pd}]
                                         :else []))
+               "refusalHistorySource" (if (vector? (get-in cert [:q6 :refusal-history]))
+                                        "retained" "predecessor-only")
                "currentInputDigest" (q6 "currentInputDigest")
                "seatsAvailable" (if (map? (:seat-roster world))
                                   (sorted-ids (mapcat :ids (vals (:seat-roster world))))

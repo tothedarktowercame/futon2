@@ -1,7 +1,6 @@
 (ns futon2.aif.previous-run
-  "Requirements Q6 at the production runner: when the previous run's typed
-  terminal outcome was a refusal and its selection-input digest equals this
-  run's, this run must not choose the previous choice again.
+  "Requirements Q6 at the production runner: a run must not choose what was
+  refused on its selection inputs, whichever earlier run refused it.
 
   The record stream. Every run appends two events to run-stream.edn in its
   run-record directory: :started (its id and recorded start instant) before
@@ -22,14 +21,16 @@
   Enforcement happens before the one G selector: the decision computes the
   selection-input digest over what the selector consumes (the scored
   family, its F carriers, beta, the precision identity and the selector's
-  other inputs), and when Q6 applies removes exactly the previous policy key
-  from the menu. With nothing left the decision abstains typed
-  :repeat-choice-after-refusal, and that refusal is carried forward until
-  the selection inputs change.
+  other inputs). Every refused policy stays compared; its prediction class cannot
+  be chosen. The predecessor carrier retains every refused run in the stream, and
+  the selector forbids those on the current digest for this task. With nothing left
+  the decision abstains typed :repeat-choice-after-refusal, and that refusal is
+  carried forward until the selection inputs change.
 
   Every carrier is sealed (value-digest under :sha256). A tampered carrier
   is not-recomputable, never a pass."
-  (:require [futon2.aif.cascade-selection :as selection]
+  (:require [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.cascade-selection :as selection]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -82,6 +83,36 @@
   (let [f (stream-file dir)]
     (io/make-parents f)
     (spit f (str (pr-str event) "\n") :append true)))
+
+(defn cascade-identity
+  "A refused policy's name in a history entry: the hash Lean's ids are taken from."
+  [policy-key]
+  (action-identity/digest policy-key))
+
+(defn refusal-history
+  "Every run started before NOW in EVENTS whose sealed terminal carrier says it
+  was refused on a chosen policy, oldest first. Read from the sealed carriers only:
+  a tampered terminal is no evidence of a refusal, and is counted, not trusted.
+  Returns {:entries [{:cascade :input-digest :run-id :target}…] :unsealed n}."
+  [events run-id now]
+  (let [started (into {} (for [e events :when (= :started (:event e))]
+                           [(:run/id e) (instant (:startedAt e))]))
+        closed (for [e events
+                     :let [at (get started (:run/id e))]
+                     :when (and (= :closed (:event e)) (not= run-id (:run/id e)) at
+                                (.isBefore ^Instant at now))]
+                 [at (:q6 e)])
+        {sealed true broken false} (group-by (comp boolean intact? second) closed)
+        refused (filter (fn [[_ t]] (and (= :refused (get-in t [:outcome :outcome]))
+                                         (= :present (get-in t [:choice :status]))
+                                         (string? (:input-digest t))))
+                        sealed)]
+    {:entries (vec (for [[_ t] (sort-by (fn [[at _]] (.toEpochMilli ^Instant at)) refused)]
+                     {:cascade (cascade-identity (get-in t [:choice :policy-key]))
+                      :input-digest (:input-digest t)
+                      :run-id (:run/id t)
+                      :target (get-in t [:choice :target])}))
+     :unsealed (count broken)}))
 
 (defn predecessor
   "The sealed Q6 predecessor carrier for run RUN-ID started at STARTED-AT in
@@ -143,7 +174,9 @@
                      ;; the prior of the next run's refresh audit
                      (:q8-frontier (first closed))
                      (assoc :frontier (:q8-frontier (first closed))))))))))]
-    (seal (merge base found))))
+    (seal (cond-> (merge base found)
+            (and now (= :present (:status stream)))
+            (assoc :refusal-history (refusal-history (:events stream) run-id now))))))
 
 (defn selection-from-record
   "Summarize the outer selection of a retained tick, independently of its
@@ -293,33 +326,53 @@
                          :input-digest digest
                          :excluded-key (first (:excluded-keys decided))}))))
 
+(defn task-refusal-history
+  "The retained refusals on TARGETS, oldest first, from an intact carrier only.
+  Entries on other digests stay: the record is the history, and they forbid nothing."
+  [predecessor targets]
+  (if (intact? predecessor)
+    (filterv #(contains? targets (:target %))
+             (get-in predecessor [:refusal-history :entries]))
+    []))
+
 (defn exclusion
   "Q6 before the one selector: PREDECESSOR (the run's sealed predecessor carrier,
   or nil) against RANKED (the certified scored family). A refused policy stays
-  compared, so nothing leaves RANKED. Returns {:carrier <sealed carrier>
-  :forbidden {:keys … :classes …}}, the refused keys and their prediction classes,
-  with :refusal set when no class is left to choose."
+  compared, so nothing leaves RANKED. What is forbidden is the prediction class of
+  every refusal on these inputs, not only the previous run's: with inputs unchanged,
+  A refused then B refused does not free A. Returns {:carrier <sealed carrier>
+  :forbidden {:keys … :classes …}}, with :refusal set when no class is left."
   [predecessor ranked selector-opts beta precision-identity]
   (let [digest (selection-inputs-digest ranked selector-opts beta precision-identity)
         decided (decide-exclusion predecessor digest)
-        barring? (= :excluded (:status decided))
         rows (map selection/selection-row ranked)
-        refused-keys (vec (:excluded-keys decided))
+        targets (set (map #(str (get-in % [:action :target])) ranked))
+        history (task-refusal-history predecessor targets)
+        on-inputs (filterv #(= digest (:input-digest %)) history)
+        key-of (into {} (for [{k :policy-key} rows :when k] [(cascade-identity k) k]))
+        refused-keys (vec (distinct (concat (:excluded-keys decided)
+                                            (keep (comp key-of :cascade) on-inputs))))
+        barring? (or (= :excluded (:status decided)) (seq refused-keys))
         forbidden (when barring?
                     {:keys refused-keys
                      :classes (selection/forbidden-classes rows refused-keys)})
-        refused? (and barring? (every? #(selection/forbidden-row? forbidden %) rows))
+        refused? (and barring? (seq rows)
+                      (every? #(selection/forbidden-row? forbidden %) rows))
         carrier (seal
                  (cond-> (merge {:schema exclusion-schema
                                  :input-digest digest
                                  :predecessor (select-keys predecessor
                                                            [:status :reason :sha256
                                                             :previous-run/id])
-                                 :menu (count ranked)}
+                                 :menu (count ranked)
+                                 :refusal-history history}
                                 (dissoc decided :excluded-keys))
                    barring? (assoc :status :forbidden
                                    :forbidden-keys refused-keys
-                                   :forbidden-classes (:classes forbidden))
+                                   :forbidden-classes (:classes forbidden)
+                                   :forbidden-runs (mapv :run-id on-inputs))
+                   (and barring? (not= :excluded (:status decided)))
+                   (assoc :reason :refused-on-these-inputs)
                    refused? (assoc :status :refused
                                    :kind :repeat-choice-after-refusal
                                    :no-admissible-class true

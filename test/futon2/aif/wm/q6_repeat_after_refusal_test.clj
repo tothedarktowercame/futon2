@@ -185,10 +185,11 @@
     (is (= "2026-10-15-0000" (:previous-run/id p))
         "the latest start before this run's, not the name that sorts last")
     (is (= :changed (get-in p [:previous :outcome :outcome])) "its own close")
-    (is (= [:not-triggered :previous-outcome-not-refused]
-           ((juxt :status :reason) (get-in (decide-after fx p) [:decision :selection-certificate :q6]))))
-    (testing "a successful previous outcome excludes nothing"
-      (is (nil? (get-in (decide-after fx p) [:decision :selection-certificate :q6 :forbidden-keys]))))))
+    (let [q6 (get-in (decide-after fx p) [:decision :selection-certificate :q6])]
+      (testing "the refusal at 10:00 outlives the run at 11:00 that was not refused,
+                on the same inputs; the refusal at 13:00 is after this run"
+        (is (= ["2026-10-15-ffff"] (mapv :run-id (:refusal-history q6))))
+        (is (= ["2026-10-15-ffff"] (:forbidden-runs q6)))))))
 
 (defn- carrier-of [result] (get-in result [:decision :selection-certificate :q6]))
 
@@ -255,7 +256,9 @@
         reseal (fn [key]
                  (let [prev (previous-run/seal (-> (:previous p0) (dissoc :sha256)
                                                    (assoc-in [:choice :policy-key] key)))]
-                   (previous-run/seal (-> p0 (dissoc :sha256) (assoc :previous prev)))))]
+                   ;; the history names the same run, so it moves with the key
+                   (previous-run/seal (-> p0 (dissoc :sha256) (assoc :previous prev)
+                                          (assoc-in [:refusal-history :entries] [])))))]
     (testing "the same key, same inputs: forbidden, and this fixture's two policies
               predict alike, so its class is the whole menu and nothing is left"
       (is (= [:refused true [k]]
