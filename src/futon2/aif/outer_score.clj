@@ -131,6 +131,41 @@
   [cascade facts field]
   (reduce (partial apply-selection-step facts) (vec field) cascade))
 
+(declare typed-step)
+
+(defn- step-value
+  [facts step candidate]
+  (when candidate
+    (case step
+      :by-rank (graph-term facts (:target candidate) :rank)
+      :by-cone (graph-term facts (:target candidate) :cone)
+      :by-unblocks (graph-term facts (:target candidate) :unblocks)
+      nil)))
+
+(defn apply-selection-cascade-traced
+  "Apply a cascade and retain the deterministic facts that explain each step.
+  The returned field is exactly `apply-selection-cascade`'s field."
+  [cascade facts field]
+  (reduce
+   (fn [{:keys [field trace]} step]
+     (let [next-field (apply-selection-step facts field step)
+           typed (typed-step step)
+           ordered? (contains? #{:by-rank :by-cone :by-unblocks} step)
+           pick (first next-field)
+           runner (second next-field)
+           pick-value (step-value facts step pick)
+           runner-value (step-value facts step runner)]
+       {:field next-field
+        :trace (conj trace
+                     (if ordered?
+                       (cond-> {:step typed :pick-value pick-value}
+                         runner (assoc :runner-up {:target (:target runner)
+                                                   :value runner-value}
+                                       :margin (Math/abs (double (- runner-value pick-value)))))
+                       {:step typed :in (count field) :out (count next-field)}))}))
+   {:field (vec field) :trace []}
+   cascade))
+
 (defn cascade-pick
   "Lean `cascadePick`: return the first candidate left by the cascade, or nil."
   [cascade facts field]

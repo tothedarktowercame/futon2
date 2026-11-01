@@ -1,5 +1,6 @@
 (ns futon2.aif.outer-select-test
-  (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
+  (:require [clojure.edn :as edn]
+            [futon2.aif.outer-menu-fixture :as menu-fixture]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-select :as outer-select]
@@ -26,6 +27,33 @@
            {:target "M-unknown" :reach 1/2 :reach-source :default-reach}]
    :facts {"M-ready" {:status :ready :unblocks 1 :cone 2}
            "M-unknown" {:status :undetermined :unblocks 0 :cone 1}}})
+
+(deftest click-12-trace-is-over-the-admitted-scoring-field
+  (let [record (edn/read-string
+                (slurp "/home/joe/code/futon2/data/wm-runs/selection-record-2026-11-01-wm-click-7d89656e-b180-4f9e-bfb0-780d225b41de.edn"))
+        selection (:outer/selection record)
+        field (mapv (fn [target] {:target target}) (:outer-score/admitted selection))
+        facts (get-in selection [:field-facts :admitted])
+        cascades (into {} (map (juxt :id :steps) (:cascades selection)))
+        traced #(outer-score/apply-selection-cascade-traced (cascades %) facts field)
+        find-trace (traced :find-out-before-building)
+        giraffe-trace (traced :giraffe-order)]
+    (is (= "24defce4d95cf3be18cbd71e0a9537ec9c22cc2e4cd1661fe9201c8d951f8e60"
+           (get-in selection [:field-facts :giraffe/pass-sha256])))
+    (is (= 591 (count field)))
+    (is (= [{:step {:status-gate :undetermined} :in 591 :out 47}
+            {:step :by-rank :pick-value 1
+             :runner-up {:target "M-apm-capability-ratchet" :value 10} :margin 9.0}]
+           (:trace find-trace)))
+    (is (= [{:step :ready-gate :in 591 :out 494}
+            {:step :by-cone :pick-value 9
+             :runner-up {:target "M-autoclock-in" :value 4} :margin 5.0}
+            {:step :by-unblocks :pick-value 1
+             :runner-up {:target "E-memory-whitepaper-v2-programme" :value 1} :margin 0.0}]
+           (:trace giraffe-trace)))
+    (doseq [[id steps] cascades]
+      (is (= (outer-score/cascade-pick steps facts field)
+             (first (:field (traced id))))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Pre-selection duplicate exclusion (DUPLICATE-TARGET-STILL-SELECTED, 2026-10-31)

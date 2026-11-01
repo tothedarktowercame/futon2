@@ -428,7 +428,8 @@ class ContinuousModeTest(unittest.TestCase):
             return {"n": n, "rc": 1 if c["alert"] else 0, "click-id": f"click-{n}", "spent": True,
                     "outcome": c.get("outcome", "ok"), "run-id": f"run-{n}", "carried": c.get("carried", True),
                     "last-result": {}, "log": None, "run-record": "R", "verdict": {"file": "V"},
-                    "alert": c["alert"], "since-epoch": since, "in-flight-repairs": []}
+                    "alert": c["alert"], "why": c.get("why"),
+                    "since-epoch": since, "in-flight-repairs": []}
 
         with tempfile.TemporaryDirectory() as td, \
              mock.patch.object(loop, "STATE", Path(td)), \
@@ -449,10 +450,18 @@ class ContinuousModeTest(unittest.TestCase):
             code = loop.run(args)
             alerts = [l for l in (Path(td) / "alerts.jsonl").read_text().splitlines()] \
                 if (Path(td) / "alerts.jsonl").exists() else []
-            events = [__import__("json").loads(l)["event"] for l in (Path(td) / "ledger.jsonl").read_text().splitlines()]
+            rows = [__import__("json").loads(l) for l in (Path(td) / "ledger.jsonl").read_text().splitlines()]
+            events = [row["event"] for row in rows]
         return {"code": code, "stop": notify.call_args[0][1], "alerts": alerts,
                 "belled": notify_alert.call_count, "repairs": repair.call_count, "events": events,
-                "reloads": reload.call_count}
+                "rows": rows, "reloads": reload.call_count}
+
+    def test_click_ledger_carries_selection_why(self):
+        why = {"classes": ["class one", "class two"], "abstention": "stopping",
+               "decision": "decision"}
+        result = self.run_continuous([{"alert": None, "why": why}])
+        click = next(row for row in result["rows"] if row["event"] == "click")
+        self.assertEqual(why, click["why"])
 
     def test_repeated_signature_pauses_the_loop_once_the_fix_is_due(self):
         r = self.run_continuous([{"alert": ["work Q7 violated"]},

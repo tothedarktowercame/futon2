@@ -1,10 +1,125 @@
 (ns futon2.aif.outer-select
   "Task choice with retained library evidence, corresponding to `R20Step.chosenCascadeEntry` and `step`."
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-observation :as observation]
             [futon2.aif.outer-score :as outer-score]))
+
+(declare value-of)
+
+(defn source-header
+  "Parse the three operator-facing header fields and compare the live bytes to PIN."
+  [{:keys [path sha256]}]
+  (if-not path
+    {:path :absent :sha256 :absent :pin :absent
+     :header {:date :absent :status :absent :timebox :absent}}
+    (let [file (io/file path)
+        bytes (java.nio.file.Files/readAllBytes (.toPath file))
+        text (String. bytes "UTF-8")
+        digest (identity/sha256 text)
+        lines (take 30 (str/split-lines text))
+        field (fn [label]
+                (or (some #(second (re-matches
+                                    (re-pattern (str "\\*\\*" label ":?\\*\\*:?\\s*(.+)")) %))
+                          lines)
+                    :absent))]
+      {:path (.getCanonicalPath file)
+       :sha256 digest
+       :pin (if (= sha256 digest) :matches :drifted)
+       :header {:date (field "Date") :status (field "Status") :timebox (field "Timebox")}})))
+
+(defn- fmt4 [x]
+  (String/format java.util.Locale/ROOT "%.4f" (to-array [(double x)])))
+(defn- short-header [header]
+  (let [short #(if (= :absent %) "absent" (first (str/split % #" maximum| —| \(")))]
+    (str "Header: dated " (short (:date header)) ", status " (short (:status header))
+         ", timebox " (short (:timebox header)) ".")))
+
+(defn- render-step [step]
+  (cond
+    (= :ready-gate step) "ready gate"
+    (map? step) (str "status gate " (:status-gate step))
+    :else (name step)))
+
+(defn- render-order-value [step value]
+  (str (case step :by-rank "rank " :by-cone "cone " :by-unblocks "unblocks " "") value))
+
+(defn render-selection-why
+  "The sole renderer for typed selection explanations."
+  [kind row]
+  (case kind
+    :class
+    (let [steps (:steps row)
+          gate (first (filter #(contains? % :out) steps))
+          orders (filter #(contains? % :pick-value) steps)
+          order-text (str/join "; " (map (fn [{:keys [step pick-value runner-up]}]
+                                            (str (render-step step) " took "
+                                                 (render-order-value step pick-value)
+                                                 (when runner-up
+                                                   (str " (runner-up " (:target runner-up) " at "
+                                                        (render-order-value step (:value runner-up)) ")")))) orders))
+          rank-note (if (= :computed-before-reading (get-in row [:giraffe :rank-basis]))
+                      (str " Rank was computed before the reading stage demoted it (prerequisite "
+                           (first (get-in row [:giraffe :prerequisites])) " unresolved).") "")
+          altitude (get-in row [:terms :altitude])]
+      (str (str/join ", " (map name (:cascades row))) " picked " (:pick row) ": "
+           (when gate (str (render-step (:step gate)) " left " (:out gate) " of " (:in gate) "; "))
+           order-text "." rank-note " " (short-header (get-in row [:source :header]))
+           " G " (fmt4 (:G row))
+           (when altitude (str " (+" altitude " altitude: predicts stopping)")) "."))
+    :abstention
+    (str "stopping: G " (fmt4 (:G row)) " = risk " (fmt4 (get-in row [:terms :risk]))
+         " + altitude " (get-in row [:terms :altitude]) " ("
+         (get-in row [:altitude-source :resource]) " "
+         (subs (get-in row [:altitude-source :sha256]) 0 6) "…)")
+    :decision
+    (str "chose " (:pick row) " (G " (fmt4 (:G row)) ") over stopping ("
+         (fmt4 (:abstention-G row)) ") and " (:other-class-count row)
+         " other class; margin to stopping " (fmt4 (:margin-to-abstention row)) " nats")))
+
+(defn- why-class [class cascades traces facts]
+  (let [members (set (:members class))
+        arrangements (filter #(members (:id %)) cascades)
+        cascade (last (sort-by #(count (:steps %)) arrangements))
+        fact (value-of facts (:pick class))
+        prerequisites (mapv :to (get-in fact [:graph-terms :prerequisites]))
+        source (source-header (get-in fact [:dependency-reading :source]))
+        row {:class (:id class) :pick (:pick class) :cascades (:members class)
+             :steps (get traces (:id cascade))
+             :giraffe {:rank (:rank fact) :status (:status fact)
+                       :reason (get-in fact [:graph-terms :reason])
+                       :unblocks (:unblocks fact) :cone (:cone fact)
+                       :rank-basis (if (and (:rank fact) (not= :ready (:status fact)))
+                                     :computed-before-reading :as-ranked)
+                       :prerequisites prerequisites
+                       :evidence (get-in fact [:graph-terms :prerequisites 0 :evidence])}
+             :source source :terms (:terms class) :G (:G class)}]
+    (assoc row :rendered (render-selection-why :class row))))
+
+(defn selection-why [classes cascades abstention traces facts outcome chosen-class]
+  (let [class-rows (mapv #(why-class % cascades traces facts) classes)
+        ordered (sort-by :G class-rows)
+        class-rows (mapv (fn [row]
+                           (let [others (remove #(= (:class row) (:class %)) ordered)]
+                             (assoc row
+                                    :margin-to-next (when-let [next (first others)]
+                                                      (Math/abs (double (- (:G next) (:G row)))))
+                                    :margin-to-abstention (- (:G abstention) (:G row)))))
+                         class-rows)
+        abstention (assoc abstention :altitude-source
+                          (assoc (:altitude-source abstention)
+                                 :resource outer-score/abstention-altitude-resource))
+        abstention (assoc abstention :rendered (render-selection-why :abstention abstention))
+        chosen (some #(when (= chosen-class (:class %)) %) class-rows)
+        decision (when chosen
+                   (let [row {:status (:status outcome) :pick (:pick chosen) :G (:G chosen)
+                              :abstention-G (:G abstention)
+                              :other-class-count (dec (count class-rows))
+                              :margin-to-abstention (- (:G abstention) (:G chosen))}]
+                     (assoc row :rendered (render-selection-why :decision row))))]
+    {:schema :wm/selection-why-v1 :classes class-rows :abstention abstention :decision decision}))
 
 (defn- refuse! [kind data]
   (throw (ex-info "Outer selection refused" (cond-> (assoc data :kind kind)
@@ -140,6 +255,15 @@
                            (catch clojure.lang.ExceptionInfo e
                              (throw (ex-info (ex-message e)
                                              (cond-> (assoc (ex-data e) :construction construction) field-facts (assoc :field-facts field-facts)) e))))) menu)
+          traces (into {} (map (fn [cascade]
+                                 [(:id cascade)
+                                  (if (some #(and (map? %)
+                                                  (or (contains? % :gate) (contains? % :order)))
+                                            (:steps cascade))
+                                    []
+                                    (:trace (outer-score/apply-selection-cascade-traced
+                                             (:steps cascade) (:facts observation)
+                                             (:field observation))))]) menu))
           details (mapv #(outer-score/score-model score-input %) models)
           library (:library construction)
           cascades (mapv #(cascade-record observation %1 %2 %3) menu models details)
@@ -190,7 +314,13 @@
                          {:cascades (mapv :id cascades) :forbidden forbidden-evidence
                           :selection-evidence evidence}))
             minimum (when (seq admissible) (reduce min (map :G admissible)))
-            tied (filterv #(= minimum (:G %)) admissible)]
+            tied (filterv #(= minimum (:G %)) admissible)
+            prospective (when (= 1 (count tied)) (first tied))
+            prospective (when (and prospective (< (:G prospective) (:G abstention))) prospective)
+            why (selection-why all-classes cascades abstention traces (:facts observation)
+                               (if prospective {:status :chosen} {:status :abstained})
+                               (:id prospective))
+            evidence (assoc evidence :why why)]
         (if (empty? classes)
           (assoc evidence :outcome {:status :abstained :case :all-policies-predict-stopping}
                  :selection nil :prediction (:prediction abstention))
