@@ -6,8 +6,8 @@
             [futon2.aif.mission-hole-wants :as wants]))
 
 (defn describe
-  "Describe the registry entry's exact pinned bytes. Never fills a baseline
-  or treats unrecognized completion prose as a false before-observation."
+  "Describe the registry entry's exact pinned bytes. Baseline measurement belongs to work, not selection discovery.
+  Never treats unrecognized completion prose as a false before-observation."
   [entry]
   (let [source (:source entry)
         text (slurp (:path source))
@@ -25,11 +25,12 @@
                   (and (pos? located) (= located (count cc))) :criteria-locators
                   (or (seq cc) (seq (:criteria prose))) :completion-prose-needs-locators
                   :else :completion-definition-not-found)]
-      {:schema :wm/completion-surface-v1 :target (:id entry) :source-pin source
+      {:schema :wm/completion-surface-v2 :target (:id entry) :source-pin source
        :completion-class class :checkbox-count (count boxes)
        :criteria-count (count cc) :located-criteria-count located
        :unlocated-criteria-count (- (count cc) located)
-       :baseline {:status :absent :reason :selected-task-baseline-not-retained}
+       :baseline-phase :work
+       :baseline-producer :selected-task-revision-baseline
        :producer (case class
                    :completion-prose-needs-locators :completion-locator-author
                    :completion-definition-not-found :task-completion-author
