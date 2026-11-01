@@ -68,7 +68,8 @@
     ;; refused choice on the same selection inputs (previous-run)
     :repeat-choice-after-refusal
     ;; Requirements Q11: no strict minimum exists (cascade-selection)
-    :tie-at-minimum})
+    :tie-at-minimum
+    :no-admissible-class})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this
@@ -214,17 +215,25 @@
         scored (into {} (map (fn [[_ row]] [(:id row) row])) (:scoring certificate))]
     (for [{:keys [id g class-emission]} (:candidates certificate)
           :when (pos? (get supported id 0.0))]
-      {:action id :g g
+      {:action id :g g :policy-key (when (map? id) (:policy-key id))
        :prediction-digest (selection/prediction-digest
                            (:steps (get scored id))
                            (get-in class-emission [:certificate :steps]))})))
 
 (defn- check-minimum!
-  "The chosen action is a member of the strictly minimal class, and no class
-  ties it."
+  "The chosen action is a member of the strictly minimal class among those a Q6
+  refusal leaves, no class ties it, and it is not in a forbidden class."
   [decision supported]
-  (let [{:keys [status detail class]} (selection/minimum-class
-                                       (certificate-rows decision supported))]
+  (let [rows (certificate-rows decision supported)
+        q6 (get-in decision [:selection-certificate :q6])
+        keys (:forbidden-keys q6)
+        forbidden {:keys keys :classes (selection/forbidden-classes rows keys)}
+        chosen (first (filter #(= (:action decision) (:action %)) rows))
+        _ (when (and chosen (selection/forbidden-row? forbidden chosen))
+            (refuse! :chosen-in-forbidden-class {:action (:action decision)
+                                                 :forbidden-keys keys}))
+        {:keys [status detail class]}
+        (selection/minimum-class (remove #(selection/forbidden-row? forbidden %) rows))]
     (case status
       :unique (when-not (some #(= (:action decision) (:action %)) (:members class))
                 (refuse! :chosen-not-minimum {:action (:action decision)
@@ -262,9 +271,14 @@
                          (cond-> {:status status}
                            class (assoc :digest (:digest class) :g (:g class)
                                         :members (mapv :action (:members class)))))
-            unrestricted (receipt-of (selection/minimum-class (certificate-rows decision acting)))
+            allowed (fn [supported]
+                      (let [rows (certificate-rows decision supported)
+                            ks (get-in decision [:selection-certificate :q6 :forbidden-keys])
+                            bar {:keys ks :classes (selection/forbidden-classes rows ks)}]
+                        (remove #(selection/forbidden-row? bar %) rows)))
+            unrestricted (receipt-of (selection/minimum-class (allowed acting)))
             choice (if conditional
-                     (receipt-of (selection/minimum-class (certificate-rows decision conditional)))
+                     (receipt-of (selection/minimum-class (allowed conditional)))
                      unrestricted)]
         (when-not (and (= :wm/ticket-queue-selection-v1 (:schema receipt))
                        (seq (:entries declaration))

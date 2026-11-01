@@ -359,9 +359,10 @@
   refusal returns {:status :refused} without calling the selector.
   OPTS :exclude, when given, receives the certified ranked union, the
   selector's options and the certification, after certification and before
-  the selector. It returns {:carrier c :ranked kept} (the menu the selector
-  sees, recorded with C) or adds :refusal when nothing is left, which
-  returns {:status :repeat-refused} without calling the selector."
+  the selector. It returns {:carrier c :forbidden f}: the record of a Q6 refusal
+  and what it bars. Forbidden policies stay on the menu, compared; the selector may
+  not choose them. With :refusal, nothing is left to choose, and this returns
+  {:status :repeat-refused} without calling the selector."
   [families {:keys [attach-f certify exclude] :as opts}]
   (let [coverage-failures (vec (mapcat :failures
                                        (remove #(= :computed (:status %)) families)))
@@ -396,16 +397,8 @@
                       :beta-status (when (:prepared-selection certified) :r20-computed)))
         excluded (when (and exclude (= :certified (:status certified)))
                    (exclude ranked opts certified))
-        menu (if excluded (:ranked excluded) ranked)
-        ;; Q6 can reduce the domain: recompute precision on the remaining menu,
-        ;; preserving the exclusion receipt, before consuming E/G/F.
-        certified (if (and certify (seq menu) (not= menu ranked)
-                           (= :certified (:status certified)))
-                    (certify menu scored) certified)
-        opts (cond-> opts
-               (= :certified (:status certified))
-               (assoc :beta (:beta certified) :prepared-selection (:prepared-selection certified)
-                      :beta-status (when (:prepared-selection certified) :r20-computed)))
+        menu ranked
+        opts (cond-> opts (:forbidden excluded) (assoc :forbidden (:forbidden excluded)))
         failures (vec (concat (mapcat :failures rows)
                               (map #(assoc % :stage (:stage % :pre-selector))
                                    (:refusals bound))))

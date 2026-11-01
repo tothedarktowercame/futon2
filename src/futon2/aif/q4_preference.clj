@@ -5,9 +5,7 @@
   semantics, every step is graded by completed-progress count.
 
   Compared means the posterior of the one G selection: the selector's menu
-  after a Q6 requirement exclusion, the same set as Q8's posterior. A
-  policy Q6 removed was scored and certified but not compared, and does not
-  count.
+  including any policy a Q6 refusal forbids, the same set as Q8's posterior.
 
   Every fact comes from the decision's certified preference receipts
   (reading-policy-preference/certify, one per scored policy, made before the

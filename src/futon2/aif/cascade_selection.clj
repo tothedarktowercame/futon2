@@ -284,6 +284,7 @@
   [entry]
   {:action (:action entry)
    :g (:controller-score entry)
+   :policy-key (get-in entry [:action :policy-key])
    :prediction-digest
    (prediction-digest (get-in entry [:certificate :steps])
                       (get-in entry [:class-emission :certificate :steps]))})
@@ -309,6 +310,38 @@
       :unique result
       :tied (refuse! :tie-at-minimum detail)
       (refuse! :no-admissible-candidate {:rows (count rows)}))))
+
+(defn forbidden-classes
+  "What a refusal forbids among ROWS: the digests of the refused KEYS, since
+  policies predicting alike are one policy to Requirements Q6."
+  [rows keys]
+  (let [refused (set keys)]
+    (vec (distinct (keep #(when (contains? refused (:policy-key %)) (:prediction-digest %))
+                         rows)))))
+
+(defn forbidden-row?
+  "Is ROW a refused key, or in a refused key's prediction class?"
+  [{:keys [keys classes]} {:keys [policy-key prediction-digest]}]
+  (or (contains? (set keys) policy-key)
+      (and (some? prediction-digest) (contains? (set classes) prediction-digest))))
+
+(defn admissible-minimum
+  "The strict minimum over the rows FORBIDDEN leaves, with the forbidden class it
+  stepped over when that class had the smaller G. Forbidden policies stay compared
+  and stay in the record; they cannot be chosen. Refuses :no-admissible-class when
+  every row is forbidden."
+  [rows forbidden]
+  (let [{barred true allowed false} (group-by #(boolean (forbidden-row? forbidden %)) rows)]
+    (when (and (seq barred) (empty? allowed))
+      (refuse! :no-admissible-class {:forbidden-classes (:classes forbidden)
+                                     :rows (count rows)}))
+    (let [result (strict-minimum allowed)
+          units (g-units (get-in result [:class :g]))
+          below (filter #(when-let [u (g-units (:g %))] (< u units)) barred)
+          lowest (when (seq below) (apply min-key :g below))]
+      (cond-> result
+        lowest (assoc :stepped-over {:digest (:prediction-digest lowest) :g (:g lowest)
+                                     :members (mapv :action below)})))))
 
 ;; ---------------------------------------------------------------------------
 ;; law receipt (PROOF-2 packet 27 / F-ABS, 2026-09-24)
@@ -413,13 +446,15 @@
                   :invalid :threshold-invalid)}))
 
 (defn selection-comparisons
-  "Recording only: the enacted class against the runner-up class. G decides, so
-  `:decided-by` is :G whenever a class competed. `:favoured-by` is the term of
+  "Recording only: the enacted class against the runner-up admissible class. G
+  decides, so `:decided-by` is :G whenever an admissible class competed, and
+  :q6-forbidden when the refusal left only one and stepped over a lower G. `:favoured-by` is the term of
   the posterior that most favoured the enacted class over the runner-up, which
   says how the record's other quantities leaned and decides nothing. Missing or
   invalid near-tie declarations are typed telemetry, never new selection gates."
   [{:keys [beta candidates posterior minimum near-tie-threshold]}]
   (let [by-id (into {} (map (juxt :id identity)) candidates)
+        stepped-over (:stepped-over minimum)
         w (-> minimum :class :members first :action)
         r (-> minimum :runner-up :members first :action)
         wc (get by-id w) rc (get by-id r)
@@ -441,7 +476,11 @@
        :winner (policy-row wc (get posterior w))
        :runner-up (if rc (policy-row rc (get posterior r)) :no-competing-policy)
        :contributions terms
-       :decided-by (if rc :G :no-competing-policy)
+       :admissible-minimum w
+       :decided-by (cond rc :G stepped-over :q6-forbidden :else :no-competing-policy)
        :favoured-by (or favoured :no-competing-policy)
        :contribution-tie-order [:habit :free-energy :G]}
+      (when stepped-over
+        {:stepped-over {:digest (:digest stepped-over) :g (:g stepped-over)
+                        :reason :q6-forbidden}})
       (threshold-record near-tie-threshold (:total terms)))}))
