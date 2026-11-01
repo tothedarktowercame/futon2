@@ -766,3 +766,17 @@
              (get-in f2 ["targetConstruction" 0 "policies"])))
       (is (= 3 (reduce + (map #(count (get % "members")) (f2 "classMembers"))))))
     (is (= old-before (selection-of live-record)) "Historical projection is unchanged")))
+
+(deftest selection-path-absences-are-the-chosen-decisions-not-the-fields
+  (clojure.test/testing "L5-4f review: a member's absent relation receipt is population evidence; the chosen pick's is on the path"
+    (let [sel (:outer/selection live-record)
+          pick (get-in sel [:selection :selected :target])
+          other (first (remove #{pick} (keys (get-in sel [:field-facts :admitted]))))
+          plant (fn [t] (assoc-in live-record [:outer/selection :field-facts :admitted t :relation :receipt]
+                                  {:status :absent :reason :claude2-review-probe}))
+          count-of (fn [r] (count (facts/selection-absence-paths r)))
+          base (count-of live-record)]
+      (when (and pick other (get-in sel [:field-facts :admitted]))
+        (is (= base (count-of (plant other))) "an absence on another member does not count")
+        (is (= (inc base) (count-of (plant pick))) "an absence on the chosen pick's fact counts"))
+      (is (< base 50) "the live 11-01 section's path count is small, not the whole field"))))

@@ -1005,9 +1005,23 @@
   candidates are, and stay out."
   [record]
   (let [selection (:outer/selection record)
-        roots [[[:outer/selection]
-                (dissoc selection :outer-field/excluded :outer-score/excluded
-                        :knowledge-producer-requests)]
+        chosen-id (:cascade-id selection)
+        chosen-class (:chosen-class selection)
+        pick (get-in selection [:selection :selected :target])
+        ;; L5-4f review: since L5-4b the section carries every admitted member's
+        ;; facts and every cascade's row.  Those are population-wide evidence
+        ;; about alternatives; the path is what the chosen decision rests on: the
+        ;; chosen cascade's row, its class, the chosen pick's own field fact, and
+        ;; the section's own carriers (construction, abstention, previous,
+        ;; forbidden, learning, prediction, receipt).
+        on-path (-> selection
+                    (dissoc :outer-field/excluded :outer-score/excluded :knowledge-producer-requests
+                            :field-facts :cascades :classes :cascade-picks :cascade-pick-relations
+                            :cascade-scores :tied-cascades)
+                    (assoc :chosen-cascade (first (filter #(= chosen-id (:id %)) (:cascades selection)))
+                           :chosen-class-row (first (filter #(= chosen-class (:id %)) (:classes selection)))
+                           :pick-fact (when pick (get-in selection [:field-facts :admitted pick]))))
+        roots [[[:outer/selection] on-path]
                [[:outer-task-selection] (:outer-task-selection record)]]]
     (vec
      (mapcat
