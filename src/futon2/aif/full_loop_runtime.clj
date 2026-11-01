@@ -1302,7 +1302,9 @@
                (not (:run-id opts)) (assoc :run-id (new-run-id))
                (not (:startedAt opts)) (assoc :startedAt (str (Instant/now)))
                (not (:selection-record/state opts))
-               (assoc :selection-record/state (atom nil)))]
+               (assoc :selection-record/state (atom nil))
+               (not (:selection-record/decided opts))
+               (assoc :selection-record/decided (atom nil)))]
     (assoc opts :selection-record/execution-identity
            {:kind :selection-execution
             :id (str "selection--" (or (:click-id opts) (:run-id opts)))})))
@@ -1451,6 +1453,8 @@
                       (retain-selection! (cond-> opts identity
                                            (assoc :runner-execution/identity identity))
                                          retained-selection selection-outcome))
+                    _ (reset! (:selection-record/decided opts)
+                              {:section retained-selection :outcome selection-outcome})
                     live-opts (assoc opts :run-id run-id :task {:id target}
                                     :outer/selection retained-selection
                                     :selection-record/retain-fn retain-for-execution!
@@ -1495,14 +1499,20 @@
                          :selection-record/evidence (atom (cond-> {} q6 (assoc :q6 q6))))
         result (try (run-ordinary-opportunity-impl! opts)
                     (catch Exception e (outer-selection-refusal e)))
+        ;; A selection that scored and chose is recorded as chosen even when the
+        ;; runner fails before its cohort-allocation retain point (L5-9 review):
+        ;; the decision was made; only the work did not start.
+        decided @(:selection-record/decided opts)
         ref (or @(:selection-record/state opts)
-                (retain-selection! opts
-                  (merge @(:selection-record/evidence opts)
-                         (or (get-in result [:details :selection-evidence])
-                             {:status :absent :reason :selection-failed-before-scoring
-                              :failure-evidence (:details result)}))
-                  {:status :refused :kind (or (:reason result) (:absent result))
-                   :detail (:details result)}))]
+                (if decided
+                  (retain-selection! opts (:section decided) (:outcome decided))
+                  (retain-selection! opts
+                    (merge @(:selection-record/evidence opts)
+                           (or (get-in result [:details :selection-evidence])
+                               {:status :absent :reason :selection-failed-before-scoring
+                                :failure-evidence (:details result)}))
+                    {:status :refused :kind (or (:reason result) (:absent result))
+                     :detail (:details result)})))]
     (assoc result :selection-record ref)))
 
 (defn- run-ordinary-opportunity-with-task!

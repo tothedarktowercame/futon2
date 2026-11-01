@@ -91,3 +91,25 @@
     (is (= {:refusal-history [] :refusal-history-unsealed 0
             :refusal-history-sealed-before-r18 0}
            (get-in record [:outer/selection :q6])))))
+
+(deftest a-chosen-selection-whose-runner-fails-before-retaining-is-still-recorded-as-chosen
+  ;; the bad case the retiming creates: the runner throws in agent-readiness or
+  ;; code-state, before the cohort-allocation retain point
+  (let [dir (wiring/temp-dir)
+        predecessor {:refusal-history {:entries [] :unsealed 0 :sealed-before-r18 0}}
+        result
+        (with-redefs [previous-run/predecessor (fn [& _] predecessor)]
+          (wiring/call-ordinary
+           {:run-id "l5-9-early-throw" :click-id "click-early-throw"
+            :startedAt "2026-11-01T12:30:00Z" :run-record-dir (.getPath dir)}
+           {#'outer-state/load-makeup (constantly fixtures/base-makeup)
+            #'outer-state/read-state (fn [_ _] fixtures/base-state)
+            #'outer-observation/outer-observation (constantly fixtures/base-observation)
+            #'runtime/run-ordinary-opportunity-with-task!
+            (fn [_] (throw (ex-info "code-state failed" {:kind :code-state-unavailable})))}))
+        record (selection-record/read-reference (:selection-record result))]
+    (is (= :chosen (get-in record [:selection-outcome :status])) (pr-str (:selection-outcome record)))
+    (is (string? (get-in record [:selection-outcome :pick])))
+    (is (= {:kind :selection-execution :id "selection--click-early-throw"}
+           (:runner-execution/identity record)))
+    (is (= [] (get-in record [:outer/selection :q6 :refusal-history])))))
