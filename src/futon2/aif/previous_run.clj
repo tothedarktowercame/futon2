@@ -259,18 +259,32 @@
 (defn- not-exercised? [record]
   (= :not-exercised (get-in record [:selection-outcome :status])))
 
+(defn- refused-before-scoring?
+  "A machine refusal that never read the field (makeup changed, pending step
+  unrecoverable, ...): no input digest, no decision over the input. It is not a
+  Q6 predecessor; it is passed over and counted like a bypass (clicks 1-4 of
+  2026-11-01 left the next real selection with an unverifiable Q6)."
+  [record]
+  (and (= :refused (get-in record [:selection-outcome :status]))
+       (= :absent (get-in record [:outer/selection :status]))
+       (nil? (get-in record [:outer/selection :choice-input-digest]))))
+
 (defn- last-exercised
-  "The latest decision before this start that was a selection, and the bypasses
-  passed on the way. Each step goes through `latest`, so an invalid or forked
-  history still refuses: only a verified not-exercised record is passed over."
+  "The latest decision before this start that was a selection, and the records
+  passed on the way: bypasses and refusals before scoring. Each step goes
+  through `latest`, so an invalid or forked history still refuses: only a
+  verified not-exercised or pre-scoring-refused record is passed over."
   [dir run-id started-at]
   (loop [run run-id at started-at skipped []]
-    (let [p (selection-record/latest dir run at)]
-      (if (and (= :present (:status p)) (not-exercised? (:record p)))
-        (recur (get-in p [:record :run/id]) (get-in p [:record :startedAt])
-               (conj skipped {:run/id (get-in p [:record :run/id])
-                              :startedAt (get-in p [:record :startedAt])
-                              :path (get-in p [:record :selection-outcome :path])}))
+    (let [p (selection-record/latest dir run at)
+          record (:record p)]
+      (if (and (= :present (:status p))
+               (or (not-exercised? record) (refused-before-scoring? record)))
+        (recur (:run/id record) (:startedAt record)
+               (conj skipped {:run/id (:run/id record)
+                              :startedAt (:startedAt record)
+                              :path (or (get-in record [:selection-outcome :path])
+                                        (get-in record [:selection-outcome :kind]))}))
         {:latest p :skipped skipped}))))
 
 (defn selection-predecessor

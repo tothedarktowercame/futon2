@@ -119,6 +119,27 @@
     (is (= {:count 2 :paths [:meta-self-heal :direct-task]}
            (:previous-skipped (previous/selection-predecessor dir "next" (at 4)))))))
 
+(deftest a-refusal-before-scoring-is-passed-over-like-a-bypass
+  ;; click 4 of 2026-11-01: refused before the field was read, no input digest
+  (let [dir (temp-dir)]
+    (store/write-decision! dir {:run-id "real" :startedAt (at 0)} exercised {:status :chosen :pick "M-task"})
+    (store/write-decision! dir {:run-id "refused-early" :startedAt (at 1)}
+                           {:status :absent :reason :selection-failed-before-scoring
+                            :failure-evidence {:cascade-digest nil :cascade-id :what-others-wait-on-first}}
+                           {:status :refused :kind :pending-steps-unrecoverable
+                            :detail {:cascade-digest nil :cascade-id :what-others-wait-on-first}})
+    (let [p (previous/selection-predecessor dir "next" (at 2))]
+      (is (= :present (:status p)))
+      (is (= "class-1" (:chosen-class p)))
+      (is (= {:count 1 :paths [:pending-steps-unrecoverable]} (:previous-skipped p))))
+    (testing "a refusal after scoring (an input digest exists) is a real predecessor"
+      (store/write-decision! dir {:run-id "refused-late" :startedAt (at 3)}
+                             (assoc exercised :outcome {:status :refused})
+                             {:status :refused :kind :repeat-choice})
+      (let [p (previous/selection-predecessor dir "next" (at 4))]
+        (is (= :refused (:outcome p)))
+        (is (not (contains? p :previous-skipped)))))))
+
 (deftest no-skip-without-a-bypass
   (let [dir (temp-dir)]
     (store/write-decision! dir {:run-id "real" :startedAt (at 0)} exercised {:status :chosen :pick "M-task"})
