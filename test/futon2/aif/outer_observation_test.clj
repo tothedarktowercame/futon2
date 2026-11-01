@@ -20,6 +20,7 @@
   {:loaded-missions
    {:missions (mapv (fn [id]
                       {:id id :path (str "/fixture/" id ".md")
+                       :source {:path (str "/fixture/" id ".md") :sha256 "fixture-sha"}
                        :status-class :open :status-line "OPEN"})
                     ["M-ready" "M-cycle" "M-waiting"])}
    :loaded-tickets {:tickets []}
@@ -240,7 +241,10 @@
         ;; Registry snapshot INPUT: exact pinned open IDs, with available source
         ;; declarations. No network registry or live policy store is consulted.
         entries (fn [prefix status]
-                  (mapv #(hash-map :id % :status-class status :path (str "/snapshot/" % ".md"))
+                  (mapv #(hash-map :id % :status-class status
+                                   :path (str "/snapshot/" % ".md")
+                                   :source {:path (str "/snapshot/" % ".md")
+                                            :sha256 "pinned-snapshot-sha"})
                         (filter #(.startsWith ^String % prefix) ids)))
         authority {:loaded-missions {:missions (entries "M-" :open)}
                    :loaded-excursions {:excursions (entries "E-" :open)}
@@ -309,16 +313,21 @@
   (let [authority (-> fixture-authority
                       (assoc-in [:loaded-missions :missions 0 :status-class] :active)
                       (assoc-in [:loaded-missions :missions 0 :path] nil)
+                      (assoc-in [:loaded-missions :missions 0 :source] {:path nil :sha256 nil})
+                      (assoc-in [:loaded-missions :missions 0 :mission/unselectable-reason]
+                                :pathless-foreign-entity)
                       (assoc-in [:loaded-missions :missions 1 :status-class] :identify)
                       (assoc-in [:loaded-missions :missions 2 :status-class] :inactive))
         result (binding [observation/*resolve-var* actual-var]
                  (observation/giraffe-field (fixture-run!) makeup authority))
         exclusion (first (:outer-field/excluded result))]
-    (is (= ["M-ready" "M-cycle"] (:enumerated-open-tasks result)))
+    (is (= ["M-cycle"] (:enumerated-open-tasks result)))
     (is (= ["M-cycle"] (mapv :target (:field result))))
-    (is (= :target-source-path-absent (:reason exclusion)))
-    (is (= (identity/sha256 (pr-str (get-in authority [:loaded-missions :missions 0]))) (:pin exclusion)))
-    (is (= [{:id "M-waiting" :status-class :inactive}] (:registry/non-open result)))))
+    (is (nil? exclusion))
+    (is (= [{:id "M-ready" :status-class :active
+             :mission/unselectable-reason :pathless-foreign-entity}
+            {:id "M-waiting" :status-class :inactive}]
+           (:registry/non-open result)))))
 
 
 (deftest retained-selector-roster-is-provenance-not-an-independent-census

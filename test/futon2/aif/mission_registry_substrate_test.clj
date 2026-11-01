@@ -44,6 +44,16 @@
     [(entity "M-hinge" {})]
     #(is (= :unknown (:status-class (first (:missions (mr/load-missions))))))))
 
+(deftest pathless-foreign-mission-is-typed-and-not-live-test
+  (with-substrate-entities
+    [(entity "M-ukrns-wp"
+             {:scope/role "mission" :mission/relation "relates-to"})]
+    (fn []
+      (let [mission (first (:missions (mr/load-missions)))]
+        (is (false? (boolean (mr/live-mission? mission))))
+        (is (= :pathless-foreign-entity
+               (:mission/unselectable-reason mission)))))))
+
 (deftest unreachable-substrate-is-typed-refusal-test
   (with-redefs [substrate/entities-by-type
                 (fn [& _] (throw (ex-info "conn" {})))]

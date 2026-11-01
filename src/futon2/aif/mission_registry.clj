@@ -532,7 +532,9 @@
    same honest-unparseable bias `classify-status` gives a file whose Status
    line it cannot read; it is NOT silently defaulted to a live class."
   [entity]
-  (let [props (parse-entity-props (:entity/props entity))]
+  (let [props (parse-entity-props (:entity/props entity))
+        path (:provenance/path props)
+        sha256 (:provenance/sha256 props)]
     {:id (:entity/external-id entity)
      :path (:provenance/path props)
      :title (or (:mission/title props) (:entity/name entity) (:entity/external-id entity))
@@ -543,7 +545,10 @@
      :operator-gated? (true? (:mission/operator-gated? props))
      :operator-gate-lines (vec (or (:mission/operator-gate-lines props) []))
      :requisition (or (:mission/requisition props) {:absent :not-ingested})
-     :source {:path (:provenance/path props) :sha256 (:provenance/sha256 props)}
+     :source {:path path :sha256 sha256}
+     :mission/unselectable-reason (when-not (and (string? path) (seq path)
+                                                  (string? sha256) (seq sha256))
+                                    :pathless-foreign-entity)
      :open-hole-count (long (or (:mission/open-hole-count props) 0))
      :open-holes (vec (or (:mission/open-holes props) []))
      ;; A stored count with no stored items means this entity predates hole
@@ -680,7 +685,11 @@
   "True when a loaded mission entry is eligible for WM `:open-mission`
    enumeration/ranking."
   [mission]
-  (and (not (:operator-gated? mission))
+  (and (string? (:path mission))
+       (seq (:path mission))
+       (string? (get-in mission [:source :sha256]))
+       (seq (get-in mission [:source :sha256]))
+       (not (:operator-gated? mission))
        (not (contains? #{:complete :inactive :draft :operator-gated}
                        (:status-class mission)))))
 
