@@ -448,6 +448,26 @@ def click_record(lr: dict, click_id: str | None) -> str | None:
     return rr
 
 
+def selection_why(record_path: str | None) -> dict | None:
+    """Rendered :why lines from the typed selection carrier.
+
+    The loop deliberately carries only the deterministic rendered strings; the
+    EDN record remains the authority for all typed fields.
+    """
+    if not record_path or not Path(record_path).is_file():
+        return None
+    text = Path(record_path).read_text(errors="replace")
+    start = text.find(":why {:schema :wm/selection-why-v1")
+    if start < 0:
+        return None
+    rendered = [json.loads('"' + value + '"') for value in
+                re.findall(r':rendered "((?:\\.|[^"\\])*)"', text[start:])]
+    if len(rendered) < 2:
+        return None
+    return {"classes": rendered[:-2], "abstention": rendered[-2],
+            "decision": rendered[-1]}
+
+
 def nothing_beats_stopping(record_path: str | None) -> str | None:
     """The outer selection refused because no compared policy's G is below the
     abstention's (:pick-not-below-abstention). Returns the selection's input
@@ -510,6 +530,8 @@ def notify_alert(args, c: dict) -> None:
     body = "\n".join([f"From wm_click_repair_loop.py, {now()}. ALERT on click {c['click-id']} "
                       f"(run {c['run-id']}); the loop continues.",
                       "", "Signature: " + "; ".join(c["alert"]), "",
+                      "Selection why:", *((c.get("why") or {}).get("classes") or []),
+                      ((c.get("why") or {}).get("decision") or "selection explanation absent"), "",
                       alert_block(c.get("log")), "",
                       f"Verdict file: {(c.get('verdict') or {}).get('file')}",
                       f"Queue: {ALERTS}",
@@ -642,9 +664,10 @@ def fire(n: int, args, since_epoch: int) -> dict:
     run_id = (lr.get("run-id-observation") or {}).get("value")
     record_path = click_record(lr, click_id)
     verdict = read_verdict(record_path)
+    why = selection_why(record_path)
     return {"n": n, "rc": rc, "click-id": click_id, "spent": spent, "outcome": lr.get("outcome", "unknown"),
             "run-id": run_id, "carried": carried(run_id), "last-result": lr, "log": str(out),
-            "run-record": record_path, "verdict": verdict, "alert": click_alert(verdict),
+            "run-record": record_path, "verdict": verdict, "alert": click_alert(verdict), "why": why,
             "since-epoch": since_epoch, "in-flight-repairs": in_flight_repairs}
 
 
