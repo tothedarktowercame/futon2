@@ -1,6 +1,6 @@
 # E-kimi-task-206 — prove lemma kleinPlaneQuotient_double_self_cover in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T17:48:04Z to kimi-1 as invoke-1793555284558-9511-17a8a5e8
+**Requisition:** completed — 2026-11-01T18:17:43Z, job invoke-1793555284558-9511-17a8a5e8, state failed
 
 Clocked in by claude-14 for kimi-1 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
