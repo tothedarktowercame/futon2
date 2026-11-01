@@ -31,7 +31,7 @@
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
    "factorizedPreference" "calibrationAuthorizations"
-   "factorizationAuthorizations"
+   "factorizationAuthorizations" "outerSelection"
 ])
 
 (defn not-recomputable [s] {"not-recomputable" s})
@@ -77,6 +77,94 @@
 (def ^:private law-names
   {:per-step-capacity-and-pattern "perStepCapacityAndPattern"
    :raw-cumulative "rawCumulative"})
+
+(def ^:private outer-makeup-path "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn")
+(def ^:private task-selection-library-dir "/home/joe/code/futon3/library/task-selection")
+
+(defn- outer-makeup
+  "The fixed cascade menu the outer scorer reads, when it is readable.
+  Never a guess: unreadable means nil and the evidence source is then not
+  recomputable."
+  []
+  (try (edn/read-string (slurp outer-makeup-path)) (catch Exception _ nil)))
+
+(defn task-selection-library-names
+  "Pinned names of the task-selection library pattern manifest: the .flexiarg
+  files of futon3/library/task-selection, Q10's `libraryPatterns`."
+  []
+  (vec (sort (keep #(when (str/ends-with? % ".flexiarg")
+                     (subs % 0 (- (count %) (count ".flexiarg"))))
+                   (try (.list (io/file task-selection-library-dir))
+                        (catch Exception _ nil))))))
+
+(defn outer-selection-facts
+  "OUTER-FACADE-PROHIBITED (Q10) facts, from the record's :outer/selection
+  carrier alone.  Values are never guessed: no retained carrier to date
+  holds per-step library identity, per-step narrowings or a stated reason
+  the chosen cascade won, and those are exported as the absences they are
+  (empty steps/patterns, chosenRationale from the record's own keys).  The
+  menu's standing source is the fixed list of outer-makeup.edn exactly when
+  the retained cascade ids are that file's menu; a source that is neither
+  that fixed list nor a retained Cascade Live carrier is not recomputable."
+  [record]
+  (let [o (get-in record [:outer/selection])]
+    (when (map? o)
+      (let [scores (vec (filter number? (:cascade-scores o)))
+            picks (vec (:cascade-picks o))
+            tied (vec (keep #(some-> % name) (:tied-cascades o)))
+            chosen (some-> (:cascade-id o) name)
+            makeup (outer-makeup)
+            makeup-ids (some->> (:cascades makeup) (mapv (comp name :id)))
+            known-menu-ids (vec (distinct (concat (when chosen [chosen]) tied)))
+            reach (get-in o [:selection :selected :reach])
+            default-reach (:default-reach makeup)
+            reach-defaulted? (and (number? reach) (number? default-reach)
+                                  (= (double reach) (double default-reach)))
+            unresolved (count (filter #(= :prerequisite-unresolved (:reason %))
+                                      (:knowledge-producer-requests o)))
+            n (count scores)
+            all-finite? (and (pos? n)
+                             (every? #(Double/isFinite (double %)) scores))
+            rationale? (boolean (some #(re-find #"(?i)rationale|reason-won|why-won"
+                                                (name (key %)))
+                                      o))
+            cascade-live? (boolean (some #(re-find #"(?i)cascade-live" (name (key %))) o))
+            fixed-menu? (and (seq makeup-ids) (seq known-menu-ids)
+                             (set known-menu-ids)
+                             (every? #(contains? (set makeup-ids) %) known-menu-ids))]
+        (when (pos? n)
+          (cond
+            fixed-menu?
+            {"policies" (vec (for [[i _score] (map-indexed vector scores)]
+                               {"cascade" (or (get known-menu-ids i)
+                                              (str "menu-entry-" i))
+                                "patterns" []
+                                "steps" []
+                                "pick" (if (and (< i (count picks))
+                                                (string? (get picks i))
+                                                (not= :no-pick (get picks i)))
+                                         (get picks i) "")}))
+             "libraryPatterns" (task-selection-library-names)
+             "distinctScores" (count (distinct (map double scores)))
+             "distinctPicks" (count (distinct picks))
+             "reachDefaulted" (if reach-defaulted? 1 0)
+             "reachObserved" (if (and (number? reach) (not reach-defaulted?)) 1 0)
+             "unresolvedKnowledgeRequests" unresolved
+             "chosenRationale" rationale?
+             "terms" {"risk" all-finite? "ambiguity" all-finite?
+                      "informationGain" all-finite?}
+             "policiesWithRiskTerm" (if all-finite? n 0)
+             "policiesWithAmbiguityTerm" (if all-finite? n 0)
+             "policiesWithInformationTerm" (if all-finite? n 0)
+             "evidence" "fixedList"
+             "absent" {:steps "no per-step library identity or narrowing retained"
+                       :rationale "no stated reason the chosen cascade won"}}
+
+            cascade-live?
+            (not-recomputable "cascade-live standing carrier found but not exported")
+
+            :else
+            (not-recomputable "outer menu standing source neither the fixed makeup list nor cascade-live")))))))
 
 (defn q4-facts
   "Requirements Q4 for a reading-family record, from the persisted
@@ -610,6 +698,9 @@
                ;; (futon2.aif.factorized-preference-sut) is deliberately
                ;; absent from the serving composition, so a carrier cannot
                ;; exist outside the record.
+               "outerSelection"
+               (or (outer-selection-facts record)
+                   (not-recomputable "no :outer/selection carrier retained"))
                "factorizedPreference" (factorized-preference record)
                "calibrationAuthorizations"
                (vec (for [e (get-in (factorized-preference-record record)

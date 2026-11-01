@@ -88,6 +88,30 @@
           (fs (field cascade :admitted)) (fs (field cascade :scored))
           (fs (field cascade :requirement-excluded))
           (fs (field cascade :posterior))))
+(defn outer-policy-term [p]
+  (format "{ cascade := %d, patterns := %s, steps := [%s], pick := %s }"
+          (id (p "cascade")) (fs (p "patterns"))
+          (str/join ", " (for [s (p "steps")]
+                           (format "{ pattern := %d, namedMapping := %s, narrowingRetained := %s }"
+                                   (id (str (s "pattern")))
+                                   (bool-lit (s "namedMapping"))
+                                   (bool-lit (s "narrowingRetained")))))
+          (if (str/blank? (p "pick")) "0" (str (id (p "pick"))))))
+
+(defn outer-selection-term [o]
+  (let [t (o "terms")]
+    (format "{ policies := [%s], libraryPatterns := %s, distinctScores := %d, distinctPicks := %d, reachDefaulted := %d, reachObserved := %d, unresolvedKnowledgeRequests := %d, chosenRationale := %s, terms := ⟨%s, %s, %s⟩, policiesWithRiskTerm := %d, policiesWithAmbiguityTerm := %d, policiesWithInformationTerm := %d, evidence := .%s }"
+            (str/join ", " (map outer-policy-term (o "policies")))
+            (fs (o "libraryPatterns"))
+            (o "distinctScores") (o "distinctPicks")
+            (o "reachDefaulted") (o "reachObserved")
+            (o "unresolvedKnowledgeRequests")
+            (bool-lit (o "chosenRationale"))
+            (bool-lit (t "risk")) (bool-lit (t "ambiguity")) (bool-lit (t "informationGain"))
+            (o "policiesWithRiskTerm") (o "policiesWithAmbiguityTerm")
+            (o "policiesWithInformationTerm")
+            (o "evidence"))))
+
 (def outcomes {"changed" ".changed" "alreadySatisfied" ".alreadySatisfied"
                "question" ".question" "refused" ".refused" "invalid" ".invalid"
                "timedOut" ".timedOut"})
@@ -103,7 +127,8 @@
         "currentChoice" "currentInputDigest"]
    :q7 ["pathAbsenceCount"]
    :q9 ["factorizedPreference" "calibrationAuthorizations"
-        "factorizationAuthorizations"]})
+        "factorizationAuthorizations"]
+   :q10 ["outerSelection"]})
 
 (defn partial-run-fact-fields
   "Read the field names from Lean's PartialRunFacts declaration.  This keeps
@@ -173,11 +198,13 @@
                          (field certificate :factorization-authority)
                          (field certificate :calibration-authorization)
                          (field certificate :factorization-authorization)
-                         calibration-registry factorization-registry))))))))
+                         calibration-registry factorization-registry))))
+        :q10 (ev-known (str "outerSelection := some "
+                            (outer-selection-term (facts "outerSelection"))))))))
 
 (defn lean-source
   ([export definition-name]
-   (lean-source export definition-name [:q1 :q3 :q4 :q5 :q6 :q7 :q9]))
+   (lean-source export definition-name [:q1 :q3 :q4 :q5 :q6 :q7 :q9 :q10]))
   ([export definition-name partial-fields]
    (let [unknown (seq (remove deps partial-fields))]
      (when unknown
