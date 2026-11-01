@@ -1662,7 +1662,11 @@
         diagnosis-observation
         (when (and (not retry) (not= :refused (:status authority)))
           (:diagnosis-observation intake))
-        acceptance-observation (if open-out-of-band
+        environmental? (meta-self-heal/environmental-diagnosis? diagnosis-observation)
+        acceptance-observation (if environmental?
+                                 {:status :not-required
+                                  :reason :meta-self-heal/environmental-probe-required}
+                                 (if open-out-of-band
                                  {:status :not-required
                                   :reason :meta-self-heal/open-out-of-band-routed}
                                  (if (= :refused (:status authority))
@@ -1675,7 +1679,7 @@
                                 (if retry
                                 {:status :not-required
                                  :reason :meta-self-heal/acceptance-retry-not-prepared}
-                                (meta-self-heal/prepare-acceptance opts diagnosis-observation)))))
+                                (meta-self-heal/prepare-acceptance opts diagnosis-observation))))))
         effective-opts (cond-> opts
                          diagnosis-context (assoc :meta-diagnosis-context diagnosis-context)
                          diagnosis-observation
@@ -1688,11 +1692,13 @@
                          (#{:accepted :present} (:status acceptance-observation))
                          (assoc :acceptance-test
                                 (:acceptance-test acceptance-observation)))
-        readiness (if (= :meta-self-heal/diagnosis-active-set-unavailable (:reason diagnosis-observation))
+        readiness (if environmental?
+                    {:status :ready :route :environmental-probe}
+                    (if (= :meta-self-heal/diagnosis-active-set-unavailable (:reason diagnosis-observation))
                     {:status :not-required}
                     (if retry
                     (meta-self-heal/attributable-retry-readiness effective-opts retry)
-                    (meta-self-heal/production-readiness effective-opts diagnosis-context)))]
+                    (meta-self-heal/production-readiness effective-opts diagnosis-context))))]
     (cond
       open-out-of-band open-out-of-band
       (= :meta-self-heal/diagnosis-active-set-unavailable (:reason diagnosis-observation))
