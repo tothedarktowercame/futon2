@@ -1,6 +1,6 @@
 # E-kimi-task-191 — prove lemma hasFDerivAt_gluedWhitneyJet_of_not_mem in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T06:18:07Z to kimi-2 as invoke-1793513887406-9186-6b8eb4e3
+**Requisition:** completed — 2026-11-01T06:23:05Z, job invoke-1793513887406-9186-6b8eb4e3, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
