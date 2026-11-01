@@ -138,15 +138,22 @@
                         {:action a :controller-score 0
                          :f-prefix (prefix/evaluate-synthetic (assoc (input p) :policy a))})
                       actions [1/4 3/4])
-        d (policy/select-action-cascades entries {:beta 2 :cascade-habit-path (str dir "/absent.edn")})
-        cs (get-in d [:selection-certificate :candidates])]
-    (is (near? 0.25 (get-in d [:selection-law :posterior (first actions)])))
-    (is (near? 0.75 (get-in d [:selection-law :posterior (second actions)])))
+        ;; Equal G has no strict minimum, so the selector refuses. The arithmetic
+        ;; this pins is the posterior's, which is computed before that.
+        opts {:beta 2 :cascade-habit-path (str dir "/absent.edn")}
+        cs (:candidates (policy/prepare-selection-inputs entries opts))
+        posterior (selection/selection-posterior {:beta 2 :candidates cs})]
+    (is (near? 0.25 (get posterior (first actions))))
+    (is (near? 0.75 (get posterior (second actions))))
+    (is (= :tie-at-minimum
+           (try (policy/select-action-cascades entries opts)
+                nil
+                (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind])))))
     (is (= (mapv :f-prefix entries) (mapv :f-prefix cs)))
     (is (= [:computed :computed] (mapv :f-status cs)))
     ;; Production must not upgrade these synthetic receipts to admission.
     (is (= [:not-supplied :not-supplied]
            (mapv #(get-in % [:f-prefix :status]) (prefix/production-ranked entries nil))))
     (println "H4-SYNTHETIC-ARITHMETIC-ONLY" (pr-str {:f (mapv :f cs)
-                                                   :posterior (get-in d [:selection-law :posterior])}))
+                                                   :posterior posterior}))
     (Files/delete dir)))

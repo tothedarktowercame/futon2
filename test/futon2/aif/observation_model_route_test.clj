@@ -205,10 +205,17 @@
         record-path (.resolve dir "outcome.edn")
         habit-path (str (.resolve dir "absent-habits.edn"))
         opts (fixture-opts :coupled-judgement)
-        request {:state {:cascade-belief (:q0 fixture)} :candidates (:candidates fixture)
-                 :opts opts :selection-opts {:beta 1 :cascade-habit-path habit-path}}]
+        ;; tick 1's C1 and C2 tie at the minimum, which refuses (pinned below),
+        ;; so the recording path runs on the menu without C2
+        full-request {:state {:cascade-belief (:q0 fixture)} :candidates (:candidates fixture)
+                      :opts opts :selection-opts {:beta 1 :cascade-habit-path habit-path}}
+        request (update full-request :candidates
+                        (fn [cs] (vec (remove #(= :C2-fix-first (:id %)) cs))))]
     (try
-      (let [record (route/run request)]
+      (let [refused (route/run full-request)
+            record (route/run request)]
+        (is (= :selection-refused (:kind refused)))
+        (is (= :tie-at-minimum (get-in refused [:refusal :refusal :kind])))
         (is (= :recorded (:status record)))
         (is (false? (:actuated? record)))
         (is (= :synthetic-bounded-replay (:scope record)))

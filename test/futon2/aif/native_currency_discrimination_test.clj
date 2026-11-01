@@ -60,9 +60,12 @@
     (is (every? #(= 0.25 (:G-ambiguity %)) field))
     (is (every? #(zero? (get-in % [:c-zone-load :mass])) field))
     (is (= 1 (count (distinct (map :G-efe field)))))
-    (is (false? (:passes? (runner/selection-discrimination
-                              (runner/ranked-candidates
-                               {:decision (policy/select-action-cascades field {:beta 1.0})})))))))
+    ;; identical G has no strict minimum, so this refuses at the selector, before
+    ;; the discrimination check it used to reach
+    (is (= :tie-at-minimum
+           (try (policy/select-action-cascades field {:beta 1.0})
+                nil
+                (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind])))))))
 
 (deftest non-gap-actions-remain-byte-identical
   (let [action {:type :no-op}
