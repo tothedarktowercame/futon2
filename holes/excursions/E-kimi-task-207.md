@@ -1,6 +1,6 @@
 # E-kimi-task-207 — prove lemma t99J02_genusTwo_homology in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T17:48:34Z to kimi-2 as invoke-1793555314935-9514-884fe94d
+**Requisition:** completed — 2026-11-01T18:09:21Z, job invoke-1793555314935-9514-884fe94d, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
