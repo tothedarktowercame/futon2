@@ -206,3 +206,31 @@ abstention). The live makeup migration and the mapping file await Joe's eye.
 - The real lineage on M-pattern-retrieval-calibration has two refusals of the same policy on two
   digests (e71c7380, f4b95abf), not two classes on one digest; the ping-pong is pinned on a fixture.
 - Click-path Q6/Q4 fixtures on `main` still produce one candidate (since L5-2C-b); separate repair.
+
+## Status, 2026-11-01 17:55Z (claude-2)
+
+| Slice | State | Where |
+|---|---|---|
+| L5-2C-a/a2 inner law: argmin over prediction classes; tests cannot write canonical data | merged | futon2 `c22814975` |
+| L5-2C-b refused policy stays compared; class forbidden | merged | `6aad8b90d` |
+| L5-2C-c per-task refusal history retained; union forbidden | merged | `6a3753d94` |
+| L5-2L-2 Lean refusal history; Q6 forbids every class refused on these inputs | merged | mathlib4 `d3e0d9724f`; checker/projector `25e32d071` |
+| L5-2L-3 Lean unsealed history = Q6 absence | returned, review pending | claude-3 |
+| L5-4e selection Q4 terms, choice-scoped digest, previous selection | merged | `9b89c7000` |
+| L5-4f immutable selection decision chains every click; selection-only alert | merged | `42c6a3953` |
+| L5-4g relations for E-/T-; declared embedding floor | merged | `bdd2dcaa4` |
+| L5-4h selection Q5 from the phase log (default path) | merged | `dfc979b71` |
+| L5-4i embedding coverage discovery: not the lever | report | `6cf534346` |
+| L5-4j relation over the pinned Giraffe graph (251 of 626) | merged | `25cc3b806` |
+| L5-4L-3 Lean: typed exclusion reasons, class-grain G4, outer factorized certificate | returned, review pending | codex-11 |
+| Stale selector tests after the makeup migration | repaired | `18007aa29` |
+
+Correction for the record: the live `data/wm-learning/outer-makeup.edn` lost its `:cascades` key
+on `main` at 13:35Z through the merge of L5-4d-2 (`c70b31779` carried the migration as a tracked-
+file change). Intended end state; not an operator edit; sha now `db05f30c…`. The selector has not
+read that key since L5-4d-2.
+
+Selection run, Lean, on the retained 11-01 field (two-click replay with the live context): Q1–Q4,
+Q6, Q11 holds; Q5 holds through the alert from main; Q7 unverifiable on a replay (learning status),
+Q9 violated against the offline roster. Work run on the real records: Q7/Q9 violated or Q1, Q11
+unverifiable until the inner stopped-kernel G (L5-3).
