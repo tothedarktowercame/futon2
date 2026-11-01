@@ -1,0 +1,100 @@
+{
+  "base": "e8bbde110",
+  "baseline": {
+    "counts": [
+      "Ran 156 tests containing 631 assertions.",
+      "20 failures, 3 errors."
+    ],
+    "failures": {
+      "ERROR retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "ERROR no-menu-makeup-and-menu-only-migration": 1,
+      "ERROR real-giraffe-run-shape": 1,
+      "FAIL real-giraffe-selection-demonstration": 3,
+      "FAIL missing-task-selects-and-enters-existing-path": 5,
+      "FAIL selection-pends-and-next-selection-learns": 7,
+      "FAIL retained-qualified-already-satisfied-advances-c": 4,
+      "FAIL missing-run-record-defers-without-replacing-pending": 1
+    },
+    "data_before": 45737,
+    "data_after": 45737,
+    "namespaces": [
+      "futon2.aif.outer-consumption-test",
+      "futon2.aif.outer-learning-manifest-test",
+      "futon2.aif.outer-menu-test",
+      "futon2.aif.outer-menu-wiring-test",
+      "futon2.aif.outer-observation-test",
+      "futon2.aif.outer-refusal-census-test",
+      "futon2.aif.outer-refusal-history-test",
+      "futon2.aif.outer-relation-admission-test",
+      "futon2.aif.outer-score-test",
+      "futon2.aif.outer-select-test",
+      "futon2.aif.outer-selection-wiring-test",
+      "futon2.aif.outer-state-test",
+      "futon2.aif.outer-state-update-test",
+      "futon2.aif.outer-state-wiring-test",
+      "futon2.aif.wm-run-facts-test",
+      "wm-check-run-facts-test"
+    ]
+  },
+  "branch": {
+    "counts": [
+      "Ran 159 tests containing 653 assertions.",
+      "20 failures, 3 errors."
+    ],
+    "failures": {
+      "ERROR retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "ERROR no-menu-makeup-and-menu-only-migration": 1,
+      "ERROR real-giraffe-run-shape": 1,
+      "FAIL real-giraffe-selection-demonstration": 3,
+      "FAIL missing-task-selects-and-enters-existing-path": 5,
+      "FAIL selection-pends-and-next-selection-learns": 7,
+      "FAIL retained-qualified-already-satisfied-advances-c": 4,
+      "FAIL missing-run-record-defers-without-replacing-pending": 1
+    },
+    "data_before": 45737,
+    "data_after": 45737,
+    "namespaces": [
+      "futon2.aif.outer-consumption-test",
+      "futon2.aif.outer-learning-manifest-test",
+      "futon2.aif.outer-menu-test",
+      "futon2.aif.outer-menu-wiring-test",
+      "futon2.aif.outer-observation-test",
+      "futon2.aif.outer-refusal-census-test",
+      "futon2.aif.outer-refusal-history-test",
+      "futon2.aif.outer-relation-admission-test",
+      "futon2.aif.outer-score-test",
+      "futon2.aif.outer-select-test",
+      "futon2.aif.outer-selection-history-test",
+      "futon2.aif.outer-selection-wiring-test",
+      "futon2.aif.outer-state-test",
+      "futon2.aif.outer-state-update-test",
+      "futon2.aif.outer-state-wiring-test",
+      "futon2.aif.wm-run-facts-test",
+      "wm-check-run-facts-test"
+    ]
+  },
+  "same_failure_distribution": true,
+  "artifact_root": "/home/joe/notes/l5-4e",
+  "sha256": {
+    "real-selection.clj": "5f8025bf114bb518fa6bc99de0c635c519649d9cb57d947469a685999a6e6ff5",
+    "first-record-copy.edn": "ec41f58493e8f71b6a07778b2595567c054502360483bd14d93bdbbb27206b5e",
+    "second-selection.edn": "599c6d97c456e68f34c90950f6956f108d72cc41bc3d1cb9c3e5d8314e6f82aa",
+    "record-copy.edn": "1d8d9412fde1aedfa6a14185a6990a4dfc102cad78aa6af8baeaa066f2368fa3",
+    "selection.json": "fb1794e55c14b180523df9791cf25d2dfbc4397d12b62a1bd169fa5d957e1bd5",
+    "work.json": "e120c4dd462ee7facb63ac4787fb9d71cc581ae43d1eefdfc63138fbfc29dadd",
+    "selection.lean": "3cf0f6c5ec85a194e5a23c60c0484062d786ece0b829f42b42433e68df2dda33",
+    "work.lean": "3617bcbd042b4f7d6bb8449d897f3df5e0b98ad4f07f632b8ebed742e6abef9d",
+    "selection-lean.log": "d981eb7738b3f9713434f708d5ad208f22a423b732dc643c823c2389cecd1ff3",
+    "work-lean.log": "b164abedee5221049c443677a7b8404036a1c8f35f76487c68943f9494da2951",
+    "baseline.log": "3bb45823a968c659e937446d9840ef3b4fcb9a2f13c77d181b58111d618b43d3",
+    "final.log": "94fca67acf8db6423b0a09cff219a733c7c3c432c4928c153e5095abae03c6ba",
+    "focused2.log": "9a46b1fc0c511ebcafd31f4db8b4486b23e4f49edb81a30d13bc1d065378711d",
+    "rulings.json": "2337442e4b8725faa51f7f2178fdaec87db505acaae2438b92c86b8285d087c7",
+    "kondo.log": "b1d5827bdba0ae91ec3145ef43afbc9f56dc9f488fc423844f948fa6c378ca0d",
+    "parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+  },
+  "rulings": {
+    "invoke-1793542095075-9334-58a36f8a": "Exclude the whole-field pins from the choice-input digest. The digest exists so Q6 can see an unchanged choice situation; a digest over the pass and input bytes changes on every click and would let a repeat after refusal through, which is the defect the L4b map noted of the current field-wide digest.\n\nRule: the choice-input digest covers exactly what determined the comparison's outcome. Include the class ids as the set of (prediction digest, G units) pairs, the abstention G units, the forbidden set, the retained focus, the library pin (which fixes the menu) and the kernel pin (which fixes the model). Exclude the reading and graph pins; they stay in `:construction` where they already are, and the record lists under `:choice-input-digest :covers` exactly the inputs hashed and under `:excludes` the two pins with the reason \"whole-field pins change on every click; the field enters the digest through the classes it produces\".\n\nTest as you proposed: with the construction pins fixed and a fact carrier changed on a task that moves no class's prediction or G, the digest is unchanged; a change that moves any class's pick, prediction or G changes it; a change to the forbidden set or the focus changes it. Keep the field-wide digest the inner Q6 uses untouched; this one is the selection run's.",
+    "invoke-1793542163468-9336-f8410b4d": "Both answers.\n\n1. Keep the retention limit in this packet, explicit and typed. Reuse the predecessor and its sealed record for completed prior ticks; where the previous outer selection refused and left no record, `:previous` carries `{:status :absent :reason :refused-selection-left-no-record}` and the projector emits the Q6 carriers as not recomputable with that reason. Do not build the history writer here. It is needed, because a refused selection repeated on unchanged inputs is exactly the case Q6 exists for and today that refusal leaves nothing behind; the plan's principle is two runs per click, each a RunFacts, refused or not. That is the next packet, L5-4f: the selection run writes its own record on every click, including when the click stops at an outer refusal, and the previous-selection reader then prefers it. Name in your bell the point in the runtime where the outer refusal returns, so L5-4f is written from your reading.\n\n2. Yes, include the class representative's pick in the digest beside the (prediction digest, G units) pairs. The class identifies the policy; the pick is what the choice enacts, and two situations whose classes coincide but whose picks differ are not the same choice. Record it under `:covers` like the rest."
+  }
+}

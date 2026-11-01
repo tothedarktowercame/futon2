@@ -10,7 +10,8 @@
   start instant strictly before this run's, compared as Instants: not the
   filename, not the run id. Its :closed event supplies the previous choice,
   outcome and input digest; a run that started and never closed is a typed
-  absence. Run records themselves are not parsed (they reach 270 MB).
+  absence. The inner carrier does not parse run records. The outer selection reader
+  below reads the one explicitly pinned predecessor record, never a directory scan.
 
   The choice is the structural reading-policy key
   (policy-prefix-admission/reading-policy-key), the identity Prefix-F, habit
@@ -142,6 +143,51 @@
                      (:q8-frontier (first closed))
                      (assoc :frontier (:q8-frontier (first closed))))))))))]
     (seal (merge base found))))
+
+(defn selection-from-record
+  "Summarize the outer selection of a retained tick, independently of its
+  inner work outcome. Chosen plus a recorded work decision means work ran."
+  [record]
+  (let [s (:outer/selection record)
+        status (get-in s [:outcome :status])
+        choice (:chosen-class s) pick (get-in s [:selection :selected :target])
+        digest (get-in s [:choice-input-digest :sha256])]
+    (cond
+      (not (map? s)) {:status :absent :reason :previous-selection-unretained}
+      (nil? digest) {:status :absent :reason :previous-choice-input-digest-unretained}
+      :else
+      {:status :present :run/id (:run/id record) :chosen-class choice :pick pick
+       :choice-input-digest digest
+       :selection-outcome (:outcome s)
+       :outcome (cond
+                  (= :refused status) :refused
+                  (= :abstained status) :abstained
+                  (and (= :chosen status) (map? (:decision record))) :changed
+                  :else {:status :absent :reason :selection-work-entry-unretained})})))
+
+(defn selection-predecessor
+  "Read the predecessor chosen by the existing sealed run stream. This covers
+  completed ticks only; outer refusals currently leave no tick record. No scan
+  by filename, no stream append, and no fabricated first-click predecessor."
+  [dir run-id started-at]
+  (let [p (predecessor dir run-id started-at)]
+    (if-not (= :present (:status p))
+      (select-keys p [:status :reason :previous-run/id])
+      (let [event (first (filter #(and (= :closed (:event %))
+                                      (= (:previous-run/id p) (:run/id %)))
+                                (:events (read-stream dir))))
+            file (when (:record-file event) (io/file (:record-file event)))]
+        (if-not (and file (.isFile file))
+          {:status :absent :reason :previous-selection-record-missing :run/id (:previous-run/id p)}
+          (try
+            (let [record (edn/read-string {:default tagged-literal} (slurp file))]
+              (if (and (= (:previous-run/id p) (:run/id record))
+                       (= (:previous p) (get-in record [:q6 :terminal])))
+                (assoc (selection-from-record record) :record-file (str file)
+                       :predecessor-sha256 (:sha256 p) :scope :previous-completed-tick
+                       :retention-gap {:status :absent :reason :refused-selection-left-no-record})
+                {:status :not-recomputable :reason :previous-selection-record-identity-mismatch}))
+            (catch Exception _ {:status :not-recomputable :reason :previous-selection-record-unreadable})))))))
 
 (defn start!
   "Before selection: the Q6 predecessor of this run, then this run's

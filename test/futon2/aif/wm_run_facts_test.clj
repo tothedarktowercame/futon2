@@ -743,7 +743,7 @@
     (is (true? (c "sliceFromWholeLibrary")))
     (is (= 3 (c "policyCount") (count (f "policyPrediction"))))
     (is (str/starts-with? ((requiring-resolve 'wm-check-run-facts/evidence) f :q2) ".known"))
-    (is (= ".nr \"not recomputable: previousChoice,previousOutcome,previousInputDigest,currentInputDigest\""
+    (is (= ".nr \"not recomputable: previousChoice,previousOutcome,previousInputDigest\""
            ((requiring-resolve 'wm-check-run-facts/evidence) f :q11)))
     (is (= (sort (map :id (:classes s))) (f "comparedPolicies") (f "constructedCascades")))
     (is (= (set (f "comparedPolicies")) (set (map #(get % "policy") (f "policyG")))))

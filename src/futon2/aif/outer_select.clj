@@ -7,7 +7,9 @@
             [futon2.aif.outer-score :as outer-score]))
 
 (defn- refuse! [kind data]
-  (throw (ex-info "Outer selection refused" (assoc data :kind kind))))
+  (throw (ex-info "Outer selection refused" (cond-> (assoc data :kind kind)
+                     (:selection-evidence data)
+                     (assoc-in [:selection-evidence :outcome] {:status :refused :kind kind})))))
 
 (defn- relation-class
   "The relation class the scorer would see for TARGET, or ::no-relation-fn
@@ -74,6 +76,19 @@
                       :g-units (second k) :members (mapv :id members)
                       :representative (:id representative)})))
           (distinct (map key-of cascades)))))
+
+(defn choice-input-digest
+  "Choice-scoped Q6 inputs. Whole-field reading/graph pins remain in the
+  construction, not in the equality test for repeating a choice situation."
+  [selection focus]
+  (let [c (:construction selection)
+        covers {:classes (vec (sort-by pr-str (map #(select-keys % [:prediction-digest :g-units :pick]) (:classes selection))))
+                :abstention-g-units (g-units (get-in selection [:abstention :G]))
+                :forbidden (vec (sort-by pr-str (:forbidden selection)))
+                :focus focus :library (get-in c [:library :sha256]) :kernel (:kernel c)}]
+    {:sha256 (identity/digest covers) :covers covers
+     :excludes {:reading (:reading c) :graph (:graph c)
+                :reason "whole-field pins change on every click; the field enters the digest through the classes it produces"}}))
 
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
@@ -152,10 +167,13 @@
             class-of (into {} (for [c classes member (:members c)] [member (:id c)]))
             evidence (-> evidence
                          (assoc :classes classes
+                                :previous (or (:previous-selection observation)
+                                              {:status :absent :reason :previous-selection-not-supplied})
                                 :representative-rule :first-in-menu-order-within-one-prediction-class)
                          (assoc-in [:construction :policy-count] (count classes))
                          (update-in [:construction :cascades]
                                     #(mapv (fn [c] (assoc c :class (class-of (:id c)))) %)))
+            evidence (assoc evidence :choice-input-digest (choice-input-digest evidence (:focus observation)))
             ;; Never choose a forbidden representative. Every arrangement remains
             ;; scored and retained; refusal cannot disappear through grouping.
             admissible (filterv #(not (contains? forbidden (:pick %))) classes)
@@ -177,7 +195,7 @@
             (refuse! :pick-not-below-abstention {:cascade (:id chosen) :G minimum
                                                :abstention-G (:G abstention)
                                                :selection-evidence evidence}))
-          (let [result (assoc evidence :chosen-class (:id chosen-class) :cascade-index index :cascade-id (:id chosen) :cascade-digest (:digest chosen)
+          (let [result (assoc evidence :outcome {:status :chosen} :chosen-class (:id chosen-class) :cascade-index index :cascade-id (:id chosen) :cascade-digest (:digest chosen)
                              :selection (when picked {:candidates (:field observation) :selected picked})
                              :prediction (:prediction chosen))]
             (assert (and (= (:cascade-scores result) (mapv :G (:cascades result)))
