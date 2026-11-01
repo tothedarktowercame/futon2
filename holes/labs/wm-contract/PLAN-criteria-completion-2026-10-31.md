@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Lead amendment 2 (2026-11-01): outer selection comes first
+
+Joe: a properly working outer selection should have been the first criterion, and the outer loop is held to the same active-inference criteria as the inner loop. The GRID gives it one comparison row, B3. Nineteen task-selection patterns exist, three cascades are named in Lean, and no futon2 source reads the library. Ordinary clicks hold until outer selection meets drafted parity criteria or Joe says otherwise. Other rows wait unless they serve this.
+
 ## Latest execution checkpoint: click 11, self-heal refused (2026-11-01)
 
 Self-heal refused before any attempt on a missing config term, :acceptance-test. Treated as the injury's one try. 7d5e374e goes to medic once on-the-fly wants land. Budget 5. No further click until then, since the next would route to the same refusal.
