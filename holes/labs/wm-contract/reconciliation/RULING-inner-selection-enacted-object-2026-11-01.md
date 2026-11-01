@@ -86,3 +86,40 @@ Reference for the discrete-time scheme and the action marginal: Parr, Pezzulo an
 *Active Inference* (MIT Press, 2022), the discrete-time generative model and action selection
 chapters; Joe's copy is at `~/downloads/book_9780262369978.pdf`. I have not pinned page
 numbers here; the record of the law we implement is `policy.clj:609` and the run records.
+
+## Ruling 4 (Joe, 2026-11-01 ~13:30Z): selection is over tasks, not over policies for doing them
+
+Joe: selection "has to be over this field [of] missions ... you can't just select based on the
+construction of a cascade, because that would mean you'd never select something you hadn't
+selected before and already worked on". The outer selection either does not consider inner
+cascades at all or, if it does, gives fair play to tasks for which none has been constructed;
+Joe prefers not considering them, "except in the most constrained way to say, well, this thing
+is feasible versus that other thing is actually completely infeasible", and never "features of
+any previously constructed inner cascade"; those are "facts which apply to the tasks, not to the
+policies for doing the tasks".
+
+**Where the principle already holds.** Lean Q2 for a selection run serves the whole enumerated
+field; the task-selection cascades order Giraffe facts (status, cone, unblocks, rank); the
+grounding's `FieldFact` carries only those facts and a pin; the relation is of the task to the
+retained focus. None of these reads an inner policy.
+
+**Where it was being violated or was at risk.**
+1. `outer_observation.clj:131` calls `policy-satisfaction/all-satisfied-exclusion`, which drops a
+   task from the outer field when every retained inner policy for it matches a "satisfied"
+   record (`policy_satisfaction.clj:84-96`; 20 exclusions with `:reason
+   :all-policies-already-satisfied` across era-2). That is a policy-derived exclusion of a task.
+   The task-level fact is the registry's lifecycle status: a mission whose wants are met is
+   closed, and Q1 (enumerated = open) then keeps it out. L5-4b removes this exclusion.
+2. Reach. My hand witness took reach for the top ready task from four prior clicks on it. A
+   never-attempted task has no such history, so a reach "observed from prior runs" would starve
+   the never-selected, which is the degeneracy in a new form. Reach must be a task fact defined
+   for every field member (dependency reading completeness, readiness, graph coverage, source
+   readability), with click history at most an additional observation and never a precondition.
+   L5-4b defines it so; `:default-reach` from a parameter file stays a violation.
+3. Feasibility is allowed only as typed task-level facts: source path readable, dependency
+   reading status, registry status. Not "a cascade was constructed for it", not "its policies
+   were satisfied", not an inner G.
+
+**Lean tripwire (L5-4L-3).** Exclusion reasons on a selection run come from a closed set of
+task-level reasons; a policy-derived reason is a violation. The grounding's field facts carry no
+inner-policy carrier; the module's docstring states this as the invariant it protects.

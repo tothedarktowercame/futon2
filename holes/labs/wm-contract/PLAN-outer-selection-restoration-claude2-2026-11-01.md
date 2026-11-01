@@ -145,3 +145,13 @@ files, not just asserted numbers.
   This replaces the question of restating `selectionGood` from the witness.
 - **L5-4 producers** then make the live `:outer/selection` carry these facts, and the projector
   supplies them, so Lean's G1–G4 run on every click beside Q1–Q11.
+
+## Ruling 4 adjustments (2026-11-01 13:35Z; record: RULING-… §Ruling 4)
+
+- **L5-4b (producers, second).** Remove the `all-satisfied-exclusion` from the outer field (a task is
+  in the field iff it is open; lifecycle status is the task fact). Define reach as a task fact for
+  every field member from Giraffe/dependency-reading facts; click history is an added observation,
+  never required. Typed exclusion reasons only from the task-level set. Remove the
+  `:outer-task-selection` stub. Field facts with record pins carried in `:outer/selection`.
+- **L5-4L-3 (Lean, small).** Closed set of task-level exclusion reasons; a policy-derived reason
+  (e.g. all-policies-already-satisfied) fails; grounding docstring names the invariant.
