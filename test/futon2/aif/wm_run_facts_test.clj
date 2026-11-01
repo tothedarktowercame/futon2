@@ -819,6 +819,18 @@
       (is (= 3 (reduce + (map #(count (get % "members")) (f2 "classMembers"))))))
     (is (= old-before (selection-of live-record)) "Historical projection is unchanged")))
 
+(deftest retained-refusal-history-replaces-the-one-step
+  (let [retained [{:cascade "c1" :input-digest "d1" :run-id "r1" :target "M"}
+                  {:cascade "c2" :input-digest "d2" :run-id "r2" :target "M"}]
+        carried (assoc-in live-record [:decision :selection-certificate :q6 :refusal-history] retained)
+        exported (:facts (facts/facts-for-record carried "r" snap))]
+    (is (= [{"cascade" "c1" "input-digest" "d1"} {"cascade" "c2" "input-digest" "d2"}]
+           (exported "refusalHistory")))
+    (is (= "retained" (exported "refusalHistorySource"))))
+  (is (= "predecessor-only" ((:facts (facts/facts-for-record live-record "r" snap))
+                             "refusalHistorySource"))
+      "an old record falls back to the one step, and says so"))
+
 (deftest refusal-history-is-the-one-step-the-record-carries
   (let [exported (:facts (facts/facts-for-record record "r" snap))
         live (:facts (facts/facts-for-record live-record "r" snap))]
