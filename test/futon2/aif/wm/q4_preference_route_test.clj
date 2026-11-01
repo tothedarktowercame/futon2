@@ -114,19 +114,19 @@
         (is (contains? (f "horizonLength") "not-recomputable") "no run-wide horizon")
         (is (= :pass (verdict export)))))))
 
-(deftest a-q6-excluded-policy-is-not-compared
+(deftest a-q6-forbidden-policy-stays-compared
   (let [fx (route/fixture)
         dir (route/temp-dir "q4-")
         _ (click! fx dir)
         {:keys [record]} (click! fx dir)
         c (q4-of record)
-        excluded (get-in record [:decision :selection-certificate :q6 :excluded-keys])]
-    (is (= 1 (count excluded)))
+        forbidden (get-in record [:decision :selection-certificate :q6 :forbidden-keys])]
+    (is (= 1 (count forbidden)))
     (is (= 2 (count (get-in record [:decision :selection-certificate :preference-receipts])))
         "both policies were scored and certified")
-    (is (= 1 (count (:compared c)) (count (:policies c))) "only the post-Q6 menu was compared")
-    (is (not-any? (set excluded) (:compared c)))
-    (is (= {:risk 1 :ambiguity 1 :information-gain 1} (:counts c)))
+    (is (= 2 (count (:compared c)) (count (:policies c))) "the refused policy stays compared")
+    (is (every? (set (:compared c)) forbidden))
+    (is (= {:risk 2 :ambiguity 2 :information-gain 2} (:counts c)))
     (is (true? (holds? record)))))
 
 (deftest mixed-horizons-hold-under-the-per-step-normalization

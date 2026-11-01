@@ -433,6 +433,10 @@
    not select, abstain, or change the posterior. Existing callers without a
    declaration report :threshold-undeclared.
 
+   Optional :forbidden {:keys [policy-key…] :classes [prediction-digest…]} is what
+   a Q6 refusal bars. Those policies stay scored and compared; the minimum is taken
+   over the rest, and :no-admissible-class refuses when nothing is left.
+
    Returns a decision in the historical flat selector's shape (action,
    rank, controller-score, authorization envelope), plus:
      :beta                 {:value β :status :declared}
@@ -459,7 +463,7 @@
 
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
-  [ranked-actions {:keys [beta beta-state near-tie-threshold novelty-inputs
+  [ranked-actions {:keys [beta beta-state forbidden near-tie-threshold novelty-inputs
                                  policy-history-pin
                                  ticket-queue ticket-queue-refusals] :as opts}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
@@ -528,8 +532,9 @@
         rows-in (fn [supported]
                   (for [e ranked-actions :when (pos? (get supported (:action e) 0.0))]
                     (assoc (cascade-selection/selection-row e) :entry e)))
-        unrestricted-minimum (cascade-selection/minimum-class (rows-in acting))
-        minimum (cascade-selection/strict-minimum (rows-in choosing-posterior))
+        allowed-rows (fn [rows] (remove #(cascade-selection/forbidden-row? forbidden %) rows))
+        unrestricted-minimum (cascade-selection/minimum-class (allowed-rows (rows-in acting)))
+        minimum (cascade-selection/admissible-minimum (rows-in choosing-posterior) forbidden)
         members (get-in minimum [:class :members])
         chosen-entry (:entry (first members))
         member-keys (mapv (comp identity-of :entry) members)

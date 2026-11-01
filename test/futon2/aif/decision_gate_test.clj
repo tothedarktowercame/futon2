@@ -161,6 +161,28 @@
       (is (= :minimum-not-unique
              (refusal-of #(gate/emit! forged)))))))
 
+(defn- keyed-tick1 []
+  (mapv (fn [e] (assoc-in e [:action :policy-key] (get-in e [:action :cascade-id])))
+        (tick1-entries)))
+
+(defn- with-q6 [decision keys]
+  (assoc-in decision [:selection-certificate :q6]
+            {:status :forbidden :forbidden-keys keys :forbidden-classes []}))
+
+(deftest the-admissible-minimum-passes-and-the-forbidden-one-does-not
+  (let [forbid {:keys [:C1-test-first] :classes []}
+        stepped (policy/select-action-cascades (keyed-tick1) {:beta tick1-beta :forbidden forbid})
+        decision (with-q6 stepped [:C1-test-first])
+        posterior (get-in decision [:selection-law :posterior])
+        by-id (fn [id] (some #(when (= id (:cascade-id %)) %) (keys posterior)))]
+    (is (= :C2-fix-first (get-in decision [:action :cascade-id])))
+    (is (= decision (gate/emit! decision)) "the minimum among what is left")
+    (is (= :chosen-in-forbidden-class
+           (refusal-of #(gate/emit! (assoc decision :action (by-id :C1-test-first))))))
+    (is (= :chosen-not-minimum
+           (refusal-of #(gate/emit! (assoc decision :action (by-id :C3-fix-only)))))
+        "stepping over the forbidden class does not free the choice")))
+
 (deftest posterior-over-non-cascade-is-refused
   (testing "a recorded posterior whose support includes a flat action throws"
     (let [decision (tick1-decision)

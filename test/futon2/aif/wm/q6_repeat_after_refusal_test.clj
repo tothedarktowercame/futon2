@@ -89,14 +89,14 @@
       (is (= 1 (:calls two)))
       (is (= (get-in one [:record :q6 :terminal :input-digest])
              (get-in two [:record :q6 :terminal :input-digest])))
-      (is (= :excluded (:status (q6 two))))
-      (is (= [k1] (:excluded-keys (q6 two))))
-      (is (= [2 1] ((juxt :menu :removed) (q6 two))))
+      (is (= :forbidden (:status (q6 two))))
+      (is (= [k1] (:forbidden-keys (q6 two))))
+      (is (= 2 (:menu (q6 two))))
       (is (previous-run/reading-key? (chosen-key two)))
       (is (not= k1 (chosen-key two)))
-      (is (not-any? #(= k1 (get-in % [:id :policy-key]))
-                    (get-in two [:decision :selection-certificate :candidates]))
-          "the excluded policy never reached the selector's menu"))
+      (is (some #(= k1 (get-in % [:id :policy-key]))
+                (get-in two [:decision :selection-certificate :candidates]))
+          "the refused policy stays compared; it is not chosen"))
     (testing "the exporter reads the carrier and Q6 holds"
       (let [f (exported two)]
         (is (= "refused" (f "previousOutcome")))
@@ -133,8 +133,8 @@
         (is (= 1 (:calls four)))
         ;; run three chose nothing, so Q6 itself has no previous choice to
         ;; compare: not recomputable, and nothing is excluded
-        (is (= [:not-recomputable :previous-choice-absent 0]
-               ((juxt :status :reason :removed) (q6 four))))
+        (is (= [:not-recomputable :previous-choice-absent nil]
+               ((juxt :status :reason :forbidden-keys) (q6 four))))
         (is (= (chosen-key one) (chosen-key four)))))))
 
 (deftest changed-inputs-allow-the-same-policy
@@ -147,8 +147,8 @@
               (click! fx dir))]
     (is (not= (get-in one [:record :q6 :terminal :input-digest])
               (get-in two [:record :q6 :terminal :input-digest])))
-    (is (= [:not-triggered :selection-inputs-changed 0]
-           ((juxt :status :reason :removed) (q6 two))))
+    (is (= [:not-triggered :selection-inputs-changed nil]
+           ((juxt :status :reason :forbidden-keys) (q6 two))))
     (is (= true (lean-q6 (exported two))))))
 
 ;; -- the predecessor, built from a real stream ---------------------------------
@@ -188,7 +188,7 @@
     (is (= [:not-triggered :previous-outcome-not-refused]
            ((juxt :status :reason) (get-in (decide-after fx p) [:decision :selection-certificate :q6]))))
     (testing "a successful previous outcome excludes nothing"
-      (is (= 0 (get-in (decide-after fx p) [:decision :selection-certificate :q6 :removed]))))))
+      (is (nil? (get-in (decide-after fx p) [:decision :selection-certificate :q6 :forbidden-keys]))))))
 
 (defn- carrier-of [result] (get-in result [:decision :selection-certificate :q6]))
 
@@ -231,7 +231,7 @@
         (let [r (decide-after fx p)
               c (carrier-of r)]
           (is (= [:not-recomputable reason] ((juxt :status :reason) c)))
-          (is (= 0 (:removed c)) "nothing excluded")
+          (is (nil? (:forbidden-keys c)) "nothing forbidden")
           (is (= 1 (:selector-calls r)))
           (let [f (facts/q6-facts {:run/id "c"
                                    :q6 {:predecessor p
@@ -242,7 +242,7 @@
             (is (= :nr (lean-q6 f)) "missing evidence is not recomputable, never a pass")
             (is (contains? (f "previousChoice") "not-recomputable"))))))))
 
-(deftest only-the-exact-structural-identity-is-excluded
+(deftest only-the-exact-structural-identity-is-forbidden
   (let [fx (route/fixture)
         d (decision fx)
         p0 (previous-run/predecessor
@@ -256,15 +256,18 @@
                  (let [prev (previous-run/seal (-> (:previous p0) (dissoc :sha256)
                                                    (assoc-in [:choice :policy-key] key)))]
                    (previous-run/seal (-> p0 (dissoc :sha256) (assoc :previous prev)))))]
-    (testing "the same key, same inputs: excluded"
-      (is (= [:excluded 1] ((juxt :status :removed) (carrier-of (decide-after fx p0))))))
+    (testing "the same key, same inputs: forbidden, and this fixture's two policies
+              predict alike, so its class is the whole menu and nothing is left"
+      (is (= [:refused true [k]]
+             ((juxt :status :no-admissible-class :forbidden-keys)
+              (carrier-of (decide-after fx p0))))))
     (doseq [[label key] {:arrangement [tag target id (update structure :edges conj ["p/a" "p/a" :overlap])]
                          :target [tag "M-elsewhere" id structure]
                          :policy [tag target (str target "/policy-0000000000000000ffff") structure]
                          :precedence-vector [target [{:id "p/a"} {:id "p/b"}]]}]
       (testing (name label)
         (let [r (decide-after fx (reseal key))]
-          (is (= 0 (:removed (carrier-of r))) "a different identity removes nothing")
+          (is (= [] (:forbidden-classes (carrier-of r))) "a different identity forbids nothing")
           (is (= 2 (count (get-in r [:decision :selection-certificate :candidates])))))))))
 
 (deftest exporter-reads-only-the-run-carrier

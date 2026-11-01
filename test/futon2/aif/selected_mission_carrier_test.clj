@@ -1,5 +1,6 @@
 (ns futon2.aif.selected-mission-carrier-test
-  (:require [clojure.test :refer [deftest is use-fixtures]]
+  (:require [futon2.aif.cascade-selection :as selection]
+            [clojure.test :refer [deftest is use-fixtures]]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.selected-mission-contract :as contract]
@@ -86,6 +87,37 @@
                      :baseline-status (:status baseline)
                      :before-observed (mapv :observed (:rows baseline))
                      :receipt receipt}))))
+
+(deftest a-forbidden-class-stays-compared-through-the-family
+  ;; The real three-policy family: forbidding the minimiser keeps all three on the
+  ;; menu and enacts the other class.
+  (let [root (str (Files/createTempDirectory "selected-forbidden-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        _ (history/backfill! root (str root "/reading-policy-class-history-index.ednl"))
+        c (contract/source-contract "/home/joe/code" target
+                                    (str repo "/holes/missions/" target ".md")
+                                    (frozen "mission-before.md"))
+        policies (mapv #(assoc % :mission-want-contract c)
+                       (edn/read-string (frozen "policies.edn")))
+        select (fn [opts]
+                 (with-redefs [class-f/history-context #(history/history root % 100)]
+                   (family/select-over-families
+                    [{:status :computed :target-id target :policies policies}]
+                    (merge {:beta 1 :enactment-fold nil :novelty-inputs {}} opts))))
+        plain (select {})
+        minimiser (get-in plain [:decision :action :policy-key])
+        forbidden (select {:exclude (fn [ranked _ _]
+                                      (let [rows (map selection/selection-row ranked)]
+                                        {:carrier {:status :forbidden}
+                                         :forbidden {:keys [minimiser]
+                                                     :classes (selection/forbidden-classes rows [minimiser])}}))
+                           :certify (fn [_ _] {:status :certified :beta 1})})
+        decision (:decision forbidden)
+        law (:selection-law decision)]
+    (is (= :selected (:status forbidden)))
+    (is (= 3 (count (:ranked forbidden)) (count (:posterior law))))
+    (is (not= minimiser (get-in decision [:action :policy-key])))
+    (is (= :q6-forbidden (get-in law [:policy-comparison :decided-by])))
+    (is (= :q6-forbidden (get-in law [:policy-comparison :stepped-over :reason])))))
 
 (deftest empty-mission-refuses-and-nonmission-is-unchanged
   (is (= :selected-want-contract-missing

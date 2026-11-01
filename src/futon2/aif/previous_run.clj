@@ -28,7 +28,8 @@
 
   Every carrier is sealed (value-digest under :sha256). A tampered carrier
   is not-recomputable, never a pass."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.cascade-selection :as selection]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
@@ -247,20 +248,40 @@
                          :excluded-key (first (:excluded-keys decided))}))))
 
 (defn exclusion
-  "Q6 before the one selector: PREDECESSOR (the run's sealed predecessor
-  carrier, or nil) against RANKED (the certified scored family). Returns
-  {:carrier <sealed exclusion carrier> :ranked <the menu the selector sees>}
-  with :refusal set when exclusion leaves nothing to select."
+  "Q6 before the one selector: PREDECESSOR (the run's sealed predecessor carrier,
+  or nil) against RANKED (the certified scored family). A refused policy stays
+  compared, so nothing leaves RANKED. Returns {:carrier <sealed carrier>
+  :forbidden {:keys … :classes …}}, the refused keys and their prediction classes,
+  with :refusal set when no class is left to choose."
   [predecessor ranked selector-opts beta precision-identity]
   (let [digest (selection-inputs-digest ranked selector-opts beta precision-identity)
         decided (decide-exclusion predecessor digest)
-        excluded (set (:excluded-keys decided))
-        kept (vec (remove #(contains? excluded (get-in % [:action :policy-key])) ranked))
-        removed (- (count ranked) (count kept))
-        refused? (and (= :excluded (:status decided)) (empty? kept))
-        carrier (exclusion-carrier predecessor digest (count ranked) removed
-                                   decided refused?)]
-    (cond-> {:carrier carrier :ranked kept}
+        barring? (= :excluded (:status decided))
+        rows (map selection/selection-row ranked)
+        refused-keys (vec (:excluded-keys decided))
+        forbidden (when barring?
+                    {:keys refused-keys
+                     :classes (selection/forbidden-classes rows refused-keys)})
+        refused? (and barring? (every? #(selection/forbidden-row? forbidden %) rows))
+        carrier (seal
+                 (cond-> (merge {:schema exclusion-schema
+                                 :input-digest digest
+                                 :predecessor (select-keys predecessor
+                                                           [:status :reason :sha256
+                                                            :previous-run/id])
+                                 :menu (count ranked)}
+                                (dissoc decided :excluded-keys))
+                   barring? (assoc :status :forbidden
+                                   :forbidden-keys refused-keys
+                                   :forbidden-classes (:classes forbidden))
+                   refused? (assoc :status :refused
+                                   :kind :repeat-choice-after-refusal
+                                   :no-admissible-class true
+                                   :rearm {:condition :selection-inputs-change
+                                           :input-digest digest
+                                           :excluded-key (first refused-keys)})))]
+    (cond-> {:carrier carrier}
+      forbidden (assoc :forbidden forbidden)
       refused? (assoc :refusal carrier))))
 
 (defn canonical-selection-inputs-digest
