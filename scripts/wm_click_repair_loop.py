@@ -205,7 +205,12 @@ def ns_of(path: Path) -> tuple[str | None, set[str]]:
 def changed_click_files(since_epoch: int) -> list[Path]:
     files: set[Path] = set()
     for repo, sub in CLICK_PATHS:
-        out = git(repo, "log", f"--since=@{since_epoch}", "--name-only", "--format=", "--", sub)
+        # --first-parent -m: a merge commit lists the files it brought onto main.
+        # Without it, a seat's commit authored before SINCE and merged after it
+        # is invisible, and a dependent namespace reloads before its dependency
+        # (21:45Z 2026-11-01: outer-select reloaded against the old outer-score).
+        out = git(repo, "log", "--first-parent", "-m", f"--since=@{since_epoch}",
+                  "--name-only", "--format=", "--", sub)
         for rel in out.split():
             p = repo / rel
             if p.suffix in (".clj", ".cljc") and p.exists():
