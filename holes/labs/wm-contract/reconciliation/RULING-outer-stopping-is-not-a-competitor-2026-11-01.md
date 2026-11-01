@@ -40,3 +40,17 @@ What this rules, in the terms of the Lean model and the code:
 
 Items 1–2 are specified in packet L5-16-L (Lean + outer selector + projector). Items 3–4 start
 with discovery packet L5-17-D.
+
+## Refinement (Joe, 2026-11-01 ~20:55Z)
+
+> "So, again, outer stopping should be a competitor, just a provably bad one unless I say 'let's
+> pause' or we literally run out pf worthwhile work to do. So I think we should definitely keep it
+> in as an option, but just expect that the machine runs at 10,000 feet or so above stopping level"
+
+This supersedes item 1 above as written. Stopping remains in the outer comparison and Lean's
+Q11 keeps `chosen.2 < abstentionG` for both kinds (codex-5's Lean half `2c8877d31` is **not
+merged**). What changes is the abstention's G on the outer: it carries a ruled **altitude**, a
+constant in nats added to its risk, large enough that a certain stop loses to any policy that
+predicts progress under any plausible learned C. Lowering the altitude to zero is "let's pause":
+the operator's model-level pause control, beside the loop's stop file. An empty field still
+abstains (`abstainEmptyField`). Items 2–4 stand.
