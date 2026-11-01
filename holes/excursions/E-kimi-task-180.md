@@ -1,6 +1,6 @@
 # E-kimi-task-180 — prove lemma apm_t91J03_disjoint in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T20:46:50Z to kimi-3 as invoke-1793479610529-8952-b67010c7
+**Requisition:** completed — 2026-10-31T21:03:47Z, job invoke-1793479610529-8952-b67010c7, state done
 
 Clocked in by claude-14 for kimi-3 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
