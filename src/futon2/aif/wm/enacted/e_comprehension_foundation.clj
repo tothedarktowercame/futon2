@@ -44,33 +44,33 @@
   "The nine reviewed completion checks as locators: each names its hole,
   its check keyword, and the excerpt span carrying the quoted evidence
   the check describes."
-  [[:hole-id ["agent/scope-before-action" 0]
+  [{:hole-id ["agent/scope-before-action" 0]
     :check :title-names-corpus-relative-comprehension
-    :span [0 78]]
-   [:hole-id ["stack-coherence/evidence-ledger" 0]
+    :span [0 78]}
+   {:hole-id ["stack-coherence/evidence-ledger" 0]
     :check :foundation-claim-not-marked-done
-    :span [119 231]]
-   [:hole-id ["agent/state-is-hypothesis" 1]
+    :span [119 231]}
+   {:hole-id ["agent/state-is-hypothesis" 1]
     :check :status-open-with-explicit-pilot-question
-    :span [119 231]]
-   [:hole-id ["agent/commitment-varies-with-confidence" 2]
+    :span [119 231]}
+   {:hole-id ["agent/commitment-varies-with-confidence" 2]
     :check :low-confidence-and-author-confirmation-outstanding
-    :span [232 319]]
-   [:hole-id ["agency/self-attribution" 3]
+    :span [232 319]}
+   {:hole-id ["agency/self-attribution" 3]
     :check :byline-names-claude-1-joe-and-date
-    :span [321 349]]
-   [:hole-id ["agent/scope-before-action" 4]
+    :span [321 349]}
+   {:hole-id ["agent/scope-before-action" 4]
     :check :holistic-architecture-under-readiness-named
-    :span [350 395]]
-   [:hole-id ["agent/evidence-over-assertion" 5]
+    :span [350 395]}
+   {:hole-id ["agent/evidence-over-assertion" 5]
     :check :cards-explain-what-pipeline-produces
-    :span [396 432]]
-   [:hole-id ["agent/state-is-hypothesis" 6]
+    :span [396 432]}
+   {:hole-id ["agent/state-is-hypothesis" 6]
     :check :improves-as-we-run-explained-and-delimited
-    :span [433 478]]
-   [:hole-id ["agent/handoff-preserves-context" 8]
+    :span [433 478]}
+   {:hole-id ["agent/handoff-preserves-context" 8]
     :check :phase-3-can-assume-foundation
-    :span [530 556]]])
+    :span [530 556]}])
 
 (defn excerpt-digest-matches?
   "True when the pinned excerpt still hashes to its recorded sha256."
