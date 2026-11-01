@@ -10337,8 +10337,13 @@
                                (meta-injury-store/ingest-record-file!
                                 ledger-path record-path))))
                          (fn [value]
-                           (select-keys value [:status :transition :durability :reason
-                                               :classification :entry]))))}
+                           ;; L5-5c-1: a publication failure after a durable
+                           ;; append says so; a published ticket is named.
+                           (cond-> (select-keys value [:status :transition :durability :reason
+                                                       :classification :entry :ledger-durable?])
+                             (:injury-ticket value)
+                             (assoc :injury-ticket
+                                    (select-keys (:injury-ticket value) [:status :finding/id]))))))}
               (if-let [manifest-path (:outer-learning-manifest-path raw-opts)]
                 {:sink :outer-learning-publication
                  :thunk (fn []
