@@ -30,6 +30,7 @@
    "abstentionPrediction" "stopped"
    "previousChoice" {"target" "t1" "cascade" "c2"} "previousOutcome" "refused"
    "previousInputDigest" "in" "currentInputDigest" "in"
+   "refusalHistory" [{"cascade" "c2" "input-digest" "in"}]
    "pathAbsenceCount" 0
    "selectionPath" {"receipt" {"observed" "h1"} "pickRelation" {"observed" 0}
                     "pickReach" "defaulted" "pendingRun" ["run0" "absent"]
@@ -151,3 +152,13 @@
       (is (re-find #"previousInputDigest := (\d+), currentInputDigest := \1" q11))))
   (testing "without the previous run Q11 is not recomputable rather than inheriting click20's refusal"
     (is (str/starts-with? (sut/evidence (dissoc selection-facts "previousOutcome") :q11) ".nr"))))
+
+(deftest refusal-history-reaches-q6-and-q11
+  (testing "L5-2L-2: the history renders as (cascade, digest) pairs in both clauses"
+    (is (re-find #"refusalHistory := \[\(\d+, \d+\)\]" (sut/evidence selection-facts :q6)))
+    (is (re-find #"refusalHistory := \[\(\d+, \d+\)\]" (sut/evidence selection-facts :q11)))
+    (testing "the history's digest renders identically to currentInputDigest"
+      (let [q6 (sut/evidence selection-facts :q6)
+            [_ cur] (re-find #"currentInputDigest := (\d+)" q6)
+            [_ _ hist] (re-find #"refusalHistory := \[\((\d+), (\d+)\)\]" q6)]
+        (is (= cur hist))))))

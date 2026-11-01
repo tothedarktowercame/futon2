@@ -743,7 +743,7 @@
     (is (true? (c "sliceFromWholeLibrary")))
     (is (= 3 (c "policyCount") (count (f "policyPrediction"))))
     (is (str/starts-with? ((requiring-resolve 'wm-check-run-facts/evidence) f :q2) ".known"))
-    (is (= ".nr \"not recomputable: previousChoice,previousOutcome,previousInputDigest\""
+    (is (= ".nr \"not recomputable: previousChoice,previousOutcome,previousInputDigest,refusalHistory\""
            ((requiring-resolve 'wm-check-run-facts/evidence) f :q11)))
     (is (= (sort (map :id (:classes s))) (f "comparedPolicies") (f "constructedCascades")))
     (is (= (set (f "comparedPolicies")) (set (map #(get % "policy") (f "policyG")))))
@@ -766,3 +766,16 @@
              (get-in f2 ["targetConstruction" 0 "policies"])))
       (is (= 3 (reduce + (map #(count (get % "members")) (f2 "classMembers"))))))
     (is (= old-before (selection-of live-record)) "Historical projection is unchanged")))
+
+(deftest refusal-history-is-the-one-step-the-record-carries
+  (let [exported (:facts (facts/facts-for-record record "r" snap))
+        live (:facts (facts/facts-for-record live-record "r" snap))]
+    (clojure.test/testing "a predecessor with absent carriers gives a typed absence, never an empty history"
+      (when (map? (get exported "previousOutcome"))
+        (is (contains? (get exported "refusalHistory") "not-recomputable"))))
+    (clojure.test/testing "a predecessor that was not refused contributes no entry"
+      (when (= "changed" (get live "previousOutcome"))
+        (is (= [] (get live "refusalHistory")))))
+    (clojure.test/testing "the history is exported for every record (L5-2L-2 deps)"
+      (is (contains? exported "refusalHistory"))
+      (is (contains? live "refusalHistory")))))

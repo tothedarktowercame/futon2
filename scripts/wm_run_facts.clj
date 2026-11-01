@@ -31,7 +31,7 @@
    "gradedPreferenceSteps" "preferenceSemantics" "gTerms" "policiesWithRiskTerm"
    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
    "interpretationOrder" "pathAbsenceCount" "previousChoice"
-   "previousOutcome" "previousInputDigest" "currentChoice"
+   "previousOutcome" "previousInputDigest" "currentChoice" "refusalHistory"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
    "factorizedPreference" "calibrationAuthorizations"
@@ -734,6 +734,15 @@
                "previousOutcome" (q6 "previousOutcome")
                "previousInputDigest" (q6 "previousInputDigest")
                "currentChoice" (q6 "currentChoice")
+               ;; L5-2L-2: the refusal history as far as the record knows it:
+               ;; the predecessor's refusal on its input digest, or nothing.
+               ;; A deeper history (every refusal retained per task) is
+               ;; L5-2C-c; until then this is the one step the record carries.
+               "refusalHistory" (let [pc (q6 "previousChoice") po (q6 "previousOutcome") pd (q6 "previousInputDigest")]
+                                  (cond (some #(and (map? %) (contains? % "not-recomputable")) [pc po pd])
+                                        (nr "refusal history needs the predecessor's choice, outcome and input digest")
+                                        (= "refused" po) [{"cascade" (get pc "cascade") "input-digest" pd}]
+                                        :else []))
                "currentInputDigest" (q6 "currentInputDigest")
                "seatsAvailable" (if (map? (:seat-roster world))
                                   (sorted-ids (mapcat :ids (vals (:seat-roster world))))
