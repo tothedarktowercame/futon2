@@ -243,10 +243,16 @@
                             {:path (:path p) :pinned (:sha256 p) :now now}))]
         (if (seq mismatch)
           {:absent :embedding-pin-mismatch :mismatch mismatch}
-          (let [stems (:stems (json/parse-string (slurp (:path jp)) true))
+          (let [payload (json/parse-string (slurp (:path jp)) true)
+                ;; New artifacts name every row by its full task ID.  The
+                ;; stems fallback reads the original mission-only authority.
+                targets (or (:targets payload) (:stems payload))
                 {:keys [rows]} (read-npy-f8 (:path np))
-                idx (into {} (map-indexed (fn [i s] [s i]) stems))
+                full-ids? (contains? payload :targets)
+                anchor-targets (set (or (:anchor_targets payload) targets))
+                idx (into {} (map-indexed (fn [i s] [s i]) targets))
                 stem (fn [t] (if (and (string? t)
+                                      (not full-ids?)
                                       (or (str/starts-with? t "M-")
                                           (str/starts-with? t "E-")))
                                (subs t 2)
@@ -256,7 +262,9 @@
               {:absent :embedding-node-not-retained}
               (let [cands (->> rowed
                                (keep (fn [[t _]] (when-let [i (idx (stem t))]
-                                                   (when (not= t target) [t (cosine (rows me) (rows i))]))))
+                                                   (when (and (not= t target)
+                                                              (anchor-targets (stem t)))
+                                                     [t (cosine (rows me) (rows i))]))))
                                (sort-by (comp - second)) vec)
                     [[nt nc] runner] cands
                     floor-present? (contains? inputs :embedding-floor)
