@@ -7,6 +7,8 @@
             [futon2.aif.cascade-shape-g :as shape]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.reading-policy-preference :as pref]
+            [futon2.aif.preference-registry :as preference-registry]
+            [futon2.aif.wm.family-canonical-g :as canonical-g]
             [futon2.aif.wm.cascade-decision :as decision]
             [futon2.aif.wm.family-selection :as sut]))
 
@@ -57,6 +59,38 @@
       (doseq [[p s] @seen]
         (is (= (select-keys (before [(:target p) (:policy-id p)]) [:f :computed-f :fit])
                (select-keys s [:f :computed-f :fit])))))))
+
+(deftest authorized-terminal-kernel-reaches-and-certifies-canonical-scores
+  (let [carrier (preference-registry/load!)
+        result (sut/select-over-families
+                families {:g-law :canonical-coapply
+                          :factorized-preference carrier})
+        ranked (:ranked result)
+        rescored (canonical-g/rescore (sut/score-family-field families nil carrier)
+                                      carrier)
+        terminal (:terminal-distribution carrier)]
+    (is (= :selected (:status result)))
+    (is (= :scoreCascadeCoN-map (get-in result [:canonical-g :lean-reduction])))
+    (doseq [entry ranked]
+      (is (= terminal
+             (get-in entry [:certificate :consumed-g :C :steps 2 :distribution])))
+      (is (every? #(= :certified (:status (canonical-g/certify-score (second %))))
+                  (mapcat :scored (:rows rescored)))))
+    (doseq [[_ score] (mapcat :scored (:rows rescored))]
+      (let [h (:horizon score)
+            old-schedule (assoc (get-in score [:canonical-inputs :options
+                                                :authorized-class-preference])
+                                h shape/terminal-class-preference)
+            altered (-> score
+                        (assoc-in [:canonical-inputs :options :authorized-class-preference] old-schedule)
+                        (assoc-in [:class-emission :model :class-preference] old-schedule))]
+        (is (= :refused (:status (canonical-g/certify-score altered))))))
+    (is (= false
+           (#'decision/authorized-kernel-consumed?
+            [(assoc-in (first ranked)
+                       [:class-emission :certificate :consumed-g :C :steps 2 :distribution]
+                       shape/terminal-class-preference)]
+            terminal)))))
 
 (deftest default-path-records-unchanged
   (let [rows (sut/score-family-field families)

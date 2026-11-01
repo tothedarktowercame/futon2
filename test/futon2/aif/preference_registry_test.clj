@@ -32,6 +32,9 @@
     (is (identical? (:factorization-authorizations carrier)
                     (get-in carrier [:registries :factorization])))
     (is (= carrier (preference/validate-certificate! carrier)))
+    (is (= {:focused 12/25 :related 6/25
+            :unrelated 4/25 :stop-the-line 3/25}
+           (:terminal-distribution carrier)))
     (is (= {:costs {:focused 0 :related 1 :unrelated 2 :stop-the-line 3}
             :probabilities {:focused 12/25 :related 6/25
                             :unrelated 4/25 :stop-the-line 3/25}

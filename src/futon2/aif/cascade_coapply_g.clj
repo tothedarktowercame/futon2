@@ -129,6 +129,11 @@
                          :rollout (:horizon-steps opts) :models (mapv :horizon models)})))
       (when-not (apply = preferences)
         (refuse! :class-preference-not-shared {}))
+      (when-let [authorized (:authorized-class-preference opts)]
+        (when-not (= authorized (first preferences))
+          (refuse! :class-preference-not-authorized {})))
+      ;; Backward-compatible theorem fixtures which explicitly request the
+      ;; historical ruled kernel retain their exact check.
       (when (:require-ruled-class-kernel? opts)
         (let [ruled (:class-preference
                      (shape/class-emission-model ::ruled #{} #{} (:horizon-steps opts)))]
@@ -155,7 +160,12 @@
                             (< 1 (count ties)) (assoc :g-tie (mapv :cascade-id ties))))) sorted)
                 refused)
           {:formal-contract :cascade-coapply-g-novelty
-           :lean-reduction (if (:require-ruled-class-kernel? opts)
-                             :compareAtHorizonN :scoreCascadeCoN-map)
+           :lean-reduction
+           (let [models (if-let [ms (:observation-model-of opts)]
+                          (map #(get ms (:id %)) candidates) [(:observation-model opts)])
+                 ruled (:class-preference
+                        (shape/class-emission-model ::ruled #{} #{} (:horizon-steps opts)))]
+             (if (every? #(= ruled (:class-preference %)) models)
+               :compareAtHorizonN :scoreCascadeCoN-map))
            :horizon-steps (:horizon-steps opts) :refused-count (count refused)})))
     (catch clojure.lang.ExceptionInfo e (ex-data e))))

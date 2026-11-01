@@ -12,6 +12,7 @@
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.meta-field-observation :as meta-field]
+            [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
             [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.selected-reading :as selected-reading]
@@ -453,6 +454,7 @@
               :run-id "runtime-test"
               :flight {:target "T"}
               :cascade-feedback-path "/tmp/runtime-test-feedback.edn"
+              :factorized-preference (preference-registry/load!)
               :trace? false
               :include-advisory-lanes? false
               :defer-render? true}

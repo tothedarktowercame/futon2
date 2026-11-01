@@ -30,6 +30,7 @@
             [futon2.aif.selection-record :as selection-record]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.outer-pending-observation :as pending-observation]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.mission-registry :as mission-registry]
@@ -1064,7 +1065,20 @@
 
 (defn- selection-judge
   [opts days]
-  (reselect-q6-refusal opts
+  (let [loaded (try
+                 {:carrier (if-let [pending (::preference-carrier opts)]
+                             @pending
+                             (preference-registry/load! (:preference-registry-path opts)))}
+                 (catch clojure.lang.ExceptionInfo e
+                   {:refusal (ex-data e)}))]
+    (if-let [refusal (:refusal loaded)]
+      {:judgement {:decision {:status :abstained
+                              :refusals [(assoc refusal :stage :factorized-preference
+                                                :kind (if (= :preference-registry-unconfigured
+                                                             (:kind refusal))
+                                                        :production-registries-unconfigured
+                                                        (:kind refusal)))]}}}
+      (reselect-q6-refusal (assoc opts :factorized-preference (:carrier loaded))
     (fn [opts]
      (wm/generate-war-machine
     days
@@ -1080,15 +1094,19 @@
                               :pattern-graph-path :target-reading-root
                               :occurrence-square-root :pattern-library-root
                               :require-occurrence-squares?
-                              :q6/predecessor :r20/makeup :outer/makeup-path])
+                              :q6/predecessor :r20/makeup :outer/makeup-path :factorized-preference])
            (select-keys opts [:meta-field-observation :meta-field-source-pin])
            ;; Construction publishes below. Do not publish twice.
-           {:trace? false :include-advisory-lanes? false :defer-render? true})))))
+           {:trace? false :include-advisory-lanes? false :defer-render? true})))))))
 
 (defn production-defaults
   "Build the report-backed functions for one production invocation."
   [opts]
-  (let [injury-authority (or (:meta-injury-authority opts)
+  (let [;; One realization (including a retained failure) per click, reused by
+        ;; judge retries/reselection; never accept a caller's replacement carrier.
+        opts (assoc opts ::preference-carrier
+                    (delay (preference-registry/load! (:preference-registry-path opts))))
+        injury-authority (or (:meta-injury-authority opts)
                              (injury-store/load-authority
                               (or (:meta-injury-root opts)
                                   injury-store/default-root)))

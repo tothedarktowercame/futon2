@@ -1,6 +1,7 @@
 (ns futon2.aif.wm.family-canonical-g
   "Opt-in field comparison using the Lean canonical co-application G."
   (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.cascade-coapply-g :as canonical]
             [futon2.aif.cascade-pattern-counts :as counts]
             [futon2.aif.cascade-observation-scoring :as scorer]
@@ -63,8 +64,12 @@
   "Rescore all successful legacy constructions once, retaining candidate failures.
    Comparison identity is the ordered target/policy census, not a fired occurrence.
    No token preference is supplied or consumed by this class-only law."
-  [rows]
+  ([rows] (rescore rows nil))
+  ([rows factorized-preference]
   (let [pairs (vec (mapcat :scored rows))
+        terminal (if factorized-preference
+                   (preference-registry/terminal-distribution! factorized-preference)
+                   shape/terminal-class-preference)
         candidates (mapv #(assoc (:candidate (second %)) :id (comparison-id %)) pairs)
         counts-result (counts/family-pattern-counts candidates)
         incoherent (into {} (keep (fn [c]
@@ -80,9 +85,15 @@
                               (let [m (get-in score [:class-emission :model])]
                                 [(comparison-id pair)
                                  (shape/class-emission-model (:target p) (:universe m) (:acceptance m) h
-                                   (get (:target-class m) (:target p)) (:provenance m))])) pairs))
+                                   (get (:target-class m) (:target p)) (:provenance m) terminal)])) pairs))
+        authorized-schedule (into {} (for [tau (range 1 (inc h))]
+                                       [tau (if (= tau h) terminal
+                                              {:ending/not-yet-evaluated 1})]))
         options {:horizon-steps h :pattern-counts (:pattern-counts counts-result)
-                 :observation-model-of models :require-ruled-class-kernel? true
+                 :observation-model-of models
+                 :authorized-class-preference authorized-schedule
+                 :require-ruled-class-kernel? (nil? factorized-preference)
+                 :factorized-preference factorized-preference
                  :prediction-context {:occurrence-id [:field-comparison (mapv :id candidates)] :tau h}}
         results (when (not= :refused (:status counts-result))
                   (if (seq eligible)
@@ -122,7 +133,7 @@
     {:rows updated :refusal refusal
      :comparison {:g-law :canonical-coapply :horizon-choice horizon-choice
                   :pattern-table (:table counts-result) :count-refusals (:refused counts-result)
-                  :lean-reduction (:lean-reduction (meta results))}}))
+                  :lean-reduction (:lean-reduction (meta results))}})))
 
 (defn certify-score
   "Recompute the canonical component from retained inputs, without ledger IO.
@@ -132,7 +143,14 @@
   (let [{:keys [candidate state options]} (:canonical-inputs record)
         model (get-in record [:class-emission :model])
         h (:horizon record)
-        ruled (:class-preference (shape/class-emission-model ::ruled #{} #{} h))
+        terminal (if-let [carrier (:factorized-preference options)]
+                   (try (preference-registry/terminal-distribution! carrier)
+                        (catch clojure.lang.ExceptionInfo _ nil))
+                   shape/terminal-class-preference)
+        authorized (when terminal
+                     (into {} (for [tau (range 1 (inc h))]
+                                [tau (if (= tau h) terminal
+                                         {:ending/not-yet-evaluated 1})])))
         counts-result (counts/family-pattern-counts [candidate])
         expected-counts (:pattern-counts counts-result)
         coherence (coherence-finding candidate (get-in options [:pattern-counts (:id candidate)]))
@@ -149,10 +167,11 @@
                     (= [(:target record) (:policy-id record)] (:id candidate))
                     (= expected-counts (:pattern-counts options))
                     (not= :refused (:status counts-result))
-                    (= true (:require-ruled-class-kernel? options))
+                    (map? authorized)
                     (= h (:horizon-steps options) (:horizon model))
                     (= model (get-in options [:observation-model-of (:id candidate)]))
-                    (= ruled (:class-preference model) (:preference-at-each-step record))
+                    (= authorized (:authorized-class-preference options)
+                       (:class-preference model) (:preference-at-each-step record))
                     (= (dissoc entry :rank :g-tie) (dissoc actual :rank :g-tie))
                     (= fields (select-keys record (keys fields)))
                     (= (:g record) (get-in record [:selection-candidate :g]))
@@ -163,7 +182,7 @@
     (if valid?
       {:status :certified :schema :wm/canonical-reading-preference-v1
        :policy-id (:policy-id record) :target (:target record)
-       :horizon h :preference ruled :g (:g record)
+       :horizon h :preference authorized :g (:g record)
        :g-terms (select-keys record [:risk :ambiguity :information-gain])
        :g-law :canonical-coapply
        :live-c {:role :diagnostic-only :selected false}
@@ -173,8 +192,11 @@
                              :information-gain (get-in terms [:raw :expected-information-gain])}
                        :terms (select-keys record [:risk :ambiguity :information-gain])
                        :consumed-fit-ambiguity? false}
-       :authority {:kind :class-emission :source :classKernel :model-horizon h
-                   :lean :compareAtHorizonN :version :canonical-coapply-g-v1}}
+       :authority {:kind :class-emission :source :authorized-factorized-preference
+                   :model-horizon h
+                   :lean (if (= terminal shape/terminal-class-preference)
+                           :compareAtHorizonN :scoreCascadeCoN-map)
+                   :version :canonical-coapply-g-v1}}
       {:status :refused :kind (or (:kind coherence) :canonical-g-not-bound-to-record)
        :coherence-finding coherence
        :policy-id (:policy-id record) :target (:target record)

@@ -305,7 +305,8 @@
   "Pure scoring stage.  It preserves one row per target and every typed
   construction/scoring failure; it never selects or certifies."
   ([families] (score-family-field families nil))
-  ([families target-classes]
+  ([families target-classes] (score-family-field families target-classes nil))
+  ([families target-classes factorized-preference]
   (mapv
    (fn [family]
      (let [target (:target-id family)
@@ -317,6 +318,8 @@
                        (mapv (fn [p]
                                (let [prepared (cond-> (assoc p :reading-pin reading-pin
                                                                :require-target-class? (some? target-classes))
+                                                factorized-preference
+                                                (assoc :factorized-preference factorized-preference)
                                                 target-class (assoc :target-class target-class))]
                                  [prepared (let [score (shape-g/score-policy prepared)]
                                              (if (= :computed (:status score))
@@ -376,8 +379,9 @@
                                        (remove #(= :computed (:status %)) families)))
         missing-targets (vec (map :target-id
                                   (remove #(= :computed (:status %)) families)))
-        rows (score-family-field families)
-        canonical (when (= :canonical-coapply (:g-law opts)) (canonical-g/rescore rows))
+        rows (score-family-field families nil (:factorized-preference opts))
+        canonical (when (= :canonical-coapply (:g-law opts))
+                    (canonical-g/rescore rows (:factorized-preference opts)))
         rows (if canonical
                (mapv (fn [row] (assoc row :policies (mapv (fn [[p s]] (policy-summary p s)) (:scored row))))
                      (:rows canonical)) rows)
@@ -400,7 +404,7 @@
         ranked (if attach-f (attach-f ranked) ranked)
         certified (when (and certify (seq ranked)) (certify ranked scored))
         opts (cond-> (dissoc opts :attach-f :certify :exclude
-                             :bind-cascade-identity :g-law)
+                             :bind-cascade-identity :g-law :factorized-preference)
                (= :certified (:status certified)) (assoc :beta (:beta certified) :prepared-selection (:prepared-selection certified)
                       :beta-status (when (:prepared-selection certified) :r20-computed)))
         excluded (when (and exclude (= :certified (:status certified)))
