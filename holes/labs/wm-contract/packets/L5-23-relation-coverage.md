@@ -2,7 +2,7 @@
 
 Basis: `reconciliation/L5-23-D-relation-coverage-codex15-2026-11-01.md` (merged). Lean: no change.
 futon2 `main`; worktree `~/worktrees/futon2/codex15-l5-23`, branch `codex15/l5-23`; never check out a
-branch in `/home/joe/code/futon2`. Mode: work. Three behaviours, one bell; a behaviour whose producer lives in another repo is delivered by one commit per repo (Behaviour 1: the futon6 producer `scripts/mission_structure_embed.py` plus the futon2 re-pin, two commits for one behaviour; clarified 23:35Z after codex-15 stopped on the count). The 0.2
+branch in `/home/joe/code/futon2`. Mode: work. Three behaviours, one bell; a behaviour whose producer lives in another repo is delivered by one commit per repo (Behaviour 1: the futon6 producer `scripts/mission_structure_embed.py` plus the futon2 re-pin, two commits for one behaviour; clarified 22:06Z after codex-15 stopped on the count). The 0.2
 embedding floor, graph bound 3, link kinds and basis stay exactly as declared (Joe's parameters).
 
 Census on the landed record: 160 of 588 known (6 focus, 154 associated); unknown 428, of which

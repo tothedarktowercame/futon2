@@ -23,7 +23,7 @@ Record `:rank-basis :after-reading` on every row so a consumer can tell the two 
 
 1. On this pass: no undetermined row has a rank lower than any ready row; the witness is a row
    that stays undetermined after GR-1, `M-apm-capability-ratchet` (old rank 10): its new rank > the
-   number of ready rows. (Corrected 22:05Z: GR-1 made `M-interim-director` ready, so the packet's
+   number of ready rows. (Corrected 21:4xZ: GR-1 made `M-interim-director` ready, so the packet's
    first witness was stale; codex-5 caught it.)
 2. Ready rows keep their relative order from the base pass.
 3. `report.md` "Giraffe order" column agrees with `:order`.
