@@ -10,11 +10,13 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.q4-preference :as q4]
-            ))
+            )
+  (:import [java.nio.file Files]))
 
 (def run-fact-fields
   ["kind" "openMissions" "openExcursions" "openTickets" "enumeratedTasks"
@@ -788,6 +790,192 @@
                                                :when (and (map? v) (contains? v "not-recomputable"))]
                                            k))}}))
 
+;; -- the selection run -----------------------------------------------------------
+
+(def ^:private default-makeup-path "data/wm-learning/outer-makeup.edn")
+
+(def ^:private no-section "no :outer/selection section")
+(def ^:private no-library-pin
+  "task-selection library pin, slice and cascade digests absent from the record (L4b row 11; L5)")
+(def ^:private one-prediction "only the chosen cascade has a prediction (L4b row 9; L5)")
+(def ^:private no-stopped-score
+  "no separately scored stopped kernel on the selection path (L4b row 10; L5)")
+(def ^:private no-previous-decision
+  "no selection-level previous decision in the record (L4b row 13; L5)")
+(def ^:private no-terms "no per-cascade terms on the selection path (L4b row 9)")
+(def ^:private no-carrier "no carrier on the selection path")
+
+;; A reach measured for this run would be retained here.  No record has one yet.
+(def ^:private reach-receipt-key :reach-receipt)
+
+(def ^:private known-relations #{:focus :associated :useful-elsewhere})
+
+(defn pinned-makeup
+  "The makeup file at PATH when its bytes hash to PIN, else nil.  The menu's
+  names live only there, so a file at any other sha says nothing about this run."
+  [path pin]
+  (let [file (io/file path)]
+    (when (and pin (.isFile file))
+      (let [bytes (Files/readAllBytes (.toPath file))]
+        (when (= pin (load-identity/sha256 bytes))
+          (edn/read-string {:default tagged-literal} (String. bytes "UTF-8")))))))
+
+(defn- menu-facts
+  "Compared policies, constructed cascades, G and cascades without G, by menu
+  position.  The record's scores have no names of their own."
+  [selection makeup]
+  (if-not makeup
+    (let [why (not-recomputable (str "outer-makeup.edn at pinned sha "
+                                     (:makeup/sha256 selection) " not available"))]
+      (zipmap ["comparedPolicies" "constructedCascades" "policyG" "cascadesWithoutG"]
+              (repeat why)))
+    (let [menu (mapv (comp policy-identity :id) (:cascades makeup))
+          scores (vec (:cascade-scores selection))
+          rows (mapv (fn [cascade score]
+                       (when-let [g (exact-g score)] {"policy" cascade "g" g}))
+                     menu scores)]
+      {"comparedPolicies" (vec (sort menu))
+       "constructedCascades" (vec (sort menu))
+       "cascadesWithoutG" (vec (sort (subvec menu (min (count scores) (count menu)))))
+       "policyG" (cond
+                   (not= (count scores) (count menu))
+                   (not-recomputable (str (count scores) " scores for "
+                                          (count menu) " menu cascades"))
+                   (some nil? rows) (not-recomputable "a menu cascade has no finite score")
+                   :else (vec (sort-by #(get % "policy") rows)))})))
+
+(defn- selection-decision
+  "The target and cascade chosen, or the empty-field abstention when the chosen
+  cascade picked nothing.  Lean reads that on a non-empty field as a violation."
+  [selection]
+  (let [target (get-in selection [:selection :selected :target])
+        picks (:cascade-picks selection)
+        index (:cascade-index selection)
+        pick (when (and picks index (< -1 index (count picks))) (nth picks index))]
+    (if (or (nil? target) (= :no-pick pick))
+      "abstain-empty-field"
+      {"target" target "cascade" (policy-identity (:cascade-id selection))})))
+
+(defn- pick-relation
+  "The relation fact, digested.  This is weaker than a classify-target receipt,
+  which the record does not retain: it says what the selection believed, not
+  what measured it."
+  [selection]
+  (let [relation (:selected-relation selection)]
+    (if (known-relations relation)
+      {"observed" (action-identity/digest
+                   {:selected-relation relation
+                    :target (get-in selection [:selection :selected :target])})}
+      "absent")))
+
+(defn- pick-reach
+  "A comparison of the record against the pinned makeup, not knowledge of the code."
+  [selection makeup]
+  (let [reach (get-in selection [:selection :selected :reach])
+        receipt (get selection reach-receipt-key)]
+    (cond
+      (nil? reach) "absent"
+      receipt {"observed" (action-identity/digest receipt)}
+      (and makeup (= reach (:default-reach makeup))) "defaulted"
+      :else "absent")))
+
+(defn- ending-provenance [ending]
+  (if (or (:classification-absence ending)
+          (contains? #{nil :not-yet-evaluated} (:ending-class ending)))
+    "absent"
+    {"observed" (action-identity/digest ending)}))
+
+(defn- selection-path [selection makeup]
+  (let [{:keys [status receipt]} (:outer/learning selection)
+        path {"receipt" {"observed" (action-identity/digest selection)}
+              "pickRelation" (pick-relation selection)
+              "pickReach" (pick-reach selection makeup)}]
+    (case status
+      :applied (let [row [(:run-id receipt) (ending-provenance (:ending receipt))]]
+                 (assoc path "pendingRun" row "consumedRuns" [row] "learningApplied" true))
+      ;; the record has no run id for a deferred ending
+      :deferred (assoc path "pendingRun" [0 "absent"] "consumedRuns" [] "learningApplied" false)
+      (not-recomputable "no :outer/learning status on the selection"))))
+
+(defn selection-absence-paths
+  "Q7's rule on the selection path.  The field exclusions and knowledge requests
+  are population-wide evidence about alternatives, as the work path's rejected
+  candidates are, and stay out."
+  [record]
+  (let [selection (:outer/selection record)
+        roots [[[:outer/selection]
+                (dissoc selection :outer-field/excluded :outer-score/excluded
+                        :knowledge-producer-requests)]
+               [[:outer-task-selection] (:outer-task-selection record)]]]
+    (vec
+     (mapcat
+      (fn [[root x]]
+        (when (some? x)
+          (for [[p _] (paths-with x
+                          #(and (map? %)
+                                (or (contains? absence-statuses (:status %))
+                                    (contains? absence-statuses (:outcome %))
+                                    (= :typed-refusal (:kind %))
+                                    (= :classification-receipt-absent (:reason %)))))]
+            (vec (concat root p)))))
+      roots))))
+
+(defn selection-facts-for-record
+  "The selection run in a tick record's `:outer/selection`, as its own RunFacts.
+  The projector labels the kind; nothing in the record does."
+  [record record-path snap {:keys [makeup-path] :or {makeup-path default-makeup-path}}]
+  (let [work (facts-for-record record record-path snap)
+        selection (:outer/selection record)
+        section? (seq selection)
+        makeup (pinned-makeup makeup-path (:makeup/sha256 selection))
+        nr not-recomputable
+        carried (fn [reason] (if section? (nr reason) (nr no-section)))
+        admitted (:outer-field/admitted selection)
+        excluded (map :target (:outer-field/excluded selection))
+        facts (merge
+               (zipmap run-fact-fields (repeat (nr no-carrier)))
+               (select-keys (:facts work)
+                            ["openMissions" "openExcursions" "openTickets"
+                             "factorizedPreference" "calibrationAuthorizations"
+                             "factorizationAuthorizations"])
+               (zipmap ["targetConstruction" "constructorPatternCount" "libraryPatternCount"]
+                       (repeat (carried no-library-pin)))
+               (zipmap ["previousChoice" "previousOutcome" "previousInputDigest"
+                        "currentInputDigest"]
+                       (repeat (carried no-previous-decision)))
+               (zipmap ["policyPreferences" "gTerms" "policiesWithRiskTerm"
+                        "policiesWithAmbiguityTerm" "policiesWithInformationTerm"]
+                       (repeat (carried no-terms)))
+               (zipmap ["abstentionG" "abstentionPrediction"]
+                       (repeat (carried no-stopped-score)))
+               {"kind" "selection"
+                "policyGScale" g-scale
+                "policyPrediction" (carried one-prediction)
+                "interpretationOrder" (nr "no interpretation step on a selection run")}
+               (if section?
+                 (merge
+                  (menu-facts selection makeup)
+                  {"enumeratedTasks" (sorted-ids (distinct (concat admitted excluded)))
+                   "currentChoice" (selection-decision selection)
+                   "pathAbsenceCount" (count (selection-absence-paths record))
+                   "selectionPath" (selection-path selection makeup)})
+                 (zipmap ["comparedPolicies" "constructedCascades" "policyG" "cascadesWithoutG"
+                          "enumeratedTasks" "currentChoice" "pathAbsenceCount" "selectionPath"]
+                         (repeat (nr no-section)))))]
+    {:facts facts
+     :sources (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
+     :diagnostics {:absencePaths (mapv pr-str (selection-absence-paths record))
+                   :notRecomputable (vec (for [[k v] facts
+                                               :when (and (map? v) (contains? v "not-recomputable"))]
+                                           k))}}))
+
+(defn export-for-kind
+  "A record's RunFacts export for one of its two runs.  Work is the default."
+  [record record-path snap {:keys [kind] :as opts}]
+  (case (or kind "work")
+    "work" (facts-for-record record record-path snap)
+    "selection" (selection-facts-for-record record record-path snap (dissoc opts :kind))))
+
 (defn history-rows [paths snap]
   (mapv (fn [path] (assoc (facts-for-record (read-edn path) path snap) :path path))
         paths))
@@ -834,9 +1022,12 @@
 (defn -main [& args]
   (if (= "--run" (first args))
     (let [path (second args)
+          {:strs [--kind --makeup]} (apply hash-map (drop 2 args))
           snap (snapshot)]
       (println (json/generate-string
-                (facts-for-record (read-edn path) path snap)
+                (export-for-kind (read-edn path) path snap
+                                 (cond-> {:kind --kind}
+                                   --makeup (assoc :makeup-path --makeup)))
                 {:pretty true})))
     (let [[run-dir output] args
           dir (or run-dir "data/wm-runs")
