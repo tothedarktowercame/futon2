@@ -442,6 +442,40 @@
                    :historical-verification-awaiting-validation nil)]
         (is (= [:STOP_LINE :HISTORICAL_VERIFICATION] (mapv :node route)))))))
 
+(deftest terminal-record-retains-run-ending-classification-before-sealing
+  (let [dir (.getPath
+             (.toFile
+              (Files/createTempDirectory
+               "wm-run-ending-terminal-" (make-array FileAttribute 0))))
+        route [{:node :RUNNER :via :test :at "2026-11-01T00:00:00Z"}]
+        retained (edn/read-string
+                  (slurp "/home/joe/code/futon2/data/wm-full-loop-machinery-170/wm-contract-machinery-170-v1/attempt-002/retained/run-ending-classification.edn"))
+        persist (fn [run-id receipt]
+                  (let [written (runner/persist-run-record!
+                                 {:run-record-dir dir :click-id (str "click-" run-id)}
+                                 run-id "2026-11-01T00:00:00Z"
+                                 {:attempt-id "attempt-002"
+                                  :outcome :grounded-progress
+                                  :wm/route route
+                                  :run-ending-classification receipt
+                                  :data {}})]
+                    (edn/read-string (slurp (:run-record written)))))]
+    (testing "the cc62f831 retained live receipt reaches the sealed tick record"
+      (let [record (persist "cc62f831-replay" retained)]
+        (is (= :unknown (get-in record [:run-ending-classification :class])))
+        (is (= :recorded (get-in record [:run-ending-classification :status])))
+        (is (= [:attested-increment]
+               (get-in record [:run-ending-classification :missing])))
+        (is ((requiring-resolve 'futon2.aif.previous-run/intact?)
+             (get-in record [:q6 :terminal])))))
+    (testing "a classifier refusal is retained rather than skipped"
+      (let [refusal (run-ending/classify {:close []})
+            record (persist "run-ending-refusal" refusal)]
+        (is (= :refused (get-in record [:run-ending-classification :status])))
+        (is (= :malformed-close (get-in record [:run-ending-classification :kind])))
+        (is ((requiring-resolve 'futon2.aif.previous-run/intact?)
+             (get-in record [:q6 :terminal])))))))
+
 (deftest production-repair-root-is-unreachable-during-runner-suite
   (is (not= hermetic/production-repair-root repair/default-root))
   (is (not= hermetic/production-trip-root tripwire/default-trip-root)))
