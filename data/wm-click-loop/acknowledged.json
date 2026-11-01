@@ -1,0 +1,44 @@
+[
+ {
+  "row": "work Q1 violated",
+  "why": "Census (file registries, 651 open incl. 14 operator-gated missions and drift) vs field (substrate route, 636). Awaiting Joe's decision: gated missions as typed exclusions in the field vs out of the census. Not a producer gap any seat can close without that word.",
+  "ref": "holes/labs/wm-contract/PLAN-outer-selection-restoration-claude2-2026-11-01.md",
+  "acknowledged-by": "claude-2",
+  "at": "2026-11-01T21:35Z"
+ },
+ {
+  "row": "selection Q1 violated",
+  "why": "Same census-vs-field disagreement as the work row (the selection export reads the independent :world-census, L5-8c).",
+  "ref": "holes/labs/wm-contract/PLAN-outer-selection-restoration-claude2-2026-11-01.md",
+  "acknowledged-by": "claude-2",
+  "at": "2026-11-01T21:35Z"
+ },
+ {
+  "row": "selection Q2 violated",
+  "why": "1 compared / 1 constructed below the selection floor of 2 because the other class predicts exactly stopping and L5-11 excludes it; root: outer-model lands on :stopped whenever the pick's relation to the focus is :unknown. Repair in flight: L5-21 (codex-12).",
+  "ref": "holes/labs/wm-contract/packets/L5-21-unknown-relation-is-a-prior.md",
+  "acknowledged-by": "claude-2",
+  "at": "2026-11-01T21:35Z"
+ },
+ {
+  "row": "selection Q11 unverifiable",
+  "why": "Two causes: previousChoice projects .nr when the predecessor refused and Q11's required keys include it (L5-20-L, codex-5 after GR-2); and one compared policy (L5-21).",
+  "ref": "holes/labs/wm-contract/packets/L5-20-L-previous-decision-optional.md",
+  "acknowledged-by": "claude-2",
+  "at": "2026-11-01T21:35Z"
+ },
+ {
+  "row": "selection Q6 unverifiable",
+  "why": "previousChoice .nr :choice-unretained for a refused predecessor although the digests differ and Lean reads the fact only when they match. Repair in flight: L5-20-L.",
+  "ref": "holes/labs/wm-contract/packets/L5-20-L-previous-decision-optional.md",
+  "acknowledged-by": "claude-2",
+  "at": "2026-11-01T21:35Z"
+ },
+ {
+  "row": "selection Q7 violated",
+  "why": "2373 of 2376 typed absences lie under [:outer/selection :previous :selection-outcome :detail], the embedded predecessor refusal; not on this record's path. Repair in flight: L5-20a (codex-13). The remaining learning classification absence is a parked finding.",
+  "ref": "holes/labs/wm-contract/packets/L5-20a-previous-detail-off-the-path.md",
+  "acknowledged-by": "claude-2",
+  "at": "2026-11-01T21:35Z"
+ }
+]
