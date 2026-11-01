@@ -1,6 +1,6 @@
 # E-kimi-task-220 — finish reform a96A04 in apm-lean
 
-**Requisition:** in-progress — dispatched 2026-11-01T23:00:59Z to kimi-3 as invoke-1793574059439-9860-f7980833
+**Requisition:** completed — 2026-11-01T23:21:56Z, job invoke-1793574059439-9860-f7980833, state failed
 
 Clocked in by claude-14 for kimi-3 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
