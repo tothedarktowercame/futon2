@@ -1139,6 +1139,15 @@
       :none (assoc path "consumedRuns" [] "learningApplied" false)
       (not-recomputable "no :outer/learning status on the selection"))))
 
+(defn- undefined-completion-discovery?
+  "V2 explicitly declares discovery, not a work-phase baseline. A missing
+   completion definition is still a selection deficit. V1 keeps its recorded
+   absence semantics; no historical record is recertified."
+  [x]
+  (and (map? x)
+       (= :wm/completion-surface-v2 (:schema x))
+       (= :completion-definition-not-found (:completion-class x))))
+
 (defn selection-absence-paths
   "Q7's rule on the selection path.  The field exclusions and knowledge requests
   are population-wide evidence about alternatives, as the work path's rejected
@@ -1171,14 +1180,16 @@
      (mapcat
       (fn [[root x]]
         (when (some? x)
-          (for [[p _] (paths-with x
+          (for [[p value] (paths-with x
                           #(and (map? %)
                                 (let [m (into {} %)]
-                                  (or (contains? absence-statuses (:status m))
+                                  (or (undefined-completion-discovery? m)
+                                      (contains? absence-statuses (:status m))
                                       (contains? absence-statuses (:outcome m))
                                       (= :typed-refusal (:kind m))
                                       (= :classification-receipt-absent (:reason m))))))]
-            (vec (concat root p)))))
+            (cond-> (vec (concat root p))
+              (undefined-completion-discovery? value) (conj :completion-class)))))
       roots)))))
 
 (defn selection-facts-for-record
