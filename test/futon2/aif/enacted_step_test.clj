@@ -43,7 +43,7 @@
 
 (deftest enacted-steps-recorded-on-the-selection-law
   ;; the decision record carries :enacted-steps keyed by the chain head,
-  ;; alongside (never replacing) :action-marginal
+  ;; alongside (never replacing) :softmax-weights
   (let [c2 (reference-action :C2)
         c1 (reference-action :C1)
         ranked [{:action c1 :controller-score 2.99}
@@ -61,8 +61,8 @@
     (is (= :aif/measurement-window-hygiene
            (get-in decision [:selection-law :enacted-steps :aif/declare-the-conditioning]))
         (pr-str (get-in decision [:selection-law :enacted-steps])))
-    ;; the marginal's key is unchanged: the chain head
-    (is (contains? (get-in decision [:selection-law :action-marginal])
+    ;; the record's key is unchanged: the chain head
+    (is (contains? (get-in decision [:selection-law :softmax-weights])
                    (first (:precedence c2))))))
 
 ;; Typed absences (claude-10, 2026-09-25; fad94c89 found the nils): the step

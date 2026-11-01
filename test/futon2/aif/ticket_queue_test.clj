@@ -51,12 +51,12 @@
         (is (= "T-documentation" (get-in front [:action :target])))
         (is (= :ticket-queue (:decided-by r)))
         (is (= ["T-documentation"] (:eligible-targets r)))
-        (is (= (:chosen-action ordinary) (get-in r [:unrestricted-choice :action])))
+        (is (= [(:action ordinary)] (get-in r [:unrestricted-choice :members])))
         (is (= (get-in ordinary [:selection-law :posterior]) (get-in front [:selection-law :posterior])))
-        (is (= (get-in ordinary [:selection-law :action-marginal]) (get-in front [:selection-law :action-marginal])))
+        (is (= (get-in ordinary [:selection-law :softmax-weights]) (get-in front [:selection-law :softmax-weights])))
         (is (= (get-in ordinary [:selection-certificate :candidates]) (get-in front [:selection-certificate :candidates])))
         (is (= r (get-in front [:selection-law :ticket-queue])))
-        (is (= :unrestricted (get-in front [:selection-law :action-comparison :selection-domain])))
+        (is (= :unrestricted (get-in front [:selection-law :policy-comparison :selection-domain])))
         (is (= front (gate/emit! front)))
         (is (= :ticket-queue-choice-invalid
                (gate-reason (-> front
@@ -92,7 +92,7 @@
             d (select rows opts (queue (entry "T-a" early)))]
         (is (= "T-a" (get-in d [:action :target])))
         (is (zero? (:chosen-action-mass d)))
-        (is (let [mass (get-in (receipt d) [:choice :mass])] (and (number? mass) (pos? mass))))
+        (is (= [(:action d)] (get-in (receipt d) [:choice :members])))
         (is (= d (gate/emit! d)))))))
 
 (deftest ordinary-refusal-does-not-block-admitted-candidates

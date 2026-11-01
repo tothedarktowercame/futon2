@@ -61,10 +61,12 @@
   A certificate with scoring rows for another candidate is contradictory and
   refuses; a certificate with no scoring rows is an honest typed absence."
   [record]
-  (let [selected (get-in record [:decision :selection-law
-                                 :per-policy-argmax :action])
+  (let [enacted (get-in record [:decision :chosen :id])
         scoring (vals (or (get-in record [:decision :selection-certificate
                                          :scoring]) {}))
+        selected (or (when enacted
+                       (:id (first (filter #(= enacted (get-in % [:id :id])) scoring))))
+                     (get-in record [:decision :selection-law :per-policy-argmax :action]))
         matches (filterv #(= selected (:id %)) scoring)]
     (cond
       (empty? scoring)

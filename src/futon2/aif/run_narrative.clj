@@ -403,7 +403,8 @@
                      (get-in b [:trace :dropped-candidates])
                      (get-in b [:trace :cascade-problems :dropped-candidates]))]
     {:selection {:rows (vec (candidate-rows b)) :chosen a
-                 :decided-by (get-in d [:selection-law :action-comparison :decided-by])
+                 :decided-by (or (get-in d [:selection-law :action-comparison :decided-by])
+                                 (get-in d [:selection-law :policy-comparison :decided-by]))
                  :declines (filterv #(or (:candidate %) (= :candidate-admission (:stage %))) declines)}
      :cascade {:target target :patterns (:precedence c)
                :need-edges (or (:need-edges c) (:need-edges a))
@@ -491,7 +492,9 @@
                          ", near-tie " (shown (:near-tie? policy)) ", threshold " (shown (:near-tie-threshold policy)) "; ")
              "Not recorded in this run: policy comparison and near-tie threshold; no near-tie verdict is inferred; ")
          (if action (str "The action comparison records decided-by " (shown (:decided-by action)) ".\n")
-             "Not recorded in this run: action comparison.\n")
+             (if (get-in d [:selection-law :law])
+               (str "The law was " (shown (get-in d [:selection-law :law])) "; no action comparison is made.\n")
+               "Not recorded in this run: action comparison.\n"))
          (coverage-text b)
          (preference-audit-text d)
          (focus-text d)

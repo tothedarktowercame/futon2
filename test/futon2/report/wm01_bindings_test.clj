@@ -215,8 +215,8 @@
         "the selection law actually applied")
     (is (= :declared (get-in decision [:beta :status])))
     (is (= 1 (get-in decision [:beta :value])) "declared β travels with the decision")
-    (is (= :action-name-ascending
-           (get-in decision [:selection-law :tie-break-rule]))
-        "cascade-selection's declared tie-break is the recorded rule")
+    (is (= :strict-G-minimum-over-prediction-classes
+           (get-in decision [:selection-law :law]))
+        "cascade-selection's strict minimum is the recorded law")
     (is (not (contains-any-keyword? decision machine-model-vocabulary))
         "no machine-model admission vocabulary in the decision")))

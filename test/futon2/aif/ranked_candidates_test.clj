@@ -40,17 +40,27 @@
       ;; The existing CLI consumer still prints G, never posterior.
       (is (.contains (#'cli/candidate-label row) (str "G=" (:G row)))))))
 
-(deftest ranking-retains-more-than-ten-and-uses-action-tie-rule
-  (let [actions (mapv (fn [n] {:kind :cascade-candidate :id (keyword (str "C" n))
-                               :target (str "M" n)
-                               :precedence [(keyword (format "pattern/p%02d" (- 12 n)))]})
-                      (range 12))
+(defn- twelve-actions []
+  (mapv (fn [n] {:kind :cascade-candidate :id (keyword (str "C" n))
+                 :target (str "M" n)
+                 :precedence [(keyword (format "pattern/p%02d" (- 12 n)))]})
+        (range 12)))
+
+(deftest twelve-equal-g-classes-refuse
+  (is (= :tie-at-minimum
+         (try (policy/select-action-cascades
+               (mapv #(hash-map :action % :controller-score 15.0) (twelve-actions)) {:beta 1})
+              (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind]))))))
+
+(deftest ranking-retains-more-than-ten-in-posterior-order
+  (let [actions (twelve-actions)
         decision (policy/select-action-cascades
-                  (mapv #(hash-map :action % :controller-score 15.0) actions) {:beta 1})
+                  (map-indexed (fn [i a] {:action a :controller-score (+ 15.0 i)}) actions)
+                  {:beta 1})
         rows (checkpoint-ranking decision)]
-    (is (= :action-name-ascending (get-in decision [:selection-law :tie-break-rule])))
+    (is (= :strict-G-minimum-over-prediction-classes (get-in decision [:selection-law :law])))
     (is (= 12 (count rows)))
-    (is (= (mapv :target (reverse actions)) (mapv :target rows)))
+    (is (= (mapv :target actions) (mapv :target rows)))
     (is (= (vec (range 1 13)) (mapv :rank rows)))))
 
 (deftest discrimination-requires-finite-posterior

@@ -99,6 +99,7 @@
             [futon2.aif.reading-preparation-outcome :as reading-preparation-outcome]
             [futon2.aif.terminal-publication-receipt :as terminal-publication]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
+            [futon2.aif.cascade-selection :as cascade-selection]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.serving-envelope :as serving-envelope]
             [futon2.aif.selection-timing :as selection-timing]
@@ -2961,6 +2962,7 @@
   [judgement]
   (let [decision (:decision judgement)
         posterior (get-in decision [:selection-law :posterior])
+        law (get-in decision [:selection-law :law])
         rule (get-in decision [:selection-law :tie-break-rule])
         certificates (into {} (map (juxt :id identity)
                                    (get-in decision [:selection-certificate :candidates])))
@@ -2969,7 +2971,9 @@
                          (first (:precedence action))
                          (if (map? action) (:type action) action)))
         tied? (some #(> % 1) (vals (frequencies (map second posterior))))]
-    (when (and tied? (not= :action-name-ascending rule))
+    ;; A posterior tie orders display rows only. Records from before the
+    ;; strict-minimum law declare the rule that broke it for them.
+    (when (and tied? (not= cascade-selection/minimum-law law) (not= :action-name-ascending rule))
       (throw (ex-info "Cannot rank a posterior tie without its declared rule"
                       {:failure-kind :unsupported-ranking-tie-rule :tie-break-rule rule})))
     (->> posterior

@@ -10,6 +10,7 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.cascade-selection :as cascade-selection]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
@@ -42,7 +43,7 @@
 ;; Q11 compares exact rationals, so a recorded double is rounded to one declared
 ;; scale.  Scores within a unit of it can become an exact tie, which Q11 refuses:
 ;; arithmetic noise must not decide a selection.
-(def ^:private g-scale 1000000)
+(def ^:private g-scale cascade-selection/g-scale)
 
 (def ^:private stopped-kernel-absent
   "no stopped-kernel G is computed on the inner path (L4b row 4; L5)")
@@ -59,10 +60,7 @@
   Nil when `x` is not a finite number."
   [x]
   (when (and (number? x) (Double/isFinite (double x)))
-    {"numerator" (-> (BigDecimal. (double x))
-                     (.setScale 6 java.math.RoundingMode/HALF_EVEN)
-                     (.movePointRight 6)
-                     .longValueExact)
+    {"numerator" (cascade-selection/g-units x)
      "denominator" g-scale "scale" g-scale "double" (double x)}))
 
 (defn- calibration-json [cal]
@@ -430,11 +428,11 @@
   ratios.  The fit-ambiguity input stays out, so policies predicting the same
   outcomes share a digest."
   [policy-key candidate scored]
-  (let [progress (mapv :prediction (:steps scored))
-        emission (mapv :prediction (get-in candidate [:class-emission :certificate :steps]))]
+  (let [progress (:steps scored)
+        emission (get-in candidate [:class-emission :certificate :steps])]
     (when (and (seq progress) (seq emission))
       {"policy" (policy-identity policy-key)
-       "digest" (action-identity/digest [progress emission])})))
+       "digest" (cascade-selection/prediction-digest progress emission)})))
 
 (defn- candidates-with-g-identities
   "Policy identities (the hash of the policy key, as everywhere else) of the

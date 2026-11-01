@@ -16,10 +16,12 @@
 ;; --- tick 1 (06-R5.edn) candidates, with receipts --------------------------
 
 (def ^:private tick1-G
-  "G at the declared common T = 3, transcribed from 06-R5.edn :computed :G."
+  "G at the declared common T = 3, transcribed from 06-R5.edn :computed :G,
+  except :C2-fix-first, which tied :C1-test-first there and is raised by 1/4:
+  an exact tie at the minimum now refuses, and `tied-minimum-is-refused` pins that."
   {:C0-empty 13.101074797244184
    :C1-test-first 11.434408130577516
-   :C2-fix-first 11.434408130577516
+   :C2-fix-first 11.684408130577516
    :C3-fix-only 12.101074797244184})
 
 (defn- cascade-action
@@ -117,28 +119,10 @@
         decision {:status :abstained :refusals [refusal]}]
     (is (= decision (gate/emit! decision)))))
 
-(deftest chosen-mass-not-the-marginal-is-refused
-  (testing "the chosen action's recorded mass is the mass of ONE cascade while
-            two share the action: not the marginal of the posterior"
-    (let [shared-first {:kind :cascade-candidate :cascade-id :A
-                        :precedence [:pattern-test :pattern-sov]
-                        :construction-receipt {:moves 2}
-                        :interpretation-receipts [{:pattern :pattern-test}
-                                                  {:pattern :pattern-sov}]}
-          also-shared {:kind :cascade-candidate :cascade-id :B
-                       :precedence [:pattern-test]
-                       :construction-receipt {:moves 1}
-                       :interpretation-receipts [{:pattern :pattern-test}]}
-          decision (policy/select-action-cascades
-                    [{:action shared-first :controller-score 1.0}
-                     {:action also-shared :controller-score 2.0}]
-                    {:beta 1.0})
-          single-mass (get (get-in decision [:selection-law :posterior])
-                            (:action decision))
-          forged (assoc decision :chosen-action-mass single-mass)]
-      (is (number? single-mass))
-      (is (= :chosen-mass-not-marginal
-             (refusal-of #(gate/emit! forged)))))))
+(deftest chosen-mass-must-be-recorded
+  (testing "the gate reads no mass from the decision, but one must be recorded"
+    (is (= :chosen-mass-not-recorded
+           (refusal-of #(gate/emit! (assoc (tick1-decision) :chosen-action-mass nil)))))))
 
 (deftest missing-beta-is-refused
   (testing "a cascade decision with no recorded β throws"
@@ -155,19 +139,26 @@
       (is (= :chosen-action-not-a-candidate
              (refusal-of #(gate/emit! decision)))))))
 
-(deftest non-bayes-choice-is-refused
-  (testing "choosing a first acting pattern with less marginal mass than another throws,
-            even when its own marginal is recorded correctly"
+(deftest non-minimum-choice-is-refused
+  (testing "an acting cascade that is not the strict G minimum throws, whatever
+            the decision records about its own mass"
     (let [decision (tick1-decision)
           posterior (get-in decision [:selection-law :posterior])
-          c0 (some #(when (= :C0-empty (:cascade-id %)) %) (keys posterior))
           c3 (some #(when (= :C3-fix-only (:cascade-id %)) %) (keys posterior))
-          low (if (seq (:precedence c3)) c3 c0)
-          forged (assoc decision :action low :chosen-action-mass
-                        (reduce + (for [[c p] posterior
-                                        :when (= (first (:precedence c)) (first (:precedence low)))]
-                                    p)))]
-      (is (= :chosen-not-bayes-action
+          forged (assoc decision :action c3 :chosen-action-mass (get posterior c3))]
+      (is (= :chosen-not-minimum
+             (refusal-of #(gate/emit! forged)))))))
+
+(deftest tied-minimum-is-refused
+  (testing "two classes at the minimum G: the gate recomputes from the certificate
+            and no name, list or action order is admitted"
+    (let [decision (tick1-decision)
+          forged (update-in decision [:selection-certificate :candidates]
+                            (fn [cs] (mapv #(cond-> %
+                                              (= :C2-fix-first (get-in % [:id :cascade-id]))
+                                              (assoc :g (:C1-test-first tick1-G)))
+                                           cs)))]
+      (is (= :minimum-not-unique
              (refusal-of #(gate/emit! forged)))))))
 
 (deftest posterior-over-non-cascade-is-refused
@@ -183,12 +174,9 @@
 ;; --- empty cascades take no action mass (2026-09-21) -----------------------
 
 (deftest gate-and-selector-agree-on-what-counts-as-an-action
-  ;; The gate recomputes the marginal INDEPENDENTLY and shares no code with
-  ;; the selector -- deliberately, since not trusting the selector's outputs is
-  ;; the whole point of the gate. That independence is also how the two drifted:
-  ;; excluding empty cascades in policy.clj alone made the gate refuse a
-  ;; correct decision with :chosen-not-bayes-action (chosen-marginal 0.17286
-  ;; vs best 0.79267, caught pre-click on 2026-09-21). This pins that the two
+  ;; The two rules are deliberately separate, and the separation is how they
+  ;; drifted: excluding empty cascades in policy.clj alone made the gate refuse a
+  ;; correct decision (caught pre-click on 2026-09-21). This pins that the two
   ;; private rules still classify the same things as actions.
   (let [selector-rule @#'policy/cascade-first-action
         gate-rule @#'gate/first-acting-pattern
@@ -234,10 +222,8 @@
            (refusal-of #(gate/emit! forged)))
         "an empty cascade cannot be the enacted step")))
 
-(deftest gate-excludes-empty-cascades-from-the-marginal
-  ;; The pooled-nil inversion, at the gate: with the empty candidate's mass
-  ;; excluded, the acting candidate the selector chose must still be the Bayes
-  ;; action rather than losing to a nil key.
+(deftest gate-excludes-empty-cascades-from-the-minimum
+  ;; An empty candidate is not an action, so it neither wins nor ties.
   (let [decision (tick1-decision)
         posterior (get-in decision [:selection-law :posterior])
         empty-mass (->> posterior
@@ -247,7 +233,7 @@
     (is (pos? empty-mass) "the fixture really does contain a scoring empty cascade")
     (is (some? (:chosen-action decision)) "the selector chose an acting cascade")
     (is (= decision (gate/emit! decision))
-        "and the gate admits it rather than preferring the excluded nil mass")))
+        "and the gate admits it")))
 
 
 (defn- located-guard-decision [locator]

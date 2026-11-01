@@ -2,9 +2,9 @@
   "Action selection policy for the WM AIF apparatus.
 
    `select-action-cascades` is the production selector: G is computed over
-   cascade POLICIES (a cascade is a policy), and the enacted choice is the
-   Bayes choice over each cascade's first acting pattern at a caller-DECLARED
-   β. The flat single-action selectors (`select-action`,
+   cascade POLICIES (a cascade is a policy), and the enacted policy is the
+   strict G minimum over prediction classes (Joe, 2026-11-01). The posterior
+   at a caller-DECLARED β is recorded and decides nothing. The flat single-action selectors (`select-action`,
    `strategic-recommendation`, `default-mode-select`) were removed on
    2026-09-17 by Joe's ruling; `futon2.aif.flat-path-gate-test` refuses any
    call site to them in production source.
@@ -382,6 +382,19 @@
     {:ranked-actions ranked-actions :candidates candidates :e-source e-source
      :original-ranked original-ranked}))
 
+(defn- identity-of
+  "The stable name of a ranked entry's policy."
+  [entry]
+  (or (get-in entry [:action :policy-key]) (:cascade-id entry)
+      (get-in entry [:action :id]) (:action entry)))
+
+(defn- minimum-receipt
+  "A minimum's outcome as a queue receipt carries it: comparable by value."
+  [{:keys [status class]}]
+  (cond-> {:status status}
+    class (assoc :digest (:digest class) :g (:g class)
+                 :members (mapv :action (:members class)))))
+
 (defn select-action-cascades
   "Cascade-candidate selection at a DECLARED β (tick 1, R14 requirement).
 
@@ -395,16 +408,15 @@
      β propagates selection-posterior's typed refusal
      :invalid-temperature. The decision records it under
      :beta {:value β :status :declared}.
-   - futon2.aif.cascade-selection/bayes-choice over each cascade's first
-     acting pattern (the per-state projection of ActionMarginal), with that
-     function's declared tie-break rule (:action-name-ascending).
+   - futon2.aif.cascade-selection/strict-minimum over prediction classes: the
+     enacted policy is the strictly smallest G, policies predicting the same
+     outcomes are one class, and an exact tie refuses :tie-at-minimum. Within
+     the class the first in ranked order is enacted, which chooses an
+     arrangement and not a policy. The posterior decides nothing.
 
-   EMPTY CASCADES DO NOT ENTER THE ACTION MARGINAL. An empty cascade has no
-   first acting pattern, so it is absence, not an action, and absence cannot
-   carry action mass. Pooling them under their shared nil key let their count
-   decide the tick (21 of them summed to 0.785275 and outvoted the best acting
-   key at 0.179031 in run 2026-09-21-1789951020). A key that grows with the
-   roster and cannot lose is not a mechanism. A TYPED no-op is unaffected: it
+   EMPTY CASCADES ARE NOT CANDIDATES. An empty cascade has no first acting
+   pattern, so it is absence, not an action (21 of them outvoted every acting
+   policy in run 2026-09-21-1789951020). A TYPED no-op is unaffected: it
    carries :type, keeps its own key, and can still win on its own mass. When
    NO candidate is acting, this refuses :no-acting-cascade-candidate with the
    excluded count and mass -- the machine declines by saying so.
@@ -428,21 +440,21 @@
                             :applied :cascade-selection-posterior
                             :beta β :beta-status :declared
                             :posterior {cascade-action-map → p}
+                            :law :strict-G-minimum-over-prediction-classes
+                            :retired [:action-marginal :tie-break-rule]
+                            :class-members [policy-key…] :enacted policy-key
+                            :representative-rule <rule>
                             :softmax-weights {first-acting-action → summed p}
-                            :action-marginal {first-acting-action → summed p}
                             :per-policy-argmax {:action :probability :first-action}
-                            :excluded-non-actions {:count :mass :reason}
-                            :tie-break-rule <rule>
-                            :tie-broken? bool}
+                            :excluded-non-actions {:count :mass :reason}}
 
    With :ticket-queue, the declared earliest admitted ticket is the eligible
    stratum. The same law selects within it; the unrestricted comparisons and
    full posterior stay unchanged. Its conditional choice is recorded separately
    under :ticket-queue in the certificate and selection law.
 
-   :softmax-weights carries the unrestricted SUMMED marginal; it is
-   recorded beside :per-policy-argmax so a reader can reconstruct a selection
-   — including a disagreement between the two — from the record alone.
+   :softmax-weights carries the unrestricted summed posterior for its readers;
+   it decides nothing.
      :softmax-weights      {first-acting-action → probability}
 
    `controller-authority/authorize` accepts the result on the admissible set
@@ -502,11 +514,6 @@
                                        :excluded-mass (reduce + 0.0 (vals excluded))
                                        :reason
                                        "no acting candidate has positive posterior support"}}})))
-        ;; bayes-choice takes action-of as a MAP (it does (get action-of id)),
-        ;; so build the per-candidate first-acting-action map, not a function.
-        action-of (zipmap (map :action ranked-actions)
-                          (map (comp cascade-first-action :action) ranked-actions))
-        unrestricted-choice (cascade-selection/bayes-choice acting action-of)
         queue-plan (when (contains? opts :ticket-queue)
                      (ticket-queue/plan ticket-queue candidates ticket-queue-refusals))
         eligible-targets (set (:eligible-targets queue-plan))
@@ -518,34 +525,29 @@
         stratum-posterior (when (seq stratum-candidates)
                             (cascade-selection/selection-posterior {:beta beta :candidates stratum-candidates}))
         choosing-posterior (or stratum-posterior acting)
-        choice (if stratum-posterior
-                 (cascade-selection/bayes-choice stratum-posterior action-of)
-                 unrestricted-choice)
-        chosen-entry (some (fn [e]
-                             (when (and (pos? (get choosing-posterior (:action e) 0.0))
-                                        (= (cascade-first-action (:action e))
-                                           (:action choice)))
-                               e))
-                           ranked-actions)
-        ;; The MARGINAL that decided, summed. This was `into {}`, which
-        ;; OVERWRITES on duplicate keys instead of summing, so the record of
-        ;; the run above showed the winning key carrying 0.035694 when
-        ;; 0.785275 had decided it -- a reader could not reconstruct why it
-        ;; won. A certificate that cannot audit its own selection is not a
-        ;; certificate.
+        rows-in (fn [supported]
+                  (for [e ranked-actions :when (pos? (get supported (:action e) 0.0))]
+                    (assoc (cascade-selection/selection-row e) :entry e)))
+        unrestricted-minimum (cascade-selection/minimum-class (rows-in acting))
+        minimum (cascade-selection/strict-minimum (rows-in choosing-posterior))
+        members (get-in minimum [:class :members])
+        chosen-entry (:entry (first members))
+        member-keys (mapv (comp identity-of :entry) members)
+        class-mass (reduce + 0.0 (map #(get posterior (:action %) 0.0) members))
+        choice {:action (cascade-first-action (:action chosen-entry)) :mass class-mass}
+        ;; The posterior summed by first action. It decides nothing; the
+        ;; readers of :softmax-weights keep their key.
         weights (reduce-kv (fn [m a p] (update m (cascade-first-action a) (fnil + 0.0) p))
                            {} acting)
-        ;; Recorded beside the marginal so a future DISAGREEMENT between the
-        ;; two is legible from the record alone, rather than needing someone
-        ;; to recompute the marginal by hand as it did tonight.
+        ;; The posterior's mode, recorded. With flat E and F it is a member of
+        ;; the minimal class; it does not choose.
         per-policy-argmax
         (let [[a p] (reduce (fn [[_ bp :as best] [a' p']] (if (> p' bp) [a' p'] best))
                             (sort-by (comp pr-str key) posterior))]
           {:action a :probability p :first-action (cascade-first-action a)})
         comparisons (cascade-selection/selection-comparisons
                      {:beta beta :candidates candidates :posterior posterior
-                      :action-of action-of :choice unrestricted-choice
-                      :near-tie-threshold near-tie-threshold})
+                      :minimum minimum :near-tie-threshold near-tie-threshold})
         ;; PROOF-wm-works ⟨1⟩6: the record carries BOTH action identities,
         ;; each labelled: the chain head (the marginal's existing key, the
         ;; law's and the tie-break's identity — unchanged) and the step that
@@ -579,13 +581,12 @@
                               [head (enacted-step-of a state)]))
         queue-receipt (when queue-plan
                         (assoc queue-plan
-                               :unrestricted-choice unrestricted-choice
-                               :choice choice
+                               :unrestricted-choice (minimum-receipt unrestricted-minimum)
+                               :choice (minimum-receipt minimum)
                                :stratum-posterior stratum-posterior
                                :decided-by (if stratum-posterior :ticket-queue :unrestricted-policy)))
         comparisons (cond-> comparisons
                       queue-receipt (assoc :ticket-queue queue-receipt)
-                      queue-receipt (assoc-in [:action-comparison :selection-domain] :unrestricted)
                       queue-receipt (assoc-in [:policy-comparison :selection-domain] :unrestricted))]
     {:action (:action chosen-entry)
      :rank (or (:rank chosen-entry) 1)
@@ -606,9 +607,7 @@
      :selection-law
      ;; M-wm-wiring row 9 (claude-10, 2026-09-25): :candidate is the CHOSEN
      ;; entry's :cascade-id (efe's ranked entries carry it), the id Clause C's
-     ;; P_c joins an enactment on. Not :per-policy-argmax, the posterior's
-     ;; mode, which the summed marginal can overrule (recorded beside it
-     ;; above). Absent when the chosen entry carries no :cascade-id: the key
+     ;; P_c joins an enactment on. Absent when the chosen entry carries no :cascade-id: the key
      ;; is left out rather than written nil, and the W_c checker reads the
      ;; missing id as :join-unverifiable.
      (cond-> (merge comparisons {:requested :cascade-selection-posterior
@@ -619,12 +618,15 @@
       :gamma (/ 1.0 beta) :tau beta
       :tau-source (if (= :r20-computed beta-status) :r20-beta-from-valence
                     (if beta-state :carry-beta :declared-beta))
+      :law cascade-selection/minimum-law
+      :retired [:action-marginal :tie-break-rule]
+      :class-members member-keys
+      :enacted (first member-keys)
+      :representative-rule cascade-selection/representative-rule
       :posterior posterior
       :softmax-weights weights
-      :action-marginal weights
       ;; ⟨1⟩6: the step the machine would actually take now, keyed by the
-      ;; same chain-head id the marginal uses — labelled, additive, and
-      ;; never a substitute for the marginal's own key
+      ;; chain-head id :softmax-weights uses
       :enacted-steps enacted-steps
       ;; step 8: where E came from (the enactment fold, never the store)
       :e-source e-source
@@ -632,16 +634,8 @@
       :excluded-non-actions
       {:count (count excluded)
        :mass (reduce + 0.0 (vals excluded))
-       :reason :empty-cascade-is-not-an-action}
-      :tie-break-rule (:tie-break-rule choice)
-      :tie-broken?
-      (boolean (some (fn [[a p]]
-                       (and (not= a (:action choice))
-                            (= p (:mass choice))))
-                     (if stratum-posterior
-                       (reduce-kv (fn [m a p] (update m (get action-of a) (fnil + 0.0) p)) {} stratum-posterior)
-                       weights)))})
+       :reason :empty-cascade-is-not-an-action}})
        (some? (:cascade-id chosen-entry)) (assoc :candidate (:cascade-id chosen-entry)))
      :softmax-weights weights
      :chosen-action (:action choice)
-     :chosen-action-mass (get weights (:action choice))}))
+     :chosen-action-mass (:mass choice)}))
