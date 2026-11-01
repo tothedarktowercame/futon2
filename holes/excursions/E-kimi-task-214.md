@@ -1,6 +1,6 @@
 # E-kimi-task-214 — statement repair m95J02 in apm-lean: dimension one
 
-**Requisition:** in-progress — dispatched 2026-11-01T21:43:58Z to kimi-2 as invoke-1793569438087-9790-dfe3297e
+**Requisition:** completed — 2026-11-01T22:42:08Z, job invoke-1793569438087-9790-dfe3297e, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
