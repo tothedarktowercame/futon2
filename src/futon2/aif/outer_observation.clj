@@ -10,6 +10,7 @@
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.outer-score :as outer-score]
             [futon2.aif.wm.construction-inputs :as construction-inputs])
   (:import [java.nio.file Files]
            [java.security MessageDigest]))
@@ -87,7 +88,7 @@
   run. Unknown status or missing row evidence stays explicitly absent."
   [row]
   (let [pin (get-in row [:dependency-reading :record-pin :sha256])
-        value ({:ready 3/4 :undetermined 1/2 :not-ready 1/4} (:status row))
+        value (get (:readiness-reach-prior outer-score/kernel-definition) (:status row))
         inputs {:status (:status row) :pin pin}]
     (if (and value (string? pin) (seq pin))
       {:value value :kind :prior :source :giraffe-status-readiness-prior-v1
@@ -177,6 +178,8 @@
           :default-reach-ignored (contains? makeup :default-reach)
           :giraffe/run-id (:run-id manifest)
           :giraffe/pass-sha256 pass-sha
+          :giraffe/input-sha256 (some (fn [f] (when (= "input.edn" (:file f)) (:sha256 f)))
+                                      (:files manifest))
           :giraffe/manifest-sha256 manifest-sha})))))
 
 (defn outer-observation
