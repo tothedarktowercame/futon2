@@ -578,6 +578,29 @@
         scoring (get-in cert [:scoring])
         world (:world-at-selection record)
         world-ids (fn [kind] (get-in world [:open-tasks kind :ids]))
+        ;; Resolve immutable terminal decision bytes only when the tick lacks
+        ;; an open-id carrier. Never reconstruct a roster from a newer registry.
+        selection-roster
+        (delay
+          (when-let [ref (:selection-record record)]
+            (let [terminal (last (:entries (selection-record/read-chain ref)))]
+              {:roster (get-in terminal [:record :outer/selection :field-facts :open-tasks])
+               :path (get-in terminal [:reference :path])})))
+        roster-keys {"openMissions" :missions "openExcursions" :excursions "openTickets" :tickets}
+        open-ids (fn [kind snapshot-key]
+                   (if-some [ids (world-ids kind)]
+                     (vec ids)
+                     (if-some [ids (get-in @selection-roster [:roster kind])]
+                       (sorted-ids ids)
+                       (sorted-ids (get snap snapshot-key)))))
+        open-source (fn [kind]
+                      (cond
+                        (some? (world-ids kind))
+                        (str record-path " " (pr-str [:world-at-selection :open-tasks kind :ids]))
+                        (some? (get-in @selection-roster [:roster kind]))
+                        (str (:path @selection-roster) " "
+                             (pr-str [:outer/selection :field-facts :open-tasks kind]))
+                        :else (:pins snap)))
         enum-ids (get-in world [:enumerated-tasks :ids])
         reaching (when (vector? candidates) (set (keep candidate-target candidates)))
         with-g (when (vector? candidates)
@@ -675,12 +698,9 @@
                "policyGScale" g-scale
                "abstentionG" (get (inner-abstention-facts record) "abstentionG")
                "abstentionPrediction" (get (inner-abstention-facts record) "abstentionPrediction")
-               "openMissions" (if (some? (world-ids :missions))
-                                (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
-               "openExcursions" (if (some? (world-ids :excursions))
-                                  (vec (world-ids :excursions)) (sorted-ids (:open-excursions snap)))
-               "openTickets" (if (some? (world-ids :tickets))
-                               (vec (world-ids :tickets)) (sorted-ids (:open-tickets snap)))
+               "openMissions" (open-ids :missions :open-missions)
+               "openExcursions" (open-ids :excursions :open-excursions)
+               "openTickets" (open-ids :tickets :open-tickets)
                "enumeratedTasks" (if enum-ids (sorted-ids enum-ids)
                                      (nr "record has enumerated counts/missing ids but no :enumerated-ids sets"))
                "targetsReachingScoring" (if (some? reaching) (sorted-ids reaching)
@@ -819,8 +839,8 @@
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond
-                                 (#{"openMissions" "openExcursions" "openTickets"
-                                    "libraryPatternCount" "seatsAvailable"} field) (:pins snap)
+                                 (contains? roster-keys field) (open-source (get roster-keys field))
+                                 (#{"libraryPatternCount" "seatsAvailable"} field) (:pins snap)
                                  (= "kind" field) "scripts/wm_run_facts.clj (projector label)"
                                  (#{"previousChoice" "previousOutcome" "previousInputDigest"
                                     "currentChoice" "currentInputDigest"} field)
