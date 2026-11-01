@@ -11,7 +11,8 @@
   filename, not the run id. Its :closed event supplies the previous choice,
   outcome and input digest; a run that started and never closed is a typed
   absence. The inner carrier does not parse run records. The outer selection reader
-  below reads the one explicitly pinned predecessor record, never a directory scan.
+  prefers the immutable decision-chain index, with sealed tick fallback for
+  histories predating that index.
 
   The choice is the structural reading-policy key
   (policy-prefix-admission/reading-policy-key), the identity Prefix-F, habit
@@ -34,6 +35,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.selection-record :as selection-record]
             [futon2.aif.policy-prefix-admission :as prefix-admission])
   (:import [java.time Instant]))
 
@@ -150,23 +152,26 @@
   inner work outcome. Chosen plus a recorded work decision means work ran."
   [record]
   (let [s (:outer/selection record)
-        status (get-in s [:outcome :status])
+        status (or (get-in record [:selection-outcome :status]) (get-in s [:outcome :status]))
         choice (:chosen-class s) pick (get-in s [:selection :selected :target])
         digest (get-in s [:choice-input-digest :sha256])]
     (cond
       (not (map? s)) {:status :absent :reason :previous-selection-unretained}
-      (nil? digest) {:status :absent :reason :previous-choice-input-digest-unretained}
+      (= :not-exercised status) {:status :not-exercised :reason :previous-selection-bypassed
+                               :selection-outcome (:selection-outcome record)}
+      (and (nil? digest) (not= selection-record/schema (:schema record)))
+      {:status :absent :reason :previous-choice-input-digest-unretained}
       :else
       {:status :present :run/id (:run/id record) :chosen-class choice :pick pick
        :choice-input-digest digest
-       :selection-outcome (:outcome s)
+       :selection-outcome (or (:selection-outcome record) (:outcome s))
        :outcome (cond
                   (= :refused status) :refused
                   (= :abstained status) :abstained
                   (and (= :chosen status) (map? (:decision record))) :changed
                   :else {:status :absent :reason :selection-work-entry-unretained})})))
 
-(defn selection-predecessor
+(defn- legacy-selection-predecessor
   "Read the predecessor chosen by the existing sealed run stream. This covers
   completed ticks only; outer refusals currently leave no tick record. No scan
   by filename, no stream append, and no fabricated first-click predecessor."
@@ -189,6 +194,25 @@
                        :retention-gap {:status :absent :reason :refused-selection-left-no-record})
                 {:status :not-recomputable :reason :previous-selection-record-identity-mismatch}))
             (catch Exception _ {:status :not-recomputable :reason :previous-selection-record-unreadable})))))))
+
+(defn selection-predecessor
+  "Prefer the outer decision stream, including refused and not-exercised runs.
+  Historical tick fallback is only used where no selection stream exists."
+  [dir run-id started-at]
+  (let [p (selection-record/latest dir run-id started-at)]
+    (cond
+      (= :no-selection-record-history (:reason p))
+      (legacy-selection-predecessor dir run-id started-at)
+      (= :present (:status p))
+      (try
+        (let [record (:record p)
+              summary (selection-from-record record)
+              tick (:tick-record (selection-record/read-completion (:reference p)))]
+          (cond-> (assoc summary :selection-record (:reference p) :scope :selection-decision :chain-length (:chain-length p))
+            (and (:path tick) (= :chosen (get-in record [:selection-outcome :status])))
+            (assoc :outcome :changed)))
+        (catch Exception _ {:status :not-recomputable :reason :selection-completion-invalid}))
+      :else p)))
 
 (defn start!
   "Before selection: the Q6 predecessor of this run, then this run's

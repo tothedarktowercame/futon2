@@ -116,10 +116,34 @@ class AlertTest(unittest.TestCase):
     status,_,calls,_=self.export_run()
     exports=[c for c in calls if "wm-run-facts" in c]
     self.assertEqual(0,status); self.assertEqual(2,len(exports))
-    self.assertNotIn("--kind",exports[0]); self.assertEqual(["--kind","selection"],exports[1][-2:])
+    self.assertNotIn("--kind",exports[1]); self.assertEqual(["--kind","selection"],exports[0][-2:])
     checks=[c for c in calls if "wm-check-run-facts" in c]
-    self.assertEqual(["work","selection"],[c[6] for c in checks])
-    self.assertEqual(["RunCheckWork.lean","RunCheckSelection.lean"],[Path(c[5]).name for c in checks])
+    self.assertEqual(["selection","work"],[c[6] for c in checks])
+    self.assertEqual(["RunCheckSelection.lean","RunCheckWork.lean"],[Path(c[5]).name for c in checks])
+
+  def test_refused_selection_evaluated_without_work(self):
+    module,root,record,args=self.mocked_evaluation()
+    selection=Path(args[3]); data=json.loads(selection.read_text())
+    data["diagnostics"].update(recordKind="selection-record", workRunStatus="not-run",
+                               selectionOutcome={"status":"refused","kind":"tie-at-minimum"})
+    selection.write_text(json.dumps(data))
+    original=module.run; calls=[]
+    def checked(cmd,cwd):
+      calls.append(cmd)
+      self.assertFalse(any("RunCheckWork" in str(c) for c in cmd))
+      return original(cmd,cwd)
+    module.run=checked; out=io.StringIO()
+    with contextlib.redirect_stdout(out):
+      status=module.main(["--run-record",str(record),*args,
+                         "--alerts-log",str(root/"alerts.log"),"--no-evidence"])
+    self.assertEqual(1,status)
+    self.assertIn("work run: not-run",out.getvalue())
+    self.assertIn("selection run:",out.getvalue())
+    self.assertNotIn("not-checked",out.getvalue())
+    verdict=Path(str(record)+".requirements.edn").read_text()
+    self.assertIn('":work-status" ":not-run"',verdict)
+    self.assertIn('":conforms" false',verdict)
+    self.assertEqual(2,len(calls))  # checker and Lean for selection only
 
   def test_both_conforming_conforms(self):
     status,stdout,verdict=self.evaluate()

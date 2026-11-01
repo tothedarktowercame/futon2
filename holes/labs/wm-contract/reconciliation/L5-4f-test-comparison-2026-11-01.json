@@ -1,0 +1,404 @@
+{
+  "base": {
+    "result": [
+      "Ran 159 tests containing 655 assertions.",
+      "22 failures, 3 errors."
+    ],
+    "failures": {
+      "real-giraffe-selection-demonstration": 3,
+      "missing-task-selects-and-enters-existing-path": 5,
+      "default-store-paths-ignore-process-working-directory": 2,
+      "selection-pends-and-next-selection-learns": 7,
+      "retained-qualified-already-satisfied-advances-c": 4,
+      "missing-run-record-defers-without-replacing-pending": 1
+    },
+    "errors": {
+      "retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "no-menu-makeup-and-menu-only-migration": 1,
+      "real-giraffe-run-shape": 1
+    },
+    "log-sha256": "b960b5f3f5fd004eb7806124ff5043c22a168a9790c9f76ff8bf6a3a4837adc4",
+    "execution": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4f-base/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4f-base/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4f-base/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4f-base/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4f-base/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4f-base/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4f-base/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4f-base/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4f-base/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4f-base/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4f-base/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.outer-consumption-test",
+        "futon2.aif.outer-learning-manifest-test",
+        "futon2.aif.outer-menu-test",
+        "futon2.aif.outer-menu-wiring-test",
+        "futon2.aif.outer-observation-test",
+        "futon2.aif.outer-refusal-census-test",
+        "futon2.aif.outer-refusal-history-test",
+        "futon2.aif.outer-relation-admission-test",
+        "futon2.aif.outer-score-test",
+        "futon2.aif.outer-select-test",
+        "futon2.aif.outer-selection-history-test",
+        "futon2.aif.outer-selection-wiring-test",
+        "futon2.aif.outer-state-test",
+        "futon2.aif.outer-state-update-test",
+        "futon2.aif.outer-state-wiring-test",
+        "futon2.aif.wm-run-facts-test",
+        "wm-check-run-facts-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 1
+    }
+  },
+  "base-current": {
+    "result": [
+      "Ran 159 tests containing 650 assertions.",
+      "22 failures, 4 errors."
+    ],
+    "failures": {
+      "real-giraffe-selection-demonstration": 3,
+      "missing-task-selects-and-enters-existing-path": 5,
+      "default-store-paths-ignore-process-working-directory": 2,
+      "selection-pends-and-next-selection-learns": 7,
+      "retained-qualified-already-satisfied-advances-c": 4,
+      "missing-run-record-defers-without-replacing-pending": 1
+    },
+    "errors": {
+      "retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "no-menu-makeup-and-menu-only-migration": 1,
+      "real-giraffe-run-shape": 1,
+      "runner-persists-only-supplied-outer-selection": 1
+    },
+    "log-sha256": "0ebb6bff191f593c7f3ced7eb7058ec53cfbccc1bf75dd789c1ec0aa5dc13449",
+    "execution": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4f-base-current/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4f-base-current/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4f-base-current/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4f-base-current/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4f-base-current/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4f-base-current/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4f-base-current/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4f-base-current/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4f-base-current/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4f-base-current/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4f-base-current/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.outer-consumption-test",
+        "futon2.aif.outer-learning-manifest-test",
+        "futon2.aif.outer-menu-test",
+        "futon2.aif.outer-menu-wiring-test",
+        "futon2.aif.outer-observation-test",
+        "futon2.aif.outer-refusal-census-test",
+        "futon2.aif.outer-refusal-history-test",
+        "futon2.aif.outer-relation-admission-test",
+        "futon2.aif.outer-score-test",
+        "futon2.aif.outer-select-test",
+        "futon2.aif.outer-selection-history-test",
+        "futon2.aif.outer-selection-wiring-test",
+        "futon2.aif.outer-state-test",
+        "futon2.aif.outer-state-update-test",
+        "futon2.aif.outer-state-wiring-test",
+        "futon2.aif.wm-run-facts-test",
+        "wm-check-run-facts-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 1
+    }
+  },
+  "final": {
+    "result": [
+      "Ran 165 tests containing 692 assertions.",
+      "22 failures, 4 errors."
+    ],
+    "failures": {
+      "real-giraffe-selection-demonstration": 3,
+      "missing-task-selects-and-enters-existing-path": 5,
+      "default-store-paths-ignore-process-working-directory": 2,
+      "selection-pends-and-next-selection-learns": 7,
+      "retained-qualified-already-satisfied-advances-c": 4,
+      "missing-run-record-defers-without-replacing-pending": 1
+    },
+    "errors": {
+      "retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "no-menu-makeup-and-menu-only-migration": 1,
+      "real-giraffe-run-shape": 1,
+      "runner-persists-only-supplied-outer-selection": 1
+    },
+    "log-sha256": "616fe58289f8cec507d4fef2abdd01ad946d2b88b7c6d24e3aa633858463b119",
+    "execution": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4f-final/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4f-final/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4f-final/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4f-final/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4f-final/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4f-final/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4f-final/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4f-final/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4f-final/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4f-final/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4f-final/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.outer-consumption-test",
+        "futon2.aif.outer-learning-manifest-test",
+        "futon2.aif.outer-menu-test",
+        "futon2.aif.outer-menu-wiring-test",
+        "futon2.aif.outer-observation-test",
+        "futon2.aif.outer-refusal-census-test",
+        "futon2.aif.outer-refusal-history-test",
+        "futon2.aif.outer-relation-admission-test",
+        "futon2.aif.outer-score-test",
+        "futon2.aif.outer-select-test",
+        "futon2.aif.outer-selection-history-test",
+        "futon2.aif.outer-selection-wiring-test",
+        "futon2.aif.outer-state-test",
+        "futon2.aif.outer-state-update-test",
+        "futon2.aif.outer-state-wiring-test",
+        "futon2.aif.wm-run-facts-test",
+        "wm-check-run-facts-test",
+        "futon2.aif.selection-record-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 1
+    }
+  },
+  "focused-final": {
+    "result": [
+      "Ran 80 tests containing 293 assertions.",
+      "0 failures, 0 errors."
+    ],
+    "failures": {},
+    "errors": {},
+    "log-sha256": "613cca0924e081794a69d990f563665aad2b3fb03fd1318f92ec88b81efc3838",
+    "execution": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4f-focused-final/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4f-focused-final/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4f-focused-final/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4f-focused-final/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4f-focused-final/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4f-focused-final/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4f-focused-final/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4f-focused-final/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4f-focused-final/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4f-focused-final/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4f-focused-final/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.selection-record-test",
+        "futon2.aif.outer-selection-history-test",
+        "futon2.aif.wm-run-facts-test",
+        "wm-check-run-facts-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 0
+    }
+  },
+  "chain-final": {
+    "result": [
+      "Ran 82 tests containing 310 assertions.",
+      "0 failures, 0 errors."
+    ],
+    "failures": {},
+    "errors": {},
+    "log-sha256": "630c7c8aa81771afd5099c891afd74d73c09ff36c646490e1577c7ee24fdb3b7",
+    "execution": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4f-chain-final/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4f-chain-final/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4f-chain-final/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4f-chain-final/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4f-chain-final/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4f-chain-final/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4f-chain-final/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4f-chain-final/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4f-chain-final/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4f-chain-final/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4f-chain-final/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.selection-record-test",
+        "futon2.aif.outer-selection-history-test",
+        "futon2.aif.wm-run-facts-test",
+        "wm-check-run-facts-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 0
+    }
+  },
+  "store-final": {
+    "result": [
+      "Ran 7 tests containing 44 assertions.",
+      "0 failures, 0 errors."
+    ],
+    "failures": {},
+    "errors": {},
+    "log-sha256": "db565da1caed86d817d0e782e9dcb3f7a201d4c53e48d8b987222f09ae6c6564",
+    "execution": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4f-store-final/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4f-store-final/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4f-store-final/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4f-store-final/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4f-store-final/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4f-store-final/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4f-store-final/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4f-store-final/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4f-store-final/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4f-store-final/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4f-store-final/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.selection-record-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 0
+    }
+  },
+  "store-identity-final": {
+    "result": [
+      "Ran 8 tests containing 46 assertions.",
+      "0 failures, 0 errors."
+    ],
+    "failures": {},
+    "errors": {},
+    "log-sha256": "bff2b2b7f078f46a4d6006964b3b511f62469d3e682502bb41f62eaa76418ebf",
+    "execution": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4f-store-identity-final/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4f-store-identity-final/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4f-store-identity-final/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4f-store-identity-final/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4f-store-identity-final/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4f-store-identity-final/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4f-store-identity-final/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4f-store-identity-final/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4f-store-identity-final/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4f-store-identity-final/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4f-store-identity-final/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.selection-record-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 0
+    }
+  },
+  "alert-base": {
+    "result": [
+      "Ran 26 tests in 51.469s",
+      "OK"
+    ],
+    "log-sha256": "5a02b4604c7caa0eb36d664b6302942343c14d38eb9d470b203fb50319d4d64b"
+  },
+  "alert-final": {
+    "result": [
+      "Ran 27 tests in 58.082s",
+      "OK"
+    ],
+    "log-sha256": "5673a93a3d81d36c9b93e5eefe71fa23840dc77b5b6334f2a26e794f5bb1852b"
+  },
+  "click-base": {
+    "result": [
+      "ERROR: test_direct_script_preparation_refusal_never_posts_and_dry_run_never_loads (wm_click_prepare_test.PrepareTest.test_direct_script_preparation_refusal_never_posts_and_dry_run_never_loads) (mode='current', run=True)",
+      "Ran 46 tests in 59.066s",
+      "FAILED (errors=1)"
+    ],
+    "log-sha256": "53d0447de5310709d4b49912a30711ff1afbe4fccce83861323751f8b9bcd3f7"
+  },
+  "click-final": {
+    "result": [
+      "ERROR: test_direct_script_preparation_refusal_never_posts_and_dry_run_never_loads (wm_click_prepare_test.PrepareTest.test_direct_script_preparation_refusal_never_posts_and_dry_run_never_loads) (mode='current', run=True)",
+      "Ran 47 tests in 60.683s",
+      "FAILED (errors=1)"
+    ],
+    "log-sha256": "edfea44536d1747bac44d3881b0af54bd1e0b0c582af05ecee18a793c64c5d8d"
+  },
+  "click-selection-final": {
+    "result": [
+      "Ran 5 tests in 15.325s",
+      "OK"
+    ],
+    "log-sha256": "6a752ad7d8b013e021f9f86a1a9336cad6f5d822772ab235c9839ebaae41a865"
+  },
+  "lean": {
+    "outcomes": [
+      [
+        "1",
+        "holds"
+      ],
+      [
+        "2",
+        "holds"
+      ],
+      [
+        "3",
+        "holds"
+      ],
+      [
+        "4",
+        "holds"
+      ],
+      [
+        "5",
+        "unverifiable"
+      ],
+      [
+        "6",
+        "violated"
+      ],
+      [
+        "7",
+        "unverifiable"
+      ],
+      [
+        "9",
+        "violated"
+      ],
+      [
+        "11",
+        "holds"
+      ]
+    ],
+    "log-sha256": "dd472054d74924544a20cad4ca7d7798322de0083325022c77b358cb59958397"
+  },
+  "canonical-data-files-now": 45737,
+  "alert-counterexample": {
+    "log-sha256": "6c4b18664bb29cc06505bc7ba219e45ec73571a996f660393889fbe75455a24b"
+  },
+  "rulings": [
+    "invoke-1793542606410-9343-05cce514",
+    "invoke-1793543345526-9358-5cb7b7c3"
+  ],
+  "last-projection": {
+    "result": [
+      "Ran 81 tests containing 290 assertions.",
+      "0 failures, 0 errors."
+    ],
+    "log-sha256": "00a61ec1a54ca66a679b2ad09ca0f8b51cbf890752a3ca9260826d8d821227ef"
+  },
+  "parens": {
+    "log-sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+  },
+  "kondo": {
+    "log-sha256": "6682fe505b82efd1f6f26fd63236969974dd61c63d3fd622ebb8c0f44506633e"
+  },
+  "kondo-base": {
+    "log-sha256": "520a03a1e0c781b73b7fed0828897dbdad72fd049cab612680a852d292f55ea3"
+  }
+}

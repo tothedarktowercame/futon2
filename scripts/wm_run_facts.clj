@@ -15,6 +15,7 @@
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.selection-record :as selection-record]
             [futon2.aif.q4-preference :as q4]
             )
   (:import [java.nio.file Files]))
@@ -1057,9 +1058,23 @@
   candidates are, and stay out."
   [record]
   (let [selection (:outer/selection record)
-        roots [[[:outer/selection]
-                (dissoc selection :outer-field/excluded :outer-score/excluded
-                        :knowledge-producer-requests)]
+        chosen-id (:cascade-id selection)
+        chosen-class (:chosen-class selection)
+        pick (get-in selection [:selection :selected :target])
+        ;; L5-4f review: since L5-4b the section carries every admitted member's
+        ;; facts and every cascade's row.  Those are population-wide evidence
+        ;; about alternatives; the path is what the chosen decision rests on: the
+        ;; chosen cascade's row, its class, the chosen pick's own field fact, and
+        ;; the section's own carriers (construction, abstention, previous,
+        ;; forbidden, learning, prediction, receipt).
+        on-path (-> selection
+                    (dissoc :outer-field/excluded :outer-score/excluded :knowledge-producer-requests
+                            :field-facts :cascades :classes :cascade-picks :cascade-pick-relations
+                            :cascade-scores :tied-cascades)
+                    (assoc :chosen-cascade (first (filter #(= chosen-id (:id %)) (:cascades selection)))
+                           :chosen-class-row (first (filter #(= chosen-class (:id %)) (:classes selection)))
+                           :pick-fact (when pick (get-in selection [:field-facts :admitted pick]))))
+        roots [[[:outer/selection] on-path]
                [[:outer-task-selection] (:outer-task-selection record)]]]
     (vec
      (mapcat
@@ -1081,7 +1096,18 @@
   [record record-path snap {:keys [makeup-path phase-log-path]
                             :or {makeup-path default-makeup-path
                                  phase-log-path default-phase-log-path}}]
-  (let [work (facts-for-record record record-path snap)
+  (let [reference (:selection-record record)
+        standalone? (= selection-record/schema (:schema record))
+        completion (when (and standalone? (.isFile (io/file record-path)))
+                     (selection-record/read-completion {:path (.getCanonicalPath (io/file record-path)) :sha256 (selection-record/file-sha record-path)}))
+        terminal-ref (or reference (:selection-record completion))
+        chain (when terminal-ref (selection-record/read-chain terminal-ref))
+        source (if chain (:record (last (:entries chain))) record)
+        disagreement? (and reference (contains? record :outer/selection)
+                           (not= (:outer/selection record) (:outer/selection source)))
+        record-path (or (:path terminal-ref) record-path)
+        record (if reference (assoc source :decision (:decision record)) source)
+        work (facts-for-record record record-path snap)
         selection (:outer/selection record)
         section? (seq selection)
         makeup (pinned-makeup makeup-path (:makeup/sha256 selection))
@@ -1124,12 +1150,25 @@
                    "selectionPath" (selection-path selection makeup)})
                  (zipmap ["comparedPolicies" "constructedCascades" "policyG" "cascadesWithoutG"
                           "enumeratedTasks" "currentChoice" "pathAbsenceCount" "selectionPath"]
-                         (repeat (nr no-section)))))]
+                         (repeat (nr no-section)))))
+        facts (if disagreement?
+                (into {} (map (fn [[k v]] [k (if (#{"kind" "policyGScale"} k) v
+                                                (nr "selection-reselected-after-decision"))]) facts))
+                facts)]
     {:facts facts
      :sources (assoc (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
                      "interpretationOrder"
                      (or phase-log-path ":phase-log path absent"))
-     :diagnostics {:taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
+     :diagnostics {:recordKind (if (= selection-record/schema (:schema source)) "selection-record" "tick-record")
+                   :selectionOutcome (:selection-outcome source)
+                   :selectionChainLength (or (:length chain) (:chain-index source))
+                   :selectionRecordDisagreement (when disagreement? :selection-reselected-after-decision)
+                   :workRecord (get-in completion [:tick-record :path])
+                   :workRunStatus (when (and (nil? reference)
+                                             (= selection-record/schema (:schema source))
+                                             (#{:refused :abstained} (get-in source [:selection-outcome :status])))
+                                    "not-run")
+                   :taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
                    :absencePaths (mapv pr-str (selection-absence-paths record))
                    :notRecomputable (vec (for [[k v] facts
                                                :when (and (map? v) (contains? v "not-recomputable"))]

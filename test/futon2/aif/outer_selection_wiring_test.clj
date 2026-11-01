@@ -102,8 +102,8 @@
                   #'runtime/run-ordinary-opportunity-with-task!
                   (fn [x] (reset! received x) {:ran true})}
                  (fn [] (#'runtime/run-ordinary-opportunity! opts)))]
-    (is (= {:ran true} result))
-    (is (= opts @received))))
+    (is (= {:ran true} (dissoc result :selection-record)))
+    (is (= opts (select-keys @received (keys opts))))))
 
 (deftest no-verified-run-is-typed-absent
   (let [called? (atom false)
@@ -112,7 +112,7 @@
                   #'runtime/run-ordinary-opportunity-with-task!
                   (fn [_] (reset! called? true))}
                  (fn [] (#'runtime/run-ordinary-opportunity! {})))]
-    (is (= {:absent :no-verified-giraffe-run} result))
+    (is (= {:absent :no-verified-giraffe-run} (dissoc result :selection-record)))
     (is (false? @called?))))
 
 (deftest empty-chosen-cascade-refuses-at-abstention-floor

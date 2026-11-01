@@ -27,6 +27,7 @@
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.selection-record :as selection-record]
             [futon2.aif.outer-state :as outer-state]
             [futon2.aif.outer-pending-observation :as pending-observation]
             [futon2.aif.c-vector :as cv]
@@ -1257,7 +1258,10 @@
   "One click-local reselection: score the unchanged field, forbidding the
   refused target only at the minimum. Retain the refusal and its digest; never
   turn a reading refusal into a task exclusion or an altered field partition."
-  [makeup state observation initial-selection selection-state persist-pending!]
+  ([makeup state observation initial-selection selection-state persist-pending!]
+   (reading-reselection-port makeup state observation initial-selection selection-state persist-pending!
+                             (fn [& _] nil)))
+  ([makeup state observation initial-selection selection-state persist-pending! retain-decision!]
   (let [used? (atom false)]
     (fn [refusal]
       (when (compare-and-set! used? false true)
@@ -1275,19 +1279,40 @@
                                (update :selection #(some-> % (dissoc :candidates)))
                                (assoc :reading-reselection reselection
                                       :selected-relation ((:relation observation) (:focus observation) target)))]
-              (persist-pending! retained)
-              (reset! selection-state {:task {:id target} :outer/selection retained})
+              (let [ref (retain-decision! retained {:status :chosen :class (:chosen-class retained) :pick target}
+                                          {:kind :reader-refusal :target (:target row) :pin (:pin row)})]
+                (persist-pending! retained)
+                (reset! selection-state (cond-> {:task {:id target} :outer/selection retained}
+                                          ref (assoc :selection-record ref))))
               {:target target :selection retained})
             (catch clojure.lang.ExceptionInfo e
               (let [data (ex-data e)
-                    retained (-> (merge (dissoc initial-selection :selection :cascade-id :cascade-index :prediction)
+                    retained (-> (merge (dissoc initial-selection :selection :cascade-id :cascade-index :cascade-digest :chosen-class :prediction)
                                          (:selection-evidence data))
                                  (assoc :forbidden forbidden :status :refused :reason (:kind data)
                                         :reading-reselection (assoc reselection :status :refused :reason (:kind data))))]
-                (reset! selection-state {:task nil :outer/selection retained})
-                (throw e)))))))))
+                (let [ref (retain-decision! retained {:status :refused :kind (:kind data) :detail data}
+                                          {:kind :reader-refusal :target (:target row) :pin (:pin row)})]
+                  (reset! selection-state (cond-> {:task nil :outer/selection retained}
+                                            ref (assoc :selection-record ref))))
+                (throw e))))))))))
 
-(defn- run-ordinary-opportunity!
+(defn- selection-context [opts]
+  (cond-> opts
+    (not (:run-id opts)) (assoc :run-id (new-run-id))
+    (not (:startedAt opts)) (assoc :startedAt (str (Instant/now)))
+    (not (:selection-record/state opts)) (assoc :selection-record/state (atom nil))))
+
+(defn- retain-selection! [opts section outcome]
+  (let [state (:selection-record/state opts)]
+    (or @state
+        (let [ref (selection-record/write-decision!
+                   (or (:run-record-dir opts) runner/default-run-record-dir)
+                   opts section outcome)]
+          (reset! state ref)
+          ref))))
+
+(defn- run-ordinary-opportunity-impl!
   "Run one production opportunity with the report-backed defaults installed.
   A caller-supplied task enters the existing task path unchanged.  Otherwise
   the R20 outer loop selects from the newest verified missions Giraffe run.
@@ -1297,7 +1322,10 @@
   META injuries are arbitrated before this function."
   [opts]
   (if (get-in opts [:task :id])
-    (run-ordinary-opportunity-with-task! opts)
+    (run-ordinary-opportunity-with-task!
+     (assoc opts :selection-record
+            (retain-selection! opts {:status :not-exercised :reason :direct-task-entry}
+                               {:status :not-exercised :path :direct-task :reason :task-supplied})))
     (if-let [giraffe-dir (find-giraffe-run opts)]
       (try
         (let [makeup (outer-state/load-makeup
@@ -1331,6 +1359,11 @@
                                  (previous-run/selection-predecessor
                                   (or (:run-record-dir opts) runner/default-run-record-dir)
                                   (:run-id opts) (or (:startedAt opts) (str (Instant/now)))))
+              _ (reset! (:selection-record/evidence opts)
+                        (assoc (select-keys observation [:giraffe/run-id :giraffe/manifest-sha256
+                                                         :focus :field-facts])
+                               :makeup/sha256 (:makeup/sha256 makeup)
+                               :previous (:previous-selection observation)))
               selection (outer-select/select makeup state observation)
               retained-selection (-> selection
                                      (assoc :outer-field/admitted
@@ -1354,7 +1387,12 @@
                                               (select-keys learning
                                                            [:status :reason :ending-class
                                                             :observed-gain :receipt]))))
-              state-path (or (:outer/state-path opts) outer-state/default-state-path)]
+              state-path (or (:outer/state-path opts) outer-state/default-state-path)
+              record-ref (retain-selection!
+                          opts retained-selection
+                          (if-let [pick (get-in selection [:selection :selected :target])]
+                            {:status :chosen :class (:chosen-class selection) :pick pick}
+                            {:status :abstained :case :empty-field}))]
           (if-let [target (get-in selection [:selection :selected :target])]
             (let [run-id (or (:run-id opts) (new-run-id))]
               (when-not (= :deferred (:status learning))
@@ -1365,7 +1403,7 @@
                          :run-id run-id
                          :giraffe/run-id (:giraffe/run-id observation)})))
               (let [selection-state (atom {:task {:id target} :outer/selection retained-selection})
-                    live-opts (assoc opts :run-id run-id :task {:id target}
+                    live-opts (assoc opts :run-id run-id :task {:id target} :selection-record record-ref
                                     :outer/selection retained-selection
                                     :reading-reselection/state selection-state)
                     reselect (reading-reselection-port
@@ -1375,7 +1413,15 @@
                                   (outer-state/write-state!
                                    state-path (outer-state/replace-pending state
                                                      {:selection replacement :run-id run-id
-                                                      :giraffe/run-id (:giraffe/run-id observation)})))))]
+                                                      :giraffe/run-id (:giraffe/run-id observation)}))))
+                              (fn [section outcome cause]
+                                (let [record-state (:selection-record/state opts)
+                                      ref (selection-record/write-decision!
+                                            (or (:run-record-dir opts) runner/default-run-record-dir)
+                                            (assoc opts :selection-predecessor @record-state :selection-cause cause)
+                                            section outcome)]
+                                  (reset! record-state ref)
+                                  ref)))]
                 (run-ordinary-opportunity-with-task!
                  (assoc live-opts :selected-target-reading-reselect-fn reselect))))
             (do
@@ -1387,6 +1433,20 @@
         (catch Exception e
           (outer-selection-refusal e)))
       {:absent :no-verified-giraffe-run})))
+
+(defn- run-ordinary-opportunity! [opts]
+  (let [opts (assoc (selection-context opts) :selection-record/evidence (atom {}))
+        result (try (run-ordinary-opportunity-impl! opts)
+                    (catch Exception e (outer-selection-refusal e)))
+        ref (or @(:selection-record/state opts)
+                (retain-selection! opts
+                  (merge @(:selection-record/evidence opts)
+                         (or (get-in result [:details :selection-evidence])
+                             {:status :absent :reason :selection-failed-before-scoring
+                              :failure-evidence (:details result)}))
+                  {:status :refused :kind (or (:reason result) (:absent result))
+                   :detail (:details result)}))]
+    (assoc result :selection-record ref)))
 
 (defn- run-ordinary-opportunity-with-task!
   [opts]
@@ -1587,14 +1647,27 @@
                      :carried-bindings carried-bindings)))))
 
 (defn run-opportunity!
-  "Resolve medic authority before any diagnosis, readiness, ledger, or
-  selection work, then arbitrate the opportunity."
+  "Resolve authority and arbitrate. Each invocation retains one immutable outer
+  decision chain (or a typed bypass), then a separate completion receipt."
   [opts]
-  (let [authority (resolve-medic-authority opts)]
-    (if (= :refused (:status authority))
-      {:status :refused :reason (:reason authority)
-       :route :dedicated-meta-self-heal :ordinary-selection-called? false}
-      (run-opportunity-with-authority! opts authority))))
+  (let [opts (selection-context (dissoc opts :selection-record/state :selection-record/evidence :selection-record))
+        attempt (try
+                  (let [authority (resolve-medic-authority opts)]
+                    {:result (if (= :refused (:status authority))
+                             {:status :refused :reason (:reason authority)
+                              :route :dedicated-meta-self-heal :ordinary-selection-called? false}
+                             (run-opportunity-with-authority! opts authority))})
+                  (catch Exception e {:exception e :result {:status :threw
+                                                            :reason :opportunity-exception}}))
+        result (:result attempt)
+        ref (or @(:selection-record/state opts)
+                (retain-selection! opts {:status :not-exercised :reason :meta-self-heal-route}
+                                   {:status :not-exercised :path :meta-self-heal
+                                    :reason (or (:reason result) :dedicated-meta-self-heal)}))
+        completion (selection-record/complete! ref result)]
+    (if-let [e (:exception attempt)]
+      (throw e)
+      (assoc result :selection-record ref :selection-completion completion))))
 
 (defn resume-on-prod-cascade!
   "Resume the production cascade-execution boundary from a sealed checkpoint.

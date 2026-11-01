@@ -143,8 +143,9 @@
       {#'runtime/run-ordinary-opportunity-with-task!
        (fn [opts] (reset! received opts) {:ran true})}
       #(is (= {:ran true}
-              (#'runtime/run-ordinary-opportunity!
-               {:task {:id "M-caller"} :outer/state-path (.getPath state-file)}))))
+              (dissoc (#'runtime/run-ordinary-opportunity!
+                        {:task {:id "M-caller"} :outer/state-path (.getPath state-file)})
+                      :selection-record))))
     (is (= "sentinel\n" (slurp state-file)))
     (is (= {:id "M-caller"} (:task @received)))))
 

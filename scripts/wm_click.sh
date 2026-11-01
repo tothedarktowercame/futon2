@@ -690,6 +690,15 @@ PY
 # a click binding can establish the same pair while the run record is still
 # unavailable. Never run the requirements checker for a mismatched pair.
 run_record="$F2/data/wm-runs/tick-run-record-$RUNID.edn"
+# An outer refusal has an immutable selection decision but no inner tick.
+# The ownership check below verifies the click and run ids; the exporter reads
+# this record rather than treating a refused selection as missing.
+if [ ! -f "$run_record" ]; then
+  selection_records=("$F2"/data/wm-runs/selection-record-????-??-??-"$clickid".edn)
+  if [ "${#selection_records[@]}" -eq 1 ] && [ -f "${selection_records[0]}" ]; then
+    run_record="${selection_records[0]}"
+  fi
+fi
 binding_id=$(printf '%s' "$clickid" | sed 's/[^A-Za-z0-9._-]/_/g')
 binding_file="$F3C/data/wm-click-run-bindings/click-run-binding-$binding_id.edn"
 # On the dedicated-meta-self-heal route our click never writes a run under

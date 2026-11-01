@@ -97,6 +97,8 @@ class ClickServer:
         record_click = "foreign-click" if self.mode == "mismatch" else CLICK
         record_run = "foreign-run" if self.mode == "mismatch" else self.run_id
         record = self.f2 / "data/wm-runs" / f"tick-run-record-{self.run_id}.edn"
+        if self.mode == "selection-only":
+            record = self.f2 / "data/wm-runs" / f"selection-record-{self.run_id[:10]}-{CLICK}.edn"
         record.parent.mkdir(parents=True, exist_ok=True)
         record.write_text(f'{{:run/id "{record_run}" :click/id "{record_click}"}}\n')
         safe = CLICK.replace("/", "_")
@@ -175,6 +177,14 @@ os.execv({sys.executable!r}, [{sys.executable!r}] + sys.argv[1:])
         self.assertIn("click ownership confirmed by run-record", result.stdout)
         self.assertNotIn("no click-id returned; not accepted", result.stdout)
         self.assertEqual(["alert"], events)
+
+    def test_refused_selection_record_reaches_alert_without_tick(self):
+        result, events = self.run_case("selection-only")
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("click ownership confirmed by run-record", result.stdout)
+        self.assertEqual(["alert"], events)
+        # The alert is a port stub here; wm_run_alert_test independently pins
+        # selection-only evaluation, typed work not-run, and exit 1.
 
     def test_partial_answer_past_limit_recovers_owned_click(self):
         result, events = self.run_case("partial")
