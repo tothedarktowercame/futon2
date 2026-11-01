@@ -434,6 +434,20 @@
       {"policy" (policy-identity policy-key)
        "digest" (action-identity/digest [progress emission])})))
 
+(defn- candidates-with-g-identities
+  "Policy identities (the hash of the policy key, as everywhere else) of the
+  candidates carrying a numeric G, joined through `:q4 :policies`.  nil when any
+  candidate cannot be joined, so Q3's carrier reads not-recomputable rather than
+  comparing two id spaces."
+  [certificate]
+  (let [candidates (:candidates certificate)
+        key-of (into {} (map (juxt :policy-id :policy-key)) (get-in certificate [:q4 :policies]))
+        id-of #(get-in % [:id :id])]
+    (when (and (vector? candidates) (seq key-of)
+               (every? (comp key-of id-of) candidates))
+      (set (for [c candidates :when (numeric-g? c)]
+             (policy-identity (key-of (id-of c))))))))
+
 (defn g-carriers
   "`policyG` and `policyPrediction` from the candidates, each joined to its policy
   key through `:q4 :policies`.  One candidate that cannot be joined or read makes
@@ -563,6 +577,7 @@
         constructor-pool (when construction
                            (set (mapcat #(get % "pool") construction)))
         constructed-policies (seq (mapcat #(get % "policies") construction))
+        with-g-identities (candidates-with-g-identities cert)
         scoring-entries (when (map? scoring) (vec (sort-by key scoring)))
         scored-bindings
         (when scoring-entries
@@ -667,13 +682,21 @@
                                        :else (nr "constructed candidate ids absent"))
                "comparedPolicies" (if policy-ids (sorted-ids policy-ids)
                                       (nr "selection posterior absent"))
-               "cascadesWithoutG" (if (and cascade-ids (some? with-g))
-                                      (sorted-ids
-                                       (set/difference
-                                        cascade-ids
-                                        (set (for [c candidates :when (numeric-g? c)]
-                                               (action-identity/digest (:id c))))))
-                                      (nr "constructed cascades or per-candidate numeric G absent"))
+               ;; Same id space as constructedCascades: a non-empty set must name
+               ;; ids that appear there.  The digest-of-:id path stays only for
+               ;; records with no census.
+               "cascadesWithoutG" (cond
+                                    (and constructed-policies with-g-identities)
+                                    (vec (sort (set/difference (set constructed-policies)
+                                                               with-g-identities)))
+                                    (and (nil? constructed-policies) cascade-ids (some? with-g))
+                                    (sorted-ids
+                                     (set/difference
+                                      cascade-ids
+                                      (set (for [c candidates :when (numeric-g? c)]
+                                             (action-identity/digest (:id c))))))
+                                    :else
+                                    (nr "constructed cascades or per-candidate numeric G absent"))
                "policyPreferences" (nr "no per-policy G normalization declaration on this route")
                "horizonLength" (or horizon (nr "common declared per-policy observation model unavailable"))
                "preferenceSteps" (if (some? pref-steps) (vec (sort pref-steps))

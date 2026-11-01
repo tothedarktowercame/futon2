@@ -530,3 +530,12 @@
                       {:candidates (repeat 100 {:status :absent})
                        :scoring {0 {:diagnostic {:kind :typed-refusal}}}}}}]
     (is (empty? (facts/absence-paths r)))))
+
+(deftest cascades-without-g-share-the-constructed-id-space
+  (let [no-g (live-certificate #(assoc-in % [:candidates 1 :g] nil))
+        exported (:facts (facts/facts-for-record no-g "r" snap))
+        without (exported "cascadesWithoutG")]
+    (is (= 1 (count without)))
+    (is (contains? (set (exported "constructedCascades")) (first without))
+        "a cascade named as lacking G is one of the constructed cascades, by the same id")
+    (is (= [] (live-facts "cascadesWithoutG")))))
