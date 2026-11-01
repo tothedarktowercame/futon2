@@ -1,6 +1,6 @@
 # E-kimi-task-200 — prove lemma apm_m01J04_rellich_translate_smooth_aux_classical in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T14:37:49Z to kimi-1 as invoke-1793543869239-9374-0777d2bf
+**Requisition:** completed — 2026-11-01T15:38:25Z, job invoke-1793543869239-9374-0777d2bf, state failed
 
 Clocked in by claude-14 for kimi-1 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
