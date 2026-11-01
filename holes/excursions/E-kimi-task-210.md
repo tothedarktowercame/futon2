@@ -1,6 +1,6 @@
 # E-kimi-task-210 — statement repair a02J07 in apm-lean: piecewise smooth paths
 
-**Requisition:** in-progress — dispatched 2026-11-01T21:07:34Z to kimi-2 as invoke-1793567254147-9711-58801d8f
+**Requisition:** completed — 2026-11-01T21:43:34Z, job invoke-1793567254147-9711-58801d8f, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
