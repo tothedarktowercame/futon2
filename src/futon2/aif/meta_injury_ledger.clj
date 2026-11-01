@@ -784,6 +784,18 @@
                                 [injury-id entry]))))
                     (into {}))}))
 
+(defn medic-current-occurrence
+  "The latest medic occurrence of INJURY-ID as `medic-state` reads it:
+  `:entry-id` (the latest ordinal as a string), `:predecessor-entry-id` (the
+  previous same-injury transition's ordinal, nil for an opening), and the
+  cause pin inherited from the opening (`:cause-record-id` / `:cause-pin`).
+  This is the `current` that `medic/process` binds a correction against; a
+  caller building a medic payload reads these from here, not off the raw
+  latest entry (a `:reopened` entry carries no cause pin and has a
+  predecessor).  L5-25b, Lean `DarkTower.WarMachine.OutOfBandReopened`."
+  [ledger injury-id]
+  (medic/latest-for (:history (:state (medic-state ledger))) injury-id))
+
 (defn effective-active-injuries
   "Authority-checked active projection. A medic correction masks only the
   exact latest [injury-id ordinal] occurrence it names. Raw history is kept."

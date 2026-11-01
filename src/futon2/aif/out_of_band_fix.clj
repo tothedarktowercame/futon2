@@ -84,21 +84,40 @@
 (def checked-medic-verifier
   "futon2.aif.out-of-band-fix/checked-medic-authority")
 
+(def eligible-states
+  "Active states whose occurrence presents retained out-of-band evidence: an
+  injury awaiting a fresh attempt.  A live attempt (:claimed, :authored,
+  :reviewed, :enacted) is not interrupted.  L5-25b (click wm-click-21ae0429:
+  injury d984347f sat :reopened after its failed attempt and the artifact was
+  never read).  Lean: DarkTower.WarMachine.OutOfBandReopened consultsOutOfBand."
+  #{:open :reopened})
+
+(defn eligible? [entry] (contains? eligible-states (:state entry)))
+
+(defn cause-record-pin
+  "The cause pin of a medic occurrence (`ledger/medic-current-occurrence`)."
+  [current]
+  {:path (:cause-record-id current) :sha256 (:cause-pin current)})
+
 (defn checked-medic-operation
   "Translate a checked out-of-band receipt into the existing genuine-repair
-  medic payload. The correction excludes the exact open occurrence; it does
-  not manufacture claim, author, review, or enact transitions."
-  [ledger open-entry artifact-pin receipt-pin receipt]
+  medic payload. The correction excludes the exact current occurrence; it
+  does not manufacture claim, author, review, or enact transitions.  CURRENT
+  is the medic occurrence (`ledger/medic-current-occurrence`): its entry id,
+  predecessor and cause are what `medic/local-binding?` compares, and a
+  reopened occurrence has a predecessor and inherits the opening's cause
+  (Lean OutOfBandReopened boundPayload / entry154_hardcoded_fails)."
+  [ledger current artifact-pin receipt-pin receipt]
   (let [candidate {:kind :genuine-repair
-                   :injury-id (:injury-id open-entry)
-                   :entry-id (str (:ordinal open-entry))
-                   :predecessor-entry-id nil
+                   :injury-id (:injury-id current)
+                   :entry-id (:entry-id current)
+                   :predecessor-entry-id (:predecessor-entry-id current)
                    :patch-id (:fixed-by receipt)
                    :reviewer "DarkTower.WarMachine.OutOfBandFix"
                    :evaluator checked-medic-verifier
                    :evidence-pin (:sha256 receipt-pin)
-                   :cause-record-id (get-in open-entry [:cause-record-pin :path])
-                   :cause-pin (get-in open-entry [:cause-record-pin :sha256])
+                   :cause-record-id (:cause-record-id current)
+                   :cause-pin (:cause-pin current)
                    :acceptance-contract (:sha256 artifact-pin)
                    :pre-replay-receipt (get-in receipt [:historical-pin :sha256])
                    :post-replay-receipt (get-in receipt [:current :run-pin :sha256])

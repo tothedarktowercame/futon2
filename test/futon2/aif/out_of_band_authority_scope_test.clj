@@ -52,10 +52,15 @@
         normal-calls (atom [])
         normal (retained-normal-authority history normal-calls)
         active (ledger/effective-active-injuries history normal)
+        ;; L5-25b: the payload binds the medic occurrence (entry id, predecessor,
+        ;; inherited cause), not the raw active entry; for this opening the two agree.
         open-entry (assoc (get-in active [:injuries injury-id]) :injury-id injury-id)
+        current (ledger/medic-current-occurrence history injury-id)
+        _ (is (= (str (:ordinal open-entry)) (:entry-id current)))
+        _ (is (nil? (:predecessor-entry-id current)))
         {:keys [operation attribution]}
         (out-of-band/checked-medic-operation
-         history open-entry (:artifact-pin receipt) receipt-pin receipt)
+         history current (:artifact-pin receipt) receipt-pin receipt)
         specific (out-of-band/checked-medic-authority operation receipt-pin receipt)
         scoped (out-of-band/scoped-medic-authority normal operation specific)
         before-entries (:entries history)
@@ -91,12 +96,10 @@
                              :injury-id "injury/different")
         wrong-pin (out-of-band/retain! (.getPath root) "receipts" wrong-receipt)
         normal (retained-normal-authority history (atom []))
-        open-entry (assoc (get-in (ledger/effective-active-injuries history normal)
-                                  [:injuries injury-id])
-                          :injury-id injury-id)
+        current (ledger/medic-current-occurrence history injury-id)
         {:keys [operation attribution]}
         (out-of-band/checked-medic-operation
-         history open-entry (:artifact-pin wrong-receipt) wrong-pin wrong-receipt)
+         history current (:artifact-pin wrong-receipt) wrong-pin wrong-receipt)
         specific (out-of-band/checked-medic-authority
                   operation wrong-pin wrong-receipt)
         scoped (out-of-band/scoped-medic-authority normal operation specific)

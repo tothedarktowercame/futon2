@@ -1866,8 +1866,13 @@
 
 (defn open-out-of-band-route!
   "Before diagnosis, certify and apply one retained direct fix to the selected
-  open occurrence through the existing append-only medic disposition. No
-  artifact means no decision; a presented artifact never falls through."
+  occurrence awaiting a fresh attempt (:open, or :reopened after a failed
+  one; `out-of-band/eligible?`) through the existing append-only medic
+  disposition. No artifact means no decision; a presented artifact never
+  falls through.  L5-25b: the occurrence's cause and predecessor are read
+  from the medic state (`ledger/medic-current-occurrence`), not off the raw
+  latest entry, which for a reopening carries neither.  Lean:
+  DarkTower.WarMachine.OutOfBandReopened."
   [opts {:keys [durable-ledger active-injuries injury-selection]}]
   (try
     (let [injury-id (or (:injury-id injury-selection)
@@ -1876,10 +1881,12 @@
                         (assoc :injury-id injury-id))
           root (or (:meta-acceptance-root opts) default-acceptance-root)
           repair-root (or (:meta-repair-store-root opts) finding-ticket/canonical-store)]
-      (when (and (= :loaded (:status durable-ledger)) (= :open (:state entry)))
+      (when (and (= :loaded (:status durable-ledger)) (out-of-band/eligible? entry))
         (when-let [{:keys [pin]} (out-of-band/artifact-for root injury-id)]
-          (let [subject {:injury-id injury-id
-                         :cause-record-pin (:cause-record-pin entry)
+          (let [current (ledger/medic-current-occurrence (:ledger durable-ledger) injury-id)
+                cause-pin (out-of-band/cause-record-pin current)
+                subject {:injury-id injury-id
+                         :cause-record-pin cause-pin
                          :target-repository (:target-repository opts)}
                 run-acceptance (:meta-acceptance-run-fn opts)
                 evidence (if (ifn? run-acceptance)
@@ -1893,7 +1900,7 @@
                :ordinary-selection-called? false}
               (let [{:keys [operation attribution]}
                     (out-of-band/checked-medic-operation
-                     (:ledger durable-ledger) entry pin receipt-pin evidence)
+                     (:ledger durable-ledger) current pin receipt-pin evidence)
                     authority (out-of-band/checked-medic-authority
                                operation receipt-pin evidence)
                     authority (out-of-band/scoped-medic-authority
@@ -1907,7 +1914,7 @@
                         (medic-ticket-closure/close-cause-ticket!
                          repair-root
                          {:injury-id injury-id
-                          :entry (merge (select-keys entry [:cause-record-pin])
+                          :entry (merge {:cause-record-pin cause-pin}
                                         (:entry written))
                           :fixed-by (:fixed-by evidence)
                           :receipt-pin receipt-pin

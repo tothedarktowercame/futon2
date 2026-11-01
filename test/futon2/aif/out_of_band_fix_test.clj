@@ -1,5 +1,6 @@
 (ns futon2.aif.out-of-band-fix-test
   (:require [clojure.test :refer [deftest is]]
+            [futon2.aif.medic-disposition :as medic]
             [futon2.aif.out-of-band-fix :as fix]
             [futon2.aif.meta-self-heal-production :as production]))
 
@@ -36,3 +37,45 @@
     (is (= refused (clojure.edn/read-string
                     (fix/read-pin (:out-of-band-receipt-pin result)))))
     (is (zero? @calls))))
+
+;; L5-25b (click wm-click-21ae0429): a :reopened injury presents its retained
+;; artifact too, and the medic payload binds the medic occurrence (entry id,
+;; predecessor, inherited cause), not the raw latest entry.  Lean:
+;; DarkTower.WarMachine.OutOfBandReopened.
+
+(deftest an-occurrence-awaiting-a-fresh-attempt-presents-the-artifact
+  (is (fix/eligible? {:state :open}))
+  (is (fix/eligible? {:state :reopened}))
+  (doseq [live [:claimed :authored :reviewed :enacted :discharged :abandoned]]
+    (is (not (fix/eligible? {:state live})) (str live " must not be interrupted or revived"))))
+
+(def entry-154
+  ;; injury d984347f as the medic state reads it after the failed attempt
+  {:injury-id "injury/d984347f3175b83feb1b65444431a05f6750a84a"
+   :entry-id "154" :predecessor-entry-id "153"
+   :cause-record-id "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-11-01-0e6ff636-1b8d-4fe0-9b65-cb8588223767.edn"
+   :cause-pin "43ce01bc2b120b464f94e716888e34b455360ef03df023a3579bedf492e6459a"
+   :active? true})
+
+(deftest the-medic-payload-binds-the-reopened-occurrence
+  (let [receipt {:status :checked :fixed-by "21c40aff1d8e25752663032b65d0fa8318f6db05"
+                 :base-sha (apply str (repeat 40 "b"))
+                 :historical-pin {:path (:cause-record-id entry-154) :sha256 (:cause-pin entry-154)}
+                 :current {:run-pin {:sha256 (apply str (repeat 64 "1"))}}
+                 :counterfactual {:run-pin {:sha256 (apply str (repeat 64 "2"))}}}
+        ledger {:ledger-pin {:path "meta-injury-ledger/ledger.edn" :sha256 (apply str (repeat 64 "3"))}}
+        artifact-pin {:path "a" :sha256 (apply str (repeat 64 "4"))}
+        receipt-pin {:path "r" :sha256 (apply str (repeat 64 "5"))}
+        {:keys [operation]} (fix/checked-medic-operation ledger entry-154 artifact-pin receipt-pin receipt)
+        candidate (get-in operation [:request :candidate])]
+    (is (= "154" (:entry-id candidate)))
+    (is (= "153" (:predecessor-entry-id candidate)))
+    (is (= (:cause-record-id entry-154) (:cause-record-id candidate)))
+    (is (= (:cause-pin entry-154) (:cause-pin candidate)))
+    (is (medic/payload-valid? candidate))
+    (is (:qualified? (medic/qualify (constantly true) entry-154 candidate candidate)))
+    ;; the deployed builder's shape: nil predecessor on a reopened occurrence
+    (is (= {:qualified? false :reason :binding-mismatch}
+           (medic/qualify (constantly true) entry-154
+                          (assoc candidate :predecessor-entry-id nil)
+                          (assoc candidate :predecessor-entry-id nil))))))
