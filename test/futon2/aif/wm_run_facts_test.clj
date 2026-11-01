@@ -553,6 +553,16 @@
 
 (def selection-live (selection-of live-record))
 
+(def live-execution-id
+  "ea1-6c24e2ab05edb2e75c0bbb01000beebce6a5486e90b91622d9528cb14759164d--attempt-002")
+(def live-phase-log "test/fixtures/wm-run-facts/ac5bc477-phases.edn.log")
+
+(defn- temp-phase-log [events]
+  (let [file (java.io.File/createTempFile "wm-phases" ".edn.log")]
+    (.deleteOnExit file)
+    (spit file (str (str/join "\n" (map pr-str events)) "\n"))
+    (.getPath file)))
+
 (defn- with-selection [& kvs]
   (reduce (fn [r [path value]] (assoc-in r (into [:outer/selection] path) value))
           live-record (partition 2 kvs)))
@@ -679,8 +689,48 @@
                         "previousChoice" "L4b row 13"
                         "currentInputDigest" "L4b row 13"
                         "gTerms" "L4b row 9"
-                        "interpretationOrder" "no interpretation step"}]
+                        ;; L5-4h review: no --phase-log means the canonical log; the
+                        ;; absence reason names that path whatever is missing in it
+                        "interpretationOrder" "wm-full-loop-phases.edn.log"}]
     (is (str/includes? (reason (selection-live field)) text))))
+
+(deftest live-11-01-phase-log-puts-selection-before-interpretation
+  (let [record (assoc live-record :runner-execution/identity
+                      {:kind :runner-execution :id live-execution-id})
+        projected (facts/selection-facts-for-record
+                   record "ac5bc477-carriers.edn" snap
+                   {:makeup-path makeup-path :phase-log-path live-phase-log})]
+    (is (= "selectionBeforeInterpretation"
+           (get-in projected [:facts "interpretationOrder"])))
+    (is (= live-phase-log (get-in projected [:sources "interpretationOrder"])))))
+
+(deftest authoring-before-selection-projects-the-lean-counter-constructor
+  (let [identity {:kind :runner-execution :id "planted-execution"}
+        path (temp-phase-log
+              [{:phase :occurrence-square-authoring :transition :start
+                :execution-identity identity}
+               {:phase :selection :transition :end :execution-identity identity}])]
+    (is (= "interpretationBeforeSelection"
+           (facts/selection-interpretation-order
+            {:runner-execution/identity identity} path)))))
+
+(deftest missing-phase-log-is-typed-absent-and-names-the-carrier
+  (clojure.test/testing "a log that does not exist at the given path is a typed absence naming that path"
+    (let [projected (facts/selection-facts-for-record
+                     live-record "ac5bc477-carriers.edn" snap
+                     {:makeup-path makeup-path :phase-log-path "/nonexistent/claude2/phases.edn.log"})]
+      (is (= "selection interpretation order needs retained phase log at /nonexistent/claude2/phases.edn.log"
+             (reason (get-in projected [:facts "interpretationOrder"]))))
+      (is (= "/nonexistent/claude2/phases.edn.log"
+             (get-in projected [:sources "interpretationOrder"])))))
+  (clojure.test/testing "an explicitly nil path (a caller refusing to supply one) is the older absence"
+    (let [projected (facts/selection-facts-for-record
+                     live-record "ac5bc477-carriers.edn" snap
+                     {:makeup-path makeup-path :phase-log-path nil})]
+      (is (= "selection interpretation order needs :phase-log path"
+             (reason (get-in projected [:facts "interpretationOrder"]))))
+      (is (= ":phase-log path absent"
+             (get-in projected [:sources "interpretationOrder"]))))))
 
 (deftest a-record-with-no-section-has-no-selection-carriers
   (let [bare (selection-of (dissoc live-record :outer/selection))]
@@ -779,3 +829,13 @@
     (clojure.test/testing "the history is exported for every record (L5-2L-2 deps)"
       (is (contains? exported "refusalHistory"))
       (is (contains? live "refusalHistory")))))
+
+(deftest selection-q5-reads-the-canonical-phase-log-by-default
+  (clojure.test/testing "the alert passes no --phase-log; the projector reads the runtime's canonical log (L5-4h review)"
+    (let [exported (facts/selection-facts-for-record live-record "r" snap {:kind "selection"})
+          order (get-in exported [:facts "interpretationOrder"])
+          source (get-in exported [:sources "interpretationOrder"])]
+      (is (not= ":phase-log path absent" source))
+      (is (= "data/wm-full-loop-phases.edn.log" source))
+      (is (or (string? order) (contains? order "not-recomputable"))
+          "a string constructor when the log holds this run, else a typed absence naming the log"))))
