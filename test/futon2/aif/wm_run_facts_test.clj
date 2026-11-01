@@ -872,4 +872,5 @@
   (clojure.test/testing "L5-2L-3: an old record has no count; it must not read as 0"
     (let [exported (:facts (facts/facts-for-record live-record "r" snap))]
       (is (contains? exported "refusalHistoryUnsealed"))
+      (is (contains? (get exported "refusalHistorySealedBeforeR18") "not-recomputable"))
       (is (contains? (get exported "refusalHistoryUnsealed") "not-recomputable")))))
