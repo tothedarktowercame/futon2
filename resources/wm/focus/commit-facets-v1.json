@@ -4438,13 +4438,13 @@
     "source-pins": [
       {
         "path": "/home/joe/code/futon6/data/mission-structure-embed/mission-embed.json",
-        "sha256": "57ab4aa46319eed4f29a5b0d9f84c86e14f0d30c8ddca906ef45ca0d9ac100fb",
-        "mtime": "2026-06-25T08:35:46.045454+00:00"
+        "sha256": "726242d968a3454997d277e04e9ba51b7c778ce6ec7d209020d8f6c67237e60b",
+        "mtime": "2026-11-01T22:08:58.979216915+00:00"
       },
       {
         "path": "/home/joe/code/futon6/data/mission-structure-embed/structure-embeddings.npy",
-        "sha256": "0c2d76be8ed53d4bdc2c52e3cd551baf43d7a31f62d510d0791633ad4ac3abe4",
-        "mtime": "2026-06-25T08:35:46.044454+00:00"
+        "sha256": "fc49309e122753cf71d94e251cca9b42c60390c5472b5b0c85cad655e91b45a4",
+        "mtime": "2026-11-01T22:08:16.642073188+00:00"
       },
       {
         "path": "/home/joe/code/futon6/data/mission-carpet-pos-embed.json",

@@ -102,7 +102,7 @@
    repair obligation inherits the repaired target's class; ticket Parent and the
    finding's historical target are fallbacks only after that obligation is no
    longer open. The order must never depend on directory or map iteration."
-  [:direct-corpus :open-repair-obligation :ticket-parent :finding-target
+  [:direct-corpus :repaired-target :ticket-parent :finding-target
    :stated-relation :giraffe-graph :embedding-neighbour])
 
 ;; CTauClassPreference.lean:124-138.  This is the sole relation-to-scorer
@@ -145,16 +145,16 @@
     (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest md)))))
 
 (defn- default-mission-text
-  "The mission or excursion file for TARGET under CODE-ROOT's primary futon
-  checkouts (<repo>/holes/{M,E}-*.md or <repo>/holes/missions/M-*.md), as {:path :text
-  :sha256}, or nil."
+  "The task file for TARGET under CODE-ROOT's primary futon checkouts, as
+  {:path :text :sha256}, or nil.  Directory precedence is explicit and shared
+  by missions, excursions, and tickets."
   [code-root target]
   (some (fn [repo]
           (some (fn [sub]
                   (let [f (io/file repo sub (str target ".md"))]
                     (when (.isFile f)
                       {:path (.getCanonicalPath f) :text (slurp f) :sha256 (sha256-file f)})))
-                ["holes/missions" "holes"]))
+                ["holes/missions" "holes/excursions" "holes/tickets" "holes"]))
         (sort-by #(.getName ^java.io.File %)
                  (filter #(and (.isDirectory ^java.io.File %)
                                (re-matches #"futon\d+[a-z]?" (.getName ^java.io.File %)))
@@ -243,10 +243,16 @@
                             {:path (:path p) :pinned (:sha256 p) :now now}))]
         (if (seq mismatch)
           {:absent :embedding-pin-mismatch :mismatch mismatch}
-          (let [stems (:stems (json/parse-string (slurp (:path jp)) true))
+          (let [payload (json/parse-string (slurp (:path jp)) true)
+                ;; New artifacts name every row by its full task ID.  The
+                ;; stems fallback reads the original mission-only authority.
+                targets (or (:targets payload) (:stems payload))
                 {:keys [rows]} (read-npy-f8 (:path np))
-                idx (into {} (map-indexed (fn [i s] [s i]) stems))
+                full-ids? (contains? payload :targets)
+                anchor-targets (set (or (:anchor_targets payload) targets))
+                idx (into {} (map-indexed (fn [i s] [s i]) targets))
                 stem (fn [t] (if (and (string? t)
+                                      (not full-ids?)
                                       (or (str/starts-with? t "M-")
                                           (str/starts-with? t "E-")))
                                (subs t 2)
@@ -256,7 +262,9 @@
               {:absent :embedding-node-not-retained}
               (let [cands (->> rowed
                                (keep (fn [[t _]] (when-let [i (idx (stem t))]
-                                                   (when (not= t target) [t (cosine (rows me) (rows i))]))))
+                                                   (when (and (not= t target)
+                                                              (anchor-targets (stem t)))
+                                                     [t (cosine (rows me) (rows i))]))))
                                (sort-by (comp - second)) vec)
                     [[nt nc] runner] cands
                     floor-present? (contains? inputs :embedding-floor)
@@ -444,11 +452,12 @@
              (classify-target inputs discovery as-of repaired-target
                               (update ctx ::repair-targets (fnil conj #{}) target))))
          repaired-class (:class repaired-classification)
-         repair-source {:kind :open-repair-obligation
+         repair-source {:kind :repaired-target
                         :repair-id (:repair/id finding-record)
                         :machine-repo (:machine-repo finding-record)
                         :repaired-target repaired-target
-                        :repaired-target-class repaired-class}
+                        :repaired-target-class repaired-class
+                        :then (:derived-via repaired-classification)}
          repair-relation (when (contains? #{:focus :associated :useful-elsewhere}
                                            repaired-class)
                            {:target target
@@ -457,9 +466,11 @@
                                         :useful-elsewhere "useful-elsewhere")
                             :facet (get-in repaired-classification [:relation :facet])
                             :source repair-source})
+         ;; One typed refusal covers both a target with no relation and a
+         ;; finding that retained no target identity.  The repaired target and
+         ;; its nested receipt remain in the evidence fields below.
          repair-unknown-reason (when active-repair?
-                                 (or (:reason repaired-classification)
-                                     :repaired-target-unknown))
+                                 :repaired-target-unrelatable)
          parent-source (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
                          (or (when ticket-dir
                              (when-let [p (ticket-parent (io/file ticket-dir (str target ".md")))]

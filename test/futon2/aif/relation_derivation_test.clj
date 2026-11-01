@@ -11,6 +11,7 @@
   refused :class-unknown-no-scalar-g on this target, flight-e70b4baf)."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.focus-receipt :as fr]
             [futon2.aif.load-identity :as identity]))
@@ -54,6 +55,15 @@
 
 (defn- row-of [& rows]
   (let [m (into {} (map (juxt :target identity) rows))] #(get m %)))
+
+(defn- repair-findings-dir [target]
+  (let [dir (doto (io/file (System/getProperty "java.io.tmpdir")
+                           (str "relation-repair-" (System/nanoTime))) .mkdirs)
+        id "repair-occ-fixture"]
+    (spit (io/file dir (str id ".edn"))
+          (pr-str {:repair/status :open :repair/id id :machine-repo "/fixture/repo"
+                   :target target}))
+    [(.getPath dir) (str "T-" id)]))
 
 (deftest a-hand-row-wins-over-a-stated-path
   (let [ins (update inputs :relations conj {:target "M-hand" :relation "focus" :facet "WM"
@@ -161,10 +171,18 @@
     (is (= :stated-relation (get-in c [:derived-via :kind])))
     (is (= "E-fixture" (get-in c [:derived-via :path 0 :from])))))
 
-(deftest live-excursion-without-a-row-path-or-embedding-stays-typed-unknown
+(deftest default-lookup-reads-an-excursion-relations-section
+  (let [lookup (var-get (ns-resolve 'futon2.aif.focus-receipt 'default-mission-text))
+        source (lookup "/home/joe/code" "E-unsolicited-pouch-turns")
+        edges (fr/stated-relations (:text source))]
+    (is (.contains ^String (:path source) "/holes/excursions/"))
+    (is (pos? (count edges)))
+    (is (every? #(str/starts-with? (:to %) "M-") edges))))
+
+(deftest retained-excursion-reaches-the-pinned-embedding
   (let [c (classify inputs "E-efe-education" (fr/relation-context "/home/joe/code"))]
-    (is (= :unknown (:class c)))
-    (is (= :embedding-node-not-retained (get-in c [:relation :reason])))))
+    (is (contains? #{:associated :unknown} (:class c)))
+    (is (not= :embedding-node-not-retained (get-in c [:relation :reason])))))
 
 (deftest live-ticket-inherits-its-parents-derived-chain
   (let [target "T-repair-occ-9b6c9871d59bde364a23f9c346ddc708e2f68f4a026d9afe0aac6c9d538f087d"
@@ -181,6 +199,27 @@
     (is (= :ticket-parent (get-in at-zero [:derived-via :kind])))
     (is (= :embedding-neighbour (get-in at-zero [:derived-via :then :kind])))
     (is (= 0.0 (get-in at-zero [:derived-via :then :floor])))))
+
+(deftest repair-ticket-resolves-a-completed-target-outside-the-admitted-field
+  (let [repaired "M-completed-fixture"
+        retained (update inputs :relations conj
+                         {:target repaired :relation "associated" :facet "WM"
+                          :effective-from "2026-09-20T00:00:00Z"
+                          :source {:status :complete :repo "fixture"}})
+        [findings target] (repair-findings-dir repaired)
+        c (classify retained target {:findings-dir findings})]
+    ;; The completed target is retained in the relation population but is not
+    ;; in an admitted field; the repair receipt still inherits its relation.
+    (is (= :associated (:class c)))
+    (is (= :repaired-target (get-in c [:derived-via :kind])))
+    (is (= repaired (get-in c [:derived-via :repaired-target])))))
+
+(deftest repair-ticket-with-an-unrelatable-target-refuses-by-name
+  (let [[findings target] (repair-findings-dir "M-no-such-retained-target")
+        c (classify inputs target {:findings-dir findings})]
+    (is (= :unknown (:class c)))
+    (is (= :repaired-target-unrelatable (get-in c [:relation :reason])))
+    (is (= :repaired-target (get-in c [:derived-via :kind])))))
 
 (deftest live-november-picks-obey-the-declared-floor
   (let [ctx (fr/relation-context "/home/joe/code")
@@ -219,12 +258,12 @@
                     receipts))]
     (is (= 626 (count receipts)))
     (is (= 72 (get table ["E-" :associated :giraffe-graph])))
-    ;; At embedding floor 0.2 (Joe, 2026-11-01): 44 tickets and 212 tasks overall
-    ;; carry a relation; at 0.0 these read 49 and 251.
+    ;; At embedding floor 0.2 (Joe, 2026-11-01), complete retained-node
+    ;; coverage adds 25 known task relations without changing the floor.
     (is (= 44 (reduce + (for [[[prefix class _] n] table
                               :when (and (= "T-" prefix) (not= :unknown class))]
                           n))))
-    (is (= 212 (count (remove #(= :unknown (:class %)) receipts))))))
+    (is (= 237 (count (remove #(= :unknown (:class %)) receipts))))))
 
 (deftest m-autoclock-in-live
   (let [c (classify inputs "M-autoclock-in" {:code-root "/home/joe/code"})
@@ -237,8 +276,8 @@
            (select-keys d [:kind :neighbour :cosine :runner-up])))
     (is (= {:absent :no-stated-path-to-a-classified-target} (:stated-relation d))
         "its Relations reach M-operational-vocabulary, which has no row and no Relations section")
-    (is (= #{"57ab4aa46319eed4f29a5b0d9f84c86e14f0d30c8ddca906ef45ca0d9ac100fb"
-             "0c2d76be8ed53d4bdc2c52e3cd551baf43d7a31f62d510d0791633ad4ac3abe4"}
+    (is (= #{"726242d968a3454997d277e04e9ba51b7c778ce6ec7d209020d8f6c67237e60b"
+             "fc49309e122753cf71d94e251cca9b42c60390c5472b5b0c85cad655e91b45a4"}
            (set (map :sha256 (:pins d)))))))
 
 (deftest a-stated-path-is-followed-two-hops-and-no-further
