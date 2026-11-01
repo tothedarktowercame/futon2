@@ -968,6 +968,8 @@
                    (if (:pick p) {"abstain-on-task" (:pick p)} "abstain-empty-field")
                    (and present (:chosen-class p) (:pick p))
                    {"target" (:pick p) "cascade" (:chosen-class p)}
+                   (and present (= :refused (:outcome p)))
+                   {"refused" true}
                    :else (nr :choice-unretained))]
     {"previousChoice" decision
      "previousOutcome" (if (and present (#{:changed :refused :abstained} (:outcome p)))
