@@ -28,9 +28,11 @@ Giraffe run `20261101T195517.913Z-c38bc009`, pass dir `~/code/storage/giraffe/<r
 3. Source facts a reader needs beside the pick: the mission header says `Date 2026-05-14`,
    `Status OPEN`, `Timebox 2 weeks`; the scaffold doc says the parent was `READY-TO-CLOSE`
    2026-05-19; §9 (2026-06-03) says close is Joe's call. None of this is on the record.
-4. G: proxy-metric class 3.3896 = risk 3.0854 + ambiguity 0.4218 − novelty 0.1175; the
-   interim-director class 3.2782 (predicts exactly what stopping predicts, so it carries the
-   altitude after L5-16); abstention 3.2782 + altitude 10.
+4. G on the pinned click-12 record (no altitude: it predates L5-16): proxy-metric class 3.3896 =
+   risk 3.0854 + ambiguity 0.4218 − novelty 0.1175; interim-director class 3.2782 = abstention 3.2782,
+   outcome refused/pick-not-below-abstention. The altitude first appears on the relaunch's click 1
+   record (`wm-click-0068e006`): abstention 13.2782 = 3.2782 + 10, sha `b1e35235…`. Pins for the
+   altitude line come from that record, not from click 12.
 
 Every one of these facts is on the record or in the pinned pass. None is in words, and they are
 in four places. The machine never says "I picked X because it is the ready task with the largest
