@@ -364,6 +364,50 @@ class ContinuousModeTest(unittest.TestCase):
             loop.reload_changed(123)
             self.assertEqual([], evals, "nothing reloaded, nothing reset")
 
+    def test_nothing_beats_stopping_waits_once_then_pauses_on_an_unchanged_field(self):
+        """clicks 12-14 of 2026-11-01: :pick-not-below-abstention three times on one
+        input digest; the loop re-fired because the projector's signatures differed."""
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            rec = Path(td) / "selection-record-2026-11-01-wm-click-x.edn"
+            rec.write_text('{:selection-outcome {:status :refused, :kind :pick-not-below-abstention, :detail {}} '
+                           ':outer/selection {:choice-input-digest {:sha256 "' + "b" * 64 + '"}}}')
+            self.assertEqual("b" * 64, loop.nothing_beats_stopping(str(rec)))
+            chosen = Path(td) / "selection-record-2026-11-01-wm-click-y.edn"
+            chosen.write_text('{:selection-outcome {:status :chosen, :pick "M-x"}}')
+            self.assertIsNone(loop.nothing_beats_stopping(str(chosen)))
+            self.assertIsNone(loop.nothing_beats_stopping(None))
+            args = loop.parse_args([
+                "run", "--clicks", "3", "--continuous", "--owner", "claude-2",
+                "--issuing-caller", "claude-2", "--author", "wm-author",
+                "--reviewer", "wm-reviewer", "--repair-reviewer", "wm-repair-reviewer"])
+            def fire(n, a, since):
+                return {"n": n, "rc": 1, "click-id": f"click-{n}", "spent": True, "outcome": "unknown",
+                        "run-id": None, "carried": False, "last-result": {}, "log": None,
+                        "run-record": str(rec), "verdict": {"file": "V"},
+                        "alert": [f"selection Q11 {'violated' if n == 1 else 'unverifiable'}"],
+                        "since-epoch": since, "in-flight-repairs": []}
+            with mock.patch.object(loop, "STATE", Path(td)), \
+                 mock.patch.object(loop, "LEDGER", Path(td) / "ledger.jsonl"), \
+                 mock.patch.object(loop, "LOGFILE", Path(td) / "loop.log"), \
+                 mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
+                 mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
+                 mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
+                 mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
+                 mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
+                 mock.patch.object(loop, "fire", side_effect=fire), \
+                 mock.patch.object(loop.time, "sleep") as sleep, \
+                 mock.patch.object(loop, "notify") as notify, \
+                 mock.patch.object(loop, "notify_alert"), \
+                 mock.patch.object(loop, "repair") as repair, \
+                 mock.patch.object(loop, "log"):
+                code = loop.run(args)
+            self.assertEqual(1, code)
+            self.assertIn("no compared policy's G is below the abstention's, twice", notify.call_args[0][1])
+            self.assertEqual(1, sum(1 for c in sleep.call_args_list if c.args == (loop.WAIT_SECONDS,)),
+                             "one wait for the field to change, then the pause")
+            self.assertEqual(0, repair.call_count)
+
     def test_absent_verdict_is_an_alert_not_conformance(self):
         loop = load_loop()
         self.assertIsNone(loop.read_verdict(None))

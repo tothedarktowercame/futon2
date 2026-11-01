@@ -448,6 +448,21 @@ def click_record(lr: dict, click_id: str | None) -> str | None:
     return rr
 
 
+def nothing_beats_stopping(record_path: str | None) -> str | None:
+    """The outer selection refused because no compared policy's G is below the
+    abstention's (:pick-not-below-abstention). Returns the selection's input
+    digest, so an unchanged field can be recognised: re-firing on the same
+    input is the repeated identical-input refusal Q6 forbids (clicks 12-14 of
+    2026-11-01). None for any other record."""
+    if not record_path or not Path(record_path).is_file():
+        return None
+    text = Path(record_path).read_text(errors="replace")
+    if ":selection-outcome {:status :refused, :kind :pick-not-below-abstention" not in text:
+        return None
+    m = re.search(r':choice-input-digest \{:sha256 "([0-9a-f]{64})"', text)
+    return m.group(1) if m else "digest-unretained"
+
+
 def click_alert(verdict: dict | None) -> list[str] | None:
     """None when the click conforms; otherwise its alert signature."""
     return None if verdict and verdict["conforms"] else alert_signature(verdict)
@@ -1005,6 +1020,7 @@ def run(args) -> int:
     spent = ticks = quiet = 0
     last_abstention: dict | None = None
     previous_alert: list[str] | None = None
+    stopping_digest: str | None = None  # the field on which nothing beat stopping
     while spent < args.clicks and ticks < args.ticks:
         if STOP_FILE.exists():
             return stop(args, f"stop file present after {spent} clicks, {ticks} carrying")
@@ -1047,7 +1063,23 @@ def run(args) -> int:
             previous_alert = open_rows
         if c["carried"]:
             quiet, fault_repairs = 0, []
+            stopping_digest = None
             continue
+        if args.continuous:
+            digest = nothing_beats_stopping(c.get("run-record"))
+            if digest:
+                record({"event": "nothing-beats-stopping", "click-id": c["click-id"], "input-digest": digest,
+                        "repeated": digest == stopping_digest})
+                if digest == stopping_digest:
+                    return stop(args, "paused: on an unchanged field no compared policy's G is below the "
+                                      f"abstention's, twice (input digest {digest[:12]}); the field must change "
+                                      "or the model must; re-firing would be the repeated identical-input "
+                                      "refusal Q6 forbids", 1)
+                stopping_digest = digest
+                log(f"click {c['n']}: nothing beats stopping on input {digest[:12]}; waiting {WAIT_SECONDS}s "
+                    "for the field to change before the next click")
+                time.sleep(WAIT_SECONDS)
+                continue
         lawful_stop = args.continuous and open_rows is None and c["outcome"] in DEBUG
         if c["outcome"] in DECIDED or c["outcome"] in WAIT or lawful_stop:
             quiet += 1
