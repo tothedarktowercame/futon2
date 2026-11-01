@@ -1252,47 +1252,18 @@
   (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
 
 (defn reading-reselection-port
-  "One click-local removal and fresh outer certificate, retaining the first
-  choice and refusal. The pending learning carrier follows the replacement."
-  [makeup state observation initial-selection selection-state persist-pending!]
+  "Retain the reading refusal without deleting an open task from the field.
+  A forbidden-target minimum is not implemented here; L5-4c must supply that
+  continuation. This port honestly refuses reselection and preserves the
+  original scored field and pending carrier."
+  [_makeup _state _observation _initial-selection selection-state _persist-pending!]
   (let [used? (atom false)]
     (fn [refusal]
       (when (compare-and-set! used? false true)
-        (let [target (:target refusal)
-              exclusion (merge {:target target :reason (:kind refusal)
-                                :scope :this-click :reader-refusal refusal}
-                               (select-keys refusal [:predecessor-run-id :digest]))
-              ranked (disj (set (:outer-score/admitted initial-selection)) target)
-              reduced (update observation :field
-                              #(vec (filter (fn [c] (contains? ranked (:target c))) %)))
-              result (when (seq (:field reduced)) (outer-select/select makeup state reduced))
-              next-target (get-in result [:selection :selected :target])
-              retained (-> (or result {})
-                           (update :selection #(some-> % (dissoc :candidates)))
-                           (assoc :outer-field/admitted (:outer-score/admitted result)
-                                  :giraffe/run-id (:giraffe/run-id observation)
-                                  :giraffe/manifest-sha256 (:giraffe/manifest-sha256 observation)
-                                  :makeup/sha256 (:makeup/sha256 makeup)
-                                  :focus (:focus observation)
-                                  :selected-relation (when next-target
-                                                      ((:relation observation)
-                                                       (:focus observation) next-target))
-                                  :outer-field/excluded
-                                  (conj (vec (or (:outer-field/excluded initial-selection)
-                                                 (into (vec (:outer-field/excluded observation))
-                                                       (:outer-score/excluded initial-selection))))
-                                        exclusion)
-                                  :knowledge-producer-requests
-                                  (:knowledge-producer-requests initial-selection)
-                                  :outer/learning (:outer/learning initial-selection)
-                                  :reading-reselection {:limit 1 :used 1
-                                                        :previous-selection initial-selection
-                                                        :refusals [refusal]}))]
-          (reset! selection-state {:task (when next-target {:id next-target})
-                                   :outer/selection retained})
-          (when next-target
-            (persist-pending! retained)
-            {:target next-target :selection retained}))))))
+        (swap! selection-state assoc-in [:outer/selection :reading-reselection]
+               {:status :refused :reason :task-field-reselection-not-supported
+                :limit 1 :used 1 :refusals [refusal]})
+        nil))))
 
 (defn- run-ordinary-opportunity!
   "Run one production opportunity with the report-backed defaults installed.
