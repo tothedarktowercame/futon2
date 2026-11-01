@@ -32,7 +32,7 @@ embedding floor 0.2, hop bound 3, link kinds relates-to/part-of/advances, bases 
 | Q11 | holds | strict G minimum over prediction classes; replay had two classes |
 
 The pick itself is not predicted: the field has moved since the replay (two classes, pick
-M-pattern-retrieval-calibration at 15:xxZ). A tie at the minimum or an empty admissible set
+M-pattern-retrieval-calibration in the two-click replay with live context). A tie at the minimum or an empty admissible set
 would be `abstainOnTask` / `abstainEmptyField`, lawful, and the verdict would still conform.
 
 ## Work run (predicted outcomes)
