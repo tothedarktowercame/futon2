@@ -342,6 +342,18 @@ def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bo
             log(text)
             record({"event": "reload", "ok": False, "ns": ns, "detail": text})
             return False, text, since_epoch
+    if order:
+        # The standing authority context is memoised in the serving JVM; a
+        # reload of the medic/authority namespaces leaves the old verifier in
+        # it, and the pre-ration gate then reads a valid ledger as tampered
+        # (19:32Z: "self-heal is not serviceable" after the environmental
+        # disposition landed). Reset it after every reload.
+        r = jvm_eval("(do (futon2.aif.standing-authority/reset-context!) :standing-reset)")
+        if ":standing-reset" not in r["out"]:
+            text = f"standing authority context reset failed after reload: {r['out'][:500]} {r['err'][:300]}"
+            log(text)
+            record({"event": "reload", "ok": False, "detail": text})
+            return False, text, since_epoch
     log(f"reload: {len(order)} namespace(s) since @{since_epoch}: {' '.join(ns for ns, _ in order) or '-'}")
     record({"event": "reload", "ok": True, "since": since_epoch,
             "namespaces": [ns for ns, _ in order], "skipped-dirty": [str(f) for f in skipped],

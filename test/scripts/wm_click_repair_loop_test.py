@@ -333,6 +333,35 @@ class ContinuousModeTest(unittest.TestCase):
         self.assertFalse(c["carried"])
         self.assertIsNone(c["run-record"])
 
+    def test_reload_resets_the_standing_authority_context(self):
+        """19:32Z: after reloading the medic namespaces the serving JVM's memoised
+        standing verifier was stale and the gate read the ledger as tampered."""
+        loop = load_loop()
+        evals = []
+        def jvm_eval(form, timeout=600):
+            evals.append(form)
+            return {"rc": 0, "out": ":reloaded" if "require" in form else ":standing-reset", "err": ""}
+        with tempfile.TemporaryDirectory() as td, \
+             mock.patch.object(loop, "click_running", return_value=False), \
+             mock.patch.object(loop, "reload_plan", return_value=([Path(td) / "a.clj"], [])), \
+             mock.patch.object(loop, "dirty", return_value=False), \
+             mock.patch.object(loop, "reload_order", return_value=[("futon2.aif.a", Path(td) / "a.clj")]), \
+             mock.patch.object(loop, "jvm_eval", side_effect=jvm_eval), \
+             mock.patch.object(loop, "record"), mock.patch.object(loop, "log"):
+            ok, _, _ = loop.reload_changed(123)
+            self.assertTrue(ok)
+            self.assertTrue(any("reset-context!" in f for f in evals), evals)
+            self.assertLess([i for i, f in enumerate(evals) if "require" in f][-1],
+                            [i for i, f in enumerate(evals) if "reset-context!" in f][0],
+                            "the reset follows the reloads")
+            evals.clear()
+        with mock.patch.object(loop, "click_running", return_value=False), \
+             mock.patch.object(loop, "reload_plan", return_value=([], [])), \
+             mock.patch.object(loop, "jvm_eval", side_effect=jvm_eval), \
+             mock.patch.object(loop, "record"), mock.patch.object(loop, "log"):
+            loop.reload_changed(123)
+            self.assertEqual([], evals, "nothing reloaded, nothing reset")
+
     def test_absent_verdict_is_an_alert_not_conformance(self):
         loop = load_loop()
         self.assertIsNone(loop.read_verdict(None))
