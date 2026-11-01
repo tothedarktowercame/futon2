@@ -1,6 +1,6 @@
 # E-kimi-task-183 — prove lemma apm_t91J03_crossing in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T21:09:15Z to kimi-2 as invoke-1793480955793-8977-f2eb2d22
+**Requisition:** completed — 2026-10-31T21:14:10Z, job invoke-1793480955793-8977-f2eb2d22, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
