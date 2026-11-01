@@ -193,15 +193,18 @@
       (is (== (:chosen-action-mass decision)
               (+ (get-in law [:posterior ab]) (get-in law [:posterior ac])))))))
 
-(deftest same-prediction-different-g-refuses
+(deftest same-prediction-different-g-compete
+  ;; What the digest leaves out (fit-ambiguity, parameter information) can
+  ;; separate two policies that predict alike. They are two policies.
   (let [steps [{:prediction {[0 false] 1}}]
         entry (fn [id g] {:action {:kind :cascade-candidate :id id :target "M"
                                    :precedence [{:id id :target "M"}]}
                           :controller-score g :certificate {:f nil :steps steps}})
-        refusal (try (policy/select-action-cascades [(entry :p 1.0) (entry :q 2.0)] {:beta 1})
-                     (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e))))]
-    (is (= :same-prediction-different-G (:kind refusal)))
-    (is (= [1000000 2000000] (get-in refusal [:detail :classes 0 :units])))))
+        decision (policy/select-action-cascades [(entry :q 2.0) (entry :p 1.0)] {:beta 1})
+        law (:selection-law decision)]
+    (is (= :p (:id (:action decision))))
+    (is (= [:p] (:class-members law)))
+    (is (= :G (get-in law [:policy-comparison :decided-by])))))
 
 (deftest g-within-a-scale-unit-is-a-tie
   (let [entry (fn [id g steps]

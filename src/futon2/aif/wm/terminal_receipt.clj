@@ -19,7 +19,8 @@
   already-computed :outcome into the record map before calling
   `terminal-receipt`, so the receipt's :outcome is the outcome the close
   already recorded, not a new judgement."
-  (:require [clojure.string :as str]))
+  (:require [futon2.aif.cascade-selection :as cascade-selection]
+            [clojure.string :as str]))
 
 (defn target-kind
   "The target's kind from its id prefix, as the target field's enumerators
@@ -61,12 +62,9 @@
   A certificate with scoring rows for another candidate is contradictory and
   refuses; a certificate with no scoring rows is an honest typed absence."
   [record]
-  (let [enacted (get-in record [:decision :chosen :id])
+  (let [selected (cascade-selection/enacted-action (:decision record))
         scoring (vals (or (get-in record [:decision :selection-certificate
                                          :scoring]) {}))
-        selected (or (when enacted
-                       (:id (first (filter #(= enacted (get-in % [:id :id])) scoring))))
-                     (get-in record [:decision :selection-law :per-policy-argmax :action]))
         matches (filterv #(= selected (:id %)) scoring)]
     (cond
       (empty? scoring)
@@ -108,8 +106,7 @@
    :click-id (or (:click/id record) {:absent :no-click-id})
    :target (selected-target record)
    :target-kind (target-kind (selected-target record))
-   :action-kind (or (get-in record [:decision :selection-law
-                                    :per-policy-argmax :action :kind])
+   :action-kind (or (:kind (cascade-selection/enacted-action (:decision record)))
                     {:absent :no-recorded-action-kind})
    :G (selected-g-decomposition record)
    :outcome (or (:outcome record) {:absent :no-recorded-outcome})

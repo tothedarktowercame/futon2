@@ -1492,7 +1492,7 @@
                     (if-let [graph-path (:pattern-graph-path raw-opts)]
                       (pattern-graph-view/for-action
                        graph-path
-                       (get-in decision [:selection-law :per-policy-argmax :action]))
+                       (cascade-selection/enacted-action decision))
                       {:status :absent :reason :pattern-graph-path-not-supplied})
                     :scan-report (scan-report/retain!
                                   target (some-> (:scan-report/state raw-opts) deref)

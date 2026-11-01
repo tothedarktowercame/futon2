@@ -2,7 +2,8 @@
   "Identity-preserving adapter from a pinned runtime construction receipt to
   DarkTower.WarMachine.ConstructionReceipt.  The generated theorem evaluates
   the decoded value; source occurrence is not treated as correspondence."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.cascade-selection :as cascade-selection]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -341,8 +342,7 @@
   retained scoring fields are classified but never rescored."
   [run-record]
   (let [chosen (get-in run-record [:decision :chosen])
-        selected-action (get-in run-record
-                                [:decision :selection-law :per-policy-argmax :action])
+        selected-action (cascade-selection/enacted-action (:decision run-record))
         entry (selected-scoring-entry run-record)
         selected (:id entry)
         candidates (get-in run-record [:decision :selection-certificate :candidates])
@@ -456,7 +456,7 @@
   [run-record]
   (let [decision (:decision run-record)
         chosen (:chosen decision)
-        action (get-in decision [:selection-law :per-policy-argmax :action])
+        action (cascade-selection/enacted-action decision)
         comparison (get-in decision [:selection-law :policy-comparison])
         candidates (get-in decision [:selection-certificate :candidates])
         scoring (get-in decision [:selection-certificate :scoring])
@@ -765,8 +765,7 @@
   and exact admitted/scored field correspondence are certified."
   [run-record]
   (let [selection (selection-input-from-run-record run-record)
-        selected-action (get-in run-record
-                                [:decision :selection-law :per-policy-argmax :action])
+        selected-action (cascade-selection/enacted-action (:decision run-record))
         selected-id (:id selected-action)
         candidates (get-in run-record [:decision :selection-certificate :candidates])
         derivations (get-in run-record
@@ -842,7 +841,7 @@
   receipt. Refused precision and token-observation subreceipts remain explicit
   non-consumed exclusions."
   [run-record]
-  (let [action (get-in run-record [:decision :selection-law :per-policy-argmax :action])
+  (let [action (cascade-selection/enacted-action (:decision run-record))
         chosen (get-in run-record [:decision :chosen])
         identity (select-keys action [:kind :id :target])
         d-task (:d-task-enactment run-record)

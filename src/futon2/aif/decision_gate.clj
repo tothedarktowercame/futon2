@@ -67,10 +67,8 @@
     ;; Requirements Q6: every admissible policy is the previous run's
     ;; refused choice on the same selection inputs (previous-run)
     :repeat-choice-after-refusal
-    ;; Requirements Q11: no strict minimum exists, or the model disagrees
-    ;; with itself about one predicted policy (cascade-selection)
-    :tie-at-minimum
-    :same-prediction-different-G})
+    ;; Requirements Q11: no strict minimum exists (cascade-selection)
+    :tie-at-minimum})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this
@@ -233,7 +231,6 @@
                                               :minimum (mapv :action (:members class))
                                               :g (:g class)}))
       :tied (refuse! :minimum-not-unique detail)
-      :class-disagrees (refuse! :same-prediction-different-G detail)
       (refuse! :no-acting-candidate {:reason :no-scored-candidate}))))
 
 (defn- check-queue!

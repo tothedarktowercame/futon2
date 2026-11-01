@@ -246,41 +246,38 @@
                              (mapv :prediction class-steps)])))
 
 (defn- prediction-class
-  "Entries with no recorded prediction are each their own class: nothing says
-  they are one policy."
-  [{:keys [action prediction-digest]}]
-  (or prediction-digest [:no-recorded-prediction action]))
+  "One policy under the model: the same predicted outcomes at the same G. Two
+  policies with one digest and different G differ in what the digest leaves out
+  (fit-ambiguity, parameter information), so they compete by G. Entries with no
+  recorded prediction are each their own class: nothing says they are one policy."
+  [{:keys [action g prediction-digest]}]
+  (if prediction-digest
+    [prediction-digest (g-units g)]
+    [:no-recorded-prediction action]))
 
 (defn minimum-class
-  "Group ROWS ({:action :g :prediction-digest}, ranked) by prediction and find
-  the strictly smallest G at `g-scale`. Returns {:status :unique :class …
-  :runner-up …}, or {:status :tied|:class-disagrees :detail …}. A class is
-  {:digest :g :members [row…]}, members in ranked order."
+  "Group ROWS ({:action :g :prediction-digest}, ranked) into classes and find the
+  strictly smallest G at `g-scale`. Returns {:status :unique :class … :runner-up …}
+  or {:status :tied :detail …}. A class is {:digest :g :members [row…]}, members in
+  ranked order."
   [rows]
-  (let [groups (->> rows
-                    (filter #(some? (g-units (:g %))))
-                    (group-by prediction-class))
-        classes (mapv (fn [[digest members]]
-                        {:digest digest :members members
-                         :units (distinct (map (comp g-units :g) members))})
-                      groups)
-        disagreeing (filterv #(< 1 (count (:units %))) classes)
-        ordered (sort-by (juxt #(first (:units %)) (comp pr-str :digest)) classes)
+  (let [classes (->> rows
+                     (filter #(some? (g-units (:g %))))
+                     (group-by prediction-class)
+                     (mapv (fn [[digest members]]
+                             {:digest digest :members members
+                              :g (:g (first members))
+                              :units (g-units (:g (first members)))})))
+        ordered (sort-by (juxt :units (comp pr-str :digest)) classes)
         [best runner] ordered
-        unit (comp first :units)
-        tied (filterv #(= (unit best) (unit %)) ordered)
-        summary (fn [c] (when c {:digest (:digest c) :g (:g (first (:members c)))
-                                 :members (:members c)}))]
+        tied (filterv #(= (:units best) (:units %)) ordered)
+        summary #(select-keys % [:digest :g :members])]
     (cond
       (empty? classes) {:status :no-scored-class}
-      (seq disagreeing) {:status :class-disagrees
-                         :detail {:classes (mapv #(hash-map :digest (:digest %)
-                                                            :units (vec (:units %)))
-                                                 disagreeing)}}
       (< 1 (count tied)) {:status :tied
-                          :detail {:digests (mapv :digest tied)
-                                   :g (:g (first (:members best)))}}
-      :else {:status :unique :class (summary best) :runner-up (summary runner)})))
+                          :detail {:digests (mapv :digest tied) :g (:g best)}}
+      :else (cond-> {:status :unique :class (summary best)}
+              runner (assoc :runner-up (summary runner))))))
 
 (defn selection-row
   "A ranked entry as `minimum-class` reads it."
@@ -291,6 +288,19 @@
    (prediction-digest (get-in entry [:certificate :steps])
                       (get-in entry [:class-emission :certificate :steps]))})
 
+(defn enacted-action
+  "The whole action that ran. A live decision carries it; a run record keeps it as
+  the certificate candidate naming `[:decision :chosen]`. `:per-policy-argmax` is
+  the posterior's mode and read only where a record names no chosen policy."
+  [decision]
+  (let [{:keys [id target]} (:chosen decision)]
+    (or (:action decision)
+        (when id
+          (:id (first (filter #(and (= id (get-in % [:id :id]))
+                                    (= target (get-in % [:id :target])))
+                              (get-in decision [:selection-certificate :candidates])))))
+        (get-in decision [:selection-law :per-policy-argmax :action]))))
+
 (defn strict-minimum
   "`minimum-class`, refusing unless the minimum is unique."
   [rows]
@@ -298,7 +308,6 @@
     (case status
       :unique result
       :tied (refuse! :tie-at-minimum detail)
-      :class-disagrees (refuse! :same-prediction-different-G detail)
       (refuse! :no-admissible-candidate {:rows (count rows)}))))
 
 ;; ---------------------------------------------------------------------------

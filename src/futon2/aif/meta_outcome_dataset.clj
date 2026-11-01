@@ -1,6 +1,7 @@
 (ns futon2.aif.meta-outcome-dataset
   "Pure empirical META outcome rows from an externally pinned run manifest."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.cascade-selection :as cascade-selection]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.meta-field-observation :as field])
@@ -92,8 +93,8 @@
             (merge (select-keys decision [:selected-enacted-identity])
                    {:selection-law
                     {:per-policy-argmax
-                     {:action {:target (get-in decision [:selection-law :per-policy-argmax
-                                                         :action :target])}}}
+                     ;; the enacted policy's target, under the key old records used
+                     {:action {:target (:target (cascade-selection/enacted-action decision))}}}
                     :selection-certificate
                     {:selected-canonical-cascade
                      {:digest (get-in decision [:selection-certificate
@@ -178,8 +179,7 @@
   (let [receipt (:outer-task-selection record)]
     (if (canonical-outer-receipt? receipt)
       {:id (get-in receipt [:chosen :id]) :source :canonical-outer}
-      (when-let [target (get-in record [:decision :selection-law
-                                        :per-policy-argmax :action :target])]
+      (when-let [target (:target (cascade-selection/enacted-action (:decision record)))]
         {:id target :source :legacy-inner-fallback}))))
 
 (defn- raw-outcome [record]
