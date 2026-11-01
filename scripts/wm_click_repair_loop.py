@@ -413,6 +413,24 @@ def alert_signature(verdict: dict | None) -> list[str]:
     return sorted(rows)
 
 
+def click_record(lr: dict, click_id: str | None) -> str | None:
+    """The record wm_click.sh checked: the run record named by last-result, or,
+    for an outer refusal or abstention that wrote no tick, the one selection
+    record carrying the click id (the same rule wm_click.sh uses for ownership).
+    None when neither exists; the verdict is then absent, which is an alert."""
+    rr = lr.get("run-record")
+    if rr and Path(rr).is_file():
+        return rr
+    run_id = (lr.get("run-id-observation") or {}).get("value")
+    if run_id and (F2 / "data" / "wm-runs" / f"tick-run-record-{run_id}.edn").is_file():
+        return str(F2 / "data" / "wm-runs" / f"tick-run-record-{run_id}.edn")
+    if click_id:
+        found = sorted((F2 / "data" / "wm-runs").glob(f"selection-record-????-??-??-{click_id}.edn"))
+        if len(found) == 1:
+            return str(found[0])
+    return rr
+
+
 def click_alert(verdict: dict | None) -> list[str] | None:
     """None when the click conforms; otherwise its alert signature."""
     return None if verdict and verdict["conforms"] else alert_signature(verdict)
@@ -567,10 +585,11 @@ def fire(n: int, args, since_epoch: int) -> dict:
     if click_id and lr.get("click-id") != click_id:
         lr = {"outcome": "unknown", "note": f"last-result is for {lr.get('click-id')}, not {click_id}"}
     run_id = (lr.get("run-id-observation") or {}).get("value")
-    verdict = read_verdict(lr.get("run-record"))
+    record_path = click_record(lr, click_id)
+    verdict = read_verdict(record_path)
     return {"n": n, "rc": rc, "click-id": click_id, "spent": spent, "outcome": lr.get("outcome", "unknown"),
             "run-id": run_id, "carried": carried(run_id), "last-result": lr, "log": str(out),
-            "run-record": lr.get("run-record"), "verdict": verdict, "alert": click_alert(verdict),
+            "run-record": record_path, "verdict": verdict, "alert": click_alert(verdict),
             "since-epoch": since_epoch, "in-flight-repairs": in_flight_repairs}
 
 

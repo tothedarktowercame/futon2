@@ -288,6 +288,22 @@ class ContinuousModeTest(unittest.TestCase):
         self.assertEqual(["work Q7 violated", "work Q9 violated"], loop.click_alert(mixed))
         self.assertIsNone(loop.click_alert(self.verdict_of(loop, self.TWO_RUN_CONFORMS)))
 
+    def test_refused_selection_record_is_found_by_click_id(self):
+        """Clicks 1 and 2 of 2026-11-01 17:28Z: an outer refusal writes a selection
+        record and no tick; last-result names no run record; the verdict beside the
+        selection record must still be read."""
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td, mock.patch.object(loop, "F2", Path(td)):
+            runs = Path(td) / "data" / "wm-runs"; runs.mkdir(parents=True)
+            rec = runs / "selection-record-2026-11-01-wm-click-abc.edn"; rec.write_text("{}")
+            Path(str(rec) + ".requirements.edn").write_text(self.TWO_RUN_ALERT)
+            self.assertEqual(str(rec), loop.click_record({"outcome": "unknown"}, "wm-click-abc"))
+            self.assertEqual("work not-run", loop.click_alert(loop.read_verdict(
+                loop.click_record({}, "wm-click-abc")))[-1])
+            self.assertIsNone(loop.click_record({"outcome": "unknown"}, "wm-click-none"))
+            tick = runs / "tick-run-record-run-7.edn"; tick.write_text("{}")
+            self.assertEqual(str(tick), loop.click_record({"run-id-observation": {"value": "run-7"}}, "wm-click-abc"))
+
     def test_absent_verdict_is_an_alert_not_conformance(self):
         loop = load_loop()
         self.assertIsNone(loop.read_verdict(None))
