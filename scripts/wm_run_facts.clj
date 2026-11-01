@@ -877,7 +877,8 @@
 (def ^:private kept-when-not-exercised
   "What a record says whether or not a selection ran; every other fact is a
   selection carrier."
-  #{"kind" "policyGScale" "openMissions" "openExcursions" "openTickets"})
+  #{"kind" "policyGScale" "openMissions" "openExcursions" "openTickets"
+    "interpretationOrder"})
 
 (defn- read-phase-events [path]
   (when (and path (.isFile (io/file path)))
@@ -1231,9 +1232,11 @@
                {"kind" "selection"
                 "policyGScale" g-scale
                 "policyPrediction" (carried one-prediction)
-                "interpretationOrder" (if (= :refused (get-in source [:selection-outcome :status]))
-                                        (nr "no interpretation in this run")
-                                        (selection-interpretation-order record phase-log-path))}
+                "interpretationOrder"
+                (if (contains? #{:refused :abstained :not-exercised}
+                               (get-in source [:selection-outcome :status]))
+                  "noInterpretation"
+                  (selection-interpretation-order record phase-log-path))}
                (if section?
                  (merge
                   (if (:construction selection)
