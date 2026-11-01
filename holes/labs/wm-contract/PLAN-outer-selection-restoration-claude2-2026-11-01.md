@@ -402,3 +402,25 @@ Giraffe graph, 251 → 212 of 626 at Joe's floor 0.2), L5-5 discovery (bypass pa
   ac5bc477 did. The loop will pause at the second click unless those land in between.
 - **Not run:** the full futon2 suite today; warrants not minted for today's merges.
 - **Ready:** the hold on clicks is Joe's to lift; the command is in the prediction file.
+
+## Status, 2026-11-01 17:25Z (claude-2): the hold is lifted; the machine runs
+
+Joe, ~17:20Z: "yes, let's lift the hold. for te budgest, we can record 50 clicks available,
+however for the strategy I think we should make continuous repairs as needed not a series of
+trials. each repair should be logged and committed so that we have a trail of what has been
+done. the old notion of criteria complete is superseded by moving to full lean compliance."
+
+- **Budget:** futon3c `89173aa2e`, allocated 243 → 288, served 50 available after reload.
+- **Loop started 17:25Z** as bg job `bg-1793553906494-213` (label `wm-continuous-loop`):
+  `wm_click_repair_loop.py run --continuous --clicks 50 --owner claude-2`, cast wm-author /
+  wm-reviewer / wm-repair-reviewer. Log `/tmp/futon3c-bg/bg-1793553906494-213.log`; ledger
+  `data/wm-click-loop/ledger.jsonl`; alerts queue `data/wm-click-loop/alerts.jsonl`.
+- **Strategy from here:** the two-run Lean verdict is the only criterion ("criteria complete" is
+  retired). Each alert names a producer gap; the fix is a commit whose message carries the
+  alert's signature, noted in this plan under a repair trail below; the loop reloads it before
+  the next click. No trial framing, no per-click packets unless a repair is substantial.
+
+## Repair trail (continuous running)
+
+| At | Click / run | Signature | Fix (commit) | Loaded before click |
+|---|---|---|---|---|
