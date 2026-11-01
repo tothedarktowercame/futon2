@@ -122,3 +122,26 @@
       (is (< (score/outer-novelty (score/outer-model known))
              (score/outer-novelty (score/outer-model unknown))))
       (is (< (score/outer-score unknown) (score/outer-score known))))))
+
+(deftest typed-steps-and-rank-match-the-interpreter
+  (is (= [:ready-gate :by-cone :by-unblocks]
+         (mapv score/typed-step [:ready-gate :by-cone :by-unblocks])))
+  (is (= [{:named "repair obligation?"} :ready-gate {:named "verifiable result required"}]
+         (mapv score/typed-step ["repair obligation?" :ready-gate "verifiable result required"])))
+  (is (= [{:status-gate :undetermined} :by-rank]
+         (mapv score/typed-step [{:gate-status :undetermined} :by-rank])))
+  (is (thrown? clojure.lang.ExceptionInfo
+               (score/apply-selection-step {} [] "repair obligation?")))
+  (let [field [{:target :a} {:target :b} {:target :c}]
+        fs {:a {:status :ready :rank 1} :b {:status :undetermined :rank 3}
+            :c {:status :undetermined :rank 3}}]
+    (is (= [{:target :b} {:target :c}]
+           (score/apply-selection-cascade [{:gate-status :undetermined} :by-rank] fs field)))))
+
+(deftest abstention-is-the-independent-stopped-model
+  (let [in {:ending-counts uniform-ending :gain-counts uniform-gain}
+        stop (score/abstention-score in)]
+    (is (= stop (score/score-model in (score/stopped-model))))
+    (is (= 1.0 (get-in stop [:prediction :outcomes [:stop-the-line :none]])))
+    (is (= 0.0 (get-in stop [:terms :novelty])))
+    (is (= 0.0 (get-in stop [:terms :ambiguity])))))

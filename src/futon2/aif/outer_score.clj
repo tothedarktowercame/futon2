@@ -48,6 +48,9 @@
     (= :by-unblocks step)
     (stable-sort-by #(graph-term facts (:target %) :unblocks) - field)
 
+    (= :by-rank step)
+    (stable-sort-by #(graph-term facts (:target %) :rank) identity field)
+
     (= :by-cone step)
     (stable-sort-by #(graph-term facts (:target %) :cone) - field)
 
@@ -100,6 +103,27 @@
                  (assoc row0 landing reach stopped (- 1.0 reach)))]
     {:doable doable :blocked blocked}))
 
+(defn stopped-model
+  "The explicit abstention model, independent of any menu cascade."
+  []
+  {:pick nil :status nil :counts {:doable 0 :blocked 1}
+   :q {:doable 0.0 :blocked 1.0} :kernel (stopped-kernel)
+   :landing [:stop-the-line :none]})
+
+(defn typed-step
+  "Serializable description of the actual interpreter step. Function steps
+  remain named/unverifiable; their printed JVM object identity is not evidence.
+  Unknown README prose is described, but apply-selection-step still refuses it."
+  ([step] (typed-step step "anonymous-step"))
+  ([step fallback-name]
+  (cond
+    (and (map? step) (contains? step :gate)) {:named (or (:name step) fallback-name)}
+    (and (map? step) (contains? step :order)) {:named (or (:name step) fallback-name)}
+    (= :ready-gate step) :ready-gate
+    (and (map? step) (contains? step :gate-status)) {:status-gate (:gate-status step)}
+    (contains? #{:by-cone :by-unblocks :by-rank} step) step
+    :else {:named (if (string? step) step (pr-str step))})))
+
 (defn outer-model
   "Lean `outerModel`: construct the doable/blocked prior and picked-task kernel.
 
@@ -117,12 +141,7 @@
        :q (normalize (value-of state-counts status) states)
        :kernel (picked-kernel landing (:reach candidate))
        :landing landing})
-    {:pick nil
-     :status nil
-     :counts {:doable 0 :blocked 1}
-     :q {:doable 0.0 :blocked 1.0}
-     :kernel (stopped-kernel)
-     :landing [:stop-the-line :none]}))
+    (stopped-model)))
 
 (defn outer-preference
   "Lean `outerPreferenceKernel`: product of normalized ending and gain counts."
@@ -179,18 +198,25 @@
 (defn- ambiguity [{:keys [q kernel]}]
   (reduce + 0.0 (for [state states] (* (q state) (entropy (kernel state))))))
 
-(defn outer-score
-  "Lean `outerScore`: risk plus ambiguity minus `outerNovelty`.
+(defn score-model
+  "Retain the finite-sum terms and prediction for one already-computed model.
+  No rounding: G is the same risk + ambiguity - novelty used by outer-score."
+  [{:keys [ending-counts gain-counts]} model]
+  (let [prediction (push model)
+        r (risk prediction (outer-preference ending-counts gain-counts))
+        a (ambiguity model)
+        n (outer-novelty model)]
+    {:terms {:risk r :ambiguity a :novelty n}
+     :G (if (= :inadmissible r) :inadmissible (- (+ r a) n))
+     :prediction (assoc (select-keys model [:q :landing :status]) :outcomes prediction)}))
 
-  Returns `:inadmissible`, the Clojure counterpart of Lean `⊤`, when a
-  predicted positive outcome has zero preference mass.  Risk and ambiguity
-  are evaluated directly from the Lean finite sums: `cascade-g/step-g`
-  requires model authority/provenance which this pure, caller-supplied outer
-  model must not fabricate."
-  [{:keys [ending-counts gain-counts] :as input}]
-  (let [model (outer-model input)
-        preference (outer-preference ending-counts gain-counts)
-        r (risk (push model) preference)]
-    (if (= :inadmissible r)
-      :inadmissible
-      (- (+ r (ambiguity model)) (outer-novelty model)))))
+(defn abstention-score
+  "Score stopping separately over the same preference; never a menu member."
+  [input]
+  (score-model input (stopped-model)))
+
+(defn outer-score
+  "Lean outerScore: risk + ambiguity - novelty, or :inadmissible for positive
+  predicted mass at zero preference. Kept as the scalar compatibility API."
+  [input]
+  (:G (score-model input (outer-model input))))

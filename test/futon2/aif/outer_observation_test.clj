@@ -2,6 +2,9 @@
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-observation :as observation]
+            [futon2.aif.focus-receipt :as focus]
+            [futon2.aif.outer-select :as select]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.selection-world :as selection-world]))
 
 (def makeup {:default-reach 1/2})
@@ -38,7 +41,7 @@
   (let [root (temp-dir)
         pass {:as-of "2026-10-28"
               :counts {:open 3 :ready 1 :ready-ignoring-externals 1}
-              :order [{:id :M-ready :status :ready :reason :order/ready-by-unblocks
+              :order [{:id :M-ready :status :ready :rank 1 :reason :order/ready-by-unblocks
                        :unblocks 2 :cone 4 :source-order 0}
                       {:id :M-cycle :status :undetermined :unblocks 0 :cone 1}
                       {:id :M-waiting :status :not-ready :unblocks 0 :cone 0}]
@@ -66,7 +69,8 @@
                    (observation/giraffe-field dir makeup fixture-authority))]
       (is (= ["M-ready" "M-cycle" "M-waiting"] (mapv :target (:field result))))
       (is (every? #(= 1/2 (:reach %)) (:field result)))
-      (is (= {:status :ready :unblocks 2 :cone 4} (get-in result [:facts "M-ready"])))
+      (is (= {:status :ready :unblocks 2 :cone 4 :rank 1 :reach-source :default-reach}
+             (select-keys (get-in result [:facts "M-ready"]) [:status :unblocks :cone :rank :reach-source])))
       (is (= :undetermined (get-in result [:facts "M-cycle" :status])))
       (is (= :not-ready (get-in result [:facts "M-waiting" :status])))
       (is (nil? (get-in result [:facts "M-closed"])))
@@ -208,3 +212,27 @@
            (set rows))
         "drifted open items are typed once; a closed member is not an exclusion")
     (is (= [] (#'observation/drift-exclusions {} #{})))))
+
+(deftest retained-relation-is-the-scoring-receipt
+  (let [calls (atom [])
+        receipt {:class :associated :reason :fixture-declared-relation :evidence {:pin "retained"}}
+        fact {:status :ready :cone 2 :unblocks 2 :rank 3 :reach-source :default-reach}
+        field {:field [{:target "M-ready" :reach 1/2 :reach-source :default-reach}]
+               :facts {"M-ready" fact}}
+        obs (with-redefs [observation/giraffe-field (fn [& _] field)
+                          focus/decision-focus (fn [& _] {:info {:focus "WM"}})
+                          focus/classify-target (fn [& args] (swap! calls conj args) receipt)]
+              (observation/outer-observation {:run-dir "unused" :makeup makeup :decision-as-of "fixed"}))
+        counts {:c {:focused 55 :related 35 :unrelated 5 :stop-the-line 5 :not-yet-evaluated 0}
+                :state-counts {:ready {:doable 3 :blocked 1}}
+                :gain-counts {:none 1 :one 2 :several 3}}
+        r (select/select {:cascades [{:id :one :patterns ["only-what-can-start-now"]
+                                      :steps [:ready-gate]}]} counts obs)]
+    (is (= 1 (count @calls)))
+    (is (identical? receipt (get-in obs [:facts "M-ready" :relation :receipt])))
+    (is (= :associated ((:relation obs) "WM" "M-ready")))
+    (is (= :associated (get-in r [:cascades 0 :relation :class])))
+    (is (= (identity/sha256 (pr-str receipt)) (get-in r [:cascades 0 :relation :receipt-digest])))
+    (is (= 3 (get-in r [:cascades 0 :pick-facts :rank])))
+    (is (= :default-reach (get-in r [:cascades 0 :reach :source])))
+    (is (= 1 (count @calls)))))

@@ -22,8 +22,7 @@
   inadmissible under the c-kit, measured on the real fields -- row report
   addendum 3), and the ignorance is retained beside each pick as
   :cascade-pick-relations."
-  (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.outer-score :as outer-score]
+  (:require [clojure.test :refer [deftest is]]
             [futon2.aif.outer-select :as outer-select]))
 
 (def makeup
@@ -69,99 +68,27 @@
    :field field
    :facts facts})
 
-(deftest unknown-relation-field-is-admitted-and-selects-with-ignorance-retained
-  (testing "the adc46631 bad case, decided: no refusal and no exclusion -- the
-            full field is admitted, selection proceeds, and each pick carries
-            its relation so the degenerate stop reads as ignorance, not as a
-            deliberate stop"
-    (let [result (outer-select/select makeup state adc46631-observation)]
-      (is (= ["M-peradam-grounding" "M-pattern-retrieval-calibration"
-              "M-typed-memories"]
-             (:outer-score/admitted result)))
-      (is (empty? (:outer-score/excluded result)))
-      ;; The picks are all relation-unknown, retained as such beside the picks.
-      (is (= ["M-peradam-grounding" "M-peradam-grounding" :no-pick]
-             (:cascade-picks result)))
-      (is (= [{:target "M-peradam-grounding" :relation :unknown :relation-known? false}
-              {:target "M-peradam-grounding" :relation :unknown :relation-known? false}
-              {:target :no-pick :relation :no-pick :relation-known? nil}]
-             (:cascade-pick-relations result)))
-      (is (= "M-peradam-grounding"
-             (get-in result [:selection :selected :target])))
-      ;; Ignorance still scores as the stop landing (DarkTower scorerClass):
-      ;; the prediction is the stopped model, but the record shows why.
-      (is (= 1.0 (get-in result [:prediction :outcomes [:stop-the-line :none]])))
-      (is (= [:stop-the-line :none] (get-in result [:prediction :landing]))))))
+(defn selection-result [observation]
+  (try (outer-select/select makeup state observation)
+       (catch clojure.lang.ExceptionInfo e (ex-data e))))
 
-(deftest known-relation-evidence-separates-the-scores
-  (testing "a classified field head (runs d5b9b513/e71c7380 really retained
-            :selected-relation :associated for their pick) separates the
-            menu: the picking cascades score a real model while the
-            gate-emptied cascade stays stopped; the pick's known relation is
-            retained beside the score"
-    (let [observation (assoc adc46631-observation
-                             :relation (fn [_ target]
-                                         (if (= target "M-peradam-grounding")
-                                           :associated
-                                           :unknown)))
-          result (outer-select/select makeup state observation)
-          {:keys [cascade-scores cascade-pick-relations]} result]
-      (is (= "M-peradam-grounding"
-             (get-in result [:selection :selected :target])))
-      (is (= [{:target "M-peradam-grounding" :relation :associated
-               :relation-known? true}
-              {:target "M-peradam-grounding" :relation :associated
-               :relation-known? true}
-              {:target :no-pick :relation :no-pick :relation-known? nil}]
-             cascade-pick-relations))
-      ;; The picking cascades score strictly below the stopped model, so the
-      ;; choice rests on real evidence.
-      (is (< (nth cascade-scores 0) (nth cascade-scores 2)))
-      (is (< (nth cascade-scores 1) (nth cascade-scores 2)))
-      ;; Same-pick equal scores are not a choice tie.
-      (is (= (nth cascade-scores 0) (nth cascade-scores 1)))
-      (is (false? (:tie? result)))
-      ;; The degenerate stop-the-line prediction is gone for the pick.
-      (let [outcomes (get-in result [:prediction :outcomes])]
-        (is (= [:related :several] (get-in result [:prediction :landing])))
-        (is (pos? (get outcomes [:related :several])))
-        (is (< (get outcomes [:stop-the-line :none]) 1.0))))))
+(deftest unknown-relations-are-retained-but-no-longer-select-by-menu-order
+  (let [r (selection-result adc46631-observation)
+        e (:selection-evidence r)]
+    (is (= :tie-at-minimum (:kind r)))
+    (is (= (mapv :target field) (:outer-score/admitted e)))
+    (is (empty? (:outer-score/excluded e)))
+    (is (= ["M-peradam-grounding" "M-peradam-grounding" :no-pick] (:cascade-picks e)))
+    (is (= [:unknown :unknown :no-pick] (mapv :relation (:cascade-pick-relations e))))
+    (is (= 1.0 (get-in e [:cascades 0 :prediction :outcomes [:stop-the-line :none]])))))
 
-(deftest a-deliberately-stopped-cascade-still-scores-the-stopped-model
-  (testing "the gate-emptied cascade (no candidate passes its gate) keeps the
-            stopped kernel and landing -- removing the relation exclusion
-            changed nothing for genuinely stopped cascades"
-    (let [result (outer-select/select makeup state adc46631-observation)
-          input {:focus (:focus adc46631-observation)
-                 :relation (:relation adc46631-observation)
-                 :facts facts :field field
-                 :state-counts (:state-counts state)
-                 :ending-counts (:c state) :gain-counts (:gain-counts state)
-                 :cascade (:steps (nth (:cascades makeup) 2))}
-          model (outer-score/outer-model input)]
-      (is (nil? (:pick model)))
-      (is (= [:stop-the-line :none] (:landing model)))
-      (is (= (nth (:cascade-scores result) 2)
-             (outer-score/outer-score input))))))
-
-(deftest chosen-model-novelty-now-contributes
-  (testing "with a known relation the Fisher novelty of the chosen model is
-            positive (it was identically 0.0 in every degenerate tie), and
-            the outer score is risk+ambiguity minus that novelty"
-    (let [observation (assoc adc46631-observation
-                             :relation (fn [_ target]
-                                         (if (= target "M-peradam-grounding")
-                                           :associated
-                                           :unknown)))
-          result (outer-select/select makeup state observation)
-          input {:focus (:focus observation) :relation (:relation observation)
-                 :facts facts
-                 :field [{:target "M-peradam-grounding" :reach 1/2}]
-                 :state-counts (:state-counts state)
-                 :ending-counts (:c state) :gain-counts (:gain-counts state)
-                 :cascade (:steps (nth (:cascades makeup) (:cascade-index result)))}
-          model (outer-score/outer-model input)
-          novelty (outer-score/outer-novelty model)]
-      (is (pos? novelty))
-      (is (= (nth (:cascade-scores result) (:cascade-index result))
-             (outer-score/outer-score input))))))
+(deftest known-relations-score-below-stop-but-same-pick-minimum-still-refuses
+  (let [observation (assoc adc46631-observation :relation (fn [_ _] :associated))
+        r (selection-result observation) e (:selection-evidence r)]
+    (is (= :tie-at-minimum (:kind r)))
+    (is (= [:what-others-wait-on-first :only-what-can-start-now] (:tied-cascades r)))
+    (is (= [:associated :associated :no-pick] (mapv :relation (:cascade-pick-relations e))))
+    (is (< (first (:cascade-scores e)) (get-in e [:abstention :G])))
+    (is (pos? (get-in e [:cascades 0 :terms :novelty])))
+    (is (= (nth (:cascade-scores e) 2) (get-in e [:abstention :G])))
+    (is (= [:stop-the-line :none] (get-in e [:cascades 2 :prediction :landing])))))

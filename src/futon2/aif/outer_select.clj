@@ -1,6 +1,9 @@
 (ns futon2.aif.outer-select
-  "Pure task choice corresponding to `R20Step.chosenCascadeEntry` and `step`."
-  (:require [futon2.aif.effective-run-history :as effective-run-history]
+  "Task choice with retained library evidence, corresponding to `R20Step.chosenCascadeEntry` and `step`."
+  (:require [clojure.java.io :as io]
+            [futon2.aif.action-identity :as identity]
+            [futon2.aif.q2-construction :as q2]
+            [futon2.aif.effective-run-history :as effective-run-history]
             [futon2.aif.outer-score :as outer-score]))
 
 (defn- refuse! [kind data]
@@ -100,105 +103,112 @@
            (update result :field conj candidate))))
      {:field [] :excluded [] :requests []} field)))
 
-(defn select
-  "Score the makeup's cascade menu and return Lean `step` selection fields.
+(defn- value-of [x k] (if (fn? x) (x k) (get x k)))
 
-  A tie is resolved by menu order only so this is a function.  The returned
-  `:tie?` records that condition because ties are a defect to remove with
-  better evidence, not a task-selection rule (Joe, 2026-10-28)."
+(defn- library-evidence [makeup]
+  (q2/library-manifest
+   (.getCanonicalPath
+    (io/file (or (:task-selection-library-root makeup)
+                 (str (System/getProperty "user.home") "/code/futon3/library/task-selection"))))))
+
+(defn- cascade-identity [library cascade]
+  (let [units (mapv (fn [index pattern]
+                      (let [safe? (and (string? pattern) (re-matches #"[A-Za-z0-9_-]+" pattern))
+                            file (when safe? (io/file (:root library) (str pattern ".flexiarg")))]
+                        {:pattern (str "futon3/library/task-selection/" pattern ".flexiarg")
+                         :index index
+                         :sha256 (get-in library [:patterns pattern])
+                         :status (if (and file (.isFile file)) :present :absent)}))
+                    (range) (:patterns cascade))
+        carrier [(name (:id cascade)) (:readme-cascade cascade)
+                 (mapv (fn [u] [(:pattern u) (:sha256 u) (:index u)]) units)
+                 (:edges cascade)]]
+    {:id (:id cascade) :digest (identity/sha256 (pr-str carrier))
+     :digest-scheme :sha256-pr-str-name-readme-units-edges
+     :lineage-status (if (and (:readme-cascade cascade) (:edges cascade)) :present :absent)
+     :lineage-note "Absent README row/edges remain nil; these makeup digests need not equal witness digests."
+     :readme-cascade (:readme-cascade cascade) :units units :edges (:edges cascade)
+     :steps (mapv (fn [index step]
+                    (outer-score/typed-step step (str (name (:id cascade)) "/step-" index)))
+                  (range) (:steps cascade))}))
+
+(defn- cascade-record [library observation cascade model score]
+  (let [candidate (:pick model) target (:target candidate)
+        class (if candidate (relation-class observation target) :no-pick)
+        receipt (get-in (value-of (:facts observation) target) [:relation :receipt])]
+    (when (and receipt (not= class (:class receipt)))
+      (refuse! :relation-receipt-class-mismatch {:target target :class class :receipt receipt}))
+    (merge (cascade-identity library cascade) score
+           {:pick (or target :no-pick)
+            :pick-facts (when candidate
+                          (select-keys (value-of (:facts observation) target)
+                                       [:status :cone :unblocks :rank]))
+            :relation (cond-> {:class class
+                              :receipt-digest (when receipt (identity/sha256 (pr-str receipt)))}
+                        (nil? receipt) (assoc :status :absent :reason :receipt-unavailable))
+            :reach {:value (:reach candidate)
+                    :source (if candidate (or (:reach-source candidate)
+                                               (:reach-source (value-of (:facts observation) target))
+                                               :reach-source-unavailable) :no-pick)}})))
+
+(defn select
+  "Score every cascade and stopping; only a unique minimum strictly below
+  abstention can select. Refusals retain the same evidence as successful selection."
   [makeup state observation]
   (let [menu (:cascades makeup)
         partition (known-term-field observation)
-        duplicate-excluded (duplicate-effective-run-exclusions
-                            (:field partition) observation)
+        duplicate-excluded (duplicate-effective-run-exclusions (:field partition) observation)
         duplicate-targets (set (map :target duplicate-excluded))
         partition (-> partition
-                      (update :field (fn [field]
-                                       (vec (remove #(contains? duplicate-targets
-                                                                (:target %))
-                                                    field))))
+                      (update :field #(vec (remove (fn [c] (contains? duplicate-targets (:target c))) %)))
                       (update :excluded into duplicate-excluded))
         observation (assoc observation :field (:field partition))]
     (when (empty? (:field partition))
-      (if (seq duplicate-excluded)
-        ;; Every candidate the graph partition admitted is refused by its
-        ;; own effective-run history: a typed refusal, never a silent
-        ;; abstention, and never a fall-through to the graph-term reason.
-        (refuse! :outer-score/duplicate-effective-run-field-emptied
-                 {:outer-score/excluded (:excluded partition)
-                  :duplicate-effective-run duplicate-excluded
-                  :knowledge-producer-requests (:requests partition)})
-        (refuse! :outer-score/no-known-graph-members
-                 {:outer-score/excluded (:excluded partition)
-                  :knowledge-producer-requests (:requests partition)})))
-    (when-not (seq menu)
-      (refuse! :empty-cascade-menu {}))
+      (refuse! (if (seq duplicate-excluded) :outer-score/duplicate-effective-run-field-emptied
+                   :outer-score/no-known-graph-members)
+               (cond-> {:outer-score/excluded (:excluded partition)
+                        :knowledge-producer-requests (:requests partition)}
+                 (seq duplicate-excluded) (assoc :duplicate-effective-run duplicate-excluded))))
+    (when-not (seq menu) (refuse! :empty-cascade-menu {}))
     (let [score-input (merge (select-keys observation [:focus :relation :facts :field])
-                             {:state-counts (:state-counts state)
-                              :ending-counts (:c state)
+                             {:state-counts (:state-counts state) :ending-counts (:c state)
                               :gain-counts (:gain-counts state)})
-          scores (mapv #(outer-score/outer-score
-                         (assoc score-input :cascade (:steps %))) menu)]
-      (when-let [bad (first (keep-indexed
-                             (fn [index score]
-                               (when-not (and (number? score)
-                                              (Double/isFinite (double score)))
-                                 {:index index :score score}))
-                             scores))]
-        (refuse! :cascade-score-inadmissible bad))
+          models (mapv #(outer-score/outer-model (assoc score-input :cascade (:steps %))) menu)
+          details (mapv #(outer-score/score-model score-input %) models)
+          library (library-evidence makeup)
+          cascades (mapv #(cascade-record library observation %1 %2 %3) menu models details)
+          scores (mapv :G cascades)
+          abstention (outer-score/abstention-score score-input)
+          legacy-relations (mapv (fn [c] {:target (:pick c) :relation (get-in c [:relation :class])
+                                         :relation-known? (when-not (= :no-pick (:pick c))
+                                                            (known-relation? (get-in c [:relation :class])))}) cascades)
+          evidence {:outer-score/admitted (mapv :target (:field partition))
+                    :outer-score/excluded (:excluded partition)
+                    :knowledge-producer-requests (:requests partition)
+                    :library library :cascades cascades :abstention abstention
+                    :cascade-scores scores :cascade-picks (mapv :pick cascades)
+                    :cascade-pick-relations legacy-relations}
+          finite? #(and (number? %) (Double/isFinite (double %)))]
+      (when-let [bad (first (keep-indexed (fn [i g] (when-not (finite? g) {:index i :score g})) scores))]
+        (refuse! :cascade-score-inadmissible (merge evidence bad)))
+      (when-not (finite? (:G abstention))
+        (refuse! :abstention-score-inadmissible evidence))
       (let [minimum (reduce min scores)
-            index (.indexOf scores minimum)
-            chosen (nth menu index)
-            model (outer-score/outer-model
-                   (assoc score-input :cascade (:steps chosen)))
-            picked (:pick model)]
-        {:outer-score/admitted (mapv :target (:field partition))
-         :outer-score/excluded (:excluded partition)
-         :knowledge-producer-requests (:requests partition)
-         :cascade-index index
-         :cascade-id (:id chosen)
-         :cascade-scores scores
-         ;; TIED-OUTER-CASCADES: retain each cascade's pick beside its score,
-         ;; so a tied score reads as same-pick, degenerate, or genuine
-         ;; without replaying the field.
-         :cascade-picks (mapv (fn [{:keys [steps]}]
-                                (let [p (outer-score/cascade-pick
-                                         steps (:facts observation) (:field observation))]
-                                  (if p (:target p) :no-pick)))
-                              menu)
-         ;; TIED-OUTER-CASCADES (claude-1 decision): retain beside each pick
-         ;; whether its relation was known, so a scored stop resting on an
-         ;; unknown relation reads as ignorance in the record.  ::no-relation-fn
-         ;; observations (pure fixtures with no relation producer) retain
-         ;; {:relation ::no-relation-fn}.
-         :cascade-pick-relations
-         (mapv (fn [pick]
-                 {:target pick
-                  :relation (if (= :no-pick pick) :no-pick
-                                (relation-class observation pick))
-                  :relation-known? (if (= :no-pick pick) nil
-                                       (known-relation? (relation-class observation pick)))})
-               (mapv (fn [{:keys [steps]}]
-                       (let [p (outer-score/cascade-pick
-                                steps (:facts observation) (:field observation))]
-                         (if p (:target p) :no-pick)))
-                     menu))
-         :selection (when picked {:candidates (:field observation)
-                                  :selected picked})
-         :prediction (when picked
-                       {:outcomes (outer-score/push model)
-                        :q (:q model)
-                        :status (:status model)
-                        :landing (:landing model)})
-         ;; Cascades that share the minimum but pick the same task are not a
-         ;; tie in the choice; only distinct tied picks are the defect.
-         :tied-cascades (vec (keep-indexed #(when (= minimum %2) (:id (nth menu %1)))
-                                           scores))
-         :tie? (< 1 (count (distinct
-                            (keep-indexed
-                             #(when (= minimum %2)
-                                (:target (outer-score/cascade-pick
-                                          (:steps (nth menu %1))
-                                          (:facts observation)
-                                          (:field observation))))
-                             scores))))}))))
+            indices (vec (keep-indexed #(when (= minimum %2) %1) scores))
+            tied (mapv #(:id (nth menu %)) indices)]
+        (when (< 1 (count indices))
+          (refuse! :tie-at-minimum {:cascades tied :G minimum :tied-cascades tied
+                                   :selection-evidence evidence}))
+        (let [index (first indices) chosen (nth cascades index) picked (:pick (nth models index))]
+          (when-not (< minimum (:G abstention))
+            (refuse! :pick-not-below-abstention {:cascade (:id chosen) :G minimum
+                                               :abstention-G (:G abstention)
+                                               :selection-evidence evidence}))
+          (let [result (assoc evidence :cascade-index index :cascade-id (:id chosen)
+                             :selection (when picked {:candidates (:field observation) :selected picked})
+                             :prediction (:prediction chosen))]
+            (assert (and (= (:cascade-scores result) (mapv :G (:cascades result)))
+                         (= (:cascade-picks result) (mapv :pick (:cascades result)))
+                         (= (:cascade-pick-relations result) legacy-relations)
+                         (= (:prediction result) (:prediction (nth (:cascades result) index)))))
+            result))))))
