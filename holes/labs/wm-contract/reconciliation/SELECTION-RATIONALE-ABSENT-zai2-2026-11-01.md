@@ -227,3 +227,141 @@ Defects named, outside this row, left for their owners:
 - makeup `:patterns` decorative, no Cascade Live reader in the selection path;
 - `M-interim-director` (and 51 others) graph-unknown with prerequisite
   evidence retained — the standing scope-census debt.
+
+---
+
+# Addendum — outer/inner parity and the library (zai-2, 2026-11-01, second requisition)
+
+Joe: "how was a properly working outer selection not the 1st criterion?
+futon3/library/task-selection/ exists, and I have insisted that the outer loop
+be held to the same criteria regarding AIF as the inner loop."
+
+## (a) The 19 patterns vs the three live cascades
+
+The library (`futon3/library/task-selection/`, README + 19 `.flexiarg`, each
+with `@guard`/`@effect`, written from ~100 witnesses in
+`~/notes/selection-patterns/witnesses-2026-10-28.md`). The Lean vocabulary is
+`R20Step.SelectionStep` (`mathlib4/DarkTower/WarMachine/R20Step.lean:88-104`)
+with exactly five constructors: `.gate keep`, `.order key`, `.readyGate`,
+`.byUnblocks`, `.byCone`; `SelectionCascade := List SelectionStep` (:104),
+applied by `foldl` of filters and insertion sorts (:108-123).
+
+**Which patterns reach live selection:**
+
+| pattern (role) | reaches live selection? | how |
+|---|---|---|
+| only-what-can-start-now (gate) | **yes** | `.readyGate` / Clojure `:ready-gate` — the one faithful port |
+| what-others-wait-on-first (order) | **yes** | `.byUnblocks` + `.byCone` (primary unblocks, cone secondary — see correction below) |
+| find-out-before-building (reshape) | **degenerately** | not in the Lean vocabulary at all; the makeup invents `{:gate-status :undetermined}` (a Clojure-only generic gate), which is not the pattern (the pattern *inserts* a discovery task); NOTE-outer-G-computation §"What each term then means" intended it to fall out of the ambiguity/IG term, which is identically 0 under stop-landings |
+| the other 16 (the-operator-asked, work-that-pays, hold-with-a-rearm-condition, repair-goes-to-the-front, spend-what-the-seats-have, end-in-something-shown, prepare-the-ground, take-the-cheap-win, finish-what-is-nearly-done, take-the-hard-one-to-learn, the-date-decides, halfway-house, bound-the-bet, write-it-down-instead, a-portfolio-not-a-winner, offer-a-menu-with-a-default) | **no** | nothing reads them; the makeup's `:patterns` strings are decorative |
+
+**What stops the others composing into cascades — three structural walls:**
+
+1. **The step vocabulary is filter+sort only.** `applySelectionCascade` is a
+   left fold of filters and stable sorts over an existing candidate list. A
+   cascade can narrow and reorder but can never *add* a candidate — so every
+   *source* pattern (operator-asked, work-that-pays, held-with-rearm) and
+   every *reshape* pattern (find-out-before-building, halfway-house,
+   bound-the-bet, write-it-down-instead) is inexpressible by construction.
+2. **The candidate record carries almost nothing.** `{:target t :reach 1/2}`
+   (`outer_observation.clj` giraffe-field). No operator asks, no hold/rearm
+   reasons, no seat or budget availability, no cost, no external dates, no
+   resolvedness/progress, no prior per-target outcomes. A gate needs its
+   `@guard`'s evidence in the record; none of these guards can read.
+3. **Facts are three Giraffe numbers.** `status`, `unblocks`, `cone`. The
+   generic `.gate`/`.order` constructors could express more, but no producer
+   supplies a predicate or key over anything else — Cascade Live (lineage,
+   clusters, arrows with delta-g, held, patterns, tickets) has no reader in
+   the path (see main report §4).
+
+## Correction to the main report (§2 "dead :by-cone defect")
+
+✘ I withdraw "dead `:by-cone` composition step" as a defect. The Lean
+comment (`R20Step.lean:126-127`) states the intended semantics: "`byUnblocks`
+is last because the last stable sort is the primary key" — unblocks primary,
+cone the stable secondary/tie-break, exactly what my replay reproduced. The
+step is not dead; it is a tie-break. What stands: the record does not retain
+the key order or the grounds, so the composition reads as unexplained — a
+rationale deficit, not a scoring defect.
+
+## (b) Parity table — inner vs outer, per active-inference obligation
+
+Starting points: `NOTE-outer-G-computation-2026-10-28.md`;
+GRID v2 stated limits (reach defaults 1/2; learning yield has no producer,
+stays :none; cascade menu = the makeup list).
+
+| obligation | inner loop (read from code/records) | outer loop (read from code/records) | parity |
+|---|---|---|---|
+| policies **constructed** from patterns | CONSTRUCTED: `interpretation_construction.clj:171` `construct` — backward search from the wants over the mission's interpretations (guard/produces), minimal support sets only, candidates carry pattern ids and precedence; prior from pattern evidence (`cascade_feedback/pattern-evidence-prior`). Joe's own wording applies: "the cascade should be constructed not chosen" | FIXED LIST: three hand-authored cascades in `data/wm-learning/outer-makeup.edn` (pinned sha f3125835…), `:patterns` decorative; nothing constructs a cascade for the click; nothing reads the library or Cascade Live | **outer fails** |
+| G with risk, ambiguity, information gain | live: `CascadeEFE.stepG` risk+ambiguity with novelty term (`PatternThetaNovelty`/`CascadeCoApplyGNovelty` in Lean; g-terms retained per candidate in certificates, `cascade_efe_sut.clj:173-174`) | implemented (`outer_score.clj:185-196`) but **degenerate in fact**: run ac5bc477 — risk-only 3.212120709595516 for all three policies, ambiguity = novelty = 0 (stop-landings); G is a constant of the kits, blind to the pick | **outer fails live** |
+| preferences learned | yes — slice 1b learned C, Smith–Friston–Whyte preference update (κ) in live use | kits learn (c-kit/gain-kit/state-kit) and were consumed live once (E2 closed 2026-10-30, run 3415b671); the learning-yield preference Joe specified (NOTE-outer-G) **has no producer** — every click observes yield `:none` (GRID v2 stated limit) | **outer partial** |
+| beliefs updated from outcomes | yes — per-run belief update, consumed across clicks | live once (E2); most runs defer (`terminal-ending-class-absent`) — honest non-consumption, not learning | **outer partial** |
+| prediction frozen and scored | **not exercised** — GRID B4 row: "Inner prediction was not exercised"; outer-only closure recorded | CLOSED outer-only (B4): `:outer/selection :prediction` frozen before effects on runs f74df9cc, 347b9b51, 5ba921b9, 376d76ff, ff4b4c5c | **outer ahead** |
+| precision | live — `ChannelPrecision.lean`; precision-weighted inner scoring | makeup carries ω/η per kit and `:precision-iterations 16`, but they parameterise the posterior updates only; **no precision term in outer G**, no per-policy precision | **outer fails** |
+| learning (from use, back into the policy evidence) | contested live — pattern feedback file read at construction, but Joe ruled it "a mistake" (learning lives in the connected pattern graph); per-pattern trials record-only | kits update, but the cascades themselves never update: per `select-tasks-from-cascade-live.flexiarg` THEN, each use should update the evidence for each selection cascade — nothing writes or reads per-cascade outcomes | **both fail; outer worse** |
+| rationale retained | strong — construction receipts, per-candidate certificates with g-terms, `selection_cascade_identity.clj:64-77` selection-law receipts, execution journal | scores, picks, tie flags only; no step traces, no grounds, no evidence read, no sentence (this row) | **outer fails** |
+
+Net: of eight obligations the outer loop meets one fully (frozen prediction),
+two partially (learned preferences, outcome-updated beliefs), and fails five.
+The failures share one root: the outer loop was given the inner loop's
+*scoring* without the inner loop's *construction* — policies arrive fixed
+rather than constructed from patterns against live evidence.
+
+## (c) Draft outer criteria (for the GRID, to sit first)
+
+O0 (ordering principle, Joe 2026-11-01): outer selection working properly is
+the first criterion; the outer loop is held to the same AIF criteria as the
+inner loop. No inner policy exists before the task is selected (standing
+rule).
+
+O1 CONSTRUCTED POLICY MENU. Each run's selection cascades are constructed for
+that click from the pattern library (`task-selection/` guard/effect patterns)
+against live evidence (Cascade Live), each naming its patterns and the
+witnesses that earned them; a fixed hand-authored cascade list is a violation.
+Evidence: the menu's construction trace in the run record, with library pins.
+
+O2 GUARDS CAN READ. Every candidate carries the evidence the composed
+patterns' guards read (status, unblocks, cone, hold/rearm reasons, operator
+asks, seat/budget availability, cost, dates, resolvedness, prior outcomes).
+A guard whose evidence is absent is a named hole in the record, never a
+silent narrowing. Evidence: per-candidate fact keys vs pattern `@guard`
+inventory; every absent channel named.
+
+O3 EXPRESSIVE STEPS. The step vocabulary can express what the library's roles
+need — gate, order, source (add candidates), reshape (insert derived tasks) —
+or each inexpressible pattern is recorded out-of-scope with a reason.
+Evidence: the Lean `SelectionStep` vocabulary vs the library role table.
+
+O4 G SEPARATES ON EVIDENCE. G over policies carries risk, ambiguity and
+information gain that can differ between the live policies. A run where all
+policies score the same G with zero ambiguity and zero novelty is retained as
+a **disclosed degeneracy** naming the input that would separate them (on
+ac5bc477: relations unknown → stop-landings). Evidence: per-policy
+risk/ambiguity/novelty decomposition in the record.
+
+O5 PREFERENCES PRODUCED. The ending/gain/state kits update from outcomes
+(retained), and the learning-yield preference has a typed producer (pattern/
+cascade introduction step per NOTE-outer-G) — until it exists, every run that
+could have been influenced by yield records the limit. Evidence: producer
+receipts or the typed absence, per run.
+
+O6 PREDICTION INCLUDES SELECTIVE POWER. The frozen outer prediction (B4, keep)
+is extended with the selection's own prediction: which input would have
+separated the policies, scored after the run against what actually changed.
+Evidence: prediction before effects; post-run scoring of the named separator.
+
+O7 USE UPDATES POLICY EVIDENCE. Each run's outcome updates not only the kits
+but the evidence for the cascades themselves (which way of selecting won), per
+`select-tasks-from-cascade-live` THEN. Evidence: per-cascade outcome ledger
+read by the next construction (O1).
+
+O8 RATIONALE RETAINED (this row's closure condition, unchanged): per-cascade
+step traces with candidate counts and the fact each step narrowed on, G terms
+per policy, the evidence read (Giraffe run + manifest, makeup sha, focus and
+relation receipts, effective-run pins), and one sentence a person can read.
+
+Relation to existing GRID rows: B3 asked only that cascades be *compared*
+with the declared G; O1-O4 hold the comparison to the inner loop's standard
+(construction, readable guards, expressive steps, live G terms). B4 outer-only
+closure stands; O6 extends it. E2/O7 overlap cleanly: E2 is state
+consumption, O7 is policy-evidence consumption.
