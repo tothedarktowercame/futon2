@@ -712,3 +712,11 @@
                                                   {:status :absent :reason :status-unavailable}))
                             ["selectionPath" "pickReach"])))
     (is (= "defaulted" (get-in selection-live ["selectionPath" "pickReach"])))))
+
+(deftest removed-stub-drops-only-the-new-record-absence
+  ;; The retained 11-01 fixture remains unchanged and still counts its stub.
+  (let [old (selection-of live-record)
+        modern (selection-of (dissoc live-record :outer-task-selection))]
+    (is (= 2 (old "pathAbsenceCount")))
+    (is (= 1 (modern "pathAbsenceCount")))
+    (is (= (dissoc old "pathAbsenceCount") (dissoc modern "pathAbsenceCount")))))

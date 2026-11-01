@@ -1,6 +1,7 @@
 (ns futon2.aif.outer-selection-wiring-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [wm-run-facts :as run-facts]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.load-identity :as load-identity]
@@ -8,6 +9,8 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
+            [futon2.aif.outer-select-test :as fixtures]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.outer-state :as outer-state]
             [futon2.test-support.runner-fixture :as runner-fixture]))
 
@@ -157,7 +160,9 @@
     ;; The source checker still hashes and compares the files; it is not stubbed.
     (with-redefs [load-identity/required-sources
                   (assoc load-identity/required-sources 'futon2.aif.full-loop-runtime
-                         (.getCanonicalPath (io/file "src/futon2/aif/full_loop_runtime.clj")))
+                         (.getCanonicalPath (io/file "src/futon2/aif/full_loop_runtime.clj"))
+                         'futon2.aif.full-loop-runner
+                         (.getCanonicalPath (io/file "src/futon2/aif/full_loop_runner.clj")))
                   runner/run-opportunity-core!
                   (fn [_]
                     {:attempt-id "outer-selection-persistence"
@@ -176,22 +181,61 @@
                                       :click-id "outer-selection-absent"))
             absent-record (edn/read-string (slurp (:run-record without-selection)))]
         (is (= selection (:outer/selection present-record)))
+        (is (not (contains? present-record :outer-task-selection)))
+        (is (not (contains? absent-record :outer-task-selection)))
+        (let [project (fn [r] (get-in (run-facts/selection-facts-for-record r "fresh-record" {} {})
+                                     [:facts "pathAbsenceCount"]))
+              with-old-stub (assoc present-record :outer-task-selection
+                                   {:status :absent :reason :receipt-not-retained})]
+          (is (= (inc (project present-record)) (project with-old-stub))))
         (is (not (contains? absent-record :outer/selection)))
         (is (= 2 (count (record-files record-dir))))))))
 
-(deftest reading-refusal-does-not-filter-the-open-field
-  (let [selection {:outer-score/admitted ["M-a" "M-b"]
-                   :field-facts {:enumerated ["M-a" "M-b"]
-                                 :admitted {"M-a" {:pin "a"} "M-b" {:pin "b"}}
-                                 :excluded []}}
-        carrier (atom {:task {:id "M-a"} :outer/selection selection})
-        port (runtime/reading-reselection-port nil nil nil selection carrier
-                                               (fn [_] (throw (ex-info "Must not replace pending" {}))))
-        refusal {:target "M-a" :kind :repeat-choice-after-refusal}]
+(deftest reading-refusal-forbids-without-changing-the-field
+  ;; Two ready rows from the pinned 11-01 pass; retained facts, not invented
+  ;; graph metrics. Named fixture gates isolate the minimum-selection law.
+  (let [text (slurp "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5/pass.edn")
+        _ (is (= "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91"
+                 (identity/sha256 text)))
+        rows (take 2 (filter #(= :ready (:status %)) (:order (edn/read-string text))))
+        targets (mapv (comp name :id) rows)
+        facts (into {} (map (fn [row] [(name (:id row))
+                                       (assoc row :pin (get-in row [:dependency-reading :record-pin :sha256]))]) rows))
+        field (mapv #(hash-map :target % :reach 3/4) targets)
+        observation {:field field :facts facts :focus (first targets)
+                     :relation (fn [_ t] (if (= t (first targets)) :focus :associated))
+                     :field-facts {:enumerated targets :admitted facts :excluded []}}
+        makeup {:cascades (mapv (fn [t] {:id t :steps [{:gate #(= t (:target %))}]}) targets)}
+        selection (outer-select/select makeup fixtures/base-state observation)
+        carrier (atom {:task {:id (first targets)} :outer/selection selection})
+        persisted (atom [])
+        port (runtime/reading-reselection-port makeup fixtures/base-state observation selection carrier
+                                               #(swap! persisted conj %))
+        refusal {:target (first targets) :kind :repeat-choice-after-refusal :digest "retained-input"}
+        result (port refusal)
+        retained (:selection result)]
+    (is (= (second targets) (:target result)))
+    (is (= (:field-facts selection) (:field-facts retained)))
+    (is (= (set targets) (set (map :pick (:cascades retained)))))
+    (is (= {:target (first targets) :reason :repeat-choice-after-refusal
+            :pin (identity/digest refusal) :receipt refusal} (first (:forbidden retained))))
+    (is (= [retained] @persisted))
+    (is (= (second targets) (get-in @carrier [:task :id])))
     (is (nil? (port refusal)))
-    (is (= selection (dissoc (:outer/selection @carrier) :reading-reselection)))
-    (is (= :task-field-reselection-not-supported
-           (get-in @carrier [:outer/selection :reading-reselection :reason])))
-    (is (= [refusal] (get-in @carrier [:outer/selection :reading-reselection :refusals])))
-    (is (= "M-a" (get-in @carrier [:task :id])))
-    (is (nil? (port refusal)))))
+    (is (= 1 (count @persisted)))))
+
+(deftest exhausted-forbidden-menu-retains-refusal-without-pending-write
+  (let [observation fixtures/base-observation
+        makeup {:cascades [(first (:cascades fixtures/base-makeup))]}
+        selection (outer-select/select makeup fixtures/base-state observation)
+        carrier (atom {:task {:id "M-ready"} :outer/selection selection})
+        writes (atom 0)
+        port (runtime/reading-reselection-port makeup fixtures/base-state observation selection carrier
+                                               (fn [_] (swap! writes inc)))
+        error (try (port {:target "M-ready" :kind :repeat-choice-after-refusal})
+                   (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= :no-admissible-pick (:kind error)))
+    (is (= :no-admissible-pick (get-in @carrier [:outer/selection :reason])))
+    (is (= (:cascades selection) (get-in @carrier [:outer/selection :cascades])))
+    (is (nil? (:task @carrier)))
+    (is (zero? @writes))))

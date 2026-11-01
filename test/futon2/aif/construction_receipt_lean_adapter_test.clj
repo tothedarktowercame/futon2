@@ -563,3 +563,17 @@
                                   [:decision :selection-certificate
                                    :policy-precision-state :status]
                                   :updated))))))))
+
+(deftest modern-selection-carrier-is-not-a-historical-learning-certificate
+  (let [selection {:cascade-id :ready-first :selection {:selected {:target "M-task"}}
+                   :outer/learning {:status :applied :receipt {:run-id "predecessor"}}}
+        record {:outer/selection selection}
+        carrier (adapter/selection-carrier record)
+        failure (try (adapter/outer-learning-input-from-run-record record "pin" {})
+                     (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= {:chosen {:id :ready-first} :action {:target "M-task"}
+            :outer-learning (:outer/learning selection)} carrier))
+    (is (= :adapter/outer-learning-certificate-unavailable (:refusal failure)))
+    (is (= carrier (:carrier failure)))
+    (is (= {:status :absent :reason :outer-selection-not-retained :missing :outer/selection}
+           (adapter/selection-carrier {})))))

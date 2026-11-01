@@ -1252,18 +1252,38 @@
   (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
 
 (defn reading-reselection-port
-  "Retain the reading refusal without deleting an open task from the field.
-  A forbidden-target minimum is not implemented here; L5-4c must supply that
-  continuation. This port honestly refuses reselection and preserves the
-  original scored field and pending carrier."
-  [_makeup _state _observation _initial-selection selection-state _persist-pending!]
+  "One click-local reselection: score the unchanged field, forbidding the
+  refused target only at the minimum. Retain the refusal and its digest; never
+  turn a reading refusal into a task exclusion or an altered field partition."
+  [makeup state observation initial-selection selection-state persist-pending!]
   (let [used? (atom false)]
     (fn [refusal]
       (when (compare-and-set! used? false true)
-        (swap! selection-state assoc-in [:outer/selection :reading-reselection]
-               {:status :refused :reason :task-field-reselection-not-supported
-                :limit 1 :used 1 :refusals [refusal]})
-        nil))))
+        (let [row {:target (:target refusal) :reason (:kind refusal)
+                   :pin (action-identity/digest refusal) :receipt refusal}
+              forbidden (conj (vec (:forbidden initial-selection)) row)
+              observation (assoc observation :forbidden (set (map :target forbidden))
+                                             :forbidden-evidence forbidden)
+              reselection {:limit 1 :used 1 :previous-selection initial-selection
+                           :refusals [refusal]}]
+          (try
+            (let [result (outer-select/select makeup state observation)
+                  target (get-in result [:selection :selected :target])
+                  retained (-> (merge initial-selection result)
+                               (update :selection #(some-> % (dissoc :candidates)))
+                               (assoc :reading-reselection reselection
+                                      :selected-relation ((:relation observation) (:focus observation) target)))]
+              (persist-pending! retained)
+              (reset! selection-state {:task {:id target} :outer/selection retained})
+              {:target target :selection retained})
+            (catch clojure.lang.ExceptionInfo e
+              (let [data (ex-data e)
+                    retained (-> (merge (dissoc initial-selection :selection :cascade-id :cascade-index :prediction)
+                                         (:selection-evidence data))
+                                 (assoc :forbidden forbidden :status :refused :reason (:kind data)
+                                        :reading-reselection (assoc reselection :status :refused :reason (:kind data))))]
+                (reset! selection-state {:task nil :outer/selection retained})
+                (throw e)))))))))
 
 (defn- run-ordinary-opportunity!
   "Run one production opportunity with the report-backed defaults installed.

@@ -549,12 +549,31 @@
       {:source-sha256 actual :projection projection
        :lean (render-selection projection actual)})))
 
+(defn selection-carrier
+  "Derive the three legacy-shaped keys from modern :outer/selection. Chosen is
+  the CASCADE, action.target is its TASK; they are not interchangeable. Learning
+  is carried unchanged. A missing modern section is an explicit absence."
+  [run-record]
+  (if-let [selection (:outer/selection run-record)]
+    {:chosen {:id (:cascade-id selection)}
+     :action {:target (get-in selection [:selection :selected :target])}
+     :outer-learning (:outer/learning selection)}
+    {:status :absent :reason :outer-selection-not-retained :missing :outer/selection}))
+
 (defn outer-learning-input-from-run-record
   "Project the two temporal edges of one outer-learning click: the posterior
   consumed while selecting this run, and this exact run record's later
   publication for a future click.  The certificate deliberately does not
-  claim that a run can influence its own selection."
+  claim that a run can influence its own selection. This is the HISTORICAL
+  R8/KL certificate adapter. Modern :outer/learning (:applied/:deferred) has no
+  Lean adapter yet; L5-4L-4 must implement Requirements.SelectionPath learning
+  clauses, not fabricate this old certificate."
   [run-record run-record-sha manifest]
+  (when (or (contains? run-record :outer/selection)
+            (not (map? (:outer-task-selection run-record)))
+            (= :absent (get-in run-record [:outer-task-selection :status])))
+    (refuse! :adapter/outer-learning-certificate-unavailable
+             {:carrier (selection-carrier run-record)}))
   (let [outer (:outer-task-selection run-record)
         learning (:outer-learning outer)
         chosen (get-in outer [:chosen :id])
