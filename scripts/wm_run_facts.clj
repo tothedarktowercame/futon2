@@ -1176,6 +1176,8 @@
         nr not-recomputable
         carried (fn [reason] (if section? (nr reason) (nr no-section)))
         field-facts (:field-facts selection)
+        roster (:open-tasks field-facts)
+        roster-keys {"openMissions" :missions "openExcursions" :excursions "openTickets" :tickets}
         admitted (if field-facts (keys (:admitted field-facts)) (:outer-field/admitted selection))
         exclusions (if field-facts (:excluded field-facts) (:outer-field/excluded selection))
         excluded (map :target exclusions)
@@ -1185,6 +1187,8 @@
                             ["openMissions" "openExcursions" "openTickets"
                              "factorizedPreference" "calibrationAuthorizations"
                              "factorizationAuthorizations"])
+               (when roster
+                 (into {} (map (fn [[k kind]] [k (sorted-ids (get roster kind))]) roster-keys)))
                (zipmap ["targetConstruction" "constructorPatternCount" "libraryPatternCount"]
                        (repeat (carried no-library-pin)))
                (zipmap ["previousChoice" "previousOutcome" "previousInputDigest"
@@ -1231,7 +1235,11 @@
                 facts)
         tick-path (get-in completion [:tick-record :path])]
     {:facts facts
-     :sources (assoc (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
+     :sources (assoc (merge (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
+                            (when roster
+                              (into {} (map (fn [[k kind]]
+                                              [k (str record-path " " (pr-str [:outer/selection :field-facts :open-tasks kind]))])
+                                            roster-keys))))
                      "interpretationOrder"
                      (or phase-log-path ":phase-log path absent"))
      :diagnostics {:recordKind (if (= selection-record/schema (:schema source)) "selection-record" "tick-record")

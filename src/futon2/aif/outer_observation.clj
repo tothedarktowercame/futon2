@@ -60,7 +60,8 @@
 (defn- target-authority []
   (let [loaded-tickets (mission-registry/load-tickets)
         loaded-excursions (mission-registry/load-excursions)]
-    {:loaded-missions (mission-registry/load-missions)
+    {:registry-source :substrate
+     :loaded-missions (mission-registry/load-missions)
      :loaded-tickets loaded-tickets
      :loaded-excursions loaded-excursions
      :ticket-targets (mapv :id (:tickets loaded-tickets))
@@ -121,6 +122,17 @@
 
 (defn- data-pin [x] (sha256 (.getBytes (pr-str x) "UTF-8")))
 
+(defn- open-roster [authority entries]
+  (let [ids (set (map :id entries))
+        groups (mapv (fn [[loaded kind]]
+                       (vec (sort (filter ids (map :id (get-in authority [loaded kind]))))))
+                     [[:loaded-missions :missions] [:loaded-excursions :excursions]
+                      [:loaded-tickets :tickets]])]
+    (assoc (zipmap [:missions :excursions :tickets] groups)
+           ;; Explicit authorities may come from tooling; do not invent provenance.
+           :source (or (:registry-source authority) :unspecified)
+           :registry-pin (data-pin groups))))
+
 (defn giraffe-field
   "The registry-open task population, partitioned into pinned pass facts and
   typed task exclusions. No inner-policy or makeup reach participates."
@@ -143,7 +155,9 @@
                  (refuse! :giraffe-pass-invalid {:run-dir (.getPath dir)}))
              by-id (into {} (map (juxt (comp name :id) identity)) rows)
              registry (registry-entries authority)
-             open-ids (mapv :id (open-entries authority))
+             open (vec (open-entries authority))
+             roster (open-roster authority open)
+             open-ids (mapv :id open)
              _ (when-not (= (count open-ids) (count (set open-ids)))
                  (refuse! :registry-duplicate-open-task {}))
              ;; Preserve the pass's order (including stable-sort ties), then
@@ -188,7 +202,7 @@
          (validate-field! enumerated (mapv :target admitted) excluded)
          {:field (mapv :candidate admitted) :facts facts
           :enumerated-open-tasks enumerated
-          :field-facts {:enumerated enumerated :admitted facts :excluded excluded
+          :field-facts {:open-tasks roster :enumerated enumerated :admitted facts :excluded excluded
                         :giraffe/pass-sha256 pass-sha}
           :outer-field/excluded excluded
           :registry/non-open (mapv #(select-keys % [:id :status-class])
