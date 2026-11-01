@@ -1,6 +1,6 @@
 # E-kimi-task-204 — prove lemma apm_t98a04_submersion_aux_section in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T15:35:27Z to kimi-2 as invoke-1793547327638-9434-042086db
+**Requisition:** completed — 2026-11-01T15:53:50Z, job invoke-1793547327638-9434-042086db, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
