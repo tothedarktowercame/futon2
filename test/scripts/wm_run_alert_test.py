@@ -24,7 +24,9 @@ FACTS={"enumeratedTasks":[],"openMissions":[],"openExcursions":[],"openTickets":
        "previousInputDigest":"none","currentInputDigest":"none","pathAbsenceCount":0,
        "targetsReachingScoring":[],"targetsWithG":[],"comparedPolicies":[],
        "completionPairsStrictlyPreferred":0,"completionPreferencePairs":0,
-       "arrangementPairsDistinguishedByG":0,"differentArrangementPairs":0}
+       "arrangementPairsDistinguishedByG":0,"differentArrangementPairs":0,
+       "kind":"work","constructorPatternCount":0,"policyG":[],"abstentionG":0,"policyPrediction":[]}
+REQUIREMENTS=(1,2,3,4,5,6,7,9,11)
 
 class AlertTest(unittest.TestCase):
   def invoke(self, extra=(), record=CLICK20, no_evidence=True):
@@ -44,21 +46,72 @@ class AlertTest(unittest.TestCase):
     self.addCleanup(server.server_close); self.addCleanup(server.shutdown)
     return f"http://127.0.0.1:{server.server_port}/evidence"
 
-  def mocked_evaluation(self):
+  def mocked_evaluation(self, lean_output=None):
     td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup); root=Path(td.name)
     record=root/"run.edn"; record.write_text("{}\n")
     facts=root/"facts.json"; facts.write_text(json.dumps({"facts":FACTS,"diagnostics":{}}))
     module=loaded_alert_module()
+    output=lean_output if lean_output is not None else {q:"holds" for q in REQUIREMENTS}
     module.run=lambda cmd,_: subprocess.CompletedProcess(cmd,0,
-      "\n".join(f"Requirement.q{q}, fixture Outcome.holds" for q in range(1,11)),"")
+      "\n".join(f"Requirement.q{q}, fixture Outcome.{v}" for q,v in output.items()),"")
     module.lake_executable=lambda: "lake"; module.sha=lambda *_: "fixture-sha"
     return module,root,record,facts
 
   def test_click20_alerts_and_exits_nonzero(self):
     p,rec=self.invoke(); self.assertNotEqual(p.returncode,0); self.assertTrue(p.stdout.startswith("ALERT FOR JOE\n"))
-    for q in (1,4,5,6,7,9): self.assertRegex(p.stdout,rf"(?m)^Q{q} (violated|unverifiable):")
-    for q in (2,3,8,10): self.assertNotRegex(p.stdout,rf"(?m)^Q{q} ")
+    for q in (1,2,4,5,6,7,9,11): self.assertRegex(p.stdout,rf"(?m)^Q{q} (violated|unverifiable):")
+    for q in (3,8,10): self.assertNotRegex(p.stdout,rf"(?m)^Q{q} ")
     self.assertTrue(Path(str(rec)+".requirements.edn").is_file())
+
+  def evaluate(self, lean_output):
+    module,root,record,facts=self.mocked_evaluation(lean_output); out=io.StringIO()
+    with contextlib.redirect_stdout(out):
+      status=module.main(["--run-record",str(record),"--facts-json",str(facts),
+                          "--alerts-log",str(root/"alerts.log"),"--no-evidence"])
+    return status,out.getvalue(),Path(str(record)+".requirements.edn").read_text()
+
+  def test_requirement_list_is_read_from_lean(self):
+    td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup); ml=Path(td.name)
+    path=ml/"DarkTower/WarMachine/Requirements.lean"; path.parent.mkdir(parents=True)
+    path.write_text("inductive Requirement where | q1 | q3 | q12\n  deriving DecidableEq\n")
+    self.assertEqual((1,3,12),loaded_alert_module().requirement_numbers(ml))
+    path.write_text("-- no such declaration\n")
+    with self.assertRaises(RuntimeError): loaded_alert_module().requirement_numbers(ml)
+
+  def test_requirement_missing_from_lean_output_is_not_checked(self):
+    output={q:"holds" for q in REQUIREMENTS if q != 7}
+    status,stdout,verdict=self.evaluate(output)
+    self.assertEqual(1,status); self.assertTrue(stdout.startswith("ALERT FOR JOE\n"))
+    self.assertRegex(stdout,r"(?m)^Q7 not-checked:")
+    self.assertIn('":Q7" ":not-checked"',verdict)
+    self.assertIn('":conforms" false',verdict)
+
+  def test_unverifiable_is_not_holds(self):
+    status,stdout,verdict=self.evaluate({q:"unverifiable" if q == 11 else "holds" for q in REQUIREMENTS})
+    self.assertEqual(1,status); self.assertTrue(stdout.startswith("ALERT FOR JOE\n"))
+    self.assertRegex(stdout,r"(?m)^Q11 unverifiable:")
+    self.assertIn('":conforms" false',verdict)
+
+  def test_empty_lean_output_conforms_to_nothing(self):
+    status,stdout,verdict=self.evaluate({})
+    self.assertEqual(1,status)
+    for q in REQUIREMENTS: self.assertRegex(stdout,rf"(?m)^Q{q} not-checked:")
+    self.assertIn('":conforms" false',verdict)
+
+  def test_outcomes_wrapped_over_lines_are_read(self):
+    module,root,record,facts=self.mocked_evaluation()
+    wrapped="[" + ",\n ".join(f"(Requirements.Requirement.q{q},\n  RequirementsReader.Outcome.holds)" for q in REQUIREMENTS) + "]"
+    module.run=lambda cmd,_: subprocess.CompletedProcess(cmd,0,wrapped,"")
+    out=io.StringIO()
+    with contextlib.redirect_stdout(out):
+      status=module.main(["--run-record",str(record),"--facts-json",str(facts),
+                          "--alerts-log",str(root/"alerts.log"),"--no-evidence"])
+    self.assertEqual(0,status); self.assertTrue(out.getvalue().startswith("CONFORMS"))
+
+  def test_nr_carrier_prints_its_reason(self):
+    module=loaded_alert_module()
+    facts=dict(FACTS,policyG={"not-recomputable":"not yet projected"})
+    self.assertIn("policyG: not yet projected",module.numbers(11,facts))
 
   def test_checker_failure_is_an_alert(self):
     p,_=self.invoke(["--mathlib-root","/definitely/missing"]); self.assertNotEqual(p.returncode,0); self.assertIn("requirements NOT CHECKED",p.stdout)

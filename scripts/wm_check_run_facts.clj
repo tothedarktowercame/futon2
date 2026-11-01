@@ -88,12 +88,68 @@
           (fs (field cascade :admitted)) (fs (field cascade :scored))
           (fs (field cascade :requirement-excluded))
           (fs (field cascade :posterior))))
+(def run-kinds {"work" ".work" "selection" ".selection"})
+(defn kind-term
+  "An unknown kind renders as no constructor, which Lean refuses to elaborate."
+  [kind]
+  (get run-kinds kind ".unknownRunKind"))
+(defn digest-term
+  "A numeric digest is kept as it is: `id` would hash an explicit 0, the
+  recorded absence, to a non-zero id."
+  [x]
+  (if (integer? x) x (id x)))
+(defn provenance-term
+  "An unknown provenance renders as no constructor, which Lean refuses."
+  [x]
+  (cond (= "defaulted" x) ".defaulted"
+        (= "absent" x) ".absent"
+        (and (map? x) (contains? x "observed")) (str ".observed " (digest-term (x "observed")))
+        :else ".unknownProvenance"))
+(defn run-provenance [[run provenance]]
+  (format "(%d, %s)" (id run) (provenance-term provenance)))
+(defn selection-path-term [path]
+  (format "some { receipt := %s, pickRelation := %s, pickReach := %s, pendingRun := %s, consumedRuns := [%s], learningApplied := %s }"
+          (provenance-term (path "receipt"))
+          (provenance-term (path "pickRelation"))
+          (provenance-term (path "pickReach"))
+          (if-let [pending (path "pendingRun")]
+            (str "some " (run-provenance pending))
+            "none")
+          (str/join ", " (map run-provenance (path "consumedRuns")))
+          (bool-lit (path "learningApplied"))))
+(defn exact-rational?
+  "An exact numerator and positive denominator.  A float is not one, and neither
+  is n/0, which Lean would read as 0."
+  [x]
+  (and (map? x) (integer? (x "numerator"))
+       (integer? (x "denominator")) (pos? (x "denominator"))))
+(defn rational-term [x]
+  (format "(%s / %s)" (x "numerator") (x "denominator")))
+(defn exact-g? [facts]
+  (and (exact-rational? (facts "abstentionG"))
+       (sequential? (facts "policyG"))
+       (every? #(exact-rational? (% "g")) (facts "policyG"))))
+(defn policy-g [rows]
+  (str "[" (str/join ", " (for [row rows]
+                            (format "(%d, %s)" (id (row "policy")) (rational-term (row "g")))))
+       "]"))
+(defn policy-prediction [rows]
+  (str "[" (str/join ", " (for [row rows]
+                            (format "(%d, %s)" (id (row "policy")) (digest-term (row "digest")))))
+       "]"))
+(defn nested-nr?
+  "A construction can carry an NR inside it.  `fs` would hash that map into
+  ids, so an inner NR makes the whole carrier not recomputable."
+  [x]
+  (some nr? (tree-seq coll? seq x)))
 (def outcomes {"changed" ".changed" "alreadySatisfied" ".alreadySatisfied"
                "question" ".question" "refused" ".refused" "invalid" ".invalid"
                "timedOut" ".timedOut"})
 
 (def deps
   {:q1 ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"]
+   :q2 ["kind" "targetConstruction" "libraryPatternCount" "constructorPatternCount"
+        "comparedPolicies" "constructedCascades" "enumeratedTasks" "currentChoice"]
    :q3 ["cascadesWithoutG"]
    :q4 ["policyPreferences" "gTerms"
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
@@ -101,9 +157,19 @@
    :q5 ["interpretationOrder"]
    :q6 ["previousChoice" "previousOutcome" "previousInputDigest"
         "currentChoice" "currentInputDigest"]
-   :q7 ["pathAbsenceCount"]
+   :q7 ["pathAbsenceCount" "kind" "selectionPath"]
    :q9 ["factorizedPreference" "calibrationAuthorizations"
-        "factorizationAuthorizations"]})
+        "factorizationAuthorizations"]
+   :q11 ["currentChoice" "comparedPolicies" "constructedCascades" "targetConstruction"
+         "enumeratedTasks" "kind" "policyG" "abstentionG" "policyPrediction"]})
+
+(defn required-keys
+  "A work run has no selection path to export, so Q7 does not wait on one.  A
+  selection run does, and a path on a work run is rendered for Q7 to refuse."
+  [facts q]
+  (if (and (= :q7 q) (= "work" (facts "kind")) (not (contains? facts "selectionPath")))
+    (remove #{"selectionPath"} (deps q))
+    (deps q)))
 
 (defn partial-run-fact-fields
   "Read the field names from Lean's PartialRunFacts declaration.  This keeps
@@ -121,13 +187,26 @@
     fields))
 
 (defn evidence [facts q]
-  (let [ks (deps q)]
-    (if-not (known? facts ks)
-      (ev-nr facts ks)
+  (let [ks (required-keys facts q)]
+    (cond
+      (not (known? facts ks)) (ev-nr facts ks)
+      (and (#{:q2 :q11} q) (nested-nr? (facts "targetConstruction")))
+      ".nr \"not recomputable: targetConstruction carries a not-recomputable value\""
+      (and (= :q11 q) (not (exact-g? facts)))
+      ".nr \"G not projected at a declared scale\""
+      (and (= :q7 q) (= "selection" (facts "kind")) (nil? (facts "selectionPath")))
+      ".nr \"not recomputable: selection run without selectionPath\""
+      :else
       (case q
         :q1 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, enumeratedTasks := %s"
                               (fs (facts "openMissions")) (fs (facts "openExcursions"))
                               (fs (facts "openTickets")) (fs (facts "enumeratedTasks"))))
+        :q2 (ev-known (format "kind := %s, enumeratedTasks := %s, currentChoice := %s, targetConstruction := %s, libraryPatternCount := %s, constructorPatternCount := %s, comparedPolicies := %s, constructedCascades := %s"
+                              (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
+                              (choice (facts "currentChoice"))
+                              (target-construction (facts "targetConstruction"))
+                              (facts "libraryPatternCount") (facts "constructorPatternCount")
+                              (fs (facts "comparedPolicies")) (fs (facts "constructedCascades"))))
         :q3 (ev-known (str "cascadesWithoutG := " (fs (facts "cascadesWithoutG"))))
         :q4 (let [g (facts "gTerms")]
               (ev-known (format "policyPreferences := %s, gTerms := ⟨%s, %s, %s⟩, policiesWithRiskTerm := %d, policiesWithAmbiguityTerm := %d, policiesWithInformationTerm := %d, comparedPolicies := %s"
@@ -143,7 +222,18 @@
                               (choice (facts "previousChoice")) (outcomes (facts "previousOutcome"))
                               (id (facts "previousInputDigest")) (choice (facts "currentChoice"))
                               (id (facts "currentInputDigest"))))
-        :q7 (ev-known (str "pathAbsenceCount := " (facts "pathAbsenceCount")))
+        :q7 (ev-known (format "pathAbsenceCount := %s, kind := %s, selectionPath := %s"
+                              (facts "pathAbsenceCount") (kind-term (facts "kind"))
+                              (if-let [path (facts "selectionPath")]
+                                (selection-path-term path)
+                                "none")))
+        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentChoice := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s"
+                               (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
+                               (choice (facts "currentChoice"))
+                               (target-construction (facts "targetConstruction"))
+                               (fs (facts "comparedPolicies")) (fs (facts "constructedCascades"))
+                               (policy-g (facts "policyG")) (rational-term (facts "abstentionG"))
+                               (policy-prediction (facts "policyPrediction"))))
         :q9 (let [certificate (facts "factorizedPreference")
                   calibration (field certificate :calibration)
                   selected-calibration-term (when calibration (calibration-term calibration))
@@ -177,7 +267,7 @@
 
 (defn lean-source
   ([export definition-name]
-   (lean-source export definition-name [:q1 :q3 :q4 :q5 :q6 :q7 :q9]))
+   (lean-source export definition-name [:q1 :q2 :q3 :q4 :q5 :q6 :q7 :q9 :q11]))
   ([export definition-name partial-fields]
    (let [unknown (seq (remove deps partial-fields))]
      (when unknown
@@ -193,7 +283,7 @@
          "def " definition-name " : PartialRunFacts where\n"
          (apply str (for [q partial-fields]
                       (str "  " (name q) " := " (evidence facts q) "\n")))
-         "#eval alert " definition-name "\n"))))
+         "#eval outcomes " definition-name "\n"))))
 
 (defn -main [& [json-path lean-path definition-name reader-path]]
   (when-not (and json-path lean-path reader-path)

@@ -70,6 +70,17 @@
     (is (contains? (exported "constructorPatternCount") "not-recomputable"))))
 
 
+(deftest the-projector-labels-a-tick-record-as-work
+  (let [planted (assoc record :kind "selection" :run-kind :selection)
+        exported (:facts (facts/facts-for-record planted "r" snap))]
+    (is (= "work" (exported "kind")))
+    (is (not (contains? exported "selectionPath")))))
+
+(deftest g-carriers-are-not-recomputable-until-projected
+  (let [exported (:facts (facts/facts-for-record record "r" snap))]
+    (doseq [field ["policyG" "abstentionG" "policyPrediction"]]
+      (is (contains? (exported field) "not-recomputable")))))
+
 (deftest runfacts-field-set-is-exact
   (let [exported (:facts (facts/facts-for-record record "r" snap))]
     (is (= (set facts/run-fact-fields) (set (keys exported))))))
