@@ -4464,6 +4464,7 @@
     ],
     "authority": "node presence only; not adjacency permission"
   },
+  "embedding-floor": 0.0,
   "global-preference": {
     "masses": {
       "focus": 0.55,

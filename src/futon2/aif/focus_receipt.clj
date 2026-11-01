@@ -145,8 +145,8 @@
     (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest md)))))
 
 (defn- default-mission-text
-  "The mission file for TARGET under CODE-ROOT's primary futon checkouts
-  (<repo>/holes/M-*.md or <repo>/holes/missions/M-*.md), as {:path :text
+  "The mission or excursion file for TARGET under CODE-ROOT's primary futon
+  checkouts (<repo>/holes/{M,E}-*.md or <repo>/holes/missions/M-*.md), as {:path :text
   :sha256}, or nil."
   [code-root target]
   (some (fn [repo]
@@ -161,7 +161,7 @@
                          (or (.listFiles (io/file code-root)) [])))))
 
 (defn stated-relations
-  "The M- targets a mission's `## Relations` section names, in order, each
+  "The M- targets a mission or excursion's `## Relations` section names, in order, each
   {:to id :line n :quote text} (the line, 1-based, as in the file)."
   [text]
   (let [lines (vec (str/split-lines text))
@@ -228,7 +228,7 @@
   is {target row}. {:row r :derived-via {:kind :embedding-neighbour
   :neighbour :cosine :runner-up :candidates :pins :floor}} or {:absent
   reason …}. A floor applies only when the inputs declare
-  :embedding :min-cosine; otherwise :floor {:absent :no-floor-declared}."
+  top-level :embedding-floor. Absence refuses embedding derivation."
   [inputs target rowed]
   (let [pins (get-in inputs [:embedding :source-pins])
         pin-of (fn [suffix] (first (filter #(str/ends-with? (str (:path %)) suffix) pins)))
@@ -246,7 +246,11 @@
           (let [stems (:stems (json/parse-string (slurp (:path jp)) true))
                 {:keys [rows]} (read-npy-f8 (:path np))
                 idx (into {} (map-indexed (fn [i s] [s i]) stems))
-                stem (fn [t] (if (str/starts-with? t "M-") (subs t 2) t))
+                stem (fn [t] (if (and (string? t)
+                                      (or (str/starts-with? t "M-")
+                                          (str/starts-with? t "E-")))
+                               (subs t 2)
+                               t))
                 me (idx (stem target))]
             (if-not me
               {:absent :embedding-node-not-retained}
@@ -255,17 +259,25 @@
                                                    (when (not= t target) [t (cosine (rows me) (rows i))]))))
                                (sort-by (comp - second)) vec)
                     [[nt nc] runner] cands
-                    floor (get-in inputs [:embedding :min-cosine])]
+                    floor-present? (contains? inputs :embedding-floor)
+                    floor (:embedding-floor inputs)]
                 (cond
                   (empty? cands) {:absent :no-classified-target-in-embedding}
-                  (and (number? floor) (< nc floor))
-                  {:absent :nearest-below-threshold :nearest nt :cosine nc :min-cosine floor}
+                  (not floor-present?)
+                  {:absent :embedding-floor-not-declared :nearest nt :cosine nc}
+                  (not (number? floor))
+                  {:absent :invalid-embedding-floor :floor floor :nearest nt :cosine nc}
+                  ;; Zero is the declared compatibility setting: it enables
+                  ;; the parameter without changing the pre-floor producer,
+                  ;; including its recorded negative-cosine observations.
+                  (and (pos? floor) (< nc floor))
+                  {:absent :embedding-below-floor :nearest nt :cosine nc :floor floor}
                   :else
                   {:row (get rowed nt)
                    :derived-via {:kind :embedding-neighbour :neighbour nt :cosine nc
                                  :runner-up (or runner {:absent :no-runner-up})
                                  :candidates cands :pins [jp np]
-                                 :floor (if (number? floor) {:min-cosine floor} {:absent :no-floor-declared})}})))))))))
+                                 :floor floor}})))))))))
 
 (defn classify-target
   "THE shared relation producer (codex-20 ruling, handoff B): one
@@ -328,20 +340,32 @@
                            (when-let [p (:target finding-record)]
                              {:kind :finding-target :parent p :source (str "finding " (subs target 2))})))
          parent (:parent parent-source)
-         ;; WM-RELATION-I: an M- target with no row, when a relation context
+         parent-stack (::parent-targets ctx)
+         parent-classification
+         (when (and parent (not active-repair?))
+           (if (contains? parent-stack parent)
+             {:class :unknown :relation {:status :absent :reason :ticket-parent-cycle}}
+             (classify-target inputs discovery as-of parent
+                              (update ctx ::parent-targets (fnil conj #{}) target))))
+         parent-relation (when (contains? #{:focus :associated :useful-elsewhere}
+                                           (:class parent-classification))
+                           (:relation parent-classification))
+         ;; WM-RELATION-I: an M- or E- target with no row, when a relation context
          ;; is given (the scoring path's), derives through (a) then (b)
-         m-derivation (when (and (nil? direct) ctx (string? target) (str/starts-with? target "M-"))
-                        (let [text (or mission-text-fn
-                                       (memoize #(default-mission-text (or code-root (str (System/getProperty "user.home") "/code")) %)))
-                              a (stated-relation-path target row-of text)]
-                          (if (:row a)
-                            a
-                            (let [rowed (into {} (keep (fn [r] (when (at-or-before? (:effective-from r) as-of) [(:target r) r])))
-                                              (reverse (:relations inputs)))
-                                  b (embedding-neighbour inputs target rowed)]
-                              (if (:row b)
-                                (assoc-in b [:derived-via :stated-relation] {:absent (:absent a)})
-                                {:absent (:absent b) :embedding b :stated-relation (:absent a)})))))
+         target-derivation (when (and (nil? direct) ctx (string? target)
+                                      (or (str/starts-with? target "M-")
+                                          (str/starts-with? target "E-")))
+                             (let [text (or mission-text-fn
+                                            (memoize #(default-mission-text (or code-root (str (System/getProperty "user.home") "/code")) %)))
+                                   a (stated-relation-path target row-of text)]
+                               (if (:row a)
+                                 a
+                                 (let [rowed (into {} (keep (fn [r] (when (at-or-before? (:effective-from r) as-of) [(:target r) r])))
+                                                   (reverse (:relations inputs)))
+                                       b (embedding-neighbour inputs target rowed)]
+                                   (if (:row b)
+                                     (assoc-in b [:derived-via :stated-relation] {:absent (:absent a)})
+                                     {:absent (:absent b) :embedding b :stated-relation (:absent a)})))))
          ;; relation-source-precedence, written out so changing this policy is
          ;; a reviewable semantic edit rather than incidental collection order.
          relation-row (or direct
@@ -349,12 +373,12 @@
                           ;; fallback evidence after the obligation closes.
                           (if active-repair?
                             repair-relation
-                            (or (when parent
-                                  (row-of parent))
-                                (:row m-derivation))))
+                            (or parent-relation
+                                (:row target-derivation))))
          derived (cond active-repair? repair-source
-                       (and parent-source relation-row (nil? direct)) parent-source
-                       (:row m-derivation) (:derived-via m-derivation))
+                       (and parent-source (nil? direct))
+                       (assoc parent-source :then (:derived-via parent-classification))
+                       (:row target-derivation) (:derived-via target-derivation))
          facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
          eligible (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
                        (contains? #{"focus" "associated" "useful-elsewhere"} (:relation relation-row))
@@ -365,15 +389,17 @@
                   relation-row
                   (cond-> {:status :absent
                            :reason (cond active-repair? repair-unknown-reason
-                                         (and (nil? relation-row) (:absent m-derivation)) (:absent m-derivation)
+                                         (and parent-source (= :unknown (:class parent-classification)))
+                                         (get-in parent-classification [:relation :reason])
+                                         (and (nil? relation-row) (:absent target-derivation)) (:absent target-derivation)
                                          (nil? relation-row) (if (and (string? target) (str/starts-with? target "T-")) :no-parent-relation :relation-not-declared)
                                          (not (contains? #{:discovered :retained} (:status discovery))) :focus-not-established
                                          :else :relation-outside-focus-facets)}
                     active-repair?
                     (assoc :repaired-target repaired-target
                            :repaired-target-class repaired-class)
-                    (and (nil? relation-row) (:absent m-derivation))
-                    (assoc :derivation (dissoc m-derivation :absent))))
+                    (and (nil? relation-row) (:absent target-derivation))
+                    (assoc :derivation (dissoc target-derivation :absent))))
       :derived-via derived})))
 
 (defn- classification [inputs discovery as-of candidate]
