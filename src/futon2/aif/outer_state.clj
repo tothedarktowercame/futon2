@@ -353,6 +353,8 @@
         (refuse! :pending-makeup-migration-required
                  {:selection-makeup pin :current-makeup (:makeup/sha256 makeup)})))))
 
+(declare checked-discharge?)
+
 (defn read-state
   "Read the durable `R20Step.State` carrier, or return init marked `:source :init`.
 
@@ -375,10 +377,34 @@
                receipt (when (.isFile receipt-file)
                          (read-one (Files/readAllBytes (.toPath receipt-file))
                                    :invalid-migration-receipt (str receipt-file)))
-               result (assoc state :source :durable)]
+               result (assoc state :source :durable)
+               discharge-file (io/file (str path ".pending-discharge-" digest ".edn"))
+               discharge (when (.isFile discharge-file)
+                           (read-one (Files/readAllBytes (.toPath discharge-file))
+                                     :invalid-discharge-receipt (str discharge-file)))]
            (when (and receipt (not (checked-migration? result makeup receipt)))
              (refuse! :invalid-migration-receipt {:path (str receipt-file)}))
-           (with-meta result {::bytes-sha256 digest ::migration receipt})))))))
+           (when (and discharge (not (checked-discharge? result makeup discharge path digest)))
+             (refuse! :invalid-discharge-receipt {:path (str discharge-file)}))
+           (with-meta result {::bytes-sha256 digest ::migration receipt ::discharge discharge})))))))
+
+(defn- checked-discharge?
+  "A discharge receipt named by the current state digest must pin exactly this
+  state, this makeup, and a backup whose exact bytes are the pinned old state
+  and whose learned values equal the current ones apart from the pending step."
+  [state makeup receipt path digest]
+  (let [backup (io/file (str path ".pre-discharge-" (subs (str (:old-state-sha256 receipt)) 0 8)))]
+    (and (= :wm/pending-discharge-v1 (:schema receipt))
+         (= digest (:new-state-sha256 receipt))
+         (= (:makeup/sha256 makeup) (:makeup-sha256 receipt) (:makeup/sha256 state))
+         (string? (:run-id receipt))
+         (= :pending-steps-unrecoverable (get-in receipt [:refusal :kind]))
+         (true? (:learning-parameters-equal receipt))
+         (.isFile backup)
+         (let [bytes (Files/readAllBytes (.toPath backup))]
+           (and (= (:old-state-sha256 receipt) (sha256 bytes))
+                (= (dissoc (read-one bytes :invalid-discharge-backup (str backup)) :pending :source)
+                   (dissoc state :pending :source)))))))
 
 (defn write-state!
   "Atomically replace the durable `R20Step.State` carrier in one directory."
@@ -440,7 +466,16 @@
     (when-not (.exists backup)
       (Files/write (.toPath backup) bytes (make-array java.nio.file.OpenOption 0)))
     (spit receipt-file (str (pr-str receipt) "\n"))
-    (write-state! path discharged)
+    ;; Compare-and-replace at the atomic move: a click that wrote the state
+    ;; after inspection must not be overwritten (codex-5 review, 2026-11-01).
+    (let [outer *before-state-move*]
+      (binding [*before-state-move*
+                (fn [temp target]
+                  (outer temp target)
+                  (when-not (= old-sha (sha256 (Files/readAllBytes (.toPath (io/file target)))))
+                    (.delete receipt-file)
+                    (refuse! :pending-discharge-source-changed {:path (str path)})))]
+        (write-state! path discharged)))
     {:status :discharged :receipt receipt :backup (.getCanonicalPath backup)
      :receipt-path (.getCanonicalPath receipt-file)}))
 

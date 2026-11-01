@@ -43,3 +43,35 @@
                                 (catch clojure.lang.ExceptionInfo e e))))))
     (is (= bytes (slurp path)) "nothing written")
     (is (empty? (filter #(re-find #"pending-discharge" (.getName %)) (.listFiles (.getParentFile (io/file path))))))))
+
+(deftest a-state-written-after-inspection-is-not-overwritten
+  (let [{:keys [old path bytes planted]} (with-pending nil)
+        newer (update planted :click-count inc)]
+    ;; a concurrent click's write, as raw bytes: write-state! would re-enter the hook
+    (binding [state/*before-state-move* (fn [_ _] (spit path (str (pr-str newer) "\n")))]
+      (is (= :pending-discharge-source-changed
+             (:kind (ex-data (try (state/discharge-unrecoverable-pending! path old :raced)
+                                  (catch clojure.lang.ExceptionInfo e e)))))))
+    (is (= (dissoc newer :source) (dissoc (state/read-state old path) :source)) "the newer state stands")
+    (is (not= bytes (slurp path)))
+    (is (empty? (filter #(re-find #"pending-discharge" (.getName %)) (.listFiles (.getParentFile (io/file path)))))
+        "no receipt survives a refused replacement")))
+
+(deftest tampered-discharge-receipt-or-backup-refuses-the-read
+  (let [{:keys [old path]} (with-pending nil)
+        result (state/discharge-unrecoverable-pending! path old :legacy)
+        receipt-path (:receipt-path result)
+        receipt (edn/read-string (slurp receipt-path))
+        backup (:backup result)
+        backup-bytes (slurp backup)]
+    (is (= :durable (:source (state/read-state old path))) "a sound receipt reads")
+    (spit receipt-path (pr-str (assoc receipt :learning-parameters-equal false)))
+    (is (= :invalid-discharge-receipt
+           (:kind (ex-data (try (state/read-state old path) (catch clojure.lang.ExceptionInfo e e))))))
+    (spit receipt-path (pr-str receipt))
+    (spit backup (str backup-bytes "\n"))
+    (is (= :invalid-discharge-receipt
+           (:kind (ex-data (try (state/read-state old path) (catch clojure.lang.ExceptionInfo e e)))))
+        "a backup whose bytes are not the pinned old state")
+    (spit backup backup-bytes)
+    (is (= :durable (:source (state/read-state old path))))))
