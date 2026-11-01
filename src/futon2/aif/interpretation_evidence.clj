@@ -79,6 +79,14 @@
             *print-meta* false *print-dup* false *print-readably* true]
     (sha256 (.getBytes (pr-str (stable x)) "UTF-8"))))
 
+(defn value-digest-before-r18
+  "`value-digest` as the serving JVM computed it before R18: namespace maps off. For
+  verifying carriers sealed then, never for sealing."
+  [x]
+  (binding [*print-namespace-maps* false *print-length* nil *print-level* nil
+            *print-meta* false *print-dup* false *print-readably* true]
+    (sha256 (.getBytes (pr-str (stable x)) "UTF-8"))))
+
 (defn supply-machine-digests
   "Fill byte/value digests that the validator can compute itself. READER returns
   the issued companion bytes for a basename. The agent remains responsible for

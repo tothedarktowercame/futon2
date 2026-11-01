@@ -33,7 +33,7 @@
    "policiesWithAmbiguityTerm" "policiesWithInformationTerm"
    "interpretationOrder" "pathAbsenceCount" "previousChoice"
    "previousOutcome" "previousInputDigest" "currentChoice" "refusalHistory"
-   "refusalHistorySource" "refusalHistoryUnsealed"
+   "refusalHistorySource" "refusalHistoryUnsealed" "refusalHistorySealedBeforeR18"
    "currentInputDigest" "seatsAvailable" "seatsUsed"
    "completionPreferencePairs" "completionPairsStrictlyPreferred"
    "factorizedPreference" "calibrationAuthorizations"
@@ -757,6 +757,11 @@
                                           (cond (nat-int? u) u
                                                 (= ::absent u) (nr "[:decision :selection-certificate :q6 :refusal-history-unsealed] absent (pre-L5-2L-3 record)")
                                                 :else (nr (str "refusal-history-unsealed is not a count: " (pr-str u)))))
+               ;; L5-6: terminals verified under the pre-R18 printer, for the report card
+               "refusalHistorySealedBeforeR18"
+               (let [k (get-in cert [:q6 :refusal-history-sealed-before-r18] ::absent)]
+                 (if (nat-int? k) k
+                     (nr "[:decision :selection-certificate :q6 :refusal-history-sealed-before-r18] absent")))
                "currentInputDigest" (q6 "currentInputDigest")
                "seatsAvailable" (if (map? (:seat-roster world))
                                   (sorted-ids (mapcat :ids (vals (:seat-roster world))))

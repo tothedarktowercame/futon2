@@ -91,30 +91,58 @@
   [policy-key]
   (action-identity/digest policy-key))
 
-(defn refusal-history
-  "Every run started before NOW in EVENTS whose sealed terminal carrier says it
-  was refused on a chosen policy, oldest first. Read from the sealed carriers only:
-  a tampered terminal is no evidence of a refusal, and is counted, not trusted.
-  Returns {:entries [{:cascade :input-digest :run-id :target}…] :unsealed n}."
-  [events run-id now]
+(def ^:private printer-bound-at
+  "R18: when `value-digest` began binding the printer. A terminal sealed inside the
+  serving JVM before this was printed with namespace maps off."
+  (Instant/parse "2026-10-26T06:19:22Z"))
+
+(defn- terminal-class
+  "A closed terminal's standing. `:sealed-before-r18` verifies under the printer
+  that sealed it; the seal is good and only the digest function has moved since.
+  Anything else that fails its seal is `:tampered`, whatever its date."
+  [terminal at]
+  (cond
+    (intact? terminal) :sealed
+    (and (map? terminal) (string? (:sha256 terminal)) (.isBefore ^Instant at printer-bound-at)
+         (= (:sha256 terminal)
+            (evidence/value-digest-before-r18 (dissoc terminal :sha256))))
+    :sealed-before-r18
+    :else :tampered))
+
+(defn- classified-terminals
+  "Each closed terminal in EVENTS with its start instant and standing."
+  [events]
   (let [started (into {} (for [e events :when (= :started (:event e))]
-                           [(:run/id e) (instant (:startedAt e))]))
-        closed (for [e events
-                     :let [at (get started (:run/id e))]
-                     :when (and (= :closed (:event e)) (not= run-id (:run/id e)) at
-                                (.isBefore ^Instant at now))]
-                 [at (:q6 e)])
-        {sealed true broken false} (group-by (comp boolean intact? second) closed)
-        refused (filter (fn [[_ t]] (and (= :refused (get-in t [:outcome :outcome]))
-                                         (= :present (get-in t [:choice :status]))
-                                         (string? (:input-digest t))))
-                        sealed)]
-    {:entries (vec (for [[_ t] (sort-by (fn [[at _]] (.toEpochMilli ^Instant at)) refused)]
+                           [(:run/id e) (instant (:startedAt e))]))]
+    (vec (for [e events
+               :let [at (get started (:run/id e))]
+               :when (and (= :closed (:event e)) at)]
+           {:run/id (:run/id e) :at at :terminal (:q6 e)
+            :class (terminal-class (:q6 e) at)}))))
+
+(defn refusal-history
+  "Every run started before NOW in EVENTS whose verified terminal carrier says it
+  was refused on a chosen policy, oldest first. A terminal that does not verify is
+  no evidence of a refusal, and is counted, not trusted. Returns
+  {:entries [{:cascade :input-digest :run-id :target}…] :unsealed n
+   :sealed-before-r18 k}, where n counts only what could not be verified."
+  [events run-id now]
+  (let [earlier (filter #(and (not= run-id (:run/id %)) (.isBefore ^Instant (:at %) now))
+                        (classified-terminals events))
+        tally (frequencies (map :class earlier))
+        refused (filter (fn [{t :terminal class :class}]
+                          (and (contains? #{:sealed :sealed-before-r18} class)
+                               (= :refused (get-in t [:outcome :outcome]))
+                               (= :present (get-in t [:choice :status]))
+                               (string? (:input-digest t))))
+                        earlier)]
+    {:entries (vec (for [{t :terminal} (sort-by (fn [c] (.toEpochMilli ^Instant (:at c))) refused)]
                      {:cascade (cascade-identity (get-in t [:choice :policy-key]))
                       :input-digest (:input-digest t)
                       :run-id (:run/id t)
                       :target (get-in t [:choice :target])}))
-     :unsealed (count broken)}))
+     :unsealed (get tally :tampered 0)
+     :sealed-before-r18 (get tally :sealed-before-r18 0)}))
 
 (defn predecessor
   "The sealed Q6 predecessor carrier for run RUN-ID started at STARTED-AT in
@@ -394,6 +422,7 @@
                                  ;; verified, as the predecessor carrier counted them;
                                  ;; Lean Q6 requires 0 (a corrupt line is an absence on
                                  ;; the path, not a smaller history).
+                                 :refusal-history-sealed-before-r18 (get-in predecessor [:refusal-history :sealed-before-r18])
                                  :refusal-history-unsealed (get-in predecessor [:refusal-history :unsealed])}
                                 (dissoc decided :excluded-keys))
                    barring? (assoc :status :forbidden
