@@ -877,8 +877,7 @@
 (def ^:private kept-when-not-exercised
   "What a record says whether or not a selection ran; every other fact is a
   selection carrier."
-  #{"kind" "policyGScale" "openMissions" "openExcursions" "openTickets"
-    "interpretationOrder"})
+  #{"kind" "policyGScale" "openMissions" "openExcursions" "openTickets"})
 
 (defn- read-phase-events [path]
   (when (and path (.isFile (io/file path)))
@@ -1233,7 +1232,12 @@
                 "policyGScale" g-scale
                 "policyPrediction" (carried one-prediction)
                 "interpretationOrder"
-                (if (contains? #{:refused :abstained :not-exercised}
+                ;; A selection refused after scoring or abstained ran no
+                ;; interpretation. A bypass is different: a direct-task entry
+                ;; interprets in its work run without any selection, which is
+                ;; exactly what Q5 forbids, so a not-exercised record keeps the
+                ;; typed absence L5-5a writes for every selection carrier.
+                (if (contains? #{:refused :abstained}
                                (get-in source [:selection-outcome :status]))
                   "noInterpretation"
                   (selection-interpretation-order record phase-log-path))}

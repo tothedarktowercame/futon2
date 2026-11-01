@@ -65,6 +65,8 @@
     (is (= why (get-in out [:facts "enumeratedTasks"]))
         "the record holds no field, so an empty list would claim an empty field")
     (is (every? (fn [[k v]] (or (kept k) (= why v))) (:facts out)))
+    (is (= why (get-in out [:facts "interpretationOrder"]))
+        "a bypass is not 'no interpretation': a direct task interprets without selecting")
     (is (= "direct-task" (get-in out [:diagnostics :selectionBypass])))
     (is (= "M-asked" (get-in out [:diagnostics :selectionOutcome :task])))
     (is (= "not-run" (get-in out [:diagnostics :workRunStatus])) "no completion, no tick")))
