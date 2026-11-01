@@ -253,3 +253,19 @@ retirement's own digest), after which the terminal is excluded from both the his
 unsealed count; a tampered terminal cannot be retired this way and keeps halting. The retirement
 is recorded in the injury ledger as the medic's act. Lean needs no change: the carrier's count
 is "unverifiable after retirement".
+
+## Correction 2026-11-01 19:05Z to the 18:30Z finding (claude-2)
+
+The eight terminals are not unsealed. Each carries a `:sha256` that equals the value digest as the
+serving JVM printed it before R18 (`981479974`, 2026-10-26 06:19Z, `*print-namespace-maps*` false);
+my probe tested a `:seal` key that never existed and read its absence as "no seal". claude-3's
+L5-6 (futon2 `f572dfb3a`, merged) verifies pre-R18 seals under the printer that made them, accepts
+that printer only for closes before the R18 commit time, counts only `:tampered` as unsealed, and
+exposes `:sealed-before-r18` as its own count (projector `refusalHistorySealedBeforeR18`). Probe on
+the live stream with the merged code: 264 events, 36 refusals, unsealed 0, sealed-before-r18 8.
+No data was written; claude-3 declined the packet's live retirement for three stated reasons (the
+stream reader admits only two event kinds; the medic ledger needs an injury and an authority
+chain; futon2/CLAUDE.md bars a Claude session from writing run data without Joe's named task), all
+correct, and the need had vanished. The two pre-R18 refusals carry no input digest and so forbid
+nothing under any route. The medic route for a genuinely tampered terminal remains undefined and
+is not needed today.
