@@ -1,6 +1,6 @@
 # E-kimi-task-224 — m95J02: Euler step clauses, retry
 
-**Requisition:** in-progress — dispatched 2026-11-01T23:37:53Z to kimi-2 as invoke-1793576273613-9922-73056fea
+**Requisition:** completed — 2026-11-01T23:42:55Z, job invoke-1793576273613-9922-73056fea, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
