@@ -192,7 +192,7 @@
                            (let [reach (task-reach row)]
                              {:candidate {:target target :reach (:value reach) :reach-source (:source reach)}
                               :target target
-                              :fact (assoc (select-keys row [:status :cone :unblocks :rank :graph-terms
+                              :fact (assoc (select-keys row [:status :cone :unblocks :rank :rank-basis :graph-terms
                                                             :completion :dependency-reading])
                                            :pin pin :reach reach :reach-source (:source reach))})))) )
                    enumerated declarations)
