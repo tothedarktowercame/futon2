@@ -21,7 +21,7 @@
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
    "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "policyPreferences"
-   "policyG" "abstentionG" "policyPrediction" "abstentionPrediction"
+   "policyG" "policyGScale" "abstentionG" "policyPrediction" "abstentionPrediction"
    ;; one run-wide horizon: no longer a Requirements field (Q4 is stated
    ;; per compared policy), kept for the history table and alert text
    "horizonLength" "preferenceSteps"
@@ -37,8 +37,31 @@
 
 (defn not-recomputable [s] {"not-recomputable" s})
 
-(def ^:private g-carrier-absent
-  "per-policy G, abstention G and prediction digests not yet projected from the inner record")
+;; Q11 compares exact rationals, so a recorded double is rounded to one declared
+;; scale.  Scores within a unit of it can become an exact tie, which Q11 refuses:
+;; arithmetic noise must not decide a selection.
+(def ^:private g-scale 1000000)
+
+(def ^:private stopped-kernel-absent
+  "no stopped-kernel G is computed on the inner path (L4b row 4; L5)")
+
+(defn policy-identity
+  "The one id of a policy: every side that names one uses this.  The Q6 carrier
+  holds the policy key and no cascade digest, so a digest on one side and a key
+  on the other would make `previous ≠ current` always true."
+  [policy-key]
+  (action-identity/digest policy-key))
+
+(defn exact-g
+  "G as an exact rational at `g-scale`, with the source double for audit.
+  Nil when `x` is not a finite number."
+  [x]
+  (when (and (number? x) (Double/isFinite (double x)))
+    {"numerator" (-> (BigDecimal. (double x))
+                     (.setScale 6 java.math.RoundingMode/HALF_EVEN)
+                     (.movePointRight 6)
+                     .longValueExact)
+     "denominator" g-scale "scale" g-scale "double" (double x)}))
 
 (defn- calibration-json [cal]
   (when (map? cal)
@@ -106,10 +129,10 @@
         (let [c (:carrier v)]
           (merge
            singles
-           {"comparedPolicies" (vec (sort (map pr-str (:compared c))))
+           {"comparedPolicies" (sorted-ids (map policy-identity (:compared c)))
             "policyPreferences"
             (vec (for [p (:policies c)]
-                   {"policy" (pr-str (:policy-key p))
+                   {"policy" (policy-identity (:policy-key p))
                     "horizon" (:horizon p)
                     "preferenceSteps" (:preference-steps p)
                     "gradedPreferenceSteps" (:graded-steps p)
@@ -348,15 +371,116 @@
   (number? (or (:G candidate) (:g candidate) (:expected-free-energy candidate)
                (get-in candidate [:score :G]) (get-in candidate [:score :g]))))
 
+(defn- key-patterns
+  "The pattern ids a policy key arranges, from its nodes."
+  [policy-key]
+  (map second (:nodes (nth policy-key 3))))
+
+(defn- census-construction
+  "One `TargetConstruction` from a Q2 construction census entry.  `action` has no
+  source and no Q reads it, so it is the recorded absence."
+  [{:keys [library graph]} {:keys [task reading kernel slice policies]}]
+  (let [patterns (:patterns library)]
+    {"targets" [(str task)]
+     "action" 0
+     "reading" (action-identity/digest reading)
+     "library" (:sha256 library)
+     "graph" (get-in graph [:pin :sha256])
+     "kernel" (action-identity/digest kernel)
+     "slice" (sorted-ids (map :pattern slice))
+     "pool" (sorted-ids (distinct (mapcat key-patterns policies)))
+     "sliceFromWholeLibrary" (every? #(and (:source-sha256 %)
+                                           (= (:source-sha256 %) (get patterns (:pattern %))))
+                                     slice)
+     "policyCount" (count policies)
+     "policies" (sorted-ids (map policy-identity policies))}))
+
 (defn- target-construction-facts [certificate]
-  (when (vector? (:target-construction certificate))
+  (if-let [entries (seq (get-in certificate [:q2-construction :entries]))]
+    (mapv #(census-construction (:q2-construction certificate) %) entries)
+    (when (vector? (:target-construction certificate))
     (mapv (fn [{:keys [target slice pool slice-from-whole-library policy-count]}]
             {"targets" [(str target)]
              "slice" (sorted-ids slice)
              "pool" (sorted-ids pool)
              "sliceFromWholeLibrary" (boolean slice-from-whole-library)
              "policyCount" policy-count})
-          (:target-construction certificate))))
+          (:target-construction certificate)))))
+
+(defn- construction-absent
+  "Which path has no construction."
+  [certificate]
+  (not-recomputable
+   (if (contains? certificate :q2-construction)
+     "[:decision :selection-certificate :q2-construction :entries] empty"
+     "[:decision :selection-certificate :q2-construction] absent")))
+
+(defn- g-carriers-absent [reason]
+  {"policyG" (not-recomputable reason) "policyPrediction" (not-recomputable reason)})
+
+(defn- candidate-g-row [policy-key candidate]
+  (when-let [g (exact-g (:g candidate))]
+    {"policy" (policy-identity policy-key) "g" g}))
+
+(defn- candidate-prediction-row
+  "The digest of what the law scored: progress and class predictions, step by
+  step.  `action-identity/digest` is canonical over map order and exact over
+  ratios.  The fit-ambiguity input stays out, so policies predicting the same
+  outcomes share a digest."
+  [policy-key candidate scored]
+  (let [progress (mapv :prediction (:steps scored))
+        emission (mapv :prediction (get-in candidate [:class-emission :certificate :steps]))]
+    (when (and (seq progress) (seq emission))
+      {"policy" (policy-identity policy-key)
+       "digest" (action-identity/digest [progress emission])})))
+
+(defn- candidates-with-g-identities
+  "Policy identities (the hash of the policy key, as everywhere else) of the
+  candidates carrying a numeric G, joined through `:q4 :policies`.  nil when any
+  candidate cannot be joined, so Q3's carrier reads not-recomputable rather than
+  comparing two id spaces."
+  [certificate]
+  (let [candidates (:candidates certificate)
+        key-of (into {} (map (juxt :policy-id :policy-key)) (get-in certificate [:q4 :policies]))
+        id-of #(get-in % [:id :id])]
+    (when (and (vector? candidates) (seq key-of)
+               (every? (comp key-of id-of) candidates))
+      (set (for [c candidates :when (numeric-g? c)]
+             (policy-identity (key-of (id-of c))))))))
+
+(defn g-carriers
+  "`policyG` and `policyPrediction` from the candidates, each joined to its policy
+  key through `:q4 :policies`.  One candidate that cannot be joined or read makes
+  the whole carrier not recomputable."
+  [certificate]
+  (let [candidates (:candidates certificate)
+        rows (get-in certificate [:q4 :policies])
+        key-of (into {} (map (juxt :policy-id :policy-key)) rows)
+        id-of #(get-in % [:id :id])
+        scored-of (into {} (map (fn [[_ row]] [(id-of row) row])) (:scoring certificate))
+        unjoined (first (remove (comp key-of id-of) candidates))
+        by-id (fn [row-of]
+                (mapv (fn [c] [(id-of c) (row-of (key-of (id-of c)) c)]) candidates))
+        g-rows (when-not unjoined (by-id candidate-g-row))
+        prediction-rows (when-not unjoined
+                          (by-id #(candidate-prediction-row %1 %2 (scored-of (id-of %2)))))
+        missing (fn [pairs] (some (fn [[candidate row]] (when-not row (or candidate :unidentified)))
+                                  pairs))]
+    (cond
+      (not (and (vector? candidates) (seq candidates)))
+      (g-carriers-absent "[:decision :selection-certificate :candidates] absent or empty")
+      (empty? rows)
+      (g-carriers-absent "[:decision :selection-certificate :q4 :policies] absent")
+      unjoined
+      (g-carriers-absent (str "candidate " (id-of unjoined) " has no :q4 :policies row"))
+      :else
+      {"policyG" (if-let [id (missing g-rows)]
+                   (not-recomputable (str "candidate " id " has no finite :g"))
+                   (vec (sort-by #(get % "policy") (map second g-rows))))
+       "policyPrediction" (if-let [id (missing prediction-rows)]
+                            (not-recomputable
+                             (str "candidate " id " has no recorded progress or class predictions"))
+                            (vec (sort-by #(get % "policy") (map second prediction-rows))))})))
 
 (defn interpretation-order
   "Q5 from the recorded selection-world instants. Instants are compared as
@@ -389,7 +513,7 @@
    :refused "refused" :timed-out "timedOut" :invalid "invalid"})
 
 (defn- q6-choice [c]
-  {"target" (:target c) "cascade" (pr-str (:policy-key c))})
+  {"target" (:target c) "cascade" (policy-identity (:policy-key c))})
 
 (defn q6-facts
   "Requirements Q6 from the run's own :q6 carrier only: the predecessor the
@@ -452,6 +576,8 @@
         construction (target-construction-facts cert)
         constructor-pool (when construction
                            (set (mapcat #(get % "pool") construction)))
+        constructed-policies (seq (mapcat #(get % "policies") construction))
+        with-g-identities (candidates-with-g-identities cert)
         scoring-entries (when (map? scoring) (vec (sort-by key scoring)))
         scored-bindings
         (when scoring-entries
@@ -529,10 +655,9 @@
         ;; The projector labels the kind; the record never does.  A record
         ;; choosing its own label could dodge the selection floor of two.
         facts {"kind" "work"
-               "policyG" (nr g-carrier-absent)
-               "abstentionG" (nr g-carrier-absent)
-               "policyPrediction" (nr g-carrier-absent)
-               "abstentionPrediction" (nr g-carrier-absent)
+               "policyGScale" g-scale
+               "abstentionG" (nr stopped-kernel-absent)
+               "abstentionPrediction" (nr stopped-kernel-absent)
                "openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
@@ -545,23 +670,33 @@
                                              (nr "selection certificate candidates absent"))
                "targetsWithG" (if (some? with-g) (sorted-ids with-g)
                                   (nr "selection certificate candidates absent"))
-               "libraryPatternCount" (count (:patterns snap))
-               "targetConstruction" (or construction
-                                          (nr "selection certificate target construction absent"))
+               "libraryPatternCount" (or (get-in cert [:q2-construction :library :count])
+                                         (nr "[:decision :selection-certificate :q2-construction :library :count] absent"))
+               "targetConstruction" (or construction (construction-absent cert))
                "constructorPatternCount" (if (some? constructor-pool)
                                              (count constructor-pool)
-                                             (nr "selection certificate target construction absent"))
-               "constructedCascades" (if cascade-ids (sorted-ids cascade-ids)
-                                         (nr "constructed candidate ids absent"))
+                                             (construction-absent cert))
+               "constructedCascades" (cond
+                                       constructed-policies (vec (sort constructed-policies))
+                                       cascade-ids (sorted-ids cascade-ids)
+                                       :else (nr "constructed candidate ids absent"))
                "comparedPolicies" (if policy-ids (sorted-ids policy-ids)
                                       (nr "selection posterior absent"))
-               "cascadesWithoutG" (if (and cascade-ids (some? with-g))
-                                      (sorted-ids
-                                       (set/difference
-                                        cascade-ids
-                                        (set (for [c candidates :when (numeric-g? c)]
-                                               (action-identity/digest (:id c))))))
-                                      (nr "constructed cascades or per-candidate numeric G absent"))
+               ;; Same id space as constructedCascades: a non-empty set must name
+               ;; ids that appear there.  The digest-of-:id path stays only for
+               ;; records with no census.
+               "cascadesWithoutG" (cond
+                                    (and constructed-policies with-g-identities)
+                                    (vec (sort (set/difference (set constructed-policies)
+                                                               with-g-identities)))
+                                    (and (nil? constructed-policies) cascade-ids (some? with-g))
+                                    (sorted-ids
+                                     (set/difference
+                                      cascade-ids
+                                      (set (for [c candidates :when (numeric-g? c)]
+                                             (action-identity/digest (:id c))))))
+                                    :else
+                                    (nr "constructed cascades or per-candidate numeric G absent"))
                "policyPreferences" (nr "no per-policy G normalization declaration on this route")
                "horizonLength" (or horizon (nr "common declared per-policy observation model unavailable"))
                "preferenceSteps" (if (some? pref-steps) (vec (sort pref-steps))
@@ -635,7 +770,7 @@
                        "version" (:version e) "authority" (:authority e)}))
                }
         ;; a reading-family record's Q4 comes from its carrier alone
-        facts (merge facts q4)
+        facts (merge facts q4 (g-carriers cert))
         sources (into {}
                       (for [field run-fact-fields]
                         [field (cond

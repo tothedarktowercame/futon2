@@ -59,9 +59,11 @@
                                 (sut/partial-run-fact-fields (slurp reader-path)))]
     (is (str/includes? source "#eval outcomes exported"))
     (is (not (str/includes? source "#eval alert")))
-    (testing "this record has no target construction, so Q2 cannot be evaluated"
-      (is (str/includes? source "q2 := .nr \"not recomputable: targetConstruction,constructorPatternCount\"")))
-    (is (str/includes? source "q11 := .nr"))
+    (testing "the construction is projected, so Q2 is evaluated"
+      (is (str/includes? source "q2 := .known"))
+      (is (str/includes? source "action := 0,")))
+    (testing "no stopped-kernel G exists on the inner path, so Q11 is not"
+      (is (re-find #"q11 := \.nr \"not recomputable: [^\"]*abstentionG" source)))
     (testing "a work run's Q7 needs no selection path"
       (is (re-find #"q7 := \.known \{ Requirements\.click20 with pathAbsenceCount := 5, kind := \.work, selectionPath := none \}"
                    source)))))
@@ -106,6 +108,11 @@
     (is (= nr (sut/evidence (assoc selection-facts "abstentionG" 4.7875) :q11)))
     (is (= nr (sut/evidence (assoc selection-facts "abstentionG" (rational 5 0)) :q11)))
     (is (= nr (sut/evidence (assoc-in selection-facts ["policyG" 0 "g"] 2.9949) :q11)))))
+
+(deftest audit-fields-do-not-disturb-an-exact-rational
+  (let [g {"numerator" 1635919 "denominator" 1000000 "scale" 1000000 "double" 1.6359186228431266}]
+    (is (sut/exact-rational? g))
+    (is (= "(1635919 / 1000000)" (sut/rational-term g)))))
 
 (deftest not-recomputable-inside-a-construction-is-not-hashed-into-ids
   (let [facts (assoc-in selection-facts ["targetConstruction" 0 "slice"]
