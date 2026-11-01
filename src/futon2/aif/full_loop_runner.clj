@@ -9182,6 +9182,15 @@
                 _ (mission-contract/require-before-author! (:selected-action construction))
                 mission-applicable?
                 (or (mission-contract/mission? (:selected-action construction))
+                    ;; EXCURSION-TARGET-FALSIFIER-AND-REVISION, wants half:
+                    ;; an excursion selected with a derived want contract is
+                    ;; an exact selected-want observation like a mission —
+                    ;; D-task dispatch, pre-author baseline and the immutable
+                    ;; C3/C4 readers all apply, so the author prompt's
+                    ;; SELECTED WANTS block and the measurement share one
+                    ;; derivation.
+                    (and (mission-contract/excursion? (:selected-action construction))
+                         (seq (get-in construction [:selected-action :want])))
                     ;; A ticket preparation selected by the canonical outer
                     ;; policy is also an exact selected-want observation. It
                     ;; must traverse the durable pre-author baseline and the
