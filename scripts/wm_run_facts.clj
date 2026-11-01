@@ -1039,7 +1039,9 @@
                     (every? #(and (pattern-name %) (:sha256 %)
                                   (= (:sha256 %) (get patterns (pattern-name %)))) units))
         pin #(if (and (string? %) (re-matches #"[0-9a-f]{64}" %)) % "")
-        ids (sorted-ids (if classes (distinct (map :class policies)) (map :digest policies)))
+        ids (sorted-ids (if (contains? selection :stopping-equivalent)
+                          (map :id classes)
+                          (if classes (distinct (map :class policies)) (map :digest policies))))
         score-ids (sorted-ids (map policy-id scored))
         g-rows (mapv #(when-let [g (exact-g (:G %))] {"policy" (policy-id %) "g" g}) scored)
         prediction-rows (mapv #(when (seq (:prediction %))
@@ -1281,6 +1283,8 @@
                                                  :let [c (set (get facts field)) r (set (get roster k))]]
                                              [k {:census-only (sorted-ids (clojure.set/difference c r))
                                                  :selector-only (sorted-ids (clojure.set/difference r c))}]))})
+                   :stoppingEquivalent (:stopping-equivalent selection)
+                   :selectionDecisionOutcome (:outcome selection)
                    :taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
                    :absencePaths (mapv pr-str (selection-absence-paths record))
                    :notRecomputable (vec (for [[k v] facts

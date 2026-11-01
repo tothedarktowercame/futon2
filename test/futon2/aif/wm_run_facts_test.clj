@@ -820,9 +820,9 @@
         export #(:facts (facts/selection-facts-for-record % "tooling" snap {}))
         f (export r) c (first (f "targetConstruction"))
         old-before (selection-of live-record)]
-    (is (= (construct root m obs) (update (:construction s) :cascades #(mapv (fn [c] (dissoc c :class)) %))))
+    (is (= (assoc (construct root m obs) :policy-count 2) (update (:construction s) :cascades #(mapv (fn [c] (dissoc c :class)) %))))
     (is (true? (c "sliceFromWholeLibrary")))
-    (is (= 3 (c "policyCount") (count (f "policyPrediction"))))
+    (is (= 2 (c "policyCount") (count (f "policyPrediction"))))
     (is (str/starts-with? ((requiring-resolve 'wm-check-run-facts/evidence) f :q2) ".known"))
     (is (= ".nr \"not recomputable: previousChoice,previousOutcome,previousInputDigest,refusalHistory\""
            ((requiring-resolve 'wm-check-run-facts/evidence) f :q11)))
@@ -842,10 +842,10 @@
                        ["targetConstruction" 0 "sliceFromWholeLibrary"])))
     (let [collapsed (select m (init-state m) (update obs :field #(vec (reverse %))))
           f2 (export {:outer/selection collapsed})]
-      (is (= 2 (count (:classes collapsed)) (count (f2 "policyG"))))
+      (is (= 1 (count (:classes collapsed)) (count (f2 "policyG"))))
       (is (= (f2 "comparedPolicies") (f2 "constructedCascades")
              (get-in f2 ["targetConstruction" 0 "policies"])))
-      (is (= 3 (reduce + (map #(count (get % "members")) (f2 "classMembers"))))))
+      (is (= 2 (reduce + (map #(count (get % "members")) (f2 "classMembers"))))))
     (is (= old-before (selection-of live-record)) "Historical projection is unchanged")))
 
 (deftest retained-refusal-history-replaces-the-one-step

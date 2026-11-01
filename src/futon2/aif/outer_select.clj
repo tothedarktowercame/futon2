@@ -163,10 +163,18 @@
         (refuse! :cascade-score-inadmissible (merge evidence bad)))
       (when-not (finite? (:G abstention))
         (refuse! :abstention-score-inadmissible evidence))
-      (let [classes (prediction-classes cascades)
-            class-of (into {} (for [c classes member (:members c)] [member (:id c)]))
+      (let [all-classes (prediction-classes cascades)
+            stop-digest (identity/digest (get-in abstention [:prediction :outcomes]))
+            stopping (filterv #(= stop-digest (:prediction-digest %)) all-classes)
+            classes (filterv #(not= stop-digest (:prediction-digest %)) all-classes)
+            class-of (into {} (for [c all-classes member (:members c)] [member (:id c)]))
             evidence (-> evidence
                          (assoc :classes classes
+                                :stopping-equivalent
+                                (mapv (fn [c]
+                                        {:class (:id c) :members (:members c) :pick (:pick c)
+                                         :landing (get-in c [:prediction :landing])
+                                         :g-units (:g-units c) :reason :predicts-stopping}) stopping)
                                 :previous (or (:previous-selection observation)
                                               {:status :absent :reason :previous-selection-not-supplied})
                                 :representative-rule :first-in-menu-order-within-one-prediction-class)
@@ -177,12 +185,16 @@
             ;; Never choose a forbidden representative. Every arrangement remains
             ;; scored and retained; refusal cannot disappear through grouping.
             admissible (filterv #(not (contains? forbidden (:pick %))) classes)
-            _ (when (empty? admissible)
+            _ (when (and (seq classes) (empty? admissible))
                 (refuse! :no-admissible-pick
                          {:cascades (mapv :id cascades) :forbidden forbidden-evidence
                           :selection-evidence evidence}))
-            minimum (reduce min (map :G admissible))
+            minimum (when (seq admissible) (reduce min (map :G admissible)))
             tied (filterv #(= minimum (:G %)) admissible)]
+        (if (empty? classes)
+          (assoc evidence :outcome {:status :abstained :case :all-policies-predict-stopping}
+                 :selection nil :prediction (:prediction abstention))
+          (do
         (when (< 1 (count tied))
           (refuse! :tie-at-minimum {:classes (mapv :id tied) :G minimum
                                    :cascades (mapv :representative tied)
@@ -202,4 +214,4 @@
                          (= (:cascade-picks result) (mapv :pick (:cascades result)))
                          (= (:cascade-pick-relations result) legacy-relations)
                          (= (:prediction result) (:prediction (nth (:cascades result) index)))))
-            result))))))
+            result))))))))

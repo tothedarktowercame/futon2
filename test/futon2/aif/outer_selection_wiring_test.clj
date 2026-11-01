@@ -115,7 +115,7 @@
     (is (= {:absent :no-verified-giraffe-run} (dissoc result :selection-record)))
     (is (false? @called?))))
 
-(deftest empty-chosen-cascade-refuses-at-abstention-floor
+(deftest empty-chosen-cascade-retains-typed-abstention
   (let [called? (atom false)
         gates-out (assoc makeup :cascades
                          [{:id :none :patterns ["test"]
@@ -129,9 +129,10 @@
                           :focus "WM" :relation (fn [_ _] :associated)})
                  #'runtime/run-ordinary-opportunity-with-task!
                  (fn [_] (reset! called? true))})]
-    (is (= :outer-selection-refused (:absent result)))
-    (is (= :pick-not-below-abstention (:reason result)))
-    (is (= :none (get-in result [:details :cascade])))
+    (is (= :no-task-selected (:absent result)))
+    (is (= {:status :abstained :case :all-policies-predict-stopping}
+           (get-in result [:outer/selection :outcome])))
+    (is (= [:none] (get-in result [:outer/selection :stopping-equivalent 0 :members])))
     (is (false? @called?))))
 
 (defn- record-files [dir]

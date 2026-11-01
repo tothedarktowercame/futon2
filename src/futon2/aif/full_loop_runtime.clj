@@ -1439,7 +1439,7 @@
               selection-outcome
               (if-let [pick (get-in selection [:selection :selected :target])]
                 {:status :chosen :class (:chosen-class selection) :pick pick}
-                {:status :abstained :case :empty-field})]
+                (or (:outcome selection) {:status :abstained :case :empty-field}))]
           (if-let [target (get-in selection [:selection :selected :target])]
             (let [run-id (or (:run-id opts) (new-run-id))]
               (when-not (= :deferred (:status learning))
