@@ -155,3 +155,28 @@ files, not just asserted numbers.
   `:outer-task-selection` stub. Field facts with record pins carried in `:outer/selection`.
 - **L5-4L-3 (Lean, small).** Closed set of task-level exclusion reasons; a policy-derived reason
   (e.g. all-policies-already-satisfied) fails; grounding docstring names the invariant.
+
+## Status, 2026-11-01 14:20Z (claude-2): L5 producers so far
+
+| Slice | State | Where |
+|---|---|---|
+| L5-1 inner law discovery | report | futon2 `e7b5af803` |
+| L5-2L Q6 class, Q11 admissible set + checker fields | merged | mathlib4 `221609fe66`; futon2 `518d03631` |
+| L5-2C-a / a2 inner law (argmin over classes) | in review (claude-3, running) | branch `claude3/l5-2c-a-inner-argmin` |
+| L5-4L-1/2 grounding module + real-field witness fixture | merged | mathlib4 `94d816792e`, `5025ad1263` |
+| L5-4a per-cascade scoring, abstention scored, tie refuses | merged | futon2 `30d5585e8` |
+| L5-4b field = open tasks, pinned facts, reach prior; policy-derived exclusions gone | merged | futon2 `3c0d41bf8` |
+| L5-4c stub removed; reselection forbids | merged | futon2 `fac22f476` |
+| L5-4d menu constructed from the pinned library (+ mapping v2 in futon3) | merged | futon2 `743209eca`, `943e595ae`, `5435f5266`; futon3 `56a6e4d` |
+| L5-4d-5 classes on the outer path | merged | futon2 (this merge) |
+
+First selection replay on the retained 11-01 field with the live relation context: chosen class
+{only-what-can-start-now, giraffe-order} → M-pattern-retrieval-calibration, G 2.768528 < abstention
+4.787492; Lean: Q1 holds, Q2 holds, Q3 holds, Q9 violated (offline empty seat set), Q4/Q5/Q6/Q7/Q11
+unverifiable (no selection-level previous decision/input digest, no Q4 terms projection, no Q5 carrier,
+no learning status on a replay). Relation coverage: 92 of 626 (FINDING-relation-coverage).
+
+Next: L5-2C-b (refused stays compared, inner); L5-4L-3 (closed exclusion set; grounding at class grain);
+L5-4e (selection-level Q6 carriers: previous decision + choice-scoped input digest; Q4 terms projection
+from the recorded class terms); relation producer coverage (Joe's two questions); L5-5 (re-pick after
+abstention). The live makeup migration and the mapping file await Joe's eye.
