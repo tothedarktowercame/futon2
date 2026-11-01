@@ -16,7 +16,7 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 
 ## Lead amendment 2 (2026-11-01): outer selection comes first
 
-Joe: a properly working outer selection should have been the first criterion, and the outer loop is held to the same active-inference criteria as the inner loop. The GRID gives it one comparison row, B3. Nineteen task-selection patterns exist, three cascades are named in Lean, and no futon2 source reads the library. Ordinary clicks hold until outer selection meets drafted parity criteria or Joe says otherwise. Other rows wait unless they serve this.
+Joe: a properly working outer selection should have been the first criterion, and the outer loop is held to the same active-inference criteria as the inner loop. The GRID gives it one comparison row, B3. Nineteen task-selection patterns exist, three cascades are named in Lean, and no futon2 source reads the library. Draft criteria O0-O8 are in reconciliation/SELECTION-RATIONALE-ABSENT-zai2-2026-11-01.md, and they sit ahead of A1-E4 once the Lean requirements settle them. On the parity table the outer loop fully meets one of eight obligations, partly meets two and fails five; it has the inner loop's scoring without its construction. Ordinary clicks hold until outer selection meets these criteria or Joe says otherwise. Other rows wait unless they serve this.
 
 ## Latest execution checkpoint: click 11, self-heal refused (2026-11-01)
 
