@@ -318,3 +318,16 @@
       (spit f "# Nothing here\n\nprose only\n")
       (is (= {:date :absent :status :absent :timebox :absent}
              (:header (outer-select/source-header {:path (.getPath f) :sha256 "00"})))))))
+
+(deftest per-task-ratings-are-retained-without-changing-the-choice
+  (let [s (outer-select/select base-makeup base-state base-observation)
+        rows (:per-task-rating s)
+        by-id (into {} (map (juxt :target identity)) rows)]
+    (is (= (count (:field base-observation)) (count rows)))
+    (is (= (:top-ten s) (outer-select/rating-top-ten rows)))
+    (is (= (dissoc s :per-task-rating :top-ten)
+           (dissoc (with-redefs [outer-select/per-task-ratings (constantly [])]
+                     (outer-select/select base-makeup base-state base-observation))
+                   :per-task-rating :top-ten)))
+    (doseq [c (:classes s)]
+      (is (< (Math/abs (- (:G c) (:G (by-id (:pick c))))) 1.0e-9)))))
