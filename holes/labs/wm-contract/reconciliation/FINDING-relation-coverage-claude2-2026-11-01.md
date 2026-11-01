@@ -35,3 +35,30 @@ Open for Joe: whether an embedding-derived relation counts as measured (it is de
 pinned embeddings and a hand-reviewed row, and the receipt records `:derived-via`), and how
 relations for E- and T- targets are to be produced (ticket parent exists for T- but found no
 parent relation for any of the 190; nothing derives for E-).
+
+## Update 2026-11-01 15:40Z, after L5-4g (codex-5, futon2 `399657ec2`, merged)
+
+Same census, same context, derivation extended to E- (stated hops, embedding) and T- (through the
+parent, chain recorded), embedding floor declared at 0.0:
+
+| Prefix | Class | Source | Count |
+|---|---|---|---|
+| M- | focus / associated | declared row | 5 / 3 |
+| M- | associated | embedding neighbour | 84 |
+| M- | unknown | `:embedding-node-not-retained` | 89 |
+| E- | associated | embedding neighbour | 1 |
+| E- | unknown | `:embedding-node-not-retained` | 254 |
+| T- | focus / associated | ticket parent | 2 / 1 |
+| T- | associated | open repair obligation | 40 |
+| T- | unknown | `:open-repair-obligation` (repaired target unclassified) | 110 |
+| T- | unknown | `:no-parent-relation` | 33 |
+| T- | unknown | ticket parent unclassified | 4 |
+
+136 of 626 classified (21.7%, from 14.7%). The remaining gap is now one thing: 343 tasks (254 E-,
+89 M-) are not nodes of the structure embedding the inputs pin
+(`futon6/data/mission-structure-embed/*`, files dated 2026-06-25), and 110 tickets inherit an
+unclassified repaired target, most of which are those same unembedded tasks. The lever is the
+embedding's coverage: regenerate the structure embedding over the current open set (a futon6 data
+producer, with its pins updated in the focus inputs), not more derivation rules. The floor is
+declared at 0.0 pending Joe's value; at 0.1 the two November picks (cosines −0.014 and 0.073) read
+unknown, so the value decides how many of the 84 + 1 embedding-derived relations survive.
