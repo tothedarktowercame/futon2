@@ -1090,6 +1090,8 @@
                  (assoc path "pendingRun" row "consumedRuns" [row] "learningApplied" true))
       ;; the record has no run id for a deferred ending
       :deferred (assoc path "pendingRun" [0 "absent"] "consumedRuns" [] "learningApplied" false)
+      ;; nothing was pending: no run to consume, nothing applied, nothing deferred
+      :none (assoc path "consumedRuns" [] "learningApplied" false)
       (not-recomputable "no :outer/learning status on the selection"))))
 
 (defn selection-absence-paths

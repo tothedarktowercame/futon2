@@ -666,6 +666,13 @@
     (is (= [] (path "consumedRuns")))
     (is (false? (path "learningApplied")))))
 
+(deftest nothing-pending-is-a-typed-path-with-nothing-consumed
+  (let [path ((selection-of (with-selection [:outer/learning] {:status :none})) "selectionPath")]
+    (is (not (contains? path "pendingRun")))
+    (is (= [] (path "consumedRuns")))
+    (is (false? (path "learningApplied")))
+    (is (contains? path "receipt"))))
+
 (deftest learning-absent-leaves-the-path-not-recomputable
   (is (contains? ((selection-of (with-selection [:outer/learning] nil)) "selectionPath")
                  "not-recomputable")))

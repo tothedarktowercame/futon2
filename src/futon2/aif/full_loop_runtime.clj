@@ -1395,11 +1395,13 @@
                                                                       [:selection :selected :target])]
                                               ((:relation observation)
                                                (:focus observation) target)))
-                                     (cond-> (not= :none (:status learning))
-                                       (assoc :outer/learning
-                                              (select-keys learning
-                                                           [:status :reason :ending-class
-                                                            :observed-gain :receipt]))))
+                                     ;; Always written: :none is "nothing was pending",
+                                     ;; a typed status Lean reads, not an absence
+                                     ;; (click 5 of 2026-11-01: Q7 unverifiable).
+                                     (assoc :outer/learning
+                                            (select-keys learning
+                                                         [:status :reason :ending-class
+                                                          :observed-gain :receipt])))
               state-path (or (:outer/state-path opts) outer-state/default-state-path)
               record-ref (retain-selection!
                           opts retained-selection
