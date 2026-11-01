@@ -5,6 +5,7 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.cause-scope :as cause-scope]
+            [futon2.aif.environmental-probe :as environmental-probe]
             [futon2.aif.out-of-band-fix :as out-of-band]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
@@ -24,6 +25,7 @@
 (def default-transaction-path (str store/default-root "/transaction.edn"))
 (def default-diagnosis-root (str store/default-root "/diagnoses"))
 (def default-acceptance-root (str store/default-root "/acceptances"))
+(declare pin? default-repository-root)
 (defn- refusal [reason & [details]] (merge {:status :refused :reason reason} details))
 (defn- medic-authority-verifier [opts]
   ;; Single shared resolution (design P1): without an explicit verifier every
@@ -62,6 +64,62 @@
 
 (defn- receipt-bytes [receipt]
   (.getBytes (str (pr-str receipt) "\n") "UTF-8"))
+
+(defn- pinned-value [pin]
+  (when (pin? pin)
+    (try
+      (let [bytes (Files/readAllBytes (.toPath (io/file (:path pin))))]
+        (when (= (:sha256 pin) (load-identity/sha256 bytes))
+          (:value (store/read-one-form (String. bytes "UTF-8")))))
+      (catch Throwable _ nil))))
+
+(defn environmental-diagnosis?
+  "True only when OBSERVATION pins an available environmental diagnosis."
+  [observation]
+  (let [receipt (when (= :available (:status observation))
+                  (pinned-value (:diagnosis-evidence-pin observation)))
+        classification (get-in receipt [:diagnosis :classification])]
+    (and (= :wm/meta-diagnosis-receipt-v1 (:schema receipt))
+         (keyword? classification)
+         (str/starts-with? (name classification) "environmental-"))))
+
+(defn- source-revision [opts]
+  (or (:meta-source-revision opts)
+      (let [{:keys [exit out]} (shell/sh "git" "-C"
+                                         (or (:meta-repository-root opts)
+                                             default-repository-root)
+                                         "rev-parse" "HEAD")]
+        (when (zero? exit) (str/trim out)))))
+
+(defn- run-environmental-probe! [opts ledger-path authority-verifier]
+  (let [diagnosis (:meta-diagnosis-observation opts)
+        observed (environmental-probe/probe!
+                  {:acceptance-root (or (:meta-acceptance-root opts)
+                                        default-acceptance-root)
+                   :injury-id (:injury-id diagnosis)
+                   :cause-pin (:source-record-pin diagnosis)
+                   :diagnosis-pin (:diagnosis-evidence-pin diagnosis)
+                   :probed-by "futon2.aif.meta-self-heal-production/route!"
+                   :source-revision (source-revision opts)})
+        disposition {:kind :environmental-probe
+                     :status (:status observed)
+                     :receipt-pin (:receipt-pin observed)}]
+    (if (= :checked (:status observed))
+      (let [discharged (environmental-probe/discharge!
+                        {:ledger-path ledger-path
+                         :injury-id (:injury-id diagnosis)
+                         :receipt (:receipt observed)
+                         :receipt-pin (:receipt-pin observed)
+                         :normal-authority authority-verifier})]
+        (assoc discharged :route :dedicated-meta-self-heal
+               :ordinary-selection-called? false
+               :environmental-probe disposition))
+      {:status :refused
+       :reason :meta-self-heal/acceptance-run-refused
+       :route :dedicated-meta-self-heal
+       :ordinary-selection-called? false
+       :acceptance-result observed
+       :environmental-probe disposition})))
 
 (defn- diagnosis-path [root receipt]
   ;; Receipts are evidence handed to later repair coordination.  Their path is
@@ -2087,7 +2145,9 @@
                  {:route :dedicated-meta-self-heal :ordinary-selection-called? false
                   :active-injuries (select-keys active [:status :reason :defects])})
         (when (seq (:injuries active))
-          (let [transaction-path (:meta-repair-transaction-path opts)
+          (if (environmental-diagnosis? (:meta-diagnosis-observation opts))
+            (run-environmental-probe! opts ledger-path authority-verifier)
+            (let [transaction-path (:meta-repair-transaction-path opts)
                 ports (effect-ports opts)
                 missing (cond-> []
                           (nil? transaction-path) (conj :transaction-path)
@@ -2347,4 +2407,4 @@
                                       :entry (->> (get-in next-durable [:ledger :entries])
                                                   (filter #(= injury-id (:injury-id %)))
                                                   last
-                                                  (#(select-keys % [:state :attempt :reason])))})))))))))))))))))))
+                                                  (#(select-keys % [:state :attempt :reason])))}))))))))))))))))))))
