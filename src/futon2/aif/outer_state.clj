@@ -402,6 +402,48 @@
        (finally
          (when (.exists temp) (Files/deleteIfExists (.toPath temp))))))))
 
+(defn discharge-unrecoverable-pending!
+  "Remove a pending learning step that `next-state` can never consume: a legacy
+  selection whose cascade has neither a retained digest nor typed steps, so
+  `chosen-cascade` refuses `:pending-steps-unrecoverable` on every click. The
+  observation is lost once and said so: the exact old bytes are backed up and a
+  separate receipt names the run, the cascade, the refusal and both state SHAs.
+  Learned counts are untouched. Refuses when there is no pending step, when the
+  step is recoverable, or when a different backup already holds the name."
+  [path makeup reason]
+  (let [target (io/file path)
+        bytes (Files/readAllBytes (.toPath target))
+        state (read-state makeup path)
+        pending (:pending state)
+        _ (when-not pending (refuse! :no-pending-step {:path (str path)}))
+        refusal (try (chosen-cascade makeup (:selection pending)) nil
+                     (catch clojure.lang.ExceptionInfo e (ex-data e)))
+        _ (when-not (= :pending-steps-unrecoverable (:kind refusal))
+            (refuse! :pending-step-recoverable {:run-id (:run-id pending)}))
+        old-sha (sha256 bytes)
+        discharged (dissoc state :pending :source)
+        receipt {:schema :wm/pending-discharge-v1
+                 :run-id (:run-id pending) :giraffe/run-id (:giraffe/run-id pending)
+                 :cascade-id (get-in pending [:selection :cascade-id])
+                 :selection-sha256 (identity/digest (:selection pending))
+                 :refusal refusal :reason reason
+                 :makeup-sha256 (:makeup/sha256 makeup)
+                 :old-state-sha256 old-sha
+                 :new-state-sha256 (sha256 (state-bytes discharged))
+                 :learning-parameters-equal true}
+        backup (io/file (str path ".pre-discharge-" (subs old-sha 0 8)))
+        receipt-file (io/file (str path ".pending-discharge-"
+                                   (:new-state-sha256 receipt) ".edn"))]
+    (when (and (.exists backup)
+               (not= old-sha (sha256 (Files/readAllBytes (.toPath backup)))))
+      (refuse! :pending-discharge-backup-conflict {:path (str backup)}))
+    (when-not (.exists backup)
+      (Files/write (.toPath backup) bytes (make-array java.nio.file.OpenOption 0)))
+    (spit receipt-file (str (pr-str receipt) "\n"))
+    (write-state! path discharged)
+    {:status :discharged :receipt receipt :backup (.getCanonicalPath backup)
+     :receipt-path (.getCanonicalPath receipt-file)}))
+
 (defn write-makeup-migration!
   "Apply an already computed migration, retaining exact old bytes and its
   separate receipt. Refuses a changed source file before any write."
