@@ -550,6 +550,24 @@
                                        [token (:observed after)]))) rows)
      :unobserved (mapv :token (filter #(= :unobserved (get-in % [:after :status])) rows))}))
 
+(defn- terminal-want-delta
+  "UNTICKED-WORK-UNSEEN (runs d5b9b513, c5590f95): grounding (a reviewed
+  commit) and want movement (a measured tick flip) are different facts; a
+  reader of the run terminal needs them separately. This projection keeps
+  the counts and the moving tokens distinct from the commit identity."
+  [mission-view]
+  (when (and (map? mission-view) (seq (:rows mission-view)))
+    (let [rows (:rows mission-view)]
+      {:wants (count rows)
+       :before-true (count (filter #(= true (get-in % [:before :observed])) rows))
+       :after-true (count (filter #(= true (get-in % [:after :observed])) rows))
+       :became-true
+       (mapv :token (filter #(and (= false (get-in % [:before :observed]))
+                                  (= true (get-in % [:after :observed])))
+                            rows))
+       :still-not-true
+       (mapv :token (remove #(= true (get-in % [:after :observed])) rows))})))
+
 (defn- decision-ground
   "Content-address the controller decision without retaining a second copy.
 
@@ -3857,6 +3875,40 @@
                                 (:absent recorded) (:absent recorded)
                                 :else :recorded-step-not-in-precedence)}})))
 
+(defn- selected-want-locator-block
+  "UNTICKED-WORK-UNSEEN (runs d5b9b513, c5590f95): the author prompt showed
+   the compiled completion checks but never the SELECTED WANTS' measurement
+   locators, so an author could land real, reviewed work and leave every
+   mission checkbox unticked — every want then measured false and the
+   machine saw no want movement. This block states, per selected want, the
+   exact locator it is measured against (for C4, the mission checkbox line
+   in its ticked form) and the tick contract: tick only wants the commit
+   truly satisfies, in the same commit, in the target repository."
+  [locators target-repository]
+  (when (and (map? locators) (seq locators))
+    (str "SELECTED WANTS (what this run is measured on):\n"
+         "Each want below is measured against its exact locator in the commit you "
+         "deliver. A C4 want is TRUE only when the named file in the TARGET "
+         "REPOSITORY contains the exact declaration line in its TICKED form at "
+         "that commit. When your commit truly completes a want, tick exactly that "
+         "checkbox line, in the SAME commit as the work, in the target repository "
+         "(" (pr-str target-repository) "). Tick ONLY wants your commit truly "
+         "satisfies: a tick with no demonstrated work stays :checkbox-only (the "
+         "two-instrument rule needs the tick plus this run's demo receipt), and "
+         "an unsupported tick fails review. Grounded work with its box left "
+         "unticked measures false, and the run records no want movement.\n"
+         (clojure.string/join
+          "\n"
+          (for [[want locator] (sort-by pr-str locators)]
+            (str "  " (pr-str want) " — "
+                 (case (:class locator)
+                   :C4 (str "C4 checkbox in " (:path locator) ": \""
+                            (:decl locator) "\"")
+                   :C3 (str "C3 path-exists: " (:path locator))
+                   (str "class " (pr-str (:class locator)) " at "
+                        (pr-str (:path locator)))))))
+         "\n")))
+
 (defn- acceptance-criterion-block
   "PROOF-wm-works ⟨1⟩6 (claude-5 ruling): the dispatch states the acceptance
    criterion VERBATIM. For the SELECTED candidate: each declared produced
@@ -4076,7 +4128,7 @@
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
                              measured-acquisition? surprise-root
-                             surprise-lookup-fn]}
+                             surprise-lookup-fn selected-want-locators]}
                       target mission cascade-entry stop-lines]
   (let [surprise-result (when surprise-root
                           (try
@@ -4117,6 +4169,7 @@
          (if (map? block)
            (str "ACCEPTANCE CRITERIA: not stated (" (name (:reason block)) ")\n")
            block))
+       (selected-want-locator-block selected-want-locators target-repository)
        "REPOSITORY ARTIFACT CONTRACT: Make and commit the complete parcel only in "
        "TARGET REPOSITORY. The artifact gate observes only that repository. Paths and "
        "actions nested in the mission record are context, not permission to commit in "
@@ -4256,6 +4309,10 @@
        "Inspect the commit rather than trusting the summary. Verify that it is substantive "
        "rather than artifact-only, is in scope for the selected target, preserves invariants, "
        "and clears the required static checks and relevant tests. Do not edit or commit.\n"
+       "MISSION CHECKBOX TICKS: if the author ticked any mission checkbox line, check each "
+       "ticked want against the work actually present in the commit. A tick whose want's work "
+       "is not demonstrated in the commit must be reported and refused; the machine will "
+       "classify it :checkbox-only regardless.\n"
        "For every code change you MUST execute the repository gates yourself: run clj-kondo "
        "on every changed .clj/.cljc/.cljs file, run futon4/dev/check-parens.el on every changed "
        "Lisp/Clojure file, and run the relevant tests in a fresh JVM. Report the exact commands "
@@ -7190,6 +7247,11 @@
                        parked-transition
                        (when (and finding (not admitted-verification?))
                          (park-r16-stop-line! opts external-attempt-id finding))
+                       ;; UNTICKED-WORK-UNSEEN: grounding (a reviewed
+                       ;; commit) and want movement (a measured tick flip)
+                       ;; are different facts; a reader of the terminal
+                       ;; needs them separately.
+                       want-delta (terminal-want-delta mission-view)
                        brief-item
                        (cond->
                         {:attempt-id external-attempt-id
@@ -7268,6 +7330,9 @@
                          mission-view
                          (assoc :mission-observation mission-view
                                 :universe-after (:universe-after mission-view))
+
+                         want-delta
+                         (assoc :want-delta want-delta)
 
                          (seq (:reviews data))
                          (assoc :reviews (:reviews data))
@@ -9084,7 +9149,16 @@
                                             cohort/default-data-root)
                                         :target-repository author-repo
                                         :target-repository-head
-                                        (:head head-observation))
+                                        (:head head-observation)
+                                        ;; UNTICKED-WORK-UNSEEN: the author
+                                        ;; must see the exact locators the
+                                        ;; selected wants are measured
+                                        ;; against, at the dispatch bound for
+                                        ;; this run.
+                                        :selected-want-locators
+                                        (get-in @d-task-dispatch
+                                                [:dispatch :occurrence :action/value
+                                                 :observation-locators]))
                                  target mission construction stop-lines))
                 _ (mission-contract/require-before-author! (:selected-action construction))
                 mission-applicable?
