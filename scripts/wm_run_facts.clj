@@ -850,6 +850,7 @@
                                  :else record-path)]))]
     {:facts facts :sources sources
      :diagnostics {:abstentionAudit (get (inner-abstention-facts record) "abstentionAudit")
+                   :previousSkipped (get-in record [:q6 :predecessor :previous-skipped])
                    :absencePaths (mapv pr-str apaths)
                    :absenceGroups absence-groups
                    :notRecomputable (vec (for [[k v] facts

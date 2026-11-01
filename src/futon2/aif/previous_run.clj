@@ -144,10 +144,25 @@
      :unsealed (get tally :tampered 0)
      :sealed-before-r18 (get tally :sealed-before-r18 0)}))
 
+(defn- skipped-work-kind [closed terminal]
+  (let [file (some-> (:record-file closed) io/file)]
+    (or (when (and file (.isFile file))
+          (try
+            (let [record (edn/read-string {:default tagged-literal} (slurp file))]
+              (or (get-in record [:failure :stage])
+                  (get-in record [:failure :kind])
+                  (get-in record [:terminal-receipt :failure-kind])))
+            (catch Exception _ nil)))
+        (get-in terminal [:outcome :kind])
+        (get-in terminal [:outcome :raw])
+        :chose-nothing-before-selection)))
+
 (defn predecessor
   "The sealed Q6 predecessor carrier for run RUN-ID started at STARTED-AT in
-  DIR's run stream: {:status :present :previous <its sealed terminal
-  carrier>} or a typed absence / not-recomputable naming why."
+  DIR's run stream. Ticks with a sealed `:chose-nothing` terminal are passed
+  over because no selection decision occurred; `:previous-skipped` records
+  their count and failure stages. Returns {:status :present :previous <sealed
+  terminal carrier>} or a typed absence / not-recomputable naming why."
   [dir run-id started-at]
   (let [now (instant started-at)
         stream (read-stream dir)
@@ -171,21 +186,44 @@
               (empty? earlier)
               {:status :absent :reason :no-earlier-started-run}
               :else
-              (let [latest (reduce (fn [a b] (if (.isAfter ^Instant (instant (:startedAt b))
-                                                           (instant (:startedAt a)))
-                                               b a))
-                                   earlier)
-                    at (instant (:startedAt latest))
-                    tied (filter #(= at (instant (:startedAt %))) earlier)
-                    closed (filter #(and (= :closed (:event %))
-                                         (= (:run/id latest) (:run/id %)))
-                                   (:events stream))
+              (let [ordered (sort-by #(instant (:startedAt %))
+                                     #(compare %2 %1) earlier)
+                    closed-for (fn [start]
+                                 (filter #(and (= :closed (:event %))
+                                               (= (:run/id start) (:run/id %)))
+                                         (:events stream)))
+                    skipped (take-while
+                             (fn [start]
+                               (let [closed (closed-for start)
+                                     terminal (:q6 (first closed))]
+                                 (and (= 1 (count closed))
+                                      (= terminal-schema (:schema terminal))
+                                      (intact? terminal)
+                                      (= :absent (get-in terminal [:choice :status]))
+                                      (= :chose-nothing (get-in terminal [:choice :reason]))
+                                      (nil? (:input-digest terminal))
+                                      (not= :abstained (get-in terminal [:outcome :outcome])))))
+                             ordered)
+                    latest (first (drop (count skipped) ordered))
+                    at (some-> latest :startedAt instant)
+                    tied (when at (filter #(= at (instant (:startedAt %))) earlier))
+                    closed (when latest (closed-for latest))
                     terminal (:q6 (first closed))
-                    who {:previous-run/id (:run/id latest)
-                         :previous-startedAt (:startedAt latest)}]
+                    skip-carrier (when (seq skipped)
+                                   {:count (count skipped)
+                                    :failure-kinds
+                                    (mapv (fn [start]
+                                            (let [closed (first (closed-for start))]
+                                              (skipped-work-kind closed (:q6 closed))))
+                                          skipped)})
+                    who (when latest {:previous-run/id (:run/id latest)
+                                      :previous-startedAt (:startedAt latest)})]
                 (merge
                  who
                  (cond
+                   (nil? latest)
+                   (cond-> {:status :absent :reason :no-earlier-decided-run}
+                     skip-carrier (assoc :previous-skipped skip-carrier))
                    (< 1 (count (set (map :run/id tied))))
                    {:status :not-recomputable :reason :previous-run-ambiguous
                     :runs (vec (sort (map :run/id tied)))}
@@ -200,6 +238,7 @@
                    {:status :not-recomputable :reason :previous-terminal-carrier-foreign}
                    :else
                    (cond-> {:status :present :previous terminal}
+                     skip-carrier (assoc :previous-skipped skip-carrier)
                      ;; Requirements Q8: the frontier this run persisted,
                      ;; the prior of the next run's refresh audit
                      (:q8-frontier (first closed))
