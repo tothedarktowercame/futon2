@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: click 11, self-heal refused (2026-11-01)
+
+Self-heal refused before any attempt on a missing config term, :acceptance-test. Treated as the injury's one try. 7d5e374e goes to medic once on-the-fly wants land. Budget 5. No further click until then, since the next would route to the same refusal.
+
 ## Latest execution checkpoint: click 10, injury 7d5e374e (2026-11-01)
 
 Click wm-click-3a9ee0a1 (run ac5bc477) selected excursion E-comprehension-foundation. The claim round resolved live, a reviewer's changes went through the revision round, then the reviewer falsifier failed and opened injury 7d5e374e, ordinal 143. Budget 6. Under the repair-once rule this injury gets its one self-heal attempt, the first with cause detail in the record and tests green, while zai-5 traces the cause.
