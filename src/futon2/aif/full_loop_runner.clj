@@ -3656,9 +3656,12 @@
     card says already + a commit that EXISTS (cat-file in the named repo,
       else find-commit-repo over the primary repos) ->
       {:outcome :already-satisfied :grounded-commit {:repo .. :sha ..}};
-    a typed reason and no artifact claim -> :guardrail-refusal (as before);
-    anything else — including already-true with no commit, or a commit
-      that does not exist — -> :invalid-author-refusal (as before).
+    a typed reason and no :proof-ref on the card -> :guardrail-refusal
+      (L5-25: the Agency-extracted ref is prose, not the author's claim;
+      OrdinaryRefusalProseRef.lean);
+    anything else — including already-true with no commit, a commit
+      that does not exist, or a refusal whose card names a :proof-ref —
+      -> :invalid-author-refusal (as before).
   EXISTS-FN is the injectable commit check ([repo sha] -> boolean) so tests
   stub the git call; REPO names where to look when the job does not."
   ([job] (author-refusal-classification job nil nil false))
@@ -3731,8 +3734,15 @@
            ;; evidence
            already? {:outcome :invalid-author-refusal}
 
+           ;; L5-25 (click wm-click-8ed79a0b, run 2026-11-01-0e6ff636): the
+           ;; author's typed claim is the card; the Agency-extracted ref is
+           ;; prose (the base HEAD or the mission file the author says it
+           ;; inspected).  A refusal whose card names no :proof-ref claims
+           ;; no artifact, whatever the prose mentions.  Lean:
+           ;; DarkTower.WarMachine.OrdinaryRefusalProseRef repairedGuardrail
+           ;; (mathlib4 darktower).
            (and (not (str/blank? reason))
-                (nil? artifact-ref))
+                (nil? proof-sha))
            {:outcome :guardrail-refusal :refusal-reason reason}
 
            :else {:outcome :invalid-author-refusal}))))))

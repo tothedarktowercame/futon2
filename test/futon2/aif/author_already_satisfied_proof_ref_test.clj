@@ -76,13 +76,23 @@
           futon5a-root known-proof?))))
 
 (deftest non-already-card-does-not-enter-the-proof-ref-branch
+  ;; L5-25 (OrdinaryRefusalProseRef.lean, proof_ref_while_refusing_invalid):
+  ;; a card that names a :proof-ref while refusing is the author's own
+  ;; artifact claim beside a refusal, contradictory under both consumers.
+  ;; Before L5-25 this shape read :guardrail-refusal only because the test
+  ;; passed no :artifact-ref; the Agency extracts the card's sha from the
+  ;; reply text, so production would have closed it invalid as well.  It
+  ;; still does not enter the proof-ref branch: no grounded commit.
   (let [reply (str "FULL_LOOP_FEATURE_CARD: {:built \"work remains\" "
                    ":want-coverage \"pending evidence\" :matches-intent? true "
                    ":things-to-try [\"inspect -> observation\"] :proof-ref \"" proof-sha "\"}\n"
                    "FULL_LOOP_AUTHOR: REFUSE out of scope\n")]
-    (is (= {:outcome :guardrail-refusal :refusal-reason "out of scope"}
+    (is (= {:outcome :invalid-author-refusal}
            (runner/author-refusal-classification
-            {:result reply} futon5a-root known-proof?)))))
+            {:result reply} futon5a-root known-proof?)))
+    (is (= {:outcome :invalid-author-refusal}
+           (runner/author-refusal-classification
+            {:result reply :artifact-ref proof-sha} futon5a-root known-proof?)))))
 
 (deftest commit-existence-distinguishes-the-real-commit-from-the-path
   (let [exists-in? @#'runner/commit-exists-in?]
