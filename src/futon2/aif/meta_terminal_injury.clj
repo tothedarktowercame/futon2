@@ -26,7 +26,15 @@
    ;; duplicate-effective-run guard refused correctly and the terminal
    ;; classifier still opened an injury because no non-injury kind existed.
    :outer/duplicate-effective-run :duplicate-effective-run
-   :outer/unchanged-refused-repeat :unchanged-refused-repeat})
+   :outer/unchanged-refused-repeat :unchanged-refused-repeat
+   ;; L5-25: the author's own typed REFUSE (throw-if-author-refused!,
+   ;; kind :guardrail-refusal) is the author's answer, not the apparatus.
+   ;; Until 2026-11-01 the kind was missing here, so the plain typed
+   ;; refusal of tick-run-record-2026-09-30-1790748841 and the reconstructed
+   ;; close of click wm-click-8ed79a0b both replayed :injury.  Lean:
+   ;; DarkTower.WarMachine.OrdinaryRefusalProseRef repairedKindVerdict
+   ;; (guardrailRefusal ↦ nonInjury; buildFailed stays an injury).
+   :guardrail-refusal :ordinary-author-refusal})
 (def successful-outcomes #{:success :closed :grounded-change :cohort-complete})
 (def close-outcome-image
   "Transcribes `DarkTower/WarMachine/CloseOutcomeImage.lean` `image`,
