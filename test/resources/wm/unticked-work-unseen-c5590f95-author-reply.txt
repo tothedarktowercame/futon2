@@ -1,0 +1,18 @@
+FULL_LOOP_FEATURE_CARD: {:built "checker: 21 reviewed M-pattern-retrieval-calibration checks as predicates over the real mission record" :want-coverage "all 21 compile-phase completion checks mechanically verified (21/21 satisfied)" :matches-intent? true :things-to-try ["clojure -M -m futon3.pattern-retrieval-calibration -> {:total 21 :all-satisfied? true} exit 0" "clojure -M:test -m cognitect.test-runner -n futon3.pattern-retrieval-calibration-test -> 5 tests 0 failures"]}
+
+Enacted patterns: `problems/r12-two-layer-calibration`, `problems/most-patterns-have-no-globally-recognised-rationale`, `cascade-construction/read-what-exists-first`, `problems/llm-over-corpus-mining-lessons`, `problems/r7-evidence-channel-precision`, `pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy` — the 21 clauses are discharged by `futon3.pattern-retrieval-calibration/verify`, which checks each named observable condition against the real mission file at `futon3/holes/missions/M-pattern-retrieval-calibration.md` (read at runtime, not inlined).
+
+Parcel (in the target repository `/home/joe/code/futon3`, base head `263dfc26…` confirmed before work):
+- `src/futon3/pattern_retrieval_calibration.clj` — 21 checks keyed by hole id, each `{check, predicate, observable}`; `verify` returns per-hole `{:check :satisfied? :observable}`; `summary` gives all-or-nothing with unsatisfied hole ids; `-main` exits 1 if any check fails.
+- `test/futon3/pattern_retrieval_calibration_test.clj` — positive path against the real mission file (21/21 satisfied), plus bad-case tests: renamed title caught, removed "Blocks on P-1" caught, Cross-refs-after-Motivation ordering caught, and line-wrap normalization bridging the wrapped MiniLM-cosine sentence.
+
+Validations:
+- `clj-kondo --lint` on both files: 0 errors, 0 warnings (one initially unused `testing` refer and a redundant `boolean` fixed before commit).
+- `clojure -M:test -m cognitect.test-runner -n futon3.pattern-retrieval-calibration-test`: 5 tests, 8 assertions, 0 failures, 0 errors.
+- `clojure -M -m futon3.pattern-retrieval-calibration`: `{:total 21, :all-satisfied? true, :unsatisfied (), …}`, exit 0.
+- No generator artifacts, so the fixed-point rule is satisfied by construction; no time-dependent output.
+- Only the two parcel files committed; base head was clean before the commit.
+
+Limitation stated honestly: the mission's six unchecked implementation tasks (P-1 parser, hybrid candidate builder, HIT widget, session close shapes, calibration artifact) and two lifecycle holes remain open; this parcel enacts the reviewed clause set, not those limbs, and the status line is unchanged (operator-gated DERIVE).
+
+FULL_LOOP_AUTHOR: DONE a12870e89bd2d791400d9dbf579949f65d9a074d
