@@ -401,6 +401,15 @@
          :provenance/path (:path entry)
          :provenance/sha256 (get-in entry [:source :sha256])}))
 
+(def mission-record-owned-keys
+  "Every key `mission-record-props` can emit. The upsert retracts these from the
+   existing props before merging, so a key the current rules do not emit for a
+   file is removed rather than inherited from an older classification."
+  [:scope/role :mission/relation :mission/title :mission/status-line :mission/status-class
+   :mission/operator-gated? :mission/operator-gate-lines :mission/requisition
+   :mission/open-hole-count :mission/open-holes :mission/classifier-sha256
+   :provenance/repo :provenance/path :provenance/sha256])
+
 (defn- record-parse-props [props]
   (cond
     (map? props) props
@@ -443,8 +452,15 @@
                         (:existing opts)
                         (get (mission-entity-index) id))
              props (record-parse-props (:entity/props existing))
+             ;; The builder drops nil-valued keys (XTDB will not store them), so
+             ;; a merge over the existing props would keep a stale derived value
+             ;; the current rules no longer emit: 15 missions kept
+             ;; :mission/operator-gated? true from the pre-a1419060a parser
+             ;; through a refresh that reported them reclassified (2026-11-01).
+             ;; Retract every writer-owned key first; foreign props stay.
              merged (into {} (remove (comp nil? val))
-                          (merge props (mission-record-props code-root entry)))]
+                          (merge (apply dissoc props mission-record-owned-keys)
+                                 (mission-record-props code-root entry)))]
          (if (and existing (= props merged))
            {:id id :status :unchanged}
            (do (substrate/put-doc!

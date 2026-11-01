@@ -260,3 +260,42 @@
                                  :mission/classifier-sha256])))))
       (finally
         (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
+
+(deftest refresh-retracts-a-stale-gate-the-current-rules-do-not-emit
+  ;; Bad case from 2026-11-01: 15 missions kept :mission/operator-gated? true
+  ;; (pre-a1419060a Status-prose rule) through a refresh that reported them
+  ;; reclassified, because the builder drops nil keys and the merge kept the
+  ;; old value. A non-gated file must come out of the refresh with no gate.
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "mission-stale-gate"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))
+        repo (io/file root "primary")
+        file (io/file repo "holes" "M-stale-gate.md")
+        store (atom {})]
+    (try
+      (.mkdirs (io/file repo ".git"))
+      (io/make-parents file)
+      (spit file "# Stale gate\n\n**Status:** OPEN — awaiting Joe\n")
+      (let [entry (#'mr/mission-doc->entry (.getAbsolutePath file))
+            props (mr/mission-record-props (.getAbsolutePath root) entry)]
+        (is (not (:operator-gated? entry)) "the current rules do not gate on Status prose")
+        (swap! store assoc (:id entry)
+               {:entity/external-id (:id entry)
+                :entity/props (assoc props
+                                     :mission/classifier-sha256 "superseded"
+                                     :mission/operator-gated? true
+                                     :mission/operator-gate-lines ["**Status:** OPEN — awaiting Joe"]
+                                     :foreign/kept "stays")}))
+      (with-redefs [substrate/put-doc!
+                    (fn [doc & _]
+                      (swap! store assoc (:entity/external-id doc) doc)
+                      doc)]
+        (mr/refresh-mission-substrate!
+         {:code-root (.getAbsolutePath root) :index-fn #(deref store)})
+        (let [props (get-in @store ["M-stale-gate" :entity/props])]
+          (is (not (contains? props :mission/operator-gated?)))
+          (is (not (contains? props :mission/operator-gate-lines)))
+          (is (= "stays" (:foreign/kept props)) "foreign props survive the retraction")
+          (is (= mr/mission-classifier-sha256 (:mission/classifier-sha256 props)))))
+      (finally
+        (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
