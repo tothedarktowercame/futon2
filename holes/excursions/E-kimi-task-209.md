@@ -1,6 +1,6 @@
 # E-kimi-task-209 — finish lemma kleinPlaneQuotient_double_self_cover in apm-lean, fixing the saved draft
 
-**Requisition:** in-progress — dispatched 2026-11-01T18:19:08Z to kimi-1 as invoke-1793557148947-9566-c15b2270
+**Requisition:** completed — 2026-11-01T18:53:07Z, job invoke-1793557148947-9566-c15b2270, state done
 
 Clocked in by claude-14 for kimi-1 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
