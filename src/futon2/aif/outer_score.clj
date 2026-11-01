@@ -10,6 +10,27 @@
 (def ^:private states [:doable :blocked])
 (def ^:private outcomes (vec (for [ending endings gain gains] [ending gain])))
 
+(def kernel-definition
+  "Versioned constants consumed by the scorer (and task reach producer).
+  Functional forms are fixed by this version, not executable data."
+  {:schema :wm/outer-kernel-parameters-v1 :version 1
+   :endings endings :gains gains :states states
+   :retraction {:focus :focused :associated :related :useful-elsewhere :unrelated}
+   :transition-kernel {:form :reach-on-landing-remainder-on-stopped
+                       :stopped [:stop-the-line :none] :stopped-mass 1.0
+                       :reach-bounds [0.0 1.0]}
+   :novelty-coefficient 0.5
+   :readiness-reach-prior {:ready 3/4 :undetermined 1/2 :not-ready 1/4}})
+
+(defn kernel-parameters
+  "Bind the code-consumed constants and this makeup's initializer/rate kits.
+  Learned counts remain separately retained state; these are not per-policy q."
+  [makeup]
+  (assoc kernel-definition :makeup-parameters
+         (into (sorted-map) (select-keys makeup [:c-kit :kappa :state-kit :gain-kit
+                                                :eta-c :omega-c :eta-state :omega-state
+                                                :eta-gain :omega-gain :precision-iterations]))))
+
 (defn- value-of [x k]
   (if (fn? x) (x k) (get x k)))
 
@@ -76,28 +97,26 @@
     (into {} (map (fn [x] [x (/ (double (or (value-of counts x) 0)) total)]) support))))
 
 (defn- bounded-reach [reach]
-  (max 0.0 (min 1.0 (double reach))))
+  (let [[lo hi] (get-in kernel-definition [:transition-kernel :reach-bounds])]
+    (max lo (min hi (double reach)))))
 
 (defn- ready-gain [unblocks]
   (cond (zero? unblocks) :none (= 1 unblocks) :one :else :several))
 
 (defn- ending-class [relation focus target]
-  (case (relation focus target)
-    :focus :focused
-    :associated :related
-    :useful-elsewhere :unrelated
-    nil))
+  (get (:retraction kernel-definition) (relation focus target)))
 
 (defn- stopped-kernel []
   (into {} (for [state states]
              [state (assoc (zipmap outcomes (repeat 0.0))
-                           [:stop-the-line :none] 1.0)])))
+                           (get-in kernel-definition [:transition-kernel :stopped])
+                           (get-in kernel-definition [:transition-kernel :stopped-mass]))])))
 
 (defn- picked-kernel [landing raw-reach]
   (let [reach (bounded-reach raw-reach)
-        stopped [:stop-the-line :none]
+        stopped (get-in kernel-definition [:transition-kernel :stopped])
         row0 (zipmap outcomes (repeat 0.0))
-        blocked (assoc row0 stopped 1.0)
+        blocked (assoc row0 stopped (get-in kernel-definition [:transition-kernel :stopped-mass]))
         doable (if (= landing stopped)
                  blocked
                  (assoc row0 landing reach stopped (- 1.0 reach)))]
@@ -108,7 +127,7 @@
   []
   {:pick nil :status nil :counts {:doable 0 :blocked 1}
    :q {:doable 0.0 :blocked 1.0} :kernel (stopped-kernel)
-   :landing [:stop-the-line :none]})
+   :landing (get-in kernel-definition [:transition-kernel :stopped])})
 
 (defn typed-step
   "Serializable description of the actual interpreter step. Function steps
@@ -134,7 +153,7 @@
           status (:status fact)
           ending (ending-class relation focus (:target candidate))
           landing (if ending [ending (ready-gain (graph-term facts (:target candidate) :unblocks))]
-                      [:stop-the-line :none])]
+                      (get-in kernel-definition [:transition-kernel :stopped]))]
       {:pick candidate
        :status status
        :counts (value-of state-counts status)
@@ -172,7 +191,7 @@
                                        prediction (/ (+ (* a ad) (* b ab)) total)]
                                  :when (pos? prediction)]
                              (/ (* (- ad ab) (- ad ab)) prediction)))]
-        (* 0.5 variance fisher)))))
+        (* (:novelty-coefficient kernel-definition) variance fisher)))))
 
 (defn push
   "Lean `push q a`: marginalize an outer model's state prior through its kernel."
