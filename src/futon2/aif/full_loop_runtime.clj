@@ -1312,6 +1312,16 @@
           (reset! state ref)
           ref))))
 
+(defn- direct-task-entry
+  "Where a caller-supplied task came from. The HTTP boundary's issuer provenance
+  is the only retained source; a session id is typed absent unless supplied."
+  [opts]
+  (let [issuer (:issuer-provenance opts)]
+    {:kind (if (= :wm-click-http-boundary (:source issuer)) :api :in-process)
+     :caller (or (:identity issuer) {:status :absent :reason :issuer-not-supplied})
+     :trigger (or (:trigger opts) {:status :absent :reason :trigger-not-supplied})
+     :session-id (or (:session-id opts) {:status :absent :reason :session-id-not-supplied})}))
+
 (defn- run-ordinary-opportunity-impl!
   "Run one production opportunity with the report-backed defaults installed.
   A caller-supplied task enters the existing task path unchanged.  Otherwise
@@ -1323,9 +1333,11 @@
   [opts]
   (if (get-in opts [:task :id])
     (run-ordinary-opportunity-with-task!
-     (assoc opts :selection-record
-            (retain-selection! opts {:status :not-exercised :reason :direct-task-entry}
-                               {:status :not-exercised :path :direct-task :reason :task-supplied})))
+     (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}]
+       (assoc opts :selection-record
+              (retain-selection! opts (assoc named :status :not-exercised :reason :direct-task-entry)
+                                 (assoc named :status :not-exercised :path :direct-task
+                                        :reason :task-supplied)))))
     (if-let [giraffe-dir (find-giraffe-run opts)]
       (try
         (let [makeup (outer-state/load-makeup
@@ -1654,16 +1666,19 @@
   (let [opts (selection-context (dissoc opts :selection-record/state :selection-record/evidence :selection-record))
         attempt (try
                   (let [authority (resolve-medic-authority opts)]
-                    {:result (if (= :refused (:status authority))
-                             {:status :refused :reason (:reason authority)
-                              :route :dedicated-meta-self-heal :ordinary-selection-called? false}
-                             (run-opportunity-with-authority! opts authority))})
-                  (catch Exception e {:exception e :result {:status :threw
-                                                            :reason :opportunity-exception}}))
+                    (if (= :refused (:status authority))
+                      {:bypass :authority-refusal
+                       :result {:status :refused :reason (:reason authority)
+                                :route :dedicated-meta-self-heal :ordinary-selection-called? false}}
+                      {:result (run-opportunity-with-authority! opts authority)}))
+                  (catch Exception e {:exception e :bypass :arbitration-exception
+                                      :result {:status :threw :reason :opportunity-exception}}))
         result (:result attempt)
+        bypass (or (:bypass attempt) :meta-self-heal)
         ref (or @(:selection-record/state opts)
-                (retain-selection! opts {:status :not-exercised :reason :meta-self-heal-route}
-                                   {:status :not-exercised :path :meta-self-heal
+                (retain-selection! opts {:status :not-exercised
+                                         :reason (if (= :meta-self-heal bypass) :meta-self-heal-route bypass)}
+                                   {:status :not-exercised :path bypass
                                     :reason (or (:reason result) :dedicated-meta-self-heal)}))
         completion (selection-record/complete! ref result)]
     (if-let [e (:exception attempt)]
