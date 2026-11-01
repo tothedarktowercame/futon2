@@ -1,6 +1,6 @@
 # E-kimi-task-221 — m95J02: Euler step clauses
 
-**Requisition:** in-progress — dispatched 2026-11-01T23:12:49Z to kimi-2 as invoke-1793574769535-9864-49cd95b6
+**Requisition:** completed — 2026-11-01T23:37:13Z, job invoke-1793574769535-9864-49cd95b6, state failed
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
