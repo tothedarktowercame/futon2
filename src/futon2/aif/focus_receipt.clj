@@ -103,7 +103,7 @@
    finding's historical target are fallbacks only after that obligation is no
    longer open. The order must never depend on directory or map iteration."
   [:direct-corpus :open-repair-obligation :ticket-parent :finding-target
-   :stated-relation :embedding-neighbour])
+   :stated-relation :giraffe-graph :embedding-neighbour])
 
 ;; CTauClassPreference.lean:124-138.  This is the sole relation-to-scorer
 ;; vocabulary: callers retain the relation, while G consumes the projection.
@@ -122,10 +122,10 @@
      :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}))
 
 ;; ---------------------------------------------------------------------------
-;; WM-RELATION-I: an M- target with no row derives its relation, in order,
-;; from (a) its mission's stated ## Relations, walked through M- targets to
-;; the first target with a row, then (b) its nearest rowed neighbour in the
-;; pinned structure embedding; else it stays :unknown with the reason. Joe,
+;; WM-RELATION-I: a target with no row derives its relation, in order, from
+;; (a) stated relations in its task text, (b) the pinned Giraffe graph for the
+;; observation, then (c) its nearest rowed neighbour in the pinned structure
+;; embedding; else it stays :unknown with the reason. Joe,
 ;; 2026-09-26: "'I do not know how this relates to anything' is not a good
 ;; answer" when the machine holds the graph and the embedding. Each
 ;; derivation is a reading with its receipt (:derived-via), not a value
@@ -222,7 +222,7 @@
     (if (or (zero? na) (zero? nb)) 0.0 (/ dot (* na nb)))))
 
 (defn embedding-neighbour
-  "(b): TARGET's nearest rowed neighbour in the structure embedding the
+  "(c): TARGET's nearest rowed neighbour in the structure embedding the
   inputs pin (:embedding :source-pins, mission-embed.json and
   structure-embeddings.npy), re-hashed against the pins at read time. ROWED
   is {target row}. {:row r :derived-via {:kind :embedding-neighbour
@@ -279,6 +279,132 @@
                                  :candidates cands :pins [jp np]
                                  :floor floor}})))))))))
 
+(defn- graph-parameter [inputs key]
+  (if (contains? inputs key)
+    {:value (get inputs key)}
+    {:absent (keyword (str (name key) "-not-declared"))}))
+
+(def ^:private graph-parameter-refusals
+  #{:graph-hop-bound-not-declared :graph-link-kinds-not-declared
+    :graph-link-bases-not-declared :invalid-graph-hop-bound
+    :invalid-graph-link-kinds :invalid-graph-link-bases})
+
+(defn- normalize-id [x]
+  (cond (keyword? x) (name x)
+        (string? x) x
+        :else nil))
+
+(defn- read-graph-input
+  "Read input.edn only when its bytes match the input.edn row in manifest.edn."
+  [run-dir]
+  (let [manifest-file (io/file run-dir "manifest.edn")
+        input-file (io/file run-dir "input.edn")]
+    (cond
+      (nil? run-dir) {:absent :giraffe-run-dir-not-retained}
+      (not (.isFile manifest-file)) {:absent :giraffe-manifest-missing}
+      (not (.isFile input-file)) {:absent :giraffe-input-missing}
+      :else
+      (try
+        (let [manifest (edn/read-string (slurp manifest-file))
+              pin (some #(when (= "input.edn" (:file %)) (:sha256 %)) (:files manifest))
+              actual (sha256-file input-file)]
+          (cond
+            (nil? pin) {:absent :giraffe-input-pin-unavailable}
+            (not= pin actual) {:absent :giraffe-input-pin-mismatch
+                               :expected pin :actual actual}
+            :else {:input (edn/read-string (slurp input-file))
+                   :input-sha actual :run (:run-id manifest)}))
+        (catch Exception e
+          {:absent :giraffe-graph-unreadable :message (.getMessage e)})))))
+
+;; One click classifies hundreds of targets against one immutable, content-pinned
+;; run. Cache that verified parse by run path; tests use distinct run dirs.
+(def ^:private graph-input (memoize read-graph-input))
+
+(defn- graph-edge [from to kind basis evidence-pin]
+  (when-let [a (normalize-id from)]
+    (when-let [b (normalize-id to)]
+      {:from a :to b :kind (keyword (name kind)) :basis (keyword (name basis))
+       :evidence-pin evidence-pin})))
+
+(defn giraffe-graph-path
+  "Nearest declared relation row reached from TARGET over the pinned Giraffe
+  graph. Declared dependency edges are always admitted; reading links are
+  filtered by the three declared graph parameters."
+  [inputs target row-of run-dir]
+  (let [bound (graph-parameter inputs :graph-hop-bound)
+        kinds (graph-parameter inputs :graph-link-kinds)
+        bases (graph-parameter inputs :graph-link-bases)
+        missing (some :absent [bound kinds bases])]
+    (cond
+      missing {:absent missing}
+      (not (and (integer? (:value bound)) (pos? (:value bound))))
+      {:absent :invalid-graph-hop-bound :value (:value bound)}
+      (not (sequential? (:value kinds))) {:absent :invalid-graph-link-kinds}
+      (not (sequential? (:value bases))) {:absent :invalid-graph-link-bases}
+      :else
+      (let [g (graph-input run-dir)]
+        (if (:absent g)
+          g
+          (let [input (:input g)
+                allowed-kinds (set (map (comp keyword name) (:value kinds)))
+                allowed-bases (set (map (comp keyword name) (:value bases)))
+                dependencies (keep #(graph-edge (:from %) (:to %)
+                                                (or (:reading-kind %) :dependency)
+                                                (or (:basis %) :declared)
+                                                (:evidence-pin %))
+                                   (:edges input))
+                links (keep (fn [link]
+                              (let [kind (keyword (name (:kind link)))
+                                    basis (keyword (name (:basis link)))]
+                                (when (and (allowed-kinds kind) (allowed-bases basis))
+                                  (graph-edge (:from link) (:to link) kind basis
+                                              (or (:evidence-pin link) (:evidence link))))))
+                            (get-in input [:reading-evidence :links]))
+                adjacency (reduce (fn [m edge]
+                                    (-> m
+                                        (update (:from edge) (fnil conj []) edge)
+                                        (update (:to edge) (fnil conj [])
+                                                (assoc edge :from (:to edge) :to (:from edge)))))
+                                  {} (concat dependencies links))
+                classify-row (fn [row]
+                               (cond
+                                 (contains? #{"focus" "associated"} (:relation row)) :associated
+                                 (= "useful-elsewhere" (:relation row)) :useful-elsewhere))]
+            (loop [frontier [[target []]] seen #{target} hops 0]
+              (if (or (empty? frontier) (>= hops (:value bound)))
+                {:absent :no-graph-path-to-classified-target}
+                (let [steps (->> frontier
+                                 (mapcat (fn [[node path]]
+                                           (for [edge (sort-by (juxt :to :kind :basis) (get adjacency node []))
+                                                 :when (not (seen (:to edge)))]
+                                             [(:to edge) (conj path edge)])))
+                                 distinct vec)
+                      hits (->> steps
+                                (keep (fn [[node path]]
+                                        (when-let [row (row-of node)]
+                                          (when-let [class (classify-row row)]
+                                            {:node node :path path :row row :class class}))))
+                                (sort-by :node) vec)]
+                  (if (seq hits)
+                    (let [classes (set (map :class hits))]
+                      (if (> (count classes) 1)
+                        {:absent :graph-anchors-disagree
+                         :hops (inc hops)
+                         :anchors (mapv #(select-keys % [:node :class]) hits)}
+                        (let [hit (first hits)]
+                          {:row (:row hit)
+                           :relation (name (:class hit))
+                           :derived-via
+                           {:kind :giraffe-graph :hops (inc hops)
+                            :path (mapv (fn [edge]
+                                          [(:from edge) (:to edge) (:kind edge) (:basis edge)
+                                           (:evidence-pin edge)])
+                                        (:path hit))
+                            :anchor (:node hit) :run (:run g)
+                            :input-sha (:input-sha g)}})))
+                    (recur steps (into seen (map first steps)) (inc hops))))))))))))
+
 (defn classify-target
   "THE shared relation producer (codex-20 ruling, handoff B): one
    classification for BOTH the scoring path and the close receipt. Accepts a
@@ -290,7 +416,8 @@
    outcome, and never guessed."
   ([inputs discovery as-of target]
    (classify-target inputs discovery as-of target nil))
-  ([inputs discovery as-of target {:keys [ticket-dir findings-dir code-root mission-text-fn] :as ctx}]
+  ([inputs discovery as-of target {:keys [ticket-dir findings-dir code-root mission-text-fn
+                                          giraffe-run-dir] :as ctx}]
    (let [row-of (fn [t] (first (filter #(and (= t (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs))))
          direct (row-of target)
          finding-record (when (and findings-dir (string? target)
@@ -359,13 +486,27 @@
                                             (memoize #(default-mission-text (or code-root (str (System/getProperty "user.home") "/code")) %)))
                                    a (stated-relation-path target row-of text)]
                                (if (:row a)
-                                 a
+                                   a
                                  (let [rowed (into {} (keep (fn [r] (when (at-or-before? (:effective-from r) as-of) [(:target r) r])))
                                                    (reverse (:relations inputs)))
-                                       b (embedding-neighbour inputs target rowed)]
-                                   (if (:row b)
-                                     (assoc-in b [:derived-via :stated-relation] {:absent (:absent a)})
-                                     {:absent (:absent b) :embedding b :stated-relation (:absent a)})))))
+                                       graph (giraffe-graph-path inputs target row-of giraffe-run-dir)
+                                       b (when-not (:row graph)
+                                           (embedding-neighbour inputs target rowed))]
+                                   (cond
+                                     (:row graph)
+                                     (-> graph
+                                         (assoc :row (assoc (:row graph) :relation (:relation graph)))
+                                         (assoc-in [:derived-via :stated-relation] {:absent (:absent a)}))
+                                     (:row b)
+                                     (-> b
+                                         (assoc-in [:derived-via :stated-relation] {:absent (:absent a)})
+                                         (assoc-in [:derived-via :giraffe-graph] (dissoc graph :input)))
+                                     :else
+                                     {:absent (if (graph-parameter-refusals (:absent graph))
+                                                (:absent graph)
+                                                (or (:absent b) (:absent graph)))
+                                      :embedding b :giraffe-graph graph
+                                      :stated-relation (:absent a)})))))
          ;; relation-source-precedence, written out so changing this policy is
          ;; a reviewable semantic edit rather than incidental collection order.
          relation-row (or direct

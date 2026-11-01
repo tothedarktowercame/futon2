@@ -4465,6 +4465,9 @@
     "authority": "node presence only; not adjacency permission"
   },
   "embedding-floor": 0.0,
+  "graph-hop-bound": 3,
+  "graph-link-kinds": ["relates-to", "part-of", "advances"],
+  "graph-link-bases": ["declared"],
   "global-preference": {
     "masses": {
       "focus": 0.55,
