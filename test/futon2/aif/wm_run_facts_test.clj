@@ -1,5 +1,7 @@
 (ns futon2.aif.wm-run-facts-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [cheshire.core :as json]
+            [clojure.string :as str]
+            [clojure.test :refer [deftest is]]
             [wm-run-facts :as facts]
             [futon2.aif.policy :as policy]
             [futon2.aif.full-loop-runner]))
@@ -76,10 +78,106 @@
     (is (= "work" (exported "kind")))
     (is (not (contains? exported "selectionPath")))))
 
-(deftest g-carriers-are-not-recomputable-until-projected
+;; The construction and G paths of the 2026-11-01 record ac5bc477, verbatim, cut
+;; down by keeping only those paths: the record itself is 5.9 MB.
+(def live-record (facts/read-edn "test/fixtures/wm-run-facts/ac5bc477-carriers.edn"))
+(def live-facts (:facts (facts/facts-for-record live-record "r" snap)))
+;; `scripts/wm_run_facts.clj --run` on the whole record, for the fields that need
+;; the Q4 and Q6 carriers intact.  Regenerate it rather than editing it.
+(def live-export
+  (get (json/parse-string (slurp "test/fixtures/wm-run-facts/ac5bc477-export.json")) "facts"))
+
+(defn- live-certificate [f]
+  (update-in live-record [:decision :selection-certificate] f))
+
+(defn- reason [x] (get x "not-recomputable"))
+
+(deftest construction-comes-from-the-recorded-census
+  (let [[tc :as all] (live-facts "targetConstruction")]
+    (is (= 1 (count all)))
+    (is (= ["E-comprehension-foundation"] (tc "targets")))
+    (is (= 0 (tc "action")))
+    (is (true? (tc "sliceFromWholeLibrary")))
+    (is (= (set (tc "slice")) (set (tc "pool"))))
+    (is (= 7 (count (tc "pool")) (live-facts "constructorPatternCount")))
+    (is (= 3 (tc "policyCount") (count (tc "policies"))))
+    (is (= "9992e2c62e41453d9ae33ba6c660b20195c91006759c84a3154af858436612e5" (tc "graph")))
+    (is (= "5f41e1a3896fa08f6d79105551c66b8910e5363cdfaeb4af93b76679624488c0" (tc "library")))
+    (is (= 1527 (live-facts "libraryPatternCount")))
+    (is (= (set (tc "policies")) (set (live-facts "constructedCascades"))))))
+
+(deftest every-side-names-a-policy-the-same-way
+  (let [[tc] (live-export "targetConstruction")
+        compared (set (live-export "comparedPolicies"))]
+    (is (= (set (tc "policies")) (set (live-export "constructedCascades")) compared))
+    (is (contains? compared (get-in live-export ["currentChoice" "cascade"])))
+    (is (= compared (set (map #(% "policy") (live-export "policyG")))))
+    (is (= compared (set (map #(% "policy") (live-export "policyPrediction")))))
+    (is (= compared (set (map #(% "policy") (live-export "policyPreferences")))))))
+
+(deftest a-slice-pattern-at-other-bytes-is-not-from-the-whole-library
+  (let [pattern (-> (live-certificate identity)
+                    (get-in [:decision :selection-certificate :q2-construction :entries 0 :slice 0 :pattern]))
+        changed (assoc-in live-record
+                          [:decision :selection-certificate :q2-construction :library :patterns pattern]
+                          "other-bytes")
+        exported (:facts (facts/facts-for-record changed "r" snap))]
+    (is (false? (get-in exported ["targetConstruction" 0 "sliceFromWholeLibrary"])))))
+
+(deftest policy-g-is-exact-with-the-source-double-beside-it
+  (let [rows (live-facts "policyG")
+        chosen (first (filter #(= 1635919 (get-in % ["g" "numerator"])) rows))]
+    (is (= 3 (count rows)))
+    (is (= [1635919 1796620 1796620] (sort (map #(get-in % ["g" "numerator"]) rows))))
+    (is (= 1.6359186228431266 (get-in chosen ["g" "double"])))
+    (is (every? #(= 1000000 (get-in % ["g" "denominator"])) rows))
+    (is (= (get-in live-export ["currentChoice" "cascade"]) (chosen "policy")))
+    (is (= 1000000 (live-facts "policyGScale")))))
+
+(deftest policy-prediction-digests-what-the-law-scored
+  (let [rows (live-facts "policyPrediction")]
+    (is (= 3 (count rows)))
+    (is (= 2 (count (set (map #(% "digest") rows)))))))
+
+(deftest stopping-has-no-g-on-the-inner-path
+  (doseq [field ["abstentionG" "abstentionPrediction"]]
+    (is (= "no stopped-kernel G is computed on the inner path (L4b row 4; L5)"
+           (reason (live-facts field))))))
+
+(deftest an-empty-census-names-the-path
+  (let [emptied (live-certificate #(assoc-in % [:q2-construction :entries] []))
+        exported (:facts (facts/facts-for-record emptied "r" snap))]
+    (is (= "[:decision :selection-certificate :q2-construction :entries] empty"
+           (reason (exported "targetConstruction"))
+           (reason (exported "constructorPatternCount"))))))
+
+(deftest an-absent-census-names-the-path
   (let [exported (:facts (facts/facts-for-record record "r" snap))]
-    (doseq [field ["policyG" "abstentionG" "policyPrediction"]]
-      (is (contains? (exported field) "not-recomputable")))))
+    (is (= "[:decision :selection-certificate :q2-construction] absent"
+           (reason (exported "targetConstruction"))))
+    (is (str/includes? (reason (exported "libraryPatternCount")) ":library :count"))))
+
+(deftest one-unjoined-candidate-makes-the-carrier-not-recomputable
+  (let [orphaned (live-certificate #(assoc-in % [:candidates 0 :id :id] "policy-with-no-row"))
+        exported (:facts (facts/facts-for-record orphaned "r" snap))]
+    (is (str/includes? (reason (exported "policyG")) "policy-with-no-row"))
+    (is (str/includes? (reason (exported "policyPrediction")) "policy-with-no-row"))))
+
+(deftest a-candidate-without-predictions-or-g-is-named
+  (let [no-steps (live-certificate #(assoc-in % [:candidates 1 :class-emission :certificate :steps] []))
+        no-g (live-certificate #(assoc-in % [:candidates 1 :g] nil))]
+    (is (str/includes? (reason (get (:facts (facts/facts-for-record no-steps "r" snap)) "policyPrediction"))
+                       "no recorded progress or class predictions"))
+    (is (str/includes? (reason (get (:facts (facts/facts-for-record no-g "r" snap)) "policyG"))
+                       "no finite :g"))))
+
+(deftest doubles-within-a-scale-unit-become-one-rational
+  (is (= (get (facts/exact-g 1.23456701) "numerator")
+         (get (facts/exact-g 1.23456708) "numerator")
+         1234567))
+  (is (= -1500000 (get (facts/exact-g -1.5) "numerator")))
+  (is (nil? (facts/exact-g Double/NaN)))
+  (is (nil? (facts/exact-g nil))))
 
 (deftest runfacts-field-set-is-exact
   (let [exported (:facts (facts/facts-for-record record "r" snap))]

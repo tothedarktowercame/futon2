@@ -13,6 +13,7 @@
 (defn nat-fs [xs] (str "{" (str/join ", " xs) "}"))
 (defn bool-lit [x] (if x "true" "false"))
 (defn field [m k] (or (get m k) (get m (name k))))
+(declare digest-term)
 (defn calibration-term [calibration]
   (format "{%s := %d, version := %d, authority := %d, registrationToken := %d, focusedCost := %d, relatedCost := %d, unrelatedCost := %d}"
           "identity" (field calibration :identity) (field calibration :version)
@@ -40,7 +41,7 @@
   (str "[" (str/join ", "
                      (for [x xs]
                        (format "{ targets := %s, action := %d, reading := %d, library := %d, graph := %d, kernel := %d, slice := %s, pool := %s, sliceFromWholeLibrary := %s, policyCount := %d, policies := %s }"
-                               (fs (x "targets")) (id (x "action")) (id (x "reading"))
+                               (fs (x "targets")) (digest-term (x "action")) (id (x "reading"))
                                (id (x "library")) (id (x "graph")) (id (x "kernel"))
                                (fs (x "slice")) (fs (x "pool"))
                                (bool-lit (x "sliceFromWholeLibrary")) (x "policyCount")

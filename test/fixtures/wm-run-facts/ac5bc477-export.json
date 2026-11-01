@@ -85,14 +85,11 @@
 "[:failure :detail :reviewer-falsifier-verification]"
 ],
 "notRecomputable": [
-"targetConstruction",
+"abstentionPrediction",
 "preferenceSemantics",
-"policyG",
 "completionPreferencePairs",
 "gradedPreferenceSteps",
 "horizonLength",
-"constructorPatternCount",
-"policyPrediction",
 "completionPairsStrictlyPreferred",
 "abstentionG",
 "preferenceSteps",
@@ -101,14 +98,17 @@
 },
 "facts": {
 "abstentionG": {
-"not-recomputable": "per-policy G, abstention G and prediction digests not yet projected from the inner record"
+"not-recomputable": "no stopped-kernel G is computed on the inner path (L4b row 4; L5)"
+},
+"abstentionPrediction": {
+"not-recomputable": "no stopped-kernel G is computed on the inner path (L4b row 4; L5)"
 },
 "calibrationAuthorizations": [],
 "cascadesWithoutG": [],
 "comparedPolicies": [
-"[:wm/reading-policy-v1 \"E-comprehension-foundation\" \"E-comprehension-foundation/policy-0ae88b7799f3f8c77494\" {:nodes [[[\"agent/scope-before-action\" 0] \"agent/scope-before-action\"] [[\"agent/state-is-hypothesis\" 1] \"agent/state-is-hypothesis\"] [[\"agent/commitment-varies-with-confidence\" 2] \"agent/commitment-varies-with-confidence\"] [[\"agency/self-attribution\" 3] \"agency/self-attribution\"] [[\"agent/scope-before-action\" 4] \"agent/scope-before-action\"] [[\"agent/evidence-over-assertion\" 5] \"agent/evidence-over-assertion\"] [[\"agent/state-is-hypothesis\" 6] \"agent/state-is-hypothesis\"] [[\"agent/handoff-preserves-context\" 8] \"agent/handoff-preserves-context\"]], :edges [[[\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] :context-enables] [[\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] :precedes] [[\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] :justified-by] [[\"agent/scope-before-action\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables] [[\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] :context-enables] [[\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] :justified-by] [[\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8] :condition-enables]], :order [[\"agent/scope-before-action\" 0] [\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8]]}]",
-"[:wm/reading-policy-v1 \"E-comprehension-foundation\" \"E-comprehension-foundation/policy-38f92101a497c80661bd\" {:nodes [[[\"stack-coherence/evidence-ledger\" 0] \"stack-coherence/evidence-ledger\"] [[\"agent/state-is-hypothesis\" 1] \"agent/state-is-hypothesis\"] [[\"agent/commitment-varies-with-confidence\" 2] \"agent/commitment-varies-with-confidence\"] [[\"agency/self-attribution\" 3] \"agency/self-attribution\"] [[\"agent/scope-before-action\" 4] \"agent/scope-before-action\"] [[\"agent/evidence-over-assertion\" 5] \"agent/evidence-over-assertion\"] [[\"agent/state-is-hypothesis\" 6] \"agent/state-is-hypothesis\"] [[\"agent/handoff-preserves-context\" 8] \"agent/handoff-preserves-context\"]], :edges [[[\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] :context-enables] [[\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] :precedes] [[\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] :justified-by] [[\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] :context-enables] [[\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] :justified-by] [[\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8] :condition-enables] [[\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables]], :order [[\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8]]}]",
-"[:wm/reading-policy-v1 \"E-comprehension-foundation\" \"E-comprehension-foundation/policy-78fb2aa6ddcc719988e1\" {:nodes [[[\"agent/scope-before-action\" 0] \"agent/scope-before-action\"] [[\"stack-coherence/evidence-ledger\" 0] \"stack-coherence/evidence-ledger\"] [[\"agent/state-is-hypothesis\" 1] \"agent/state-is-hypothesis\"] [[\"agent/commitment-varies-with-confidence\" 2] \"agent/commitment-varies-with-confidence\"] [[\"agency/self-attribution\" 3] \"agency/self-attribution\"] [[\"agent/scope-before-action\" 4] \"agent/scope-before-action\"] [[\"agent/evidence-over-assertion\" 5] \"agent/evidence-over-assertion\"] [[\"agent/state-is-hypothesis\" 6] \"agent/state-is-hypothesis\"] [[\"agent/handoff-preserves-context\" 8] \"agent/handoff-preserves-context\"]], :edges [[[\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] :context-enables] [[\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] :precedes] [[\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] :justified-by] [[\"agent/scope-before-action\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables] [[\"agent/scope-before-action\" 0] [\"stack-coherence/evidence-ledger\" 0] :overlap] [[\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] :context-enables] [[\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] :justified-by] [[\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8] :condition-enables] [[\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables]], :order [[\"agent/scope-before-action\" 0] [\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8]]}]"
+"032fa4302204587c6900ee07e76131728803e8db84c45f579ab9ae6d3ede75b7",
+"233e60be1c147ee561a63f22aaa912e6de620e0c22e8b13f4df6607b28d12191",
+"ef3afc4ac8e17ce062b8c96d50f091db2f32e61d259d06037ddfb6fcb25b9b0a"
 ],
 "completionPairsStrictlyPreferred": {
 "not-recomputable": "no runtime strict-preference census producer: legacy habit store retired, Q9 SUT absent from serving"
@@ -117,15 +117,13 @@
 "not-recomputable": "no runtime completion-preference census producer: legacy habit store retired, Q9 SUT absent from serving"
 },
 "constructedCascades": [
-"2f0c5293dc215d48762a25deda3468ba5c38a36e10af431aeafb8cc190ce660c",
-"4b4184d70f36166d49a254558334a5724ce0c4a2c9a06c70dd84f6231892ec7b",
-"71e38554603d894532f8978f87505c820ec31b2ea3a2f36200a4312e0279633a"
+"032fa4302204587c6900ee07e76131728803e8db84c45f579ab9ae6d3ede75b7",
+"233e60be1c147ee561a63f22aaa912e6de620e0c22e8b13f4df6607b28d12191",
+"ef3afc4ac8e17ce062b8c96d50f091db2f32e61d259d06037ddfb6fcb25b9b0a"
 ],
-"constructorPatternCount": {
-"not-recomputable": "selection certificate target construction absent"
-},
+"constructorPatternCount": 7,
 "currentChoice": {
-"cascade": "[:wm/reading-policy-v1 \"E-comprehension-foundation\" \"E-comprehension-foundation/policy-78fb2aa6ddcc719988e1\" {:nodes [[[\"agent/scope-before-action\" 0] \"agent/scope-before-action\"] [[\"stack-coherence/evidence-ledger\" 0] \"stack-coherence/evidence-ledger\"] [[\"agent/state-is-hypothesis\" 1] \"agent/state-is-hypothesis\"] [[\"agent/commitment-varies-with-confidence\" 2] \"agent/commitment-varies-with-confidence\"] [[\"agency/self-attribution\" 3] \"agency/self-attribution\"] [[\"agent/scope-before-action\" 4] \"agent/scope-before-action\"] [[\"agent/evidence-over-assertion\" 5] \"agent/evidence-over-assertion\"] [[\"agent/state-is-hypothesis\" 6] \"agent/state-is-hypothesis\"] [[\"agent/handoff-preserves-context\" 8] \"agent/handoff-preserves-context\"]], :edges [[[\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] :context-enables] [[\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] :precedes] [[\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] :justified-by] [[\"agent/scope-before-action\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables] [[\"agent/scope-before-action\" 0] [\"stack-coherence/evidence-ledger\" 0] :overlap] [[\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] :context-enables] [[\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] :justified-by] [[\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8] :condition-enables] [[\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables]], :order [[\"agent/scope-before-action\" 0] [\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8]]}]",
+"cascade": "233e60be1c147ee561a63f22aaa912e6de620e0c22e8b13f4df6607b28d12191",
 "target": "E-comprehension-foundation"
 },
 "currentInputDigest": "0381ab3ae1173b3023112cf74cfca0659763e5f8de25c2a2ad570fb6eb39b96a",
@@ -1409,12 +1407,50 @@
 "policiesWithAmbiguityTerm": 3,
 "policiesWithInformationTerm": 3,
 "policiesWithRiskTerm": 3,
-"policyG": {
-"not-recomputable": "per-policy G, abstention G and prediction digests not yet projected from the inner record"
+"policyG": [
+{
+"g": {
+"denominator": 1000000,
+"double": 1.7966202879146833,
+"numerator": 1796620,
+"scale": 1000000
 },
-"policyPrediction": {
-"not-recomputable": "per-policy G, abstention G and prediction digests not yet projected from the inner record"
+"policy": "032fa4302204587c6900ee07e76131728803e8db84c45f579ab9ae6d3ede75b7"
 },
+{
+"g": {
+"denominator": 1000000,
+"double": 1.6359186228431266,
+"numerator": 1635919,
+"scale": 1000000
+},
+"policy": "233e60be1c147ee561a63f22aaa912e6de620e0c22e8b13f4df6607b28d12191"
+},
+{
+"g": {
+"denominator": 1000000,
+"double": 1.7966202879146833,
+"numerator": 1796620,
+"scale": 1000000
+},
+"policy": "ef3afc4ac8e17ce062b8c96d50f091db2f32e61d259d06037ddfb6fcb25b9b0a"
+}
+],
+"policyGScale": 1000000,
+"policyPrediction": [
+{
+"digest": "af87f54999cac7ae684c8e250db788f9eb6fdc2cd64600aeb58256ffddf41b2d",
+"policy": "032fa4302204587c6900ee07e76131728803e8db84c45f579ab9ae6d3ede75b7"
+},
+{
+"digest": "70d9e73e18c7b9cd0194eabecdff8dd14397603a2ed7d8a54e918e79c9673621",
+"policy": "233e60be1c147ee561a63f22aaa912e6de620e0c22e8b13f4df6607b28d12191"
+},
+{
+"digest": "af87f54999cac7ae684c8e250db788f9eb6fdc2cd64600aeb58256ffddf41b2d",
+"policy": "ef3afc4ac8e17ce062b8c96d50f091db2f32e61d259d06037ddfb6fcb25b9b0a"
+}
+],
 "policyPreferences": [
 {
 "gradedPreferenceSteps": [
@@ -1429,7 +1465,7 @@
 ],
 "horizon": 8,
 "normalization": "perStepCapacityAndPattern",
-"policy": "[:wm/reading-policy-v1 \"E-comprehension-foundation\" \"E-comprehension-foundation/policy-0ae88b7799f3f8c77494\" {:nodes [[[\"agent/scope-before-action\" 0] \"agent/scope-before-action\"] [[\"agent/state-is-hypothesis\" 1] \"agent/state-is-hypothesis\"] [[\"agent/commitment-varies-with-confidence\" 2] \"agent/commitment-varies-with-confidence\"] [[\"agency/self-attribution\" 3] \"agency/self-attribution\"] [[\"agent/scope-before-action\" 4] \"agent/scope-before-action\"] [[\"agent/evidence-over-assertion\" 5] \"agent/evidence-over-assertion\"] [[\"agent/state-is-hypothesis\" 6] \"agent/state-is-hypothesis\"] [[\"agent/handoff-preserves-context\" 8] \"agent/handoff-preserves-context\"]], :edges [[[\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] :context-enables] [[\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] :precedes] [[\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] :justified-by] [[\"agent/scope-before-action\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables] [[\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] :context-enables] [[\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] :justified-by] [[\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8] :condition-enables]], :order [[\"agent/scope-before-action\" 0] [\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8]]}]",
+"policy": "ef3afc4ac8e17ce062b8c96d50f091db2f32e61d259d06037ddfb6fcb25b9b0a",
 "preferenceSteps": [
 0,
 1,
@@ -1460,7 +1496,7 @@
 ],
 "horizon": 8,
 "normalization": "perStepCapacityAndPattern",
-"policy": "[:wm/reading-policy-v1 \"E-comprehension-foundation\" \"E-comprehension-foundation/policy-38f92101a497c80661bd\" {:nodes [[[\"stack-coherence/evidence-ledger\" 0] \"stack-coherence/evidence-ledger\"] [[\"agent/state-is-hypothesis\" 1] \"agent/state-is-hypothesis\"] [[\"agent/commitment-varies-with-confidence\" 2] \"agent/commitment-varies-with-confidence\"] [[\"agency/self-attribution\" 3] \"agency/self-attribution\"] [[\"agent/scope-before-action\" 4] \"agent/scope-before-action\"] [[\"agent/evidence-over-assertion\" 5] \"agent/evidence-over-assertion\"] [[\"agent/state-is-hypothesis\" 6] \"agent/state-is-hypothesis\"] [[\"agent/handoff-preserves-context\" 8] \"agent/handoff-preserves-context\"]], :edges [[[\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] :context-enables] [[\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] :precedes] [[\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] :justified-by] [[\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] :context-enables] [[\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] :justified-by] [[\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8] :condition-enables] [[\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables]], :order [[\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8]]}]",
+"policy": "032fa4302204587c6900ee07e76131728803e8db84c45f579ab9ae6d3ede75b7",
 "preferenceSteps": [
 0,
 1,
@@ -1492,7 +1528,7 @@
 ],
 "horizon": 9,
 "normalization": "perStepCapacityAndPattern",
-"policy": "[:wm/reading-policy-v1 \"E-comprehension-foundation\" \"E-comprehension-foundation/policy-78fb2aa6ddcc719988e1\" {:nodes [[[\"agent/scope-before-action\" 0] \"agent/scope-before-action\"] [[\"stack-coherence/evidence-ledger\" 0] \"stack-coherence/evidence-ledger\"] [[\"agent/state-is-hypothesis\" 1] \"agent/state-is-hypothesis\"] [[\"agent/commitment-varies-with-confidence\" 2] \"agent/commitment-varies-with-confidence\"] [[\"agency/self-attribution\" 3] \"agency/self-attribution\"] [[\"agent/scope-before-action\" 4] \"agent/scope-before-action\"] [[\"agent/evidence-over-assertion\" 5] \"agent/evidence-over-assertion\"] [[\"agent/state-is-hypothesis\" 6] \"agent/state-is-hypothesis\"] [[\"agent/handoff-preserves-context\" 8] \"agent/handoff-preserves-context\"]], :edges [[[\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] :context-enables] [[\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] :precedes] [[\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] :justified-by] [[\"agent/scope-before-action\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables] [[\"agent/scope-before-action\" 0] [\"stack-coherence/evidence-ledger\" 0] :overlap] [[\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] :context-enables] [[\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] :justified-by] [[\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8] :condition-enables] [[\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] :context-enables]], :order [[\"agent/scope-before-action\" 0] [\"stack-coherence/evidence-ledger\" 0] [\"agent/state-is-hypothesis\" 1] [\"agent/commitment-varies-with-confidence\" 2] [\"agency/self-attribution\" 3] [\"agent/scope-before-action\" 4] [\"agent/evidence-over-assertion\" 5] [\"agent/state-is-hypothesis\" 6] [\"agent/handoff-preserves-context\" 8]]}]",
+"policy": "233e60be1c147ee561a63f22aaa912e6de620e0c22e8b13f4df6607b28d12191",
 "preferenceSteps": [
 0,
 1,
@@ -1519,7 +1555,7 @@
 "not-recomputable": "per-policy horizons: see policyPreferences"
 },
 "previousChoice": {
-"cascade": "[:wm/reading-policy-v1 \"M-pattern-retrieval-calibration\" \"M-pattern-retrieval-calibration/policy-bd8f7522f4d4f0b4296f\" {:nodes [[[\"problems/r12-two-layer-calibration\" 0] \"problems/r12-two-layer-calibration\"] [[\"problems/most-patterns-have-no-globally-recognised-rationale\" 1] \"problems/most-patterns-have-no-globally-recognised-rationale\"] [[\"problems/most-patterns-have-no-globally-recognised-rationale\" 2] \"problems/most-patterns-have-no-globally-recognised-rationale\"] [[\"cascade-construction/read-what-exists-first\" 3] \"cascade-construction/read-what-exists-first\"] [[\"problems/llm-over-corpus-mining-lessons\" 4] \"problems/llm-over-corpus-mining-lessons\"] [[\"problems/r7-evidence-channel-precision\" 5] \"problems/r7-evidence-channel-precision\"] [[\"problems/r7-evidence-channel-precision\" 6] \"problems/r7-evidence-channel-precision\"] [[\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 9] \"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\"] [[\"cascade-construction/read-what-exists-first\" 10] \"cascade-construction/read-what-exists-first\"] [[\"problems/most-patterns-have-no-globally-recognised-rationale\" 11] \"problems/most-patterns-have-no-globally-recognised-rationale\"] [[\"problems/r12-two-layer-calibration\" 12] \"problems/r12-two-layer-calibration\"] [[\"cascade-construction/read-what-exists-first\" 13] \"cascade-construction/read-what-exists-first\"] [[\"cascade-construction/read-what-exists-first\" 14] \"cascade-construction/read-what-exists-first\"] [[\"problems/llm-over-corpus-mining-lessons\" 15] \"problems/llm-over-corpus-mining-lessons\"] [[\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 16] \"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\"] [[\"cascade-construction/read-what-exists-first\" 17] \"cascade-construction/read-what-exists-first\"] [[\"problems/llm-over-corpus-mining-lessons\" 18] \"problems/llm-over-corpus-mining-lessons\"] [[\"problems/llm-over-corpus-mining-lessons\" 19] \"problems/llm-over-corpus-mining-lessons\"] [[\"cascade-construction/read-what-exists-first\" 20] \"cascade-construction/read-what-exists-first\"] [[\"cascade-construction/read-what-exists-first\" 21] \"cascade-construction/read-what-exists-first\"] [[\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 22] \"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\"]], :edges [[[\"cascade-construction/read-what-exists-first\" 10] [\"problems/most-patterns-have-no-globally-recognised-rationale\" 11] :contrasts-with] [[\"cascade-construction/read-what-exists-first\" 13] [\"cascade-construction/read-what-exists-first\" 14] :dependency-enables] [[\"cascade-construction/read-what-exists-first\" 14] [\"problems/llm-over-corpus-mining-lessons\" 15] :dependency-enables] [[\"cascade-construction/read-what-exists-first\" 17] [\"problems/llm-over-corpus-mining-lessons\" 18] :context-enables] [[\"cascade-construction/read-what-exists-first\" 20] [\"cascade-construction/read-what-exists-first\" 21] :context-enables] [[\"cascade-construction/read-what-exists-first\" 21] [\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 22] :context-enables] [[\"cascade-construction/read-what-exists-first\" 3] [\"problems/llm-over-corpus-mining-lessons\" 4] :context-enables] [[\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 16] [\"cascade-construction/read-what-exists-first\" 17] :contrasts-with] [[\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 9] [\"cascade-construction/read-what-exists-first\" 10] :condition-enables] [[\"problems/llm-over-corpus-mining-lessons\" 15] [\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 16] :condition-enables] [[\"problems/llm-over-corpus-mining-lessons\" 18] [\"problems/llm-over-corpus-mining-lessons\" 19] :condition-enables] [[\"problems/llm-over-corpus-mining-lessons\" 19] [\"cascade-construction/read-what-exists-first\" 20] :goal-precedes] [[\"problems/llm-over-corpus-mining-lessons\" 4] [\"problems/r7-evidence-channel-precision\" 5] :justified-by] [[\"problems/most-patterns-have-no-globally-recognised-rationale\" 11] [\"problems/r12-two-layer-calibration\" 12] :contrasts-with] [[\"problems/most-patterns-have-no-globally-recognised-rationale\" 1] [\"problems/most-patterns-have-no-globally-recognised-rationale\" 2] :condition-enables] [[\"problems/most-patterns-have-no-globally-recognised-rationale\" 2] [\"cascade-construction/read-what-exists-first\" 3] :context-enables] [[\"problems/r12-two-layer-calibration\" 0] [\"problems/most-patterns-have-no-globally-recognised-rationale\" 1] :context-enables] [[\"problems/r12-two-layer-calibration\" 12] [\"cascade-construction/read-what-exists-first\" 13] :goal-precedes] [[\"problems/r7-evidence-channel-precision\" 5] [\"problems/r7-evidence-channel-precision\" 6] :contrasts-with] [[\"problems/r7-evidence-channel-precision\" 6] [\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 9] :condition-enables]], :order [[\"problems/r12-two-layer-calibration\" 0] [\"problems/most-patterns-have-no-globally-recognised-rationale\" 1] [\"problems/most-patterns-have-no-globally-recognised-rationale\" 2] [\"cascade-construction/read-what-exists-first\" 3] [\"problems/llm-over-corpus-mining-lessons\" 4] [\"problems/r7-evidence-channel-precision\" 5] [\"problems/r7-evidence-channel-precision\" 6] [\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 9] [\"cascade-construction/read-what-exists-first\" 10] [\"problems/most-patterns-have-no-globally-recognised-rationale\" 11] [\"problems/r12-two-layer-calibration\" 12] [\"cascade-construction/read-what-exists-first\" 13] [\"cascade-construction/read-what-exists-first\" 14] [\"problems/llm-over-corpus-mining-lessons\" 15] [\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 16] [\"cascade-construction/read-what-exists-first\" 17] [\"problems/llm-over-corpus-mining-lessons\" 18] [\"problems/llm-over-corpus-mining-lessons\" 19] [\"cascade-construction/read-what-exists-first\" 20] [\"cascade-construction/read-what-exists-first\" 21] [\"pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy\" 22]]}]",
+"cascade": "6ede6dd534232ab1f00039b88b989dda2b3da18327732cb794ce54e962c94ec5",
 "target": "M-pattern-retrieval-calibration"
 },
 "previousInputDigest": "9d63a9b90a7fee1770c7fea9ffcf7e4e3d1928f06a72c42639ce6d1cb1c6599b",
@@ -1579,9 +1615,43 @@
 "seatsUsed": {
 "not-recomputable": "participant seat ids absent"
 },
-"targetConstruction": {
-"not-recomputable": "selection certificate target construction absent"
-},
+"targetConstruction": [
+{
+"action": 0,
+"graph": "9992e2c62e41453d9ae33ba6c660b20195c91006759c84a3154af858436612e5",
+"kernel": "86d545ed999b27319f894aa68e7c2da8095741516aa8e0d99cca41f48eb63157",
+"library": "5f41e1a3896fa08f6d79105551c66b8910e5363cdfaeb4af93b76679624488c0",
+"policies": [
+"032fa4302204587c6900ee07e76131728803e8db84c45f579ab9ae6d3ede75b7",
+"233e60be1c147ee561a63f22aaa912e6de620e0c22e8b13f4df6607b28d12191",
+"ef3afc4ac8e17ce062b8c96d50f091db2f32e61d259d06037ddfb6fcb25b9b0a"
+],
+"policyCount": 3,
+"pool": [
+"agency/self-attribution",
+"agent/commitment-varies-with-confidence",
+"agent/evidence-over-assertion",
+"agent/handoff-preserves-context",
+"agent/scope-before-action",
+"agent/state-is-hypothesis",
+"stack-coherence/evidence-ledger"
+],
+"reading": "c9ce0f356510093182664051998280c227b2d5ace3818fc681309d924b5b4c22",
+"slice": [
+"agency/self-attribution",
+"agent/commitment-varies-with-confidence",
+"agent/evidence-over-assertion",
+"agent/handoff-preserves-context",
+"agent/scope-before-action",
+"agent/state-is-hypothesis",
+"stack-coherence/evidence-ledger"
+],
+"sliceFromWholeLibrary": true,
+"targets": [
+"E-comprehension-foundation"
+]
+}
+],
 "targetsReachingScoring": [
 "E-comprehension-foundation"
 ],
