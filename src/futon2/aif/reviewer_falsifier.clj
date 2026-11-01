@@ -22,30 +22,16 @@
                      (select-keys standing [:source :declarations]))
     (check :fail (or (:reason standing) :mission-standing-unverifiable) standing)))
 
-(defn- no-selected-wants?
-  "The accounting receipt refused ONLY because the target genuinely selected
-   no wants, and carries its own evidence of that: a valid target string and
-   an attested empty want set in :details (the shape the real excursion
-   refusal of run 2026-11-01-ac5bc477 produced). A bare or unexplained
-   identity refusal — no :details, a non-string target, or wants present —
-   is not this and still fails: a target that DID select wants must account
-   for them."
-  [outcomes]
-  (and (map? outcomes)
-       (= :refused (:status outcomes))
-       (= :selected-want-identity-missing (:reason outcomes))
-       (string? (get-in outcomes [:details :target]))
-       (seq (get-in outcomes [:details :target]))
-       (= [] (get-in outcomes [:details :wants]))))
+;; NOTE (2026-11-01, Joe's correction to row EXCURSION-TARGET-FALSIFIER-AND-
+;; REVISION): an empty want list on an excursion does NOT make these checks
+;; not-applicable — wants are derived on the fly upstream (zai-4's branch),
+;; and the falsifier keeps refusing an unaccounted want set, empty or not.
+;; This branch deliberately reverts its earlier not-applicable relaxation;
+;; only the excursion revision source-path fix remains here.
 
 (defn- want-check [outcomes]
-  (cond
-    (= :verified (:status outcomes))
+  (if (= :verified (:status outcomes))
     (check :pass nil (select-keys outcomes [:receipt/id :target :selected-wants :outcomes]))
-    (no-selected-wants? outcomes)
-    (check :not-applicable :no-selected-wants-to-account
-           (select-keys outcomes [:schema :status :reason :details]))
-    :else
     (check :fail (or (:reason outcomes) :selected-want-accounting-unverifiable) outcomes)))
 
 (defn- repair-binding-check
@@ -90,15 +76,10 @@
        (string? (get-in result [:evidence :path]))))
 
 (defn- authority-check [outcomes commit]
-  (if (no-selected-wants? outcomes)
-    ;; With no selected wants there are no measurements to authorize: the
-    ;; authority question is vacuous for this target, not failed.
-    (check :not-applicable :no-selected-wants-no-measurements
-           {:commit commit :target (get-in outcomes [:details :target])})
-    (let [rows (mapv #(get-in % [:after :measurement]) (:outcomes outcomes))]
-      (if (and (seq rows) (every? #(authoritative-row? % commit) rows))
-        (check :pass nil {:commit commit :measurements rows})
-        (check :fail :revision-authority-missing {:commit commit :measurements rows})))))
+  (let [rows (mapv #(get-in % [:after :measurement]) (:outcomes outcomes))]
+    (if (and (seq rows) (every? #(authoritative-row? % commit) rows))
+      (check :pass nil {:commit commit :measurements rows})
+      (check :fail :revision-authority-missing {:commit commit :measurements rows}))))
 
 (defn- disposition-check [outcomes disposition]
   (let [classes (mapv :classification (:outcomes outcomes))

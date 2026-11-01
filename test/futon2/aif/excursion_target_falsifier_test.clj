@@ -8,8 +8,11 @@
   artifact-binding passed and whose only failing falsifier checks were
   :selected-want-accounting (:selected-want-identity-missing over wants [])
   and :evidence-authority (:revision-authority-missing over measurements []).
-  The work passed on its merits; those two checks were vacuous for a target
-  that selected no wants."
+
+  After Joe's correction this branch fixes ONLY the revision source path for
+  excursions; the falsifier checks are deliberately unrelaxed (an empty want
+  set still refuses) and the first test pins that. Wants will be derived on
+  the fly upstream (zai-4's branch)."
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-revision :as revision]
@@ -41,20 +44,20 @@
                  :executed? true :tool-events 8 :execution-source :job-summary
                  :passed? true}})
 
-(deftest excursion-without-wants-falsifier-checks-are-not-applicable
-  (let [receipt (falsifier/receipt (excursion-inputs))
-        verification (falsifier/verify receipt (excursion-inputs))]
-    (is (= :not-applicable
-           (get-in receipt [:checks :selected-want-accounting :status])))
-    (is (= :no-selected-wants-to-account
+(deftest excursion-empty-want-refusal-still-fails-until-wants-are-derived
+  ;; Joe's correction (2026-11-01): an empty want list does NOT make the
+  ;; checks not-applicable. Wants are derived on the fly upstream (zai-4's
+  ;; branch); until then the falsifier keeps refusing this receipt. This
+  ;; test pins that — do not re-relax here without an upstream derivation.
+  (let [receipt (falsifier/receipt (excursion-inputs))]
+    (is (= :fail (get-in receipt [:checks :selected-want-accounting :status])))
+    (is (= :selected-want-identity-missing
            (get-in receipt [:checks :selected-want-accounting :reason])))
-    (is (= :not-applicable
-           (get-in receipt [:checks :evidence-authority :status])))
-    (is (= :no-selected-wants-no-measurements
-           (get-in receipt [:checks :evidence-authority :reason])))
-    (is (= :verified (:status receipt)))
-    (is (= [] (:failed-checks receipt)))
-    (is (= :verified (:status verification)))))
+    (is (= :fail (get-in receipt [:checks :evidence-authority :status])))
+    (is (= :refused (:status receipt)))
+    (is (= [:selected-want-accounting :evidence-authority]
+           (:failed-checks receipt))
+        "matches finding repair-occ-e14c140ee3f5 verbatim")))
 
 (deftest mission-target-with-wants-still-fails-when-unaccounted
   ;; The bad case that must keep failing: a mission target that selected a
