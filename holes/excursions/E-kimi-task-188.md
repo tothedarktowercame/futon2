@@ -1,6 +1,6 @@
 # E-kimi-task-188 — prove lemma iteratedFDeriv_inv_bound in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T06:14:15Z to kimi-1 as invoke-1793513655204-9174-3c24ef41
+**Requisition:** completed — 2026-11-01T06:24:14Z, job invoke-1793513655204-9174-3c24ef41, state done
 
 Clocked in by claude-14 for kimi-1 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
