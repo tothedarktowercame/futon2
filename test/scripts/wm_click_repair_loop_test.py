@@ -34,7 +34,8 @@ class RepairLoopCastTest(unittest.TestCase):
              mock.patch.object(loop, "click_running", return_value=False), \
              mock.patch.object(loop, "changed_click_files", return_value=[family]), \
              mock.patch.object(loop, "dirty", return_value=False), \
-             mock.patch.object(loop, "jvm_eval", return_value={"rc": 0, "out": ":reloaded", "err": ""}) as reload, \
+             mock.patch.object(loop, "jvm_eval", side_effect=lambda form, timeout=600: {
+                 "rc": 0, "out": ":standing-reset" if "reset-context!" in form else ":reloaded", "err": ""}) as reload, \
              mock.patch.object(loop, "record") as record, \
              mock.patch.object(loop, "log"):
                 identities = loop.source_identity_inventory()
@@ -44,7 +45,8 @@ class RepairLoopCastTest(unittest.TestCase):
                 ok, text, _ = loop.reload_changed(123)
         self.assertTrue(ok)
         self.assertEqual("", text)
-        self.assertIn("futon2.aif.wm.family-selection", reload.call_args.args[0])
+        self.assertTrue(any("futon2.aif.wm.family-selection" in c.args[0] for c in reload.call_args_list))
+        self.assertIn("reset-context!", reload.call_args.args[0], "the standing context reset is the last eval")
         event = record.call_args.args[0]
         self.assertEqual(["futon2.aif.wm.family-selection"], event["source-identity-dependencies"])
         self.assertNotIn("futon2.aif.full-loop-runner", event["source-identity-dependencies"])
