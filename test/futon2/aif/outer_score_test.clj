@@ -142,6 +142,25 @@
   (let [in {:ending-counts uniform-ending :gain-counts uniform-gain}
         stop (score/abstention-score in)]
     (is (= stop (score/score-model in (score/stopped-model))))
+    (is (= 10 (get-in stop [:terms :altitude])))
+    (is (= 10 (get-in stop [:altitude-source :nats])))
+    (is (re-matches #"[0-9a-f]{64}" (get-in stop [:altitude-source :sha256])))
     (is (= 1.0 (get-in stop [:prediction :outcomes [:stop-the-line :none]])))
     (is (= 0.0 (get-in stop [:terms :novelty])))
     (is (= 0.0 (get-in stop [:terms :ambiguity])))))
+
+(deftest abstention-altitude-is-declared-even-when-zero
+  (let [file (java.io.File/createTempFile "outer-abstention-altitude" ".edn")]
+    (spit file (pr-str {:schema :wm/outer-abstention-altitude-v1 :nats 0
+                        :authority "test pause" :authorized-at "2026-11-01T00:00Z"}))
+    (binding [score/*abstention-altitude-path* (.getPath file)]
+      (is (= 0 (get-in (score/abstention-score
+                         {:ending-counts uniform-ending :gain-counts uniform-gain})
+                       [:terms :altitude]))))))
+
+(deftest missing-abstention-altitude-refuses-by-name
+  (binding [score/*abstention-altitude-path* "/nonexistent/outer-abstention-altitude.edn"]
+    (let [failure (try (score/abstention-score
+                        {:ending-counts uniform-ending :gain-counts uniform-gain})
+                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :abstention-altitude-unconfigured (:kind failure))))))

@@ -147,8 +147,8 @@
         input {:ending-counts (:c base-state) :gain-counts (:gain-counts base-state)}]
     (is (= 2 (count (:cascades r))))
     (doseq [c (:cascades r)]
-      (let [{:keys [risk ambiguity novelty]} (:terms c)]
-        (is (< (Math/abs (- (:G c) (- (+ risk ambiguity) novelty))) 1.0e-9)))
+      (let [{:keys [risk ambiguity novelty altitude]} (:terms c)]
+        (is (< (Math/abs (- (:G c) (+ (- (+ risk ambiguity) novelty) (or altitude 0)))) 1.0e-9)))
       (is (< (Math/abs (- 1.0 (reduce + (vals (get-in c [:prediction :outcomes]))))) 1.0e-9))
       (is (= :default-reach (get-in c [:reach :source])))
       (is (re-matches #"[0-9a-f]{64}" (:digest c))))
@@ -225,7 +225,7 @@
                (outer-select/select base-makeup base-state
                                     (assoc base-observation :forbidden #{"M-ready"})))))
 
-(deftest stopping-equivalent-is-retained-but-never-compared
+(deftest stopping-equivalent-is-retained-at-altitude-but-not-compared
   (let [obs (assoc base-observation :relation (fn [_ target]
                                               (if (= target "M-ready") :focus :unknown)))
         r (outer-select/select base-makeup base-state obs)]
@@ -239,10 +239,10 @@
     (is (= 2 (count (:cascades r))))
     (is (< (get-in r [:classes 0 :G]) (get-in r [:abstention :G])))
     (is (every? #(not= (get-in % [:prediction :outcomes])
-                      (get-in r [:abstention :prediction :outcomes])) (:classes r)))))
+                       (get-in r [:abstention :prediction :outcomes])) (:classes r)))))
 
 
-(deftest filtered-comparison-projects-without-the-stopping-policy
+(deftest comparison-projects-progressing-policy-and-altitude
   (let [obs (assoc base-observation :relation (fn [_ t] (if (= t "M-ready") :focus :unknown))
                   :field-facts {:enumerated ["M-ready" "M-unknown"]
                                 :admitted (:facts base-observation) :excluded []}
@@ -260,6 +260,7 @@
     (is (every? #(not= (get % "digest") (f "abstentionPrediction")) (f "policyPrediction")))
     (is (= (identity/digest (get-in r [:abstention :prediction :outcomes])) (f "abstentionPrediction")))
     (is (= (:stopping-equivalent r) (get-in export [:diagnostics :stoppingEquivalent])))
+    (is (= (get-in r [:abstention :terms]) (get-in export [:diagnostics :abstentionTerms :terms])))
     (is (.startsWith (checker/evidence f :q11) ".known"))
     (is (= 2 (count (get-in old [:facts "constructedCascades"])))
         "Historical projection uses all retained arrangement classes")))

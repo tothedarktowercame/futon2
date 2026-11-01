@@ -6,10 +6,18 @@
             [wm-run-facts :as facts]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.outer-menu :as outer-menu]
+            [futon2.aif.outer-score :as outer-score]
+            [futon2.aif.outer-select :as outer-select]
             [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.policy :as policy]
             [futon2.aif.full-loop-runner]
             [futon2.aif.selection-record :as selection-record]))
+
+(def click-12-selection-record
+  "/home/joe/code/futon2/data/wm-runs/selection-record-2026-11-01-wm-click-878186ce-4e68-411b-8d2e-581c559b72cb.edn")
+
+(def click-12-reselection-export (atom nil))
 
 (def snap {:open-missions #{"M-x"} :open-excursions #{} :open-tickets #{}
            :patterns #{"p1" "p2"} :seats #{"author"}
@@ -1022,3 +1030,59 @@
       (let [e (project (assoc-in r [:outer/selection :outer/learning] {:status :none}))]
         (is (= false (get-in e [:facts "selectionPath" "learningApplied"])))
         (is (= [] (get-in e [:facts "selectionPath" "consumedRuns"])))))))
+
+(deftest click-12-reselects-below-stopping-at-ruled-altitude
+  (let [record (edn/read-string (slurp click-12-selection-record))
+        retained (:outer/selection record)
+        params (get-in retained [:construction :kernel-input :makeup-parameters])
+        admitted (get-in retained [:field-facts :admitted])
+        targets (:outer-score/admitted retained)
+        relation-by-target (into {} (map (juxt :target :relation)
+                                         (:cascade-pick-relations retained)))
+        state {:c (update-vals (:c-kit params) #(* 100 %))
+               :state-counts (:state-kit params) :gain-counts (:gain-kit params)}
+        observation {:focus (:focus retained)
+                     :relation (fn [_ target] (get relation-by-target target :unknown))
+                     :field (mapv (fn [target]
+                                    {:target target
+                                     :reach (get-in admitted [target :reach :value])
+                                     :reach-source (get-in admitted [target :reach :source])}) targets)
+                     :facts admitted :field-facts (:field-facts retained)
+                     :previous-selection (:previous retained)
+                     :giraffe/pass-sha256 (:giraffe/pass-sha256 retained)
+                     :giraffe/input-sha256 (get-in retained [:construction :graph])}
+        altitude-source (outer-score/abstention-altitude)
+        stopping-outcomes (get-in retained [:abstention :prediction :outcomes])
+        with-altitude (fn [score]
+                        (if (= stopping-outcomes (get-in score [:prediction :outcomes]))
+                          (-> score
+                              (update :G + (:nats altitude-source))
+                              (assoc-in [:terms :altitude] (:nats altitude-source))
+                              (assoc :altitude-source altitude-source))
+                          score))
+        retained-scores (atom (:cascades retained))
+        reselection (with-redefs [outer-menu/construct
+                                  (fn [_ _ _] (dissoc (:construction retained) :policy-count))
+                                  outer-score/score-model
+                                  (fn [_ _]
+                                    (let [score (first @retained-scores)]
+                                      (swap! retained-scores subvec 1)
+                                      (with-altitude
+                                        (select-keys score [:G :terms :prediction :gain-source]))))
+                                  outer-score/abstention-score
+                                  (fn [_] (with-altitude (:abstention retained)))]
+                      (outer-select/select params state observation))
+        reselection (assoc reselection :q6 (:q6 retained))
+        export (facts/selection-facts-for-record
+                (assoc record :selection-outcome {:status :chosen}
+                       :outer/selection reselection)
+                "click-12-read-only-reselection" snap {})
+        projected (:facts export)]
+    (reset! click-12-reselection-export export)
+    (is (= "M-interim-director-proxy-metric-inventory"
+           (get-in reselection [:selection :selected :target])))
+    (is (= 3.3896147707408804 (get-in reselection [:classes 0 :G])))
+    (is (= 13.278213771580794 (get-in reselection [:abstention :G])))
+    (is (= 10 (get-in export [:diagnostics :abstentionTerms :terms :altitude])))
+    (is (.startsWith ((requiring-resolve 'wm-check-run-facts/evidence) projected :q11)
+                     ".known"))))
