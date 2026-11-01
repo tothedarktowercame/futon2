@@ -9,7 +9,8 @@
             [futon2.aif.outer-select :as select]
             [futon2.aif.outer-state :as state]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.selection-world :as selection-world]))
+            [futon2.aif.selection-world :as selection-world]
+            [wm-run-facts :as run-facts]))
 
 (clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
@@ -318,3 +319,35 @@
     (is (= :target-source-path-absent (:reason exclusion)))
     (is (= (identity/sha256 (pr-str (get-in authority [:loaded-missions :missions 0]))) (:pin exclusion)))
     (is (= [{:id "M-waiting" :status-class :inactive}] (:registry/non-open result)))))
+
+
+(deftest retained-open-roster-survives-a-disagreeing-projector-registry
+  (let [authority (-> fixture-authority-with-tickets
+                      (assoc :registry-source :substrate)
+                      (update-in [:loaded-missions :missions] conj
+                                 {:id "M-gated" :status-class :open :operator-gated? true}))
+        field (binding [observation/*resolve-var* actual-var]
+                (observation/giraffe-field (fixture-run!) makeup authority))
+        roster (get-in field [:field-facts :open-tasks])
+        groups (mapv roster [:missions :excursions :tickets])
+        record {:outer/selection {:field-facts (:field-facts field)}}
+        snap {:open-missions #{"M-gated"} :open-excursions #{} :open-tickets #{}}
+        projected (run-facts/selection-facts-for-record record "pinned-record" snap {})
+        old (run-facts/selection-facts-for-record
+             (update-in record [:outer/selection :field-facts] dissoc :open-tasks)
+             "pinned-record" snap {})]
+    (is (= :substrate (:source roster)))
+    (is (= (identity/sha256 (pr-str groups)) (:registry-pin roster)))
+    (is (= (set (:enumerated-open-tasks field)) (set (mapcat identity groups))))
+    (is (every? #(= % (vec (sort %))) groups))
+    (is (not (some #{"M-gated"} (:missions roster))))
+    (is (= (:missions roster) (get-in projected [:facts "openMissions"])))
+    (is (= (:tickets roster) (get-in projected [:facts "openTickets"])))
+    (is (= (set (mapcat identity groups)) (set (get-in projected [:facts "enumeratedTasks"]))))
+    (is (= "pinned-record [:outer/selection :field-facts :open-tasks :missions]"
+           (get-in projected [:sources "openMissions"])))
+    (is (= ["M-gated"] (get-in old [:facts "openMissions"])))
+    (is (= (run-facts/facts-for-record record "pinned-record" snap)
+           (run-facts/facts-for-record
+            (update-in record [:outer/selection :field-facts] dissoc :open-tasks)
+            "pinned-record" snap)))))
