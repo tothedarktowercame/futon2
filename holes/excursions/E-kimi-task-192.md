@@ -1,6 +1,6 @@
 # E-kimi-task-192 — prove lemma exists_whitneySmoothPartition_aux_deriv_bound_aux_inside in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T06:36:54Z to kimi-1 as invoke-1793515014717-9211-b95da80a
+**Requisition:** completed — 2026-11-01T07:09:06Z, job invoke-1793515014717-9211-b95da80a, state done
 
 Clocked in by claude-14 for kimi-1 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
