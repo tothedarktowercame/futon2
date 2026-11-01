@@ -165,13 +165,18 @@
         "policiesWithRiskTerm" "policiesWithAmbiguityTerm"
         "policiesWithInformationTerm" "comparedPolicies"]
    :q5 ["interpretationOrder"]
+   ;; L5-2L: Q6 forbids the refused cascade's prediction class, read from the
+   ;; compared policies' prediction digests.
    :q6 ["previousChoice" "previousOutcome" "previousInputDigest"
-        "currentChoice" "currentInputDigest"]
+        "currentChoice" "currentInputDigest" "comparedPolicies" "policyPrediction"]
    :q7 ["pathAbsenceCount" "kind" "selectionPath"]
    :q9 ["factorizedPreference" "calibrationAuthorizations"
         "factorizationAuthorizations"]
+   ;; L5-2L: Q11's minimum is over the policies Q6 does not forbid, so it reads
+   ;; the previous run's refusal and the input digests too.
    :q11 ["currentChoice" "comparedPolicies" "constructedCascades" "targetConstruction" "abstentionPrediction"
-         "enumeratedTasks" "kind" "policyG" "abstentionG" "policyPrediction"]})
+         "enumeratedTasks" "kind" "policyG" "abstentionG" "policyPrediction"
+         "previousChoice" "previousOutcome" "previousInputDigest" "currentInputDigest"]})
 
 (defn required-keys
   "A work run has no selection path to export, so Q7 does not wait on one.  A
@@ -228,23 +233,27 @@
                                 (facts "policiesWithInformationTerm")
                                 (fs (facts "comparedPolicies")))))
         :q5 (ev-known (str "interpretationOrder := ." (facts "interpretationOrder")))
-        :q6 (ev-known (format "previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentDecision := %s, currentInputDigest := %d"
+        :q6 (ev-known (format "previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentDecision := %s, currentInputDigest := %d, comparedPolicies := %s, policyPrediction := %s"
                               (decision (facts "previousChoice")) (outcomes (facts "previousOutcome"))
                               (id (facts "previousInputDigest")) (decision (facts "currentChoice"))
-                              (id (facts "currentInputDigest"))))
+                              (id (facts "currentInputDigest"))
+                              (fs (facts "comparedPolicies"))
+                              (policy-prediction (facts "policyPrediction"))))
         :q7 (ev-known (format "pathAbsenceCount := %s, kind := %s, selectionPath := %s"
                               (facts "pathAbsenceCount") (kind-term (facts "kind"))
                               (if-let [path (facts "selectionPath")]
                                 (selection-path-term path)
                                 "none")))
-        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s"
+        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s, previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d"
                                (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
                                (decision (facts "currentChoice"))
                                (target-construction (facts "targetConstruction"))
                                (fs (facts "comparedPolicies")) (fs (facts "constructedCascades"))
                                (policy-g (facts "policyG")) (rational-term (facts "abstentionG"))
                                (policy-prediction (facts "policyPrediction"))
-                               (digest-term (facts "abstentionPrediction"))))
+                               (digest-term (facts "abstentionPrediction"))
+                               (decision (facts "previousChoice")) (outcomes (facts "previousOutcome"))
+                               (id (facts "previousInputDigest")) (id (facts "currentInputDigest"))))
         :q9 (let [certificate (facts "factorizedPreference")
                   calibration (field certificate :calibration)
                   selected-calibration-term (when calibration (calibration-term calibration))

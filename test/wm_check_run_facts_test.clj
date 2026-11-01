@@ -28,6 +28,8 @@
    "abstentionG" (rational 47875 10000)
    "policyPrediction" [{"policy" "c1" "digest" "d1"} {"policy" "c2" "digest" 0}]
    "abstentionPrediction" "stopped"
+   "previousChoice" {"target" "t1" "cascade" "c2"} "previousOutcome" "refused"
+   "previousInputDigest" "in" "currentInputDigest" "in"
    "pathAbsenceCount" 0
    "selectionPath" {"receipt" {"observed" "h1"} "pickRelation" {"observed" 0}
                     "pickReach" "defaulted" "pendingRun" ["run0" "absent"]
@@ -135,3 +137,17 @@
 
 (deftest q11-without-the-stopped-prediction-is-not-recomputable
   (is (str/starts-with? (sut/evidence (dissoc selection-facts "abstentionPrediction") :q11) ".nr")))
+
+(deftest q6-and-q11-carry-the-refusal-and-the-prediction-classes
+  (testing "Q6 reads the compared policies' predictions, so a same-class re-choice is seen (L5-2L)"
+    (let [q6 (sut/evidence selection-facts :q6)]
+      (is (str/includes? q6 "previousOutcome := .refused"))
+      (is (re-find #"comparedPolicies := \{\d+, \d+\}" q6))
+      (is (re-find #"policyPrediction := \[\(\d+, \d+\), \(\d+, 0\)\]" q6))))
+  (testing "Q11 reads the previous refusal and digests, so its minimum is over the admissible set"
+    (let [q11 (sut/evidence selection-facts :q11)]
+      (is (re-find #"previousDecision := \(\.pick \d+ \d+\)" q11))
+      (is (str/includes? q11 "previousOutcome := .refused"))
+      (is (re-find #"previousInputDigest := (\d+), currentInputDigest := \1" q11))))
+  (testing "without the previous run Q11 is not recomputable rather than inheriting click20's refusal"
+    (is (str/starts-with? (sut/evidence (dissoc selection-facts "previousOutcome") :q11) ".nr"))))
