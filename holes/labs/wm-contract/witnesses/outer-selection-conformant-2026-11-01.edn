@@ -35,7 +35,9 @@
    :relation
    {:class :associated,
     :facet "WM",
-    :producer "focus-receipt/classify-target, run 2026-11-01T06:02Z"},
+    :producer "focus-receipt/classify-target, run 2026-11-01T06:02Z"
+    :derived-via {:kind :embedding-neighbour :neighbour "M-action-cost-modelling"
+                  :note "no declared row for this target; relation derived from the nearest rowed neighbour in the pinned structure embedding, as the scoring path does when given its relation context (focus_receipt.clj m-derivation). Disclosed 2026-11-01 15:40Z after L5-4d-3."}},
    :model
    {:state-counts [3 1],
     :state-counts-source
