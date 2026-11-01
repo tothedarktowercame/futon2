@@ -163,7 +163,8 @@
   over because no selection decision occurred; `:previous-skipped` records
   their count and failure stages. Returns {:status :present :previous <sealed
   terminal carrier>} or a typed absence / not-recomputable naming why."
-  [dir run-id started-at]
+  ([dir run-id started-at] (predecessor dir run-id started-at {:skip-undecided? true}))
+  ([dir run-id started-at {:keys [skip-undecided?]}]
   (let [now (instant started-at)
         stream (read-stream dir)
         base {:schema predecessor-schema :run/id run-id :startedAt started-at
@@ -192,8 +193,12 @@
                                  (filter #(and (= :closed (:event %))
                                                (= (:run/id start) (:run/id %)))
                                          (:events stream)))
+                    ;; The work run's Q6 passes over ticks that never reached an
+                    ;; inner decision (L5-12). The selection side's legacy fallback
+                    ;; reads the outer selection on the tick, so it never skips.
                     skipped (take-while
                              (fn [start]
+                               (and skip-undecided?
                                (let [closed (closed-for start)
                                      terminal (:q6 (first closed))]
                                  (and (= 1 (count closed))
@@ -202,7 +207,7 @@
                                       (= :absent (get-in terminal [:choice :status]))
                                       (= :chose-nothing (get-in terminal [:choice :reason]))
                                       (nil? (:input-digest terminal))
-                                      (not= :abstained (get-in terminal [:outcome :outcome])))))
+                                      (not= :abstained (get-in terminal [:outcome :outcome]))))))
                              ordered)
                     latest (first (drop (count skipped) ordered))
                     at (some-> latest :startedAt instant)
@@ -245,7 +250,7 @@
                      (assoc :frontier (:q8-frontier (first closed))))))))))]
     (seal (cond-> (merge base found)
             (and now (= :present (:status stream)))
-            (assoc :refusal-history (refusal-history (:events stream) run-id now))))))
+            (assoc :refusal-history (refusal-history (:events stream) run-id now)))))))
 
 (defn selection-from-record
   "Summarize the outer selection of a retained tick, independently of its
@@ -276,7 +281,7 @@
   completed ticks only; outer refusals currently leave no tick record. No scan
   by filename, no stream append, and no fabricated first-click predecessor."
   [dir run-id started-at]
-  (let [p (predecessor dir run-id started-at)]
+  (let [p (predecessor dir run-id started-at {:skip-undecided? false})]
     (if-not (= :present (:status p))
       (select-keys p [:status :reason :previous-run/id])
       (let [event (first (filter #(and (= :closed (:event %))

@@ -83,6 +83,10 @@
     (is (re-find #"consumedRuns := \[\(\d+, \.observed \d+\)\]" q7))
     (is (str/includes? q7 "learningApplied := true"))))
 
+(deftest no-interpretation-renders-as-a-known-q5-constructor
+  (is (= ".known { Requirements.click20 with interpretationOrder := .noInterpretation }"
+         (sut/evidence {"interpretationOrder" "noInterpretation"} :q5))))
+
 (deftest selection-run-without-a-path-is-not-recomputable
   (is (str/starts-with? (sut/evidence (dissoc selection-facts "selectionPath") :q7) ".nr"))
   (is (str/starts-with? (sut/evidence (assoc selection-facts "selectionPath" nil) :q7) ".nr")))

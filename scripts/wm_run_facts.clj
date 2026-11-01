@@ -1231,9 +1231,16 @@
                {"kind" "selection"
                 "policyGScale" g-scale
                 "policyPrediction" (carried one-prediction)
-                "interpretationOrder" (if (= :refused (get-in source [:selection-outcome :status]))
-                                        (nr "no interpretation in this run")
-                                        (selection-interpretation-order record phase-log-path))}
+                "interpretationOrder"
+                ;; A selection refused after scoring or abstained ran no
+                ;; interpretation. A bypass is different: a direct-task entry
+                ;; interprets in its work run without any selection, which is
+                ;; exactly what Q5 forbids, so a not-exercised record keeps the
+                ;; typed absence L5-5a writes for every selection carrier.
+                (if (contains? #{:refused :abstained}
+                               (get-in source [:selection-outcome :status]))
+                  "noInterpretation"
+                  (selection-interpretation-order record phase-log-path))}
                (if section?
                  (merge
                   (if (:construction selection)

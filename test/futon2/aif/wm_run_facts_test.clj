@@ -1012,13 +1012,12 @@
     (doseq [e exports]
       (is (= ".nr \"selection refused: :pick-not-below-abstention\""
              ((requiring-resolve 'wm-check-run-facts/evidence) (:facts e) :q11)))
-      (is (= ".nr \"no interpretation in this run\""
+      (is (= ".known { Requirements.click20 with interpretationOrder := .noInterpretation }"
              ((requiring-resolve 'wm-check-run-facts/evidence) (:facts e) :q5)))
       (is (= {"not-recomputable" "selection refused: :pick-not-below-abstention"}
              (get-in e [:facts "currentChoice"])))
       (is (= 0 (get-in e [:facts "pathAbsenceCount"])))
-      (is (= {"not-recomputable" "no interpretation in this run"}
-             (get-in e [:facts "interpretationOrder"]))))
+      (is (= "noInterpretation" (get-in e [:facts "interpretationOrder"]))))
     (doseq [r records]
       (let [e (project (assoc-in r [:outer/selection :outer/learning] {:status :none}))]
         (is (= false (get-in e [:facts "selectionPath" "learningApplied"])))
