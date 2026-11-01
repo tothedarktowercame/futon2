@@ -192,3 +192,17 @@ abstention). The live makeup migration and the mapping file await Joe's eye.
   writes `:removed`; align or retire with L5-5.
 - Click-path Q6 fixtures on `main` produce one candidate and cannot reach a repeat; the pins are at
   selector, carrier and family level on real policies. Fix the fixture separately.
+
+## Noted 2026-11-01 17:05Z (from L5-2C-c review, futon2 `6a3753d94`)
+
+- **Tampered history is invisible to Lean.** The producer counts refusals whose terminal seal is
+  broken as `:unsealed` and does not trust them; a broken seal therefore shrinks the history, and
+  Lean's consistency clause protects only the latest refusal. Follow-up **L5-2L-3**: a
+  `refusalHistoryUnsealed : Nat` carrier; Q6 requires it to be 0 (a corrupted refusal is an absence
+  on the path, not a smaller history); projector emits the producer's count. Dispatched to claude-3.
+- **A refusal outlives a later success on the same inputs** (L5-2L-2 reading): a one-policy route
+  that was refused refuses until its inputs change. Consistent with Joe's Q6 rule; note that it is
+  the inputs digest, not time, that frees a task.
+- The real lineage on M-pattern-retrieval-calibration has two refusals of the same policy on two
+  digests (e71c7380, f4b95abf), not two classes on one digest; the ping-pong is pinned on a fixture.
+- Click-path Q6/Q4 fixtures on `main` still produce one candidate (since L5-2C-b); separate repair.
