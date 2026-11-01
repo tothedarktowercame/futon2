@@ -882,6 +882,7 @@
 
     (= :abstained (:status decision))
     (if-let [refusals (seq (:refusals decision))]
+      (merge (select-keys (:abstention decision) [:case :target])
       {:status :abstained
        :targets (mapv (fn [{:keys [target kind missing]}]
                         {:target target
@@ -894,7 +895,7 @@
                                                                   [:candidate :reason
                                                                    :missing-evidence])))
                                          dropped-candidates)})
-                      refusals)}
+                      refusals)})
       {:status :absent :reason :judge-recorded-no-refusal-list})
 
     :else {:status :not-abstained})))

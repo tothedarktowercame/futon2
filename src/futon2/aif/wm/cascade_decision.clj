@@ -1284,6 +1284,11 @@
                               (occurrence-readings entry (:reading-pin entry)))}))
                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))]
         (case (:status result)
+          :stopped
+          {:decision (decision-gate/emit!
+                       (-> (:decision result)
+                           (assoc-in [:selection-certificate :selection-route] :wm/reading-policy-family-v1)
+                           (assoc-in [:selection-certificate :q6] (:q6 result))))}
           :repeat-refused
           ;; Q6: every admissible policy is the previous run's refused
           ;; choice on the same inputs; nothing is selected or interpreted
