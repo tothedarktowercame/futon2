@@ -41,6 +41,17 @@ Per click:
 
 State: data/wm-click-loop/ledger.jsonl (one line per event), loop.log beside it.
 Stop file: data/wm-click-loop/STOP (touch it; the loop stops before the next click).
+
+--continuous (Joe, 2026-11-01: "no more whole click trials, just continuous
+improvement as needed as the machine runs"): every click's two-run Lean verdict
+(<run record>.requirements.edn, written by wm_run_alert.py) is read and
+recorded. A click that does not conform is an alert: it is appended to
+data/wm-click-loop/alerts.jsonl as work for --owner, who is belled once with
+the alert block, and the loop clicks again. No repair seat is dispatched. A
+lawful abstention (the verdict conforms) is a decided click, not a defect. The
+loop pauses, by stopping with a bell, only when the same requirements fail on
+two consecutive clicks: the fix has not landed, and clicking on would repeat
+the same alert. An absent or unreadable verdict is itself an alert.
 """
 from __future__ import annotations
 
@@ -64,6 +75,7 @@ STATE = F2 / "data" / "wm-click-loop"
 LEDGER = STATE / "ledger.jsonl"
 LOGFILE = STATE / "loop.log"
 STOP_FILE = STATE / "STOP"
+ALERTS = STATE / "alerts.jsonl"
 AGENCY = "http://localhost:7070"
 SEND = F3C / "scripts" / "agency_send.py"
 EVAL = F3C / "scripts" / "proof-eval.sh"
@@ -357,6 +369,85 @@ def carried(run_id: str | None) -> bool:
     return False
 
 
+# ---------------------------------------------------------------- verdict
+
+def read_verdict(run_record: str | None) -> dict | None:
+    """The click's two-run Lean verdict as wm_run_alert.py wrote it beside the
+    run record: string-keyed EDN, read by pattern and never defaulted. None
+    when the record or the verdict file is absent; the caller treats that as
+    an alert, not as conformance."""
+    if not run_record:
+        return None
+    f = Path(str(run_record) + ".requirements.edn")
+    if not f.is_file():
+        return None
+    text = f.read_text(errors="replace")
+
+    def scalar(key):
+        m = re.search(r'"%s"\s+(\S+)' % re.escape(key), text)
+        return m.group(1).strip('"') if m else None  # keywords are written quoted
+
+    def outcomes(key):
+        m = re.search(r'"%s"\s+\{([^}]*)\}' % re.escape(key), text)
+        return dict(re.findall(r'":(Q\d+)"\s+":([a-z-]+)"', m.group(1))) if m else {}
+
+    return {"file": str(f), "conforms": scalar(":conforms") == "true",
+            "work-status": scalar(":work-status"), "selection-status": scalar(":selection-status"),
+            "work": outcomes(":verdicts"), "selection": outcomes(":selection-verdicts")}
+
+
+def alert_signature(verdict: dict | None) -> list[str]:
+    """Every requirement that did not hold, as 'run Qn outcome', sorted, plus a
+    run that did not happen. Two clicks with the same signature failed the same
+    way."""
+    if verdict is None:
+        return ["verdict absent"]
+    rows = [f"{run} {q} {outcome}" for run in ("work", "selection")
+            for q, outcome in verdict[run].items() if outcome != "holds"]
+    if verdict["work-status"] == ":not-run":
+        rows.append("work not-run")
+    if verdict["selection-status"] == ":not-exercised":
+        rows.append("selection not-exercised")
+    return sorted(rows)
+
+
+def click_alert(verdict: dict | None) -> list[str] | None:
+    """None when the click conforms; otherwise its alert signature."""
+    return None if verdict and verdict["conforms"] else alert_signature(verdict)
+
+
+def alert_block(log_path: str | None) -> str:
+    """The ALERT FOR JOE / CONFORMS block wm_click.sh printed last, from the click log."""
+    if not log_path or not Path(log_path).is_file():
+        return "(click log absent)"
+    lines = Path(log_path).read_text(errors="replace").splitlines()
+    starts = [i for i, l in enumerate(lines) if l.startswith(("ALERT FOR JOE", "CONFORMS"))]
+    return "\n".join(lines[starts[-1]:starts[-1] + 40]) if starts else "(no alert block in the click log)"
+
+
+def queue_alert(c: dict, repeated: bool) -> None:
+    row = {"at": now(), "click-id": c["click-id"], "run-id": c["run-id"], "run-record": c.get("run-record"),
+           "signature": c["alert"], "verdict": c.get("verdict"), "repeated": repeated, "log": c.get("log")}
+    with ALERTS.open("a") as fh:
+        fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    record({"event": "alert", "click-id": c["click-id"], "run-id": c["run-id"],
+            "signature": c["alert"], "repeated": repeated})
+
+
+def notify_alert(args, c: dict) -> None:
+    """Bell the owner once per alert; the loop does not wait for an answer."""
+    body = "\n".join([f"From wm_click_repair_loop.py, {now()}. ALERT on click {c['click-id']} "
+                      f"(run {c['run-id']}); the loop continues.",
+                      "", "Signature: " + "; ".join(c["alert"]), "",
+                      alert_block(c.get("log")), "",
+                      f"Verdict file: {(c.get('verdict') or {}).get('file')}",
+                      f"Queue: {ALERTS}",
+                      "The loop pauses if the same signature repeats on the next click."])
+    r = sh(sys.executable, SEND, "--from", "wm-click-loop", "--to", args.owner, "--kind", "bell",
+           input=body, timeout=120)
+    log(f"alert belled to {args.owner}: {r.stdout.strip()[-200:]}")
+
+
 def debugger_stop(run_id: str | None = None) -> dict | None:
     """Read the serving debugger, not the click's coarse public phase.
 
@@ -474,8 +565,10 @@ def fire(n: int, args, since_epoch: int) -> dict:
     if click_id and lr.get("click-id") != click_id:
         lr = {"outcome": "unknown", "note": f"last-result is for {lr.get('click-id')}, not {click_id}"}
     run_id = (lr.get("run-id-observation") or {}).get("value")
+    verdict = read_verdict(lr.get("run-record"))
     return {"n": n, "rc": rc, "click-id": click_id, "spent": spent, "outcome": lr.get("outcome", "unknown"),
             "run-id": run_id, "carried": carried(run_id), "last-result": lr, "log": str(out),
+            "run-record": lr.get("run-record"), "verdict": verdict, "alert": click_alert(verdict),
             "since-epoch": since_epoch, "in-flight-repairs": in_flight_repairs}
 
 
@@ -850,6 +943,7 @@ def run(args) -> int:
 
     spent = ticks = quiet = 0
     last_abstention: dict | None = None
+    previous_alert: list[str] | None = None
     while spent < args.clicks and ticks < args.ticks:
         if STOP_FILE.exists():
             return stop(args, f"stop file present after {spent} clicks, {ticks} carrying")
@@ -866,10 +960,24 @@ def run(args) -> int:
             return stop(args, c["last-result"]["reason"], 1)
         if c["rc"] == 3 and not c["spent"]:
             return stop(args, "wm_click.sh could not launch (exit 3: seats or single-flight held 30 min)", 1)
+        if args.continuous:
+            record({"event": "verdict", "click-id": c["click-id"], "run-id": c["run-id"],
+                    "conforms": c["alert"] is None, "signature": c["alert"]})
+            if c["alert"] is None:
+                previous_alert = None
+            else:
+                repeated = previous_alert == c["alert"]
+                queue_alert(c, repeated)
+                if repeated:
+                    return stop(args, "paused: the same requirements failed on two consecutive clicks "
+                                      f"({'; '.join(c['alert'])}); fix, then restart. Queue: {ALERTS}", 1)
+                notify_alert(args, c)
+                previous_alert = c["alert"]
         if c["carried"]:
             quiet, fault_repairs = 0, []
             continue
-        if c["outcome"] in DECIDED or c["outcome"] in WAIT:
+        lawful_stop = args.continuous and c["alert"] is None and c["outcome"] in DEBUG
+        if c["outcome"] in DECIDED or c["outcome"] in WAIT or lawful_stop:
             quiet += 1
             if quiet >= args.stall:
                 return stop(args, f"{quiet} clicks in a row carried no tick without failing "
@@ -888,11 +996,13 @@ def run(args) -> int:
             record({"event": "debugger", "click-id": c["click-id"], "page": str(page),
                     "counts": summary["signature"]["counts"]})
             log(f"click {c['n']}: debugger page {page}")
-        if args.observe_only:
+        if args.observe_only or args.continuous:
             record({"event": "external-repair-skipped",
                     "click-id": c["click-id"],
-                    "reason": "META self-heal observation trial"})
-            log(f"click {c['n']}: observation-only; no external repair dispatched")
+                    "reason": ("continuous: alert queued for the owner" if args.continuous
+                               else "META self-heal observation trial")})
+            log(f"click {c['n']}: no external repair dispatched "
+                f"({'continuous' if args.continuous else 'observation-only'})")
             continue
         # The apparatus failed, or the machine had nothing to select. Repair,
         # reload, click again.
@@ -936,6 +1046,9 @@ def parse_args(argv=None):
     r.add_argument("--max-repairs", type=int, default=3)
     r.add_argument("--observe-only", action="store_true",
                    help="capture debugger evidence but never dispatch external repairs")
+    r.add_argument("--continuous", action="store_true",
+                   help="record every click's Lean verdict, queue alerts for --owner, dispatch no "
+                        "repair seat, pause only when the same requirements fail on consecutive clicks")
     r.add_argument("--repair-seat", help="repair worker; defaults to the explicit repair reviewer")
     r.add_argument("--seat-model", default="gpt-5.6-sol")
     r.add_argument("--repair-timeout", type=int, default=5400)

@@ -255,5 +255,104 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertIn("VERDICT: repaired", packet)
 
 
+
+class ContinuousModeTest(unittest.TestCase):
+    """--continuous: the Lean verdict is read, alerts are queued, and only a
+    repeated signature pauses the loop."""
+
+    TWO_RUN_ALERT = ('{":run-record" "R" ":conforms" false ":runs" [":work" ":selection"] '
+                     '":work-status" ":not-run" ":selection-status" ":not-exercised" ":verdicts" {} '
+                     '":selection-verdicts" {":Q1" ":unverifiable" ":Q6" ":unverifiable"}}')
+    TWO_RUN_MIXED = ('{":run-record" "R" ":conforms" false ":work-status" ":evaluated" '
+                     '":selection-status" ":exercised" ":verdicts" {":Q1" ":holds" ":Q7" ":violated" '
+                     '":Q9" ":violated"} ":selection-verdicts" {":Q1" ":holds" ":Q11" ":holds"}}')
+    TWO_RUN_CONFORMS = ('{":run-record" "R" ":conforms" true ":work-status" ":evaluated" '
+                        '":selection-status" ":exercised" ":verdicts" {":Q1" ":holds"} '
+                        '":selection-verdicts" {":Q1" ":holds"}}')
+
+    def verdict_of(self, loop, text):
+        with tempfile.TemporaryDirectory() as td:
+            record = Path(td) / "tick-run-record.edn"
+            record.write_text("{}")
+            Path(str(record) + ".requirements.edn").write_text(text)
+            return loop.read_verdict(str(record))
+
+    def test_verdict_is_read_by_pattern_and_signed(self):
+        loop = load_loop()
+        v = self.verdict_of(loop, self.TWO_RUN_ALERT)
+        self.assertFalse(v["conforms"])
+        self.assertEqual({"Q1": "unverifiable", "Q6": "unverifiable"}, v["selection"])
+        self.assertEqual(["selection Q1 unverifiable", "selection Q6 unverifiable",
+                          "selection not-exercised", "work not-run"], loop.click_alert(v))
+        mixed = self.verdict_of(loop, self.TWO_RUN_MIXED)
+        self.assertEqual(["work Q7 violated", "work Q9 violated"], loop.click_alert(mixed))
+        self.assertIsNone(loop.click_alert(self.verdict_of(loop, self.TWO_RUN_CONFORMS)))
+
+    def test_absent_verdict_is_an_alert_not_conformance(self):
+        loop = load_loop()
+        self.assertIsNone(loop.read_verdict(None))
+        with tempfile.TemporaryDirectory() as td:
+            self.assertIsNone(loop.read_verdict(str(Path(td) / "no-such-record.edn")))
+        self.assertEqual(["verdict absent"], loop.click_alert(None))
+
+    def run_continuous(self, clicks):
+        loop = load_loop()
+        args = loop.parse_args([
+            "run", "--clicks", str(len(clicks)), "--continuous", "--owner", "claude-2",
+            "--issuing-caller", "claude-2", "--author", "wm-author",
+            "--reviewer", "wm-reviewer", "--repair-reviewer", "wm-repair-reviewer"])
+        fired = iter(clicks)
+
+        def fire(n, a, since):
+            c = next(fired)
+            return {"n": n, "rc": 1 if c["alert"] else 0, "click-id": f"click-{n}", "spent": True,
+                    "outcome": c.get("outcome", "ok"), "run-id": f"run-{n}", "carried": c.get("carried", True),
+                    "last-result": {}, "log": None, "run-record": "R", "verdict": {"file": "V"},
+                    "alert": c["alert"], "since-epoch": since, "in-flight-repairs": []}
+
+        with tempfile.TemporaryDirectory() as td, \
+             mock.patch.object(loop, "STATE", Path(td)), \
+             mock.patch.object(loop, "LEDGER", Path(td) / "ledger.jsonl"), \
+             mock.patch.object(loop, "LOGFILE", Path(td) / "loop.log"), \
+             mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
+             mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
+             mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
+             mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
+             mock.patch.object(loop, "fire", side_effect=fire), \
+             mock.patch.object(loop, "notify") as notify, \
+             mock.patch.object(loop, "notify_alert") as notify_alert, \
+             mock.patch.object(loop, "repair") as repair, \
+             mock.patch.object(loop, "log"):
+            code = loop.run(args)
+            alerts = [l for l in (Path(td) / "alerts.jsonl").read_text().splitlines()] \
+                if (Path(td) / "alerts.jsonl").exists() else []
+            events = [__import__("json").loads(l)["event"] for l in (Path(td) / "ledger.jsonl").read_text().splitlines()]
+        return {"code": code, "stop": notify.call_args[0][1], "alerts": alerts,
+                "belled": notify_alert.call_count, "repairs": repair.call_count, "events": events}
+
+    def test_repeated_signature_pauses_the_loop_once_the_fix_is_due(self):
+        r = self.run_continuous([{"alert": ["work Q7 violated"]},
+                                 {"alert": ["work Q7 violated"]},
+                                 {"alert": None}])
+        self.assertEqual(1, r["code"])
+        self.assertIn("same requirements failed on two consecutive clicks", r["stop"])
+        self.assertIn("work Q7 violated", r["stop"])
+        self.assertEqual(2, len(r["alerts"]), "both failing clicks are queued as work")
+        self.assertEqual(1, r["belled"], "the owner is belled once; the repeat is the pause")
+        self.assertEqual(0, r["repairs"])
+
+    def test_different_alerts_and_a_conforming_click_keep_clicking(self):
+        r = self.run_continuous([{"alert": ["work Q7 violated"]},
+                                 {"alert": ["selection Q9 violated"]},
+                                 {"alert": None, "outcome": "abstained", "carried": False},
+                                 {"alert": ["work Q7 violated"]}])
+        self.assertEqual(0, r["code"])
+        self.assertTrue(r["stop"].startswith("done: 4 clicks spent"))
+        self.assertEqual(3, len(r["alerts"]))
+        self.assertEqual(3, r["belled"])
+        self.assertEqual(0, r["repairs"], "a lawful abstention and alerts dispatch no repair seat")
+        self.assertEqual(4, r["events"].count("verdict"))
+
+
 if __name__ == "__main__":
     unittest.main()
