@@ -12,7 +12,8 @@
 
 (def schema :wm/medic-disposition-v1)
 (def correction-kinds #{:historical-misclassification :ordinary-author-refusal
-                        :genuine-repair :cause-reattribution})
+                        :genuine-repair :cause-reattribution
+                        :environmental-recovery})
 (def replay-results #{:producer-qualified-non-injury
                       :unsupported-author-refusal :done-at-base-revision :injury
                       :successful-close-non-injury
@@ -40,6 +41,10 @@
   (into common-fields [:original-record-id :original-pin :rejected-cause-id
                        :replacement-injury-id :replacement-cause-id
                        :failure-kind :failure-stage]))
+(def ^:private environmental-fields
+  (into common-fields [:cause-record-id :cause-pin :classification
+                       :probe-receipt-pin :probe-request-digest :probe-status
+                       :probe-elapsed-ms :probe-deadline-ms :probed-at]))
 
 (defn occurrence [x] [(:injury-id x) (:entry-id x)])
 
@@ -99,6 +104,7 @@
     :ordinary-author-refusal author-refusal-fields
     :genuine-repair genuine-fields
     :cause-reattribution reattribution-fields
+    :environmental-recovery environmental-fields
     nil))
 
 (defn payload-valid?
@@ -109,7 +115,9 @@
     (and (map? payload) fields (exact-keys? payload fields)
          (present-scalars? payload (disj fields :kind :predecessor-entry-id
                                           :original-acceptance-repaired? :replay
-                                          :failure-kind :failure-stage))
+                                          :failure-kind :failure-stage :classification
+                                          :probe-status :probe-elapsed-ms
+                                          :probe-deadline-ms))
          (not= (:reviewer payload) (:evaluator payload))
          (case kind
            :historical-misclassification (contains? replay-results (:replay payload))
@@ -121,6 +129,13 @@
                 (keyword? (:failure-stage payload))
                 (not= (:injury-id payload) (:replacement-injury-id payload))
                 (not= (:rejected-cause-id payload) (:replacement-cause-id payload)))
+           :environmental-recovery
+           (and (keyword? (:classification payload))
+                (str/starts-with? (name (:classification payload)) "environmental-")
+                (= :checked (:probe-status payload))
+                (nat-int? (:probe-elapsed-ms payload))
+                (pos-int? (:probe-deadline-ms payload))
+                (<= (:probe-elapsed-ms payload) (:probe-deadline-ms payload)))
            false))))
 
 (defn- local-binding? [current candidate evidence]
@@ -146,6 +161,10 @@
               (= (:cause-pin current) (:original-pin candidate))
               (not= (:injury-id current) (:replacement-injury-id candidate))
               (not= (:rejected-cause-id candidate) (:replacement-cause-id candidate)))
+         :environmental-recovery
+         (and (= (:cause-record-id current) (:cause-record-id candidate))
+              (= (:cause-pin current) (:cause-pin candidate))
+              (= :checked (:probe-status candidate)))
          false)))
 
 (defn qualify
