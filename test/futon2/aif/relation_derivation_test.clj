@@ -1,7 +1,7 @@
 (ns futon2.aif.relation-derivation-test
-  "WM-RELATION-I: an M- target with no row derives its relation from (a) its
-  mission's stated ## Relations, walked through M- targets (hop bound 2) to a
-  rowed target, then (b) its nearest rowed neighbour in the pinned structure
+  "WM-RELATION-I: a target with no row derives its relation from (a) stated
+  relations in its task text, then (b) the observation's pinned Giraffe graph,
+  then (c) its nearest rowed target in the checked, inputs-pinned structure
   embedding, re-hashed against the pins; else :unknown with the reason. A hand
   row wins; tickets classify their parent through the same producer. Live pin: M-autoclock-in against the
   real facets file (resources/wm/focus/commit-facets-v1.json) and the real
@@ -12,7 +12,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
-            [futon2.aif.focus-receipt :as fr]))
+            [futon2.aif.focus-receipt :as fr]
+            [futon2.aif.load-identity :as identity]))
 
 (def inputs (fr/read-inputs))
 
@@ -32,6 +33,27 @@
   (str "# M\n\n## Relations\n\n" (apply str (for [i ids] (str "- [[" i "]] related\n"))) "\n## Next\n"))
 
 (defn- classify [inputs target ctx] (fr/classify-target inputs discovery as-of target ctx))
+
+(def live-giraffe-run
+  "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5")
+
+(defn- graph-run [links]
+  (let [dir (doto (io/file (System/getProperty "java.io.tmpdir")
+                           (str "relation-graph-" (System/nanoTime))) .mkdirs)
+        input (io/file dir "input.edn")
+        bytes (.getBytes (pr-str {:edges [] :reading-evidence {:links links}}) "UTF-8")
+        pin (identity/sha256 bytes)]
+    (spit input (String. bytes "UTF-8"))
+    (spit (io/file dir "manifest.edn")
+          (pr-str {:run-id "fixture-graph" :files [{:file "input.edn" :sha256 pin}]}))
+    (.getPath dir)))
+
+(defn- graph-link [from to kind basis]
+  {:from from :to to :kind kind :basis basis
+   :evidence {:path "/fixture/source.md" :line 1 :quote "fixture" :sha256 "fixture-pin"}})
+
+(defn- row-of [& rows]
+  (let [m (into {} (map (juxt :target identity) rows))] #(get m %)))
 
 (deftest a-hand-row-wins-over-a-stated-path
   (let [ins (update inputs :relations conj {:target "M-hand" :relation "focus" :facet "WM"
@@ -77,6 +99,56 @@
     (is (= :unknown (:class c)))
     (is (= :embedding-floor-not-declared (get-in c [:relation :reason])))))
 
+(deftest missing-graph-parameter-refuses-by-name
+  (let [c (classify (dissoc inputs :graph-hop-bound) "E-no-such-node"
+                    {:giraffe-run-dir live-giraffe-run :mission-text-fn (constantly nil)})]
+    (is (= :unknown (:class c)))
+    (is (= :graph-hop-bound-not-declared (get-in c [:relation :reason])))))
+
+(deftest graph-link-kind-and-basis-parameters-are-enforced
+  (let [anchor {:target "M-anchor" :relation "focus"}
+        rows (row-of anchor)
+        superseded (graph-run [(graph-link "E-target" "M-anchor" "superseded-by" "declared")])
+        inferred (graph-run [(graph-link "E-target" "M-anchor" "relates-to" "inferred")])]
+    (is (= :no-graph-path-to-classified-target
+           (:absent (fr/giraffe-graph-path inputs "E-target" rows superseded))))
+    (is (= :no-graph-path-to-classified-target
+           (:absent (fr/giraffe-graph-path inputs "E-target" rows inferred))))
+    (is (= "M-anchor"
+           (get-in (fr/giraffe-graph-path
+                    (update inputs :graph-link-bases conj "inferred")
+                    "E-target" rows inferred)
+                   [:derived-via :anchor])))))
+
+(deftest equal-distance-anchors-with-different-classes-refuse
+  (let [run (graph-run [(graph-link "E-target" "M-focus" "relates-to" "declared")
+                        (graph-link "E-target" "M-elsewhere" "relates-to" "declared")])
+        rows (row-of {:target "M-focus" :relation "focus"}
+                     {:target "M-elsewhere" :relation "useful-elsewhere"})
+        result (fr/giraffe-graph-path inputs "E-target" rows run)]
+    (is (= :graph-anchors-disagree (:absent result)))
+    (is (= [{:node "M-elsewhere" :class :useful-elsewhere}
+            {:node "M-focus" :class :associated}]
+           (:anchors result)))))
+
+(deftest live-november-graph-paths-are-pinned
+  (let [ctx (assoc (fr/relation-context "/home/joe/code")
+                   :giraffe-run-dir live-giraffe-run)
+        [pattern interim comprehension]
+        (mapv #(fr/classify-target inputs discovery "2026-11-01T06:02:00Z" % ctx)
+              ["M-pattern-retrieval-calibration" "M-interim-director"
+               "E-comprehension-foundation"])]
+    (is (= [:associated :associated :associated]
+           (mapv :class [pattern interim comprehension])))
+    (is (= [:giraffe-graph :embedding-neighbour :giraffe-graph]
+           (mapv #(get-in % [:derived-via :kind]) [pattern interim comprehension])))
+    (is (= [3 3] (mapv #(get-in % [:derived-via :hops]) [pattern comprehension])))
+    (is (= ["M-apm-capability-ratchet" "M-wm-aif-policy-grain-compliance"]
+           (mapv #(get-in % [:derived-via :anchor]) [pattern comprehension])))
+    (is (every? #(= "730407c514e2fd21905da2b533d92e046a454372c919fbd89089fc953ebf1667"
+                     (get-in % [:derived-via :input-sha]))
+                [pattern comprehension]))))
+
 (deftest excursion-uses-the-stated-relation-producer
   (let [c (classify inputs "E-fixture"
                     {:mission-text-fn (text-fn {"E-fixture" (relations "M-aif4iad")})})]
@@ -121,17 +193,18 @@
 (deftest live-open-task-relation-census
   (let [ids (:ids (edn/read-string
                    (slurp "holes/labs/wm-contract/witnesses/witnesses-open-tasks-2026-11-01.edn")))
-        ctx (fr/relation-context "/home/joe/code")
+        ctx (assoc (fr/relation-context "/home/joe/code")
+                   :giraffe-run-dir live-giraffe-run)
         receipts (map #(fr/classify-target inputs discovery "2026-11-01T06:02:00Z" % ctx) ids)
         table (frequencies
                (map (fn [r] [(subs (:target r) 0 2) (:class r) (census-source r)])
                     receipts))]
     (is (= 626 (count receipts)))
-    (is (= 1 (get table ["E-" :associated :embedding-neighbour])))
-    (is (= 43 (reduce + (for [[[prefix class _] n] table
+    (is (= 72 (get table ["E-" :associated :giraffe-graph])))
+    (is (= 49 (reduce + (for [[[prefix class _] n] table
                               :when (and (= "T-" prefix) (not= :unknown class))]
                           n))))
-    (is (= 136 (count (remove #(= :unknown (:class %)) receipts))))))
+    (is (= 251 (count (remove #(= :unknown (:class %)) receipts))))))
 
 (deftest m-autoclock-in-live
   (let [c (classify inputs "M-autoclock-in" {:code-root "/home/joe/code"})
@@ -160,3 +233,16 @@
     (is (= ["M-a" "M-b"] (mapv :from (get-in two [:derived-via :path]))))
     (is (= :unknown (:class three)) "three hops is beyond the bound; M-a has no embedding stem")
     (is (= :embedding-node-not-retained (get-in three [:relation :reason])))))
+
+(deftest a-missing-graph-parameter-does-not-fall-through-to-the-embedding
+  ;; claude-2, L5-4j review: M-pattern-retrieval-calibration has an embedding
+  ;; neighbour; with the hop bound undeclared it must read unknown by the
+  ;; parameter's name, not associated through the embedding.
+  (let [inputs (fr/read-inputs)
+        as-of "2026-11-01T06:02:00Z"
+        derived (:info (fr/decision-focus inputs as-of nil))
+        ctx (assoc (fr/relation-context "/home/joe/code") :giraffe-run-dir live-giraffe-run)
+        r (fr/classify-target (dissoc inputs :graph-hop-bound) derived as-of "M-pattern-retrieval-calibration" ctx)]
+    (is (= :unknown (:class r)))
+    (is (= :graph-hop-bound-not-declared (get-in r [:relation :reason])))
+    (is (nil? (get-in r [:derived-via :kind])))))

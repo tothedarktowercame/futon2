@@ -1340,8 +1340,9 @@
                             :decision-as-of (or (:decision-as-of opts) (str (Instant/now)))
                             :previous-focus (:previous-focus opts)
                             :relation-context
-                            (focus-receipt/relation-context
-                             (or (:code-root opts) "/home/joe/code"))})
+                            (assoc (focus-receipt/relation-context
+                                    (or (:code-root opts) "/home/joe/code"))
+                                   :giraffe-run-dir giraffe-dir)})
               learning (resolve-pending-learning opts makeup state giraffe-dir observation)
               state (:state learning)
               ;; Pre-selection duplicate view (DUPLICATE-TARGET-STILL-SELECTED):
