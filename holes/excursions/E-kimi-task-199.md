@@ -1,6 +1,6 @@
 # E-kimi-task-199 — prove lemma manifold_local_critical_image_null in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T10:34:07Z to kimi-2 as invoke-1793529247922-9248-7743692c
+**Requisition:** completed — 2026-11-01T11:13:41Z, job invoke-1793529247922-9248-7743692c, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
