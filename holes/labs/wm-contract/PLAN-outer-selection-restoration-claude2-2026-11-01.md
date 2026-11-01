@@ -234,3 +234,22 @@ Selection run, Lean, on the retained 11-01 field (two-click replay with the live
 Q6, Q11 holds; Q5 holds through the alert from main; Q7 unverifiable on a replay (learning status),
 Q9 violated against the offline roster. Work run on the real records: Q7/Q9 violated or Q1, Q11
 unverifiable until the inner stopped-kernel G (L5-3).
+
+## Finding 2026-11-01 18:30Z: eight unsealed terminals in the live run stream (claude-2)
+
+With L5-2L-3 wired (mathlib4 `b3fcae050f`; futon2 `68aed91c0`), Q6 requires the stream's count of
+unverifiable terminals to be 0. The live stream (`data/wm-runs`, 264 events, 124 closed, 36
+refusals) has **8** closed terminals whose seal does not verify. All eight are 2026-10-22 to
+2026-10-24 and carry no `:sha256` at all: written before terminals were sealed, not tampered
+(`:outcome` invalid ×5, refused ×2, already-satisfied ×1). The producer's `intact?` cannot tell a
+never-sealed terminal from a mismatched one, so both count as unsealed, and the next real click
+would read Q6 violated on every task until the eight are retired or re-sealed. Clicks are held, so
+nothing is blocked today, but the halt is real and the stream is append-only.
+
+Resolution (L5-6, claude-3): the producer distinguishes `:unsigned-legacy` (no seal key, written
+before sealing began) from `:tampered` (seal present, digest mismatch); a medic route appends a
+*sealed* retirement event for each legacy terminal (run id, reason `:unsigned-legacy`, the
+retirement's own digest), after which the terminal is excluded from both the history and the
+unsealed count; a tampered terminal cannot be retired this way and keeps halting. The retirement
+is recorded in the injury ledger as the medic's act. Lean needs no change: the carrier's count
+is "unverifiable after retirement".
