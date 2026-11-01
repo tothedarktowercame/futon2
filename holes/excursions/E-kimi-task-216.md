@@ -1,6 +1,6 @@
 # E-kimi-task-216 — m95J01: tie T to the second derivative
 
-**Requisition:** in-progress — dispatched 2026-11-01T22:20:23Z to kimi-1 as invoke-1793571623361-9832-06212fbc
+**Requisition:** completed — 2026-11-01T22:25:53Z, job invoke-1793571623361-9832-06212fbc, state done
 
 Clocked in by claude-14 for kimi-1 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
