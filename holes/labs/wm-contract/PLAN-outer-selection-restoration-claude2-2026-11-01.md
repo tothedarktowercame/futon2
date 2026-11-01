@@ -336,3 +336,46 @@ Giraffe graph, 251 → 212 of 626 at Joe's floor 0.2), L5-5 discovery (bypass pa
 - **Time correction:** two earlier status headings in this plan (17:55Z, 20:35Z) were written ahead
   of the clock; corrected above to their commit times (15:13Z, 16:06Z). The commit messages keep the
   wrong times.
+
+## Status, 2026-11-01 16:42Z (claude-2): L5-5c-1 merged; an opened injury now publishes a repair ticket
+
+- **L5-5c-1 merged** at `dd4e547b6` (codex-11, branch `codex11/l5-5c-1-injury-ticket-join`, sha
+  `a68e75fef`, base `af7dd0b3f`; report
+  `reconciliation/L5-5c-1-injury-ticket-join-codex11-2026-11-01.md`). Diff read in full. Behaviour:
+  after a durable injury append (or a duplicate re-observation) the store publishes one repair
+  finding and ticket joined to the injury by `:injury-id`, `:cause-record-pin` and
+  `:origin-run/id`. A new finding carries the keys inline; an existing finding joined by injury id,
+  exact cause pin or origin run keeps its bytes and gets an immutable attachment under
+  `injury-joins/`, pinned to the finding's sha (my in-thread ruling, same append style as
+  observations and dispositions). `injury_ticket_join/resolve-join` gives one answer for both forms,
+  types a missing join absent, refuses a conflicting one, and reads a replaced finding as
+  `:injury-join-finding-sha-mismatch`. Ambiguous matches refuse; failure-kind or target
+  coincidence is not a join. The ticket receipt pins the finding sha, not the ticket text, so the
+  appended provenance block does not break it. Publication failure after the append returns
+  `:injury-ticket-publication-failed` with `:ledger-durable? true` and is retried by re-ingesting.
+- **Tests are the right ones:** same injury ingested twice gives one ledger append, one finding,
+  one ticket with identical bytes, and the field producer admits the ticket on a real Giraffe
+  fixture; attachment and inline resolve equal; a newline appended to the attachment conflicts;
+  tampering the finding makes the join and the medic closure read absent; an injected publication
+  outage leaves the ledger durable and the retry publishes. Re-executed here (codex-11's worktree,
+  hermetic): join test and medic-closure test, 10 tests, 50 assertions, 0 failures. Live store
+  checked read-only: all 299 findings carry a `:repair/id` matching their filename, which the
+  resolver's file lookup relies on. Canonical `data/` unchanged at 45737.
+- **Follow-up fix, mine** (`a8fd0f6d0`): the runner's ingest-sink projection dropped
+  `:ledger-durable?` and `:injury-ticket`, so a run record would have read a durable injury as a
+  refused ingest and never named the ticket. Projection now keeps both (ticket as status and
+  finding id). Kondo warnings unchanged at 7 on that file; no new test for the projection.
+- **Premise correction (mine, from claude-3's L5-5 count):** the packet's "9 pinned injuries" came
+  from the superseded `data/wm-meta-injuries/ledger.edn` (22 Oct). The live ledger is
+  `data/wm-meta-injuries-live-2026-10-22/ledger.edn`: 144 entries, 23 injury ids, 22 open, every
+  pinned cause record present. Codex-11's replay script rerun over it (read-only, no ticket
+  written; `reconciliation/L5-5c-1-live-ledger-replay-*-claude2-2026-11-01.edn`): 21 would mint
+  new inline findings, 1 (injury 7d5e374e, run `ac5bc477` today) would attach to existing finding
+  `repair-occ-e14c140e…` by origin run. Would-be relations under the live producer: 7 associated
+  via the hand-reviewed M-aif4iad row (targets M-stack-geometry, M-war-machine-wiring,
+  M-reachable-from-boot), 7 embedding below floor, 4 embedding node not retained, 4 no parent.
+- **Not done, by design:** the 22 existing open injuries get no ticket until re-observed; the
+  store publishes at ingest. Whether to publish for them once is a one-time choice for Joe, not a
+  backfill the code should do on its own. Obligation fact, repair-goes-to-the-front step and
+  arbitration remain L5-5c-2/3.
+- **Not yet loaded:** serving JVM.
