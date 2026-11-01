@@ -1,6 +1,6 @@
 # E-kimi-task-179 — prove lemma apm_t91J03_periodic_lift in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T20:46:19Z to kimi-2 as invoke-1793479580022-8950-7cad43e4
+**Requisition:** completed — 2026-10-31T21:08:48Z, job invoke-1793479580022-8950-7cad43e4, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
