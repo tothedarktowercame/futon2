@@ -1,6 +1,6 @@
 # E-kimi-task-213 — finish reformed statement m93J06 in apm-lean
 
-**Requisition:** in-progress — dispatched 2026-11-01T21:26:07Z to kimi-3 as invoke-1793568367946-9757-0004c7f9
+**Requisition:** completed — 2026-11-01T22:21:58Z, job invoke-1793568367946-9757-0004c7f9, state done
 
 Clocked in by claude-14 for kimi-3 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
