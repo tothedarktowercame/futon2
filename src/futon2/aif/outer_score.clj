@@ -19,6 +19,7 @@
    :transition-kernel {:form :reach-on-landing-remainder-on-stopped
                        :stopped [:stop-the-line :none] :stopped-mass 1.0
                        :reach-bounds [0.0 1.0]}
+   :discovery-gain {:status :undetermined :gain :none :source :discovery-yields-no-ready}
    :novelty-coefficient 0.5
    :readiness-reach-prior {:ready 3/4 :undetermined 1/2 :not-ready 1/4}})
 
@@ -153,10 +154,16 @@
     (let [fact (value-of facts (:target candidate))
           status (:status fact)
           ending (ending-class relation focus (:target candidate))
-          landing (if ending [ending (ready-gain (graph-term facts (:target candidate) :unblocks))]
+          discovery? (= status (get-in kernel-definition [:discovery-gain :status]))
+          gain (when ending (if discovery?
+                              (get-in kernel-definition [:discovery-gain :gain])
+                              (ready-gain (graph-term facts (:target candidate) :unblocks))))
+          landing (if ending [ending gain]
                       (get-in kernel-definition [:transition-kernel :stopped]))]
       {:pick candidate
        :status status
+       :gain-source (if discovery? (get-in kernel-definition [:discovery-gain :source])
+                        :giraffe-unblocks)
        :counts (value-of state-counts status)
        :q (normalize (value-of state-counts status) states)
        :kernel (picked-kernel landing (:reach candidate))
@@ -228,7 +235,8 @@
         n (outer-novelty model)]
     {:terms {:risk r :ambiguity a :novelty n}
      :G (if (= :inadmissible r) :inadmissible (- (+ r a) n))
-     :prediction (assoc (select-keys model [:q :landing :status]) :outcomes prediction)}))
+     :gain-source (:gain-source model)
+     :prediction (assoc (select-keys model [:q :landing :status :gain-source]) :outcomes prediction)}))
 
 (defn abstention-score
   "Score stopping separately over the same preference; never a menu member."

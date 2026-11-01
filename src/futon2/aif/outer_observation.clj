@@ -31,6 +31,24 @@
     (catch Exception e
       (refuse! kind {:path (str file) :message (.getMessage e)}))))
 
+(defn verified-input-pin
+  "Read the input pin from the run manifest and verify the actual bytes.
+  Missing evidence remains a typed absence; a mismatched pin refuses."
+  [run-dir]
+  (let [manifest-file (io/file run-dir "manifest.edn")
+        input-file (io/file run-dir "input.edn")]
+    (cond
+      (not (.isFile manifest-file)) {:status :absent :reason :giraffe-manifest-missing}
+      (not (.isFile input-file)) {:status :absent :reason :giraffe-input-missing}
+      :else
+      (let [manifest (read-edn-file manifest-file :giraffe-manifest-unreadable)
+            pin (some #(when (= "input.edn" (:file %)) (:sha256 %)) (:files manifest))
+            actual (sha256 (Files/readAllBytes (.toPath input-file)))]
+        (cond
+          (nil? pin) {:status :absent :reason :giraffe-input-pin-unavailable}
+          (= pin actual) actual
+          :else (refuse! :giraffe-input-pin-mismatch {:expected pin :actual actual}))))))
+
 (defn- verifier []
   (try
     (or (*resolve-var* 'futon3c.giraffe.run/verify-run)
@@ -178,8 +196,7 @@
           :default-reach-ignored (contains? makeup :default-reach)
           :giraffe/run-id (:run-id manifest)
           :giraffe/pass-sha256 pass-sha
-          :giraffe/input-sha256 (some (fn [f] (when (= "input.edn" (:file f)) (:sha256 f)))
-                                      (:files manifest))
+          :giraffe/input-sha256 (verified-input-pin run-dir)
           :giraffe/manifest-sha256 manifest-sha})))))
 
 (defn outer-observation

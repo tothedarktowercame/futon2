@@ -720,3 +720,43 @@
     (is (= 2 (old "pathAbsenceCount")))
     (is (= 1 (modern "pathAbsenceCount")))
     (is (= (dissoc old "pathAbsenceCount") (dissoc modern "pathAbsenceCount")))))
+
+(deftest constructed-selection-projects-pinned-library-and-scoring
+  (let [construct (requiring-resolve 'futon2.aif.outer-menu/construct)
+        load-makeup (requiring-resolve 'futon2.aif.outer-state/load-makeup)
+        init-state (requiring-resolve 'futon2.aif.outer-state/init-state)
+        select (requiring-resolve 'futon2.aif.outer-select/select)
+        root "/home/joe/code/futon3/library/task-selection"
+        m (assoc (load-makeup "data/wm-learning/outer-makeup.edn") :task-selection-library-root root)
+        obs {:focus "M-large" :relation (fn [_ target] (if (= target "M-large") :focus :associated))
+             :giraffe/pass-sha256 "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91"
+             :giraffe/input-sha256 "730407c514e2fd21905da2b533d92e046a454372c919fbd89089fc953ebf1667"
+             :field [{:target "M-first" :reach 3/4} {:target "M-large" :reach 3/4}]
+             :facts {"M-first" {:status :ready :cone 0 :unblocks 0 :rank 2}
+                     "M-large" {:status :ready :cone 3 :unblocks 3 :rank 1}}}
+        s (select m (init-state m) obs)
+        r {:outer/selection s}
+        export #(:facts (facts/selection-facts-for-record % "tooling" snap {}))
+        f (export r) c (first (f "targetConstruction"))
+        old-before (selection-of live-record)]
+    (is (= (:construction s) (construct root m obs)))
+    (is (true? (c "sliceFromWholeLibrary")))
+    (is (= 3 (c "policyCount") (count (f "policyPrediction"))))
+    (is (str/starts-with? ((requiring-resolve 'wm-check-run-facts/evidence) f :q2) ".known"))
+    (is (= ".nr \"not recomputable: previousChoice,previousOutcome,previousInputDigest,currentInputDigest\""
+           ((requiring-resolve 'wm-check-run-facts/evidence) f :q11)))
+    (is (= (sort (map :digest (:cascades s))) (f "comparedPolicies") (f "constructedCascades")))
+    (is (= (set (f "comparedPolicies")) (set (map #(get % "policy") (f "policyG")))))
+    (is (= (:cascade-digest s) (get-in f ["currentChoice" "cascade"])))
+    (is (= (facts/exact-g (get-in s [:abstention :G])) (f "abstentionG")))
+    (is (= (action-identity/digest (get-in s [:abstention :prediction])) (f "abstentionPrediction")))
+    (is (= (:giraffe/input-sha256 obs) (c "graph")))
+    (is (false? (get-in (export (assoc-in r [:outer/selection :construction :cascades 0 :units 0 :sha256] "bad"))
+                       ["targetConstruction" 0 "sliceFromWholeLibrary"])))
+    (is (false? (get-in (export (assoc-in r [:outer/selection :construction :slice] ["invented"]))
+                       ["targetConstruction" 0 "sliceFromWholeLibrary"])))
+    (is (= "" (get-in (export (assoc-in r [:outer/selection :construction :graph]
+                                        {:status :absent :reason :missing})) ["targetConstruction" 0 "graph"])))
+    (is (false? (get-in (export (assoc-in r [:outer/selection :construction :library :manifest-sha] "bad"))
+                       ["targetConstruction" 0 "sliceFromWholeLibrary"])))
+    (is (= old-before (selection-of live-record)) "Historical projection is unchanged")))
