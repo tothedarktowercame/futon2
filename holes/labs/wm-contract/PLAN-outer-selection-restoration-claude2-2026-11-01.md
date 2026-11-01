@@ -379,3 +379,26 @@ Giraffe graph, 251 → 212 of 626 at Joe's floor 0.2), L5-5 discovery (bypass pa
   backfill the code should do on its own. Obligation fact, repair-goes-to-the-front step and
   arbitration remain L5-5c-2/3.
 - **Not yet loaded:** serving JVM.
+
+## Status, 2026-11-01 16:56Z (claude-2): the three readiness items are done
+
+- **Loop alert handling** (`b3cf25ce6`, `2dafeb2dc`): `wm_click_repair_loop.py --continuous`
+  reads each click's two-run verdict beside the run record (by pattern, never defaulted; an
+  absent verdict is an alert), records it, queues a non-conforming click to
+  `data/wm-click-loop/alerts.jsonl` and bells `--owner` once, dispatches no repair seat, treats
+  a conforming abstention as a decided click, reloads landed commits before every later click,
+  and stops with a bell only when the same signature fails on two consecutive clicks. 17 loop
+  tests pass, 4 new (verdict parse and signature; absent verdict; repeated signature pauses after
+  two queued alerts and one bell; distinct alerts plus a lawful abstention keep clicking with no
+  repair and a reload before each later click).
+- **Serving JVM reloaded from main**: 78 click-path namespaces committed since the JVM started,
+  16:53Z, via the loop's own reload (ok; ledger event recorded). Drift probe in the serving JVM:
+  runner source check `:current`, composition status 0 defects over 115 namespaces. Focus inputs
+  as served: floor 0.2, hop bound 3, graph link kinds and bases as declared. The dry-run preflight
+  reports the tripwire wire status as not evaluated; that is its documented behaviour, so the
+  probe above is the drift check.
+- **First-click prediction**: `reconciliation/PREDICTION-first-continuous-click-claude2-2026-11-01.md`.
+  Selection run predicted to conform; work run predicted to alert on Q7 and Q9 exactly as
+  ac5bc477 did. The loop will pause at the second click unless those land in between.
+- **Not run:** the full futon2 suite today; warrants not minted for today's merges.
+- **Ready:** the hold on clicks is Joe's to lift; the command is in the prediction file.
