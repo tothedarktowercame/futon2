@@ -1,6 +1,6 @@
 # E-kimi-task-190 — prove lemma whitney_support_geometry in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T06:14:45Z to kimi-2 as invoke-1793513685631-9178-bed42451
+**Requisition:** completed — 2026-11-01T06:17:33Z, job invoke-1793513685631-9178-bed42451, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
