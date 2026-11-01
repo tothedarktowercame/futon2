@@ -38,6 +38,19 @@
      :excursions (map :id (filter registry/live-excursion? (:excursions excursions)))
      :tickets (map :id (filter registry/live-ticket? (:tickets tickets)))}))
 
+(defn capture-census
+  "Independent file-registry census for an immutable outer decision, never its field."
+  [opts]
+  (let [root (or (:code-root opts) "/home/joe/code")
+        base {:source :files :code-root root :captured-at (str (Instant/now))}]
+    (try
+      (assoc base :open-tasks
+             (into {} (map (fn [[k ids]] [k (:ids (id-set ids))])
+                           ((or (:world-task-sets-fn opts) default-task-sets) root))))
+      (catch Exception e
+        (assoc base :status :failed :reason :independent-census-unavailable
+               :error (ex-message e))))))
+
 (defn critical-task-counts
   "Counts of tasks available to the selector for a registered run. Reuse a
   successful selection-world snapshot when present. Runs that terminate before

@@ -28,6 +28,7 @@
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.selection-record :as selection-record]
+            [futon2.aif.selection-world :as selection-world]
             [futon2.aif.outer-state :as outer-state]
             [futon2.aif.outer-pending-observation :as pending-observation]
             [futon2.aif.c-vector :as cv]
@@ -1305,7 +1306,9 @@
                (assoc :selection-record/state (atom nil))
                (not (:selection-record/decided opts))
                (assoc :selection-record/decided (atom nil)))]
-    (assoc opts :selection-record/execution-identity
+    (assoc opts :selection-record/census
+           (or (:selection-record/census opts) (delay (selection-world/capture-census opts)))
+           :selection-record/execution-identity
            {:kind :selection-execution
             :id (str "selection--" (or (:click-id opts) (:run-id opts)))})))
 
@@ -1332,7 +1335,7 @@
                                   (:selection-record/execution-identity opts)))
               ref (selection-record/write-decision!
                    (or (:run-record-dir opts) runner/default-run-record-dir)
-                   write-opts (cond-> section
+                   write-opts (cond-> (assoc section :world-census @(:selection-record/census opts))
                           (and (:selection/q6 opts) (not (contains? section :q6)))
                           (assoc :q6 (:selection/q6 opts)))
                    outcome)]
@@ -1406,6 +1409,7 @@
                                :previous (:previous-selection observation)))
               selection (outer-select/select makeup state observation)
               retained-selection (-> selection
+                                     (assoc :world-census @(:selection-record/census opts))
                                      (assoc :outer-field/admitted
                                             (:outer-score/admitted selection))
                                      (update :selection #(some-> % (dissoc :candidates)))
@@ -1717,7 +1721,8 @@
   "Resolve authority and arbitrate. Each invocation retains one immutable outer
   decision chain (or a typed bypass), then a separate completion receipt."
   [opts]
-  (let [opts (selection-context (dissoc opts :selection-record/state :selection-record/evidence :selection-record))
+  (let [opts (selection-context (dissoc opts :selection-record/state :selection-record/evidence
+                                             :selection-record/census :selection-record))
         attempt (try
                   (let [authority (resolve-medic-authority opts)]
                     (if (= :refused (:status authority))

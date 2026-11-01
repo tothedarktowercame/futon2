@@ -582,10 +582,12 @@
         ;; an open-id carrier. Never reconstruct a roster from a newer registry.
         selection-roster
         (delay
-          (when-let [ref (:selection-record record)]
+          (if-let [ref (:selection-record record)]
             (let [terminal (last (:entries (selection-record/read-chain ref)))]
-              {:roster (get-in terminal [:record :outer/selection :field-facts :open-tasks])
-               :path (get-in terminal [:reference :path])})))
+              {:roster (get-in terminal [:record :outer/selection :world-census :open-tasks])
+               :path (get-in terminal [:reference :path])})
+            {:roster (get-in record [:outer/selection :world-census :open-tasks])
+             :path record-path}))
         roster-keys {"openMissions" :missions "openExcursions" :excursions "openTickets" :tickets}
         open-ids (fn [kind snapshot-key]
                    (if-some [ids (world-ids kind)]
@@ -599,7 +601,7 @@
                         (str record-path " " (pr-str [:world-at-selection :open-tasks kind :ids]))
                         (some? (get-in @selection-roster [:roster kind]))
                         (str (:path @selection-roster) " "
-                             (pr-str [:outer/selection :field-facts :open-tasks kind]))
+                             (pr-str [:outer/selection :world-census :open-tasks kind]))
                         :else (:pins snap)))
         enum-ids (get-in world [:enumerated-tasks :ids])
         reaching (when (vector? candidates) (set (keep candidate-target candidates)))
@@ -1176,7 +1178,8 @@
   [record record-path snap {:keys [makeup-path phase-log-path]
                             :or {makeup-path default-makeup-path
                                  phase-log-path default-phase-log-path}}]
-  (let [reference (:selection-record record)
+  (let [tick-path-original record-path
+        reference (:selection-record record)
         standalone? (= selection-record/schema (:schema record))
         completion (when (and standalone? (.isFile (io/file record-path)))
                      (selection-record/read-completion {:path (.getCanonicalPath (io/file record-path)) :sha256 (selection-record/file-sha record-path)}))
@@ -1186,16 +1189,17 @@
         disagreement? (and reference (contains? record :outer/selection)
                            (not= (:outer/selection record) (:outer/selection source)))
         record-path (or (:path terminal-ref) record-path)
-        record (if reference (assoc source :decision (:decision record)) source)
-        work (facts-for-record record record-path snap)
+        record (if reference (assoc source :decision (:decision record)
+                                   :world-at-selection (:world-at-selection record)) source)
+        work (facts-for-record
+              (cond-> record reference (assoc :selection-record reference))
+              (if reference tick-path-original record-path) snap)
         selection (:outer/selection record)
         section? (seq selection)
         makeup (pinned-makeup makeup-path (:makeup/sha256 selection))
         nr not-recomputable
         carried (fn [reason] (if section? (nr reason) (nr no-section)))
         field-facts (:field-facts selection)
-        roster (:open-tasks field-facts)
-        roster-keys {"openMissions" :missions "openExcursions" :excursions "openTickets" :tickets}
         admitted (if field-facts (keys (:admitted field-facts)) (:outer-field/admitted selection))
         exclusions (if field-facts (:excluded field-facts) (:outer-field/excluded selection))
         excluded (map :target exclusions)
@@ -1205,8 +1209,6 @@
                             ["openMissions" "openExcursions" "openTickets"
                              "factorizedPreference" "calibrationAuthorizations"
                              "factorizationAuthorizations"])
-               (when roster
-                 (into {} (map (fn [[k kind]] [k (sorted-ids (get roster kind))]) roster-keys)))
                (zipmap ["targetConstruction" "constructorPatternCount" "libraryPatternCount"]
                        (repeat (carried no-library-pin)))
                (zipmap ["previousChoice" "previousOutcome" "previousInputDigest"
@@ -1255,10 +1257,7 @@
         tick-path (get-in completion [:tick-record :path])]
     {:facts facts
      :sources (assoc (merge (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
-                            (when roster
-                              (into {} (map (fn [[k kind]]
-                                              [k (str record-path " " (pr-str [:outer/selection :field-facts :open-tasks kind]))])
-                                            roster-keys))))
+                            (select-keys (:sources work) ["openMissions" "openExcursions" "openTickets"]))
                      "interpretationOrder"
                      (or phase-log-path ":phase-log path absent"))
      :diagnostics {:recordKind (if (= selection-record/schema (:schema source)) "selection-record" "tick-record")
@@ -1273,6 +1272,15 @@
                                              (or (#{:refused :abstained} (:status outcome))
                                                  (and not-exercised? (nil? tick-path))))
                                     "not-run")
+                   :fieldFacts (when-let [roster (:open-tasks field-facts)]
+                                 {:selectorRoster roster
+                                  :censusDifference
+                                  (into {} (for [[k field] [[:missions "openMissions"]
+                                                           [:excursions "openExcursions"]
+                                                           [:tickets "openTickets"]]
+                                                 :let [c (set (get facts field)) r (set (get roster k))]]
+                                             [k {:census-only (sorted-ids (clojure.set/difference c r))
+                                                 :selector-only (sorted-ids (clojure.set/difference r c))}]))})
                    :taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
                    :absencePaths (mapv pr-str (selection-absence-paths record))
                    :notRecomputable (vec (for [[k v] facts
