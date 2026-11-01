@@ -4,7 +4,8 @@
   Values are never guessed. A missing carrier becomes {not-recomputable ...}.
   Sets in Lean are emitted as sorted JSON arrays. The sibling `sources` map
   records the record path or snapshot command for every RunFacts field."
-  (:require [cheshire.core :as json]
+  (:require [futon2.aif.inner-abstention :as stop]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -553,6 +554,20 @@
                                 (string? cd) cd
                                 :else (nr "selection-input digest absent: decision computed none"))}))
 
+(defn inner-abstention-facts [record]
+  (let [sc (get-in record [:decision :selection-certificate])
+        a (:abstention sc)
+        nr #(zipmap ["abstentionG" "abstentionPrediction"] (repeat (not-recomputable %)))]
+    (if-not a
+      (nr stopped-kernel-absent)
+      (try
+        (stop/validate! a (:candidates sc))
+        (let [entry (get-in a [:per-policy (:chosen-reference a)])]
+          {"abstentionG" (exact-g (:G entry))
+           "abstentionPrediction" (:prediction-digest entry)
+           "abstentionAudit" (select-keys a [:chosen-reference :rule :cross-lens])})
+        (catch Exception e (nr (str "invalid inner abstention: " (:kind (ex-data e)))))))))
+
 (defn facts-for-record
   "Return {:facts <RunFacts-shaped JSON data> :sources ... :diagnostics ...}."
   [record record-path snap]
@@ -658,8 +673,8 @@
         ;; choosing its own label could dodge the selection floor of two.
         facts {"kind" "work"
                "policyGScale" g-scale
-               "abstentionG" (nr stopped-kernel-absent)
-               "abstentionPrediction" (nr stopped-kernel-absent)
+               "abstentionG" (get (inner-abstention-facts record) "abstentionG")
+               "abstentionPrediction" (get (inner-abstention-facts record) "abstentionPrediction")
                "openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
@@ -735,7 +750,9 @@
                "previousChoice" (q6 "previousChoice")
                "previousOutcome" (q6 "previousOutcome")
                "previousInputDigest" (q6 "previousInputDigest")
-               "currentChoice" (q6 "currentChoice")
+               "currentChoice" (if (= :abstain-on-task (get-in record [:decision :abstention :case]))
+                                 {"abstain-on-task" (get-in record [:decision :abstention :target])}
+                                 (q6 "currentChoice"))
                ;; L5-2L-2: the refusal history as far as the record knows it:
                ;; every refusal retained for this task. A record from before
                ;; retention carries only its predecessor's, and says so.
@@ -810,7 +827,8 @@
                                  (str record-path " [:q6]")
                                  :else record-path)]))]
     {:facts facts :sources sources
-     :diagnostics {:absencePaths (mapv pr-str apaths)
+     :diagnostics {:abstentionAudit (get (inner-abstention-facts record) "abstentionAudit")
+                   :absencePaths (mapv pr-str apaths)
                    :absenceGroups absence-groups
                    :notRecomputable (vec (for [[k v] facts
                                                :when (and (map? v) (contains? v "not-recomputable"))]

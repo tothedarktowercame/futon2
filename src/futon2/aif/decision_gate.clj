@@ -35,7 +35,8 @@
    chosen mass is not the posterior marginal, and a missing β. There is no
    fallback and no silent default: refusing is the only alternative to
    admitting."
-  (:require [futon2.aif.cascade-selection :as selection]
+  (:require [futon2.aif.inner-abstention :as stop]
+            [futon2.aif.cascade-selection :as selection]
             [futon2.aif.observation-checks :as observations]
             [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.reading-interpretation-debt :as reading-debt]
@@ -69,7 +70,8 @@
     :repeat-choice-after-refusal
     ;; Requirements Q11: no strict minimum exists (cascade-selection)
     :tie-at-minimum
-    :no-admissible-class})
+    :no-admissible-class
+    :pick-not-below-abstention})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this
@@ -296,8 +298,35 @@
           (refuse! :ticket-queue-choice-invalid {:eligible-targets targets}))
         conditional))))
 
+(defn- check-stop! [decision]
+  (when-let [carrier (get-in decision [:selection-certificate :abstention])]
+    (stop/validate! carrier (get-in decision [:selection-certificate :candidates]))
+    (when (= :abstain-on-task (get-in decision [:abstention :case]))
+      (let [supported (or (get-in decision [:selection-certificate :ticket-queue :stratum-posterior])
+                          (get-in decision [:selection-law :posterior]))
+            rows (certificate-rows decision supported)
+            ks (get-in decision [:selection-certificate :q6 :forbidden-keys])
+            forbidden {:keys ks :classes (selection/forbidden-classes rows ks)}
+            allowed (remove #(selection/forbidden-row? forbidden %) rows)
+            minimum (selection/minimum-class allowed)
+            reference (get-in minimum [:class :members 0 :action :id])]
+        (when-not (and (= :unique (:status minimum))
+                       (= reference (:chosen-reference carrier))
+                       (:cross-lens carrier)
+                       (every? #(>= (:g %) (get-in carrier [:per-policy (get-in % [:action :id]) :G]))
+                               allowed))
+          (refuse! :invalid-stop-minimum-reference {:reference (:chosen-reference carrier)}))))
+    (when-let [action (:action decision)]
+      (when-not (= (:id action) (:chosen-reference carrier))
+        (refuse! :stop-reference-not-chosen {:reference (:chosen-reference carrier)}))
+      (when-not (< (:g (first (filter #(= action (:id %))
+                                      (get-in decision [:selection-certificate :candidates]))))
+                   (get-in carrier [:per-policy (:id action) :G]))
+        (refuse! :pick-not-below-abstention {:reference (:id action)})))))
+
 (defn- check-cascade-decision!
   [decision]
+  (check-stop! decision)
   (check-beta! decision)
   (let [posterior (get-in decision [:selection-law :posterior])]
     (when-not (and (map? posterior) (seq posterior))
@@ -335,6 +364,7 @@
 
 (defn- check-abstention!
   [decision]
+  (check-stop! decision)
   (let [refusals (:refusals decision)]
     (when-not (and (sequential? refusals) (seq refusals))
       (refuse! :empty-refusals {:refusals refusals}))

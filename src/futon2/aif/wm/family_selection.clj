@@ -4,7 +4,8 @@
   placeholder policy. Habit E is attached by the selector from the enactment
   fold under each policy's structural reading-policy key (cascade-habit-store
   policy-view); a ranked entry carries no E of its own before that."
-  (:require [futon2.aif.cascade-feedback :as cascade-feedback]
+  (:require [futon2.aif.inner-abstention :as stop]
+            [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.selected-mission-contract :as mission-contract]
             [futon2.aif.occurrence-index :as occurrence-index]
@@ -80,6 +81,7 @@
                :f-status (:f-status score)
                :computed-f computed-f
                :class-emission (:class-emission score)
+               :abstention (:abstention score)
                :habit 1
                :habit-provenance {:source :pending-selector-attachment}
                :transition-kernel kernel-version
@@ -316,7 +318,13 @@
                                (let [prepared (cond-> (assoc p :reading-pin reading-pin
                                                                :require-target-class? (some? target-classes))
                                                 target-class (assoc :target-class target-class))]
-                                 [prepared (shape-g/score-policy prepared)]))
+                                 [prepared (let [score (shape-g/score-policy prepared)]
+                                             (if (= :computed (:status score))
+                                               (assoc score :abstention
+                                                 (stop/score {:id (:candidate score)
+                                                              :class-emission (:class-emission score)}
+                                                   (get-in score [:scorer-result 0 :certificate])))
+                                               score))]))
                              (:policies family)) [])
            scored (filterv #(= :computed (:status (second %))) attempted)
            score-failures
@@ -489,10 +497,10 @@
                        (assoc-in [:selection-certificate
                                   :selected-canonical-cascade]
                                  (:canonical-cascade selected-bound-entry)))
-            identity-check (when bound
+            identity-check (when (and bound (not= :abstained (:status decision)))
                              (cascade-identity/verify-selected-identity
                               decision menu))]
-        (if (and bound (not= :verified (:status identity-check)))
+        (if (and bound (not= :abstained (:status decision)) (not= :verified (:status identity-check)))
           {:status :refused
            :refusal {:kind :cascade-identity-mismatch
                      :stage :post-selector-identity-check
@@ -505,7 +513,7 @@
            :target-policy-families summaries
            :failures failures
            :failure-count (count failures)}
-          {:status :selected
+          {:status (if (= :abstained (:status decision)) :stopped :selected)
            :certification certified
            :q6 (:carrier excluded)
            :policy-stages stages

@@ -16,7 +16,8 @@
 
    Contract: contributes to R6 (softmax action selection) per
    `futon2/docs/futon-aif-completeness.md`."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.aif.inner-abstention :as stop]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.g-term-decomposition :as decomposition]
@@ -537,6 +538,8 @@
         minimum (cascade-selection/admissible-minimum (rows-in choosing-posterior) forbidden)
         members (get-in minimum [:class :members])
         chosen-entry (:entry (first members))
+        stop-comparison (stop/comparison ranked-actions
+                            (map :entry (allowed-rows (rows-in choosing-posterior))) chosen-entry)
         member-keys (mapv (comp identity-of :entry) members)
         class-mass (reduce + 0.0 (map #(get posterior (:action %) 0.0) members))
         choice {:action (cascade-first-action (:action chosen-entry)) :mass class-mass}
@@ -592,8 +595,8 @@
                                :decided-by (if stratum-posterior :ticket-queue :unrestricted-policy)))
         comparisons (cond-> comparisons
                       queue-receipt (assoc :ticket-queue queue-receipt)
-                      queue-receipt (assoc-in [:policy-comparison :selection-domain] :unrestricted))]
-    {:action (:action chosen-entry)
+                      queue-receipt (assoc-in [:policy-comparison :selection-domain] :unrestricted))
+        decision {:action (:action chosen-entry)
      :rank (or (:rank chosen-entry) 1)
      :controller-score (:controller-score chosen-entry)
      :selection-boundary :cascade-selection-posterior
@@ -643,4 +646,15 @@
        (some? (:cascade-id chosen-entry)) (assoc :candidate (:cascade-id chosen-entry)))
      :softmax-weights weights
      :chosen-action (:action choice)
-     :chosen-action-mass (:mass choice)}))
+     :chosen-action-mass (:mass choice)}
+          decision (cond-> decision
+                     stop-comparison (assoc-in [:selection-certificate :abstention]
+                                               (:carrier stop-comparison)))]
+      (if (= :abstain-on-task (:status stop-comparison))
+        (-> decision
+            (dissoc :action :chosen-action :chosen-action-mass)
+            (assoc :status :abstained
+                   :abstention {:case :abstain-on-task :target (get-in chosen-entry [:action :target])}
+                   :refusals [{:target (get-in chosen-entry [:action :target])
+                               :kind :pick-not-below-abstention}]))
+        decision)))
