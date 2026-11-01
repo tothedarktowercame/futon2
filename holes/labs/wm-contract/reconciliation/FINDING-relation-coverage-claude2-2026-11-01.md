@@ -117,3 +117,14 @@ E-comprehension-foundation, now reads associated through three declared links to
 Review fix: a missing graph parameter stops derivation with its own reason instead of falling
 through to the embedding. Remaining unknowns are tasks neither embedded nor within three hops of
 the nine anchors; the levers now are more declared rows (anchors) and the hop bound, both Joe's.
+
+## Update 2026-11-01 19:55Z: Joe set the embedding floor to 0.2
+
+`resources/wm/focus/commit-facets-v1.json` `:embedding-floor` 0.0 → 0.2 (Joe, 2026-11-01, "let's try
+an embedding floor of .2"). Census, same context and run: 212 of 626 classified (from 251 at 0.0).
+Embedding-derived relations fall from 45 to 12 missions and from 1 to 0 excursions; 34 now read
+`:embedding-below-floor`; the graph-derived relations (72 E-, 76 M-) and the declared rows are
+unaffected, and 6 tickets that inherited through an embedding-derived parent drop to unknown.
+The two November picks remain associated through the graph, not the embedding. The serving JVM
+reads this resource at load; it sees 0.2 only after a reload, which is not needed while clicks are
+held.

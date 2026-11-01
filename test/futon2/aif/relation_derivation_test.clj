@@ -88,7 +88,8 @@
            (select-keys (get-in c [:relation :derivation :embedding]) [:nearest :cosine :floor])))))
 
 (deftest declared-zero-floor-preserves-neighbour-derivation
-  (let [c (classify inputs "M-autoclock-in" {:mission-text-fn (text-fn {"M-autoclock-in" (relations "M-no-row")})})]
+  ;; pinned under an explicit 0.0 since the live floor became 0.2 (Joe, 2026-11-01)
+  (let [c (classify (assoc inputs :embedding-floor 0.0) "M-autoclock-in" {:mission-text-fn (text-fn {"M-autoclock-in" (relations "M-no-row")})})]
     (is (= :associated (:class c)))
     (is (= 0.0 (get-in c [:derived-via :floor])))
     (is (= {:absent :no-stated-path-to-a-classified-target} (get-in c [:derived-via :stated-relation])))))
@@ -138,10 +139,14 @@
         (mapv #(fr/classify-target inputs discovery "2026-11-01T06:02:00Z" % ctx)
               ["M-pattern-retrieval-calibration" "M-interim-director"
                "E-comprehension-foundation"])]
-    (is (= [:associated :associated :associated]
+    ;; Joe set the embedding floor to 0.2 (2026-11-01); M-interim-director's only
+    ;; source is an embedding neighbour at cosine 0.073, so it reads unknown below
+    ;; the floor, while the two graph-derived relations are unaffected.
+    (is (= [:associated :unknown :associated]
            (mapv :class [pattern interim comprehension])))
-    (is (= [:giraffe-graph :embedding-neighbour :giraffe-graph]
+    (is (= [:giraffe-graph nil :giraffe-graph]
            (mapv #(get-in % [:derived-via :kind]) [pattern interim comprehension])))
+    (is (= :embedding-below-floor (get-in interim [:relation :reason])))
     (is (= [3 3] (mapv #(get-in % [:derived-via :hops]) [pattern comprehension])))
     (is (= ["M-apm-capability-ratchet" "M-wm-aif-policy-grain-compliance"]
            (mapv #(get-in % [:derived-via :anchor]) [pattern comprehension])))
@@ -163,27 +168,40 @@
 
 (deftest live-ticket-inherits-its-parents-derived-chain
   (let [target "T-repair-occ-9b6c9871d59bde364a23f9c346ddc708e2f68f4a026d9afe0aac6c9d538f087d"
-        c (classify inputs target (fr/relation-context "/home/joe/code"))]
-    (is (= :associated (:class c)))
-    (is (= :ticket-parent (get-in c [:derived-via :kind])))
-    (is (= "M-autonomous-pattern-lifecycle" (get-in c [:derived-via :parent])))
-    (is (= :embedding-neighbour (get-in c [:derived-via :then :kind])))
-    (is (= 0.0 (get-in c [:derived-via :then :floor])))))
+        ctx (fr/relation-context "/home/joe/code")
+        live (classify inputs target ctx)
+        at-zero (classify (assoc inputs :embedding-floor 0.0) target ctx)]
+    ;; At the live floor (0.2 since 2026-11-01) the parent's embedding neighbour
+    ;; is below the floor, so the ticket inherits unknown by that reason.
+    (is (= :unknown (:class live)))
+    (is (= :embedding-below-floor (get-in live [:relation :reason])))
+    (is (= "M-autonomous-pattern-lifecycle" (get-in live [:derived-via :parent])))
+    ;; At 0.0 the chain is recorded through the parent's embedding derivation.
+    (is (= :associated (:class at-zero)))
+    (is (= :ticket-parent (get-in at-zero [:derived-via :kind])))
+    (is (= :embedding-neighbour (get-in at-zero [:derived-via :then :kind])))
+    (is (= 0.0 (get-in at-zero [:derived-via :then :floor])))))
 
 (deftest live-november-picks-obey-the-declared-floor
   (let [ctx (fr/relation-context "/home/joe/code")
         targets ["M-pattern-retrieval-calibration" "M-interim-director"]
-        at-zero (mapv #(classify inputs % ctx) targets)
-        at-point-one (mapv #(classify (assoc inputs :embedding-floor 0.1) % ctx) targets)]
+        live (mapv #(classify inputs % ctx) targets)
+        at-zero (mapv #(classify (assoc inputs :embedding-floor 0.0) % ctx) targets)]
+    ;; The live floor is 0.2 (Joe, 2026-11-01): both picks' embedding neighbours
+    ;; (cosines -0.014 and 0.073) are below it and read unknown by name, with the
+    ;; cosine and the floor recorded; at an explicit 0.0 they read associated.
+    (is (= 0.2 (:embedding-floor inputs)))
+    (is (= [:unknown :unknown] (mapv :class live)))
+    (is (= [:embedding-below-floor :embedding-below-floor]
+           (mapv #(get-in % [:relation :reason]) live)))
+    (is (= [0.2 0.2]
+           (mapv #(get-in % [:relation :derivation :embedding :floor]) live)))
+    (is (= [-0.013961024444296847 0.07298983447075927]
+           (mapv #(get-in % [:relation :derivation :embedding :cosine]) live)))
     (is (= [:associated :associated] (mapv :class at-zero)))
     (is (= [-0.013961024444296847 0.07298983447075927]
            (mapv #(get-in % [:derived-via :cosine]) at-zero)))
-    (is (= [0.0 0.0] (mapv #(get-in % [:derived-via :floor]) at-zero)))
-    (is (= [:unknown :unknown] (mapv :class at-point-one)))
-    (is (= [:embedding-below-floor :embedding-below-floor]
-           (mapv #(get-in % [:relation :reason]) at-point-one)))
-    (is (= [0.1 0.1]
-           (mapv #(get-in % [:relation :derivation :embedding :floor]) at-point-one)))))
+    (is (= [0.0 0.0] (mapv #(get-in % [:derived-via :floor]) at-zero)))))
 
 (defn- census-source [receipt]
   (or (get-in receipt [:derived-via :kind])
@@ -201,10 +219,12 @@
                     receipts))]
     (is (= 626 (count receipts)))
     (is (= 72 (get table ["E-" :associated :giraffe-graph])))
-    (is (= 49 (reduce + (for [[[prefix class _] n] table
+    ;; At embedding floor 0.2 (Joe, 2026-11-01): 44 tickets and 212 tasks overall
+    ;; carry a relation; at 0.0 these read 49 and 251.
+    (is (= 44 (reduce + (for [[[prefix class _] n] table
                               :when (and (= "T-" prefix) (not= :unknown class))]
                           n))))
-    (is (= 251 (count (remove #(= :unknown (:class %)) receipts))))))
+    (is (= 212 (count (remove #(= :unknown (:class %)) receipts))))))
 
 (deftest m-autoclock-in-live
   (let [c (classify inputs "M-autoclock-in" {:code-root "/home/joe/code"})
