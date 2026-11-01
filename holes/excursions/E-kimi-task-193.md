@@ -1,6 +1,6 @@
 # E-kimi-task-193 — finish lemma iteratedFDeriv_taylorPolynomial_exact in apm-lean from banked helpers
 
-**Requisition:** in-progress — dispatched 2026-11-01T07:10:16Z to kimi-2 as invoke-1793517017011-9219-60ac304d
+**Requisition:** completed — 2026-11-01T07:36:06Z, job invoke-1793517017011-9219-60ac304d, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
