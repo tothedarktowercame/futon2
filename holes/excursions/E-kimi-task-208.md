@@ -1,6 +1,6 @@
 # E-kimi-task-208 — prove lemma threePresentationComplex_piOne in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T17:49:05Z to kimi-3 as invoke-1793555345502-9516-dc8b3bdb
+**Requisition:** completed — 2026-11-01T18:22:59Z, job invoke-1793555345502-9516-dc8b3bdb, state done
 
 Clocked in by claude-14 for kimi-3 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
