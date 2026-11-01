@@ -22,6 +22,13 @@
                      (select-keys standing [:source :declarations]))
     (check :fail (or (:reason standing) :mission-standing-unverifiable) standing)))
 
+;; NOTE (2026-11-01, Joe's correction to row EXCURSION-TARGET-FALSIFIER-AND-
+;; REVISION): an empty want list on an excursion does NOT make these checks
+;; not-applicable — wants are derived on the fly upstream (zai-4's branch),
+;; and the falsifier keeps refusing an unaccounted want set, empty or not.
+;; This branch deliberately reverts its earlier not-applicable relaxation;
+;; only the excursion revision source-path fix remains here.
+
 (defn- want-check [outcomes]
   (if (= :verified (:status outcomes))
     (check :pass nil (select-keys outcomes [:receipt/id :target :selected-wants :outcomes]))

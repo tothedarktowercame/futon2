@@ -3025,6 +3025,20 @@
   (first (filter #(= (missions/mission-target-id target) (:id %))
                  (missions/open-missions))))
 
+(defn excursion-entry-for
+  "Registry lookup for an excursion target (E-*). The excursion doc entry
+   carries its real source :path/:sha256, which cascade revision's
+   whole-mission-context pins so revision can reach a real proposal instead
+   of refusing :whole-mission-source-unavailable with a nil path
+   (click 3a9ee0a1, 2026-11-01). Public for tests and repair callers."
+  [target]
+  (let [target (cond (keyword? target) (name target)
+                     (some? target) (str target)
+                     :else nil)]
+    (when (and target (re-matches #"E-.*" target))
+      (first (filter #(= target (:id %))
+                     (:excursions (missions/load-excursions)))))))
+
 (defmulti construct-selected-action
   "Production constructor dispatch. Every selectable meta-action needs its
   own construction contract; it must not be made to look like an ordinary
@@ -3383,6 +3397,11 @@
        :required-evidence [:started :completed :independently-verified]}
 
       (= :advance-ticket (:type action)) (missions/ticket-entry target)
+      ;; An excursion target is not a mission: mission-entry returns nil for
+      ;; it, which starved cascade revision of a source path. Resolve it to
+      ;; its real excursion doc entry (kind :excursion, real :source pin).
+      (and (some? target) (str/starts-with? (str target) "E-"))
+      (or (excursion-entry-for target) (mission-entry target))
       :else (mission-entry target))))
 
 (defn- job-text [job] (task-execution/job-text job))
