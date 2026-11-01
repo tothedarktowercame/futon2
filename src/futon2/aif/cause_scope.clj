@@ -27,6 +27,20 @@
       (throw (ex-info "Cause input pin mismatch" {:kind :cause-scope/input-pin-mismatch})))
     (edn/read-string (String. bytes "UTF-8"))))
 
+(defn stable-digest
+  "SHA-256 of VALUE printed under fixed bindings. The minting side ran in the
+  serving JVM with *print-namespace-maps* false and the acceptance side in a
+  fresh `clojure -M:test` JVM with Clojure's default true; the same bytes then
+  digested differently and every acceptance refused `:cause-scope/input-mismatch`
+  (injury 93d40d07, clicks 7-8 of 2026-11-01). false is the binding the retained
+  scopes were minted under, so they stay valid."
+  [value]
+  (identity/sha256
+   (.getBytes ^String (binding [*print-namespace-maps* false *print-length* nil
+                                *print-level* nil *print-meta* false]
+                        (pr-str value))
+              "UTF-8")))
+
 (defn seal [cause-entry]
   (let [record (read-pin (get-in cause-entry [:input :record-pin]))
         input (get-in record (get-in cause-entry [:input :path]) ::absent)]
@@ -36,7 +50,7 @@
     {:cause-entry (:var cause-entry)
      :input-pin (get-in cause-entry [:input :record-pin])
      :input-path (get-in cause-entry [:input :path])
-     :input-digest (identity/sha256 (.getBytes (pr-str input) "UTF-8"))
+     :input-digest (stable-digest input)
      :healthy-predicate (:healthy-predicate cause-entry)}))
 
 (defn- healthy? [predicate result]
@@ -56,7 +70,7 @@
         input (get-in record (:input-path scope) ::absent)
         _ (when (= ::absent input)
             (throw (ex-info "Retained carrier absent" {:kind :cause-scope-unretained})))
-        digest (identity/sha256 (.getBytes (pr-str input) "UTF-8"))
+        digest (stable-digest input)
         _ (when-not (= digest (:input-digest scope))
             (throw (ex-info "Retained carrier changed" {:kind :cause-scope/input-mismatch})))
         entry (requiring-resolve (symbol (:cause-entry scope)))
@@ -65,7 +79,7 @@
         receipt {:schema :wm/cause-scope-receipt-v1 :scope scope
                  :observed-entry (:cause-entry scope) :invoked true
                  :predicate-observed-result true
-                 :result-digest (identity/sha256 (.getBytes (pr-str result) "UTF-8"))
+                 :result-digest (stable-digest result)
                  :healthy? healthy :failures (if healthy 0 1) :errors 0}]
     (when-let [path (System/getenv "FUTON_CAUSE_SCOPE_RECEIPT")]
       (spit path (pr-str receipt)))
