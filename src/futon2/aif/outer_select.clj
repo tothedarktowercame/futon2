@@ -15,20 +15,25 @@
   (if-not path
     {:path :absent :sha256 :absent :pin :absent
      :header {:date :absent :status :absent :timebox :absent}}
-    (let [file (io/file path)
-        bytes (java.nio.file.Files/readAllBytes (.toPath file))
-        text (String. bytes "UTF-8")
-        digest (identity/sha256 text)
-        lines (take 30 (str/split-lines text))
-        field (fn [label]
-                (or (some #(second (re-matches
-                                    (re-pattern (str "\\*\\*" label ":?\\*\\*:?\\s*(.+)")) %))
-                          lines)
-                    :absent))]
-      {:path (.getCanonicalPath file)
-       :sha256 digest
-       :pin (if (= sha256 digest) :matches :drifted)
-       :header {:date (field "Date") :status (field "Status") :timebox (field "Timebox")}})))
+    (let [file (io/file path)]
+      (if-not (.isFile file)
+        ;; The pinned source is gone or unreadable at selection time: typed, so
+        ;; a renamed task file cannot fail the selection it is explaining.
+        {:path path :sha256 :absent :pin :unreadable
+         :header {:date :absent :status :absent :timebox :absent}}
+        (let [bytes (java.nio.file.Files/readAllBytes (.toPath file))
+              text (String. bytes "UTF-8")
+              digest (identity/sha256 text)
+              lines (take 30 (str/split-lines text))
+              field (fn [label]
+                      (or (some #(second (re-matches
+                                          (re-pattern (str "\\*\\*" label ":?\\*\\*:?\\s*(.+)")) %))
+                                lines)
+                          :absent))]
+          {:path (.getCanonicalPath file)
+           :sha256 digest
+           :pin (if (= sha256 digest) :matches :drifted)
+           :header {:date (field "Date") :status (field "Status") :timebox (field "Timebox")}})))))
 
 (defn- fmt4 [x]
   (String/format java.util.Locale/ROOT "%.4f" (to-array [(double x)])))
@@ -91,8 +96,11 @@
              :giraffe {:rank (:rank fact) :status (:status fact)
                        :reason (get-in fact [:graph-terms :reason])
                        :unblocks (:unblocks fact) :cone (:cone fact)
-                       :rank-basis (if (and (:rank fact) (not= :ready (:status fact)))
-                                     :computed-before-reading :as-ranked)
+                       ;; GR-2 labels the Giraffe row itself once ranks are
+                       ;; reassigned after reading; prefer the row's own label.
+                       :rank-basis (or (:rank-basis fact)
+                                       (if (and (:rank fact) (not= :ready (:status fact)))
+                                         :computed-before-reading :as-ranked))
                        :prerequisites prerequisites
                        :evidence (get-in fact [:graph-terms :prerequisites 0 :evidence])}
              :source source :terms (:terms class) :G (:G class)}]

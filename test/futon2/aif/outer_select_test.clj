@@ -292,3 +292,28 @@
     (is (.startsWith (checker/evidence f :q11) ".known"))
     (is (= 2 (count (get-in old [:facts "constructedCascades"])))
         "Historical projection uses all retained arrangement classes")))
+
+(deftest source-header-reads-pinned-files-and-types-every-absence
+  ;; Live pin: the interim-director mission file as the click-12 record pins it.
+  (let [path "/home/joe/code/futon7/holes/M-interim-director.md"
+        pinned (outer-select/source-header
+                {:path path
+                 :sha256 "aad85c4b70e1e68ec659f21c0ec07a4d886a4520bad48555d30aca84a3511dd3"})]
+    (is (= "2026-05-14" (get-in pinned [:header :date])))
+    (is (clojure.string/starts-with? (get-in pinned [:header :status]) "OPEN"))
+    (is (clojure.string/starts-with? (get-in pinned [:header :timebox]) "2 weeks"))
+    (is (contains? #{:matches :drifted} (:pin pinned)))
+    ;; a wrong pin is :drifted, never silently :matches
+    (is (= :drifted (:pin (outer-select/source-header {:path path :sha256 "00"}))))
+    ;; no path at all
+    (is (= {:path :absent :sha256 :absent :pin :absent
+            :header {:date :absent :status :absent :timebox :absent}}
+           (outer-select/source-header {})))
+    ;; a pinned file that no longer exists must not throw out of the selection
+    (is (= :unreadable (:pin (outer-select/source-header
+                              {:path "/nonexistent/M-gone.md" :sha256 "00"}))))
+    ;; a file without the three header lines
+    (let [f (java.io.File/createTempFile "no-header" ".md")]
+      (spit f "# Nothing here\n\nprose only\n")
+      (is (= {:date :absent :status :absent :timebox :absent}
+             (:header (outer-select/source-header {:path (.getPath f) :sha256 "00"})))))))
