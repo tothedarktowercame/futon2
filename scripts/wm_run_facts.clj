@@ -21,7 +21,7 @@
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
    "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "policyPreferences"
-   "policyG" "abstentionG" "policyPrediction"
+   "policyG" "abstentionG" "policyPrediction" "abstentionPrediction"
    ;; one run-wide horizon: no longer a Requirements field (Q4 is stated
    ;; per compared policy), kept for the history table and alert text
    "horizonLength" "preferenceSteps"
@@ -532,6 +532,7 @@
                "policyG" (nr g-carrier-absent)
                "abstentionG" (nr g-carrier-absent)
                "policyPrediction" (nr g-carrier-absent)
+               "abstentionPrediction" (nr g-carrier-absent)
                "openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))

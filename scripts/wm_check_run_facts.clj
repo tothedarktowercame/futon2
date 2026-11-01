@@ -23,7 +23,16 @@
   (let [missing (filter #(or (not (contains? facts %)) (nr? (get facts %))) ks)]
     (str ".nr \"not recomputable: " (str/join "," missing) "\"")))
 (defn ev-known [body] (str ".known { Requirements.click20 with " body " }"))
-(defn choice [x] (format "⟨%d, %d⟩" (id (x "target")) (id (x "cascade"))))
+(defn decision
+  "A Requirements.Decision: a pick, or one of the two abstentions L3b admits.
+  Any other shape renders as no constructor, which Lean refuses to elaborate."
+  [x]
+  (cond (and (map? x) (contains? x "abstain-on-task"))
+        (format ".abstainOnTask %d" (id (x "abstain-on-task")))
+        (= "abstain-empty-field" x) ".abstainEmptyField"
+        (and (map? x) (contains? x "target") (contains? x "cascade"))
+        (format "(.pick %d %d)" (id (x "target")) (id (x "cascade")))
+        :else ".unknownDecision"))
 (defn target-construction
   "An absent pin or digest renders 0 (id of the empty string), which Q2
   refuses."
@@ -144,7 +153,7 @@
   (some nr? (tree-seq coll? seq x)))
 (def outcomes {"changed" ".changed" "alreadySatisfied" ".alreadySatisfied"
                "question" ".question" "refused" ".refused" "invalid" ".invalid"
-               "timedOut" ".timedOut"})
+               "timedOut" ".timedOut" "abstained" ".abstained"})
 
 (def deps
   {:q1 ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"]
@@ -160,7 +169,7 @@
    :q7 ["pathAbsenceCount" "kind" "selectionPath"]
    :q9 ["factorizedPreference" "calibrationAuthorizations"
         "factorizationAuthorizations"]
-   :q11 ["currentChoice" "comparedPolicies" "constructedCascades" "targetConstruction"
+   :q11 ["currentChoice" "comparedPolicies" "constructedCascades" "targetConstruction" "abstentionPrediction"
          "enumeratedTasks" "kind" "policyG" "abstentionG" "policyPrediction"]})
 
 (defn required-keys
@@ -201,9 +210,9 @@
         :q1 (ev-known (format "openMissions := %s, openExcursions := %s, openTickets := %s, enumeratedTasks := %s"
                               (fs (facts "openMissions")) (fs (facts "openExcursions"))
                               (fs (facts "openTickets")) (fs (facts "enumeratedTasks"))))
-        :q2 (ev-known (format "kind := %s, enumeratedTasks := %s, currentChoice := %s, targetConstruction := %s, libraryPatternCount := %s, constructorPatternCount := %s, comparedPolicies := %s, constructedCascades := %s"
+        :q2 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, libraryPatternCount := %s, constructorPatternCount := %s, comparedPolicies := %s, constructedCascades := %s"
                               (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
-                              (choice (facts "currentChoice"))
+                              (decision (facts "currentChoice"))
                               (target-construction (facts "targetConstruction"))
                               (facts "libraryPatternCount") (facts "constructorPatternCount")
                               (fs (facts "comparedPolicies")) (fs (facts "constructedCascades"))))
@@ -218,22 +227,23 @@
                                 (facts "policiesWithInformationTerm")
                                 (fs (facts "comparedPolicies")))))
         :q5 (ev-known (str "interpretationOrder := ." (facts "interpretationOrder")))
-        :q6 (ev-known (format "previousChoice := %s, previousOutcome := %s, previousInputDigest := %d, currentChoice := %s, currentInputDigest := %d"
-                              (choice (facts "previousChoice")) (outcomes (facts "previousOutcome"))
-                              (id (facts "previousInputDigest")) (choice (facts "currentChoice"))
+        :q6 (ev-known (format "previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentDecision := %s, currentInputDigest := %d"
+                              (decision (facts "previousChoice")) (outcomes (facts "previousOutcome"))
+                              (id (facts "previousInputDigest")) (decision (facts "currentChoice"))
                               (id (facts "currentInputDigest"))))
         :q7 (ev-known (format "pathAbsenceCount := %s, kind := %s, selectionPath := %s"
                               (facts "pathAbsenceCount") (kind-term (facts "kind"))
                               (if-let [path (facts "selectionPath")]
                                 (selection-path-term path)
                                 "none")))
-        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentChoice := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s"
+        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s"
                                (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
-                               (choice (facts "currentChoice"))
+                               (decision (facts "currentChoice"))
                                (target-construction (facts "targetConstruction"))
                                (fs (facts "comparedPolicies")) (fs (facts "constructedCascades"))
                                (policy-g (facts "policyG")) (rational-term (facts "abstentionG"))
-                               (policy-prediction (facts "policyPrediction"))))
+                               (policy-prediction (facts "policyPrediction"))
+                               (digest-term (facts "abstentionPrediction"))))
         :q9 (let [certificate (facts "factorizedPreference")
                   calibration (field certificate :calibration)
                   selected-calibration-term (when calibration (calibration-term calibration))

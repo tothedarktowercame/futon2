@@ -27,6 +27,7 @@
               {"policy" "c2" "g" (rational -1 2)}]
    "abstentionG" (rational 47875 10000)
    "policyPrediction" [{"policy" "c1" "digest" "d1"} {"policy" "c2" "digest" 0}]
+   "abstentionPrediction" "stopped"
    "pathAbsenceCount" 0
    "selectionPath" {"receipt" {"observed" "h1"} "pickRelation" {"observed" 0}
                     "pickReach" "defaulted" "pendingRun" ["run0" "absent"]
@@ -96,6 +97,7 @@
     (is (str/includes? q11 "(29949 / 10000)"))
     (is (str/includes? q11 "(-1 / 2)"))
     (is (str/includes? q11 "abstentionG := (47875 / 10000)"))
+    (is (re-find #"abstentionPrediction := \d+" q11))
     (testing "a prediction digest of 0 stays the recorded absence"
       (is (re-find #"policyPrediction := \[\(\d+, \d+\), \(\d+, 0\)\]" q11)))))
 
@@ -110,3 +112,19 @@
                         {"not-recomputable" "slice absent"})]
     (is (str/starts-with? (sut/evidence facts :q2) ".nr"))
     (is (str/starts-with? (sut/evidence facts :q11) ".nr"))))
+
+(deftest decisions-render-as-the-lean-constructor
+  (testing "a pick is Decision.pick over the two ids (L3b replaced Choice)"
+    (is (re-find #"currentDecision := \(\.pick \d+ \d+\)" (sut/evidence selection-facts :q11)))
+    (is (re-find #"currentDecision := \(\.pick \d+ \d+\)" (sut/evidence selection-facts :q2))))
+  (testing "the two abstentions Joe admits"
+    (is (= ".abstainEmptyField" (sut/decision "abstain-empty-field")))
+    (is (re-find #"^\.abstainOnTask \d+$" (sut/decision {"abstain-on-task" "t1"}))))
+  (testing "anything else is no constructor, which Lean refuses"
+    (is (= ".unknownDecision" (sut/decision "none")))
+    (is (= ".unknownDecision" (sut/decision {"target" "t1"}))))
+  (testing "an abstained previous outcome reaches Lean as its constructor"
+    (is (= ".abstained" (sut/outcomes "abstained")))))
+
+(deftest q11-without-the-stopped-prediction-is-not-recomputable
+  (is (str/starts-with? (sut/evidence (dissoc selection-facts "abstentionPrediction") :q11) ".nr")))

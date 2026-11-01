@@ -40,7 +40,7 @@ def construction_line(f):
                        f"{card(f['comparedPolicies'])} compared / {card(f['constructedCascades'])} constructed")
 
 def strict_minimum_line(f):
-    reasons=nr_reasons(f,"policyG","abstentionG","policyPrediction")
+    reasons=nr_reasons(f,"policyG","abstentionG","policyPrediction","abstentionPrediction")
     return reasons or (f"{card(f['policyG'])} G / {card(f['comparedPolicies'])} compared; "
                        f"abstention G {f['abstentionG']}; {card(f['policyPrediction'])} prediction digests")
 
