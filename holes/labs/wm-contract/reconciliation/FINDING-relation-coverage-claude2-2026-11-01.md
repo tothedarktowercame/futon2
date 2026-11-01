@@ -91,3 +91,29 @@ existing stated-relation hops over task text (`relation-hop-bound`), now over th
 Giraffe already reads. Parameters to declare in the focus inputs, not default: the hop bound, the
 admitted link kinds, the admitted bases (declared only, first). Reliability by distance belongs in
 the ambiguity term later, as with the embedding cosine. Implementation: L5-4j (codex-5).
+
+## Update 2026-11-01 17:30Z, after L5-4j (codex-5, futon2 `a5733ad7c` + review fix)
+
+Relation over the pinned Giraffe graph (hop bound 3; relates-to, part-of, advances; declared bases),
+precedence declared row → stated-relation hops → Giraffe graph → embedding neighbour → unknown.
+Census, same context, same as-of, live run dir threaded (as `full_loop_runtime.clj:1317` does):
+
+| Prefix | Class | Source | Count |
+|---|---|---|---|
+| M- | focus / associated | declared row | 5 / 3 |
+| M- | associated | Giraffe graph | 76 |
+| M- | associated | embedding neighbour | 45 |
+| M- | unknown | not embedded, no graph anchor within 3 | 52 |
+| E- | associated | Giraffe graph | 72 |
+| E- | associated | embedding neighbour | 1 |
+| E- | unknown | not embedded, no graph anchor within 3 | 182 |
+| T- | focus / associated | ticket parent | 2 / 4 |
+| T- | associated | open repair obligation | 43 |
+| T- | unknown | repaired target unclassified / no parent / parent unclassified | 107 / 33 / 1 |
+
+251 of 626 classified (40.1%, from 21.7% after L5-4g and 14.7% at the start). Every graph-derived
+relation carries its path with evidence pins (file, line, quote, sha). The façade's click-12 target,
+E-comprehension-foundation, now reads associated through three declared links to a declared row.
+Review fix: a missing graph parameter stops derivation with its own reason instead of falling
+through to the embedding. Remaining unknowns are tasks neither embedded nor within three hops of
+the nine anchors; the levers now are more declared rows (anchors) and the hop bound, both Joe's.
