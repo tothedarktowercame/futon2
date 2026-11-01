@@ -2,7 +2,7 @@
   "Task choice with retained library evidence, corresponding to `R20Step.chosenCascadeEntry` and `step`."
   (:require [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.q2-construction :as q2]
+            [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-observation :as observation]
             [futon2.aif.outer-score :as outer-score]))
 
@@ -33,40 +33,13 @@
 
 (defn- value-of [x k] (if (fn? x) (x k) (get x k)))
 
-(defn- library-evidence [makeup]
-  (q2/library-manifest
-   (.getCanonicalPath
-    (io/file (or (:task-selection-library-root makeup)
-                 (str (System/getProperty "user.home") "/code/futon3/library/task-selection"))))))
-
-(defn- cascade-identity [library cascade]
-  (let [units (mapv (fn [index pattern]
-                      (let [safe? (and (string? pattern) (re-matches #"[A-Za-z0-9_-]+" pattern))
-                            file (when safe? (io/file (:root library) (str pattern ".flexiarg")))]
-                        {:pattern (str "futon3/library/task-selection/" pattern ".flexiarg")
-                         :index index
-                         :sha256 (get-in library [:patterns pattern])
-                         :status (if (and file (.isFile file)) :present :absent)}))
-                    (range) (:patterns cascade))
-        carrier [(name (:id cascade)) (:readme-cascade cascade)
-                 (mapv (fn [u] [(:pattern u) (:sha256 u) (:index u)]) units)
-                 (:edges cascade)]]
-    {:id (:id cascade) :digest (identity/sha256 (pr-str carrier))
-     :digest-scheme :sha256-pr-str-name-readme-units-edges
-     :lineage-status (if (and (:readme-cascade cascade) (:edges cascade)) :present :absent)
-     :lineage-note "Absent README row/edges remain nil; these makeup digests need not equal witness digests."
-     :readme-cascade (:readme-cascade cascade) :units units :edges (:edges cascade)
-     :steps (mapv (fn [index step]
-                    (outer-score/typed-step step (str (name (:id cascade)) "/step-" index)))
-                  (range) (:steps cascade))}))
-
-(defn- cascade-record [library observation cascade model score]
+(defn- cascade-record [observation cascade model score]
   (let [candidate (:pick model) target (:target candidate)
         class (if candidate (relation-class observation target) :no-pick)
         receipt (get-in (value-of (:facts observation) target) [:relation :receipt])]
     (when (and receipt (not= class (:class receipt)))
       (refuse! :relation-receipt-class-mismatch {:target target :class class :receipt receipt}))
-    (merge (cascade-identity library cascade) score
+    (merge (update cascade :steps #(mapv (fn [i step] (outer-score/typed-step step (str (name (:id cascade)) "/step-" i))) (range) %)) score
            {:pick (or target :no-pick)
             :pick-facts (when candidate
                           (select-keys (value-of (:facts observation) target)
@@ -83,7 +56,11 @@
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection."
   [makeup state observation]
-  (let [menu (:cascades makeup)
+  (let [construction (menu/construct
+                       (.getCanonicalPath (io/file (or (:task-selection-library-root makeup)
+                         (str (System/getProperty "user.home") "/code/futon3/library/task-selection"))))
+                       makeup observation)
+        menu (:cascades construction)
         partition (known-term-field observation)
         observation (assoc observation :field (:field partition))
         field-facts (:field-facts observation)
@@ -124,10 +101,10 @@
                               (assoc score-input :cascade [] :field (if candidate [candidate] []))))
                            (catch clojure.lang.ExceptionInfo e
                              (throw (ex-info (ex-message e)
-                                             (cond-> (ex-data e) field-facts (assoc :field-facts field-facts)) e))))) menu)
+                                             (cond-> (assoc (ex-data e) :construction construction) field-facts (assoc :field-facts field-facts)) e))))) menu)
           details (mapv #(outer-score/score-model score-input %) models)
-          library (library-evidence makeup)
-          cascades (mapv #(cascade-record library observation %1 %2 %3) menu models details)
+          library (:library construction)
+          cascades (mapv #(cascade-record observation %1 %2 %3) menu models details)
           scores (mapv :G cascades)
           abstention (outer-score/abstention-score score-input)
           legacy-relations (mapv (fn [c] {:target (:pick c) :relation (get-in c [:relation :class])
@@ -136,7 +113,7 @@
           evidence (cond-> {:outer-score/admitted (mapv :target (:field partition))
                     :outer-score/excluded (:excluded partition)
                     :knowledge-producer-requests (:requests partition)
-                    :library library :cascades cascades :abstention abstention
+                    :library library :construction construction :cascades cascades :abstention abstention
                     :forbidden forbidden-evidence
                     :cascade-scores scores :cascade-picks (mapv :pick cascades)
                     :cascade-pick-relations legacy-relations}
@@ -164,7 +141,7 @@
             (refuse! :pick-not-below-abstention {:cascade (:id chosen) :G minimum
                                                :abstention-G (:G abstention)
                                                :selection-evidence evidence}))
-          (let [result (assoc evidence :cascade-index index :cascade-id (:id chosen)
+          (let [result (assoc evidence :cascade-index index :cascade-id (:id chosen) :cascade-digest (:digest chosen)
                              :selection (when picked {:candidates (:field observation) :selected picked})
                              :prediction (:prediction chosen))]
             (assert (and (= (:cascade-scores result) (mapv :G (:cascades result)))

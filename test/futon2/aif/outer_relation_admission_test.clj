@@ -22,8 +22,11 @@
   inadmissible under the c-kit, measured on the real fields -- row report
   addendum 3), and the ignorance is retained beside each pick as
   :cascade-pick-relations."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.outer-select :as outer-select]))
+
+(clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
 (def makeup
   "The real outer-makeup v1 menu (test/fixtures/outer-consumption/outer-makeup.edn

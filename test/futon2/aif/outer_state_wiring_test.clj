@@ -1,5 +1,6 @@
 (ns futon2.aif.outer-state-wiring-test
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.focus-receipt :as focus-receipt]
@@ -7,6 +8,8 @@
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-state :as outer-state]
             [futon2.aif.run-ending-classification :as run-ending]))
+
+(clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
 (def makeup
   {:schema :wm/outer-makeup-v1
@@ -168,7 +171,7 @@
         run-id "retained-already-satisfied"
         ;; Production retained selections always carry their Makeup pin.
         selected {:makeup/sha256 (:makeup/sha256 makeup)
-                  :cascade-index 0 :cascade-id :ready
+                  :cascade-index 0 :cascade-id :ready :steps [:ready-gate]
                   :selection {:selected candidate}
                   :focus "WM" :selected-relation :associated}
         state (assoc (outer-state/init-state makeup)

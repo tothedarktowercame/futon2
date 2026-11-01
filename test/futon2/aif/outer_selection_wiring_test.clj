@@ -1,5 +1,6 @@
 (ns futon2.aif.outer-selection-wiring-test
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [wm-run-facts :as run-facts]
             [clojure.test :refer [deftest is use-fixtures]]
@@ -13,6 +14,8 @@
             [futon2.aif.action-identity :as identity]
             [futon2.aif.outer-state :as outer-state]
             [futon2.test-support.runner-fixture :as runner-fixture]))
+
+(clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
 (use-fixtures :once hermetic/with-hermetic-stores
               runner-fixture/with-hermetic-traces)

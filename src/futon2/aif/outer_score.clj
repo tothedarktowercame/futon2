@@ -62,8 +62,8 @@
     (= :ready-gate step)
     (filterv #(= :ready (:status (value-of facts (:target %)))) field)
 
-    (and (map? step) (contains? step :gate-status))
-    (filterv #(= (:gate-status step)
+    (and (map? step) (or (contains? step :gate-status) (contains? step :status-gate)))
+    (filterv #(= (or (:status-gate step) (:gate-status step))
                  (:status (value-of facts (:target %)))) field)
 
     (= :by-unblocks step)
@@ -140,6 +140,7 @@
     (and (map? step) (contains? step :order)) {:named (or (:name step) fallback-name)}
     (= :ready-gate step) :ready-gate
     (and (map? step) (contains? step :gate-status)) {:status-gate (:gate-status step)}
+    (and (map? step) (contains? step :status-gate)) step
     (contains? #{:by-cone :by-unblocks :by-rank} step) step
     :else {:named (if (string? step) step (pr-str step))})))
 

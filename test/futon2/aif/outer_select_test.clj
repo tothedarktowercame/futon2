@@ -1,10 +1,13 @@
 (ns futon2.aif.outer-select-test
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
+            [clojure.edn :as edn]
             [futon2.aif.action-identity :as identity]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.outer-state :as outer-state]))
+
+(clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
 (def base-makeup
   {:cascades [{:id :first :patterns ["test"] :steps [{:gate-status :ready}]}
@@ -178,7 +181,7 @@
     (is (every? #(= :receipt-unavailable (get-in % [:relation :reason])) (:cascades r)))
     (is (every? #(nil? (get-in % [:relation :receipt-digest])) (:cascades r)))))
 
-(deftest library-and-cascade-identities-are-stable-and-honest
+(deftest legacy-fixture-identities-are-stable
   (let [m {:cascades [{:id :custom :patterns ["only-what-can-start-now"]
                        :steps [{:gate #(= "M-ready" (:target %))}]}]}
         a (outer-select/select m base-state base-observation)

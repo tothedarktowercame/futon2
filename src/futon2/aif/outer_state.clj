@@ -172,15 +172,31 @@
                 [:doable :blocked]))
       decayed)))
 
-(defn- chosen-cascade [makeup selection-result]
-  (let [index (:cascade-index selection-result)
-        entry (when (nat-int? index) (nth (:cascades makeup) index nil))]
-    (when-not (and entry (= (:id entry) (:cascade-id selection-result)))
-      (refuse! :invalid-selection-result
-               {:reason :cascade-identity
-                :cascade-index index
-                :cascade-id (:cascade-id selection-result)}))
-    (:steps entry)))
+(defn- chosen-cascade
+  "Replay retained steps, never the current makeup menu. A modern digest
+  identifies exactly one retained composition; legacy records need their own
+  typed steps and cannot borrow them from today's configuration."
+  [_makeup selection-result]
+  (let [digest (:cascade-digest selection-result)
+        rows (:cascades selection-result)
+        matches (filter #(if digest (= digest (:digest %))
+                             (= (:cascade-id selection-result) (:id %))) rows)
+        entry (when (= 1 (count matches)) (first matches))
+        actual (when (and digest entry)
+                 (identity/sha256
+                  (pr-str [(name (:id entry)) (:readme-cascade entry)
+                           (mapv (fn [u] [(:pattern u) (:sha256 u) (:index u)]) (:units entry))
+                           (:edges entry)])))
+        steps (if digest (:steps entry) (or (:steps entry) (:steps selection-result)))
+        typed? (and (vector? steps)
+                    (every? #(or (contains? #{:ready-gate :by-cone :by-unblocks :by-rank} %)
+                                 (and (map? %) (= 1 (count %))
+                                      (contains? #{:ready :not-ready :undetermined}
+                                                 (or (:status-gate %) (:gate-status %))))) steps))]
+    (when-not (and typed? (or (nil? digest) (= digest actual)))
+      (refuse! :pending-steps-unrecoverable {:cascade-digest digest
+                                           :cascade-id (:cascade-id selection-result)}))
+    steps))
 
 (declare valid-state? check-pending-makeup!)
 
@@ -284,15 +300,18 @@
 (defn- check-makeup-extension! [old new]
   (validate-makeup! old :old-makeup)
   (validate-makeup! new :new-makeup)
-  (when-not (and (not (contains? old :precision-iterations))
-                 (nat-int? (:precision-iterations new))
-                 (= (makeup-values old)
-                    (dissoc (makeup-values new) :precision-iterations)))
+  (when-not (or (and (not (contains? old :precision-iterations))
+                     (nat-int? (:precision-iterations new))
+                     (= (makeup-values old)
+                        (dissoc (makeup-values new) :precision-iterations)))
+                (and (contains? old :cascades) (not (contains? new :cascades))
+                     (= (dissoc (makeup-values old) :cascades) (makeup-values new))))
     (refuse! :makeup-migration-not-precision-only
-             {:old (makeup-values old) :new (makeup-values new)})))
+             {:old (makeup-values old) :new (makeup-values new)
+              :allowed [:precision-extension :menu-removal-only]})))
 
 (defn migrate-makeup-pin
-  "Pure, narrowly admitted Makeup extension. All state values except the pin
+  "Pure precision extension or menu-only removal. All state values except the pin
   are retained unchanged. State SHAs use write-state!'s encoding; when the
   supported reader supplied exact original bytes, the old SHA pins those bytes.
   The receipt is stored separately, never inserted into the learned state."
