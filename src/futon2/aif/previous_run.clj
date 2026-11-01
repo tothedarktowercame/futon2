@@ -256,24 +256,48 @@
                 {:status :not-recomputable :reason :previous-selection-record-identity-mismatch}))
             (catch Exception _ {:status :not-recomputable :reason :previous-selection-record-unreadable})))))))
 
-(defn selection-predecessor
-  "Prefer the outer decision stream, including refused and not-exercised runs.
-  Historical tick fallback is only used where no selection stream exists."
+(defn- not-exercised? [record]
+  (= :not-exercised (get-in record [:selection-outcome :status])))
+
+(defn- last-exercised
+  "The latest decision before this start that was a selection, and the bypasses
+  passed on the way. Each step goes through `latest`, so an invalid or forked
+  history still refuses: only a verified not-exercised record is passed over."
   [dir run-id started-at]
-  (let [p (selection-record/latest dir run-id started-at)]
-    (cond
-      (= :no-selection-record-history (:reason p))
-      (legacy-selection-predecessor dir run-id started-at)
-      (= :present (:status p))
-      (try
-        (let [record (:record p)
-              summary (selection-from-record record)
-              tick (:tick-record (selection-record/read-completion (:reference p)))]
-          (cond-> (assoc summary :selection-record (:reference p) :scope :selection-decision :chain-length (:chain-length p))
-            (and (:path tick) (= :chosen (get-in record [:selection-outcome :status])))
-            (assoc :outcome :changed)))
-        (catch Exception _ {:status :not-recomputable :reason :selection-completion-invalid}))
-      :else p)))
+  (loop [run run-id at started-at skipped []]
+    (let [p (selection-record/latest dir run at)]
+      (if (and (= :present (:status p)) (not-exercised? (:record p)))
+        (recur (get-in p [:record :run/id]) (get-in p [:record :startedAt])
+               (conj skipped {:run/id (get-in p [:record :run/id])
+                              :startedAt (get-in p [:record :startedAt])
+                              :path (get-in p [:record :selection-outcome :path])}))
+        {:latest p :skipped skipped}))))
+
+(defn selection-predecessor
+  "The last exercised selection: refused and abstained decisions count, a
+  not-exercised record does not, and what was passed over is recorded in
+  `:previous-skipped`. Historical tick fallback is used where the decision
+  stream has no selection before this start."
+  [dir run-id started-at]
+  (let [{p :latest skipped :skipped} (last-exercised dir run-id started-at)
+        oldest (last skipped)
+        found (cond
+                (or (= :no-selection-record-history (:reason p))
+                    (and oldest (= :no-prior-selection (:reason p))))
+                (legacy-selection-predecessor dir (or (:run/id oldest) run-id)
+                                              (or (:startedAt oldest) started-at))
+                (= :present (:status p))
+                (try
+                  (let [record (:record p)
+                        summary (selection-from-record record)
+                        tick (:tick-record (selection-record/read-completion (:reference p)))]
+                    (cond-> (assoc summary :selection-record (:reference p) :scope :selection-decision :chain-length (:chain-length p))
+                      (and (:path tick) (= :chosen (get-in record [:selection-outcome :status])))
+                      (assoc :outcome :changed)))
+                  (catch Exception _ {:status :not-recomputable :reason :selection-completion-invalid}))
+                :else p)]
+    (cond-> found
+      (seq skipped) (assoc :previous-skipped {:count (count skipped) :paths (mapv :path skipped)}))))
 
 (defn start!
   "Before selection: the Q6 predecessor of this run, then this run's

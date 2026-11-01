@@ -145,6 +145,39 @@ class AlertTest(unittest.TestCase):
     self.assertIn('":conforms" false',verdict)
     self.assertEqual(2,len(calls))  # checker and Lean for selection only
 
+  def bypassed(self, work_run):
+    module,root,record,args=self.mocked_evaluation()
+    selection=Path(args[3]); data=json.loads(selection.read_text())
+    data["diagnostics"].update(recordKind="selection-record", selectionStatus="not-exercised",
+                               selectionBypass="direct-task",
+                               selectionOutcome={"status":"not-exercised","path":"direct-task"})
+    if not work_run: data["diagnostics"]["workRunStatus"]="not-run"
+    selection.write_text(json.dumps(data))
+    out=io.StringIO()
+    with contextlib.redirect_stdout(out):
+      status=module.main(["--run-record",str(record),*args,
+                         "--alerts-log",str(root/"alerts.log"),"--no-evidence"])
+    return status,out.getvalue(),Path(str(record)+".requirements.edn").read_text()
+
+  def test_not_exercised_selection_with_work_never_conforms(self):
+    status,out,verdict=self.bypassed(True)
+    self.assertEqual(1,status)
+    self.assertTrue(out.startswith("ALERT FOR JOE\nwork run:\n"))
+    self.assertIn("selection run: not exercised (direct-task)",out)
+    self.assertNotIn("abstain-empty-field",out)
+    self.assertIn('":selection-status" ":not-exercised"',verdict)
+    self.assertIn('":work-status" ":evaluated"',verdict)
+    self.assertIn('":conforms" false',verdict)
+
+  def test_not_exercised_selection_without_a_tick_reports_work_not_run(self):
+    status,out,verdict=self.bypassed(False)
+    self.assertEqual(1,status)
+    self.assertIn("work run: not-run",out)
+    self.assertNotIn("work run:\n",out)
+    self.assertIn("selection run: not exercised (direct-task)",out)
+    self.assertIn('":work-status" ":not-run"',verdict)
+    self.assertIn('":selection-status" ":not-exercised"',verdict)
+
   def test_both_conforming_conforms(self):
     status,stdout,verdict=self.evaluate()
     self.assertEqual(0,status); self.assertTrue(stdout.startswith("CONFORMS\nwork run:\n"))

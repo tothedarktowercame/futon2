@@ -103,7 +103,7 @@
     (with-redefs-fn {#'runtime/resolve-medic-authority (constantly {:status :refused :reason :test-authority})}
       #(let [result (runtime/run-opportunity! (assoc opts :run-record-dir dir))
              record (store/read-reference (:selection-record result))]
-         (is (= {:status :not-exercised :path :meta-self-heal :reason :test-authority} (:selection-outcome record)))
+         (is (= {:status :not-exercised :path :authority-refusal :reason :test-authority} (:selection-outcome record)))
          (is (.isFile (io/file (get-in result [:selection-completion :path]))))))))
 
 (deftest reading-reselection-retains-a-chain-and-tick-names-terminal

@@ -168,13 +168,18 @@ def main(argv=None):
                                 Path(selection["diagnostics"].get("workRecord") or record)))
       work_scale=work["facts"].get("policyGScale"); selection_scale=selection["facts"].get("policyGScale")
       scale_differs=not work_not_run and work_scale != selection_scale
-      conforms=not (work_not_run or work["bad"] or selection["bad"] or scale_differs)
-      lines=["CONFORMS" if conforms else "ALERT FOR JOE"]+(["work run: not-run"] if work_not_run else run_lines("work",work))+run_lines("selection",selection)
+      diagnostics=selection["diagnostics"]
+      not_exercised=diagnostics.get("selectionStatus") == "not-exercised"
+      conforms=not (work_not_run or not_exercised or work["bad"] or selection["bad"] or scale_differs)
+      selection_lines=([f"selection run: not exercised ({diagnostics.get('selectionBypass')})"]
+                       if not_exercised else run_lines("selection",selection))
+      lines=["CONFORMS" if conforms else "ALERT FOR JOE"]+(["work run: not-run"] if work_not_run else run_lines("work",work))+selection_lines
       if scale_differs: lines.append(f"policyGScale differs: work {work_scale} / selection {selection_scale}")
       block="\n".join(lines); print(block, flush=True)
       result={":run-record":str(record),":checked-at":started.isoformat(),":conforms":conforms,
               ":runs":[":work",":selection"],
               ":work-status":":not-run" if work_not_run else ":evaluated",
+              ":selection-status":":not-exercised" if not_exercised else ":exercised",
               ":verdicts":work["verdicts"],
               ":critical-parameters":work["parameters"],
               ":not-recomputable":work["not-recomputable"],

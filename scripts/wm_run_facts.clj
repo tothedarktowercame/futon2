@@ -833,6 +833,10 @@
   "no selection-level previous decision in the record (L4b row 13; L5)")
 (def ^:private no-terms "no per-cascade terms on the selection path (L4b row 9)")
 (def ^:private no-carrier "no carrier on the selection path")
+(def ^:private kept-when-not-exercised
+  "What a record says whether or not a selection ran; every other fact is a
+  selection carrier."
+  #{"kind" "policyGScale" "openMissions" "openExcursions" "openTickets"})
 
 (defn- read-phase-events [path]
   (when (and path (.isFile (io/file path)))
@@ -1172,19 +1176,35 @@
         facts (if disagreement?
                 (into {} (map (fn [[k v]] [k (if (#{"kind" "policyGScale"} k) v
                                                 (nr "selection-reselected-after-decision"))]) facts))
-                facts)]
+                facts)
+        outcome (:selection-outcome source)
+        not-exercised? (= :not-exercised (:status outcome))
+        ;; The record may hold the field although no selection ran. An empty
+        ;; enumeration here would read as the empty-field abstention.
+        field (seq (concat admitted excluded))
+        facts (if not-exercised?
+                (let [why (nr (str "selection not exercised: " (some-> (:path outcome) name)))]
+                  (into {} (map (fn [[k v]]
+                                  [k (cond (kept-when-not-exercised k) v
+                                           (and field (= "enumeratedTasks" k)) (sorted-ids (distinct field))
+                                           :else why)]) facts)))
+                facts)
+        tick-path (get-in completion [:tick-record :path])]
     {:facts facts
      :sources (assoc (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
                      "interpretationOrder"
                      (or phase-log-path ":phase-log path absent"))
      :diagnostics {:recordKind (if (= selection-record/schema (:schema source)) "selection-record" "tick-record")
-                   :selectionOutcome (:selection-outcome source)
+                   :selectionOutcome outcome
+                   :selectionStatus (when not-exercised? "not-exercised")
+                   :selectionBypass (when not-exercised? (some-> (:path outcome) name))
                    :selectionChainLength (or (:length chain) (:chain-index source))
                    :selectionRecordDisagreement (when disagreement? :selection-reselected-after-decision)
-                   :workRecord (get-in completion [:tick-record :path])
+                   :workRecord tick-path
                    :workRunStatus (when (and (nil? reference)
                                              (= selection-record/schema (:schema source))
-                                             (#{:refused :abstained} (get-in source [:selection-outcome :status])))
+                                             (or (#{:refused :abstained} (:status outcome))
+                                                 (and not-exercised? (nil? tick-path))))
                                     "not-run")
                    :taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
                    :absencePaths (mapv pr-str (selection-absence-paths record))
