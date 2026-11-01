@@ -1,0 +1,2 @@
+{:case :empty-products, :outcome :grounded-progress, :outer-class :grounded-progress, :effect-evidence []}
+{:case :malformed, :outcome :grounded-progress, :outer-class :grounded-progress, :effect-evidence []}

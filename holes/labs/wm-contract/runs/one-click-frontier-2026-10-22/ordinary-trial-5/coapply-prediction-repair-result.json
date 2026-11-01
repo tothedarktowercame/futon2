@@ -1,0 +1,56 @@
+{
+  "schema": "wm/coapply-prediction-repair-result-v1",
+  "recorded_by": "zai-8",
+  "date": "2026-10-22",
+  "dispatch": "invoke-1792651916775-2372-bde29d5c (codex-11)",
+  "worktree": "/home/joe/code/futon2-effect-prediction-review",
+  "branch": "effect-prediction-review",
+  "base": "ceb23ed371b9810c3a398ba1ee28d7b03820a8c5 (canonical main HEAD at dispatch)",
+  "commit": "baf204561 token-outcome: accept the co-apply precedence step in freeze-prediction",
+  "scope": {
+    "changed_files": [
+      "src/futon2/aif/token_outcome.clj",
+      "test/futon2/aif/token_outcome_coapply_test.clj"
+    ],
+    "untouched": "selection/scoring, declaration data, horizon defaults, reviewer-falsifier, construct-selected-action enrichment, full_loop_runner"
+  },
+  "repair": {
+    "acceptance": "freeze-prediction now accepts both precedence shapes push-forward evaluates: legacy vector (semantics/schema preserved exactly) and the {:co-apply {:units :descent :patterns}} map (Lean coApplyKernel, cascade_model_manifest evaluate-co-apply). New :precedence-kind key on frozen predictions (:precedence-vector | :co-apply-map); all other keys unchanged.",
+    "validation_split": "Structural validation (sole :co-apply key, distinct non-empty units, 2-pair descent referencing only declared units, map-valued patterns covering every unit) refuses :prediction-input-unavailable with typed :precedence-finding {:kind :malformed-co-apply-step :detail ...} or :malformed-precedence-step. Semantic refusals are NOT re-implemented: uninterpreted patterns and invalid theta refuse from the model itself as :model-rollout-refused (missing-interpretation / pattern-theta), same authority as the vector path.",
+    "intended_outputs": "co-apply path unions produces over declared units' patterns accepting either produces spelling (top-level or nested :transition) as cascade_model_manifest/produces-of does; legacy vector path keeps mapcat :produces exactly (would otherwise have silently dropped outputs on the map shape)."
+  },
+  "tests": {
+    "namespace": "futon2.aif.token-outcome-coapply-test (6 tests, 49 assertions, all pure — no git, no JVM sharing, no slow tag needed)",
+    "coverage": [
+      "positive: true co-application frontier with >=2 enabled patterns (u1,u2 above u3 in descent; u3 guard false at q0), fractional thetas give marginal mass 1/2 per frontier token and :co-application kernel records — kernel distinguishable from first-enabled",
+      "verdicts: predicted-and-observed / predicted-not-observed / not-predicted-observed / neither through compare-outcomes on the co-apply prediction",
+      "malformed controls: string step, extraneous keys, empty units, duplicate units, descent arity, descent naming unknown unit, patterns missing a unit, non-map pattern — all refuse with typed finding",
+      "real model validation: structurally-valid co-apply with an uninterpreted pattern refuses :model-rollout-refused via the model's own missing-interpretation check",
+      "legacy regression: vector path frozen/refused semantics unchanged, key set pinned"
+    ],
+    "existing": "futon2.aif.token-outcome-test untouched, 3 tests / 17 assertions green"
+  },
+  "gates": {
+    "clj_kondo": "clean (0 errors, 0 warnings) on both files",
+    "check_parens": "OK (emacs -Q --batch -l futon4/dev/check-parens.el, strategy both)",
+    "focused_tests": "clojure -M:test -n futon2.aif.token-outcome-coapply-test and -n futon2.aif.token-outcome-test, both 0 failures",
+    "slow_note": "No new git-history tests were added, so nothing new to tag ^:slow; the existing git-fixture test lives in the untouched token-outcome-test."
+  },
+  "replay": {
+    "script": "coapply-declared-effect-replay.clj (this directory), run with `clojure -M` from the worktree classpath, rc=0",
+    "outputs": ["coapply-declared-effect-replay-output.edn", "coapply-declared-effect-replay.stderr"],
+    "pinned": {
+      "source_declaration": "resources/wm/cascade-sources/T-repair-occ-444fb018.edn, sha256 1b9d390201fb96d3145222c070f1adc76a8dd27b0e42edc3528a72452b80027b",
+      "before": "0798f96ad2082a8f80c8a850c8e1138c036213f9 (ticket OPEN)",
+      "after": "97e17e10f2695c481c55ddaebe9026f2d245663f (ticket DONE)"
+    },
+    "positive": "observed q0 only (manifest/observed-belief over C4 facts at before); 4-unit co-apply step (descent [], all enabled units on the frontier; kernel records [:co-application :identity]) -> freeze :frozen :co-apply-map, want :restoration-accepted predicted 1, measurements at after (6 rows) -> compared :predicted-and-observed -> accounting :verified (reached) -> reviewer-falsifier receipt :verified AND verify :verified",
+    "negatives": [
+      "malformed co-apply (units naming a unit with no pattern) -> refused :prediction-input-unavailable, finding :malformed-co-apply-step :detail :patterns",
+      "measure at before -> compared, want :predicted-not-observed"
+    ],
+    "regression": "legacy vector precedence over the same patterns -> :frozen :precedence-vector, want predicted 1",
+    "limitation_stated": "The replay decision (precedence step, certificate, token-belief-stage) is MANUALLY ASSEMBLED from the historical declaration — no live runner route produced it. construct-selected-action enrichment and the compiled-route assembly are deliberately not implemented (that method may not run on the compiled route; route to be traced separately). This is pure shape support, independently useful, not the complete production bridge; overall route decisions (D1-D5 in falsifier-frontier-discovery-result.json) remain open."
+  },
+  "constraints_honored": "no canonical writes, no Trials, no deploy, no shared JVM, no fullrunner suites, no ledger mutation; only standalone offline script and single-namespace test runs in the isolated worktree."
+}

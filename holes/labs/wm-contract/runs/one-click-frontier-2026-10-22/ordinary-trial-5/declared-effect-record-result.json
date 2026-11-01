@@ -1,0 +1,86 @@
+{
+  "schema": "wm/declared-effect-record-result-v1",
+  "author": "zai-2",
+  "request": "invoke-1792652357709-2378-37742f83 (codex-11)",
+  "mode": "isolated sibling worktree /home/joe/code/futon2-declared-effect-review, branch declared-effect-review, from futon2 main 0f222f6fd. Round 1 f90c614fd; revision 1 fef62e9b; revision 2 commit 5460a97ddd1ee36be019f5611f0bda16f7702b83 (code/tests only). No main-repo edits, no falsifier/selection-scoring/action-map/declaration-file changes, no runner wiring, no Trials, no deploy, no shared JVM, no fullrunner suites.",
+  "revision-round-2": {
+    "review": "declared-effect-round2-review.json (REQUEST_CHANGES, probe declared-effect-round2-probe.clj/.edn)",
+    "defects-closed": [
+      "Empty-rows record with active summary verified: verify-record now enforces complete required shapes (:record-shape-invalid for missing/malformed :declaration/:horizon; :pinned needs path+sha256, :declared needs pos-int value) and runs the census on the ACTUAL observation rows — row statuses/evidence shapes/boolean polarity, summary lists equal to row tokens, every declared want in exactly one bucket. Eligibility is derived by ONE shared admission-refusals fn used by build and verify, and eligible requires pinned declaration + declared horizon + resolved base + an open want. The exact probe record now fails :record-shape-invalid.",
+      "Echoing reader admitted wrong-repo/not-a-revision: the base revision is resolved INDEPENDENTLY via a revision-resolver port (production default: real git rev-parse mirroring observation-checks; unit tests inject a model resolver). Unresolvable base => nothing observed, all wants typed :base-unresolved, admission refused; observation evidence must carry the INDEPENDENTLY resolved sha (:observation-evidence-mismatch otherwise); locator :repo must equal the base repo (:locator-repo-mismatch otherwise). The exact probe (production defaults, echo reader, resolved-sha not-a-commit) now yields {:eligible false, :refusals [:base-unresolved :unknown-observation]}.",
+      "reconstruct re-consumes the pinned declaration BYTES: re-reads :path and checks the sha256 pin before rebuilding; a changed or lying declaration fails :declaration-pin-broken rather than trusting the record's :pinned status.",
+      "Docstring corrected: the record digest is destined for the runner's occurrence-context binding (a separate binding receipt), not the scoring certificate and not the occurrence mint itself.",
+      "verify-record explicitly documented as a consistency/shape check, not truth: truth is established only by reconstruct (re-derivation from pinned inputs)."
+    ],
+    "probe-reruns": "both reviewer probe scripts re-executed at 5460a97d refuse: round-1 probe — bare boolean => {:eligible false, :refusals [:base-unresolved :unknown-observation]}, forged :bogus schema => :record-schema-mismatch, tampered reconstruct => false; round-2 probe — empty-rows fake => :record-shape-invalid (:field :declaration), wrong-repo/not-a-revision echo => {:eligible false, :refusals [:base-unresolved :unknown-observation]} (the resulting typed record verifies as CONSISTENT, which is correct: it is an honest refusal record; its claims are re-established by reconstruct).",
+    "known-injection-limit": "an injected resolver + reader can still collude in unit tests (that is what injection means); production authority comes from the git default resolver + real C4 check, exercised in the slow suite."
+  },
+  "namespace": "futon2.aif.declared-effect-record (src/futon2/aif/declared_effect_record.clj)",
+  "revision-round": {
+    "review": "declared-effect-record-independent-review.json (REQUEST_CHANGES, probe declared-effect-record-review-probe.clj/.edn)",
+    "findings-closed": [
+      "(1) unproven observation admitted: an observation now counts only if its evidence carries check :C4 and matches the requested :repo/:path/:decl and the base revision reference, with a :resolved-sha shared by every observed row (:observation-base-inconsistent refusal otherwise). A bare {:observed false}, mismatched evidence (:observation-evidence-mismatch), unsupported locator class (:unsupported-locator-class), unresolvable base (:unknown-sha) are typed unknown rows; none becomes observed-before false, none admits. The exact probe input (wrong-repo/not-a-revision base, (fn [_] {:observed false})) now yields {:eligible false, :refusals [:unknown-observation]}.",
+      "(2) forged self-hashed record verified: verify-record now enforces the exact schema (:record-schema-mismatch), unique [target token] want ownership, want census (active + excluded-already-true + unknown exactly partition :wants), admission matching eligibility re-derived from the record's own content (:admission-inconsistent), and row resolved-shas consistent with :base-revision (:base-revision-inconsistent) — on top of digest re-derivation and legacy-field rejection. The exact {:schema :bogus ...} probe now fails :record-schema-mismatch.",
+      "(3) tampered body passed reconstruct: reconstruct validates the supplied record with verify-record first, then requires FULL canonical body equality with the rebuilt record, not stored-digest equality. The exact tampered-:target probe now fails :record-digest-mismatch (verify) / reconstruct false."
+    ],
+    "probe-rerun": "the reviewer's probe script re-executed at fef62e9b outputs {:unproven-observation-admission {:eligible false, :refusals [:unknown-observation]}, :forged-schema-verification {:verified false, :reason :record-schema-mismatch, :schema :bogus}, :tampered-reconstruction {:verified false}} (see declared-effect-record-review-probe.edn for the round-1 acceptances).",
+    "other-reviewer-items": [
+      "locator class handled explicitly: only :C4 is interpreted (the sole class the existing historical target declares); other or missing :class is typed :unsupported-locator-class, never silently reinterpreted as C4, and no observation is attempted for such locators. No new class semantics invented.",
+      "typed errors for invalid/missing inputs instead of throwing: nil/non-map declaration, blank path, invalid base revision, and any build exception produce typed refused records (:invalid-build-inputs / :declaration-source-missing / :build-error) with :admission :eligible false.",
+      "deps change justification: futon2 has NO existing alias that serves an extra test path (checked deps.edn; the futon3c ':test-all -i :slow' convention does not exist here, and cognitect.test-runner's default dir is 'test' only). The round-1 :test-slow alias is a one-line main-opts override ('-d test-slow'), adds no dependencies, and is what keeps the default suite fast while the git-reading replay tests stay explicitly runnable."
+    ]
+  },
+  "api": {
+    "build-record": "inputs {:target :declaration {:path :expected-sha256?} :base-revision {:repo :sha} :observe}. :declaration nil => lookup by :target in the classpath cascade-sources dir; no hit => typed absent record. :observe defaults to the real C4 check futon2.aif.observation-checks/check-decl-in-file and is the injection point for unit tests and replay. Always returns a record with :schema :wm/selected-effect-declaration-v1, :record/digest and :admission; typed refusals are carried in the record, never thrown.",
+    "verify-record": "structural integrity AND authority: digest re-derivation through the existing action-identity canonical printer (proving total EDN), no legacy declaration fields, exact schema, want ownership/census, admission consistent with content, base-revision consistency.",
+    "reconstruct": "validates the supplied record, rebuilds from the same inputs, and requires full canonical body equality plus digest equality.",
+    "record-digest": "sha256 over [:wm/selected-effect-declaration-v1 (action-identity/canonical body)] using action-identity/printed + sha256; :schema is covered, :record/digest is not."
+  },
+  "record-schema": {
+    ":target": "string target id",
+    ":declaration": "{:status :pinned :path .. :sha256 ..} | {:status :absent :reason :no-target-effect-declaration} | {:status :refused :reason :declaration-source-mismatch|:declaration-source-missing|:declaration-unreadable|:declaration-not-a-map|:invalid-build-inputs|:build-error :details ..}",
+    ":base-revision": "{:repo .. :sha <pinned reference>} plus :resolved-sha once any observation resolved it",
+    ":horizon": "{:status :declared :value N :authority :declaration/horizon-steps} | {:status :absent :reason :horizon-not-declared} — never defaulted to cascade length",
+    ":wants": "authored :want tokens as [target token] pairs; only :want is read, never :facts",
+    ":want-observations": "{:active [{:want :locator :locator-class :observation}] :excluded-already-true [{:want :observation}] :unknown [{:want :locator-class :observation}]} — every declared want appears in exactly one bucket",
+    ":excluded-already-true / :active-wants": "token lists mirroring the buckets (already-true listed with its observation, never silently dropped)",
+    ":admission": "{:eligible bool :refusals [..]} — refusals: :no-declared-effect, :declaration-source-refused, :invalid-build-inputs, :declaration-target-mismatch, :declaration-no-want, :no-declared-horizon, :unknown-observation, :observation-base-inconsistent, :no-open-declared-want",
+    "observation-rows": "{:status :observed :observed-before bool :check :C4 :evidence {.. :resolved-sha ..}} | {:status :unknown :kind :missing-locator|:unsupported-locator-class|:contradictory-observation|:observation-not-boolean|:observation-evidence-mismatch|<reader kind> :reader-result/expected ..}. An unknown row is NEVER observed-before false; evidence must prove the exact locator, C4 check and base reference."
+  },
+  "sample": {
+    "case": "real T-repair declaration, real C4 reader, pinned base ae69f5e7b1a1d9012742fddc6d14313ac9292e3d (2026-09-22, ticket OPEN)",
+    "record": {
+      "schema": ":wm/selected-effect-declaration-v1",
+      "target": "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
+      "declaration": {"status": ":pinned", "path": "resources/wm/cascade-sources/T-repair-occ-444fb018.edn", "sha256": "1b9d390201fb96d3145222c070f1adc76a8dd27b0e42edc3528a72452b80027b"},
+      "base-revision": {"repo": "futon2", "sha": "ae69f5e7b1a1d9012742fddc6d14313ac9292e3d", "resolved-sha": "ae69f5e7b1a1d9012742fddc6d14313ac9292e3d"},
+      "horizon": {"status": ":declared", "value": 4, "authority": ":declaration/horizon-steps"},
+      "wants": [["T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade", ":restoration-accepted"]],
+      "active-wants": [["T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade", ":restoration-accepted"]],
+      "excluded-already-true": [],
+      "admission": {"eligible": true, "refusals": []},
+      "note": "record/digest at round 1 was 581b4ab3...; the revision changed row shapes (:locator-class, typed-unknown fields), so the digest at fef62e9b differs — recompute with futon2.aif.declared-effect-record/record-digest"
+    },
+    "observed-before": {"want": ":restoration-accepted", "observed-before": false, "check": ":C4", "evidence": {"repo": "futon2", "sha": "ae69f5e7b1a1d9012742fddc6d14313ac9292e3d", "resolved-sha": "ae69f5e7b1a1d9012742fddc6d14313ac9292e3d", "path": "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md", "decl": "**Status:** DONE", "file-present": true}},
+    "after-case": "same inputs at base 97e17e10f2695c481c55ddaebe9026f2d245663f (acceptance): want observed true, listed in :excluded-already-true, admission refused [:no-open-declared-want]"
+  },
+  "tests": {
+    "fast (default suite, injected reader, no git)": "clojure -M:test -n futon2.aif.declared-effect-record-test => 21 deftests, 93 assertions, 0 failures. Adds the three reviewer probe negatives verbatim (bare boolean at wrong-repo/not-a-revision => typed unknown, not eligible; forged self-hashed :bogus schema => :record-schema-mismatch; tampered :target with old digest => verify and reconstruct false), the mismatched-evidence control with boolean false (:observation-evidence-mismatch), inconsistent resolved base (:observation-base-inconsistent), unsupported/missing locator class typed with no observation attempted, invalid inputs typed never thrown, admission-inconsistency and want-census tampering (re-hashed) failing verification — plus all round-1 positives.",
+    "slow (git reads, run explicitly)": "clojure -M:test:test-slow -n futon2.aif.declared-effect-record-slow-test => 4 deftests, 25 assertions, 0 failures, unchanged: real pinned T-repair before/after positives preserved under the stricter evidence validation.",
+    "gates": "clj-kondo 0 errors/0 warnings on all three files; futon4/dev/check-parens.el OK; reviewer probe re-run at fef62e9b shows all three acceptances closed."
+  },
+  "limits": [
+    "Pure producer/validator only. Nothing consumes the record yet: no occurrence-mint binding, no admission check, no selected-want-outcome/falsifier change. The future runner binding goes into the occurrence context, not the scoring certificate, and is out of this packet.",
+    "Only :want (not :facts) is read for wants, so a declaration whose authored selection lives in :facts cannot be admitted — intentional.",
+    "Evidence validation proves the reader read the requested locator at the requested reference; with an INJECTED reader a test can still supply fabricated-but-well-formed evidence (that is what injection means). Production authority comes from the default real C4 check.",
+    "Only the C4 locator class is interpreted; a future class needs explicit support and tests.",
+    "The declaration is read from the file on disk (pinned by byte sha256), not at the base revision; historical declaration authorship is not reconstructed.",
+    ":base-revision :resolved-sha comes from the first observed row; with zero observed rows the reference stays unresolved."
+  ],
+  "owner-flags": [
+    "Schema name :wm/selected-effect-declaration-v1 follows claude-2's review wording; confirm or rename before runner wiring.",
+    "Whether an authored :want of zero tokens (:declaration-no-want) should be an admission refusal (current) or a typed-absent declaration like no-declaration.",
+    "Whether :facts-backed wants should ever enter the record (currently never; only :want).",
+    "Whether the horizon authority keyword :declaration/horizon-steps and pos-int? validation (a non-positive :horizon-steps is treated as not declared) match the intended declaration schema."
+  ]
+}

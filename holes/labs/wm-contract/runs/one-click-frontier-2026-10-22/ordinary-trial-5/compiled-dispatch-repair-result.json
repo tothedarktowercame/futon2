@@ -1,0 +1,51 @@
+{
+  "request": "bounded compiled-cascade prompt-rendering repair (dispatch-criteria-replay.clj/.json)",
+  "responders": {"implementer": "zai-5", "independent-reviewer": "codex-11 (later)"},
+  "date": "2026-10-22",
+  "worktree": "/home/joe/code/futon2-compiled-prompt-review",
+  "branch": "compiled-prompt-review",
+  "base": "f4ae5b676 (futon2 main)",
+  "commit": "3c85d21b4 wm: render compiled-cascade operational plan and completion checks in prompts",
+  "committed-files": [
+    "src/futon2/aif/cascade_plan.clj",
+    "src/futon2/aif/full_loop_runner.clj",
+    "test/futon2/aif/compiled_prompt_rendering_test.clj"
+  ],
+  "problem": "Frozen construction is :compiled-cascade with :compiled-fold and a 19-step :operational-plan; acceptance-criterion-block rendered {:status :absent :reason :no-renderable-criteria} and cascade-plan-text rendered the legacy pattern dump containing 0 of the 19 completion checks (dispatch-criteria-replay.json: completion-checks-in-pattern-plan 0).",
+  "repair": {
+    "cascade-plan.clj": [
+      "compiled-operational-plan-text: typed {:status :absent :reason :compiled-operational-plan-not-renderable | :compiled-operational-plan-digests-missing} for absent/malformed plans or missing digests; otherwise {:status :rendered ...} with BOTH recorded digests (selected c601dc56..., compiled f2d6feed...), every step's occurrence identity, operation, capability, consumes->produces, VERBATIM completion check, authoring attribution (author/reviewer/authority), recorded provenance (reading-record-id, source sha256), recorded guard/order relation and effect status. 18000-char budget, whole steps kept while they fit, omission explicitly counted ('[k of n operational steps shown; m omitted for space]').",
+      "compiled-completion-criteria-text: acceptance-criterion rendering -- all checks verbatim with occurrence ids, operations and both digests; 12000-char budget with counted omission; typed-absent on malformed plans; NO coercion into C3/C4 locator classes.",
+      "cascade-plan-text routes :compiled-cascade (compiled-cascade? = :construction-kind) to the compiled section and also reads wiring from :compiled-fold; legacy format untouched."
+    ],
+    "full_loop_runner.clj": [
+      "acceptance-criterion-block: compiled-cascade constructions dispatch to cascade-plan/compiled-completion-criteria-text; malformed/absent compiled plans remain typed absent ({:status :absent :reason ...}), so author-prompt prints 'ACCEPTANCE CRITERIA: not stated (reason)' rather than rendering completeness. Legacy path byte-identical.",
+      "Both author-prompt and reviewer-prompt flow through cascade-plan-text, so both now carry the compiled plan."
+    ]
+  },
+  "preserved": [
+    "legacy pattern rendering and legacy acceptance-criterion path (regression-tested)",
+    "all 19 checks/ids are preexisting facts of the retained construction; no clauses changed, nothing invented, no success/obligation/locator fabrication",
+    "no selection changes, no comparator resurrection, no dispatch/deployment; runtime author source untouched; Trial5 in-flight execution not interrupted"
+  ],
+  "replay-after-repair": {
+    "cmd": "clojure -M -i <worktree-local equivalent of dispatch-criteria-replay.clj against worktree code and worktree copy of construction.edn.gz>",
+    "result": "{:step-count 19, :block-string? true, :checks-in-block 19, :completion-checks-in-plan 19, :block-chars 4159, :plan-chars 13337}",
+    "frozen-construction-gz-sha256": "7fb089be87eded78b1972ebdd26d93192d0c7812569c17614d3b9808a4bba67b"
+  },
+  "gates": {
+    "clj-kondo": "0 errors 0 warnings on cascade_plan.clj, compiled_prompt_rendering_test.clj; full_loop_runner.clj 0 errors, 2 pre-existing warnings present on unmodified main (redundant let, unused binding; line numbers shifted only)",
+    "check-parens": "OK on all three files",
+    "focused-tests": {
+      "futon2.aif.compiled-prompt-rendering-test": "6 tests, 121 assertions, 0 failures -- includes real-frozen-construction sha pin, all 19 checks VERBATIM in both the production acceptance block and the prompt plan text, both digests, 19 'step [' lines, render-facts (steps-shown 19 of 19, omitted 0), malformed/absent/digest-missing typed-absent cases (block and plan text), and legacy regression (pattern rendering + legacy :no-renderable-criteria passthrough)",
+      "futon2.aif.cascade-plan-test (regression)": "4 tests, 37 assertions, 0 failures"
+    },
+    "not-run": ["full-loop-runner-test namespace (per instruction: narrow vars only)", "full suite", "any live/loaded JVM actions"]
+  },
+  "limitations": [
+    "prompt-construction on main already pr-str's :operational-plan into the reviewer CONSTRUCTION CONTRACT verbatim and unbounded; this repair does not change that shared projection (out of the stated scope), so the reviewer prompt still carries the raw dump alongside the new bounded rendering. Bounding it is a one-line follow-up for the root if wanted.",
+    "The compiled renderer reports the recorded guard/order relation as-is; the frozen construction records empty :application-order and :guards, rendered honestly as '(none recorded)' -- no order relation is invented.",
+    "Rendering only; acceptance/adjudication of the 19 checks is unchanged and out of scope."
+  ],
+  "trial-state": "Trial5 remains held/in-flight; no deployment performed; independent root review pending."
+}

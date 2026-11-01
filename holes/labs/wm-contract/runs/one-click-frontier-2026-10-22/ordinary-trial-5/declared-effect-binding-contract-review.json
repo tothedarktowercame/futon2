@@ -1,0 +1,74 @@
+{
+ "schema": "wm/declared-effect-binding-contract-review-v1",
+ "reviewer": "claude-2",
+ "request": "invoke-1792653237007-2383-1a821672 (codex-11)",
+ "repo_head": "futon2 32af77e69",
+ "mode": "read-only; no source, Trial, deploy or JVM change; nothing executed",
+ "checked": [
+  "close_retention.clj:84-100 mint-occurrence: exact six-key input; probe EDN in this dir confirms {:close-retention/refusal :shape-invalid :path [:mint-input]}",
+  "close_retention.clj:49-70 validate-occurrence: exact nine-key map, v1/v2 schemas both accepted",
+  "full_loop_runner.clj:7083-7100 selection cell freezes token-outcome-prediction before mint; :7201 mint; :7211 d-task/context reset",
+  "full_loop_runner.clj:4781-4830 retain-token-outcome! reads [:dispatch :occurrence] from the d-task source record",
+  "attempt_learning.clj:81-98 requires v2 schema by literal, compares occurrence by map equality against dispatch and signed observation, keys dedup on (action/id, action/value-sha256, transition/id)",
+  "learning_trial_ledger.clj:205-215 occurrence-key is that same 3-key triple",
+  "interpretation_evidence.clj:99-103 calls retention/validate-occurrence on the identity it carries",
+  "d_predecessor_task_authority.clj:402-418 context: :universe only from token-belief-stage prospective carry; :candidate-to-minted-join :not-established",
+  "action_identity.clj:62-63 digest is domain-tagged :wm/action-identity-v2 over an action value",
+  "declared-effect-record-result.json: C2 record API (build-record / verify-record / reconstruct, :record/digest, :admission)"
+ ],
+ "verdict": "Use the separate versioned binding receipt. Do not migrate the occurrence.",
+ "why_not_migration": [
+  "validate-occurrence is an exact key set shared by v1 and v2; a v3 needs a per-schema key set in close_retention, and every validated reader inherits it (interpretation_evidence, close retention block, cohort close).",
+  "attempt_learning.clj:81 refuses anything not literally :wm/action-transition-occurrence-v2 (:occurrence-v2-required), so a v3 occurrence turns every learning receipt into a refusal until that literal and contract (attempt_learning.clj:30,37) are versioned too.",
+  "Occurrence equality is the join at attempt_learning.clj:83 and :90 and the dedup key in learning_trial_ledger.clj; changing the occurrence map changes the identity those already-banked rows were keyed under, so legacy ledger rows need explicit mapping.",
+  "The occurrence is minted for repair routes as well, which have no declared-effect record; a v3 occurrence would need an optional digest field, which is exactly the ad hoc relaxation the request forbids."
+ ],
+ "binding_receipt": {
+  "schema": ":wm/occurrence-declared-effect-binding-v1",
+  "shape_exact_keys": [
+   ":schema",
+   ":occurrence/digest",
+   ":occurrence/key  {:action/id :action/value-sha256 :transition/id}  (same triple as learning dedup)",
+   ":target",
+   ":declared-effect/digest  (C2 :record/digest)",
+   ":declared-effect/source  {:path :sha256}  (C2 :declaration, status :pinned only)",
+   ":base-revision  {:repo :sha :resolved-sha}  (copied from the C2 record)",
+   ":selection/recorded-at  (checkpoint-events [:selection :recorded-at])",
+   ":bound-at",
+   ":binding/digest"
+  ],
+  "occurrence_digest": "sha256 over printed [:wm/action-transition-occurrence-digest-v1 (action-identity/canonical occurrence)]. Use a new domain tag; do not call action-identity/digest on the occurrence, because that tags the bytes as an action identity.",
+  "construction": "Pure function in a new namespace beside declared_effect_record (not in the runner). Exact-map validation on its input and output, mirroring close-retention refuse!/exact-map! style. Minted once per attempt via compare-and-set! on its own atom, as mint-action-occurrence-once! does."
+ },
+ "invariant": "For an attempt on an ordinary (non-repair) route, an occurrence O exists if and only if exactly one binding B exists with: B.occurrence/digest = occ-digest(O); B.occurrence/key = select-keys of O; B.target = (:target (:action/value O)) = selection cell :selected-mission = record :target; B.declared-effect/digest = verify-record(R) where R is the record frozen in the selection cell; (:eligible (:admission R)) is true; B.declared-effect/source equals R :declaration {:path :sha256}; B.base-revision equals R :base-revision. The action value, action digest and selection/scoring certificate are not read or altered by the binding.",
+ "ordering": [
+  "S1 selection cell (runner ~7087): build-record and verify-record; freeze the record itself (or a retained file + sha) in the selection cell under its own key, not inside :controller-decision or the selection certificate. If (:eligible (:admission R)) is false, throw before mint with failure-kind :no-declared-effect (or the record's first admission refusal), failure-stage :selection-admission. Result: an inadmissible ordinary target never gets an occurrence, so the 'if and only if' does not need a gap case.",
+  "S2 mint (7201) unchanged, six keys.",
+  "S3 bind immediately after mint and before the d-task/context reset at 7211 and before interpretation/dispatch. Persist to <attempt>/retained/declared-effect-binding.edn; keep {:path :sha256}. Any exception here fails the attempt with :declared-effect-binding-failed; nothing downstream may run on an occurrence without its binding."
+ ],
+ "verification_sites": {
+  "shared_verifier": "verify-binding [occurrence binding record] in the pure namespace: re-derive occ-digest, record digest (verify-record), binding digest; check every equality in the invariant; return typed refusal, never a default. Every site below calls this one function; none re-implements a partial check.",
+  "dispatch": "d_predecessor_task_authority context (402): add :declared-effect {:binding {:path :sha256} :universe <record :active-wants> :universe-source :declared-effect-record}. Keep :prospective-carry and its :universe exactly as now; do not merge the two, and do not write the declared universe under :universe or say carry supplied it. :candidate-to-minted-join stays :not-established; the binding does not establish it. The dispatch record written by d-task stores the binding {:path :sha256} next to [:dispatch :occurrence].",
+  "capture_before_dispatch": "runner 7518 / d_predecessor_task_authority 115: declaration reads captured for the run must include B.declared-effect/source; re-read bytes, compare sha, refuse :declaration-bytes-changed before dispatch. Read at B.base-revision, not HEAD, so a later HEAD move cannot change the before observation.",
+  "build": "runner 7769: load binding from the dispatch record's pin, call verify-binding against @action-occurrence and the selection-cell record; measurement/comparison and selected-want accounting read wants and locators from R only.",
+  "close": "runner 5917 (retain-token-outcome! context) and the selected-want-outcome receipt just after: same verify-binding call, plus check the d-task source record's binding pin equals the retained binding file sha. retain-token-outcome! already prefers (:occurrence context) over [:dispatch :occurrence]; add an equality check between the two so a mismatch refuses instead of silently picking the context one.",
+  "retention_and_manifest": "Leave close-retention-v1 untouched (exact-map). List retained/declared-effect-binding.edn with its sha in the close evidence manifest (runner ~6178) so a reviewer can join occurrence -> binding -> record from retained files alone.",
+  "reviewer_falsifier": "Re-derive from the retained files, not from runner-passed values: occurrence from retention block, binding from manifest entry, record from its retained file; run verify-binding independently."
+ },
+ "legacy_handling": "Required iff route is ordinary AND the run's attempt contract declares binding v1 (version the attempt contract, attempt_learning.clj:30-41). Repair route is identified from the selected action (repair-action?), not from the binding being absent, and keeps its existing durable-finding truth-maker. Earlier runs are recognised by contract version, never by a missing file. Ordinary + new contract + no binding = refusal :declared-effect-binding-missing. No N/A branch for ordinary targets.",
+ "tests_the_change_should_carry": [
+  "binding with occurrence altered by one key (e.g. :action-at) -> occurrence digest refusal",
+  "binding whose record digest matches a different target's record -> target mismatch refusal",
+  "declaration file bytes changed between selection and dispatch -> :declaration-bytes-changed",
+  "HEAD advanced after selection: before observation unchanged (pin at base revision)",
+  "ineligible record -> no occurrence minted, typed :no-declared-effect",
+  "repair route with no binding still closes; ordinary route with no binding refuses",
+  "context: prospective carry absent, declared universe present -> :universe key absent, :declared-effect :universe-source :declared-effect-record",
+  "existing v2 occurrence learning rows still key identically (occurrence untouched)"
+ ],
+ "open": [
+  "Whether the record goes into the selection cell inline or as a retained file + sha is a size question; either satisfies the invariant if the cell carries the digest.",
+  "Not checked: whether the cell/checkpoint events are themselves digested on write; if not, S1's freeze is only as strong as the checkpoint file's immutability.",
+  "C2 producer (job2378, f90c614fd) is not on main; this contract assumes its build-record/verify-record API as described in declared-effect-record-result.json."
+ ]
+}

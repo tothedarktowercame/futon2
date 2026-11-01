@@ -1,0 +1,19 @@
+{
+  "followup_to": "acc694539",
+  "review": "compiled-renderer-followup-independent-review.json (REQUEST_CHANGES)",
+  "branch": "compiled-prompt-review (isolated worktree futon2-compiled-prompt-review)",
+  "changes": [
+    "(1) completion-check shape now validated against the producer schema, not just non-nil: a check is a vector [check-name-keyword observed-condition] (authored clauses futon2.aif.wm.authored.*, e.g. req_fbad4b8b.clj; square-derived completions cascade_enactment_compiler.clj square-derived-completion [:square-B-observed elems]). false, bare keywords, non-keyword names -> typed absent :compiled-operational-plan-step-invalid :detail :step-completion-check-malformed. Explicit note: the producer's assemble-inputs marks any clause whose :completion-check is not truthy as an owed hole, so a false check never reaches a compiled plan through the real path; the renderer now matches that contract.",
+    "(1b) digests validated as hex64 (same shape as cascade_enactment_compiler hex64?) -> typed absent :compiled-operational-plan-digests-malformed. The review's 20,000-char digest counterexample is now refused at this earlier gate, so digest bloat can no longer overflow any budget; header overflow is reachable only via huge guards/application-order.",
+    "(2) header-alone overflow handled explicitly: if the bare header plus a zero-shown counted omission marker exceeds the budget, the plan returns typed absent :compiled-operational-plan-over-budget {:header-chars :limit} -- no silent clipping of digests. Criteria has its own 12000-char guard (:compiled-completion-criteria-over-budget) and does NOT relay a plan-only over-budget (its header carries only the valid digests), so guards bloat cannot hide the checks."
+  ],
+  "gates": {
+    "clj-kondo": "0 errors 0 warnings (cascade_plan.clj, compiled_prompt_rendering_test.clj)",
+    "check-parens": "OK both files",
+    "clojure -M:test -n futon2.aif.compiled-prompt-rendering-test": "13 tests, 155 assertions, 0 failures (frozen 19 checks verbatim + both digests + 19 'step [' lines still positive; ordering, legacy, dedup tests retained)",
+    "clojure -M:test -n futon2.aif.cascade-plan-test": "4 tests, 37 assertions, 0 failures",
+    "probe replays": "compiled-renderer-review-probe.clj and compiled-renderer-followup-probe.clj both now return typed absence (followup probe's short digests are refused as :compiled-operational-plan-digests-malformed)"
+  },
+  "constraints_honored": "no main integration, no deploy, no shared JVM, no fullrunner tests/Trials/dispatches, active Trial untouched",
+  "deployed": false
+}

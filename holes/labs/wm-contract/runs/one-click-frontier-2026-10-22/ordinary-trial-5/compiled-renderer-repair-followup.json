@@ -1,0 +1,20 @@
+{
+  "followup_to": "3c85d21b4",
+  "review": "compiled-renderer-independent-review.json (REQUEST_CHANGES)",
+  "branch": "compiled-prompt-review (isolated worktree futon2-compiled-prompt-review)",
+  "changes": [
+    "compiled-plan-steps validates every step before rendering: occurrence-id present, clause a map, operation non-nil, completion-check non-nil; any failure returns typed {:status :absent :reason :compiled-operational-plan-step-invalid :detail k} -- the exact review repro (steps [{}] + two string digests) now yields typed absence in both renderers",
+    "duplicate occurrence-ids rejected explicitly (:detail :duplicate-occurrence-id) instead of silently deduplicated",
+    "compiled-completion-criteria-text preserves recorded sequential order (mapv, no into {} keyed by occurrence+operation)",
+    "character budgets now enforced on the FINAL text including header and counted omission marker: plan <= 18000 total, criteria <= 12000 total; large guards/application-order/digest headers and the omission marker itself count against the promise"
+  ],
+  "gates": {
+    "clj-kondo": "0 errors (cascade_plan.clj, compiled_prompt_rendering_test.clj, full_loop_runner.clj)",
+    "check-parens": "OK",
+    "clojure -M:test -n futon2.aif.compiled-prompt-rendering-test": "10 tests, 143 assertions, 0 failures (19 frozen checks still all positive: verbatim checks, both digests, 19 'step [' lines)",
+    "clojure -M:test -n futon2.aif.cascade-plan-test": "4 tests, 37 assertions, 0 failures (legacy rendering untouched)",
+    "review probe replay": "clojure -M compiled-renderer-review-probe.clj from this worktree -> both plan and criteria {:status :absent :reason :compiled-operational-plan-step-invalid :detail :step-occurrence-id-missing}"
+  },
+  "constraints_honored": "no main integration, no deploy, no shared JVM, no fullrunner/Trials/dispatches, active Trial untouched",
+  "deployed": false
+}

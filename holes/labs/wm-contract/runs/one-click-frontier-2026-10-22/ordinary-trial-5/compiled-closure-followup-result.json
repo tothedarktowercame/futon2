@@ -1,0 +1,36 @@
+{
+  "task": "C1 co-apply closure classification, followup to 0bb9f6a4b after codex-11 REQUEST_CHANGES (edge invoke-1792652880952-2381-7a8e0fc4)",
+  "worktree": "/home/joe/code/futon2-compiled-closure-review",
+  "branch": "compiled-closure-review",
+  "base": "0bb9f6a4b",
+  "followup-commit": "c79f26b38",
+  "changes": [
+    "full_loop_runner.clj classify-grounded-outcome: the declare-nothing legacy early return now applies ONLY to the legacy vector precedence. On the compiled map route an empty declared union is :grounded-progress, never closure credit for an absent claim.",
+    "full_loop_runner.clj co-apply-product-census (new): the closure census is taken ONLY from the recorded :units. Well-formed requires: co-apply map, non-empty sequential :units, :patterns map, every unit has a pattern entry, no pattern id outside the unit census, each pattern is a map whose :produces (when present) is a collection (set or vector; strings rejected). Any violation -> typed {:status :malformed :reason k} and the outcome is :grounded-progress.",
+    "full_loop_runner.clj classify-grounded-outcome: a declared product whose token has NO locator in the target's cascade sources is now independently unverified -> :grounded-progress, instead of being silently dropped from produced-tokens while accepted-increment scored only the measured subset (this closed the partial-locator hole for both compiled and vector shapes; vector behavior unchanged where all declared tokens are measured)."
+  ],
+  "probe-replay": {
+    "command": "clojure -M compiled-closure-followup-probe.clj (reviewer's exact compiled-closure-review-negatives cases, from this worktree)",
+    "empty-products": "{:case :empty-products, :outcome :grounded-progress, :outer-class :grounded-progress}",
+    "malformed-empty-map": "{:case :malformed, :outcome :grounded-progress, :outer-class :grounded-progress}",
+    "before": "both cases were :grounded-change / :closure with zero effect evidence"
+  },
+  "tests": {
+    "namespace": "futon2.aif.compiled-closure-classification-test (dedicated, isolated)",
+    "command": "clojure -M:test -n futon2.aif.compiled-closure-classification-test",
+    "result": "7 tests, 37 assertions, 0 failures (~6s wall; fixture = temp git repo, no live state writes)",
+    "new-cases": [
+      "exact-review-negatives-replay-to-progress: the reviewer's two exact probe cases (empty-product co-apply, precedence {}) -> :grounded-progress",
+      "malformed-co-apply-census-is-progress: units missing / units empty / unit without pattern / pattern outside census / :produces not a collection / co-apply not a map / patterns not a map",
+      "legitimate-multi-unit-positive-closes-and-partial-fails: two units both products observed true via real C4 checks at the after-sha -> :grounded-change/:closure; one unit's token without a locator -> :grounded-progress",
+      "forged-binding-with-true-locators-is-not-accepted: binding claiming every freshness flag but with no pre-dispatch head fails accepted-increment (a) :binding-not-fresh -> :grounded-progress",
+      "co-apply declaring nothing -> :grounded-progress (legacy declare-nothing :grounded-change retained ONLY for vector precedence, pinned by vector-and-non-grounded-behavior-is-preserved)"
+    ],
+    "falsifier-not-weakened": "positive real accepted-increment path (real git fixture, real observation-checks, before-absent/after-present declaration) remains mandatory and still passes; the before-sha negative and status-only binding negatives are unchanged."
+    },
+  "gates": {
+    "clj-kondo": "0 errors (2 pre-existing warnings in full_loop_runner.clj, present at 0bb9f6a4b, outside the changed region)",
+    "check-parens": "OK on both changed files",
+    "constraints": "no canonical/deploy/Trial/fullrunner-suite invocation; no live state writes; worktree-local followup commit c79f26b38 on compiled-closure-review only"
+  }
+}

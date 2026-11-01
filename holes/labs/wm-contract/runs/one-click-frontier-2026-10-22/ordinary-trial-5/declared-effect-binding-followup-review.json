@@ -1,0 +1,31 @@
+{
+  "reviewer": "claude-2",
+  "date": "2026-10-22",
+  "request": "invoke-1792654718371-2402-2f130dad (codex-11)",
+  "binding_commit": "256b1b26f on f1a9a08dc (worktree futon2-declared-effect-binding)",
+  "producer_commit_replayed": "37a9c991d",
+  "verdict": "ACCEPT binding followup in isolation; integration stays blocked on C2 F1/F2 and on a fixed production verifier adapter",
+  "checked": [
+    "git show 256b1b26f; read occurrence_declared_effect_binding.clj build/verify paths",
+    "C2 37a9c991d record-digest and reconstruct return shape, to check the binding's duplicated digest scheme and the replay adapter",
+    "binding-real-producer-replay.clj/.edn and binding-quota-recovery-result.json",
+    "ran the focused namespace once (first run of new tests): 8 tests, 42 assertions, 0 failures. Lint and parens taken as reported"
+  ],
+  "accepted": [
+    "A verdict map is no longer accepted; the verifier is a fn invoked on the current record at every build and verify",
+    "Body digest re-derived before the verifier is called; same scheme as C2 record-digest ([schema canonical-body]); the real-record replay verifying shows the two agree",
+    "Test current-body-and-selection-target-are-rechecked would fail on f1a9a08dc: a mutated body with its old digest plus an old :verified result passed there, and refuses here",
+    "verify-binding now checks selected-mission against the occurrence target"
+  ],
+  "integration_gate": {
+    "G1": "Authority still rests on the caller-supplied fn. The unit-test fixture (fn [r] {:verified true :digest (:record/digest r)}) binds any self-hashed record. Only the real reconstruct catches the self-hashed horizon forgery, and only in the replay. Before integration the dispatch, close and falsifier sites must call one named adapter that wraps C2's port-free reconstruct over retained pinned inputs. Those sites must not take a verifier from their own callers. This is the same problem as C2 F1, one layer up.",
+    "G2": "The adapter needs the retained inputs: the base sha (already a 40-hex here, because record! requires rev-text) and the declaration bytes. The replay re-reads the working-tree declaration, so editing the declaration afterwards makes verify fail for good."
+  },
+  "nits": [
+    "Replay adapter echoes (:record/digest current) as :digest; return reconstruct's :rebuilt so the binding's digest-equality check compares something independent",
+    "verify-binding reports a body-digest mismatch as :record-verification-refused with the stale path [:record-verification]; the specific reason is only in :details",
+    "Docstring claims the result must be exactly {:verified true :digest ...}; the code accepts extra keys",
+    "The binding duplicates C2's digest scheme; if C2 changes it, the binding fails closed (refuses everything). Consider calling d/record-digest once C2 is on the same branch"
+  ],
+  "scope": "Code, fixture tests and one standalone historical replay; no live route, merge, deploy or Trial"
+}

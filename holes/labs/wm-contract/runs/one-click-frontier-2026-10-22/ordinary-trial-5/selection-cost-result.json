@@ -1,0 +1,40 @@
+{
+  "task": "read-only bounded discovery: selection cost in outer_learning_runtime/load_shadow",
+  "method": "source reading + filesystem stat only; no reruns, no loads, no writes to production data",
+  "stack_summary": {
+    "file": "selection-stack.json",
+    "hot": "futon2.aif.meta_field_observation$canonical (meta_field_observation.clj:30-37) under $digest (meta_field_observation.clj:40) called from meta_outcome_dataset$produce",
+    "call_chain": [
+      "runner_service$click_BANG_ (runner_service.clj:1237)",
+      "full_loop_runtime$run_opportunity_BANG_ (full_loop_runtime.clj:494) -> $run_ordinary_opportunity_BANG_ (:492)",
+      "full_loop_runner$run_opportunity_BANG_ (full_loop_runner.clj:8213) -> run_phase_BANG_ (:395) -> run_opportunity_core_BANG_ (:6688)",
+      "full_loop_runtime$selection_judge (:282) -> war_machine$judge (war_machine.clj:6655) -> select_outer_task (:1551)",
+      "meta_live_outer_selector$selector -> select_live -> outer_policy_evidence_provider$resolve_provider -> outer_policy_provider_runtime$production_provider",
+      "outer_learning_runtime$load_shadow (outer_learning_runtime.clj:21)",
+      "meta_outcome_dataset$produce (meta_outcome_dataset.clj:258)",
+      "meta_field_observation$digest (:40) -> $canonical (:32-37) recursion depth ~14-18, canonical_key_compare (:30)"
+    ]
+  },
+  "files_read_per_load_shadow_call": [
+    {"path": "/home/joe/code/futon2/resources/wm/outer-learning-authority.edn", "size_bytes": 1207, "ref": "outer_learning_runtime.clj:12-14, readAllBytes at :24-25"},
+    {"path": "/home/joe/code/futon2/data/wm-learning/run-record-manifest.edn", "size_bytes": 17586, "entries": 97, "ref": "outer_learning_manifest.clj:10-12,19 (slurp)"},
+    {"path": "each of the 97 manifest-pinned run records (77 present, 20 /tmp scan fixtures MISSING)", "total_present_bytes": 560785437, "largest": 35600417, "ref": "meta_outcome_dataset.clj:262 read-bytes default Files/readAllBytes; sha256 per record :269; edn/read-string per record ~:285"}
+  ],
+  "findings": {
+    "full_history_reprocessed_every_selection": "Yes. load_shadow is invoked on every outer selection (select_live -> production_provider -> load_shadow) and re-reads + re-sha256s + re-EDN-parses every manifest-pinned run record each time: ~560 MB of EDN parsed per selection, growing each day. 20 of 97 manifest entries point at vanished /tmp/click-scan-* fixtures and cost a failing open each run (meta_outcome_dataset.clj:58-66).",
+    "canonicalization": "canonical/digest do NOT run over full run records in produce: records are byte-sha256'd (:269) and field-extracted (selected-target, terminal-cause, timings). canonical+digest run over (a) the merged manifest body in manifest-check (meta_outcome_dataset.clj:29, manifest-from outer_learning_runtime.clj:17-18), (b) interoceptive-evidence bodies (:143), (c) the final dataset body source-pin (:405). These bodies are summaries (rows/exclusions/counts), so the sampled canonical frames are the tail of per-selection digest work, not the bulk. The bulk cost is 560 MB of Files/readAllBytes + edn/read-string + per-record sha256, repeated every click.",
+    "canonical_key_compare_cost": "meta_field_observation.clj:30 compares keys by (compare (pr-str left) (pr-str right)) - re-prints keys at every comparison (O(n log n) pr-str per map). Worth fixing only if digests ever cover big maps; today they don't."
+  },
+  "smallest_semantics_preserving_speedup": {
+    "primary_corrected": "A manifest-keyed cache of produce/output is NOT semantics-preserving: produce re-verifies each record's bytes against its pin at read time (meta_outcome_dataset.clj:262-282, actual sha256 at :269 vs the pinned sha256, exclusion :record-source-drift). Unchanged manifest bytes do not guarantee unchanged record bytes; record!'s refuse-on-drift (outer_learning_manifest.clj:48-60) only guards at append time. Correction from codex-11, accepted. Semantics-preserving alternatives that keep the drift check: (a) cache keyed by (manifest sha256, per-record sha256 freshly computed) — still reads and hashes all 560 MB but skips only the EDN parse, which is the dominant cost after I/O; (b) immutable/content-addressed record storage, where a path+pin hit proves byte identity without re-reading.",
+    "secondary": "Prune the 20 dead /tmp/click-scan-* manifest entries (each currently a typed :record-missing exclusion rebuilt every selection) - a data fix via the manifest's own append/refuse authority, not a code change.",
+    "replay_boundary": "futon2.aif.meta-outcome-dataset/produce is the exact replay boundary: same manifest + same expected pin + same read-bytes => same dataset. The only impure seam is the default read-bytes (Files/readAllBytes) and file mtime-independent sha256 verification, both of which the cache key subsumes."
+  },
+  "measurements": {
+    "manifest_entries": 97,
+    "present_records": 77,
+    "missing_records": 20,
+    "total_present_bytes": 560785437,
+    "measured_at": "2026-10-24, stat only"
+  }
+}

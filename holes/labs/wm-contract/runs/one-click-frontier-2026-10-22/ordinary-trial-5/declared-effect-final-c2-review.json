@@ -1,0 +1,42 @@
+{
+  "reviewer": "claude-2",
+  "commits": ["5460a97dd", "37a9c991d"],
+  "worktree": "/home/joe/code/futon2-declared-effect-review",
+  "verdict": "REQUEST_CHANGES (two small changes; followup 37a9c991d itself accepted)",
+  "followup_37a9c991d": {
+    "verdict": "accept",
+    "reason": "build-record and record-facts now share wants-owned? (distinct + every owned). Before the fix, build admitted a foreign [\"foreign-target\" :want-a] want and duplicate wants that verify then rejected; the new test's (false? eligible) assertion fails on the pre-fix code, so it pins the bug.",
+    "nit": "the test asserts only eligible false; asserting refusals = [:declaration-no-want] would also pin which refusal fires. The refusal name is generic for duplicate/foreign cases."
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "required",
+      "file": "src/futon2/aif/declared_effect_record.clj:549-577",
+      "summary": "reconstruct passes the caller's :observe and :resolve-revision straight into build-record, so 'authority uses the default git resolver/reader' is a calling convention, not enforced.",
+      "counterexample": "Probe run this turn: a resolver returning resolved-sha 0000...0 for base {:repo futon2 :sha \"not-a-commit\"} and a reader echoing evidence with that sha. build-record gives eligible true, verify-record gives verified true, (reconstruct inputs record) gives verified true. The same record under (reconstruct (dissoc inputs :observe :resolve-revision) record) gives verified false.",
+      "fix": "Make the authority entry point drop or refuse injected ports, e.g. a reconstruct that does (build-record (dissoc inputs :observe :resolve-revision)), with a separately named test-only variant that accepts ports. The binding verifier and reviewer falsifier must call only the port-free entry."
+    },
+    {
+      "id": "F2",
+      "severity": "required",
+      "file": "src/futon2/aif/declared_effect_record.clj:234-236, 372-376",
+      "summary": "The base is pinned by reference name, not by commit: a symbolic ref such as \"HEAD\" or a branch is accepted, and the reader is handed :sha = the reference, not the resolved sha.",
+      "counterexample": "Probe run this turn: base {:repo futon2 :sha \"HEAD\"} with default ports builds an eligible record whose :base-revision is {:sha \"HEAD\" :resolved-sha b7e9f1e5...}. Within one build this fails closed (if HEAD moves between resolution and the reader's own rev-parse, the resolved-sha mismatch makes the row unknown). But any later commit in that repo makes reconstruct with the same inputs re-resolve HEAD to a different sha and fail, so the record cannot be reconstructed after the run.",
+      "fix": "Either refuse a base :sha that is not a full 40-hex commit (typed :base-not-a-commit), or observe at {:sha resolved-sha} and have reconstruct rebuild from the resolved sha. The first is simpler and matches the binding contract's 'base revision equals the record's'."
+    }
+  ],
+  "notes_not_defects": [
+    "verify-record does not check that an active row's evidence :repo/:path/:decl/:sha equals that row's :locator, or that the locator repo equals the base repo. Consistent with its stated scope (internal shape, not truth), but both are internal consistency checks it could make cheaply.",
+    "sha256-of-bytes hashes the UTF-8-decoded string, not the raw bytes: equal to sha256sum for valid UTF-8, different for files with invalid sequences (decoded to U+FFFD). The docstring says 'file bytes'. Low risk; fix the docstring or hash the bytes.",
+    "declaration-file-for picks the first file by sorted path when several declarations share a :target. No duplicates exist in resources/wm/cascade-sources today; a duplicate should be a typed refusal, not a silent choice.",
+    "The declaration is read from the working tree/classpath, not from any pinned revision. The sha256 pin makes drift fail closed, but reconstruct after an edit to the declaration is impossible unless the binding retains the declaration bytes in the run directory."
+  ],
+  "checked": [
+    "git show 5460a97dd, 37a9c991d (src + test); full read of declared_effect_record.clj at 37a9c991d",
+    "observation_checks.clj check-decl-in-file / resolve-reference; action_identity.clj sha256",
+    "declared-effect-quota-recovery-review.json, declared-effect-round2-review.json",
+    "one REPL probe (stub ports vs default ports; HEAD base). No test suites rerun: the recovery record's fast/slow/lint/parens counts accepted as reported."
+  ],
+  "boundary": "Fixture/probe evidence only; no live-route claim. No merge, deploy or Trial. No goal or horizon invented."
+}

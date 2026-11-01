@@ -1,0 +1,68 @@
+{
+ "schema": "wm/declared-effect-binding-implementation-result-v1",
+ "recorded_by": "zai-8",
+ "date": "2026-10-22",
+ "dispatch": "invoke-1792653590697-2385-974b502b (codex-11)",
+ "worktree": "/home/joe/code/futon2-declared-effect-binding",
+ "branch": "declared-effect-binding-review",
+ "base": "5bdeb2a0d4d4b00e98f77292c4fa4ae08cf13351 (canonical main at dispatch)",
+ "commits": [
+  "f1a9a08dc Pure occurrence->declared-effect binding receipt v1 with shared verifier",
+  "256b1b26f Reverify current effect records and selected mission at each binding check (review fixes: injected verifier FUNCTION invoked per build/verify on current bytes; independent record-digest re-derivation before trusting any verifier result; :selected-mission input to verify-binding with occurrence/binding/record/selected-mission target equality; exact stale-body-with-old-verdict regression; build stays six-key, verify exact five-key)"
+ ],
+ "namespace": "futon2.aif.occurrence-declared-effect-binding (src/futon2/aif/occurrence_declared_effect_binding.clj)",
+ "scope": {
+  "implemented": [
+   "build-binding: exact input map {occurrence selected-mission record record-verification recorded-at bound-at}; close-retention v2 occurrence required and validated; structural record check (schema :wm/selected-effect-declaration-v1, :record/digest, :declaration {:status :pinned :path :sha256}, :base-revision {:repo :sha :resolved-sha} (git 40-hex or sha256 64-hex), :admission shape); target equality across occurrence-action target / selected-mission / record target; explicit clock values (:selection/recorded-at from checkpoint events, :bound-at) validated as ISO instants; output is the exact ten-key :wm/occurrence-declared-effect-binding-v1 receipt per the claude-2 contract, with the learning-dedup key triple",
+   "domain-separated digests: :occurrence/digest = sha256 over [:wm/action-transition-occurrence-digest-v1 (action-identity/canonical occurrence)] \u2014 a NEW domain tag, never action-identity/digest; :binding/digest = sha256 over [:wm/occurrence-declared-effect-binding-digest-v1 (canonical body)] covering everything except itself",
+   "verify-binding: the one shared verifier; checks injected record authority, self-integrity (binding digest) BEFORE field equality, then every invariant equality (occurrence digest, key triple, target x3, declared-effect digest vs record digest, source pin vs record declaration, base revision vs record); returns typed {:status :refused :reason \u2026} \u2014 never a throw, never a default"
+  ],
+  "explicitly_not_implemented": [
+   "no persistence/CAS/dispatch \u2014 checkpoint-retention-review only verified the CREATE_NEW writer's overwrite refusal, not a general immutable-filesystem claim, so this packet persists and verifies nothing",
+   "no runner wiring, no selection-cell freeze, no d-task context change, no manifest/falsifier change, no occurrence migration (v1/v2 schemas untouched)",
+   "no atom/compare-and-set mint-once here (contract mentions it for the eventual runner call site; this namespace is pure)"
+  ]
+ },
+ "c2_dependency": {
+  "status": "RESOLVED against corrected C2 5460a97ddd1ee36be019f5611f0bda16f7702b83 (zai-2 job2384, branch declared-effect-review, worktree a2e54d1ae); rejected f90c614fd (round 1) and fef62e9b0 (round 2) never used.",
+  "authority_design": "record authority is an INJECTED VERIFIER FUNCTION invoked on the current record bytes at EVERY build and verify (accepted only as {:verified true :digest <64-hex>} matching the record's digest), plus an independent re-derivation of the record's :record/digest from the current bytes before any verifier result is trusted \u2014 a mutated record carrying an old digest and an echoing verifier refuses :record-body-digest-mismatch with the verifier never consulted. Caller-supplied status maps are never accepted.",
+  "production_adapter": "wraps corrected C2 reconstruct with PRODUCTION ports (reconstruct refuses injected ports itself); reconstruct's {:verified true :expected = :rebuilt} is translated to {:verified true :digest <record digest>} at the adapter, refusals pass through. Implemented and exercised in binding-real-c2-integration-probe.clj \u2014 not a prose claim.",
+  "real_producer_integration": {
+   "probe": "binding-real-c2-integration-probe.clj/.edn (rc=0, this directory)",
+   "positive": "real build-record at pinned base ae69f5e7b1a1d9012742fddc6d14313ac9292e3d (declaration pinned 1b9d3902\u2026, eligible, refusals []) -> real reconstruct authority -> build-binding -> shared verify-binding :verified",
+   "negatives": [
+    "forged record body (horizon/wants mutated) with old digest + echoing verifier -> :record-body-digest-mismatch (typed in details), verifier never invoked",
+    "record-digest swap for the real AFTER-base record's digest, binding digest recomputed (self-hashed) -> :record-digest-mismatch",
+    "same occurrence/binding/record with different selection-cell target -> :target-mismatch",
+    "AFTER base 97e17e10: reconstruct genuinely :verified but admission not eligible -> build refuses :record-not-eligible (real record, real authority, still never binds)"
+   ]
+  },
+  "integration_gap": "tests use record FIXTURES modeled on the C2 frozen shape (declared-effect-record-result.json sample) with digests computed by the documented scheme \u2014 clearly labeled fixtures, not the producer. The real corrected-producer positive (and forged-record negative through the real verify-record) must be run once job2384 lands; binding-side negatives (occurrence tamper, target/base/source/record-digest mismatch, self-hashed forgeries, no-verification) are fully covered."
+ },
+ "ordering_note": "occurrence-then-binding is NOT atomic: build/verify docstrings state the eventual wiring must fail the attempt (:declared-effect-binding-failed) and refuse dispatch when binding fails or is missing for an ordinary route. Recorded here because the pure module cannot enforce it.",
+ "tests": {
+  "namespace": "futon2.aif.occurrence-declared-effect-binding-test \u2014 8 deftests, 42 assertions, 0 failures (pure, no git, nothing to tag ^:slow)",
+  "coverage": [
+   "positive: build + shared verify :verified; exact ten keys; occurrence-digest differs from action-identity digest (domain separation); source pin and base revision copied from the record",
+   "input/shape: extra/missing input key, v1 occurrence, drifted action sha, unpinned declaration, wrong record schema, malformed instants",
+   "no-status-only-trust: eligible record with nil/refused/inconsistent verification refuses; ineligible admission never binds",
+   "occurrence tamper: :action-at changed -> :occurrence-digest-mismatch; key triple self-hashed -> :occurrence-key-mismatch",
+   "forged/self-hashed: source pin, base revision, record digest, target, key each tampered WITH recomputed binding digest still refused by cross-equality (:declaration-source-mismatch, :base-revision-mismatch, :record-digest-mismatch, :target-mismatch, :occurrence-key-mismatch); tamper WITHOUT rehash -> :binding-digest-mismatch (self-integrity checked first)",
+   "v2 occurrence passes through unchanged (9 keys, action sha intact)"
+  ],
+  "legacy": "futon2.aif.token-outcome-test (3/17) and futon2.aif.close-retention-test (5/18) green and untouched in this worktree"
+ },
+ "gates": {
+  "clj_kondo": "0 errors 0 warnings (both files)",
+  "check_parens": "OK (futon4/dev/check-parens.el, strategy both)",
+  "focused_tests": "clojure -M:test -n on binding, token-outcome, close-retention namespaces \u2014 all 0 failures; no full runner suite"
+ },
+ "preserved": "occurrence v2 schema and action identity untouched (no :declared-effect field added; repair-route occurrences unaffected); selection/scoring certificate never read or altered; no declaration authoring; no default horizon (record fields copied only).",
+ "remaining_dependencies": [
+  "runner wiring S1-S3 (selection-cell record freeze + admission throw, bind after mint before reset, :declared-effect-binding-failed) per the contract's ordering",
+  "verification sites (dispatch context :declared-effect, capture bytes-unchanged at base revision, build/close/falsifier re-derivation from retained files) \u2014 none implemented here",
+  "legacy handling: attempt-contract versioning for binding v1 vs earlier ordinary runs",
+  "owner decisions: record inline vs retained-file+sha in the selection cell; whether checkpoint events are digested on write (contract 'open' list)"
+ ],
+ "objective_status": "broad declared-effect objective remains unfinished; this packet is the pure binding module only."
+}

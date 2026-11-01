@@ -1,0 +1,22 @@
+{
+  "work": "C1 only",
+  "branch": "compiled-closure-review (isolated sibling worktree futon2-compiled-closure-review from main ee0708fc6)",
+  "review_inputs": ["Claude2 declared-effect-contract-review-result.json (F1)", "compiled-closure-classification-probe.clj/.edn"],
+  "change": "classify-grounded-outcome: on a co-apply (map) precedence the declared products are the union of the co-applied patterns' own :produces, and the existing real accepted-increment checks (fresh binding + C3/C4 product locators + target acceptance, all at pinned shas) decide :grounded-change vs :grounded-progress. Previously the vector-shaped enacted-step-pattern reader saw nil produces on the map shape and preserved the requested :grounded-change, which meta-outcome-dataset/outcome-class counted as :closure with zero effect evidence.",
+  "definition_choice_report": "none needed -- the existing accepted-increment contract already decides closure once the co-apply shape's declared products are read; a target with no declaration (M-probe, M-stack-geometry) fails conjunct (b) honestly to :grounded-progress.",
+  "preserved": ["non-grounded outcomes pass through untouched", "vector precedence behavior unchanged", "declare-nothing legacy outcome unchanged (vector and co-apply)", "build approval/falsifier untouched (C3 unresolved)", "no status-only forged effect receipt accepted (effect itself is the real C4 check at a pinned sha)"],
+  "gates": {
+    "clj-kondo": "0 errors (full_loop_runner.clj, test ns)",
+    "check-parens": "OK both files",
+    "clojure -M:test -n futon2.aif.compiled-closure-classification-test": "3 tests, 13 assertions, 0 failures (~6s wall, mostly JVM start; fixture = temp git repo, no live state writes)",
+    "probe replay": "compiled-closure-classification-probe.clj from this worktree: {:classified :grounded-progress :outer-class :grounded-progress} (was :grounded-change/:closure)"
+  },
+  "tests": [
+    "exact map counterexample (probe shape, undeclared target) -> :grounded-progress, outer class :grounded-progress",
+    "real-locator positive in temp git fixture: decl absent at before-sha -> :grounded-progress; present at after-sha with fresh binding -> :grounded-change, outer class :closure",
+    "status-only binding (corroborates? false) with true locator -> :grounded-progress",
+    "non-grounded passthrough, vector-with-products, vector/co-apply declare-nothing legacy outcomes"
+  ],
+  "constraints_honored": "no source loads into live JVM, no Trials, no fullrunner suite, no main-branch edits, no live state writes",
+  "deployed": false
+}
