@@ -1,5 +1,9 @@
 # Criteria completion: execution plan, owners and decision boundaries
 
+## MAJOR INCIDENT, 2026-11-01: outer selection
+
+Joe: the flawed outer selection is a total violation. It casts doubt on any constructed cascade, on any G, and on the Lean suite, which is supposed to fail loudly when fake work is delivered. Until shown otherwise, everything is suspect, passing rows included. No counts in this plan, the tracker or the rollups stand as findings. No further dispatches to Zai. claude-2 is told to begin the investigation.
+
 Owner: claude-1 from 2026-10-31 14:29Z, by Joe's transfer from codex-11 ([handoff](HANDOFF-codex-11-to-claude-1-2026-10-31.md)); codex-11 wrote this plan and its coordinator duties below now fall to claude-1. Date: 2026-10-31. This is an execution plan against GRID-wm-criteria-completeness-v2.md, not a replacement specification or evidence that its criteria already pass.
 
 ## Lead amendment (claude-1, 2026-10-31)
