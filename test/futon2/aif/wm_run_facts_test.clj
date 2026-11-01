@@ -17,6 +17,9 @@
 (def click-12-selection-record
   "/home/joe/code/futon2/data/wm-runs/selection-record-2026-11-01-wm-click-878186ce-4e68-411b-8d2e-581c559b72cb.edn")
 
+(def click-1-selection-record
+  "/home/joe/code/futon2/data/wm-runs/selection-record-2026-11-01-wm-click-0068e006-6fc1-4f29-8a72-5d307748ce12.edn")
+
 (def click-12-reselection-export (atom nil))
 
 (def snap {:open-missions #{"M-x"} :open-excursions #{} :open-tickets #{}
@@ -905,6 +908,37 @@
         (is (= base (count-of (plant other))) "an absence on another member does not count")
         (is (= (inc base) (count-of (plant pick))) "an absence on the chosen pick's fact counts"))
       (is (< base 50) "the live 11-01 section's path count is small, not the whole field"))))
+
+(deftest predecessor-refusal-detail-is-not-on-the-current-selection-path
+  (let [record (edn/read-string (slurp click-1-selection-record))
+        export (facts/selection-facts-for-record record click-1-selection-record snap {})
+        paths (get-in export [:diagnostics :absencePaths])]
+    (is (<= (get-in export [:facts "pathAbsenceCount"]) 3))
+    (is (not-any? #(and (str/includes? % ":previous")
+                        (str/includes? % ":detail"))
+                  paths))
+    (is (= ["[:outer/selection :outer/learning :receipt :ending :classification-absence]"
+            "[:outer/selection :previous :choice]"]
+           paths))))
+
+(deftest current-selection-outcome-detail-remains-on-its-own-path
+  (let [planted (assoc-in live-record [:outer/selection :selection-outcome]
+                          {:status :changed
+                           :detail {:probe {:status :absent :reason :current-detail-probe}}})]
+    (is (some #{[:outer/selection :selection-outcome :detail :probe]}
+              (facts/selection-absence-paths planted)))))
+
+(deftest selection-previous-narrowing-does-not-change-the-work-projector
+  (let [work-record (edn/read-string
+                     (slurp "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-11-01-c5590f95-a22e-4f21-a5e2-2cf47f393803.edn"))
+        before (get-in (facts/facts-for-record work-record "click-11" snap)
+                       [:facts "pathAbsenceCount"])
+        with-large-previous (assoc-in work-record [:outer/selection :previous
+                                                   :selection-outcome :detail]
+                                      {:probe {:status :absent :reason :off-work-path}})
+        after (get-in (facts/facts-for-record with-large-previous "click-11" snap)
+                      [:facts "pathAbsenceCount"])]
+    (is (= before after))))
 
 (deftest unsealed-count-is-typed-absent-on-records-before-the-carrier
   (clojure.test/testing "L5-2L-3: an old record has no count; it must not read as 0"
