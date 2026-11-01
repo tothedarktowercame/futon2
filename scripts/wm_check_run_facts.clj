@@ -210,6 +210,13 @@
 (defn evidence [facts q]
   (let [ks (required-keys facts q)]
     (cond
+      (and (= q :q11) (= "selection" (facts "kind"))
+           (str/starts-with? (str (get-in facts ["currentChoice" "not-recomputable"]))
+                             "selection refused: "))
+      (str ".nr " (pr-str (get-in facts ["currentChoice" "not-recomputable"])))
+      (and (= q :q5) (= "no interpretation in this run"
+                                      (get-in facts ["interpretationOrder" "not-recomputable"])))
+      (str ".nr " (pr-str "no interpretation in this run"))
       (not (known? facts ks)) (ev-nr facts ks)
       (and (#{:q2 :q11} q) (nested-nr? (facts "targetConstruction")))
       ".nr \"not recomputable: targetConstruction carries a not-recomputable value\""

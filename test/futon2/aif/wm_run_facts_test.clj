@@ -1,5 +1,6 @@
 (ns futon2.aif.wm-run-facts-test
-  (:require [cheshire.core :as json]
+  (:require [clojure.edn :as edn]
+            [cheshire.core :as json]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [wm-run-facts :as facts]
@@ -995,3 +996,30 @@
            (get-in out [:sources "openMissions"])))
     (is (= ref (retain opts section {:status :refused :kind :test})))
     (is (= ["/fixture"] @calls))))
+
+(deftest retained-post-score-refusals-have-the-same-decision-signature
+  (let [pins [["878186ce-4e68-411b-8d2e-581c559b72cb" "c92ed1991a46c00af10d4279135888af0703fa542c6570a3614b3db9799535c4"]
+              ["28d27460-bc9d-44c1-9555-74b8b6931300" "0cca2d2a5a1d32fdd3e6db829586691622c98833721bfb9861cb7754e6cd9d02"]]
+        records (mapv (fn [[id sha]]
+                        (let [text (slurp (str "/home/joe/code/futon2/data/wm-runs/selection-record-2026-11-01-wm-click-" id ".edn"))]
+                          (is (= sha (action-identity/sha256 text)))
+                          (edn/read-string text))) pins)
+        project #(facts/selection-facts-for-record % "read-only-fixture" snap {})
+        exports (mapv project records)
+        keys ["currentChoice" "pathAbsenceCount" "interpretationOrder"]
+        signature #(select-keys (:facts %) keys)]
+    (is (= (signature (first exports)) (signature (second exports))))
+    (doseq [e exports]
+      (is (= ".nr \"selection refused: :pick-not-below-abstention\""
+             ((requiring-resolve 'wm-check-run-facts/evidence) (:facts e) :q11)))
+      (is (= ".nr \"no interpretation in this run\""
+             ((requiring-resolve 'wm-check-run-facts/evidence) (:facts e) :q5)))
+      (is (= {"not-recomputable" "selection refused: :pick-not-below-abstention"}
+             (get-in e [:facts "currentChoice"])))
+      (is (= 0 (get-in e [:facts "pathAbsenceCount"])))
+      (is (= {"not-recomputable" "no interpretation in this run"}
+             (get-in e [:facts "interpretationOrder"]))))
+    (doseq [r records]
+      (let [e (project (assoc-in r [:outer/selection :outer/learning] {:status :none}))]
+        (is (= false (get-in e [:facts "selectionPath" "learningApplied"])))
+        (is (= [] (get-in e [:facts "selectionPath" "consumedRuns"])))))))

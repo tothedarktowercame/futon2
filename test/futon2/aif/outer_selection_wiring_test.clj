@@ -243,3 +243,21 @@
     (is (= (:cascades selection) (get-in @carrier [:outer/selection :cascades])))
     (is (nil? (:task @carrier)))
     (is (zero? @writes))))
+
+(deftest scoring-refusal-retains-the-computed-learning-status
+  (doseq [status [:none :applied :deferred]]
+    (let [dir (temp-dir)
+          learning {:status status :reason :fixture :receipt {:run-id "previous"}
+                    :state (outer-state/init-state makeup)}
+          result (call-ordinary
+                  {:run-record-dir (str dir)
+                   :world-task-sets-fn (fn [_] {:missions [] :excursions [] :tickets []})}
+                  {#'outer-observation/outer-observation (fn [_] {:field [] :facts {} :focus "WM"})
+                   #'runtime/resolve-pending-learning (fn [& _] learning)
+                   #'outer-select/select (fn [& _]
+                                          (throw (ex-info "fixture scoring refusal"
+                                                   {:kind :pick-not-below-abstention
+                                                    :selection-evidence {:classes []}})))})
+          retained (edn/read-string (slurp (get-in result [:selection-record :path])))]
+      (is (= :refused (get-in retained [:selection-outcome :status])))
+      (is (= (dissoc learning :state) (get-in retained [:outer/selection :outer/learning]))))))
