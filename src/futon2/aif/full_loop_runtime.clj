@@ -25,6 +25,7 @@
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
+            [futon2.aif.previous-run :as previous-run]
             [futon2.aif.outer-state :as outer-state]
             [futon2.aif.outer-pending-observation :as pending-observation]
             [futon2.aif.c-vector :as cv]
@@ -1325,6 +1326,10 @@
                            observation
                            (assoc observation
                                   :effective-run-index-rows effective-index-rows))
+              observation (assoc observation :previous-selection
+                                 (previous-run/selection-predecessor
+                                  (or (:run-record-dir opts) runner/default-run-record-dir)
+                                  (:run-id opts) (or (:startedAt opts) (str (Instant/now)))))
               selection (outer-select/select makeup state observation)
               retained-selection (-> selection
                                      (assoc :outer-field/admitted

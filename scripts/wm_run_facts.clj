@@ -844,6 +844,43 @@
                    (some nil? rows) (not-recomputable "a menu cascade has no finite score")
                    :else (vec (sort-by #(get % "policy") rows)))})))
 
+(defn- selection-history-facts [selection]
+  (let [p (:previous selection)
+        present (= :present (:status p))
+        nr #(not-recomputable (str "previous selection: " (or (:reason p) %)))
+        decision (cond
+                   (and present (= :abstained (:outcome p)))
+                   (if (:pick p) {"abstain-on-task" (:pick p)} "abstain-empty-field")
+                   (and present (:chosen-class p) (:pick p))
+                   {"target" (:pick p) "cascade" (:chosen-class p)}
+                   :else (nr :choice-unretained))]
+    {"previousChoice" decision
+     "previousOutcome" (if (and present (#{:changed :refused :abstained} (:outcome p)))
+                         (name (:outcome p)) (nr :outcome-unretained))
+     "previousInputDigest" (if (and present (:choice-input-digest p)) (:choice-input-digest p)
+                              (nr :digest-unretained))
+     "currentInputDigest" (or (get-in selection [:choice-input-digest :sha256])
+                              (not-recomputable "choice-input-digest unretained"))}))
+
+(defn- selection-preferences
+  "One terminal-only control step per retained prediction class. Novelty is
+  the information term; missing numeric terms are not inferred from G."
+  [classes]
+  (let [missing (first (filter #(not (every? (fn [k] (number? (get-in % [:terms k])))
+                                            [:risk :ambiguity :novelty])) classes))
+        fields ["policyPreferences" "gTerms" "policiesWithRiskTerm"
+                "policiesWithAmbiguityTerm" "policiesWithInformationTerm"]]
+    (if (or (empty? classes) missing)
+      (zipmap fields (repeat (not-recomputable (str "selection class " (:id missing) " lacks recorded terms"))))
+      {"policyPreferences" (mapv (fn [c] {"policy" (:id c) "horizon" 1
+                                         "preferenceSteps" [0] "gradedPreferenceSteps" []
+                                         "semantics" "terminal-only" "normalization" "rawCumulative"
+                                         "terms" {"risk" true "ambiguity" true "informationGain" true}}) classes)
+       "gTerms" {"risk" true "ambiguity" true "informationGain" true}
+       "policiesWithRiskTerm" (count classes)
+       "policiesWithAmbiguityTerm" (count classes)
+       "policiesWithInformationTerm" (count classes)})))
+
 (defn- constructed-menu-facts
   "Project retained construction, never the present library. Recompute slice
   membership from its manifest and unit pins, not a producer truth flag."
@@ -1024,7 +1061,9 @@
                (if section?
                  (merge
                   (if (:construction selection)
-                    (constructed-menu-facts selection (sorted-ids (distinct (concat admitted excluded))))
+                    (merge (constructed-menu-facts selection (sorted-ids (distinct (concat admitted excluded))))
+                           (when (:classes selection) (selection-preferences (:classes selection)))
+                           (when (:choice-input-digest selection) (selection-history-facts selection)))
                     (menu-facts selection makeup))
                   {"enumeratedTasks" (sorted-ids (distinct (concat admitted excluded)))
                    "currentChoice" (selection-decision selection)
