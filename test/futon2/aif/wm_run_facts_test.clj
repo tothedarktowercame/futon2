@@ -910,10 +910,10 @@
                       "work-roster" (make-array java.nio.file.attribute.FileAttribute 0)))
         opts {:run-id "roster-test" :startedAt "2026-11-01T00:00:00Z"}
         root (selection-record/write-decision!
-              dir opts {:field-facts {:open-tasks {:missions ["M-stale"]}}} {:status :chosen})
+              dir opts {:world-census {:open-tasks {:missions ["M-stale"]}}} {:status :chosen})
         ref (selection-record/write-decision!
              dir (assoc opts :selection-predecessor root)
-             {:field-facts {:open-tasks {:missions ["M-retained"] :excursions [] :tickets ["T-retained"]}}}
+             {:world-census {:open-tasks {:missions ["M-retained"] :excursions [] :tickets ["T-retained"]}}}
              {:status :chosen})
         tick {:selection-record ref
               :world-at-selection {:enumerated-tasks {:ids ["M-different"]}}}
@@ -928,7 +928,7 @@
     (is (= ["T-retained"] (get-in actual [:facts "openTickets"])))
     (is (= ["M-different"] (get-in actual [:facts "enumeratedTasks"]))
         "Do not repair disagreement with the enumeration")
-    (is (= (str (:path ref) " [:outer/selection :field-facts :open-tasks :missions]")
+    (is (= (str (:path ref) " [:outer/selection :world-census :open-tasks :missions]")
            (get-in actual [:sources "openMissions"])))
     (is (= [] (get-in (project override) [:facts "openMissions"]))
         "An explicitly empty world roster has precedence")
@@ -946,3 +946,52 @@
     (is (= :selection-record/reference-invalid
            (try (project tick) nil
                 (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))
+
+(deftest independent-census-does-not-certify-the-selectors-own-roster
+  (let [section {:field-facts {:open-tasks {:missions ["M-selected"] :excursions [] :tickets []}
+                              :admitted {"M-selected" {}} :excluded []}
+                 :world-census {:open-tasks {:missions ["M-selected" "M-gated"]
+                                             :excursions [] :tickets []}}}
+        project #(facts/selection-facts-for-record {:outer/selection %} "selection.edn" snap {})
+        out (project section)
+        old (project (dissoc section :world-census))]
+    (is (= ["M-gated" "M-selected"] (get-in out [:facts "openMissions"])))
+    (is (= ["M-selected"] (get-in out [:facts "enumeratedTasks"])))
+    (is (not= (set (get-in out [:facts "openMissions"]))
+              (set (get-in out [:facts "enumeratedTasks"]))))
+    (is (= ["M-gated"] (get-in out [:diagnostics :fieldFacts :censusDifference :missions :census-only])))
+    (is (= ["M-x"] (get-in old [:facts "openMissions"])))
+    (is (= (:pins snap) (get-in old [:sources "openMissions"])))
+    (is (= "selection.edn [:outer/selection :world-census :open-tasks :missions]"
+           (get-in out [:sources "openMissions"])))))
+
+(deftest runtime-retains-independent-census-on-decision
+  (require 'futon2.aif.full-loop-runtime)
+  (let [context (ns-resolve 'futon2.aif.full-loop-runtime 'selection-context)
+        retain (ns-resolve 'futon2.aif.full-loop-runtime 'retain-selection!)
+        dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "census-decision" (make-array java.nio.file.attribute.FileAttribute 0)))
+        calls (atom [])
+        opts (context {:run-id "census-test" :startedAt "2026-11-01T00:00:00Z"
+                       :run-record-dir (str dir) :code-root "/fixture"
+                       :world-task-sets-fn (fn [root] (swap! calls conj root)
+                                            {:missions ["M-gated" "M-selected"]
+                                             :excursions [] :tickets []})})
+        section {:field-facts {:open-tasks {:missions ["M-selected"]}}}
+        ref (retain opts section {:status :refused :kind :test})
+        retained (selection-record/read-reference ref)
+        census (get-in retained [:outer/selection :world-census])
+        out (facts/selection-facts-for-record
+             {:selection-record ref
+              :world-at-selection {:open-tasks {:missions {:ids ["M-world"]}}}}
+             "tick.edn" snap {})]
+    (is (= ["/fixture"] @calls))
+    (is (= :files (:source census)))
+    (is (= "/fixture" (:code-root census)))
+    (is (string? (:captured-at census)))
+    (is (= ["M-gated" "M-selected"] (get-in census [:open-tasks :missions])))
+    (is (= ["M-world"] (get-in out [:facts "openMissions"])))
+    (is (= "tick.edn [:world-at-selection :open-tasks :missions :ids]"
+           (get-in out [:sources "openMissions"])))
+    (is (= ref (retain opts section {:status :refused :kind :test})))
+    (is (= ["/fixture"] @calls))))

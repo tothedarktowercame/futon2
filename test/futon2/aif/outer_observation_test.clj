@@ -321,7 +321,7 @@
     (is (= [{:id "M-waiting" :status-class :inactive}] (:registry/non-open result)))))
 
 
-(deftest retained-open-roster-survives-a-disagreeing-projector-registry
+(deftest retained-selector-roster-is-provenance-not-an-independent-census
   (let [authority (-> fixture-authority-with-tickets
                       (assoc :registry-source :substrate)
                       (update-in [:loaded-missions :missions] conj
@@ -341,11 +341,10 @@
     (is (= (set (:enumerated-open-tasks field)) (set (mapcat identity groups))))
     (is (every? #(= % (vec (sort %))) groups))
     (is (not (some #{"M-gated"} (:missions roster))))
-    (is (= (:missions roster) (get-in projected [:facts "openMissions"])))
-    (is (= (:tickets roster) (get-in projected [:facts "openTickets"])))
+    (is (= ["M-gated"] (get-in projected [:facts "openMissions"])))
+    (is (= [] (get-in projected [:facts "openTickets"])))
     (is (= (set (mapcat identity groups)) (set (get-in projected [:facts "enumeratedTasks"]))))
-    (is (= "pinned-record [:outer/selection :field-facts :open-tasks :missions]"
-           (get-in projected [:sources "openMissions"])))
+    (is (= (:pins snap) (get-in projected [:sources "openMissions"])))
     (is (= ["M-gated"] (get-in old [:facts "openMissions"])))
     (is (= (run-facts/facts-for-record record "pinned-record" snap)
            (run-facts/facts-for-record
