@@ -2,6 +2,10 @@
 ;; Usage: bb emit-selection-grounding-lean.bb WITNESS_DIR PASS_EDN OUTPUT_LEAN
 ;; Open-set pin hashes pr-str of the sorted vector of ID strings, not file bytes.
 (require '[clojure.edn :as edn] '[clojure.string :as str] '[clojure.set :as set])
+;; Reuse production's canonical prediction digest without loading the selector.
+(require '[babashka.classpath :as cp] '[clojure.java.io :as io])
+(cp/add-classpath (.getCanonicalPath (io/file (.getParent (io/file *file*)) "../../../../src")))
+(require '[futon2.aif.action-identity :as identity])
 (import '[java.security MessageDigest] '[java.math BigDecimal BigInteger RoundingMode])
 (defn sha [s] (format "%064x" (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256") (.getBytes s "UTF-8")))))
 (defn ensure! [ok msg data] (when-not ok (throw (ex-info msg data))))
@@ -10,6 +14,10 @@
 (defn text-id [s] (pin-id (sha s)))
 (defn rat [x] (if (ratio? x) (str "(" (numerator x) " / " (denominator x) " : ℚ)") (str "(" x " : ℚ)")))
 (defn rounded [x] (/ (.longValueExact (.movePointRight (.setScale (BigDecimal/valueOf (double x)) 6 RoundingMode/HALF_EVEN) 6)) 1000000))
+;; Matches outer-select/g-units (BigDecimal(double), not valueOf).
+(defn g-units [g]
+  (-> (BigDecimal. (double g)) (.setScale 6 RoundingMode/HALF_EVEN)
+      (.movePointRight 6) .longValueExact))
 (defn rounded-score [s]
   (let [ts (mapv #(rounded (get s %)) [:risk :ambiguity :novelty]) g (- (+ (ts 0) (ts 1)) (ts 2))
         diff (- (double g) (double (:G s)))]
@@ -40,6 +48,9 @@
         _ (ensure! (and (= 626 (count opens) (count (set opens))) (= 609 (count rows) (count (set row-names)))
                         (= 17 (count missing)) (set/subset? (set row-names) (set opens))
                         (= (set missing) (set/intersection (set opens) drift))) "population partition mismatch" {})
+        _ (doseq [e (get-in w [:field :excluded])]
+            (ensure! (= :giraffe/unread-new (:reason e))
+                     "unsupported exclusion reason" {:reason (:reason e) :members (:ids e)}))
         _ (ensure! (= (set missing) (set (mapcat :ids (get-in w [:field :excluded])))) "witness exclusions differ" {})
         _ (ensure! (= {:ready 500 :not-ready 57 :undetermined 52} (frequencies (map :status rows))) "status counts differ" {})
         _ (ensure! (= 626 (count (set (map text-id opens)))) "task ID collision" {})
@@ -52,6 +63,15 @@
         _ (ensure! (= 3 (count (set cids))) "cascade ID collision" {})
         _ (ensure! (= 629 (count (set (concat cids (map text-id opens))))) "task/cascade ID collision" {})
         scores (mapv #(rounded-score (:score %)) cs)
+        prediction-digests (mapv #(identity/digest (get-in % [:score :prediction])) cs)
+        class-keys (mapv (fn [i] [(prediction-digests i) (g-units (get-in cs [i :score :G]))]) (range 3))
+        class-digests (mapv #(sha (pr-str %)) class-keys)
+        class-ids (mapv pin-id class-digests)
+        _ (ensure! (= (count (set class-digests)) (count (set class-ids))) "class ID collision" {})
+        _ (ensure! (= (count (set prediction-digests)) (count (set (map pin-id prediction-digests))))
+                   "prediction ID collision" {})
+        representatives (vec (map first (vals (group-by class-ids (range 3)))))
+        representatives (sort representatives)
         abst (rounded-score (get-in w [:abstention :score]))
         picks (mapv #(or (get-in % [:applied :pick-target]) (get-in % [:applied :pick])) cs)
         _ (ensure! (every? #(contains? (set opens) %) picks) "pick not enumerated" {})
@@ -71,7 +91,7 @@
                             (ensure! (= :associated (get-in cs [i :relation :class])) "unsupported relation" {:cascade i})
                             (str "def c" (inc i) " : GroundedPolicy :=\n  ⟨" (cids i) ", " (list-lean (steps i))
                                  ", some " (text-id (picks i)) ", " (rat (reaches i)) ", .associated, "
-                                 (terms (:terms (scores i))) ", " (rat (:g (scores i))) "⟩\n")) (range 3))
+                                 (terms (:terms (scores i))) ", " (rat (:g (scores i))) ", " (class-ids i) ", " (pin-id (prediction-digests i)) "⟩\n")) (range 3))
         chosen (first (sort-by #(get-in scores [% :g]) (range 3)))
         _ (ensure! (= (get-in w [:selection :minimum]) (:id (cs chosen))) "minimum differs" {})
         facts (mapv (fn [r]
@@ -80,7 +100,7 @@
                         (ensure! (or (nat-int? (k r)) (and (= :undetermined (:status r)) (nil? (k r)))) "invalid metric" {:id (:id r) :key k}))
                       (str ".fact " (text-id (name (:id r))) " ⟨" (status (:status r)) ", " (or (:cone r) 0)
                            ", " (or (:unblocks r) 0) ", " (:rank r) ", " (pin-id (get-in r [:dependency-reading :record-pin :sha256])) "⟩")) rows)
-        excluded (map #(str ".excluded " (text-id %) " 1 " (pin-id psha)) missing)
+        excluded (map #(str ".excluded " (text-id %) " .unreadNew " (pin-id psha)) missing)
         result (str "import DarkTower.WarMachine.SelectionGrounding\n\n"
                     "/-! Generated by emit-selection-grounding-lean.bb; do not hand-edit.\n"
                     "Witness raw SHA256: " (sha wtext) "\nPass raw SHA256: " psha "\nOpen-set raw SHA256: " osha "\n"
@@ -88,7 +108,10 @@
                     "Open-set canonical SHA256: " canonical-open-sha " (sorted ID vector pr-str).\n"
                     "Drift outside enumerated set: " (pr-str (sort (set/difference drift (set opens)))) "\n"
                     "Cascade digest = pr-str of [name readme-row [[pattern sha index] ...] edges].\n"
-                    "Fact pins use dependency-reading.record-pin.sha256; exclusion reason 1 = giraffe/unread-new.\n"
+                    "Prediction ID = first 15 hex of action-identity/digest of prediction outcomes.\n"
+                    "Class ID = first 15 hex of SHA256(pr-str [prediction-digest g-units]); g-units uses outer-select HALF_EVEN at 10^6 on recorded G.\n"
+                    "c1/c2 share a prediction class; c3 is distinct.\n"
+                    "Fact pins use dependency-reading.record-pin.sha256; exclusion reason .unreadNew = giraffe/unread-new.\n"
                     "Exclusion pin = first 15 digits of pass digest (not a second hash).\n"
                     "Undetermined nil cone/unblocks encoded as 0; status preserved. Descending metric orders follow readyGate here. Ordering undetermined rows by those unavailable metrics would be an invalid use of this carrier; status/rank projection does not use them.\n"
                     "Terms rounded HALF_EVEN at 6 decimals; G recomputed from rounded terms.\n"
@@ -99,10 +122,10 @@
                     (str/join "\n" policy-lines)
                     "\ndef witness : Grounding where\n  enumerated := " (list-lean (map text-id opens)) ".toFinset\n"
                     "  field := " (list-lean (concat facts excluded)) "\n  policies := [c1, c2, c3]\n"
-                    "  abstention := (" (terms (:terms abst)) ", " (rat (:g abst)) ")\n  chosen := " (cids chosen) "\n\n"
+                    "  abstention := (" (terms (:terms abst)) ", " (rat (:g abst)) ")\n  chosen := " (class-ids chosen) "\n\n"
                     "def witnessRun : Requirements.RunFacts :=\n  { Requirements.selectionGood with\n"
-                    "    enumeratedTasks := witness.enumerated\n    currentDecision := .pick " (text-id (picks chosen)) " " (cids chosen) "\n"
-                    "    policyG := [(c1.cascade, c1.g), (c2.cascade, c2.g), (c3.cascade, c3.g)]\n    abstentionG := witness.abstention.2 }\n\n"
+                    "    enumeratedTasks := witness.enumerated\n    currentDecision := .pick " (text-id (picks chosen)) " " (class-ids chosen) "\n"
+                    "    policyG := [" (str/join ", " (map #(str "(c" (inc %) ".class, c" (inc %) ".g)") representatives)) "]\n    abstentionG := witness.abstention.2 }\n\n"
                     "theorem witness_field_considered : fieldConsidered witness = true := by native_decide\n"
                     "theorem witness_scored_from_terms : scoredFromTerms witness = true := by native_decide\n"
                     "theorem witness_agrees : agreesWithRunFacts witness witnessRun = true := by native_decide\n"
@@ -110,7 +133,10 @@
                     "theorem witness_c1_pick : recomputedPick witness c1 = some c1.pick := by native_decide\n"
                     (when c3known "theorem witness_c3_pick : recomputedPick witness c3 = some c3.pick := by native_decide\n")
                     "\n#print axioms witness_field_considered\nend DarkTower.WarMachine.SelectionGroundingWitness\n")]
+    (ensure! (= [(class-ids 0) (class-ids 0) (class-ids 2)] class-ids) "ready classes differ" {})
+    (ensure! (not= (class-ids 0) (class-ids 2)) "discovery class not distinct" {})
     (spit out result)
+    (println :class-ids class-ids :class-keys class-keys)
     (doseq [i (range 3)] (println (:id (cs i)) :term-difference (:difference (scores i))))
     (println :abstention-difference (:difference abst) :cascade3-recomputed c3known :repair-click :unverifiable)
     (println :file-sha256 (sha result) :bytes (count (.getBytes result "UTF-8")))))
