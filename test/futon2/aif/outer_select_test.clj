@@ -102,20 +102,33 @@
     (is (< (Math/abs (- 1.0 (reduce + (vals (:outcomes prediction)))))
            1.0e-12))))
 
-(deftest ties-refuse-even-with-the-same-pick
-  (doseq [different-picks? [false true]]
-    (let [observation (assoc base-observation :relation (fn [_ _] :focus)
-                             :facts {"M-ready" {:status :ready :unblocks 0 :cone 0}
-                                     "M-unknown" {:status :ready :unblocks 0 :cone 0}})
-          makeup {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
-                             {:id :b :patterns ["test"]
-                              :steps (if different-picks? [{:gate #(= "M-unknown" (:target %))}]
-                                         [:ready-gate])}]}
-          refusal (try (outer-select/select makeup base-state observation)
-                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-      (is (= :tie-at-minimum (:kind refusal)))
-      (is (= [:a :b] (:cascades refusal) (:tied-cascades refusal)))
-      (is (= 2 (count (get-in refusal [:selection-evidence :cascades])))))))
+(deftest identical-predictions-are-one-policy
+  (let [observation (assoc base-observation :relation (fn [_ _] :focus))
+        makeup {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
+                           {:id :b :patterns ["test"] :steps [:ready-gate]}]}
+        r (outer-select/select makeup base-state observation)]
+    (is (= 1 (count (:classes r))))
+    (is (= [:a :b] (:members (first (:classes r)))))
+    (is (= :a (:cascade-id r)))
+    (is (= 2 (count (:cascades r))))))
+
+(deftest distinct-predictions-at-equal-g-refuse
+  (let [observation (assoc base-observation :relation (fn [_ _] :focus)
+                           :facts {"M-ready" {:status :ready :unblocks 0 :cone 0}
+                                   "M-unknown" {:status :ready :unblocks 0 :cone 0}})
+        makeup {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
+                           {:id :b :patterns ["test"] :steps [{:gate #(= "M-unknown" (:target %))}]}]}
+        original outer-score/score-model
+        counter (atom 0)
+        refusal (with-redefs [outer-score/score-model
+                             (fn [input model]
+                               (let [r (original input model)]
+                                 (if (= 2 (swap! counter inc))
+                                   (assoc-in r [:prediction :outcomes] {[:related :one] 1.0}) r)))]
+                  (try (outer-select/select makeup base-state observation)
+                       (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (is (= :tie-at-minimum (:kind refusal)))
+    (is (= 2 (count (:classes refusal))))))
 
 (deftest real-giraffe-selection-demonstration
   ;; Fixed pass bytes, not the host/cwd-sensitive historical-run verifier.

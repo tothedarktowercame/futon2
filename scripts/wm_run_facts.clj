@@ -851,7 +851,9 @@
   (let [c (:construction selection)
         library (:library c)
         policies (:cascades c)
-        scored (:cascades selection)
+        classes (:classes selection)
+        scored (or classes (:cascades selection))
+        policy-id (if classes :id :digest)
         patterns (:patterns library)
         units (mapcat :units policies)
         pattern-name #(second (re-matches #"futon3/library/task-selection/(.+)\.flexiarg" (:pattern %)))
@@ -868,11 +870,11 @@
                     (every? #(and (pattern-name %) (:sha256 %)
                                   (= (:sha256 %) (get patterns (pattern-name %)))) units))
         pin #(if (and (string? %) (re-matches #"[0-9a-f]{64}" %)) % "")
-        ids (sorted-ids (map :digest policies))
-        score-ids (sorted-ids (map :digest scored))
-        g-rows (mapv #(when-let [g (exact-g (:G %))] {"policy" (:digest %) "g" g}) scored)
+        ids (sorted-ids (if classes (distinct (map :class policies)) (map :digest policies)))
+        score-ids (sorted-ids (map policy-id scored))
+        g-rows (mapv #(when-let [g (exact-g (:G %))] {"policy" (policy-id %) "g" g}) scored)
         prediction-rows (mapv #(when (seq (:prediction %))
-                                {"policy" (:digest %) "digest" (action-identity/digest (:prediction %))}) scored)
+                                {"policy" (policy-id %) "digest" (action-identity/digest (if classes (get-in % [:prediction :outcomes]) (:prediction %)))}) scored)
         rows-or-nr (fn [rows why] (if (every? some? rows)
                                    (vec (sort-by #(get % "policy") rows))
                                    (not-recomputable why)))]
@@ -885,13 +887,14 @@
      "constructorPatternCount" (count (:pool c))
      "libraryPatternCount" (:count library)
      "constructedCascades" ids "comparedPolicies" score-ids
-     "cascadesWithoutG" (sorted-ids (map :digest (remove #(exact-g (:G %)) scored)))
+     "classMembers" (mapv #(hash-map "class" (:id %) "members" (mapv str (:members %))) classes)
+     "cascadesWithoutG" (sorted-ids (map policy-id (remove #(exact-g (:G %)) scored)))
      "policyG" (rows-or-nr g-rows "constructed cascade missing finite G")
      "policyPrediction" (rows-or-nr prediction-rows "constructed cascade missing prediction")
      "abstentionG" (or (exact-g (get-in selection [:abstention :G]))
                         (not-recomputable "abstention G unavailable"))
      "abstentionPrediction" (if-let [prediction (seq (get-in selection [:abstention :prediction]))]
-                               (action-identity/digest (into {} prediction))
+                               (action-identity/digest (if classes (get-in selection [:abstention :prediction :outcomes]) (into {} prediction)))
                                (not-recomputable "abstention prediction unavailable"))}))
 
 (defn- selection-decision
@@ -904,7 +907,7 @@
         pick (when (and picks index (< -1 index (count picks))) (nth picks index))]
     (if (or (nil? target) (= :no-pick pick))
       "abstain-empty-field"
-      {"target" target "cascade" (if (:construction selection) (:cascade-digest selection)
+      {"target" target "cascade" (if (:construction selection) (or (:chosen-class selection) (:cascade-digest selection))
                                       (policy-identity (:cascade-id selection)))})))
 
 (defn- pick-relation
