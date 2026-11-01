@@ -424,3 +424,4 @@ done. the old notion of criteria complete is superseded by moving to full lean c
 
 | At | Click / run | Signature | Fix (commit) | Loaded before click |
 |---|---|---|---|---|
+| 17:30Z | before click 1's verdict; from ac5bc477's work export | work Q7 violated (5 typed absences, all under `[:failure :detail …]`: the run's reviewer falsifier failed, so Q7 reports a real work failure, not an exporter gap; its injury 7d5e374e is the repair route) ; work Q9 violated (verified negative: the factorized-preference producer is deliberately absent from serving) | Q9: discovery packet `packets/L5-7-D-q9-factorized-preference-into-serving.md` → codex-11 | n/a |
