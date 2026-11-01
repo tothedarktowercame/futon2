@@ -954,6 +954,24 @@
      "currentInputDigest" (or (get-in selection [:choice-input-digest :sha256])
                               (not-recomputable "choice-input-digest unretained"))}))
 
+(defn- selection-refusal-history-facts [selection]
+  (when-let [q6 (:q6 selection)]
+    {"refusalHistory"
+     (if (vector? (:refusal-history q6))
+       (mapv (fn [{:keys [cascade input-digest]}]
+               {"cascade" cascade "input-digest" input-digest})
+             (:refusal-history q6))
+       (not-recomputable "selection refusal history is not a vector"))
+     "refusalHistorySource" "retained"
+     "refusalHistoryUnsealed"
+     (if (nat-int? (:refusal-history-unsealed q6))
+       (:refusal-history-unsealed q6)
+       (not-recomputable "selection refusal-history-unsealed is not a count"))
+     "refusalHistorySealedBeforeR18"
+     (if (nat-int? (:refusal-history-sealed-before-r18 q6))
+       (:refusal-history-sealed-before-r18 q6)
+       (not-recomputable "selection refusal-history-sealed-before-r18 is not a count"))}))
+
 (defn- selection-preferences
   "One terminal-only control step per retained prediction class. Novelty is
   the information term; missing numeric terms are not inferred from G."
@@ -1189,7 +1207,8 @@
                   {"enumeratedTasks" (sorted-ids (distinct (concat admitted excluded)))
                    "currentChoice" (selection-decision selection)
                    "pathAbsenceCount" (count (selection-absence-paths record))
-                   "selectionPath" (selection-path selection makeup)})
+                   "selectionPath" (selection-path selection makeup)}
+                  (selection-refusal-history-facts selection))
                  (zipmap ["comparedPolicies" "constructedCascades" "policyG" "cascadesWithoutG"
                           "enumeratedTasks" "currentChoice" "pathAbsenceCount" "selectionPath"]
                          (repeat (nr no-section)))))

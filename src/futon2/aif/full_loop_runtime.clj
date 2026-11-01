@@ -1298,17 +1298,42 @@
                 (throw e))))))))))
 
 (defn- selection-context [opts]
-  (cond-> opts
-    (not (:run-id opts)) (assoc :run-id (new-run-id))
-    (not (:startedAt opts)) (assoc :startedAt (str (Instant/now)))
-    (not (:selection-record/state opts)) (assoc :selection-record/state (atom nil))))
+  (let [opts (cond-> opts
+               (not (:run-id opts)) (assoc :run-id (new-run-id))
+               (not (:startedAt opts)) (assoc :startedAt (str (Instant/now)))
+               (not (:selection-record/state opts))
+               (assoc :selection-record/state (atom nil)))]
+    (assoc opts :selection-record/execution-identity
+           {:kind :selection-execution
+            :id (str "selection--" (or (:click-id opts) (:run-id opts)))})))
+
+(defn- selection-refusal-history
+  "The Q6 history visible at the click's declared start, before its work run is
+  appended to the stream. This carrier belongs to the outer decision even when
+  scoring later refuses."
+  [opts]
+  (let [p (previous-run/predecessor
+           (or (:run-record-dir opts) runner/default-run-record-dir)
+           (:run-id opts) (:startedAt opts))
+        h (:refusal-history p)]
+    (when (map? h)
+      {:refusal-history (vec (:entries h))
+       :refusal-history-unsealed (:unsealed h)
+       :refusal-history-sealed-before-r18 (:sealed-before-r18 h)})))
 
 (defn- retain-selection! [opts section outcome]
   (let [state (:selection-record/state opts)]
     (or @state
-        (let [ref (selection-record/write-decision!
+        (let [write-opts (cond-> opts
+                           (not (:runner-execution/identity opts))
+                           (assoc :runner-execution/identity
+                                  (:selection-record/execution-identity opts)))
+              ref (selection-record/write-decision!
                    (or (:run-record-dir opts) runner/default-run-record-dir)
-                   opts section outcome)]
+                   write-opts (cond-> section
+                          (and (:selection/q6 opts) (not (contains? section :q6)))
+                          (assoc :q6 (:selection/q6 opts)))
+                   outcome)]
           (reset! state ref)
           ref))))
 
@@ -1401,13 +1426,14 @@
                                      (assoc :outer/learning
                                             (select-keys learning
                                                          [:status :reason :ending-class
-                                                          :observed-gain :receipt])))
+                                                          :observed-gain :receipt]))
+                                     (cond-> (:selection/q6 opts)
+                                       (assoc :q6 (:selection/q6 opts))))
               state-path (or (:outer/state-path opts) outer-state/default-state-path)
-              record-ref (retain-selection!
-                          opts retained-selection
-                          (if-let [pick (get-in selection [:selection :selected :target])]
-                            {:status :chosen :class (:chosen-class selection) :pick pick}
-                            {:status :abstained :case :empty-field}))]
+              selection-outcome
+              (if-let [pick (get-in selection [:selection :selected :target])]
+                {:status :chosen :class (:chosen-class selection) :pick pick}
+                {:status :abstained :case :empty-field})]
           (if-let [target (get-in selection [:selection :selected :target])]
             (let [run-id (or (:run-id opts) (new-run-id))]
               (when-not (= :deferred (:status learning))
@@ -1418,8 +1444,16 @@
                          :run-id run-id
                          :giraffe/run-id (:giraffe/run-id observation)})))
               (let [selection-state (atom {:task {:id target} :outer/selection retained-selection})
-                    live-opts (assoc opts :run-id run-id :task {:id target} :selection-record record-ref
+                    execution-identity-state (atom nil)
+                    retain-for-execution!
+                    (fn [identity]
+                      (reset! execution-identity-state identity)
+                      (retain-selection! (cond-> opts identity
+                                           (assoc :runner-execution/identity identity))
+                                         retained-selection selection-outcome))
+                    live-opts (assoc opts :run-id run-id :task {:id target}
                                     :outer/selection retained-selection
+                                    :selection-record/retain-fn retain-for-execution!
                                     :reading-reselection/state selection-state)
                     reselect (reading-reselection-port
                               makeup state observation retained-selection selection-state
@@ -1433,13 +1467,18 @@
                                 (let [record-state (:selection-record/state opts)
                                       ref (selection-record/write-decision!
                                             (or (:run-record-dir opts) runner/default-run-record-dir)
-                                            (assoc opts :selection-predecessor @record-state :selection-cause cause)
+                                            (cond-> (assoc opts :selection-predecessor @record-state
+                                                          :selection-cause cause)
+                                              @execution-identity-state
+                                              (assoc :runner-execution/identity
+                                                     @execution-identity-state))
                                             section outcome)]
                                   (reset! record-state ref)
                                   ref)))]
                 (run-ordinary-opportunity-with-task!
                  (assoc live-opts :selected-target-reading-reselect-fn reselect))))
             (do
+              (retain-selection! opts retained-selection selection-outcome)
               (when (= :applied (:status learning))
                 (outer-state/write-state! state-path state))
               {:absent :no-task-selected :outer/selection retained-selection})))
@@ -1450,7 +1489,10 @@
       {:absent :no-verified-giraffe-run})))
 
 (defn- run-ordinary-opportunity! [opts]
-  (let [opts (assoc (selection-context opts) :selection-record/evidence (atom {}))
+  (let [opts (selection-context opts)
+        q6 (selection-refusal-history opts)
+        opts (assoc opts :selection/q6 q6
+                         :selection-record/evidence (atom (cond-> {} q6 (assoc :q6 q6))))
         result (try (run-ordinary-opportunity-impl! opts)
                     (catch Exception e (outer-selection-refusal e)))
         ref (or @(:selection-record/state opts)
