@@ -3,7 +3,12 @@
 import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.request
 from pathlib import Path
 
-PARTIAL_REQUIREMENTS=(1,3,4,5,6,7,9)
+def requirement_numbers(ml):
+    """The requirement list is Lean's constructor list, nothing held here."""
+    text=(ml/"DarkTower/WarMachine/Requirements.lean").read_text()
+    found=re.search(r"inductive\s+Requirement\s+where\s*((?:\|\s*q\d+\s*)+)", text)
+    if not found: raise RuntimeError("could not read inductive Requirement from Requirements.lean")
+    return tuple(int(q) for q in re.findall(r"q(\d+)", found.group(1)))
 
 def run(cmd, cwd):
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True, check=True)
@@ -24,16 +29,33 @@ def nr(x): return isinstance(x, dict) and "not-recomputable" in x
 def card(x): return "NR" if nr(x) else len(x)
 def val(x): return "NR" if nr(x) else x
 
+def nr_reasons(f, *keys):
+    return "; ".join(f"{k}: {f[k]['not-recomputable']}" for k in keys if nr(f.get(k)))
+
+def construction_line(f):
+    reasons=nr_reasons(f,"kind","targetConstruction","libraryPatternCount","constructorPatternCount",
+                       "comparedPolicies","constructedCascades","enumeratedTasks","currentChoice")
+    return reasons or (f"kind {f['kind']}; {card(f['targetConstruction'])} constructions; "
+                       f"{f['constructorPatternCount']} pool patterns / {f['libraryPatternCount']} library; "
+                       f"{card(f['comparedPolicies'])} compared / {card(f['constructedCascades'])} constructed")
+
+def strict_minimum_line(f):
+    reasons=nr_reasons(f,"policyG","abstentionG","policyPrediction")
+    return reasons or (f"{card(f['policyG'])} G / {card(f['comparedPolicies'])} compared; "
+                       f"abstention G {f['abstentionG']}; {card(f['policyPrediction'])} prediction digests")
+
 def numbers(q, f):
     opened = sum(card(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) if not any(nr(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) else "NR"
     table = {
       1: f"{card(f['enumeratedTasks'])} enumerated / {opened} open tasks",
+      2: construction_line(f),
       3: f"{card(f['cascadesWithoutG'])} cascades without G / {card(f['constructedCascades'])} constructed",
       4: f"{card(f['preferenceSteps'])} preference steps / horizon {val(f['horizonLength'])}; G terms {val(f['gTerms'])}",
       5: f"order {val(f['interpretationOrder'])}",
       6: f"previous {val(f['previousChoice'])} -> current {val(f['currentChoice'])}; digests {val(f['previousInputDigest'])}/{val(f['currentInputDigest'])}",
       7: f"{val(f['pathAbsenceCount'])} typed path absences",
-      9: f"{val(f['completionPairsStrictlyPreferred'])}/{val(f['completionPreferencePairs'])} completion pairs strictly preferred"}
+      9: f"{val(f['completionPairsStrictlyPreferred'])}/{val(f['completionPreferencePairs'])} completion pairs strictly preferred",
+      11: strict_minimum_line(f)}
     return table[q]
 
 def edn(x):
@@ -88,6 +110,7 @@ def main(argv=None):
     verdict=Path(str(record)+".requirements.edn"); started=datetime.datetime.now(datetime.timezone.utc)
     try:
       if not record.is_file(): raise RuntimeError(f"run record missing: {record}")
+      requirements=requirement_numbers(ml)
       with tempfile.TemporaryDirectory(prefix="wm-requirements-") as td:
         td=Path(td); exported=td/"facts.json"; lean=td/"RunCheck.lean"
         if a.facts_json:
@@ -98,14 +121,14 @@ def main(argv=None):
         run(["clojure","-M","-m","wm-check-run-facts",str(exported),str(lean),"exported",str(reader)], f2)
         checked=run([lake_executable(),"env","lean",str(lean)], ml).stdout
         export=json.loads(exported.read_text()); facts=export["facts"]
-      found={int(q): outcome for q,outcome in re.findall(r"Requirement\.q(\d+), [^)\n]*Outcome\.(\w+)", checked)}
-      outcomes={q: found.get(q,"holds") for q in PARTIAL_REQUIREMENTS}
+      found={int(q): outcome for q,outcome in re.findall(r"Requirement\.q(\d+),\s+[^)]*?Outcome\.(\w+)", checked)}
+      outcomes={q: found.get(q,"not-checked") for q in requirements}
       bad={q:v for q,v in outcomes.items() if v != "holds"}; head="ALERT FOR JOE" if bad else "CONFORMS"
       lines=[head]+[f"Q{q} {outcomes[q]}: {numbers(q,facts)}" for q in (bad or outcomes)]
       block="\n".join(lines); print(block, flush=True)
       result={":run-record":str(record),":checked-at":started.isoformat(),":conforms":not bad,
               ":verdicts":{f":Q{q}":f":{v}" for q,v in outcomes.items()},
-              ":critical-parameters":{f":Q{q}":numbers(q,facts) for q in PARTIAL_REQUIREMENTS},
+              ":critical-parameters":{f":Q{q}":numbers(q,facts) for q in requirements},
               ":not-recomputable":export.get("diagnostics",{}).get("notRecomputable",[]),
               ":module-shas":{":mathlib-head":sha(ml),":requirements":sha(ml,"DarkTower/WarMachine/Requirements.lean"),":reader":sha(ml,"DarkTower/WarMachine/RequirementsReader.lean")},
               ":exporter-sha":sha(f2,"scripts/wm_run_facts.clj")}

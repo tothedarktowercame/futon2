@@ -17,10 +17,11 @@
             ))
 
 (def run-fact-fields
-  ["openMissions" "openExcursions" "openTickets" "enumeratedTasks"
+  ["kind" "openMissions" "openExcursions" "openTickets" "enumeratedTasks"
    "targetsReachingScoring" "targetsWithG" "libraryPatternCount"
    "targetConstruction" "constructorPatternCount" "constructedCascades"
    "comparedPolicies" "cascadesWithoutG" "policyPreferences"
+   "policyG" "abstentionG" "policyPrediction"
    ;; one run-wide horizon: no longer a Requirements field (Q4 is stated
    ;; per compared policy), kept for the history table and alert text
    "horizonLength" "preferenceSteps"
@@ -35,6 +36,9 @@
 ])
 
 (defn not-recomputable [s] {"not-recomputable" s})
+
+(def ^:private g-carrier-absent
+  "per-policy G, abstention G and prediction digests not yet projected from the inner record")
 
 (defn- calibration-json [cal]
   (when (map? cal)
@@ -522,7 +526,13 @@
                                   (get-in record [:interpretation-ask :seat])]))
         nr (fn [s] (not-recomputable s))
         q4 (q4-facts record)
-        facts {"openMissions" (if (some? (world-ids :missions))
+        ;; The projector labels the kind; the record never does.  A record
+        ;; choosing its own label could dodge the selection floor of two.
+        facts {"kind" "work"
+               "policyG" (nr g-carrier-absent)
+               "abstentionG" (nr g-carrier-absent)
+               "policyPrediction" (nr g-carrier-absent)
+               "openMissions" (if (some? (world-ids :missions))
                                 (vec (world-ids :missions)) (sorted-ids (:open-missions snap)))
                "openExcursions" (if (some? (world-ids :excursions))
                                   (vec (world-ids :excursions)) (sorted-ids (:open-excursions snap)))
@@ -630,6 +640,7 @@
                         [field (cond
                                  (#{"openMissions" "openExcursions" "openTickets"
                                     "libraryPatternCount" "seatsAvailable"} field) (:pins snap)
+                                 (= "kind" field) "scripts/wm_run_facts.clj (projector label)"
                                  (#{"previousChoice" "previousOutcome" "previousInputDigest"
                                     "currentChoice" "currentInputDigest"} field)
                                  (str record-path " [:q6]")
