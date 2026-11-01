@@ -233,3 +233,16 @@
     (is (= ["M-a" "M-b"] (mapv :from (get-in two [:derived-via :path]))))
     (is (= :unknown (:class three)) "three hops is beyond the bound; M-a has no embedding stem")
     (is (= :embedding-node-not-retained (get-in three [:relation :reason])))))
+
+(deftest a-missing-graph-parameter-does-not-fall-through-to-the-embedding
+  ;; claude-2, L5-4j review: M-pattern-retrieval-calibration has an embedding
+  ;; neighbour; with the hop bound undeclared it must read unknown by the
+  ;; parameter's name, not associated through the embedding.
+  (let [inputs (fr/read-inputs)
+        as-of "2026-11-01T06:02:00Z"
+        derived (:info (fr/decision-focus inputs as-of nil))
+        ctx (assoc (fr/relation-context "/home/joe/code") :giraffe-run-dir live-giraffe-run)
+        r (fr/classify-target (dissoc inputs :graph-hop-bound) derived as-of "M-pattern-retrieval-calibration" ctx)]
+    (is (= :unknown (:class r)))
+    (is (= :graph-hop-bound-not-declared (get-in r [:relation :reason])))
+    (is (nil? (get-in r [:derived-via :kind])))))

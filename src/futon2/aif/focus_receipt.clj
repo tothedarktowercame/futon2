@@ -490,7 +490,12 @@
                                  (let [rowed (into {} (keep (fn [r] (when (at-or-before? (:effective-from r) as-of) [(:target r) r])))
                                                    (reverse (:relations inputs)))
                                        graph (giraffe-graph-path inputs target row-of giraffe-run-dir)
-                                       b (when-not (:row graph)
+                                       ;; A graph parameter that is not declared is a
+                                       ;; misconfiguration, not an absence of evidence: it
+                                       ;; stops derivation here rather than falling through
+                                       ;; to the embedding (claude-2, L5-4j review).
+                                       b (when-not (or (:row graph)
+                                                       (graph-parameter-refusals (:absent graph)))
                                            (embedding-neighbour inputs target rowed))]
                                    (cond
                                      (:row graph)
