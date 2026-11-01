@@ -1386,6 +1386,8 @@
                                     (or (:code-root opts) "/home/joe/code"))
                                    :giraffe-run-dir giraffe-dir)})
               learning (resolve-pending-learning opts makeup state giraffe-dir observation)
+              _ (swap! (:selection-record/evidence opts) assoc :outer/learning
+                       (select-keys learning [:status :reason :ending-class :observed-gain :receipt]))
               state (:state learning)
               ;; Pre-selection duplicate view (DUPLICATE-TARGET-STILL-SELECTED):
               ;; the same index rows the post-construction guard reads, given
@@ -1402,7 +1404,7 @@
                                  (previous-run/selection-predecessor
                                   (or (:run-record-dir opts) runner/default-run-record-dir)
                                   (:run-id opts) (or (:startedAt opts) (str (Instant/now)))))
-              _ (reset! (:selection-record/evidence opts)
+              _ (swap! (:selection-record/evidence opts) merge
                         (assoc (select-keys observation [:giraffe/run-id :giraffe/manifest-sha256
                                                          :focus :field-facts])
                                :makeup/sha256 (:makeup/sha256 makeup)

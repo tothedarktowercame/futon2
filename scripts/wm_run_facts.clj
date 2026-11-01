@@ -1069,9 +1069,11 @@
                                (not-recomputable "abstention prediction unavailable"))}))
 
 (defn- selection-decision
-  "The target and cascade chosen, or the empty-field abstention when the chosen
-  cascade picked nothing.  Lean reads that on a non-empty field as a violation."
-  [selection]
+  "An explicit refused outcome has no representable Lean Decision. Otherwise
+  preserve the chosen target/cascade or historical no-pick abstention projection."
+  [selection outcome]
+  (if (= :refused (:status outcome))
+    (not-recomputable (str "selection refused: " (:kind outcome)))
   (let [target (get-in selection [:selection :selected :target])
         picks (:cascade-picks selection)
         index (:cascade-index selection)
@@ -1079,7 +1081,7 @@
     (if (or (nil? target) (= :no-pick pick))
       "abstain-empty-field"
       {"target" target "cascade" (if (:construction selection) (or (:chosen-class selection) (:cascade-digest selection))
-                                      (policy-identity (:cascade-id selection)))})))
+                                      (policy-identity (:cascade-id selection)))}))))
 
 (defn- pick-relation
   "Modern constructions retain the chosen classify-target receipt digest.
@@ -1141,6 +1143,10 @@
   are population-wide evidence about alternatives, as the work path's rejected
   candidates are, and stay out."
   [record]
+  ;; No decision was enacted: alternatives are not a chosen execution path.
+  ;; Refusal evidence stays retained, but contributes zero decision-path absences.
+  (if (= :refused (get-in record [:selection-outcome :status]))
+    []
   (let [selection (:outer/selection record)
         chosen-id (:cascade-id selection)
         chosen-class (:chosen-class selection)
@@ -1172,7 +1178,7 @@
                                       (= :typed-refusal (:kind m))
                                       (= :classification-receipt-absent (:reason m))))))]
             (vec (concat root p)))))
-      roots))))
+      roots)))))
 
 (defn selection-facts-for-record
   "The selection run in a tick record's `:outer/selection`, as its own RunFacts.
@@ -1224,7 +1230,9 @@
                {"kind" "selection"
                 "policyGScale" g-scale
                 "policyPrediction" (carried one-prediction)
-                "interpretationOrder" (selection-interpretation-order record phase-log-path)}
+                "interpretationOrder" (if (= :refused (get-in source [:selection-outcome :status]))
+                                        (nr "no interpretation in this run")
+                                        (selection-interpretation-order record phase-log-path))}
                (if section?
                  (merge
                   (if (:construction selection)
@@ -1233,7 +1241,7 @@
                            (when (:choice-input-digest selection) (selection-history-facts selection)))
                     (menu-facts selection makeup))
                   {"enumeratedTasks" (sorted-ids (distinct (concat admitted excluded)))
-                   "currentChoice" (selection-decision selection)
+                   "currentChoice" (selection-decision selection (:selection-outcome source))
                    "pathAbsenceCount" (count (selection-absence-paths record))
                    "selectionPath" (selection-path selection makeup)}
                   (selection-refusal-history-facts selection))
