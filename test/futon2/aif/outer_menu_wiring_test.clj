@@ -6,6 +6,7 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.outer-menu :as menu]
+            [futon2.aif.outer-observation :as observation]
             [futon2.aif.outer-menu-test :as pins]
             [futon2.aif.outer-score :as score]
             [futon2.aif.outer-select :as select]
@@ -84,7 +85,7 @@
                                      [{:target "x"} {:target "y"}]
                                      {:status-gate :undetermined}))))
 
-(deftest retained-field-names-the-remaining-discovery-gain-blocker
+(deftest retained-field-scores-discovery-without-graph-metrics
   (let [text (slurp (io/file pins/pass-root "pass.edn"))
         _ (when-not (= pins/pass-sha (identity/sha256 text))
             (throw (ex-info "Retained pass drift" {})))
@@ -92,10 +93,38 @@
         m (makeup)
         obs {:focus "WM" :relation (fn [_ _] :associated)
              :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
-             :field (mapv #(hash-map :target (name (:id %)) :reach 1/2) rows)
+             :field (mapv #(hash-map :target (name (:id %)) :reach (:value (observation/task-reach %))) rows)
              :facts (into {} (map #(vector (name (:id %)) %) rows))}
-        refusal (try (select/select m (state/init-state m) obs)
-                     (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-    (is (= :outer-score/graph-term-unavailable (:kind refusal)))
-    (is (= :unblocks (:term refusal)))
-    (is (= 3 (get-in refusal [:construction :policy-count])))))
+        result (try (select/select m (state/init-state m) obs)
+                    (catch clojure.lang.ExceptionInfo e
+                      (is (= :tie-at-minimum (:kind (ex-data e))))
+                      (:selection-evidence (ex-data e))))
+        discovery (first (filter #(= :find-out-before-building (:id %)) (:cascades result)))]
+    (is (= 3 (get-in result [:construction :policy-count])))
+    (is (= :discovery-yields-no-ready (:gain-source discovery)))
+    (is (= [:related :none] (get-in discovery [:prediction :landing])))
+    (is (= :undetermined (get-in discovery [:prediction :status])))
+    (is (number? (:G discovery)))
+    (is (= "M-interim-director" (:pick discovery)))))
+
+(deftest verified-graph-pin-and-missing-or-corrupt-evidence
+  (is (= pins/input-sha (observation/verified-input-pin pins/pass-root)))
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory "l54d3-input" (make-array java.nio.file.attribute.FileAttribute 0)))
+        manifest (io/file dir "manifest.edn") input (io/file dir "input.edn")]
+    (is (= :giraffe-manifest-missing (:reason (observation/verified-input-pin dir))))
+    (spit manifest (pr-str {:files [{:file "input.edn" :sha256 pins/input-sha}]}))
+    (is (= :giraffe-input-missing (:reason (observation/verified-input-pin dir))))
+    (spit input "corrupt")
+    (is (= :giraffe-input-pin-mismatch (kind #(observation/verified-input-pin dir))))))
+
+(deftest discovery-never-reads-numeric-gain-terms
+  (let [input {:focus "x" :relation (fn [_ _] :associated)
+               :facts {"x" {:status :undetermined :cone :unavailable :unblocks :unavailable}}
+               :field [{:target "x" :reach 1/2}] :state-counts (:state-kit (makeup))
+               :cascade [{:status-gate :undetermined}]}
+        m (score/outer-model input)]
+    (is (= [:related :none] (:landing m)))
+    (with-redefs [score/kernel-definition (assoc-in score/kernel-definition [:discovery-gain :gain] :one)]
+      (is (= [:related :one] (:landing (score/outer-model input)))))
+    (is (= :outer-score/graph-term-unavailable
+           (kind #(score/outer-model (assoc input :cascade [{:status-gate :undetermined} :by-cone])))))))

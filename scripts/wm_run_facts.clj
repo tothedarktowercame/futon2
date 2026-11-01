@@ -844,6 +844,56 @@
                    (some nil? rows) (not-recomputable "a menu cascade has no finite score")
                    :else (vec (sort-by #(get % "policy") rows)))})))
 
+(defn- constructed-menu-facts
+  "Project retained construction, never the present library. Recompute slice
+  membership from its manifest and unit pins, not a producer truth flag."
+  [selection enumerated]
+  (let [c (:construction selection)
+        library (:library c)
+        policies (:cascades c)
+        scored (:cascades selection)
+        patterns (:patterns library)
+        units (mapcat :units policies)
+        pattern-name #(second (re-matches #"futon3/library/task-selection/(.+)\.flexiarg" (:pattern %)))
+        unit-patterns (set (map pattern-name units))
+        slice? (and (seq units)
+                    (= (:count library) (count patterns))
+                    (= (:manifest-sha library)
+                       (load-identity/sha256 (.getBytes (pr-str (into (sorted-map) patterns)) "UTF-8")))
+                    (= (:sha256 library)
+                       (load-identity/sha256 (.getBytes (pr-str [(:manifest-sha library)
+                                                                (:mapping-sha library)
+                                                                (:readme-sha library)]) "UTF-8")))
+                    (= (set (:slice c)) unit-patterns (set (:pool c)))
+                    (every? #(and (pattern-name %) (:sha256 %)
+                                  (= (:sha256 %) (get patterns (pattern-name %)))) units))
+        pin #(if (and (string? %) (re-matches #"[0-9a-f]{64}" %)) % "")
+        ids (sorted-ids (map :digest policies))
+        score-ids (sorted-ids (map :digest scored))
+        g-rows (mapv #(when-let [g (exact-g (:G %))] {"policy" (:digest %) "g" g}) scored)
+        prediction-rows (mapv #(when (seq (:prediction %))
+                                {"policy" (:digest %) "digest" (action-identity/digest (:prediction %))}) scored)
+        rows-or-nr (fn [rows why] (if (every? some? rows)
+                                   (vec (sort-by #(get % "policy") rows))
+                                   (not-recomputable why)))]
+    {"targetConstruction" [{"targets" enumerated "action" 0
+                            "reading" (pin (:reading c)) "library" (pin (:sha256 library))
+                            "graph" (pin (:graph c)) "kernel" (pin (:kernel c))
+                            "slice" (sorted-ids (:slice c)) "pool" (sorted-ids (:pool c))
+                            "sliceFromWholeLibrary" (boolean slice?)
+                            "policyCount" (:policy-count c) "policies" ids}]
+     "constructorPatternCount" (count (:pool c))
+     "libraryPatternCount" (:count library)
+     "constructedCascades" ids "comparedPolicies" score-ids
+     "cascadesWithoutG" (sorted-ids (map :digest (remove #(exact-g (:G %)) scored)))
+     "policyG" (rows-or-nr g-rows "constructed cascade missing finite G")
+     "policyPrediction" (rows-or-nr prediction-rows "constructed cascade missing prediction")
+     "abstentionG" (or (exact-g (get-in selection [:abstention :G]))
+                        (not-recomputable "abstention G unavailable"))
+     "abstentionPrediction" (if-let [prediction (seq (get-in selection [:abstention :prediction]))]
+                               (action-identity/digest (into {} prediction))
+                               (not-recomputable "abstention prediction unavailable"))}))
+
 (defn- selection-decision
   "The target and cascade chosen, or the empty-field abstention when the chosen
   cascade picked nothing.  Lean reads that on a non-empty field as a violation."
@@ -854,19 +904,24 @@
         pick (when (and picks index (< -1 index (count picks))) (nth picks index))]
     (if (or (nil? target) (= :no-pick pick))
       "abstain-empty-field"
-      {"target" target "cascade" (policy-identity (:cascade-id selection))})))
+      {"target" target "cascade" (if (:construction selection) (:cascade-digest selection)
+                                      (policy-identity (:cascade-id selection)))})))
 
 (defn- pick-relation
-  "The relation fact, digested.  This is weaker than a classify-target receipt,
-  which the record does not retain: it says what the selection believed, not
-  what measured it."
+  "Modern constructions retain the chosen classify-target receipt digest.
+  Historical records keep the weaker class-and-target digest fallback."
   [selection]
-  (let [relation (:selected-relation selection)]
+  (let [chosen (first (filter #(= (:cascade-digest selection) (:digest %)) (:cascades selection)))
+        relation (:selected-relation selection)]
+    (if (:construction selection)
+      (if (and (known-relations (get-in chosen [:relation :class]))
+               (get-in chosen [:relation :receipt-digest]))
+        {"observed" (get-in chosen [:relation :receipt-digest])} "absent")
     (if (known-relations relation)
       {"observed" (action-identity/digest
                    {:selected-relation relation
                     :target (get-in selection [:selection :selected :target])})}
-      "absent")))
+      "absent"))))
 
 (defn- pick-reach
   "New fields retain the measured status and declared prior kit. Legacy
@@ -921,10 +976,11 @@
         (when (some? x)
           (for [[p _] (paths-with x
                           #(and (map? %)
-                                (or (contains? absence-statuses (:status %))
-                                    (contains? absence-statuses (:outcome %))
-                                    (= :typed-refusal (:kind %))
-                                    (= :classification-receipt-absent (:reason %)))))]
+                                (let [m (into {} %)]
+                                  (or (contains? absence-statuses (:status m))
+                                      (contains? absence-statuses (:outcome m))
+                                      (= :typed-refusal (:kind m))
+                                      (= :classification-receipt-absent (:reason m))))))]
             (vec (concat root p)))))
       roots))))
 
@@ -964,7 +1020,9 @@
                 "interpretationOrder" (nr "no interpretation step on a selection run")}
                (if section?
                  (merge
-                  (menu-facts selection makeup)
+                  (if (:construction selection)
+                    (constructed-menu-facts selection (sorted-ids (distinct (concat admitted excluded))))
+                    (menu-facts selection makeup))
                   {"enumeratedTasks" (sorted-ids (distinct (concat admitted excluded)))
                    "currentChoice" (selection-decision selection)
                    "pathAbsenceCount" (count (selection-absence-paths record))

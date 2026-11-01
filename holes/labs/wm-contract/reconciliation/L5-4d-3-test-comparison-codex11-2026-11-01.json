@@ -1,0 +1,92 @@
+{
+  "base": "943e595ae",
+  "baseline": {
+    "summary": [
+      "Ran 152 tests containing 599 assertions.",
+      "20 failures, 3 errors."
+    ],
+    "failures": {
+      "ERROR no-menu-makeup-and-menu-only-migration": 1,
+      "ERROR real-giraffe-run-shape": 1,
+      "ERROR retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "FAIL missing-run-record-defers-without-replacing-pending": 1,
+      "FAIL missing-task-selects-and-enters-existing-path": 5,
+      "FAIL real-giraffe-selection-demonstration": 3,
+      "FAIL retained-qualified-already-satisfied-advances-c": 4,
+      "FAIL selection-pends-and-next-selection-learns": 7
+    },
+    "data_before": 45737,
+    "data_after": 45737,
+    "namespaces": [
+      "futon2.aif.outer-consumption-test",
+      "futon2.aif.outer-learning-manifest-test",
+      "futon2.aif.outer-menu-test",
+      "futon2.aif.outer-menu-wiring-test",
+      "futon2.aif.outer-observation-test",
+      "futon2.aif.outer-refusal-census-test",
+      "futon2.aif.outer-refusal-history-test",
+      "futon2.aif.outer-relation-admission-test",
+      "futon2.aif.outer-score-test",
+      "futon2.aif.outer-select-test",
+      "futon2.aif.outer-selection-wiring-test",
+      "futon2.aif.outer-state-test",
+      "futon2.aif.outer-state-update-test",
+      "futon2.aif.outer-state-wiring-test",
+      "futon2.aif.wm-run-facts-test",
+      "wm-check-run-facts-test"
+    ],
+    "exit": 1
+  },
+  "branch": {
+    "summary": [
+      "Ran 155 tests containing 626 assertions.",
+      "20 failures, 3 errors."
+    ],
+    "failures": {
+      "ERROR no-menu-makeup-and-menu-only-migration": 1,
+      "ERROR real-giraffe-run-shape": 1,
+      "ERROR retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "FAIL missing-run-record-defers-without-replacing-pending": 1,
+      "FAIL missing-task-selects-and-enters-existing-path": 5,
+      "FAIL real-giraffe-selection-demonstration": 3,
+      "FAIL retained-qualified-already-satisfied-advances-c": 4,
+      "FAIL selection-pends-and-next-selection-learns": 7
+    },
+    "data_before": 45737,
+    "data_after": 45737,
+    "namespaces": [
+      "futon2.aif.outer-consumption-test",
+      "futon2.aif.outer-learning-manifest-test",
+      "futon2.aif.outer-menu-test",
+      "futon2.aif.outer-menu-wiring-test",
+      "futon2.aif.outer-observation-test",
+      "futon2.aif.outer-refusal-census-test",
+      "futon2.aif.outer-refusal-history-test",
+      "futon2.aif.outer-relation-admission-test",
+      "futon2.aif.outer-score-test",
+      "futon2.aif.outer-select-test",
+      "futon2.aif.outer-selection-wiring-test",
+      "futon2.aif.outer-state-test",
+      "futon2.aif.outer-state-update-test",
+      "futon2.aif.outer-state-wiring-test",
+      "futon2.aif.wm-run-facts-test",
+      "wm-check-run-facts-test"
+    ],
+    "exit": 1
+  },
+  "same_failure_distribution": true,
+  "focused": "{:test 85, :pass 278, :fail 0, :error 0}",
+  "artifact_root": "/home/joe/notes/l5-4d-3",
+  "sha256": {
+    "baseline.log": "3af5a16782d6294573a30c7b289b26e32f0763b96d896cda611d7d61d1c19afe",
+    "final2.log": "dd3a1e7598ee3273a0bdb81daff2e98719fe61822f020374ba66f00de7dc66bb",
+    "focused-final.log": "5a51f43a3798ce3517057636079b128c5cedd628b56d842c5509a26de8b84c80",
+    "inputs.edn": "ac683015df75ae361286b61daf8fdcfe936674852d0d0b1315d12e38c79d6213",
+    "real-selection.clj": "dd82f5efb1177c7492bddfb7a5eaf28e1bbe2f031a2b60074cd1e4a6b208cb14",
+    "real-selection.log": "4b89bde724c920307dc7b080b45359153b1722fc119ebc2fd5a16ee3788e6264",
+    "selection-result.edn": "04f8010371256721403101dd5a96e1a8933dbda9abf6391e33aedc0757ac4878",
+    "observation.edn": "21cf2f76bf9cd1e65e33f19aaecb05b4999349c17ff0bde0f885ac018138df81",
+    "kondo.log": "8744224d1a3fca70230c380d758041bd2347d645e9e61a217133ded361a38101",
+    "parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+  }
+}
