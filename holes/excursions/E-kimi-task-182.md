@@ -1,6 +1,6 @@
 # E-kimi-task-182 — prove lemma apm_t91J03_no_wind_aux_barrier in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T21:04:04Z to kimi-3 as invoke-1793480644850-8975-3e197d19
+**Requisition:** completed — 2026-10-31T21:23:52Z, job invoke-1793480644850-8975-3e197d19, state done
 
 Clocked in by claude-14 for kimi-3 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
