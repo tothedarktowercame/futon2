@@ -1148,6 +1148,27 @@
        (= :wm/completion-surface-v2 (:schema x))
        (= :completion-definition-not-found (:completion-class x))))
 
+(defn- previous-path-facts
+  "The predecessor contributes only the three facts Q6 reads.  Its retained
+   selection outcome may contain the predecessor's complete refusal evidence;
+   that evidence explains the earlier click, but is not a dependency of this
+   click's selection.  Preserve a typed absence for each missing Q6 fact."
+  [previous]
+  (when (map? previous)
+    (let [present? (= :present (:status previous))
+          choice (when (and present? (:chosen-class previous) (:pick previous))
+                   {:target (:pick previous) :cascade (:chosen-class previous)})
+          outcome (when (and present?
+                             (contains? #{:changed :refused :abstained}
+                                        (:outcome previous)))
+                    (:outcome previous))
+          input-digest (when present? (:choice-input-digest previous))]
+      {:choice (or choice {:status :absent :reason :previous-choice-unretained})
+       :previous-outcome (or outcome
+                             {:status :absent :reason :previous-outcome-unretained})
+       :input-digest (or input-digest
+                         {:status :absent :reason :previous-input-digest-unretained})})))
+
 (defn selection-absence-paths
   "Q7's rule on the selection path.  The field exclusions and knowledge requests
   are population-wide evidence about alternatives, as the work path's rejected
@@ -1171,6 +1192,7 @@
                     (dissoc :outer-field/excluded :outer-score/excluded :knowledge-producer-requests
                             :field-facts :cascades :classes :cascade-picks :cascade-pick-relations
                             :cascade-scores :tied-cascades)
+                    (assoc :previous (previous-path-facts (:previous selection)))
                     (assoc :chosen-cascade (first (filter #(= chosen-id (:id %)) (:cascades selection)))
                            :chosen-class-row (first (filter #(= chosen-class (:id %)) (:classes selection)))
                            :pick-fact (when pick (get-in selection [:field-facts :admitted pick]))))
