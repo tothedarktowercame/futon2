@@ -122,6 +122,15 @@
                         (.getBytes (str text) "UTF-8"))]
     (apply str (map #(format "%02x" %) digest))))
 
+(def mission-classifier-version
+  "Explicit version of the mission status/gate classification rules. Change
+   this value whenever those rules change; its digest is retained with every
+   derived mission record so unchanged source files are reclassified."
+  "mission-classifier-v2-explicit-gate-lines")
+
+(def mission-classifier-sha256
+  (sha256-text mission-classifier-version))
+
 (defn- classify-status
   "Classify a mission from its Status line. Terminal / draft / inactive states are
    recognised ONLY from the LEADING state token (the mission's overall state, after
@@ -387,6 +396,7 @@
          ;; discarded on each scan; a count cannot project into an outcome
          ;; domain and an item can. Omitted when empty (XTDB drops nil).
          :mission/open-holes (when (seq (:open-holes entry)) (vec (:open-holes entry)))
+         :mission/classifier-sha256 mission-classifier-sha256
          :provenance/repo (repo-of code-root (:path entry))
          :provenance/path (:path entry)
          :provenance/sha256 (get-in entry [:source :sha256])}))
@@ -592,6 +602,15 @@
           upsert-fn upsert-mission-record!}}]
    (let [entries (:missions (scan-fn code-root))
          before (index-fn)
+         reclassified-ids (->> entries
+                               (keep (fn [entry]
+                                       (let [props (some-> (get before (:id entry))
+                                                           :entity/props parse-entity-props)]
+                                         (when (and props
+                                                    (not= mission-classifier-sha256
+                                                          (:mission/classifier-sha256 props)))
+                                           (:id entry)))))
+                               set)
          results (mapv (fn [entry]
                          (upsert-fn {:code-root code-root
                                      :path (:path entry)
@@ -601,12 +620,18 @@
          after (index-fn)
          stale (->> entries
                     (keep (fn [entry]
-                            (let [actual (some-> (get after (:id entry))
-                                                 :entity/props parse-entity-props
-                                                 :provenance/sha256)
-                                  expected (sha256-file (:path entry))]
-                              (when-not (= expected actual)
-                                {:id (:id entry) :expected expected :actual actual}))))
+                            (let [actual-props (some-> (get after (:id entry))
+                                                       :entity/props parse-entity-props)
+                                  actual-sha (:provenance/sha256 actual-props)
+                                  expected-sha (sha256-file (:path entry))
+                                  actual-classifier (:mission/classifier-sha256 actual-props)]
+                              (when-not (and (= expected-sha actual-sha)
+                                             (= mission-classifier-sha256 actual-classifier))
+                                {:id (:id entry)
+                                 :expected {:sha256 expected-sha
+                                            :classifier-sha256 mission-classifier-sha256}
+                                 :actual {:sha256 actual-sha
+                                          :classifier-sha256 actual-classifier}}))))
                     vec)]
      (when (or (empty? entries) (seq errors) (seq stale))
        (throw (ex-info "Mission substrate freshness could not be established"
@@ -617,6 +642,9 @@
       :scanned (count entries)
       :created (count (filter #(= :created (:status %)) results))
       :updated (count (filter #(= :updated (:status %)) results))
+      :reclassified (count (filter #(and (contains? reclassified-ids (:id %))
+                                         (contains? #{:updated :unchanged} (:status %)))
+                                   results))
       :unchanged (count (filter #(= :unchanged (:status %)) results))})))
 
 (def ^:private missions-cache (atom nil))
