@@ -1,0 +1,4 @@
+{:schema :wm/outer-abstention-altitude-v1
+ :nats 10
+ :authority "Joe, 2026-11-01: the machine runs at 10,000 feet or so above stopping level; lowering this to 0 is 'let's pause'"
+ :authorized-at "2026-11-01T20:55Z"}

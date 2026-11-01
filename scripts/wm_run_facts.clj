@@ -1311,6 +1311,9 @@
                                              [k {:census-only (sorted-ids (clojure.set/difference c r))
                                                  :selector-only (sorted-ids (clojure.set/difference r c))}]))})
                    :stoppingEquivalent (:stopping-equivalent selection)
+                   :abstentionTerms (when-let [terms (get-in selection [:abstention :terms])]
+                                       {:terms terms
+                                        :altitudeSource (get-in selection [:abstention :altitude-source])})
                    :selectionDecisionOutcome (:outcome selection)
                    :taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
                    :absencePaths (mapv pr-str (selection-absence-paths record))

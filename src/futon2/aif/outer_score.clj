@@ -1,8 +1,37 @@
 (ns futon2.aif.outer-score
   "Pure task-selection cascade application and expected-free-energy scoring.
 
-  This namespace follows DarkTower.WarMachine.R20Step.  It performs no I/O,
-  constructs no field, and carries no state between clicks.")
+  This namespace follows DarkTower.WarMachine.R20Step. It constructs no field
+  and carries no state between clicks; the ruled stopping altitude is read from
+  its pinned resource."
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [futon2.aif.load-identity :as identity]))
+
+(def ^:dynamic *abstention-altitude-path*
+  "resources/wm/outer-abstention-altitude.edn")
+
+(defn abstention-altitude
+  "Read and pin Joe's explicit stopping altitude. Absence and malformed data
+  refuse rather than silently turning the altitude into a pause."
+  []
+  (let [file (io/file *abstention-altitude-path*)]
+    (try
+      (let [bytes (java.nio.file.Files/readAllBytes (.toPath file))
+            resource (edn/read-string (String. bytes "UTF-8"))]
+        (when-not (and (= :wm/outer-abstention-altitude-v1 (:schema resource))
+                       (number? (:nats resource))
+                       (<= 0 (:nats resource))
+                       (string? (:authority resource)) (seq (:authority resource))
+                       (string? (:authorized-at resource)) (seq (:authorized-at resource)))
+          (throw (ex-info "Outer abstention altitude is malformed" {})))
+        {:path (.getCanonicalPath file)
+         :sha256 (identity/sha256 bytes)
+         :nats (:nats resource)})
+      (catch Exception e
+        (throw (ex-info "Outer abstention altitude is not configured"
+                        {:kind :abstention-altitude-unconfigured
+                         :path (.getPath file)} e))))))
 
 (def ^:private endings
   [:focused :related :unrelated :stop-the-line :not-yet-evaluated])
@@ -232,14 +261,20 @@
   (let [prediction (push model)
         r (risk prediction (outer-preference ending-counts gain-counts))
         a (ambiguity model)
-        n (outer-novelty model)]
-    {:terms {:risk r :ambiguity a :novelty n}
-     :G (if (= :inadmissible r) :inadmissible (- (+ r a) n))
+        n (outer-novelty model)
+        stopping? (= prediction (push (stopped-model)))
+        altitude-source (when stopping? (abstention-altitude))
+        altitude (or (:nats altitude-source) 0)]
+    {:terms (cond-> {:risk r :ambiguity a :novelty n}
+              stopping? (assoc :altitude altitude))
+     :altitude-source altitude-source
+     :G (if (= :inadmissible r) :inadmissible (+ (- (+ r a) n) altitude))
      :gain-source (:gain-source model)
      :prediction (assoc (select-keys model [:q :landing :status :gain-source]) :outcomes prediction)}))
 
 (defn abstention-score
-  "Score stopping separately over the same preference; never a menu member."
+  "Score stopping separately over the same preference and ruled altitude;
+  never a menu member."
   [input]
   (score-model input (stopped-model)))
 
