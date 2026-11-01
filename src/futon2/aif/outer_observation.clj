@@ -6,10 +6,10 @@
   available."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.outer-state :as outer-state]
-            [futon2.aif.policy-satisfaction :as policy-satisfaction]
             [futon2.aif.wm.construction-inputs :as construction-inputs])
   (:import [java.nio.file Files]
            [java.security MessageDigest]))
@@ -54,122 +54,130 @@
                 (:tickets loaded-tickets)
                 (:excursions loaded-excursions))))
 
-(defn- excluded-candidate [target declaration registry-entry]
-  (cond-> {:target target
-           :reason (or (:status-class registry-entry)
-                       (:source-absent declaration)
-                       :source-unavailable)}
-    (:status-line registry-entry) (assoc :status-line (:status-line registry-entry))))
+(def task-exclusion-reasons
+  "Task-level evidence gaps only; no in-flight producer exists yet.
+  Registry statuses and inner-policy satisfaction are not exclusions."
+  #{:target-source-path-absent :target-source-conflict :target-item-line-absent
+    :unread-new :reading-source-changed})
 
-(defn- drift-exclusions
-  "Open items the run left out of its graph (typed in the manifest's
-  :reading-drift), as outer exclusions, so Q1 can account for each. SEEN holds
-  targets already admitted or excluded, so no item is counted twice."
-  [manifest seen]
-  (vec (for [[reason ids] (select-keys (get-in manifest [:reading-drift :drift])
-                                       [:unread-new :reading-source-changed])
-             id ids
-             :let [target (name id)]
-             :when (not (contains? seen target))]
-         {:target target :reason reason})))
+(defn validate-exclusion! [{:keys [target reason pin] :as row}]
+  (when-not (and (string? target) (task-exclusion-reasons reason)
+                 (string? pin) (seq pin))
+    (refuse! :invalid-task-exclusion {:exclusion row}))
+  row)
 
-(defn- declaration-sha [declaration]
-  (or (:source-sha256 declaration)
-      (when-let [path (:source-path declaration)]
-        (let [file (io/file path)]
-          (when (.isFile file)
-            (sha256 (Files/readAllBytes (.toPath file))))))))
+(defn validate-field!
+  "Check exact open-set partition, not just matching cardinalities."
+  [enumerated admitted excluded]
+  (doseq [row excluded] (validate-exclusion! row))
+  (let [ids (concat admitted (map :target excluded))]
+    (when-not (and (= (count enumerated) (count (set enumerated)))
+                   (= (count ids) (count (set ids)))
+                   (= (set enumerated) (set ids)))
+      (refuse! :task-field-partition-invalid
+               {:missing (set/difference (set enumerated) (set ids))
+                :extra (set/difference (set ids) (set enumerated))
+                :duplicate-ids (vec (for [[id n] (frequencies ids) :when (> n 1)] id))})))
+  true)
+
+(defn task-reach
+  "Version 1 readiness prior: ready 3/4, undetermined 1/2, not-ready 1/4.
+  Status is measured in the pinned pass; the mapping is an empirical kit Joe
+  may replace, NOT a calibrated probability. Reads no policy, makeup or prior
+  run. Unknown status or missing row evidence stays explicitly absent."
+  [row]
+  (let [pin (get-in row [:dependency-reading :record-pin :sha256])
+        value ({:ready 3/4 :undetermined 1/2 :not-ready 1/4} (:status row))
+        inputs {:status (:status row) :pin pin}]
+    (if (and value (string? pin) (seq pin))
+      {:value value :kind :prior :source :giraffe-status-readiness-prior-v1
+       :inputs inputs :kit-version 1}
+      {:status :absent :reason (if value :row-pin-unavailable :status-unavailable)
+       :inputs inputs})))
+
+(defn- open-entries [authority]
+  (concat (filter mission-registry/live-mission? (get-in authority [:loaded-missions :missions]))
+          (filter mission-registry/live-excursion? (get-in authority [:loaded-excursions :excursions]))
+          (filter mission-registry/live-ticket? (get-in authority [:loaded-tickets :tickets]))))
+
+(defn- data-pin [x] (sha256 (.getBytes (pr-str x) "UTF-8")))
 
 (defn giraffe-field
-  "Build Lean `Observation.field` and `Observation.facts` from a verified run.
-
-  Returns `{:field ... :facts ... :giraffe/run-id ...
-  :giraffe/manifest-sha256 ... :outer-field/excluded ...}`. Candidate reach
-  is the makeup's explicit `:default-reach`, because task reach is not yet
-  produced by the runtime. `target-source-declarations` is the shared inner
-  resolver authority for M-, E-, T-, and explicitly declared target kinds."
+  "The registry-open task population, partitioned into pinned pass facts and
+  typed task exclusions. No inner-policy or makeup reach participates."
   ([run-dir] (giraffe-field run-dir (outer-state/load-makeup)))
   ([run-dir makeup] (giraffe-field run-dir makeup (target-authority)))
   ([run-dir makeup authority]
-   (let [dir (io/file run-dir)
-         verification ((verifier) dir)]
+   (let [dir (io/file run-dir) verification ((verifier) dir)]
      (when-not (:ok? verification)
-       (refuse! :giraffe-run-unverified
-                {:run-dir (.getPath dir) :verification verification}))
-     (let [manifest-file (io/file dir "manifest.edn")
-           pass-file (io/file dir "pass.edn")]
+       (refuse! :giraffe-run-unverified {:run-dir (.getPath dir) :verification verification}))
+     (let [manifest-file (io/file dir "manifest.edn") pass-file (io/file dir "pass.edn")]
        (when-not (and (.isFile manifest-file) (.isFile pass-file))
          (refuse! :giraffe-run-incomplete {:run-dir (.getPath dir)}))
-       (let [manifest-bytes (Files/readAllBytes (.toPath manifest-file))
-             manifest (read-edn-file manifest-file :giraffe-manifest-malformed)
+       (let [manifest (read-edn-file manifest-file :giraffe-manifest-malformed)
              pass (read-edn-file pass-file :giraffe-pass-malformed)
-             rows (:order pass)]
-         (when-not (and (vector? rows)
-                        (every? #(and (:id %) (contains? % :status)
-                                      (or (and (nat-int? (:unblocks %)) (nat-int? (:cone %)))
-                                          (and (= :unknown (get-in % [:graph-terms :status]))
-                                               (nil? (:cone %)) (nil? (:unblocks %))))) rows))
-           (refuse! :giraffe-pass-invalid {:run-dir (.getPath dir)}))
-         (let [targets (mapv (comp name :id) rows)
-               declarations (construction-inputs/target-source-declarations targets authority)
-               registry-by-id (registry-entries authority)
-               entries (mapv (fn [{:keys [id status unblocks cone rank graph-terms completion dependency-reading]} declaration]
-                               (let [target (name id)]
-                                 {:candidate {:target target
-                                              :reach (:default-reach makeup)
-                                              :reach-source :default-reach}
-                                  :target target
-                                  :declaration declaration
-                                  :fact {:status status
-                                         :unblocks unblocks
-                                         :cone cone :rank rank :reach-source :default-reach :graph-terms graph-terms
-                                         :completion completion :dependency-reading dependency-reading}}))
-                             rows declarations)
-               available (filterv #(nil? (get-in % [:declaration :source-absent])) entries)
-               satisfied (into {}
-                               (keep (fn [{:keys [target declaration]}]
-                                       (when-let [exclusion
-                                                  (policy-satisfaction/all-satisfied-exclusion
-                                                   nil target (declaration-sha declaration))]
-                                         [target exclusion])))
-                               available)
-               admitted (filterv #(nil? (get satisfied (:target %))) available)
-               excluded (into (vec (vals satisfied))
-                              (comp (remove #(nil? (get-in % [:declaration :source-absent])))
-                                    (map (fn [{:keys [target declaration]}]
-                                           (excluded-candidate target declaration
-                                                               (get registry-by-id target)))))
-                              entries)
-               ;; Q1-ENUMERATION-DUPLICATE-DROP (2026-10-31): a ticket can be
-               ;; open in the registry while the retained verified Giraffe
-               ;; field predates it (T-repair-ea1-19929445...attempt-002 was
-               ;; minted 2026-10-31 01:13Z; the field the click consumed was
-               ;; the 2026-10-30 21:39Z run).  Such a ticket is not a row in
-               ;; the pass, so before this fix it vanished from the outer
-               ;; population with no typed account while the census counted
-               ;; it (Q1 read 608/609).  Every registry-open ticket the field
-               ;; never saw is now carried as an explicit exclusion: the
-               ;; selector did not admit it, and the record names why.  No
-               ;; graph facts are invented for it.
-               field-targets (set (map :target entries))
-               unseen-open-tickets (->> (get-in authority [:loaded-tickets :tickets])
-                                        (filter mission-registry/live-ticket?)
-                                        (remove #(contains? field-targets (:id %))))
-               absent-excluded (mapv (fn [ticket]
-                                       {:target (:id ticket)
-                                        :reason :registry-open-not-in-giraffe-field
-                                        :status-line (:status-line ticket)
-                                        :registry-path (:path ticket)})
-                                     unseen-open-tickets)]
-           {:field (mapv :candidate admitted)
-            :facts (into {} (map (juxt :target :fact)) admitted)
-            :outer-field/excluded
-            (let [named (vec (concat excluded absent-excluded))]
-              (into named
-                    (drift-exclusions manifest
-                                      (into field-targets (map :target) named))))
-            :giraffe/run-id (:run-id manifest)
-            :giraffe/manifest-sha256 (sha256 manifest-bytes)}))))))
+             manifest-sha (sha256 (Files/readAllBytes (.toPath manifest-file)))
+             pass-sha (sha256 (Files/readAllBytes (.toPath pass-file)))
+             rows (:order pass)
+             _ (when-not (and (vector? rows) (every? #(and (:id %) (contains? % :status)) rows)
+                              (= (count rows) (count (set (map :id rows)))))
+                 (refuse! :giraffe-pass-invalid {:run-dir (.getPath dir)}))
+             by-id (into {} (map (juxt (comp name :id) identity)) rows)
+             registry (registry-entries authority)
+             open-ids (mapv :id (open-entries authority))
+             _ (when-not (= (count open-ids) (count (set open-ids)))
+                 (refuse! :registry-duplicate-open-task {}))
+             ;; Preserve the pass's order (including stable-sort ties), then
+             ;; append newly open tasks that have no pass row.
+             enumerated (into (filterv (set open-ids) (mapv (comp name :id) rows))
+                              (remove #(contains? by-id %) open-ids))
+             declarations (construction-inputs/target-source-declarations enumerated authority)
+             changed (set (map name (get-in manifest [:reading-drift :drift :reading-source-changed])))
+             entries
+             (mapv (fn [target declaration]
+                     (let [row (get by-id target)
+                           reason (cond (contains? changed target) :reading-source-changed
+                                        (nil? row) :unread-new
+                                        :else (:source-absent declaration))
+                           pin (get-in row [:dependency-reading :record-pin :sha256])]
+                       (if reason
+                         {:excluded (validate-exclusion!
+                                     {:target target :reason reason
+                                      :reach (if row (task-reach row)
+                                               {:status :absent :reason :pass-row-unavailable})
+                                      :pin (case reason
+                                             :reading-source-changed manifest-sha
+                                             :unread-new pass-sha
+                                             (data-pin (get registry target)))
+                                      :evidence (if (contains? #{:unread-new :reading-source-changed} reason)
+                                                  {:pass-sha256 pass-sha :manifest-sha256 manifest-sha
+                                                   :registry-entry (get registry target)}
+                                                  {:registry-entry (get registry target) :declaration declaration})})}
+                         (do
+                           (when-not (and (string? pin) (seq pin))
+                             (refuse! :giraffe-row-pin-unavailable {:target target :pass-sha256 pass-sha}))
+                           (let [reach (task-reach row)]
+                             {:candidate {:target target :reach (:value reach) :reach-source (:source reach)}
+                              :target target
+                              :fact (assoc (select-keys row [:status :cone :unblocks :rank :graph-terms
+                                                            :completion :dependency-reading])
+                                           :pin pin :reach reach :reach-source (:source reach))})))) )
+                   enumerated declarations)
+             admitted (filterv :candidate entries)
+             excluded (mapv :excluded (filter :excluded entries))
+             facts (into {} (map (juxt :target :fact)) admitted)]
+         (validate-field! enumerated (mapv :target admitted) excluded)
+         {:field (mapv :candidate admitted) :facts facts
+          :enumerated-open-tasks enumerated
+          :field-facts {:enumerated enumerated :admitted facts :excluded excluded
+                        :giraffe/pass-sha256 pass-sha}
+          :outer-field/excluded excluded
+          :registry/non-open (mapv #(select-keys % [:id :status-class])
+                                  (remove #(contains? (set enumerated) (:id %)) (vals registry)))
+          :default-reach-ignored (contains? makeup :default-reach)
+          :giraffe/run-id (:run-id manifest)
+          :giraffe/pass-sha256 pass-sha
+          :giraffe/manifest-sha256 manifest-sha})))))
 
 (defn outer-observation
   "Build the input read by `outer-score`, aligned with Lean `R20Step.Observation`.

@@ -693,3 +693,22 @@
   (let [text #(json/generate-string (facts/export-for-kind live-record "r" snap %))
         direct (json/generate-string (facts/facts-for-record live-record "r" snap))]
     (is (= direct (text {}) (text {:kind nil}) (text {:kind "work"})))))
+
+(deftest task-field-reach-is-observed-and-exclusions-project
+  (let [target (get-in live-record [:outer/selection :selection :selected :target])
+        value (get-in live-record [:outer/selection :selection :selected :reach])
+        reach {:value value :kind :prior :source :giraffe-status-readiness-prior-v1
+               :inputs {:status :ready :pin "row-sha"} :kit-version 1}
+        field {:enumerated [target "M-unread"]
+               :admitted {target {:status :ready :pin "row-sha" :reach reach}}
+               :excluded [{:target "M-unread" :reason :unread-new :pin "pass-sha"}]}
+        r (assoc-in live-record [:outer/selection :field-facts] field)
+        projected (facts/selection-facts-for-record r "r" snap {:makeup-path makeup-path})]
+    (is (= {"observed" (action-identity/digest reach)}
+           (get-in projected [:facts "selectionPath" "pickReach"])))
+    (is (= (:excluded field) (get-in projected [:diagnostics :taskExclusions])))
+    (is (= (set [target "M-unread"]) (set (get-in projected [:facts "enumeratedTasks"])) ))
+    (is (= "absent" (get-in (selection-of (assoc-in r [:outer/selection :field-facts :admitted target :reach]
+                                                  {:status :absent :reason :status-unavailable}))
+                            ["selectionPath" "pickReach"])))
+    (is (= "defaulted" (get-in selection-live ["selectionPath" "pickReach"])))))

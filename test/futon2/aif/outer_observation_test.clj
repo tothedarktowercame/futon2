@@ -1,9 +1,12 @@
 (ns futon2.aif.outer-observation-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [futon2.aif.policy-satisfaction :as satisfaction]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-observation :as observation]
             [futon2.aif.focus-receipt :as focus]
             [futon2.aif.outer-select :as select]
+            [futon2.aif.outer-state :as state]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.selection-world :as selection-world]))
 
@@ -59,7 +62,7 @@
                             :adapter-result {:input {:as-of "2026-10-28"
                                                      :items [] :edges []}
                                              :rejected []}
-                            :pass-output pass})]
+                            :pass-output (update pass :order #(mapv (fn [row] (assoc row :dependency-reading {:record-pin {:sha256 (identity/sha256 (pr-str row))}})) %))})]
     (io/file (:dir result))))
 
 (deftest verified-field-carries-open-facts
@@ -68,8 +71,8 @@
           result (binding [observation/*resolve-var* actual-var]
                    (observation/giraffe-field dir makeup fixture-authority))]
       (is (= ["M-ready" "M-cycle" "M-waiting"] (mapv :target (:field result))))
-      (is (every? #(= 1/2 (:reach %)) (:field result)))
-      (is (= {:status :ready :unblocks 2 :cone 4 :rank 1 :reach-source :default-reach}
+      (is (= [3/4 1/2 1/4] (mapv :reach (:field result))))
+      (is (= {:status :ready :unblocks 2 :cone 4 :rank 1 :reach-source :giraffe-status-readiness-prior-v1}
              (select-keys (get-in result [:facts "M-ready"]) [:status :unblocks :cone :rank :reach-source])))
       (is (= :undetermined (get-in result [:facts "M-cycle" :status])))
       (is (= :not-ready (get-in result [:facts "M-waiting" :status])))
@@ -129,7 +132,7 @@
                                               {:input {:as-of "2026-10-28"
                                                        :items [] :edges []}
                                                :rejected []}
-                                              :pass-output pass})))
+                                              :pass-output (update pass :order #(mapv (fn [row] (assoc row :dependency-reading {:record-pin {:sha256 (identity/sha256 (pr-str row))}})) %))})))
           result (binding [observation/*resolve-var* actual-var]
                    (observation/giraffe-field run-dir makeup fixture-authority-with-tickets))
           excluded (into {} (map (juxt :target identity))
@@ -138,11 +141,8 @@
       (is (contains? (set (map :target (:field result))) "T-in-field"))
       (is (nil? (get excluded "T-in-field")))
       ;; The unseen open ticket: a typed exclusion, never in the field/facts.
-      (is (= {:target "T-minted-after-run"
-              :reason :registry-open-not-in-giraffe-field
-              :status-line "OPEN"
-              :registry-path "/fixture/T-minted-after-run.md"}
-             (get excluded "T-minted-after-run")))
+      (is (= :unread-new (:reason (get excluded "T-minted-after-run"))))
+      (is (string? (:pin (get excluded "T-minted-after-run"))))
       (is (not (contains? (set (map :target (:field result)))
                           "T-minted-after-run")))
       (is (nil? (get-in result [:facts "T-minted-after-run"]))))))
@@ -193,25 +193,11 @@
           targets (set (map :target (:field result)))
           excluded (some #(when (= "M-repl-wins-over-cli" (:target %)) %)
                          (:outer-field/excluded result))]
-      (is (= {:target "M-repl-wins-over-cli"
-              :reason :inactive
-              :status-line "OPEN — parked"}
-             excluded))
+      (is (nil? excluded) "inactive is outside the enumerated open set")
       (is (not (contains? targets "M-repl-wins-over-cli")))
       (is (nil? (get-in result [:facts "M-repl-wins-over-cli"])))
       (is (contains? targets "M-futonzero-prelim-practice"))
       (is (some? (get-in result [:facts "M-futonzero-prelim-practice"]))))))
-
-(deftest reading-drift-reaches-the-excluded-population
-  (let [manifest {:reading-drift {:drift {:unread-new [:E-kimi-task-171 :T-seen]
-                                          :reading-source-changed [:M-changed]
-                                          :members-not-open [:E-closed]}}}
-        rows (#'observation/drift-exclusions manifest #{"T-seen"})]
-    (is (= #{{:target "E-kimi-task-171" :reason :unread-new}
-             {:target "M-changed" :reason :reading-source-changed}}
-           (set rows))
-        "drifted open items are typed once; a closed member is not an exclusion")
-    (is (= [] (#'observation/drift-exclusions {} #{})))))
 
 (deftest retained-relation-is-the-scoring-receipt
   (let [calls (atom [])
@@ -236,3 +222,96 @@
     (is (= 3 (get-in r [:cascades 0 :pick-facts :rank])))
     (is (= :default-reach (get-in r [:cascades 0 :reach :source])))
     (is (= 1 (count @calls)))))
+
+(def retained-pass-dir "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5")
+(def retained-pass-sha "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91")
+
+(deftest retained-open-field-is-exact-and-policy-independent
+  (let [population-text (slurp "holes/labs/wm-contract/witnesses/witnesses-open-tasks-2026-11-01.edn")
+        ids (:ids (edn/read-string population-text))
+        pass-text (slurp (io/file retained-pass-dir "pass.edn"))
+        _ (is (= retained-pass-sha (identity/sha256 pass-text)))
+        _ (is (= "e82f6381fa3e056fff332cdb510662469e353fb120cbb7120d1eb2b46f9333d9"
+                 (identity/sha256 (pr-str (vec (sort (map str ids)))))))
+        ;; Registry snapshot INPUT: exact pinned open IDs, with available source
+        ;; declarations. No network registry or live policy store is consulted.
+        entries (fn [prefix status]
+                  (mapv #(hash-map :id % :status-class status :path (str "/snapshot/" % ".md"))
+                        (filter #(.startsWith ^String % prefix) ids)))
+        authority {:loaded-missions {:missions (entries "M-" :open)}
+                   :loaded-excursions {:excursions (entries "E-" :open)}
+                   :loaded-tickets {:tickets (entries "T-" :live)}
+                   :ticket-targets (vec (filter #(.startsWith ^String % "T-") ids))
+                   :excursion-targets (vec (filter #(.startsWith ^String % "E-") ids))}
+        verifier (fn [_] (fn [dir]
+                          {:ok? (= retained-pass-sha (identity/sha256 (slurp (io/file dir "pass.edn"))))}))
+        build (fn [reach]
+                (binding [observation/*resolve-var* verifier]
+                  (with-redefs [satisfaction/all-satisfied-exclusion
+                                (fn [& _] (throw (ex-info "Policy lookup forbidden" {})))]
+                    (observation/giraffe-field retained-pass-dir {:default-reach reach} authority))))
+        a (build 0) b (build 999)
+        field (:field-facts a) admitted (:admitted field) excluded (:excluded field)]
+    (is (= a b) "makeup default reach is not read")
+    (is (= 626 (count (:enumerated field))))
+    (is (= 609 (count admitted)))
+    (is (= 17 (count excluded)))
+    (is (= (set ids) (set (concat (keys admitted) (map :target excluded)))))
+    (is (= #{:unread-new} (set (map :reason excluded))))
+    (is (every? #(observation/task-exclusion-reasons (:reason %)) excluded))
+    (is (every? (comp seq :pin) excluded))
+    (is (contains? admitted "M-futonzero-prelim-practice")
+        "ac5bc477 excluded this open task for satisfied inner policies")
+    (is (not (contains? (set (map :target excluded)) "E-kimi-task-187")))
+    (is (every? (fn [[_ fact]] (and (:pin fact)
+                                     (<= 0 (get-in fact [:reach :value]) 1)
+                                     (= :prior (get-in fact [:reach :kind]))
+                                     (= (:pin fact) (get-in fact [:reach :inputs :pin])))) admitted))
+    (is (= 1/2 (get-in admitted ["M-interim-director" :reach :value])))
+    (is (= retained-pass-sha (:giraffe/pass-sha256 field)))
+    (is (true? (:default-reach-ignored a)))
+    (let [kit (state/load-makeup)
+          selected (select/select (assoc kit :cascades [{:id :ready-only
+                                                         :steps [:ready-gate :by-cone :by-unblocks]}])
+                                  (state/init-state kit)
+                                  (assoc a :focus "WM" :relation (fn [_ _] :associated)))]
+      (is (= field (:field-facts selected)))
+      (is (= 609 (count (:outer-score/admitted selected))))
+      (is (= :giraffe-status-readiness-prior-v1 (get-in selected [:cascades 0 :reach :source])))
+      (is (= 3/4 (get-in selected [:selection :selected :reach]))))))
+
+(deftest task-reach-is-a-pinned-prior-not-run-history
+  (doseq [[status expected] [[:ready 3/4] [:undetermined 1/2] [:not-ready 1/4]]]
+    (let [row {:status status :dependency-reading {:record-pin {:sha256 "row-pin"}}}
+          reach (observation/task-reach row)]
+      (is (= expected (:value reach)))
+      (is (= reach (observation/task-reach (assoc row :prior-run :never-attempted :policy :ignored))))
+      (is (= {:status status :pin "row-pin"} (:inputs reach)))))
+  (is (= :status-unavailable (:reason (observation/task-reach {:status :unknown}))))
+  (is (= :row-pin-unavailable (:reason (observation/task-reach {:status :ready})))))
+
+(deftest partition-and-exclusion-contract-refuse-invalid-input
+  (doseq [row [{:target "M-x" :reason :open :pin "p"}
+               {:target "M-x" :reason :all-policies-already-satisfied :pin "p"}
+               {:target "M-x" :reason :unread-new :pin nil}]]
+    (is (thrown? clojure.lang.ExceptionInfo (observation/validate-exclusion! row))))
+  (doseq [[admitted excluded] [[[] []] [["M-x" "M-x"] []]
+                               [["M-x"] [{:target "M-x" :reason :unread-new :pin "p"}]]
+                               [["M-extra"] []]]]
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (observation/validate-field! ["M-x"] admitted excluded)))))
+
+(deftest registry-status-is-not-a-source-exclusion-reason
+  (let [authority (-> fixture-authority
+                      (assoc-in [:loaded-missions :missions 0 :status-class] :active)
+                      (assoc-in [:loaded-missions :missions 0 :path] nil)
+                      (assoc-in [:loaded-missions :missions 1 :status-class] :identify)
+                      (assoc-in [:loaded-missions :missions 2 :status-class] :inactive))
+        result (binding [observation/*resolve-var* actual-var]
+                 (observation/giraffe-field (fixture-run!) makeup authority))
+        exclusion (first (:outer-field/excluded result))]
+    (is (= ["M-ready" "M-cycle"] (:enumerated-open-tasks result)))
+    (is (= ["M-cycle"] (mapv :target (:field result))))
+    (is (= :target-source-path-absent (:reason exclusion)))
+    (is (= (identity/sha256 (pr-str (get-in authority [:loaded-missions :missions 0]))) (:pin exclusion)))
+    (is (= [{:id "M-waiting" :status-class :inactive}] (:registry/non-open result)))))

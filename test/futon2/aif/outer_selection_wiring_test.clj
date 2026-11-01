@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.outer-observation :as outer-observation]
@@ -151,7 +152,13 @@
                           :meta-injury-root (.getPath (io/file root "injuries"))
                           :meta-injury-ledger-path (.getPath (io/file root "injuries/ledger.edn"))})]
     (is (empty? (record-files record-dir)))
-    (with-redefs [runner/run-opportunity-core!
+    ;; The persistence witness runs from an isolated worktree. Compare the
+    ;; actually loaded runtime to that checkout, not unrelated canonical bytes.
+    ;; The source checker still hashes and compares the files; it is not stubbed.
+    (with-redefs [load-identity/required-sources
+                  (assoc load-identity/required-sources 'futon2.aif.full-loop-runtime
+                         (.getCanonicalPath (io/file "src/futon2/aif/full_loop_runtime.clj")))
+                  runner/run-opportunity-core!
                   (fn [_]
                     {:attempt-id "outer-selection-persistence"
                      :outcome :grounded-change
@@ -171,3 +178,20 @@
         (is (= selection (:outer/selection present-record)))
         (is (not (contains? absent-record :outer/selection)))
         (is (= 2 (count (record-files record-dir))))))))
+
+(deftest reading-refusal-does-not-filter-the-open-field
+  (let [selection {:outer-score/admitted ["M-a" "M-b"]
+                   :field-facts {:enumerated ["M-a" "M-b"]
+                                 :admitted {"M-a" {:pin "a"} "M-b" {:pin "b"}}
+                                 :excluded []}}
+        carrier (atom {:task {:id "M-a"} :outer/selection selection})
+        port (runtime/reading-reselection-port nil nil nil selection carrier
+                                               (fn [_] (throw (ex-info "Must not replace pending" {}))))
+        refusal {:target "M-a" :kind :repeat-choice-after-refusal}]
+    (is (nil? (port refusal)))
+    (is (= selection (dissoc (:outer/selection @carrier) :reading-reselection)))
+    (is (= :task-field-reselection-not-supported
+           (get-in @carrier [:outer/selection :reading-reselection :reason])))
+    (is (= [refusal] (get-in @carrier [:outer/selection :reading-reselection :refusals])))
+    (is (= "M-a" (get-in @carrier [:task :id])))
+    (is (nil? (port refusal)))))

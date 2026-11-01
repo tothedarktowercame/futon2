@@ -869,11 +869,19 @@
       "absent")))
 
 (defn- pick-reach
-  "A comparison of the record against the pinned makeup, not knowledge of the code."
+  "New fields retain the measured status and declared prior kit. Legacy
+  records continue to distinguish an explicit receipt from makeup defaults."
   [selection makeup]
-  (let [reach (get-in selection [:selection :selected :reach])
+  (let [target (get-in selection [:selection :selected :target])
+        reach (get-in selection [:selection :selected :reach])
+        fact-reach (get-in selection [:field-facts :admitted target :reach])
         receipt (get selection reach-receipt-key)]
     (cond
+      (contains? selection :field-facts)
+      (if (and (number? (:value fact-reach)) (<= 0 (:value fact-reach) 1)
+               (:source fact-reach) (get-in fact-reach [:inputs :pin])
+               (= reach (:value fact-reach)))
+        {"observed" (action-identity/digest fact-reach)} "absent")
       (nil? reach) "absent"
       receipt {"observed" (action-identity/digest receipt)}
       (and makeup (= reach (:default-reach makeup))) "defaulted"
@@ -930,8 +938,10 @@
         makeup (pinned-makeup makeup-path (:makeup/sha256 selection))
         nr not-recomputable
         carried (fn [reason] (if section? (nr reason) (nr no-section)))
-        admitted (:outer-field/admitted selection)
-        excluded (map :target (:outer-field/excluded selection))
+        field-facts (:field-facts selection)
+        admitted (if field-facts (keys (:admitted field-facts)) (:outer-field/admitted selection))
+        exclusions (if field-facts (:excluded field-facts) (:outer-field/excluded selection))
+        excluded (map :target exclusions)
         facts (merge
                (zipmap run-fact-fields (repeat (nr no-carrier)))
                (select-keys (:facts work)
@@ -964,7 +974,8 @@
                          (repeat (nr no-section)))))]
     {:facts facts
      :sources (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
-     :diagnostics {:absencePaths (mapv pr-str (selection-absence-paths record))
+     :diagnostics {:taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
+                   :absencePaths (mapv pr-str (selection-absence-paths record))
                    :notRecomputable (vec (for [[k v] facts
                                                :when (and (map? v) (contains? v "not-recomputable"))]
                                            k))}}))

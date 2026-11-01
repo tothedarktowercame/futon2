@@ -1,0 +1,136 @@
+{
+  "baseline": {
+    "log": "/home/joe/notes/l5-4b/baseline.log",
+    "sha256": "4b8d9e14c394f49a30bb5e100a33096445c9d1581f1890bb929c0b0162e54fbd",
+    "summary": [
+      "Ran 133 tests containing 484 assertions.",
+      "17 failures, 2 errors."
+    ],
+    "failures": {
+      "retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "real-giraffe-run-shape": 1,
+      "missing-task-selects-and-enters-existing-path": 5,
+      "selection-pends-and-next-selection-learns": 7,
+      "retained-qualified-already-satisfied-advances-c": 4,
+      "missing-run-record-defers-without-replacing-pending": 1
+    },
+    "run": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4b-baseline/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4b-baseline/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4b-baseline/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4b-baseline/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4b-baseline/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4b-baseline/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4b-baseline/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4b-baseline/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4b-baseline/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4b-baseline/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4b-baseline/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.outer-consumption-test",
+        "futon2.aif.outer-learning-manifest-test",
+        "futon2.aif.outer-observation-test",
+        "futon2.aif.outer-refusal-census-test",
+        "futon2.aif.outer-refusal-history-test",
+        "futon2.aif.outer-relation-admission-test",
+        "futon2.aif.outer-score-test",
+        "futon2.aif.outer-select-test",
+        "futon2.aif.outer-selection-wiring-test",
+        "futon2.aif.outer-state-test",
+        "futon2.aif.outer-state-update-test",
+        "futon2.aif.outer-state-wiring-test",
+        "futon2.aif.wm-run-facts-test",
+        "wm-check-run-facts-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 1
+    }
+  },
+  "accepted": {
+    "log": "/home/joe/notes/l5-4b/accepted.log",
+    "sha256": "394cfad4d038f7792132b5fe6592991dc963a5b33d0a4c0f9d6db7a56779af1b",
+    "summary": [
+      "Ran 137 tests containing 522 assertions.",
+      "17 failures, 2 errors."
+    ],
+    "failures": {
+      "retained-run-consumed-and-replaced-atomically-on-real-outer-path": 1,
+      "real-giraffe-run-shape": 1,
+      "missing-task-selects-and-enters-existing-path": 5,
+      "selection-pends-and-next-selection-learns": 7,
+      "retained-qualified-already-satisfied-advances-c": 4,
+      "missing-run-record-defers-without-replacing-pending": 1
+    },
+    "run": {
+      "env": {
+        "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT": "/tmp/l5-4b-accepted/FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT",
+        "FUTON_WM_META_INJURY_ROOT": "/tmp/l5-4b-accepted/FUTON_WM_META_INJURY_ROOT",
+        "FUTON_WM_MORNING_BRIEF_ROOT": "/tmp/l5-4b-accepted/FUTON_WM_MORNING_BRIEF_ROOT",
+        "FUTON_WM_PHASE_LOG": "/tmp/l5-4b-accepted/FUTON_WM_PHASE_LOG",
+        "FUTON_WM_PHASE_REPLAY_INPUT_ROOT": "/tmp/l5-4b-accepted/FUTON_WM_PHASE_REPLAY_INPUT_ROOT",
+        "FUTON_WM_REPAIR_OBLIGATION_ROOT": "/tmp/l5-4b-accepted/FUTON_WM_REPAIR_OBLIGATION_ROOT",
+        "FUTON_WM_RUN_CONFIG": "/tmp/l5-4b-accepted/FUTON_WM_RUN_CONFIG",
+        "FUTON_WM_RUN_LOCK": "/tmp/l5-4b-accepted/FUTON_WM_RUN_LOCK",
+        "FUTON_WM_RUN_RECORD_DIR": "/tmp/l5-4b-accepted/FUTON_WM_RUN_RECORD_DIR",
+        "FUTON_WM_TICKET_PUBLICATION_ROOT": "/tmp/l5-4b-accepted/FUTON_WM_TICKET_PUBLICATION_ROOT",
+        "FUTON_WM_TRACE_DIR": "/tmp/l5-4b-accepted/FUTON_WM_TRACE_DIR"
+      },
+      "namespaces": [
+        "futon2.aif.outer-consumption-test",
+        "futon2.aif.outer-learning-manifest-test",
+        "futon2.aif.outer-observation-test",
+        "futon2.aif.outer-refusal-census-test",
+        "futon2.aif.outer-refusal-history-test",
+        "futon2.aif.outer-relation-admission-test",
+        "futon2.aif.outer-score-test",
+        "futon2.aif.outer-select-test",
+        "futon2.aif.outer-selection-wiring-test",
+        "futon2.aif.outer-state-test",
+        "futon2.aif.outer-state-update-test",
+        "futon2.aif.outer-state-wiring-test",
+        "futon2.aif.wm-run-facts-test",
+        "wm-check-run-facts-test"
+      ],
+      "before": 45737,
+      "after": 45737,
+      "exit": 1
+    }
+  },
+  "focused-vars": {
+    "log": "/home/joe/notes/l5-4b/focused-vars.log",
+    "sha256": "689b16dd00ff856e3bf57685593b3a73c83aff9111d933c1d835c04b8a65ca55",
+    "summary": [
+      "Ran 12 tests containing 92 assertions.",
+      "0 failures, 0 errors."
+    ],
+    "failures": {},
+    "run": {
+      "command": [
+        "clojure",
+        "-X:test",
+        ":nses",
+        "[futon2.aif.outer-observation-test futon2.aif.outer-select-test futon2.aif.outer-selection-wiring-test futon2.aif.wm-run-facts-test]",
+        ":vars",
+        "[futon2.aif.outer-observation-test/retained-open-field-is-exact-and-policy-independent futon2.aif.outer-observation-test/task-reach-is-a-pinned-prior-not-run-history futon2.aif.outer-observation-test/partition-and-exclusion-contract-refuse-invalid-input futon2.aif.outer-observation-test/registry-status-is-not-a-source-exclusion-reason futon2.aif.outer-observation-test/verified-field-carries-open-facts futon2.aif.outer-observation-test/registry-open-ticket-absent-from-field-is-typed-excluded futon2.aif.outer-select-test/completed-inner-work-does-not-remove-open-tasks futon2.aif.outer-select-test/unknown-graph-member-stays-in-the-field futon2.aif.outer-select-test/real-giraffe-selection-demonstration futon2.aif.outer-selection-wiring-test/reading-refusal-does-not-filter-the-open-field futon2.aif.outer-selection-wiring-test/runner-persists-only-supplied-outer-selection futon2.aif.wm-run-facts-test/task-field-reach-is-observed-and-exclusions-project]"
+      ],
+      "exit": 0,
+      "before": 45737,
+      "after": 45737
+    }
+  },
+  "kondo": {
+    "result": "linting took 132ms, errors: 0, warnings: 0",
+    "sha256": "0ce8894dc71de46342c9a2c399fa6479cc88b7273effcda7e81408b548ca879b"
+  },
+  "parens": {
+    "result": "OK",
+    "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+  },
+  "base": "30d5585e8",
+  "same_failure_distribution": true,
+  "retained_pass_sha256": "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91",
+  "historical_policy_exclusion_record_sha256": "7dbf1614668d9f8c565562447c5d336b9424e6bb93d42335fde1ba1c32e7a9ac"
+}

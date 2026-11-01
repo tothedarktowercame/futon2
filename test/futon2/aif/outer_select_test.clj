@@ -56,50 +56,14 @@
   [(index-row "M-ready" manifest-a true "2026-10-31-4955b6e6")
    (index-row "M-ready" manifest-a false "2026-10-31-0ba3370c")])
 
-(deftest blocking-history-target-is-excluded-before-scoring
-  (testing "the bad case still selects the target when selection has no
-            history view (demonstrates the finding), and is excluded once it does"
-    ;; Without the index view the bad case reproduces: M-ready is selectable.
-    (let [without-history (outer-select/select
-                           base-makeup base-state
-                           (assoc base-observation :giraffe/manifest-sha256 manifest-a))]
-      (is (contains? (set (map :target (get-in without-history [:selection :candidates])))
-                     "M-ready")))
-    ;; With the view, the guard's target never reaches scoring.
-    (let [result (outer-select/select
-                  base-makeup base-state
-                  (assoc base-observation
-                         :giraffe/manifest-sha256 manifest-a
-                         :effective-run-index-rows finding-rows))
-          exclusion (some #(when (= "M-ready" (:target %)) %)
-                          (:outer-score/excluded result))]
-      (is (= ["M-unknown"] (:outer-score/admitted result)))
-      (is (= ["2026-10-31-4955b6e6"] (:matched-run-ids exclusion)))
-      (is (= :outer-score/duplicate-effective-run (:kind exclusion)))
-      (is (= :blocking-effective-run-on-same-giraffe-field (:reason exclusion)))
-      (is (not (contains? (set (map :target (get-in result [:selection :candidates])))
-                          "M-ready"))))))
-
-(deftest changed-giraffe-field-readmits-the-target
-  (let [result (outer-select/select
-                base-makeup base-state
-                (assoc base-observation
-                       :giraffe-manifest-sha256 "a-new-giraffe-run-changed-the-field"
-                       :effective-run-index-rows finding-rows))]
-    (is (= ["M-ready" "M-unknown"] (:outer-score/admitted result)))
-    (is (nil? (some #(= :outer-score/duplicate-effective-run (:kind %))
-                    (:outer-score/excluded result))))))
-
-(deftest wholly-blocked-field-is-a-typed-refusal
-  (let [observation (assoc base-observation
-                           :field [{:target "M-ready" :reach 1/2}]
-                           :giraffe/manifest-sha256 manifest-a
-                           :effective-run-index-rows finding-rows)
-        refusal (try (outer-select/select base-makeup base-state observation)
-                     nil (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-    (is (= :outer-score/duplicate-effective-run-field-emptied (:kind refusal)))
-    (is (= ["M-ready"] (mapv :target (:duplicate-effective-run refusal))))
-    (is (= 1 (count (get-in refusal [:duplicate-effective-run 0 :matched-run-ids]))))))
+(deftest completed-inner-work-does-not-remove-open-tasks
+  (let [plain (outer-select/select base-makeup base-state base-observation)
+        with-history (outer-select/select base-makeup base-state
+                      (assoc base-observation :giraffe/manifest-sha256 manifest-a
+                             :effective-run-index-rows finding-rows))]
+    (is (= (:outer-score/admitted plain) (:outer-score/admitted with-history)))
+    (is (= (:cascade-picks plain) (:cascade-picks with-history)))
+    (is (empty? (:outer-score/excluded with-history)))))
 
 (deftest chosen-score-is-minimal
   (testing "Lean chosenCascade_score_le"
@@ -165,41 +129,24 @@
                        :focus "WM" :relation (fn [_ _] :associated)}
           result (try (outer-select/select makeup state observation)
                       (catch clojure.lang.ExceptionInfo e (ex-data e)))
-          evidence (or (:selection-evidence result) result)]
-      (is (= :tie-at-minimum (:kind result)))
-      (is (= 3 (count (:cascades evidence))))
-      (is (= (:cascade-scores evidence) (mapv :G (:cascades evidence))))
-      (is (every? #(= :default-reach (get-in % [:reach :source]))
-                  (remove #(= :no-pick (:pick %)) (:cascades evidence))))
-      (is (= [:ready-gate :by-cone :by-unblocks] (get-in evidence [:cascades 0 :steps])))
-      (is (every? #(and (:sha256 %) (= :present (:status %)))
-                  (mapcat :units (:cascades evidence)))))))
+          evidence result]
+      (is (= :outer-score/graph-term-unavailable (:kind evidence)))
+      (is (= :cone (:term evidence)))
+      (is (some #(= (:target evidence) (name (:id %)))
+                (filter #(= :undetermined (:status %)) rows)))
+      (is (= 609 (count (:field observation)))))))
 
-(deftest unknown-graph-member-is-excluded-with-a-producer-request
-  (let [graph {:status :unknown :reason :prerequisite-unresolved
-               :scope :population/missions-excursions :population-sha "frozen"
-               :prerequisites [{:raw_target "external prerequisite" :kind "depends-on"
-                                :absence :unresolved-prerequisite}]}
-        obs (assoc-in base-observation [:facts "M-unknown"]
-                      {:status :undetermined :cone nil :unblocks nil :graph-terms graph})
-        result (outer-select/select base-makeup base-state obs)
-        exclusion (first (:outer-score/excluded result))]
-    (is (= "M-ready" (get-in result [:selection :selected :target])))
-    (is (= ["M-ready"] (:outer-score/admitted result)))
-    (is (= ["M-ready"] (mapv :target (get-in result [:selection :candidates]))))
-    (is (= :outer-score/graph-term-unavailable (:kind exclusion)))
-    (is (= [:cone :unblocks] (mapv :term (:terms exclusion))))
-    (is (= (:prerequisites graph) (get-in exclusion [:terms 0 :prerequisites])))
-    (is (= [(:knowledge-producer-request exclusion)] (:knowledge-producer-requests result)))
-    (is (nil? (get-in obs [:facts "M-unknown" :cone])))
-    (let [all-unknown (assoc obs :field [{:target "M-unknown" :reach 1/2}])
-          refusal (try (outer-select/select base-makeup base-state all-unknown)
-                       nil (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-      (is (= :outer-score/no-known-graph-members (:kind refusal)))
-      (is (= 1 (count (:outer-score/excluded refusal)))))
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (outer-score/apply-selection-step (:facts obs) (:field obs) :by-cone))
-        "The numeric scorer still refuses an unknown; the boundary never supplies a zero.")))
+(deftest unknown-graph-member-stays-in-the-field
+  (let [obs (assoc-in base-observation [:facts "M-unknown" :cone] nil)
+        partition (outer-select/known-term-field obs)
+        error (try (outer-select/select
+                    {:cascades [{:id :unknown :steps [{:gate-status :undetermined} :by-cone]}]}
+                    base-state obs)
+                   (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= (:field obs) (:field partition)))
+    (is (empty? (:excluded partition)))
+    (is (= :outer-score/graph-term-unavailable (:kind error)))
+    (is (= "M-unknown" (:target error)))))
 
 (deftest every-policy-retains-terms-prediction-and-separate-stop
   (let [r (outer-select/select base-makeup base-state base-observation)
@@ -249,3 +196,13 @@
                                       base-state base-observation)]
       (is (= :absent (get-in missing [:library :status])))
       (is (= :library-root-absent (get-in missing [:library :reason]))))))
+
+(deftest typed-field-applies-function-steps-only-once
+  (let [calls (atom 0)
+        obs (assoc base-observation :field-facts
+                   {:enumerated ["M-ready" "M-unknown"] :admitted (:facts base-observation) :excluded []})
+        result (outer-select/select
+                {:cascades [{:id :one-pass :steps [{:gate (fn [_] (swap! calls inc) true)}]}]}
+                base-state obs)]
+    (is (= 2 @calls))
+    (is (= "M-ready" (get-in result [:selection :selected :target])))))

@@ -3,46 +3,11 @@
   (:require [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.q2-construction :as q2]
-            [futon2.aif.effective-run-history :as effective-run-history]
+            [futon2.aif.outer-observation :as observation]
             [futon2.aif.outer-score :as outer-score]))
 
 (defn- refuse! [kind data]
   (throw (ex-info "Outer selection refused" (assoc data :kind kind))))
-
-(defn- duplicate-effective-run-exclusions
-  "Typed pre-selection exclusions for candidates whose effective-run history
-  already holds a blocking row on the field this selection reads
-  (DUPLICATE-TARGET-STILL-SELECTED, 2026-10-31).
-
-  This is the outer-level view only: the identity components known before
-  selection are the target and the Giraffe manifest the field was built
-  from. A blocking row for the same target under the same manifest means
-  the post-construction duplicate guard (require-novel!) would refuse the
-  run after ~40 s of selection; admission now refuses the target before
-  scoring instead. blocking-row? is effective-run-history's own rule and
-  is called, not copied (zai-5 owns its concurrent change). No inner
-  policy is built here."
-  [candidates observation]
-  (let [rows (:effective-run-index-rows observation)
-        manifest-sha (:giraffe/manifest-sha256 observation)]
-    (if-not (and (seq rows) (string? manifest-sha))
-      []
-      (into []
-            (keep (fn [candidate]
-                    (let [target (:target candidate)
-                          matched (filterv
-                                   #(= manifest-sha
-                                      (get-in % [:effective-run-identity
-                                                 :giraffe-manifest-sha256]))
-                                   (effective-run-history/blocking-rows-for-target
-                                    rows target))]
-                      (when (seq matched)
-                        {:kind :outer-score/duplicate-effective-run
-                         :target target
-                         :reason :blocking-effective-run-on-same-giraffe-field
-                         :giraffe-manifest-sha256 manifest-sha
-                         :matched-run-ids (mapv :run-id matched)}))))
-            candidates))))
 
 (defn- relation-class
   "The relation class the scorer would see for TARGET, or ::no-relation-fn
@@ -60,48 +25,11 @@
   (contains? #{:focus :associated :useful-elsewhere} class))
 
 (defn known-term-field
-  "Supply R20Step.applySelectionStep the known-term subset; retain the
-  excluded population and its knowledge requests separately, without zeroes.
-
-  TIED-OUTER-CASCADES (2026-10-31, rev per claude-1 decision): the relation
-  term is NOT an admission gate -- a relation-unknown candidate stays in the
-  field (Joe's rule: the machine must not abstain, and a small field is a
-  failure).  Ignorance is retained beside each pick instead: `select`
-  records `:cascade-pick-relations`, so a scored stop that rests on an
-  unknown relation reads as ignorance in the record, not as a deliberate
-  stop.  The earlier revision's `:outer-score/relation-unavailable`
-  exclusion and the `:outer-score/no-known-relation-members` refusal are
-  removed; mapping an unknown relation onto a `:not-yet-evaluated` landing
-  was measured on the real fields and is inadmissible (c-kit preference 0
-  gives risk ⊤ for every pick with reach > 0), which would refuse the whole
-  menu -- see the row report, addendum 3."
-  [{:keys [field facts]}]
-  (let [graph-exclusion
-        (fn [result target _fact graph terms]
-          (let [reason (or (:reason graph) :graph-term-not-observed)
-                request {:kind :outer-score/graph-term-knowledge-request
-                         :target target :producer (or (:producer graph) :dependency-reader-reviewer)
-                         :terms terms :reason reason
-                         :prerequisites (:prerequisites graph)
-                         :scope (select-keys graph [:scope :population-sha :coverage])}]
-            (-> result
-                (update :excluded conj
-                        {:kind :outer-score/graph-term-unavailable :target target
-                         :terms (mapv (fn [term] {:term term :reason reason
-                                                  :prerequisites (:prerequisites graph)}) terms)
-                         :graph-terms graph :knowledge-producer-request request})
-                (update :requests conj request))))]
-    (reduce
-     (fn [result candidate]
-       (let [target (:target candidate)
-             fact (if (fn? facts) (facts target) (get facts target))
-             graph (:graph-terms fact)
-             terms (filterv #(or (= :unknown (:status graph))
-                                 (not (nat-int? (get fact %)))) [:cone :unblocks])]
-         (if (seq terms)
-           (graph-exclusion result target fact graph terms)
-           (update result :field conj candidate))))
-     {:field [] :excluded [] :requests []} field)))
+  "Compatibility entrypoint: unknown metrics stay in the field. An order that
+  needs an unavailable term refuses at apply-selection-step, never by silently
+  restricting the candidate domain."
+  [{:keys [field]}]
+  {:field (vec field) :excluded [] :requests []})
 
 (defn- value-of [x k] (if (fn? x) (x k) (get x k)))
 
@@ -146,10 +74,10 @@
             :relation (cond-> {:class class
                               :receipt-digest (when receipt (identity/sha256 (pr-str receipt)))}
                         (nil? receipt) (assoc :status :absent :reason :receipt-unavailable))
-            :reach {:value (:reach candidate)
-                    :source (if candidate (or (:reach-source candidate)
-                                               (:reach-source (value-of (:facts observation) target))
-                                               :reach-source-unavailable) :no-pick)}})))
+            :reach (or (:reach (value-of (:facts observation) target))
+                       {:value (:reach candidate)
+                        :source (if candidate (or (:reach-source candidate)
+                                                  :reach-source-unavailable) :no-pick)})})))
 
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
@@ -157,23 +85,37 @@
   [makeup state observation]
   (let [menu (:cascades makeup)
         partition (known-term-field observation)
-        duplicate-excluded (duplicate-effective-run-exclusions (:field partition) observation)
-        duplicate-targets (set (map :target duplicate-excluded))
-        partition (-> partition
-                      (update :field #(vec (remove (fn [c] (contains? duplicate-targets (:target c))) %)))
-                      (update :excluded into duplicate-excluded))
-        observation (assoc observation :field (:field partition))]
+        observation (assoc observation :field (:field partition))
+        field-facts (:field-facts observation)]
+    (when field-facts
+      (observation/validate-field! (:enumerated field-facts)
+                                   (mapv :target (:field observation))
+                                   (:excluded field-facts))
+      (when-not (= (set (keys (:admitted field-facts)))
+                   (set (map :target (:field observation))))
+        (refuse! :task-field-facts-mismatch {})))
     (when (empty? (:field partition))
-      (refuse! (if (seq duplicate-excluded) :outer-score/duplicate-effective-run-field-emptied
-                   :outer-score/no-known-graph-members)
-               (cond-> {:outer-score/excluded (:excluded partition)
-                        :knowledge-producer-requests (:requests partition)}
-                 (seq duplicate-excluded) (assoc :duplicate-effective-run duplicate-excluded))))
+      (refuse! :outer-score/no-admitted-tasks
+               {:field-facts field-facts :outer-score/excluded (:excluded field-facts)}))
     (when-not (seq menu) (refuse! :empty-cascade-menu {}))
     (let [score-input (merge (select-keys observation [:focus :relation :facts :field])
                              {:state-counts (:state-counts state) :ending-counts (:c state)
                               :gain-counts (:gain-counts state)})
-          models (mapv #(outer-score/outer-model (assoc score-input :cascade (:steps %))) menu)
+          models (mapv (fn [cascade]
+                         (try
+                           ;; Apply the cascade once, including any function
+                           ;; steps. The scorer receives that exact pick.
+                           (let [candidate (outer-score/cascade-pick (:steps cascade)
+                                                                    (:facts observation)
+                                                                    (:field observation))]
+                             (when (and field-facts candidate (not (number? (:reach candidate))))
+                               (refuse! :outer-score/reach-unavailable
+                                        {:target (:target candidate) :field-facts field-facts}))
+                             (outer-score/outer-model
+                              (assoc score-input :cascade [] :field (if candidate [candidate] []))))
+                           (catch clojure.lang.ExceptionInfo e
+                             (throw (ex-info (ex-message e)
+                                             (cond-> (ex-data e) field-facts (assoc :field-facts field-facts)) e))))) menu)
           details (mapv #(outer-score/score-model score-input %) models)
           library (library-evidence makeup)
           cascades (mapv #(cascade-record library observation %1 %2 %3) menu models details)
@@ -182,12 +124,15 @@
           legacy-relations (mapv (fn [c] {:target (:pick c) :relation (get-in c [:relation :class])
                                          :relation-known? (when-not (= :no-pick (:pick c))
                                                             (known-relation? (get-in c [:relation :class])))}) cascades)
-          evidence {:outer-score/admitted (mapv :target (:field partition))
+          evidence (cond-> {:outer-score/admitted (mapv :target (:field partition))
                     :outer-score/excluded (:excluded partition)
                     :knowledge-producer-requests (:requests partition)
                     :library library :cascades cascades :abstention abstention
                     :cascade-scores scores :cascade-picks (mapv :pick cascades)
                     :cascade-pick-relations legacy-relations}
+                     field-facts (assoc :field-facts field-facts
+                                        :giraffe/pass-sha256 (:giraffe/pass-sha256 observation)
+                                        :default-reach-ignored (:default-reach-ignored observation)))
           finite? #(and (number? %) (Double/isFinite (double %)))]
       (when-let [bad (first (keep-indexed (fn [i g] (when-not (finite? g) {:index i :score g})) scores))]
         (refuse! :cascade-score-inadmissible (merge evidence bad)))
