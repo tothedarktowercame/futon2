@@ -72,6 +72,34 @@
     (assert healthy (str "cause remains unhealthy: " (:cause-entry scope)))
     receipt))
 
+(defn- ns-require-aliases
+  "Alias map from a test source's own ns form: {alias namespace}. Only
+  [:require ... :as alias] entries matter for resolving a designated call."
+  [forms]
+  (let [ns-form (first (filter #(and (seq? %) (= 'ns (first %))) forms))
+        requires (->> (rest ns-form)
+                      (filter #(and (seq? %) (= :require (first %))))
+                      (mapcat rest))
+        entry-alias (fn [entry]
+                      (when (vector? entry)
+                        (let [as-pair (first (filter #(and (seq? %) (= :as (first %)))
+                                                     (partition 2 2 nil (rest entry))))]
+                          (when (and as-pair (symbol? (second as-pair)))
+                            {(second as-pair) (first entry)}))))]
+    (into {} (keep entry-alias requires))))
+
+(defn- resolve-alias-call
+  "Resolve a call head through the source's own :require aliases. An aliased
+  head like cause-scope/assert-repair resolves to the designated var; a
+  fully-qualified or unknown head is returned unchanged."
+  [head aliases]
+  (if (and (symbol? head) (clojure.string/includes? (str head) "/"))
+    (let [[pre post] (clojure.string/split (str head) #"/" 2)]
+      (if-let [lib (get aliases (symbol pre))]
+        (symbol (str lib "/" post))
+        head))
+    head))
+
 (defn designated-test-defect [source expected-scope]
   (try
     (let [forms (binding [*read-eval* false]
@@ -79,13 +107,15 @@
                     (loop [xs []]
                       (let [x (read {:eof ::eof} r)]
                         (if (= ::eof x) xs (recur (conj xs x)))))))
+          aliases (ns-require-aliases forms)
           tests (filter #(and (seq? %) (= 'deftest (first %))) forms)
           body (when (= 1 (count tests)) (drop 2 (first tests)))
           call (when (= 1 (count body)) (first body))]
       (cond
         (not= 1 (count tests)) :cause-scope/designated-test-count
         (not (and (seq? call)
-                  (= 'futon2.aif.cause-scope/assert-repair (first call))
+                  (= 'futon2.aif.cause-scope/assert-repair
+                     (resolve-alias-call (first call) aliases))
                   (= 2 (count call)))) :cause-scope/designated-call-required
         (not= expected-scope (second call)) :cause-scope/scope-mismatch
         :else nil))

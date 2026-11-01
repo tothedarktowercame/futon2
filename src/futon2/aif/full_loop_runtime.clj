@@ -1476,6 +1476,26 @@
     {:opts opts :diagnosis-observation diagnosis-observation
      :acceptance-reconsideration reconsideration}))
 
+(defn acceptance-pipeline-refusal
+  "A refusal from the acceptance pipeline itself is the click's refusal, with
+  its own typed reason — not a production-config absence. Click 11
+  (wm-click-8d7a38d9, injury 7d5e374e, 2026-11-01): the pipeline produced a
+  diagnosis and a concrete proposal, admission refused
+  :cause-scope/designated-call-required, and route! relabelled that as
+  :meta-self-heal/production-config-required with :absent-terms
+  [:acceptance-test] — hiding the real reason and describing a refused
+  admission as missing configuration. Returns nil when there is nothing to
+  surface (no refusal, or a supplied/accepted test for route! to check)."
+  [acceptance-observation effective-opts]
+  (when (and (map? acceptance-observation)
+             (= :refused (:status acceptance-observation))
+             (not (contains? effective-opts :acceptance-test)))
+    {:status :refused
+     :reason (:reason acceptance-observation)
+     :route :dedicated-meta-self-heal
+     :ordinary-selection-called? false
+     :acceptance-observation acceptance-observation}))
+
 (defn- run-opportunity-with-authority!
   "Arbitrate durable META injuries before constructing any ordinary policy
   field. An active injury consumes the opportunity without fallback."
@@ -1554,6 +1574,10 @@
       (= :refused (:status readiness))
       (assoc readiness :diagnosis-observation diagnosis-observation
              :acceptance-observation acceptance-observation
+             :carried-bindings carried-bindings)
+      (acceptance-pipeline-refusal acceptance-observation effective-opts)
+      (assoc (acceptance-pipeline-refusal acceptance-observation effective-opts)
+             :diagnosis-observation diagnosis-observation
              :carried-bindings carried-bindings)
       retry (assoc (run-ordinary-opportunity! effective-opts)
                    :diagnosis-observation diagnosis-observation
