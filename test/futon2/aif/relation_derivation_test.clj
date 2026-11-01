@@ -55,6 +55,15 @@
 (defn- row-of [& rows]
   (let [m (into {} (map (juxt :target identity) rows))] #(get m %)))
 
+(defn- repair-findings-dir [target]
+  (let [dir (doto (io/file (System/getProperty "java.io.tmpdir")
+                           (str "relation-repair-" (System/nanoTime))) .mkdirs)
+        id "repair-occ-fixture"]
+    (spit (io/file dir (str id ".edn"))
+          (pr-str {:repair/status :open :repair/id id :machine-repo "/fixture/repo"
+                   :target target}))
+    [(.getPath dir) (str "T-" id)]))
+
 (deftest a-hand-row-wins-over-a-stated-path
   (let [ins (update inputs :relations conj {:target "M-hand" :relation "focus" :facet "WM"
                                            :effective-from "2026-09-20T00:00:00Z" :source {:repo "fixture"}})
@@ -181,6 +190,27 @@
     (is (= :ticket-parent (get-in at-zero [:derived-via :kind])))
     (is (= :embedding-neighbour (get-in at-zero [:derived-via :then :kind])))
     (is (= 0.0 (get-in at-zero [:derived-via :then :floor])))))
+
+(deftest repair-ticket-resolves-a-completed-target-outside-the-admitted-field
+  (let [repaired "M-completed-fixture"
+        retained (update inputs :relations conj
+                         {:target repaired :relation "associated" :facet "WM"
+                          :effective-from "2026-09-20T00:00:00Z"
+                          :source {:status :complete :repo "fixture"}})
+        [findings target] (repair-findings-dir repaired)
+        c (classify retained target {:findings-dir findings})]
+    ;; The completed target is retained in the relation population but is not
+    ;; in an admitted field; the repair receipt still inherits its relation.
+    (is (= :associated (:class c)))
+    (is (= :repaired-target (get-in c [:derived-via :kind])))
+    (is (= repaired (get-in c [:derived-via :repaired-target])))))
+
+(deftest repair-ticket-with-an-unrelatable-target-refuses-by-name
+  (let [[findings target] (repair-findings-dir "M-no-such-retained-target")
+        c (classify inputs target {:findings-dir findings})]
+    (is (= :unknown (:class c)))
+    (is (= :repaired-target-unrelatable (get-in c [:relation :reason])))
+    (is (= :repaired-target (get-in c [:derived-via :kind])))))
 
 (deftest live-november-picks-obey-the-declared-floor
   (let [ctx (fr/relation-context "/home/joe/code")

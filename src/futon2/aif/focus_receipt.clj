@@ -102,7 +102,7 @@
    repair obligation inherits the repaired target's class; ticket Parent and the
    finding's historical target are fallbacks only after that obligation is no
    longer open. The order must never depend on directory or map iteration."
-  [:direct-corpus :open-repair-obligation :ticket-parent :finding-target
+  [:direct-corpus :repaired-target :ticket-parent :finding-target
    :stated-relation :giraffe-graph :embedding-neighbour])
 
 ;; CTauClassPreference.lean:124-138.  This is the sole relation-to-scorer
@@ -452,11 +452,12 @@
              (classify-target inputs discovery as-of repaired-target
                               (update ctx ::repair-targets (fnil conj #{}) target))))
          repaired-class (:class repaired-classification)
-         repair-source {:kind :open-repair-obligation
+         repair-source {:kind :repaired-target
                         :repair-id (:repair/id finding-record)
                         :machine-repo (:machine-repo finding-record)
                         :repaired-target repaired-target
-                        :repaired-target-class repaired-class}
+                        :repaired-target-class repaired-class
+                        :then (:derived-via repaired-classification)}
          repair-relation (when (contains? #{:focus :associated :useful-elsewhere}
                                            repaired-class)
                            {:target target
@@ -465,9 +466,11 @@
                                         :useful-elsewhere "useful-elsewhere")
                             :facet (get-in repaired-classification [:relation :facet])
                             :source repair-source})
+         ;; One typed refusal covers both a target with no relation and a
+         ;; finding that retained no target identity.  The repaired target and
+         ;; its nested receipt remain in the evidence fields below.
          repair-unknown-reason (when active-repair?
-                                 (or (:reason repaired-classification)
-                                     :repaired-target-unknown))
+                                 :repaired-target-unrelatable)
          parent-source (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
                          (or (when ticket-dir
                              (when-let [p (ticket-parent (io/file ticket-dir (str target ".md")))]
