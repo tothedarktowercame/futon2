@@ -812,6 +812,47 @@
 (def ^:private no-terms "no per-cascade terms on the selection path (L4b row 9)")
 (def ^:private no-carrier "no carrier on the selection path")
 
+(defn- read-phase-events [path]
+  (when (and path (.isFile (io/file path)))
+    (with-open [reader (io/reader path)]
+      (doall
+       (keep (fn [line]
+               (when-not (str/blank? line)
+                 (try (edn/read-string {:default tagged-literal} line)
+                      (catch Exception _ nil))))
+             (line-seq reader))))))
+
+(defn selection-interpretation-order
+  "Project Q5 from the retained runtime phase log for RECORD's execution.
+  The decision boundary is :selection :end; interpretation begins at
+  :occurrence-square-authoring :start. Missing carriers remain typed absent."
+  [record phase-log-path]
+  (let [execution-id (get-in record [:runner-execution/identity :id])
+        missing (fn [carrier]
+                  (not-recomputable
+                   (str "selection interpretation order needs " carrier)))
+        events (read-phase-events phase-log-path)]
+    (cond
+      (nil? phase-log-path) (missing ":phase-log path")
+      (nil? events) (missing (str "retained phase log at " phase-log-path))
+      (nil? execution-id) (missing "[:runner-execution/identity :id]")
+      :else
+      (let [matching (filter #(= execution-id (get-in % [:execution-identity :id])) events)
+            indexed (map-indexed vector matching)
+            selection-end (some (fn [[i event]]
+                                  (when (and (= :selection (:phase event))
+                                             (= :end (:transition event))) i))
+                                indexed)
+            authoring-start (some (fn [[i event]]
+                                    (when (and (= :occurrence-square-authoring (:phase event))
+                                               (= :start (:transition event))) i))
+                                  indexed)]
+        (cond
+          (nil? selection-end) (missing (str ":selection :end in " phase-log-path))
+          (nil? authoring-start) (missing (str ":occurrence-square-authoring :start in " phase-log-path))
+          (< selection-end authoring-start) "selectionBeforeInterpretation"
+          :else "interpretationBeforeSelection")))))
+
 ;; A reach measured for this run would be retained here.  No record has one yet.
 (def ^:private reach-receipt-key :reach-receipt)
 
@@ -1034,7 +1075,8 @@
 (defn selection-facts-for-record
   "The selection run in a tick record's `:outer/selection`, as its own RunFacts.
   The projector labels the kind; nothing in the record does."
-  [record record-path snap {:keys [makeup-path] :or {makeup-path default-makeup-path}}]
+  [record record-path snap {:keys [makeup-path phase-log-path]
+                            :or {makeup-path default-makeup-path}}]
   (let [work (facts-for-record record record-path snap)
         selection (:outer/selection record)
         section? (seq selection)
@@ -1064,7 +1106,7 @@
                {"kind" "selection"
                 "policyGScale" g-scale
                 "policyPrediction" (carried one-prediction)
-                "interpretationOrder" (nr "no interpretation step on a selection run")}
+                "interpretationOrder" (selection-interpretation-order record phase-log-path)}
                (if section?
                  (merge
                   (if (:construction selection)
@@ -1080,7 +1122,9 @@
                           "enumeratedTasks" "currentChoice" "pathAbsenceCount" "selectionPath"]
                          (repeat (nr no-section)))))]
     {:facts facts
-     :sources (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
+     :sources (assoc (zipmap (keys facts) (repeat (str record-path " [:outer/selection]")))
+                     "interpretationOrder"
+                     (or phase-log-path ":phase-log path absent"))
      :diagnostics {:taskExclusions (mapv #(select-keys % [:target :reason :pin]) exclusions)
                    :absencePaths (mapv pr-str (selection-absence-paths record))
                    :notRecomputable (vec (for [[k v] facts
@@ -1140,12 +1184,13 @@
 (defn -main [& args]
   (if (= "--run" (first args))
     (let [path (second args)
-          {:strs [--kind --makeup]} (apply hash-map (drop 2 args))
+          {:strs [--kind --makeup --phase-log]} (apply hash-map (drop 2 args))
           snap (snapshot)]
       (println (json/generate-string
                 (export-for-kind (read-edn path) path snap
                                  (cond-> {:kind --kind}
-                                   --makeup (assoc :makeup-path --makeup)))
+                                   --makeup (assoc :makeup-path --makeup)
+                                   --phase-log (assoc :phase-log-path --phase-log)))
                 {:pretty true})))
     (let [[run-dir output] args
           dir (or run-dir "data/wm-runs")

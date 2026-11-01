@@ -553,6 +553,16 @@
 
 (def selection-live (selection-of live-record))
 
+(def live-execution-id
+  "ea1-6c24e2ab05edb2e75c0bbb01000beebce6a5486e90b91622d9528cb14759164d--attempt-002")
+(def live-phase-log "test/fixtures/wm-run-facts/ac5bc477-phases.edn.log")
+
+(defn- temp-phase-log [events]
+  (let [file (java.io.File/createTempFile "wm-phases" ".edn.log")]
+    (.deleteOnExit file)
+    (spit file (str (str/join "\n" (map pr-str events)) "\n"))
+    (.getPath file)))
+
 (defn- with-selection [& kvs]
   (reduce (fn [r [path value]] (assoc-in r (into [:outer/selection] path) value))
           live-record (partition 2 kvs)))
@@ -679,8 +689,37 @@
                         "previousChoice" "L4b row 13"
                         "currentInputDigest" "L4b row 13"
                         "gTerms" "L4b row 9"
-                        "interpretationOrder" "no interpretation step"}]
+                        "interpretationOrder" ":phase-log path"}]
     (is (str/includes? (reason (selection-live field)) text))))
+
+(deftest live-11-01-phase-log-puts-selection-before-interpretation
+  (let [record (assoc live-record :runner-execution/identity
+                      {:kind :runner-execution :id live-execution-id})
+        projected (facts/selection-facts-for-record
+                   record "ac5bc477-carriers.edn" snap
+                   {:makeup-path makeup-path :phase-log-path live-phase-log})]
+    (is (= "selectionBeforeInterpretation"
+           (get-in projected [:facts "interpretationOrder"])))
+    (is (= live-phase-log (get-in projected [:sources "interpretationOrder"])))))
+
+(deftest authoring-before-selection-projects-the-lean-counter-constructor
+  (let [identity {:kind :runner-execution :id "planted-execution"}
+        path (temp-phase-log
+              [{:phase :occurrence-square-authoring :transition :start
+                :execution-identity identity}
+               {:phase :selection :transition :end :execution-identity identity}])]
+    (is (= "interpretationBeforeSelection"
+           (facts/selection-interpretation-order
+            {:runner-execution/identity identity} path)))))
+
+(deftest missing-phase-log-is-typed-absent-and-names-the-carrier
+  (let [projected (facts/selection-facts-for-record
+                   live-record "ac5bc477-carriers.edn" snap
+                   {:makeup-path makeup-path})]
+    (is (= "selection interpretation order needs :phase-log path"
+           (reason (get-in projected [:facts "interpretationOrder"]))))
+    (is (= ":phase-log path absent"
+           (get-in projected [:sources "interpretationOrder"])))))
 
 (deftest a-record-with-no-section-has-no-selection-carriers
   (let [bare (selection-of (dissoc live-record :outer/selection))]
