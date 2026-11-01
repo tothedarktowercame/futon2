@@ -145,16 +145,16 @@
     (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest md)))))
 
 (defn- default-mission-text
-  "The mission or excursion file for TARGET under CODE-ROOT's primary futon
-  checkouts (<repo>/holes/{M,E}-*.md or <repo>/holes/missions/M-*.md), as {:path :text
-  :sha256}, or nil."
+  "The task file for TARGET under CODE-ROOT's primary futon checkouts, as
+  {:path :text :sha256}, or nil.  Directory precedence is explicit and shared
+  by missions, excursions, and tickets."
   [code-root target]
   (some (fn [repo]
           (some (fn [sub]
                   (let [f (io/file repo sub (str target ".md"))]
                     (when (.isFile f)
                       {:path (.getCanonicalPath f) :text (slurp f) :sha256 (sha256-file f)})))
-                ["holes/missions" "holes"]))
+                ["holes/missions" "holes/excursions" "holes/tickets" "holes"]))
         (sort-by #(.getName ^java.io.File %)
                  (filter #(and (.isDirectory ^java.io.File %)
                                (re-matches #"futon\d+[a-z]?" (.getName ^java.io.File %)))

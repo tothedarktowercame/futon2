@@ -11,6 +11,7 @@
   refused :class-unknown-no-scalar-g on this target, flight-e70b4baf)."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.focus-receipt :as fr]
             [futon2.aif.load-identity :as identity]))
@@ -169,6 +170,14 @@
     (is (= :associated (:class c)))
     (is (= :stated-relation (get-in c [:derived-via :kind])))
     (is (= "E-fixture" (get-in c [:derived-via :path 0 :from])))))
+
+(deftest default-lookup-reads-an-excursion-relations-section
+  (let [lookup (var-get (ns-resolve 'futon2.aif.focus-receipt 'default-mission-text))
+        source (lookup "/home/joe/code" "E-unsolicited-pouch-turns")
+        edges (fr/stated-relations (:text source))]
+    (is (.contains ^String (:path source) "/holes/excursions/"))
+    (is (pos? (count edges)))
+    (is (every? #(str/starts-with? (:to %) "M-") edges))))
 
 (deftest retained-excursion-reaches-the-pinned-embedding
   (let [c (classify inputs "E-efe-education" (fr/relation-context "/home/joe/code"))]
