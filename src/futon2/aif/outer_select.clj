@@ -90,6 +90,46 @@
      :excludes {:reading (:reading c) :graph (:graph c)
                 :reason "whole-field pins change on every click; the field enters the digest through the classes it produces"}}))
 
+(defn per-task-ratings
+  "Diagnostic conditional G: score each admitted candidate as the pick, using
+  the click's existing relation producer and score inputs. This does not run a
+  selection cascade or affect eligibility, classes, Q6 inputs or the decision.
+  Unformable models remain rows with typed absence, never new refusals."
+  [score-input]
+  (mapv
+   (fn [candidate]
+     (let [target (:target candidate)]
+       (try
+         (let [fact (value-of (:facts score-input) target)
+               relation (relation-class score-input target)
+               row (merge {:target target :relation {:class relation}}
+                          (select-keys fact [:status :rank :cone :unblocks]))]
+           (if (= ::no-relation-fn relation)
+             (assoc row :absence {:kind :relation-producer-unavailable})
+             (if-not (and (number? (:reach candidate))
+                          (Double/isFinite (double (:reach candidate))))
+               (assoc row :absence {:kind :reach-unavailable})
+               (let [input (assoc score-input :cascade [] :field [candidate]
+                                  :relation (fn [_ _] relation))
+                     score (outer-score/score-model input (outer-score/outer-model input))
+                     g (:G score)]
+                 (if (and (number? g) (Double/isFinite (double g)))
+                   (merge row (select-keys score [:terms :G :altitude-source])
+                          {:prediction-digest (identity/digest (get-in score [:prediction :outcomes]))})
+                   (assoc row :absence {:kind :score-inadmissible :score g}))))))
+         (catch Exception e
+           {:target target
+            :relation {:status :absent :reason :rating-model-unavailable}
+            :absence {:kind (or (:kind (ex-data e)) :model-unavailable)
+                      :message (ex-message e)}}))))
+   (:field score-input)))
+
+(defn rating-top-ten
+  "Lowest diagnostic G; equal G is displayed by target id, not adjudicated.
+  This display order does not break a selection tie. Absence rows stay outside."
+  [ratings]
+  (vec (take 10 (sort-by (juxt :G :target) (filter #(number? (:G %)) ratings)))))
+
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection."
@@ -145,6 +185,7 @@
           cascades (mapv #(cascade-record observation %1 %2 %3) menu models details)
           scores (mapv :G cascades)
           abstention (outer-score/abstention-score score-input)
+          ratings (per-task-ratings score-input)
           legacy-relations (mapv (fn [c] {:target (:pick c) :relation (get-in c [:relation :class])
                                          :relation-known? (when-not (= :no-pick (:pick c))
                                                             (known-relation? (get-in c [:relation :class])))}) cascades)
@@ -152,6 +193,7 @@
                     :outer-score/excluded (:excluded partition)
                     :knowledge-producer-requests (:requests partition)
                     :library library :construction construction :cascades cascades :abstention abstention
+                    :per-task-rating ratings :top-ten (rating-top-ten ratings)
                     :forbidden forbidden-evidence
                     :cascade-scores scores :cascade-picks (mapv :pick cascades)
                     :cascade-pick-relations legacy-relations}

@@ -264,3 +264,16 @@
     (is (.startsWith (checker/evidence f :q11) ".known"))
     (is (= 2 (count (get-in old [:facts "constructedCascades"])))
         "Historical projection uses all retained arrangement classes")))
+
+(deftest per-task-ratings-are-retained-without-changing-the-choice
+  (let [s (outer-select/select base-makeup base-state base-observation)
+        rows (:per-task-rating s)
+        by-id (into {} (map (juxt :target identity)) rows)]
+    (is (= (count (:field base-observation)) (count rows)))
+    (is (= (:top-ten s) (outer-select/rating-top-ten rows)))
+    (is (= (dissoc s :per-task-rating :top-ten)
+           (dissoc (with-redefs [outer-select/per-task-ratings (constantly [])]
+                     (outer-select/select base-makeup base-state base-observation))
+                   :per-task-rating :top-ten)))
+    (doseq [c (:classes s)]
+      (is (< (Math/abs (- (:G c) (:G (by-id (:pick c))))) 1.0e-9)))))
