@@ -1,6 +1,6 @@
 # E-kimi-task-197 — prove lemma taylor_difference_bound in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-11-01T09:02:42Z to kimi-2 as invoke-1793523762548-9238-365eb389
+**Requisition:** completed — 2026-11-01T09:31:40Z, job invoke-1793523762548-9238-365eb389, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
