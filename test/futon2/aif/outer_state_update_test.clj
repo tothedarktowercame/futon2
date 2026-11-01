@@ -30,6 +30,7 @@
 (def selection
   {:cascade-index 0
    :cascade-id :ready
+   :steps [:ready-gate]
    :cascade-scores [0.0]
    :selection {:candidates [candidate] :selected candidate}})
 

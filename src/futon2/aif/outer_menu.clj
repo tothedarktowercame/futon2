@@ -74,6 +74,9 @@
         :not-executable
         (when-not (seq (:needs c))
           (refuse! :outer-menu/unsupported-without-reason {:cascade (:id c)}))
+        :alias
+        (when-not (some #(and (= (:alias-of c) (:id %)) (= :executable (:status %))) entries)
+          (refuse! :outer-menu/alias-target-invalid {:cascade (:id c) :alias-of (:alias-of c)}))
         (refuse! :outer-menu/mapping-status-invalid {:cascade (:id c)})))
     {:mapping mapping
      :library (assoc manifest :manifest-sha (:sha256 manifest)
@@ -103,6 +106,9 @@
   (let [{:keys [library mapping]} (load-library root)
         cascades (mapv #(construct-cascade library %)
                        (filter #(= :executable (:status %)) (:cascades mapping)))
+        duplicates (filter #(> (count %) 1) (vals (group-by (juxt :steps :units) cascades)))
+        _ (when (seq duplicates)
+            (refuse! :duplicate-policy {:cascades (mapv #(mapv :id %) duplicates)}))
         _ (when (< (count cascades) 2)
             (refuse! :outer-menu/insufficient-cascades {:count (count cascades)}))
         slice (vec (sort (set (mapcat :patterns cascades))))

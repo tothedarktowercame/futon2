@@ -1,5 +1,6 @@
 (ns futon2.aif.outer-observation-test
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
+            [clojure.edn :as edn]
             [futon2.aif.policy-satisfaction :as satisfaction]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
@@ -9,6 +10,8 @@
             [futon2.aif.outer-state :as state]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.selection-world :as selection-world]))
+
+(clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
 (def makeup {:default-reach 1/2})
 
