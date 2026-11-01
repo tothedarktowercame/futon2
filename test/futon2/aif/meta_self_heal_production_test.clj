@@ -1624,7 +1624,10 @@
                       production/production-readiness readiness
                       production/route! route]
           (runtime/run-opportunity!
+           ;; The test pins diagnosis threading. A supplied acceptance test
+           ;; reaches route!; an absent one now refuses with its own reason.
            {:meta-diagnosis-root (str dir "/diagnoses")
+            :acceptance-test {:supplied :fixture}
             :meta-diagnosis-fn (fn [request] (swap! diagnosis-calls inc)
                                  {:status :succeeded
                                   :diagnosis (scoped-diagnosis-fixture
@@ -1635,7 +1638,8 @@
                       production/production-readiness readiness
                       production/route! route]
           (runtime/run-opportunity!
-           {:meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
+           {:acceptance-test {:supplied :fixture}
+            :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
                                  {:status :failed :reason :offline})}))
         supplied-pin {:path "diagnoses/supplied.edn"
                       :sha256 (apply str (repeat 64 "a"))}
@@ -1645,6 +1649,7 @@
                       production/route! route]
           (runtime/run-opportunity!
            {:diagnosis-evidence-pin supplied-pin
+            :acceptance-test {:supplied :fixture}
             :meta-diagnosis-fn (fn [_] (swap! diagnosis-calls inc)
                                  (throw (Exception. "must not call")))}))
         ordinary-seen (atom nil)
