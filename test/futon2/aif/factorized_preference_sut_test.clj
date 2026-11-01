@@ -43,6 +43,7 @@
         p (get-in r [:kernel :probabilities])]
     (is (= :scored (:status r)) (pr-str r))
     (is (= #{:pi1 :pi2} (set (get-in r [:posterior-grain :policy-identities]))))
+    (is (every? #(= :not-requested (get-in % [:inference :status])) (:scored r)))
     (is (> (:focused p) (:related p) (:unrelated p) (:stop-the-line p)))
     (is (every? #(= p (:distribution (last %))) (get-in r [:consumption :rows])))
     (is (sut/preferred? calibration {:completion :completed :relevance :unrelated}

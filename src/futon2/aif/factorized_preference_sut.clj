@@ -139,6 +139,7 @@
             scored (scoring/rank-cascade-actions
                     state candidates
                     {:observation-model model :horizon-steps horizon
+                     :prediction-only? true
                      :prediction-context {:occurrence-id "controlled-q9" :tau horizon}
                      :cascade-spec {:want acceptance :evidence #{} :zeroed #{}
                                     :c-schedule schedule}})]
