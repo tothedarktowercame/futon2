@@ -48,10 +48,12 @@ improvement as needed as the machine runs"): every click's two-run Lean verdict
 recorded. A click that does not conform is an alert: it is appended to
 data/wm-click-loop/alerts.jsonl as work for --owner, who is belled once with
 the alert block, and the loop clicks again. No repair seat is dispatched. A
-lawful abstention (the verdict conforms) is a decided click, not a defect. The
-loop pauses, by stopping with a bell, only when the same requirements fail on
-two consecutive clicks: the fix has not landed, and clicking on would repeat
-the same alert. An absent or unreadable verdict is itself an alert.
+lawful abstention (the verdict conforms) is a decided click, not a defect.
+Before every click after the first, click-path namespaces committed since the
+last reload are reloaded, so a fix landed between clicks is what the next click
+runs. The loop pauses, by stopping with a bell, only when the same requirements
+fail on two consecutive clicks: no fix landed, and clicking on would repeat the
+same alert. An absent or unreadable verdict is itself an alert.
 """
 from __future__ import annotations
 
@@ -947,6 +949,12 @@ def run(args) -> int:
     while spent < args.clicks and ticks < args.ticks:
         if STOP_FILE.exists():
             return stop(args, f"stop file present after {spent} clicks, {ticks} carrying")
+        if args.continuous and spent:
+            # A fix landed between clicks is loaded before the next one; that is
+            # how an alert's signature stops repeating without a pause.
+            ok, text, since = reload_when_idle(since)
+            if not ok:
+                return stop(args, f"paused: a namespace committed since the last click will not load: {text[:300]}", 1)
         c = fire(spent + 1, args, since)
         since = c.pop("since-epoch")
         spent += 1 if c["spent"] else 0

@@ -317,7 +317,7 @@ class ContinuousModeTest(unittest.TestCase):
              mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
              mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
              mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
-             mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
+             mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)) as reload, \
              mock.patch.object(loop, "fire", side_effect=fire), \
              mock.patch.object(loop, "notify") as notify, \
              mock.patch.object(loop, "notify_alert") as notify_alert, \
@@ -328,7 +328,8 @@ class ContinuousModeTest(unittest.TestCase):
                 if (Path(td) / "alerts.jsonl").exists() else []
             events = [__import__("json").loads(l)["event"] for l in (Path(td) / "ledger.jsonl").read_text().splitlines()]
         return {"code": code, "stop": notify.call_args[0][1], "alerts": alerts,
-                "belled": notify_alert.call_count, "repairs": repair.call_count, "events": events}
+                "belled": notify_alert.call_count, "repairs": repair.call_count, "events": events,
+                "reloads": reload.call_count}
 
     def test_repeated_signature_pauses_the_loop_once_the_fix_is_due(self):
         r = self.run_continuous([{"alert": ["work Q7 violated"]},
@@ -352,6 +353,7 @@ class ContinuousModeTest(unittest.TestCase):
         self.assertEqual(3, r["belled"])
         self.assertEqual(0, r["repairs"], "a lawful abstention and alerts dispatch no repair seat")
         self.assertEqual(4, r["events"].count("verdict"))
+        self.assertEqual(1 + 3, r["reloads"], "one reload at start, then one before each later click")
 
 
 if __name__ == "__main__":
