@@ -3,13 +3,14 @@
   mission's stated ## Relations, walked through M- targets (hop bound 2) to a
   rowed target, then (b) its nearest rowed neighbour in the pinned structure
   embedding, re-hashed against the pins; else :unknown with the reason. A hand
-  row wins; T- targets are unchanged. Live pin: M-autoclock-in against the
+  row wins; tickets classify their parent through the same producer. Live pin: M-autoclock-in against the
   real facets file (resources/wm/focus/commit-facets-v1.json) and the real
   pinned embedding (futon6/data/mission-structure-embed, sha256 57ab4aa4… and
   0c2d76be…) derives associated/WM via M-aif4iad at 0.3777004044318593,
   runner-up M-futonzero-generative 0.11165555990299686 (the fourth flight
   refused :class-unknown-no-scalar-g on this target, flight-e70b4baf)."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.focus-receipt :as fr]))
 
@@ -57,18 +58,80 @@
     (is (= "0000" (get-in c [:relation :derivation :embedding :mismatch 0 :pinned])))))
 
 (deftest a-declared-floor-above-the-cosine-keeps-it-unknown-typed
-  (let [c (classify (assoc-in inputs [:embedding :min-cosine] 0.5) "M-autoclock-in"
+  (let [c (classify (assoc inputs :embedding-floor 0.5) "M-autoclock-in"
                     {:mission-text-fn (text-fn {"M-autoclock-in" (relations "M-no-row")})})]
     (is (= :unknown (:class c)))
-    (is (= :nearest-below-threshold (get-in c [:relation :reason])))
-    (is (= {:nearest "M-aif4iad" :cosine 0.3777004044318593 :min-cosine 0.5}
-           (select-keys (get-in c [:relation :derivation :embedding]) [:nearest :cosine :min-cosine])))))
+    (is (= :embedding-below-floor (get-in c [:relation :reason])))
+    (is (= {:nearest "M-aif4iad" :cosine 0.3777004044318593 :floor 0.5}
+           (select-keys (get-in c [:relation :derivation :embedding]) [:nearest :cosine :floor])))))
 
-(deftest with-no-floor-declared-the-neighbours-class-is-derived
+(deftest declared-zero-floor-preserves-neighbour-derivation
   (let [c (classify inputs "M-autoclock-in" {:mission-text-fn (text-fn {"M-autoclock-in" (relations "M-no-row")})})]
     (is (= :associated (:class c)))
-    (is (= {:absent :no-floor-declared} (get-in c [:derived-via :floor])))
+    (is (= 0.0 (get-in c [:derived-via :floor])))
     (is (= {:absent :no-stated-path-to-a-classified-target} (get-in c [:derived-via :stated-relation])))))
+
+(deftest missing-floor-refuses-embedding-derivation-by-name
+  (let [c (classify (dissoc inputs :embedding-floor) "M-autoclock-in"
+                    {:mission-text-fn (text-fn {"M-autoclock-in" (relations "M-no-row")})})]
+    (is (= :unknown (:class c)))
+    (is (= :embedding-floor-not-declared (get-in c [:relation :reason])))))
+
+(deftest excursion-uses-the-stated-relation-producer
+  (let [c (classify inputs "E-fixture"
+                    {:mission-text-fn (text-fn {"E-fixture" (relations "M-aif4iad")})})]
+    (is (= :associated (:class c)))
+    (is (= :stated-relation (get-in c [:derived-via :kind])))
+    (is (= "E-fixture" (get-in c [:derived-via :path 0 :from])))))
+
+(deftest live-excursion-without-a-row-path-or-embedding-stays-typed-unknown
+  (let [c (classify inputs "E-efe-education" (fr/relation-context "/home/joe/code"))]
+    (is (= :unknown (:class c)))
+    (is (= :embedding-node-not-retained (get-in c [:relation :reason])))))
+
+(deftest live-ticket-inherits-its-parents-derived-chain
+  (let [target "T-repair-occ-9b6c9871d59bde364a23f9c346ddc708e2f68f4a026d9afe0aac6c9d538f087d"
+        c (classify inputs target (fr/relation-context "/home/joe/code"))]
+    (is (= :associated (:class c)))
+    (is (= :ticket-parent (get-in c [:derived-via :kind])))
+    (is (= "M-autonomous-pattern-lifecycle" (get-in c [:derived-via :parent])))
+    (is (= :embedding-neighbour (get-in c [:derived-via :then :kind])))
+    (is (= 0.0 (get-in c [:derived-via :then :floor])))))
+
+(deftest live-november-picks-obey-the-declared-floor
+  (let [ctx (fr/relation-context "/home/joe/code")
+        targets ["M-pattern-retrieval-calibration" "M-interim-director"]
+        at-zero (mapv #(classify inputs % ctx) targets)
+        at-point-one (mapv #(classify (assoc inputs :embedding-floor 0.1) % ctx) targets)]
+    (is (= [:associated :associated] (mapv :class at-zero)))
+    (is (= [-0.013961024444296847 0.07298983447075927]
+           (mapv #(get-in % [:derived-via :cosine]) at-zero)))
+    (is (= [0.0 0.0] (mapv #(get-in % [:derived-via :floor]) at-zero)))
+    (is (= [:unknown :unknown] (mapv :class at-point-one)))
+    (is (= [:embedding-below-floor :embedding-below-floor]
+           (mapv #(get-in % [:relation :reason]) at-point-one)))
+    (is (= [0.1 0.1]
+           (mapv #(get-in % [:relation :derivation :embedding :floor]) at-point-one)))))
+
+(defn- census-source [receipt]
+  (or (get-in receipt [:derived-via :kind])
+      (get-in receipt [:relation :reason])
+      :declared))
+
+(deftest live-open-task-relation-census
+  (let [ids (:ids (edn/read-string
+                   (slurp "holes/labs/wm-contract/witnesses/witnesses-open-tasks-2026-11-01.edn")))
+        ctx (fr/relation-context "/home/joe/code")
+        receipts (map #(fr/classify-target inputs discovery "2026-11-01T06:02:00Z" % ctx) ids)
+        table (frequencies
+               (map (fn [r] [(subs (:target r) 0 2) (:class r) (census-source r)])
+                    receipts))]
+    (is (= 626 (count receipts)))
+    (is (= 1 (get table ["E-" :associated :embedding-neighbour])))
+    (is (= 43 (reduce + (for [[[prefix class _] n] table
+                              :when (and (= "T-" prefix) (not= :unknown class))]
+                          n))))
+    (is (= 136 (count (remove #(= :unknown (:class %)) receipts))))))
 
 (deftest m-autoclock-in-live
   (let [c (classify inputs "M-autoclock-in" {:code-root "/home/joe/code"})
