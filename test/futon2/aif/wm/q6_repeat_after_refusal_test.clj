@@ -292,3 +292,50 @@
                (select-keys f ["previousChoice" "previousOutcome" "previousInputDigest"
                                "currentChoice" "currentInputDigest"])))))
     (is (.exists (io/file dir previous-run/stream-name)))))
+
+(deftest work-predecessor-passes-over-a-tick-that-never-decided
+  (let [dir (route/temp-dir "q6-work-skip-")
+        fx (route/fixture)
+        decided (previous-run/terminal {:run-id "decided" :started-at "2026-11-01T10:00:00Z"
+                                        :decision (decision fx) :outcome :changed})
+        failed (previous-run/terminal {:run-id "failed" :started-at "2026-11-01T11:00:00Z"
+                                       :decision {} :outcome :incomplete})
+        decided-file (io/file dir "decided.edn")
+        failed-file (io/file dir "failed.edn")]
+    (spit decided-file (pr-str {:run/id "decided" :q6 {:terminal decided}}))
+    (spit failed-file (pr-str {:run/id "failed"
+                               :failure {:kind :untyped-failure :stage :ticket-readiness-refresh}
+                               :q6 {:terminal failed}}))
+    (previous-run/start! dir "decided" "2026-11-01T10:00:00Z")
+    (previous-run/close! dir decided decided-file)
+    (previous-run/start! dir "failed" "2026-11-01T11:00:00Z")
+    (previous-run/close! dir failed failed-file)
+    (let [p (previous-run/predecessor dir "current" "2026-11-01T12:00:00Z")
+          current (previous-run/terminal {:run-id "current" :started-at "2026-11-01T12:00:00Z"
+                                          :decision (decision fx) :outcome :changed})
+          record {:run/id "current" :q6 {:predecessor p :terminal current}}
+          export (facts/facts-for-record record "fixture" snap)
+          q6 (facts/q6-facts record)]
+      (is (= "decided" (:previous-run/id p)))
+      (is (= {:count 1 :failure-kinds [:ticket-readiness-refresh]}
+             (:previous-skipped p)))
+      (is (= "changed" (q6 "previousOutcome")))
+      (is (string? (q6 "previousInputDigest")))
+      (is (map? (q6 "previousChoice")))
+      (is (= (:previous-skipped p) (get-in export [:diagnostics :previousSkipped])))
+      (is (not-any? #(and (map? %) (contains? % "not-recomputable"))
+                    (map q6 ["previousOutcome" "previousInputDigest" "previousChoice"]))))))
+
+(deftest work-predecessor-keeps-a-refusal-after-scoring
+  (let [dir (route/temp-dir "q6-work-refused-")
+        terminal (previous-run/terminal
+                  {:run-id "refused" :started-at "2026-11-01T10:00:00Z"
+                   :decision (decision (route/fixture)) :downstream {:kind :execution-refused}})
+        file (io/file dir "refused.edn")]
+    (spit file (pr-str {:run/id "refused" :q6 {:terminal terminal}}))
+    (previous-run/start! dir "refused" "2026-11-01T10:00:00Z")
+    (previous-run/close! dir terminal file)
+    (let [p (previous-run/predecessor dir "current" "2026-11-01T11:00:00Z")]
+      (is (= "refused" (:previous-run/id p)))
+      (is (= :refused (get-in p [:previous :outcome :outcome])))
+      (is (not (contains? p :previous-skipped))))))
