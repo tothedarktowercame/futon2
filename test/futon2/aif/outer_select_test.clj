@@ -1,5 +1,6 @@
 (ns futon2.aif.outer-select-test
   (:require [clojure.edn :as edn]
+            [clojure.string :as string]
             [futon2.aif.outer-menu-fixture :as menu-fixture]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-score :as outer-score]
@@ -300,8 +301,8 @@
                 {:path path
                  :sha256 "aad85c4b70e1e68ec659f21c0ec07a4d886a4520bad48555d30aca84a3511dd3"})]
     (is (= "2026-05-14" (get-in pinned [:header :date])))
-    (is (clojure.string/starts-with? (get-in pinned [:header :status]) "OPEN"))
-    (is (clojure.string/starts-with? (get-in pinned [:header :timebox]) "2 weeks"))
+    (is (string/starts-with? (get-in pinned [:header :status]) "OPEN"))
+    (is (string/starts-with? (get-in pinned [:header :timebox]) "2 weeks"))
     (is (contains? #{:matches :drifted} (:pin pinned)))
     ;; a wrong pin is :drifted, never silently :matches
     (is (= :drifted (:pin (outer-select/source-header {:path path :sha256 "00"}))))
