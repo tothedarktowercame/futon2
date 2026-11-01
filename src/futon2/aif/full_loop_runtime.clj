@@ -1,6 +1,7 @@
 (ns futon2.aif.full-loop-runtime
   "Production composition root for the full-loop runner."
-  (:require [cheshire.core :as json]
+  (:require [futon2.data-paths :as data-paths]
+            [cheshire.core :as json]
             [futon2.aif.wm.cascade-patch-delivery :as patch-delivery]
             [futon2.aif.wm.delivery-failure-evidence :as delivery-evidence]
             [futon2.aif.wm.cascade-capability-dispatch :as capability-dispatch]
@@ -51,13 +52,13 @@
 (def default-pattern-graph-path
   "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")
 (def default-pattern-graph-diff-dir
-  "/home/joe/code/futon2/data/wm-pattern-graph-diffs")
+  (data-paths/path "wm-pattern-graph-diffs"))
 (def default-reading-precision-campaign-path
   "/home/joe/code/futon2/resources/wm/reading-precision-beta/wm-readiness-2026-10-17-campaign.edn")
 (def default-cascade-continuation-close-root
-  "/home/joe/code/futon2/data/wm-cascade-continuation-closes")
+  (data-paths/path "wm-cascade-continuation-closes"))
 (def default-cascade-continuation-failure-root
-  "/home/joe/code/futon2/data/wm-cascade-continuation-failures")
+  (data-paths/path "wm-cascade-continuation-failures"))
 (def default-ticket-readiness-manifest
   "/home/joe/code/futon2/data/wm-ticket-readiness/manifest.edn")
 (def default-ticket-readiness-prompt-budget-chars

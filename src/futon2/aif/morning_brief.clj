@@ -4,7 +4,8 @@
   The opportunity runner writes one item. The operator later records a typed
   verdict; that review projects to an entity-grain A-matrix event consumed by
   the next War Machine judgement. Items and reviews are immutable files."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.string :as str]
@@ -18,7 +19,7 @@
 
 (def default-root
   (or (System/getenv "FUTON_WM_MORNING_BRIEF_ROOT")
-      "/home/joe/code/futon2/data/wm-morning-brief"))
+      (data-paths/path "wm-morning-brief")))
 (def lifecycle-schema :wm/morning-brief-lifecycle-v1)
 
 (defn- sha256 [^bytes bytes]

@@ -4,7 +4,8 @@
    that produces grounded work attests the selected cascade when at least one
    selected want was reached or progressed; operator acceptance is a separate,
    potentially stronger observation rather than a prerequisite."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
             [futon2.aif.action-identity :as identity]
@@ -17,8 +18,7 @@
 (def receipt-schema :wm/cascade-execution-feedback-v1)
 (def metadata-schema :wm/pattern-feedback-metadata-v1)
 (def default-path
-  (str (System/getProperty "user.home")
-       "/code/futon2/data/wm-pattern-feedback/events.edn"))
+  (data-paths/path "wm-pattern-feedback" "events.edn"))
 
 (defn- selected-patterns [action]
   (->> (:precedence action) (keep :id) distinct vec))

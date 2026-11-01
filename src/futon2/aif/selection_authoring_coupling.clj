@@ -4,7 +4,8 @@
   Reads the latest WM trace, finds the top lane mission that is blocked at
   :abstain-missing-leg, and dispatches exactly one mana-gated fold-authoring
   flight when the mission lacks an escrow deposit."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.fold-escrow :as esc]
@@ -12,7 +13,7 @@
             [futon2.aif.mission-registry :as missions])
   (:import [java.time Instant]))
 
-(def default-trace-dir "/home/joe/code/futon2/data/wm-trace")
+(def default-trace-dir (data-paths/path "wm-trace"))
 (def default-log-file "/home/joe/code/futon2/logs/selection-authoring-coupling.log")
 (def default-lock-dir "/home/joe/code/futon2/logs/selection-authoring-coupling")
 (def default-author-script "/home/joe/code/futon3c/scripts/author_deposit_for.sh")

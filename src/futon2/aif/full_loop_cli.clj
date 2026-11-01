@@ -1,6 +1,7 @@
 (ns futon2.aif.full-loop-cli
   "Operator entrypoint for real War Machine ticks and durée clicks."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.pprint :as pp]
@@ -49,7 +50,7 @@
                                 (:agent-budget-seconds flags))))))
 
 (defn- canary-path []
-  (str "/home/joe/code/futon2/data/wm-full-loop-canary/canary-"
+  (str (data-paths/path "wm-full-loop-canary") "/canary-"
        (str/replace (str (java.time.Instant/now)) #"[:.]" "-") ".edn"))
 
 (defn- print-value [x]

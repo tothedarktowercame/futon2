@@ -1,7 +1,8 @@
 (ns futon2.aif.ticket-queue
   "Declared front placement for any ordinary ticket. The declaration orders
    eligibility; it supplies neither candidates nor model quantities."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.interoceptive-store-lock :as store-lock]
@@ -39,7 +40,7 @@
 ;; untracked data/ root. resources/wm/ticket-queue.edn stays the versioned empty
 ;; declaration: writing entries (and a .lock) into a tracked resource dirtied
 ;; the shared checkout and made every default-reading test depend on live data.
-(def live-path "/home/joe/code/futon2/data/wm-ticket-queue/queue.edn")
+(def live-path (data-paths/path "wm-ticket-queue" "queue.edn"))
 
 (defn read-declaration
   "Read one declaration; missing or malformed configuration refuses."

@@ -15,7 +15,8 @@
 
   Parts 2 and 3 are separate commits. Nothing here interprets: retrieval
   candidates are unjudged, and the response is the answerer's."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.set :as set]
@@ -360,7 +361,7 @@
   "Machine-published interpretations, one file per target. Kept apart from
   resources/wm/cascade-sources (hand-written declarations), which win on any
   pattern they both name."
-  "/home/joe/code/futon2/data/wm-interpretations")
+  (data-paths/path "wm-interpretations"))
 
 (defn content-id [kind x]
   (str (name kind) "-" (subs (evidence/sha256 (.getBytes (pr-str x) "UTF-8")) 0 16)))

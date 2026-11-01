@@ -3,7 +3,8 @@
    from signature prose. An agent authors a complete cascade-source-v1 declaration
    through cascade-sources/load-declared; proposals never populate its executable
    :candidates or :interpretations maps. Retrieval is explicit, outside the tick."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.interpretation-request :as request]
@@ -13,7 +14,7 @@
   (:import [java.nio.file Files StandardOpenOption]
            [java.util UUID]))
 
-(def default-dir (str (io/file registry/default-code-root "futon2" "data" "wm-cascade-proposals")))
+(def default-dir (data-paths/path "wm-cascade-proposals"))
 
 (defn- decline [target reason details]
   {:target target :stage :proposal-supply :reason reason :missing-evidence details})

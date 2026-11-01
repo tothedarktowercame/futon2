@@ -1,6 +1,7 @@
 (ns futon2.aif.artifact-read-observation
   "Append-only observations made only by a consumer's actual artifact read."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
@@ -8,7 +9,7 @@
            [java.util UUID]))
 
 (def schema :wm/artifact-read-observation-v1)
-(def default-root "/home/joe/code/futon2/data/wm-artifact-reads")
+(def default-root (data-paths/path "wm-artifact-reads"))
 
 (defn sha256 [^bytes bytes]
   (format "%064x" (BigInteger. 1 (.digest (doto (MessageDigest/getInstance "SHA-256")

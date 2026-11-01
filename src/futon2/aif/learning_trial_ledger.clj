@@ -3,7 +3,8 @@
    comparison (before any close verdict); read by pattern-theta and b-update,
    and snapshotted into each close as the B-C carrier (close-b-update).
    OS lock serializes independent writers."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.load-identity :as load-identity])
@@ -13,7 +14,7 @@
 ;; Absolute, like the cohort root: the serving JVM runs with futon3c as cwd.
 (def default-root
   (or (System/getenv "FUTON_WM_LEARNING_TRIAL_LEDGER_ROOT")
-      "/home/joe/code/futon2/data/wm-learning-trials"))
+      (data-paths/path "wm-learning-trials")))
 (defonce ^:private mutex (Object.))
 
 (defn- records [text]

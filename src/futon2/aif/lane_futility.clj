@@ -5,7 +5,8 @@
    gets success credit when that same target receives a :pass act-gate verdict in
    the trace record. Other passes in the same tick are real evidence, but not
    evidence that the selected lane paid."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.selection-gain :as selection-gain])
@@ -20,7 +21,7 @@
    cwd-relative root never does. Cannot require trace.clj — it requires this
    namespace."
   (or (System/getenv "FUTON_WM_TRACE_DIR")
-      (str (System/getProperty "user.home") "/code/futon2/data/wm-trace")))
+      (data-paths/path "wm-trace")))
 (def default-expected-coverage-dg -0.25)
 (def default-futility-threshold 5)
 

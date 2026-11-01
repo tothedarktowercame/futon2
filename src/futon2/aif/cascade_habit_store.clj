@@ -1,7 +1,8 @@
 (ns futon2.aif.cascade-habit-store
   "Persist warranted cascade reinforcement and feed its habit to selection.
    Counts occupy one entry per distinct policy; no per-tick history is retained."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.data-paths :as data-paths]
+            [futon2.aif.load-identity :as load-identity]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.cascade-prior :as prior]
@@ -14,7 +15,7 @@
 (load-identity/register! *ns* *file*)
 
 (def default-path
-  (str (System/getProperty "user.home") "/code/futon2/data/wm-habit/cascade-prior.edn"))
+  (data-paths/path "wm-habit" "cascade-prior.edn"))
 
 (def selection-basis :first-ranked-sharing-chosen-action)
 (defonce ^:private monitor (Object.))

@@ -5,7 +5,8 @@
   no exception from a wire or trip action is allowed to reach the runner.  The
   richer `:tripwire/snapshot` key is an observational input seam for ledgers
   whose facts are not themselves phase telemetry."
-  (:require [babashka.http-client :as http]
+  (:require [futon2.data-paths :as data-paths]
+            [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -29,14 +30,14 @@
 
 (load-identity/register! *ns* *file*)
 
-(def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+(def default-trip-root (data-paths/path "wm-tripwires" "trips"))
 (def default-firing-root
   "Per-firing outcome records live under their own root, NOT the trip root:
   cross-run code reads the trip root and must not see firing tallies mixed
   into trip reports."
-  "/home/joe/code/futon2/data/wm-tripwires/firings")
+  (data-paths/path "wm-tripwires" "firings"))
 (def default-incident-coverage-root
-  "/home/joe/code/futon2/data/wm-tripwires/incident-coverage")
+  (data-paths/path "wm-tripwires" "incident-coverage"))
 (def default-action :record)
 (def default-agency-base "http://127.0.0.1:7070")
 (def investigation-window-ms (* 45 60 1000))
@@ -1375,7 +1376,7 @@
           (if (contains? opts :tripwire/t12-run-history)
             (:tripwire/t12-run-history opts)
             (t12-run-history
-             (or (:run-record-dir opts) "/home/joe/code/futon2/data/wm-runs")
+             (or (:run-record-dir opts) (data-paths/path "wm-runs"))
              (or (:tripwire/t12-window-size opts) t12-window-size)
              (:run-id opts)))
           history (mapv (fn [attempt]

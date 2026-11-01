@@ -4,7 +4,8 @@
   The unit is a scheduler opportunity, not a successful build. Checkpoint
   payloads use the existing flight calculus: a grounded term or a typed sorry.
   State is derived from immutable event files; no summary is authoritative."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.string :as str]
@@ -24,7 +25,7 @@
 (def default-preregistration
   "/home/joe/code/futon2/holes/labs/M-aif-full-loop-46/cohort.edn")
 
-(def default-data-root "/home/joe/code/futon2/data/wm-full-loop")
+(def default-data-root (data-paths/path "wm-full-loop"))
 
 (def max-checkpoint-bytes
   "Hard durability/readback bound for one cohort event. Historical selection

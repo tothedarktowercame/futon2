@@ -1,6 +1,7 @@
 (ns futon2.aif.meta-injury-store
   "Locked, atomic, one-form durable storage for the META injury ledger."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-injury-observation :as injury]
@@ -20,7 +21,7 @@
 ;; transaction, diagnosis, acceptance) resolve under this single definition.
 (def default-root
   (or (System/getenv "FUTON_WM_META_INJURY_ROOT")
-      "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22"))
+      (data-paths/path "wm-meta-injuries-live-2026-10-22")))
 
 (def eof-token (Object.))
 (defn- refusal [reason & [details]]
