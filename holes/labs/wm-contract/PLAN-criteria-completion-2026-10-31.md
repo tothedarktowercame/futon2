@@ -14,6 +14,10 @@ The criteria, deficit rows and evidence rules stand. Sequence changes:
 6. **P6 is a check, not a target.** It starts once ordinary clicks have stopped needing fixes.
 7. **Kimi work goes to standard kimi-N seats (Joe, 2026-10-31).** Earlier use of 象-2 was a mistake; assignments below that name it now mean a kimi-N seat, currently kimi-1.
 
+## Latest execution checkpoint: click 9 real work (2026-11-01)
+
+Click wm-click-ded9918c (run c5590f95) closed :grounded-progress on M-pattern-retrieval-calibration, futon3 a12870e89, 165 lines plus tests, no injury. The target the author claimed twice now got real work, with no correction round needed, after the prompt fix. All six wants measured false because the boxes stayed unticked, so zai-4 has UNTICKED-WORK-UNSEEN before the next click. Budget 7.
+
 ## Latest execution checkpoint: medic refunds, clicks resume (2026-11-01)
 
 Joe ruled that medic clicks do not take credits. All seven charged were refunded through the ledger's refund path: 243 allocated, 235 consumed, 8 available. Unknown relations remain Joe's call and do not block ordinary clicks. Click 9 is the first live chance for the way out, objection round and cascade revision.
