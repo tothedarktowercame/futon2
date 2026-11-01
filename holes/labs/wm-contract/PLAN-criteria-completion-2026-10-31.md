@@ -40,7 +40,7 @@ Click wm-click-0385d9a0 (run f4b95abf), the first with every fix loaded, selecte
 
 ## Criteria rollup (2026-10-31)
 
-Across the eight ordinary clicks of P5 ([rollup](reconciliation/ROLLUP-P5-criteria-2026-10-31.md)): zai-6 counts 12 clean observed, 7 with limits, 0 unknown, 1 violated (E4). The lead reads C4 as with limits, 11 and 8, because the reviewer approved three mission-text claims the machine then refused. This is best status per criterion across runs, not a run that passed all twenty.
+Across the eight ordinary clicks of P5 ([rollup](reconciliation/ROLLUP-P5-criteria-2026-10-31.md)): zai-6 counts 12 clean observed, 7 with limits, 0 unknown, 1 violated (E4). The lead reads 11 clean, 7 with limits, 0 unknown, 2 violated (B3, E4): C4 moves to limits because the reviewer approved three mission-text claims the machine then refused, and B3 is violated because selection has shown identical G across its policies with no stated reason. This is best status per criterion across runs, not a run that passed all twenty.
 
 ## Latest execution checkpoint: click 7, cascade revision door refused (2026-10-31)
 
