@@ -5,6 +5,7 @@
             [wm-run-facts :as facts]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.policy :as policy]
             [futon2.aif.full-loop-runner]))
 
@@ -93,6 +94,26 @@
   (update-in live-record [:decision :selection-certificate] f))
 
 (defn- reason [x] (get x "not-recomputable"))
+
+(deftest production-preference-registry-shape-reaches-the-projector
+  (let [carrier (preference-registry/load!)
+        planted (assoc-in record
+                          [:decision :selection-certificate
+                           :factorized-preference]
+                          carrier)
+        exported (:facts (facts/facts-for-record planted "r" snap))]
+    (is (= 4001 (get-in exported ["factorizedPreference"
+                                  "calibration-authorization"])))
+    (is (= [{"receipt" 4001
+             "calibration" {"identity" 2001 "version" 1
+                            "authority" 3001 "registration-token" 3101
+                            "focused-cost" 0 "related-cost" 1
+                            "unrelated-cost" 2}
+             "authorized-by" 3001}]
+           (exported "calibrationAuthorizations")))
+    (is (= [{"receipt" 4002 "identity" 2002 "version" 1
+             "authority" 3001}]
+           (exported "factorizationAuthorizations")))))
 
 (deftest construction-comes-from-the-recorded-census
   (let [[tc :as all] (live-facts "targetConstruction")]

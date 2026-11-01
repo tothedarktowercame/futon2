@@ -35,8 +35,11 @@
 (defn- authorization [registry receipt]
   (first (filter #(= receipt (:receipt %)) registry)))
 
-(defn- validate-certificate! [{:keys [certificate calibration-authorizations
-                                      factorization-authorizations] :as carrier}]
+(defn validate-certificate!
+  "Validate a normalized factorized-preference carrier or throw a typed
+   ExceptionInfo refusal. Returns CARRIER unchanged when valid."
+  [{:keys [certificate calibration-authorizations
+           factorization-authorizations] :as carrier}]
   (when-not (= carrier-schema (:schema carrier))
     (throw (ex-info "factorized preference refused" {:kind :carrier-schema-invalid})))
   (let [{:keys [calibration selector-authority factorization-identity
@@ -70,7 +73,9 @@
       (throw (ex-info "factorized preference refused" {:kind :factorization-authorization-mismatch})))
     carrier))
 
-(defn- kernel [calibration]
+(defn kernel
+  "Construct the deterministic reciprocal-mass kernel for CALIBRATION."
+  [calibration]
   ;; Completion dominates the complete relevance range structurally: the
   ;; noncompletion cost is one beyond the authorized unrelated endpoint.
   (let [costs {:focused (:focused-cost calibration)
