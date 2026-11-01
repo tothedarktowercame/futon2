@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Fail-closed post-run Requirements checker for one persisted WM run."""
+"""Fail-closed post-run Requirements checker for one persisted WM click.
+
+A click records a work run and a selection run, each a RunFacts.  The click
+conforms only when every requirement holds on both.  There is no one-run verdict.
+"""
 import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.request
 from pathlib import Path
 
@@ -44,6 +48,19 @@ def strict_minimum_line(f):
     return reasons or (f"{card(f['policyG'])} G / {card(f['comparedPolicies'])} compared; "
                        f"abstention G {f['abstentionG']}; {card(f['policyPrediction'])} prediction digests")
 
+def provenance_name(x):
+    return "observed" if isinstance(x, dict) else str(x).lower()
+
+def path_line(f):
+    """On a selection run, which part of the typed path Lean read."""
+    count=f"{val(f['pathAbsenceCount'])} typed path absences"
+    if f.get("kind") != "selection": return count
+    path=f.get("selectionPath")
+    if nr(path): return f"{count}; selectionPath: {path['not-recomputable']}"
+    if not isinstance(path, dict): return f"{count}; selectionPath absent"
+    parts=[f"{k} {provenance_name(path.get(k))}" for k in ("receipt","pickRelation","pickReach")]
+    return f"{count}; {', '.join(parts)}, learningApplied {provenance_name(path.get('learningApplied'))}"
+
 def numbers(q, f):
     opened = sum(card(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) if not any(nr(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) else "NR"
     table = {
@@ -53,7 +70,7 @@ def numbers(q, f):
       4: f"{card(f['preferenceSteps'])} preference steps / horizon {val(f['horizonLength'])}; G terms {val(f['gTerms'])}",
       5: f"order {val(f['interpretationOrder'])}",
       6: f"previous {val(f['previousChoice'])} -> current {val(f['currentChoice'])}; digests {val(f['previousInputDigest'])}/{val(f['currentInputDigest'])}",
-      7: f"{val(f['pathAbsenceCount'])} typed path absences",
+      7: path_line(f),
       9: f"{val(f['completionPairsStrictlyPreferred'])}/{val(f['completionPreferencePairs'])} completion pairs strictly preferred",
       11: strict_minimum_line(f)}
     return table[q]
@@ -99,37 +116,68 @@ def write_verdict(path, result):
       except FileNotFoundError: pass
       raise
 
+def evaluate_run(kind, source, requirements, td, f2, ml, reader, record):
+    """One run's export, Lean check and outcomes.  Any failure raises: a click is
+    checked on both runs or not at all."""
+    title=kind.capitalize(); exported=td/f"facts-{kind}.json"; lean=td/f"RunCheck{title}.lean"
+    if source:
+      exported.write_text(Path(source).read_text())
+    else:
+      export_cmd=["clojure","-M","-m","wm-run-facts","--run",str(record)]
+      if kind != "work": export_cmd+=["--kind",kind]
+      exported.write_text(run(export_cmd, f2).stdout)
+    run(["clojure","-M","-m","wm-check-run-facts",str(exported),str(lean),kind,str(reader)], f2)
+    checked=run([lake_executable(),"env","lean",str(lean)], ml).stdout
+    export=json.loads(exported.read_text()); facts=export["facts"]
+    if facts.get("kind") != kind:
+      raise RuntimeError(f"{kind} export is labelled {facts.get('kind')!r}")
+    found={int(q): outcome for q,outcome in re.findall(r"Requirement\.q(\d+),\s+[^)]*?Outcome\.(\w+)", checked)}
+    outcomes={q: found.get(q,"not-checked") for q in requirements}
+    return {"facts":facts,"outcomes":outcomes,
+            "bad":{q:v for q,v in outcomes.items() if v != "holds"},
+            "verdicts":{f":Q{q}":f":{v}" for q,v in outcomes.items()},
+            "parameters":{f":Q{q}":numbers(q,facts) for q in requirements},
+            "not-recomputable":export.get("diagnostics",{}).get("notRecomputable",[])}
+
+def run_lines(title, checked):
+    shown=checked["bad"] or checked["outcomes"]
+    return [f"{title} run:"]+[f"Q{q} {checked['outcomes'][q]}: {numbers(q,checked['facts'])}" for q in shown]
+
 def main(argv=None):
     p=argparse.ArgumentParser(); p.add_argument("--run-record", required=True)
     p.add_argument("--futon2-root", default=str(Path(__file__).resolve().parents[1]))
     p.add_argument("--mathlib-root", default="/home/joe/code/mathlib4")
     p.add_argument("--alerts-log"); p.add_argument("--evidence-url", default="http://127.0.0.1:7073/api/alpha/evidence")
-    p.add_argument("--facts-json", help="pre-exported fixture; tests only")
+    p.add_argument("--facts-json", help="pre-exported work fixture; tests only")
+    p.add_argument("--selection-facts-json", help="pre-exported selection fixture; tests only")
     p.add_argument("--no-evidence", action="store_true", help="hermetic tests only")
     a=p.parse_args(argv); f2=Path(a.futon2_root); ml=Path(a.mathlib_root); record=Path(a.run_record)
     verdict=Path(str(record)+".requirements.edn"); started=datetime.datetime.now(datetime.timezone.utc)
     try:
       if not record.is_file(): raise RuntimeError(f"run record missing: {record}")
       requirements=requirement_numbers(ml)
+      if bool(a.facts_json) != bool(a.selection_facts_json):
+        raise RuntimeError("one fixture given: a click is checked on both runs")
+      reader=ml/"DarkTower/WarMachine/RequirementsReader.lean"
       with tempfile.TemporaryDirectory(prefix="wm-requirements-") as td:
-        td=Path(td); exported=td/"facts.json"; lean=td/"RunCheck.lean"
-        if a.facts_json:
-          exported.write_text(Path(a.facts_json).read_text())
-        else:
-          exported.write_text(run(["clojure","-M","-m","wm-run-facts","--run",str(record)], f2).stdout)
-        reader=ml/"DarkTower/WarMachine/RequirementsReader.lean"
-        run(["clojure","-M","-m","wm-check-run-facts",str(exported),str(lean),"exported",str(reader)], f2)
-        checked=run([lake_executable(),"env","lean",str(lean)], ml).stdout
-        export=json.loads(exported.read_text()); facts=export["facts"]
-      found={int(q): outcome for q,outcome in re.findall(r"Requirement\.q(\d+),\s+[^)]*?Outcome\.(\w+)", checked)}
-      outcomes={q: found.get(q,"not-checked") for q in requirements}
-      bad={q:v for q,v in outcomes.items() if v != "holds"}; head="ALERT FOR JOE" if bad else "CONFORMS"
-      lines=[head]+[f"Q{q} {outcomes[q]}: {numbers(q,facts)}" for q in (bad or outcomes)]
+        td=Path(td)
+        work=evaluate_run("work",a.facts_json,requirements,td,f2,ml,reader,record)
+        selection=evaluate_run("selection",a.selection_facts_json,requirements,td,f2,ml,reader,record)
+      work_scale=work["facts"].get("policyGScale"); selection_scale=selection["facts"].get("policyGScale")
+      scale_differs=work_scale != selection_scale
+      conforms=not (work["bad"] or selection["bad"] or scale_differs)
+      lines=["CONFORMS" if conforms else "ALERT FOR JOE"]+run_lines("work",work)+run_lines("selection",selection)
+      if scale_differs: lines.append(f"policyGScale differs: work {work_scale} / selection {selection_scale}")
       block="\n".join(lines); print(block, flush=True)
-      result={":run-record":str(record),":checked-at":started.isoformat(),":conforms":not bad,
-              ":verdicts":{f":Q{q}":f":{v}" for q,v in outcomes.items()},
-              ":critical-parameters":{f":Q{q}":numbers(q,facts) for q in requirements},
-              ":not-recomputable":export.get("diagnostics",{}).get("notRecomputable",[]),
+      result={":run-record":str(record),":checked-at":started.isoformat(),":conforms":conforms,
+              ":runs":[":work",":selection"],
+              ":verdicts":work["verdicts"],
+              ":critical-parameters":work["parameters"],
+              ":not-recomputable":work["not-recomputable"],
+              ":selection-verdicts":selection["verdicts"],
+              ":selection-critical-parameters":selection["parameters"],
+              ":selection-not-recomputable":selection["not-recomputable"],
+              ":policy-g-scale":{":work":work_scale,":selection":selection_scale} if scale_differs else work_scale,
               ":module-shas":{":mathlib-head":sha(ml),":requirements":sha(ml,"DarkTower/WarMachine/Requirements.lean"),":reader":sha(ml,"DarkTower/WarMachine/RequirementsReader.lean")},
               ":exporter-sha":sha(f2,"scripts/wm_run_facts.clj")}
     except Exception as e:
@@ -149,7 +197,7 @@ def main(argv=None):
       payload={"evidence/id":"e-wm-requirements-"+hashlib.sha256(str(record).encode()).hexdigest()[:24],
           "evidence/subject":{"ref/type":"wm-run","ref/id":record.name},"evidence/type":"reflection",
           "evidence/claim-type":"observation","evidence/at":started.isoformat(),"evidence/author":"wm-run-alert",
-          "evidence/body":{"event":"wm-requirements","conforms":not bad,"verdict-file":str(verdict),"block":block},
+          "evidence/body":{"event":"wm-requirements","conforms":conforms,"verdict-file":str(verdict),"block":block},
           "evidence/tags":["war-machine","requirements","alert"]}
       req=urllib.request.Request(a.evidence_url,data=json.dumps(payload).encode(),
           headers={"Content-Type":"application/json","X-Penholder":"api"},method="POST")
@@ -171,6 +219,6 @@ def main(argv=None):
         return post_check_failure("PUBLICATION-RECEIPT-PERSISTENCE", e)
     if not verdict.is_file():
       return post_check_failure("VERDICT-PERSISTENCE", RuntimeError())
-    return 1 if bad else 0
+    return 0 if conforms else 1
 
 if __name__ == "__main__": sys.exit(main())
