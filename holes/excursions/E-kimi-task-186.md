@@ -1,6 +1,6 @@
 # E-kimi-task-186 — prove lemma apm_t91J03_degree in apm-lean, one leaf
 
-**Requisition:** in-progress — dispatched 2026-10-31T21:35:50Z to kimi-1 as invoke-1793482550085-8988-d417985b
+**Requisition:** completed — 2026-10-31T21:52:21Z, job invoke-1793482550085-8988-d417985b, state done
 
 Clocked in by claude-14 for kimi-1 on 2026-10-31 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
