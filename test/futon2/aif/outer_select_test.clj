@@ -1,11 +1,8 @@
 (ns futon2.aif.outer-select-test
   (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
-            [clojure.edn :as edn]
-            [futon2.aif.action-identity :as identity]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-score :as outer-score]
-            [futon2.aif.outer-select :as outer-select]
-            [futon2.aif.outer-state :as outer-state]))
+            [futon2.aif.outer-select :as outer-select]))
 
 (clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
@@ -129,28 +126,6 @@
                        (catch clojure.lang.ExceptionInfo e (ex-data e))))]
     (is (= :tie-at-minimum (:kind refusal)))
     (is (= 2 (count (:classes refusal))))))
-
-(deftest real-giraffe-selection-demonstration
-  ;; Fixed pass bytes, not the host/cwd-sensitive historical-run verifier.
-  (let [text (slurp "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5/pass.edn")
-        expected "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91"]
-    (is (= expected (identity/sha256 text)))
-    (when-not (= expected (identity/sha256 text)) (throw (ex-info "Pass pin drift" {})))
-    (let [rows (:order (edn/read-string text))
-          makeup (outer-state/load-makeup)
-          state (outer-state/init-state makeup)
-          observation {:field (mapv #(hash-map :target (name (:id %)) :reach (:default-reach makeup)
-                                               :reach-source :default-reach) rows)
-                       :facts (into {} (map #(vector (name (:id %)) %) rows))
-                       :focus "WM" :relation (fn [_ _] :associated)}
-          result (try (outer-select/select makeup state observation)
-                      (catch clojure.lang.ExceptionInfo e (ex-data e)))
-          evidence result]
-      (is (= :outer-score/graph-term-unavailable (:kind evidence)))
-      (is (= :cone (:term evidence)))
-      (is (some #(= (:target evidence) (name (:id %)))
-                (filter #(= :undetermined (:status %)) rows)))
-      (is (= 609 (count (:field observation)))))))
 
 (deftest unknown-graph-member-stays-in-the-field
   (let [obs (assoc-in base-observation [:facts "M-unknown" :cone] nil)

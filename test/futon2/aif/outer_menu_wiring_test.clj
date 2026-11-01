@@ -56,9 +56,15 @@
 
 (deftest no-menu-makeup-and-menu-only-migration
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory "l54d2-makeup" (make-array java.nio.file.attribute.FileAttribute 0)))
-        old (state/load-makeup)
+        ;; The live makeup lost its menu on 2026-11-01 (L5-4d-2 migration, merged
+        ;; 13:35Z), so the pre-migration shape is rebuilt here from the live kits
+        ;; plus a menu, and both shapes are loaded from files for coherent shas.
+        live (dissoc (state/load-makeup) :makeup/path :makeup/sha256)
+        old-f (io/file dir "makeup-with-menu.edn")
+        _ (spit old-f (pr-str (assoc live :cascades [{:id :menu-only :patterns ["only-what-can-start-now"] :steps [:ready-gate]}])))
+        old (state/load-makeup old-f)
         f (io/file dir "makeup.edn")
-        _ (spit f (pr-str (dissoc old :cascades :makeup/path :makeup/sha256)))
+        _ (spit f (pr-str live))
         new (state/load-makeup f)
         s (state/init-state old)
         migrated (:state (state/migrate-makeup-pin s old new))]
@@ -131,3 +137,31 @@
       (is (= [:related :one] (:landing (score/outer-model input)))))
     (is (= :outer-score/graph-term-unavailable
            (kind #(score/outer-model (assoc input :cascade [{:status-gate :undetermined} :by-cone])))))))
+
+(deftest real-giraffe-field-selects-through-the-constructed-menu
+  ;; Moved from outer-select-test on 2026-11-01 (claude-2, L5-4j review): that
+  ;; namespace stubs the constructor from the makeup's :cascades, which the live
+  ;; makeup no longer carries (L5-4d-2), so the test read :empty-cascade-menu
+  ;; there and had pinned the pre-L5-4d-3 refusal. Here the production
+  ;; constructor runs over the real 11-01 pass with constant associated
+  ;; relations and the default reach, and the pin is what the restored chain
+  ;; decides on that field.
+  (let [text (slurp "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5/pass.edn")
+        expected "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91"]
+    (is (= expected (identity/sha256 text)))
+    (when (= expected (identity/sha256 text))
+      (let [rows (:order (edn/read-string text))
+            makeup (state/load-makeup "data/wm-learning/outer-makeup.edn")
+            st (state/init-state makeup)
+            obs {:field (mapv #(hash-map :target (name (:id %)) :reach (:default-reach makeup)
+                                         :reach-source :default-reach) rows)
+                 :facts (into {} (map #(vector (name (:id %)) %) rows))
+                 :focus "WM" :relation (fn [_ _] :associated)}
+            r (select/select makeup st obs)
+            chosen (first (filter #(= (:chosen-class r) (:id %)) (:classes r)))]
+        (is (nil? (:kind r)) "the real field decides; it does not refuse")
+        (is (= 609 (count (:outer-score/admitted r))))
+        (is (= 2 (count (:classes r))) "two prediction classes: the two ready-gated arrangements, and discovery")
+        (is (= [:only-what-can-start-now :giraffe-order] (:members chosen)))
+        (is (= "M-pattern-retrieval-calibration" (get-in r [:selection :selected :target])))
+        (is (< (:G chosen) (get-in r [:abstention :G])) "the chosen class is strictly below stopping")))))
