@@ -13,6 +13,7 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.load-identity :as identity]
+            [futon2.aif.injury-ticket-join :as injury-join]
             [futon2.aif.ticket-publication-io :as publication]))
 
 (defn- read-edn [^java.io.File f]
@@ -69,7 +70,12 @@
         (->> (.listFiles dir)
              (keep (fn [^java.io.File f]
                      (when (and (.isFile f) (.endsWith (.getName f) ".edn"))
-                       (let [finding (read-edn f)
+                       (let [raw (read-edn f)
+                             resolved (when (map? raw)
+                                        (injury-join/resolve-join repair-root (:repair/id raw)))
+                             finding (when (or (= :present (:status resolved))
+                                                (= :injury-join-not-retained (:reason resolved)))
+                                       (merge raw (:join resolved)))
                              join (cond
                                     (and (map? finding)
                                          (= pin (select-keys (:cause-record-pin finding)

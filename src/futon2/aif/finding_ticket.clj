@@ -6,6 +6,7 @@
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [futon2.aif.load-identity :as identity]
+            [futon2.aif.injury-ticket-join :as injury-join]
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.ticket-publication-io :as publication]
             [futon2.aif.ticket-queue :as queue]))
@@ -37,7 +38,7 @@
         behaviour (str/replace (name (or (:failure-kind finding) :unspecified-failure)) "-" " ")]
     (str "# " (if environmental? "Verify or restore " "Correct ") behaviour "\n\n"
          "**Status:** OPEN\n\n"
-         (when (re-matches #"M-[A-Za-z0-9_-]+" (str (:target finding)))
+         (when (re-matches #"(?:M|E|T)-[A-Za-z0-9_-]+" (str (:target finding)))
            (str "Parent: " (:target finding) "\n\n"))
          "## Observed failure\n\n"
          "Target: " (or (:target finding) "not retained") "; stage: " (:failure-stage finding) ".\n\n"
@@ -125,6 +126,22 @@
      (store-lock/with-store-lock-for root
        (fn []
          (publication/publish-text! path (ticket-text finding (.getPath source) (identity/sha256 bytes)) false)
+         (let [resolved (injury-join/resolve-join root id)]
+           (when (= :refused (:status resolved))
+             (throw (ex-info "Ticket injury join refused" resolved)))
+           (when (= :present (:status resolved))
+             (let [marker "## Injury provenance"
+                   block (str "\n" marker "\n\n```edn\n"
+                              (pr-str (assoc (:join resolved)
+                                             :finding-sha256 (:finding-sha256 resolved)))
+                              "\n```\n")
+                   previous (slurp path)]
+               (cond
+                 (str/includes? previous block) nil
+                 (str/includes? previous marker)
+                 (throw (ex-info "Ticket injury provenance conflicts"
+                                 {:reason :injury-join-conflict}))
+                 :else (publication/publish-text! path (str previous block) true)))))
          (queue/enqueue! queue-path entry)
          (publication/publish-text! receipt-file (pr-str receipt) false)
          ;; Retain the first publication's byte pin. The store accepts legacy
