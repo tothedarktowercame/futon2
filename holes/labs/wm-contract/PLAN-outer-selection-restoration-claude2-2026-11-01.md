@@ -180,3 +180,15 @@ Next: L5-2C-b (refused stays compared, inner); L5-4L-3 (closed exclusion set; gr
 L5-4e (selection-level Q6 carriers: previous decision + choice-scoped input digest; Q4 terms projection
 from the recorded class terms); relation producer coverage (Joe's two questions); L5-5 (re-pick after
 abstention). The live makeup migration and the mapping file await Joe's eye.
+
+## Noted 2026-11-01 15:10Z (from L5-2C-b review)
+
+- **Q6 remembers one step.** Lean's `forbidden` derives from `previousDecision` alone, so A refused,
+  B chosen and refused on the same inputs makes A admissible again (ping-pong). Follow-up
+  **L5-2L-2**: a `refusalHistory : List (Id × Id)` carrier (cascade, input digest) and `forbidden`
+  over every entry whose digest equals the current one; producer retains the history per input
+  digest; projector emits it.
+- `canonical-exclusion` (the `:canonical-coapply` path, not live on era-2) still removes keys and
+  writes `:removed`; align or retire with L5-5.
+- Click-path Q6 fixtures on `main` produce one candidate and cannot reach a repeat; the pins are at
+  selector, carrier and family level on real policies. Fix the fixture separately.
