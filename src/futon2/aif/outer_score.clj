@@ -9,29 +9,46 @@
             [futon2.aif.load-identity :as identity]))
 
 (def ^:dynamic *abstention-altitude-path*
-  "resources/wm/outer-abstention-altitude.edn")
+  "Optional file override (tests). When nil the resource is resolved on the
+  classpath as `wm/outer-abstention-altitude.edn` (futon2/resources), so the
+  serving JVM finds it regardless of its working directory."
+  nil)
+
+(def abstention-altitude-resource "wm/outer-abstention-altitude.edn")
+
+(defn- abstention-altitude-bytes
+  "Returns [location bytes] or throws. Location is the canonical file path
+  when overridden, else the classpath URL string."
+  []
+  (if *abstention-altitude-path*
+    (let [file (io/file *abstention-altitude-path*)]
+      [(.getCanonicalPath file) (java.nio.file.Files/readAllBytes (.toPath file))])
+    (let [url (io/resource abstention-altitude-resource)]
+      (when-not url
+        (throw (ex-info "Outer abstention altitude resource is not on the classpath"
+                        {:resource abstention-altitude-resource})))
+      [(str url) (with-open [in (io/input-stream url)] (.readAllBytes in))])))
 
 (defn abstention-altitude
   "Read and pin Joe's explicit stopping altitude. Absence and malformed data
   refuse rather than silently turning the altitude into a pause."
   []
-  (let [file (io/file *abstention-altitude-path*)]
-    (try
-      (let [bytes (java.nio.file.Files/readAllBytes (.toPath file))
-            resource (edn/read-string (String. bytes "UTF-8"))]
-        (when-not (and (= :wm/outer-abstention-altitude-v1 (:schema resource))
-                       (number? (:nats resource))
-                       (<= 0 (:nats resource))
-                       (string? (:authority resource)) (seq (:authority resource))
-                       (string? (:authorized-at resource)) (seq (:authorized-at resource)))
-          (throw (ex-info "Outer abstention altitude is malformed" {})))
-        {:path (.getCanonicalPath file)
-         :sha256 (identity/sha256 bytes)
-         :nats (:nats resource)})
-      (catch Exception e
-        (throw (ex-info "Outer abstention altitude is not configured"
-                        {:kind :abstention-altitude-unconfigured
-                         :path (.getPath file)} e))))))
+  (try
+    (let [[location bytes] (abstention-altitude-bytes)
+          resource (edn/read-string (String. bytes "UTF-8"))]
+      (when-not (and (= :wm/outer-abstention-altitude-v1 (:schema resource))
+                     (number? (:nats resource))
+                     (<= 0 (:nats resource))
+                     (string? (:authority resource)) (seq (:authority resource))
+                     (string? (:authorized-at resource)) (seq (:authorized-at resource)))
+        (throw (ex-info "Outer abstention altitude is malformed" {:location location})))
+      {:path location
+       :sha256 (identity/sha256 bytes)
+       :nats (:nats resource)})
+    (catch Exception e
+      (throw (ex-info "Outer abstention altitude is not configured"
+                      {:kind :abstention-altitude-unconfigured
+                       :path (or *abstention-altitude-path* abstention-altitude-resource)} e)))))
 
 (def ^:private endings
   [:focused :related :unrelated :stop-the-line :not-yet-evaluated])
