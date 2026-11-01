@@ -94,13 +94,16 @@
     (is (= #{"M-alpha"} ids))))
 
 (deftest open-missions-filters-closed-inactive-and-draft-test
-  (let [doc {:missions [{:id "M-open" :status-class :open}
-                        {:id "M-active" :status-class :active}
-                        {:id "M-partial" :status-class :partial}
-                        {:id "M-unknown" :status-class :unknown}
-                        {:id "M-complete" :status-class :complete}
-                        {:id "M-inactive" :status-class :inactive}
-                        {:id "M-draft" :status-class :draft}]}
+  (let [entry (fn [id status]
+                {:id id :status-class status :path (str "/fixture/" id ".md")
+                 :source {:path (str "/fixture/" id ".md") :sha256 "fixture-sha"}})
+        doc {:missions [(entry "M-open" :open)
+                        (entry "M-active" :active)
+                        (entry "M-partial" :partial)
+                        (entry "M-unknown" :unknown)
+                        (entry "M-complete" :complete)
+                        (entry "M-inactive" :inactive)
+                        (entry "M-draft" :draft)]}
         openes (mr/open-missions doc)]
     (is (= #{"M-open" "M-active" "M-partial" "M-unknown"}
            (set (map :id openes))))))
@@ -170,7 +173,9 @@
   (is (true? (fm/can-propose? {:missions [{:id "M-alpha"}]} :open-mission))))
 
 (deftest can-execute-open-mission-requires-target-in-state-test
-  (let [state {:missions [{:id "M-alpha"} {:id "M-beta"}]}]
+  (let [entry (fn [id] {:id id :path (str "/fixture/" id ".md")
+                        :source {:path (str "/fixture/" id ".md") :sha256 "fixture-sha"}})
+        state {:missions [(entry "M-alpha") (entry "M-beta")]}]
     (is (true? (fm/can-execute? state {:type :open-mission :target "M-alpha"})))
     (is (true? (fm/can-execute? state {:type :open-mission :target "M-beta"})))
     (is (true? (fm/can-execute? state {:type :open-mission
@@ -178,9 +183,12 @@
     (is (false? (fm/can-execute? state {:type :open-mission :target "M-missing"})))))
 
 (deftest live-mission-target-normalizes-substrate-2-mission-endpoints-test
-  (let [missions [{:id "M-alpha" :status-class :open}
-                  {:id "M-beta" :status-class :complete}
-                  {:id "M-gamma" :status-class :draft}]]
+  (let [entry (fn [id status]
+                {:id id :status-class status :path (str "/fixture/" id ".md")
+                 :source {:path (str "/fixture/" id ".md") :sha256 "fixture-sha"}})
+        missions [(entry "M-alpha" :open)
+                  (entry "M-beta" :complete)
+                  (entry "M-gamma" :draft)]]
     (is (= "M-alpha" (mr/mission-target-id "futon4-d/mission/alpha")))
     (is (= "M-alpha" (mr/mission-target-id "M-alpha")))
     (is (true? (mr/live-mission-target? missions "futon4-d/mission/alpha")))

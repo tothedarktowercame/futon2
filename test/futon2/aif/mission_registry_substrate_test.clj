@@ -44,6 +44,16 @@
     [(entity "M-hinge" {})]
     #(is (= :unknown (:status-class (first (:missions (mr/load-missions))))))))
 
+(deftest pathless-foreign-mission-is-typed-and-not-live-test
+  (with-substrate-entities
+    [(entity "M-ukrns-wp"
+             {:scope/role "mission" :mission/relation "relates-to"})]
+    (fn []
+      (let [mission (first (:missions (mr/load-missions)))]
+        (is (false? (boolean (mr/live-mission? mission))))
+        (is (= :pathless-foreign-entity
+               (:mission/unselectable-reason mission)))))))
+
 (deftest unreachable-substrate-is-typed-refusal-test
   (with-redefs [substrate/entities-by-type
                 (fn [& _] (throw (ex-info "conn" {})))]
@@ -200,13 +210,53 @@
       (.mkdirs (io/file repo ".git"))
       (io/make-parents file)
       (spit file "# Stale\n\nStatus: ACTIVE\n\n- [ ] work\n")
-      (try
-        (mr/refresh-mission-substrate!
-         {:code-root (str root)
-          :index-fn (constantly {"M-stale" {:entity/props {:provenance/sha256 "old"}}})
-          :upsert-fn (constantly {:id "M-stale" :status :updated})})
-        (is false "a stale substrate readback must refuse")
-        (catch clojure.lang.ExceptionInfo e
-          (is (= :mission-substrate-freshness-unestablished (:kind (ex-data e))))))
+      (let [entry (#'mr/mission-doc->entry (.getAbsolutePath file))
+            props (assoc (mr/mission-record-props (str root) entry)
+                         :mission/classifier-sha256 "stale-classifier")]
+        (try
+          (mr/refresh-mission-substrate!
+           {:code-root (str root)
+            :index-fn (constantly {"M-stale" {:entity/props props}})
+            :upsert-fn (constantly {:id "M-stale" :status :updated})})
+          (is false "a readback with the file sha but stale classifier must refuse")
+          (catch clojure.lang.ExceptionInfo e
+            (is (= :mission-substrate-freshness-unestablished (:kind (ex-data e)))))))
+      (finally
+        (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
+
+(deftest refresh-rederives-when-classifier-digest-changes
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "mission-classifier-refresh"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))
+        repo (io/file root "primary")
+        stale-file (io/file repo "holes" "M-stale-classifier.md")
+        current-file (io/file repo "holes" "M-current-classifier.md")
+        store (atom {})]
+    (try
+      (.mkdirs (io/file repo ".git"))
+      (io/make-parents stale-file)
+      (spit stale-file "# Stale classifier\n\nStatus: ACTIVE\n")
+      (spit current-file "# Current classifier\n\nStatus: ACTIVE\n")
+      (doseq [file [stale-file current-file]]
+        (let [entry (#'mr/mission-doc->entry (.getAbsolutePath file))
+              props (mr/mission-record-props (.getAbsolutePath root) entry)]
+          (swap! store assoc (:id entry)
+                 {:entity/external-id (:id entry)
+                  :entity/props (cond-> props
+                                  (= file stale-file)
+                                  (assoc :mission/classifier-sha256 "superseded"))})))
+      (with-redefs [substrate/put-doc!
+                    (fn [doc & _]
+                      (swap! store assoc (:entity/external-id doc) doc)
+                      doc)]
+        (let [report (mr/refresh-mission-substrate!
+                      {:code-root (.getAbsolutePath root)
+                       :index-fn #(deref store)})]
+          (is (= 1 (:reclassified report)))
+          (is (= 1 (:updated report)))
+          (is (= 1 (:unchanged report)))
+          (is (= mr/mission-classifier-sha256
+                 (get-in @store ["M-stale-classifier" :entity/props
+                                 :mission/classifier-sha256])))))
       (finally
         (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))

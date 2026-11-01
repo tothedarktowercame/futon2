@@ -205,7 +205,8 @@
           :field-facts {:open-tasks roster :enumerated enumerated :admitted facts :excluded excluded
                         :giraffe/pass-sha256 pass-sha}
           :outer-field/excluded excluded
-          :registry/non-open (mapv #(select-keys % [:id :status-class])
+          :registry/non-open (mapv #(select-keys % [:id :status-class
+                                                    :mission/unselectable-reason])
                                   (remove #(contains? (set enumerated) (:id %)) (vals registry)))
           :default-reach-ignored (contains? makeup :default-reach)
           :giraffe/run-id (:run-id manifest)
