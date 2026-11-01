@@ -1,11 +1,12 @@
 (ns futon2.aif.policy-satisfaction
   "Durable, producer-qualified evidence that one exact reading policy already holds."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.meta-terminal-injury :as terminal]))
 
-(def default-root "/home/joe/code/futon2/data/wm-policy-satisfaction")
+(def default-root (data-paths/path "wm-policy-satisfaction"))
 
 (defn completion-checks [construction]
   (vec (sort-by pr-str

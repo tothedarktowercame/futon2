@@ -4,8 +4,7 @@
   enactment on. Its bad case is a posterior MODE that differs from the chosen
   action: two cascades sharing a first step outweigh, summed, one cascade
   that is the single most probable policy."
-  (:require [clojure.edn :as edn]
-            [clojure.string]
+  (:require [clojure.string]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.policy :as policy])
@@ -38,43 +37,27 @@
           ranked-actions {:beta 1 :novelty-inputs {} :cascade-habit-path (str (io/file root "absent.edn"))})
          (finally (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
 
-(deftest the-candidate-is-the-chosen-action-not-the-posterior-mode
+(deftest the-candidate-is-the-minimum-class-representative
   (let [d (decide roster)
         law (:selection-law d)]
-    (is (= :cas/b (get-in law [:per-policy-argmax :action :id])) "the mode is :cas/b")
-    (is (= (step :p/a "M-t") (:chosen-action d)) "the marginal chose the :p/a step")
-    (is (#{:cas/a1 :cas/a2} (:candidate law)) "the recorded candidate is a :p/a cascade")
-    (is (= (:candidate law) (get-in d [:action :id])) "and it is the decision's own action")
-    (is (not= (:candidate law) (get-in law [:per-policy-argmax :action :id])))))
+    (is (= :strict-G-minimum-over-prediction-classes (:law law)))
+    (is (= [:action-marginal :tie-break-rule] (:retired law)))
+    (is (= :cas/b (:candidate law) (get-in d [:action :id])) "the smallest G is enacted")
+    (is (= (step :p/b "M-t") (:chosen-action d)))
+    (is (= [:cas/b] (:class-members law)))
+    (is (= :cas/b (:enacted law)))
+    (is (= :first-in-ranked-order-within-one-prediction-class (:representative-rule law)))
+    (is (= (:candidate law) (get-in law [:per-policy-argmax :action :id]))
+        "with E and F flat the posterior's mode is the same policy")
+    (is (not (contains? law :action-marginal)))
+    (is (not (contains? law :action-comparison)))
+    (is (not (contains? law :tie-break-rule)))))
 
-(deftest every-other-selection-law-key-is-unchanged
-  ;; fixture: pr-str of this decision from policy.clj at futon2 54e3c396,
-  ;; before row 9, captured before the change. It froze :enacted-steps as
-  ;; nils ({:p/b nil ...}: the roster carries no prediction belief), which
-  ;; enacted-step-of now records as {:absent :no-scoring-belief}; so both
-  ;; sides project :enacted-steps (and the output its new :candidate) away,
-  ;; both read back through EDN so the comparison is of the same printing.
-  ;; The fixture bytes are untouched; the typed values are pinned below and
-  ;; in enacted-step-test.
-  (let [d (decide roster)
-        ;; :e-source (step 8, the enactment fold) joined after the capture too.
-        ;; The retained runtime G certificate joined later still; it is outside
-        ;; the selection-law field under test, so project that named addition
-        ;; from both sides without weakening the comparison of any old field.
-        proj (fn [m]
-               (pr-str
-                (-> m
-                    (update :selection-law dissoc :candidate :enacted-steps :e-source)
-                    (update-in [:selection-certificate :scoring]
-                               (fn [scoring]
-                                 (into {} (map (fn [[i entry]] [i (dissoc entry :g)]))
-                                       scoring))))))]
-    ;; step 8's named drop: the habit provenance names the enactment fold
-    (is (= (proj (edn/read-string (clojure.string/replace
-                                   (edn/read-string (slurp "test/fixtures/selection-law/row9-before@futon2-54e3c396.edn"))
-                                   ":source :cascade-prior" ":source :enactment-fold")))
-           (proj (edn/read-string (pr-str d)))))
-    (is (every? #(= {:absent :no-scoring-belief} %) (vals (get-in d [:selection-law :enacted-steps]))))))
+(deftest g-decides-where-e-would-not
+  ;; The posterior's mode can differ from the minimum once E is not flat. The
+  ;; law takes the minimum: the ruling is stated on G.
+  (let [d (decide (mapv (fn [entry h] (assoc entry :habit h)) roster [1 1000 1]))]
+    (is (= :cas/b (get-in d [:action :id])))))
 
 (deftest no-cascade-id-leaves-the-key-out
   ;; an entry without :cascade-id (the ticket-queue fixtures' shape): no

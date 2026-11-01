@@ -1,6 +1,7 @@
 (ns futon2.aif.outer-learning-manifest
   "Atomic append-only authority over run records admitted to outer learning."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.meta-field-observation :as field]
             [futon2.aif.meta-outcome-dataset :as dataset])
@@ -9,8 +10,7 @@
 
 (def schema :wm/outer-learning-run-manifest-v1)
 (def default-path
-  (str (System/getProperty "user.home")
-       "/code/futon2/data/wm-learning/run-record-manifest.edn"))
+  (data-paths/path "wm-learning" "run-record-manifest.edn"))
 
 (defn read-manifest
   ([] (read-manifest default-path))

@@ -28,44 +28,24 @@
 (defn approx [expected actual]
   (and (number? actual) (< (abs (- expected actual)) 1.0e-12)))
 
-(deftest recorded-runs
-  (doseq [id ["1789964661" "1789952479"]]
-    (let [f (fixture id) d (replay f) law (:selection-law d)
-          p (:policy-comparison law) a (:action-comparison law)]
-      (testing id
-        (is (= (get-in f [:law :posterior]) (:posterior law)))
-        (is (= (get-in f [:law :action-marginal]) (:action-marginal law)))
-        (is (= (:chosen-action d) (get-in a [:winner :action])))
-        (is (= (if (= id "1789964661") "M-aif-policy-conditioned-eig" "M-expressions-of-interest")
-               (get-in d [:action :target])))
-        (is (= :acting-policy (:comparison-domain p)))
-        (is (= :recorded-run (get-in law [:e-source :source])) "a replay, never a live E")
-        (is (every? #(= :recorded-run (get-in % [:habit-provenance :source]))
-                    (get-in d [:selection-certificate :candidates])))
-        (is (= :action (:comparison-domain a)))
-        (if (= id "1789964661")
-          (do
-            (is (= :G (:decided-by p)))
-            (is (= #{:G} (:decided-by a)))
-            (is (true? (get-in a [:flips :G :flipped?])))
-            (is (= :apparatus/done-is-observed-running
-                   (get-in a [:flips :G :winner :action :id])))
-            (is (approx (double (/ 443 350694)) (get-in p [:contributions :G])))
-            (is (true? (:near-tie? p))))
-          (do
-            (is (= :habit (:decided-by p)))
-            (is (= :robust (:decided-by a)))
-            (is (every? false? (map :flipped? (vals (:flips a)))))
-            (is (= 0.0 (get-in p [:contributions :G])))
-            (is (approx (Math/log 5) (get-in p [:contributions :habit])))
-            (is (= :C2 (get-in p [:runner-up :id :id])))))
-        (is (and (number? (get-in p [:winner :posterior]))
-                 (number? (get-in p [:runner-up :posterior]))
-                 (approx (Math/log (/ (get-in p [:winner :posterior])
-                                     (get-in p [:runner-up :posterior])))
-                         (get-in p [:contributions :total]))))
-        (is (= #{:habit :free-energy :G} (set (keys (:flips a)))))
-        (is (= :computed-not-attached (get-in p [:winner :f-status])))))))
+(deftest recorded-runs-under-the-strict-minimum
+  (let [f (fixture "1789964661") d (replay f) law (:selection-law d)
+        p (:policy-comparison law)
+        smallest (apply min (map :g (:candidates f)))]
+    (is (= (get-in f [:law :posterior]) (:posterior law)) "the posterior is still the record")
+    (is (not (contains? law :action-comparison)))
+    (is (= smallest (:controller-score d)) "the smallest G is enacted")
+    (is (= :prediction-class (:comparison-domain p)))
+    (is (= :G (:decided-by p)))
+    (is (= :recorded-run (get-in law [:e-source :source])) "a replay, never a live E")
+    (is (approx (Math/log (/ (get-in p [:winner :posterior]) (get-in p [:runner-up :posterior])))
+                (get-in p [:contributions :total]))))
+  (testing "this run's two lowest G are exactly equal and nothing records that they
+            predict alike, so the habit no longer decides it: the law refuses"
+    (is (= :tie-at-minimum
+           (try (replay (fixture "1789952479"))
+                nil
+                (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind])))))))
 
 (defn simple [g1 g2]
   [{:action :a :controller-score g1} {:action :b :controller-score g2}])
@@ -84,22 +64,22 @@
                  [:selection-law :policy-comparison :near-tie?]))))
 
 (deftest exact-ties-and-single-action
-  (let [law (:selection-law (select (simple 0 0) {:beta 1} nil))]
-    (is (= :tie-break (get-in law [:policy-comparison :decided-by])))
-    (is (= :tie-break (get-in law [:action-comparison :decided-by]))))
+  (is (= :tie-at-minimum
+         (try (select (simple 0 0) {:beta 1} nil)
+              (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind])))))
   (let [law (:selection-law (select [{:action :a :controller-score 0}] {:beta 1} nil))]
     (is (= :no-competing-policy (get-in law [:policy-comparison :status])))
-    (is (= :no-competing-action (get-in law [:action-comparison :runner-up])))))
+    (is (= :no-competing-policy (get-in law [:policy-comparison :decided-by])))))
 
 (deftest free-energy-sign-and-status
   (let [d (select [{:action :a :controller-score 2 :f 0}
                    {:action :b :controller-score 0 :f 4}]
                   {:beta 2} nil)
-        p (get-in d [:selection-law :policy-comparison])
-        a (get-in d [:selection-law :action-comparison])]
-    (is (= {:habit 0.0 :free-energy 4.0 :G -1.0 :total 3.0} (:contributions p)))
-    (is (= :free-energy (:decided-by p)))
-    (is (= #{:free-energy} (:decided-by a))))
+        p (get-in d [:selection-law :policy-comparison])]
+    (is (= :b (:action d)) "G decides; the posterior would have preferred :a")
+    (is (= {:habit 0.0 :free-energy -4.0 :G 1.0 :total -3.0} (:contributions p)))
+    (is (= :G (:decided-by p)))
+    (is (= :G (:favoured-by p))))
   (let [entry {:action :a :controller-score 0
                :f-prefix {:policy :a :status :not-supplied :f nil}}
         refusal (try
@@ -113,18 +93,15 @@
          (try (select [{:action :a :controller-score 0 :f ##Inf}] {:beta 1} nil)
               (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind]))))))
 
-(deftest exclusions-and-pooled-single-action
+(deftest exclusions-and-shared-first-action
   (let [d (select [{:action :b :controller-score 2}
                    {:action :a :controller-score 0
                     :f-prefix {:policy :a :status :zero-support :f nil}}
                    {:action :c :controller-score ##Inf}]
-                  {:beta 1} nil)
-        a (get-in d [:selection-law :action-comparison])]
-    (is (= :no-competing-action (:runner-up a)))
-    (is (= :robust (:decided-by a)))
-    (is (every? #(= :b (get-in % [:winner :action])) (vals (:flips a)))))
+                  {:beta 1} nil)]
+    (is (= :b (:action d)) "no support and no finite G are not candidates")
+    (is (= :no-competing-policy (get-in d [:selection-law :policy-comparison :status]))))
   (let [d (select [{:action {:id :p1 :precedence [:a]} :controller-score 0}
                    {:action {:id :p2 :precedence [:a :b]} :controller-score 1}]
                   {:beta 1} nil)]
-    (is (= :compared (get-in d [:selection-law :policy-comparison :status])))
-    (is (= :no-competing-action (get-in d [:selection-law :action-comparison :runner-up])))))
+    (is (= :compared (get-in d [:selection-law :policy-comparison :status])))))

@@ -4356,14 +4356,16 @@
         (assoc judgement
                :decision
                (policy/select-action-cascades
-                ;; identical G: the posterior cannot discriminate
+                ;; 2 units of G apart: a strict minimum exists, which identical
+                ;; G now refuses before this stop, and the posterior still
+                ;; cannot discriminate (masses within discrimination-epsilon)
                 [(runner-fixture/loop-exercised-ranked-entry
                   selected-action 4.0 1)
                  (runner-fixture/loop-exercised-ranked-entry
                   (assoc selected-action
                          :cascade-id "M-flat-b" :id "M-flat-b"
                          :precedence [:test/other-pattern])
-                  4.0 2)]
+                  4.000002 2)]
                 {:beta 2.0}))
         result
         (runner/run-opportunity!

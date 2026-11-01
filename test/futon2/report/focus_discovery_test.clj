@@ -5,6 +5,8 @@
 (binding [*out* (java.io.StringWriter.)]
   (load-file "holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-7-evidence/improve_7_replay.clj"))
 
+;; :policy-decided-by and :action-decided-by were read from the retired action
+;; comparison; the offline replay's choices below still hold under the new law.
 (deftest focus-domain-counterexamples
   (let [[latest earlier] @(ns-resolve 'improve-7-replay 'results)
         case-of (fn [r k] (first (filter #(= k (:case %)) (:cases r))))
@@ -15,9 +17,7 @@
     (is (= "M-aif-policy-conditioned-eig" (get-in literal [:choice :action :target])))
     (is (= :no-admissible-candidate (get-in (case-of earlier :literal-60-40-zero) [:selection-refusal :kind])))
     (is (= "M-expressions-of-interest" (get-in epsilon [:choice :action :target])))
-    (is (= :habit (:policy-decided-by epsilon)))
     (is (= "M-wm-08-external-f2" (get-in global [:choice :action :target])))
-    (is (= #{:G} (:action-decided-by global)))
     (is (> 1 (:odds (first (:odds-at-initial-context global)))))
     (doseq [r [latest earlier] c (:cases r) :when (nil? (:selection-refusal c))]
       (is (< (abs (- 1 (reduce + (map :posterior (:rows c))))) 1e-8)))))
@@ -47,7 +47,7 @@
     (doseq [[l g] (map vector (take 2 (:rows local)) (take 2 (:rows global)))]
       (is (< (abs (- (:G l) (:G g) (Math/log 0.55))) 1e-8)))
     (is (= Double/POSITIVE_INFINITY (:G (last (:rows local)))))
-    (is (= #{:G} (:action-decided-by local)))))
+    (is (= "M-aif-policy-conditioned-eig" (get-in local [:choice :action :target])))))
 
 (deftest stationarity-does-not-survive-an-unmodelled-exit-gate
   (let [pi [55/100 35/100 5/100 5/100]

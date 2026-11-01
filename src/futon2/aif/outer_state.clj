@@ -3,7 +3,8 @@
 
   This is deliberately separate from outer-learning-manifest, which pins
   completed run publications rather than mutable state between clicks."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.outer-score :as outer-score]
             [futon2.aif.action-identity :as identity])
@@ -15,7 +16,7 @@
 (def state-schema :wm/outer-state-v1)
 ;; The serving JVM runs from futon3c; live stores belong to canonical futon2.
 (def default-makeup-path "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn")
-(def default-state-path "/home/joe/code/futon2/data/wm-learning/outer-state.edn")
+(def default-state-path (data-paths/path "wm-learning" "outer-state.edn"))
 
 (def ^:dynamic *before-state-move*
   "Fault-injection observer called after the temp file is complete, before rename."

@@ -5,7 +5,8 @@
   classes. Findings and resolutions are separate immutable records. An
   obligation is open until an approved, grounded successor run records a
   resolution that names the original failure and its replacement artifact."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.pprint :as pp]
@@ -24,7 +25,7 @@
 
 (def default-root
   (or (System/getenv "FUTON_WM_REPAIR_OBLIGATION_ROOT")
-      "/home/joe/code/futon2/data/wm-repair-obligations"))
+      (data-paths/path "wm-repair-obligations")))
 
 (def artifact-shapes #{:code-commit :data-deposit :spec-document})
 (defonce ^:private finding-publication-monitors (atom {}))

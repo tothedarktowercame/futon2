@@ -18,7 +18,8 @@
 
   It runs at the wm-build-loop's end-of-session stop (`wm-build-loop.sh`,
   `bulletin()`), not on a timer and not as a daemon."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
@@ -42,8 +43,8 @@
    :run-era-ledger (str home "/code/futon2/holes/labs/wm-contract/run-era-ledger.edn")
    :runs-repo (str home "/code/futon2")
    :runs-rel "holes/labs/wm-contract/runs"
-   :tripwire-root "/home/joe/code/futon2/data/wm-tripwires/trips"
-   :trace-root "/home/joe/code/futon2/data/wm-trace"
+   :tripwire-root (data-paths/path "wm-tripwires" "trips")
+   :trace-root (data-paths/path "wm-trace")
    :trace-review-ledger (str home "/code/futon2/holes/labs/zaif-harness/trace-review-ledger.edn")
    :out-dir (str home "/code/futon2/holes/labs/wm-contract/bulletins")
    :bulletin-rel-dir "holes/labs/wm-contract/bulletins"

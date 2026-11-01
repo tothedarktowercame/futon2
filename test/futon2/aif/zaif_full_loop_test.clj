@@ -260,7 +260,10 @@
       ;; boundary) were deleted; the walk's decision is the cascade selector
       ;; over the same ranked field at a declared β=1 (argmax over the same
       ;; min-G head for these single-action candidates).
-      :cascade-decision (policy/select-action-cascades ranked {:beta 1.0})})))
+      ;; a G tie has no strict minimum, so a channel that ties refuses
+      :cascade-decision (try (policy/select-action-cascades ranked {:beta 1.0})
+                             (catch clojure.lang.ExceptionInfo e
+                               {:refusal (get-in (ex-data e) [:refusal :kind])}))})))
 
 (def ^:private run (memoize pipeline))
 
@@ -766,8 +769,8 @@
                    :let [{:keys [level variance realised]} (grounding-for grounding-run-id ch)]]
                {:channel ch
                 :order (:order (run ch level variance realised))
-                :head (get-in (run ch level variance realised)
-                              [:cascade-decision :action :type])})]
+                :head (let [decision (:cascade-decision (run ch level variance realised))]
+                        (or (get-in decision [:action :type]) (:refusal decision)))})]
     (testing "the corpus carries seven channels at R8, all grounded"
       (is (= 7 (count channels)))
       (is (= [:active-repo-ratio :annotation-health :attack-coverage :coupling-density
@@ -777,11 +780,10 @@
       (is (= 3 (count (distinct (map :order runs)))))
       (is (= #{[:retrieve :ask :act] [:act :retrieve :ask] [:act :ask :retrieve]}
              (set (map :order runs))))
-      ;; H6b: heads are now the cascade posterior's choice (β=1, tie-break
-      ;; :action-name-ascending) instead of the flat controller-head order,
-      ;; so a G-tie resolves to :ask here where the old head took the first
-      ;; ranked arm — still a plant-dependence result, one arm per placement.
-      (is (= #{:retrieve :act :ask} (set (map :head runs)))))
+      ;; Heads are the strict G minimum. The channel that a name order used to
+      ;; resolve to :ask now refuses: still a plant-dependence result, one
+      ;; outcome per placement.
+      (is (= #{:retrieve :act :tie-at-minimum} (set (map :head runs)))))
     (testing "the conclusion this licenses, and its limit"
       ;; Re-grounding removed two invented numbers and left the arm-conditional
       ;; delta and the channel placement planted. So the U6 prohibition stands

@@ -26,7 +26,8 @@
     explicit append-only contract proposal (supplemental-carrier-proposal)
     that a human review admits or rejects; nothing here changes the
     existing rule that input.record-pin must equal the source-record pin."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.walk :as walk]
             [clojure.java.io :as io]
             [futon2.aif.load-identity :as load-identity])
@@ -40,7 +41,7 @@
 
 (def default-store-root
   "Canonical content-addressed store for retained delivery failures."
-  "/home/joe/code/futon2/data/wm-delivery-failure-evidence")
+  (data-paths/path "wm-delivery-failure-evidence"))
 
 (defn- record-bytes [record]
   (.getBytes ^String (pr-str record) StandardCharsets/UTF_8))

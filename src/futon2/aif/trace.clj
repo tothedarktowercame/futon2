@@ -46,7 +46,8 @@
    stamp (git sha + dirty flag, the resolved mode/flag set, and
    `trace-schema-version`). Present-only; see `wm-version-stamp` /
    `wm-version-of`."
-  (:require [futon2.aif.accumulation-bmr :as accumulation-bmr]
+  (:require [futon2.data-paths :as data-paths]
+            [futon2.aif.accumulation-bmr :as accumulation-bmr]
             [futon2.aif.load-identity :as load-identity]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -63,7 +64,7 @@
 
 (def default-trace-dir
   (or (System/getenv "FUTON_WM_TRACE_DIR")
-      (str (System/getProperty "user.home") "/code/futon2/data/wm-trace")))
+      (data-paths/path "wm-trace")))
 
 (def ^:private date-fmt
   (DateTimeFormatter/ofPattern "yyyy-MM-dd"))

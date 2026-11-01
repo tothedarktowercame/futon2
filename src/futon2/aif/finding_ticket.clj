@@ -1,6 +1,7 @@
 (ns futon2.aif.finding-ticket
   "Creation/provenance boundary only. Published tickets have ordinary fields."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.string :as str]
@@ -11,7 +12,7 @@
 
 (identity/register! *ns* *file*)
 
-(def canonical-store "/home/joe/code/futon2/data/wm-repair-obligations")
+(def canonical-store (data-paths/path "wm-repair-obligations"))
 
 (defn destinations
   "The canonical store publishes to the primary checkout. Other store roots

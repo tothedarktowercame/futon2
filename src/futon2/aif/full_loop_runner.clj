@@ -6,7 +6,8 @@
   resulting commit, records a typed implementation/discharge in Futon1b, queues
   Morning Brief QA, and closes every preregistered checkpoint. The deterministic
   fold executor is not an actuator here."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.data-paths :as data-paths]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.loaded-displacement :as loaded-displacement]
             [futon2.aif.flight :as flight]
             [babashka.http-client :as http]
@@ -99,6 +100,7 @@
             [futon2.aif.reading-preparation-outcome :as reading-preparation-outcome]
             [futon2.aif.terminal-publication-receipt :as terminal-publication]
             [futon2.aif.registered-run-telemetry :as registered-telemetry]
+            [futon2.aif.cascade-selection :as cascade-selection]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.serving-envelope :as serving-envelope]
             [futon2.aif.selection-timing :as selection-timing]
@@ -123,7 +125,7 @@
 (def default-substrate-base "http://127.0.0.1:7073")
 (def default-phase-replay-input-root
   (or (System/getenv "FUTON_WM_PHASE_REPLAY_INPUT_ROOT")
-      "/home/joe/code/futon2/data/wm-phase-replay-inputs"))
+      (data-paths/path "wm-phase-replay-inputs")))
 
 (def ^:dynamic *runtime-defaults*
   "Production functions supplied by futon2.aif.full-loop-runtime. Tests and
@@ -150,7 +152,7 @@
 ;; flight clicks that never dispatch an author. A cast is now the caller's or
 ;; the env's; one not given is absent, and a tick that selects an action with
 ;; no cast records that absence where it would dispatch.
-(def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
+(def default-phase-log (data-paths/path "wm-full-loop-phases.edn.log"))
 (def default-run-record-dir
   "Where a run drops its receipt when the caller names no directory. Under
   data/ (gitignored), not the lab root: 148 receipts accumulated there and NO
@@ -159,7 +161,7 @@
   has no date (claude-7's inbox-zero analysis, 2026-09-17). A caller that
   wants a receipt kept as evidence passes :run-record-dir explicitly."
   (or (System/getenv "FUTON_WM_RUN_RECORD_DIR")
-      "/home/joe/code/futon2/data/wm-runs"))
+      (data-paths/path "wm-runs")))
 (def default-agent-budget-ms (* 45 60 1000))
 (def semantic-epoch :full-loop-real-actuation-v6)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
@@ -351,7 +353,7 @@
                        parse-long)
                default-agent-budget-ms)
            :phase-log (or (System/getenv "FUTON_WM_PHASE_LOG") default-phase-log)
-           :observation-labels-path "/home/joe/code/futon2/data/wm-observation-labels/labels.edn"
+           :observation-labels-path (data-paths/path "wm-observation-labels" "labels.edn")
            :poll-ms 2000
            :window-days 14
            :build-cure-retries
@@ -1490,7 +1492,7 @@
                     (if-let [graph-path (:pattern-graph-path raw-opts)]
                       (pattern-graph-view/for-action
                        graph-path
-                       (get-in decision [:selection-law :per-policy-argmax :action]))
+                       (cascade-selection/enacted-action decision))
                       {:status :absent :reason :pattern-graph-path-not-supplied})
                     :scan-report (scan-report/retain!
                                   target (some-> (:scan-report/state raw-opts) deref)
@@ -2961,6 +2963,7 @@
   [judgement]
   (let [decision (:decision judgement)
         posterior (get-in decision [:selection-law :posterior])
+        law (get-in decision [:selection-law :law])
         rule (get-in decision [:selection-law :tie-break-rule])
         certificates (into {} (map (juxt :id identity)
                                    (get-in decision [:selection-certificate :candidates])))
@@ -2969,7 +2972,9 @@
                          (first (:precedence action))
                          (if (map? action) (:type action) action)))
         tied? (some #(> % 1) (vals (frequencies (map second posterior))))]
-    (when (and tied? (not= :action-name-ascending rule))
+    ;; A posterior tie orders display rows only. Records from before the
+    ;; strict-minimum law declare the rule that broke it for them.
+    (when (and tied? (not= cascade-selection/minimum-law law) (not= :action-name-ascending rule))
       (throw (ex-info "Cannot rank a posterior tie without its declared rule"
                       {:failure-kind :unsupported-ranking-tie-rule :tie-break-rule rule})))
     (->> posterior

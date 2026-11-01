@@ -1,6 +1,7 @@
 (ns futon2.aif.tripwire-calibration
   "Retro-trip identifiability calibration over the War Machine incident museum."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.data-paths :as data-paths]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [futon2.aif.repair-obligation :as repair]
@@ -13,7 +14,7 @@
 (def attempt-006-source-ledger
   "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-coverage-path
-  "/home/joe/code/futon2/data/wm-tripwires/coverage-v2.edn")
+  (data-paths/path "wm-tripwires" "coverage-v2.edn"))
 (def run-5b-incident-path
   "/home/joe/code/futon2/data/wm-tripwires/incidents/run-5b-artifact-binding.edn")
 

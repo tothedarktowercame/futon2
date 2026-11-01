@@ -5,11 +5,9 @@
 
    1. A cascade decision, as emitted by futon2.aif.policy/select-action-cascades
       (policy.clj ~:891): :selection-law {:applied :cascade-selection-posterior},
-      β recorded as :declared or :learned, the chosen action's probability equal
-      to the MARGINAL of the recorded cascade posterior over candidates whose
-      first acting pattern is that action (recomputed here from the decision's
-      own :selection-law :posterior and each candidate's precedence — never
-      trusted from :softmax-weights or :chosen-action-mass).
+      β recorded as :declared or :learned, the chosen action a member of the
+      strictly minimal prediction class (recomputed here from the certificate's
+      own G and predictions, never trusted from the decision's law fields).
       An optional declared ticket queue restricts eligibility to its earliest
       admitted ticket; the same policy law chooses within that stratum. Both
       the full-family and conditional posterior remain recorded and checked.
@@ -68,7 +66,9 @@
     :model-contract-refused
     ;; Requirements Q6: every admissible policy is the previous run's
     ;; refused choice on the same selection inputs (previous-run)
-    :repeat-choice-after-refusal})
+    :repeat-choice-after-refusal
+    ;; Requirements Q11: no strict minimum exists (cascade-selection)
+    :tie-at-minimum})
 
 (def ^:private mass-tolerance
   "The chosen-action probability must equal its posterior marginal this
@@ -205,15 +205,33 @@
       (check-reading-policy! candidate)
       (check-interpreted-candidate! candidate))))
 
-(defn- marginal-mass
-  "Sum the recorded posterior over candidates whose first acting pattern is
-  `pattern`. Recomputed from the decision's own posterior; never reads
-  :softmax-weights."
-  [posterior pattern]
-  (transduce (comp (filter (fn [[candidate _]]
-                             (= (first-acting-pattern candidate) pattern)))
-                   (map val))
-             + 0.0 posterior))
+(defn- certificate-rows
+  "The certificate's candidates as `minimum-class` reads them, restricted to
+  SUPPORTED, in the certificate's own (ranked) order. Recomputed from what was
+  scored, so the gate does not take the selector's word."
+  [decision supported]
+  (let [certificate (:selection-certificate decision)
+        scored (into {} (map (fn [[_ row]] [(:id row) row])) (:scoring certificate))]
+    (for [{:keys [id g class-emission]} (:candidates certificate)
+          :when (pos? (get supported id 0.0))]
+      {:action id :g g
+       :prediction-digest (selection/prediction-digest
+                           (:steps (get scored id))
+                           (get-in class-emission [:certificate :steps]))})))
+
+(defn- check-minimum!
+  "The chosen action is a member of the strictly minimal class, and no class
+  ties it."
+  [decision supported]
+  (let [{:keys [status detail class]} (selection/minimum-class
+                                       (certificate-rows decision supported))]
+    (case status
+      :unique (when-not (some #(= (:action decision) (:action %)) (:members class))
+                (refuse! :chosen-not-minimum {:action (:action decision)
+                                              :minimum (mapv :action (:members class))
+                                              :g (:g class)}))
+      :tied (refuse! :minimum-not-unique detail)
+      (refuse! :no-acting-candidate {:reason :no-scored-candidate}))))
 
 (defn- check-queue!
   "Independently check the declared order and recompute both choices. The
@@ -240,9 +258,14 @@
                           (selection/selection-posterior
                            {:beta (get-in decision [:beta :value])
                             :candidates (filterv #(contains? ids (:id %)) candidates)}))
-            action-of (into {} (map (fn [id] [id (first-acting-pattern id)])) (keys posterior))
-            unrestricted (selection/bayes-choice acting action-of)
-            choice (if conditional (selection/bayes-choice conditional action-of) unrestricted)]
+            receipt-of (fn [{:keys [status class]}]
+                         (cond-> {:status status}
+                           class (assoc :digest (:digest class) :g (:g class)
+                                        :members (mapv :action (:members class)))))
+            unrestricted (receipt-of (selection/minimum-class (certificate-rows decision acting)))
+            choice (if conditional
+                     (receipt-of (selection/minimum-class (certificate-rows decision conditional)))
+                     unrestricted)]
         (when-not (and (= :wm/ticket-queue-selection-v1 (:schema receipt))
                        (seq (:entries declaration))
                        (= targets (:eligible-targets receipt))
@@ -254,7 +277,7 @@
                        (= conditional (:stratum-posterior receipt))
                        (= unrestricted (:unrestricted-choice receipt))
                        (= choice (:choice receipt))
-                       (= (:action choice) (first-acting-pattern (:action decision)))
+                       (some #{(:action decision)} (:members choice))
                        (or (nil? front) (= (:ticket front) (get-in decision [:action :target]))))
           (refuse! :ticket-queue-choice-invalid {:eligible-targets targets}))
         conditional))))
@@ -272,54 +295,25 @@
         (refuse! :posterior-not-normalised {:total total})))
     (when-not (contains? posterior (:action decision))
       (refuse! :chosen-action-not-a-candidate {:action (:action decision)}))
-    ;; An EMPTY cascade has no first acting pattern, so its key here is nil.
-    ;; Summing those together pools every structurally distinct do-nothing
-    ;; into one key whose mass grows with the roster and cannot lose --
-    ;; 21 of them carried 0.785275 against 0.179031 for the best acting key in
-    ;; run 2026-09-21-1789951020. Absence is not an action and takes no action
-    ;; mass. This mirrors policy.clj's rule and is deliberately NOT shared code:
-    ;; this gate recomputes independently, and `gate-and-selector-agree-on-what-
-    ;; counts-as-an-action` in the tests is what stops the two drifting apart.
+    ;; An EMPTY cascade has no first acting pattern. Absence is not an action
+    ;; and cannot be chosen. This mirrors policy.clj's rule and is deliberately
+    ;; NOT shared code: `gate-and-selector-agree-on-what-counts-as-an-action`
+    ;; in the tests is what stops the two drifting apart.
     (let [acting (into {} (filter (fn [[c _]] (some? (first-acting-pattern c)))) posterior)
-          marginals (reduce (fn [m [c p]] (update m (first-acting-pattern c) (fnil + 0.0) p))
-                            {} acting)
-          chosen-pattern (first-acting-pattern (:action decision))
           conditional (check-queue! decision posterior acting)
-          eligible-marginals (if conditional
-                               (reduce-kv (fn [m c p] (update m (first-acting-pattern c) (fnil + 0.0) p)) {} conditional)
-                               marginals)]
-      (when (nil? chosen-pattern)
+          supported (if conditional (into {} (filter (comp pos? val)) conditional) acting)
+          chosen-mass (:chosen-action-mass decision)]
+      (when (nil? (first-acting-pattern (:action decision)))
         (refuse! :chosen-action-is-not-an-action
                  {:action (:action decision)
                   :reason :empty-cascade-has-no-first-acting-pattern}))
-      (when (empty? marginals)
+      (when (empty? acting)
         (refuse! :no-acting-candidate
                  {:candidates (count posterior)
                   :reason :every-candidate-is-an-empty-cascade}))
-      (let [best (apply max (vals eligible-marginals))]
-        ;; the enacted step is the Bayes action in the declared stratum: no first acting pattern may
-        ;; carry more marginal mass than the chosen one (ties are the selector's
-        ;; declared tie-break, so equality is admitted)
-        (when (> (- best (get eligible-marginals chosen-pattern 0.0)) mass-tolerance)
-          (refuse! :chosen-not-bayes-action
-                   {:chosen chosen-pattern :chosen-marginal (get marginals chosen-pattern)
-                    :best-marginal best}))))
-    (let [chosen (:action decision)
-          chosen-mass (:chosen-action-mass decision)
-          marginal (marginal-mass posterior (first-acting-pattern chosen))]
-      (when-not (and (number? chosen-mass)
-                     (if (seq (get-in decision [:selection-certificate :ticket-queue :eligible-targets]))
-                       ;; A finite-support queued policy can underflow in the
-                       ;; full family; the checked conditional mass is positive.
-                       (and (not (neg? chosen-mass))
-                            (pos? (get-in decision [:selection-certificate :ticket-queue :choice :mass])))
-                       (pos? chosen-mass)))
-        (refuse! :chosen-mass-not-recorded {:chosen-action-mass chosen-mass}))
-      (when (> (abs (- (double chosen-mass) (double marginal))) mass-tolerance)
-        (refuse! :chosen-mass-not-marginal
-                 {:chosen-action-mass chosen-mass
-                  :recomputed-marginal marginal
-                  :first-acting-pattern (first-acting-pattern chosen)})))))
+      (check-minimum! decision supported)
+      (when-not (number? chosen-mass)
+        (refuse! :chosen-mass-not-recorded {:chosen-action-mass chosen-mass})))))
 
 (defn- abstention?
   [decision]

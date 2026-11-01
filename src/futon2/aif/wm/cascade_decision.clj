@@ -1,5 +1,6 @@
 (ns futon2.aif.wm.cascade-decision
-  (:require [futon2.aif.affective-level :as affective]
+  (:require [futon2.data-paths :as data-paths]
+            [futon2.aif.affective-level :as affective]
             [futon2.aif.outer-state :as outer-state]
             [futon2.aif.cascade-selection :as cascade-selection]
             [clojure.edn :as edn]
@@ -1469,11 +1470,9 @@
 ;; ---------------------------------------------------------------------------
 
 (def default-executable-cascade-root
-  (str (System/getProperty "user.home")
-       "/code/futon2/data/wm-executable-cascades"))
+  (data-paths/path "wm-executable-cascades"))
 (def default-execution-journal-root
-  (str (System/getProperty "user.home")
-       "/code/futon2/data/wm-execution-journals"))
+  (data-paths/path "wm-execution-journals"))
 
 (declare execute-selected-cascade!)
 

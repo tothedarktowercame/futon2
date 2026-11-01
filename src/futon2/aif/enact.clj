@@ -38,7 +38,8 @@
    Resilience: every side-effecting step is guarded; a failure is retained as
    a typed `:enactment-failed` variant so the trace cannot confuse a crash with
    an unattempted tick. Never throws into the scheduled run."
-  (:require [cheshire.core :as json]
+  (:require [futon2.data-paths :as data-paths]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
@@ -50,7 +51,7 @@
 (def ^:private futon3a-dir "/home/joe/code/futon3a")
 (def ^:private fold-engine-rel "holes/labs/M-memes-arrows/fold_engine.clj")
 (def ^:private escrow-dir
-  (str (System/getProperty "user.home") "/code/futon2/data/fold-escrow"))
+  (data-paths/path "fold-escrow"))
 
 (defn- escrow-wiring
   "Read the deprecated per-mission escrow without conflating absence with an

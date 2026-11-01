@@ -22,7 +22,8 @@
    (PolicyTemperature), habit must be positive (habit prior mass), and at
    least one candidate must have finite G (selectionPosterior is undefined
    otherwise — division by a zero total)."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.load-identity :as load-identity]
             [clojure.math :as math]))
 
 (load-identity/register! *ns* *file*)
@@ -209,6 +210,107 @@
       {:action a :mass (double m) :tie-break-rule bayes-choice-tie-rule})))
 
 ;; ---------------------------------------------------------------------------
+;; The enacted object is a cascade (Joe, 2026-11-01; Requirements Q11)
+;;
+;; The runner commits to one whole cascade, so the law is the strict G minimum
+;; over the compared policies. Policies predicting the same outcomes are one
+;; policy under the model, and their count must not count for anything. An exact
+;; tie refuses: no name, list or action order stands in for G. `bayes-choice`
+;; stays for a grain where one unit is enacted and the agent re-selects.
+;; ---------------------------------------------------------------------------
+
+(def minimum-law :strict-G-minimum-over-prediction-classes)
+
+(def representative-rule :first-in-ranked-order-within-one-prediction-class)
+
+(def g-scale
+  "Units of G per nat. G is compared at this scale here and in Lean, so scores
+  within a unit are one score: arithmetic noise must not decide a selection."
+  1000000)
+
+(defn g-units
+  "G as an integer count of `g-scale` units, HALF_EVEN; nil unless finite."
+  [g]
+  (when (and (number? g) (Double/isFinite (double g)))
+    (-> (BigDecimal. (double g))
+        (.setScale 6 java.math.RoundingMode/HALF_EVEN)
+        (.movePointRight 6)
+        .longValueExact)))
+
+(defn prediction-digest
+  "What the law scored for one policy, step by step: its progress and class
+  predictions. Nil when the policy has no recorded progress predictions."
+  [progress-steps class-steps]
+  (when (seq progress-steps)
+    (action-identity/digest [(mapv :prediction progress-steps)
+                             (mapv :prediction class-steps)])))
+
+(defn- prediction-class
+  "One policy under the model: the same predicted outcomes at the same G. Two
+  policies with one digest and different G differ in what the digest leaves out
+  (fit-ambiguity, parameter information), so they compete by G. Entries with no
+  recorded prediction are each their own class: nothing says they are one policy."
+  [{:keys [action g prediction-digest]}]
+  (if prediction-digest
+    [prediction-digest (g-units g)]
+    [:no-recorded-prediction action]))
+
+(defn minimum-class
+  "Group ROWS ({:action :g :prediction-digest}, ranked) into classes and find the
+  strictly smallest G at `g-scale`. Returns {:status :unique :class … :runner-up …}
+  or {:status :tied :detail …}. A class is {:digest :g :members [row…]}, members in
+  ranked order."
+  [rows]
+  (let [classes (->> rows
+                     (filter #(some? (g-units (:g %))))
+                     (group-by prediction-class)
+                     (mapv (fn [[digest members]]
+                             {:digest digest :members members
+                              :g (:g (first members))
+                              :units (g-units (:g (first members)))})))
+        ordered (sort-by (juxt :units (comp pr-str :digest)) classes)
+        [best runner] ordered
+        tied (filterv #(= (:units best) (:units %)) ordered)
+        summary #(select-keys % [:digest :g :members])]
+    (cond
+      (empty? classes) {:status :no-scored-class}
+      (< 1 (count tied)) {:status :tied
+                          :detail {:digests (mapv :digest tied) :g (:g best)}}
+      :else (cond-> {:status :unique :class (summary best)}
+              runner (assoc :runner-up (summary runner))))))
+
+(defn selection-row
+  "A ranked entry as `minimum-class` reads it."
+  [entry]
+  {:action (:action entry)
+   :g (:controller-score entry)
+   :prediction-digest
+   (prediction-digest (get-in entry [:certificate :steps])
+                      (get-in entry [:class-emission :certificate :steps]))})
+
+(defn enacted-action
+  "The whole action that ran. A live decision carries it; a run record keeps it as
+  the certificate candidate naming `[:decision :chosen]`. `:per-policy-argmax` is
+  the posterior's mode and read only where a record names no chosen policy."
+  [decision]
+  (let [{:keys [id target]} (:chosen decision)]
+    (or (:action decision)
+        (when id
+          (:id (first (filter #(and (= id (get-in % [:id :id]))
+                                    (= target (get-in % [:id :target])))
+                              (get-in decision [:selection-certificate :candidates])))))
+        (get-in decision [:selection-law :per-policy-argmax :action]))))
+
+(defn strict-minimum
+  "`minimum-class`, refusing unless the minimum is unique."
+  [rows]
+  (let [{:keys [status detail] :as result} (minimum-class rows)]
+    (case status
+      :unique result
+      :tied (refuse! :tie-at-minimum detail)
+      (refuse! :no-admissible-candidate {:rows (count rows)}))))
+
+;; ---------------------------------------------------------------------------
 ;; law receipt (PROOF-2 packet 27 / F-ABS, 2026-09-24)
 ;;
 ;; The `wm-policy-selection` contract bound at cascade_selection.clj:51
@@ -292,9 +394,6 @@
       (assoc :candidates-f-not-applicable outside-domain
              :f-not-applicable-reason :certified-zero-history))))
 
-(defn- ordered-masses [m]
-  (sort-by (fn [[id p]] [(- p) (pr-str id)]) (filter (comp pos? val) m)))
-
 (defn- consumed-f [c]
   ;; Exactly selection-posterior's absent-prefix semantics. Legacy unattached
   ;; F already carries its neutral consumed value; retain its status below.
@@ -314,62 +413,35 @@
                   :invalid :threshold-invalid)}))
 
 (defn selection-comparisons
-  "Recording only. Compare the top two positive-mass ACTING policies, then
-   diagnose the actual action marginal using the same posterior/Bayes code.
-   Policy ties use printed identity ascending; equal positive contributions
-   use the declared order [:habit :free-energy :G]. Neither chooses an action.
-   Neutralizations preserve zero-support F and non-finite G exclusions: these
-   are support constraints, not finite score contributions. Missing or invalid
-   near-tie declarations are typed telemetry, never new selection gates."
-  [{:keys [beta candidates posterior action-of choice near-tie-threshold]}]
+  "Recording only: the enacted class against the runner-up class. G decides, so
+  `:decided-by` is :G whenever a class competed. `:favoured-by` is the term of
+  the posterior that most favoured the enacted class over the runner-up, which
+  says how the record's other quantities leaned and decides nothing. Missing or
+  invalid near-tie declarations are typed telemetry, never new selection gates."
+  [{:keys [beta candidates posterior minimum near-tie-threshold]}]
   (let [by-id (into {} (map (juxt :id identity)) candidates)
-        acting (into {} (filter (fn [[id _]] (some? (get action-of id)))) posterior)
-        [[w wp] [r rp]] (ordered-masses acting)
+        w (-> minimum :class :members first :action)
+        r (-> minimum :runner-up :members first :action)
         wc (get by-id w) rc (get by-id r)
         policy-row (fn [c p]
                      (assoc (select-keys c [:id :habit :f :f-status :computed-f :reason])
                             :posterior p))
-        terms (when r
+        terms (when rc
                 (let [habit (- (math/log (double (:habit wc))) (math/log (double (:habit rc))))
                       f (- (consumed-f rc) (consumed-f wc))
                       g (/ (- (double (:g rc)) (double (:g wc))) (double beta))]
                   {:habit habit :free-energy f :G g :total (+ habit f g)}))
-        dominant (when terms
-                   (if (zero? (:total terms)) :tie-break
-                       (first (sort-by #(- (get terms %))
-                                       (filter #(pos? (get terms %)) [:habit :free-energy :G])))))
-        policy-record (merge
-                       {:comparison-domain :acting-policy
-                        :status (if r :compared :no-competing-policy)
-                        :winner (policy-row wc wp)
-                        :runner-up (if r (policy-row rc rp) :no-competing-policy)
-                        :contributions terms :decided-by (or dominant :no-competing-policy)
-                        :tie-break-rule :policy-printed-identity-ascending
-                        :contribution-tie-order [:habit :free-energy :G]}
-                       (threshold-record near-tie-threshold (:total terms)))
-        marginal (reduce-kv (fn [m id p] (update m (get action-of id) (fnil + 0.0) p)) {} acting)
-        other (first (remove #(= (key %) (:action choice)) (ordered-masses marginal)))
-        tied? (and other (= (val other) (:mass choice)))
-        flips (into {}
-                    (for [term [:habit :free-energy :G]]
-                      (let [neutral (mapv
-                                     (fn [c]
-                                       (case term
-                                         :habit (assoc c :habit 1.0)
-                                         :free-energy (if (= :zero-support (:f-status c)) c
-                                                        (assoc c :f 0.0 :f-status :attached))
-                                         :G (if (and (number? (:g c)) (Double/isFinite (double (:g c))))
-                                              (assoc c :g 0.0) c))) candidates)
-                            post (selection-posterior {:beta beta :candidates neutral})
-                            active (into {} (filter (fn [[id _]] (some? (get action-of id)))) post)
-                            next-choice (bayes-choice active action-of)]
-                        [term {:flipped? (not= (:action choice) (:action next-choice))
-                               :winner (select-keys next-choice [:action :mass])}])))
-        flipped (into #{} (keep (fn [[term result]] (when (:flipped? result) term))) flips)]
-    {:policy-comparison policy-record
-     :action-comparison
-     {:comparison-domain :action :winner (select-keys choice [:action :mass])
-      :runner-up (if other {:action (key other) :mass (val other)} :no-competing-action)
-      :flips flips :neutralization-support :preserve-exclusions
-      :decided-by (cond tied? :tie-break (seq flipped) flipped :else :robust)
-      :tie-break-rule (:tie-break-rule choice)}}))
+        favoured (when terms
+                   (first (sort-by #(- (get terms %))
+                                   (filter #(pos? (get terms %)) [:habit :free-energy :G]))))]
+    {:policy-comparison
+     (merge
+      {:comparison-domain :prediction-class
+       :status (if rc :compared :no-competing-policy)
+       :winner (policy-row wc (get posterior w))
+       :runner-up (if rc (policy-row rc (get posterior r)) :no-competing-policy)
+       :contributions terms
+       :decided-by (if rc :G :no-competing-policy)
+       :favoured-by (or favoured :no-competing-policy)
+       :contribution-tie-order [:habit :free-energy :G]}
+      (threshold-record near-tie-threshold (:total terms)))}))

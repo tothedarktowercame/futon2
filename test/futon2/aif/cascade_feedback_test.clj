@@ -297,12 +297,15 @@
         (doseq [file (reverse (file-seq dir))]
           (io/delete-file file true))))))
 
-(deftest verified-feedback-changes-the-unchanged-policy-choice-through-e
-  (let [entry (fn [id]
+(deftest verified-feedback-moves-the-posterior-through-e-and-not-the-choice
+  ;; The enacted policy is the strict G minimum (Joe, 2026-11-01), so E no longer
+  ;; chooses. :patterns/a keeps the smaller G; feedback still reaches E and the
+  ;; recorded posterior. This was a tied menu that E decided.
+  (let [entry (fn [id g]
                 {:action {:kind :cascade-candidate :id id :target "M-current"
                           :precedence [{:id id :target "M-current"}]}
-                 :controller-score 1.0 :certificate {:f nil}})
-        entries [(entry :patterns/a) (entry :patterns/b)]
+                 :controller-score g :certificate {:f nil}})
+        entries [(entry :patterns/a 1.0) (entry :patterns/b 1.5)]
         metadata {:wm/global
                   {:schema feedback/metadata-schema
                    :scope :global
@@ -317,9 +320,10 @@
         after (policy/select-action-cascades entries
                                              {:beta 1 :pattern-feedback metadata})
         habits (get-in after [:selection-certificate :policies])]
-    (is (= :patterns/a (get-in before [:action :id]))
-        "the unchanged tied menu uses the declared action-name tie-break")
-    (is (= :patterns/b (get-in after [:action :id]))
+    (is (= :patterns/a (get-in before [:action :id]) (get-in after [:action :id]))
+        "G chooses, with or without feedback")
+    (is (< (get-in before [:selection-law :posterior (:action (second entries))])
+           (get-in after [:selection-law :posterior (:action (second entries))]))
         "verified global feedback changes the posterior, not mission state")
     (is (= 1.0 (reduce + (map :habit habits))))
     (is (= :verified-application-beta11-likelihood-ratio

@@ -2,7 +2,8 @@
   "Read retained run evidence and write Markdown with two adjacent SVG figures.
   CLI: clojure -M -m futon2.aif.run-narrative <run-id> [out.md].
   FUTON2_NARRATIVE_ROOT selects the evidence checkout (default current directory)."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.aif.cascade-selection :as cascade-selection]
+            [futon2.aif.load-identity :as load-identity]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -403,7 +404,8 @@
                      (get-in b [:trace :dropped-candidates])
                      (get-in b [:trace :cascade-problems :dropped-candidates]))]
     {:selection {:rows (vec (candidate-rows b)) :chosen a
-                 :decided-by (get-in d [:selection-law :action-comparison :decided-by])
+                 :decided-by (or (get-in d [:selection-law :action-comparison :decided-by])
+                                 (get-in d [:selection-law :policy-comparison :decided-by]))
                  :declines (filterv #(or (:candidate %) (= :candidate-admission (:stage %))) declines)}
      :cascade {:target target :patterns (:precedence c)
                :need-edges (or (:need-edges c) (:need-edges a))
@@ -464,7 +466,7 @@
 (defn- selection-text [b]
   (let [d (decision b) rows (candidate-rows b)
         winner (or (:selected-action (judgment b :selection)) (:action d)
-                   (get-in d [:selection-law :per-policy-argmax :action]))
+                   (cascade-selection/enacted-action d))
         cp (get-in b [:trace :cascade-problems])
         refusals (:refusals cp) policy (get-in d [:selection-law :policy-comparison])
         action (get-in d [:selection-law :action-comparison])
@@ -491,7 +493,9 @@
                          ", near-tie " (shown (:near-tie? policy)) ", threshold " (shown (:near-tie-threshold policy)) "; ")
              "Not recorded in this run: policy comparison and near-tie threshold; no near-tie verdict is inferred; ")
          (if action (str "The action comparison records decided-by " (shown (:decided-by action)) ".\n")
-             "Not recorded in this run: action comparison.\n")
+             (if (get-in d [:selection-law :law])
+               (str "The law was " (shown (get-in d [:selection-law :law])) "; no action comparison is made.\n")
+               "Not recorded in this run: action comparison.\n"))
          (coverage-text b)
          (preference-audit-text d)
          (focus-text d)

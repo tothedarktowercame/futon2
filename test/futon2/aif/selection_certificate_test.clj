@@ -4,7 +4,7 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.policy :as policy]))
 
 (defn- baseline []
@@ -14,43 +14,22 @@
 (defn- select [entries beta]
   (policy/select-action-cascades entries {:beta beta}))
 
+;; strict-minimum.edn is before.edn's six cases regenerated under the 2026-11-01
+;; law. before.edn stays as the historical snapshot its other tests read.
 (deftest decisions-byte-identical
-  ;; Captured from the unmodified selector. Includes actual tick-001 G values,
-  ;; a tied field, and scorer-produced infinite F; beta varies away from 1.
-  ;; Both arms cross the same EDN read boundary before byte comparison:
-  ;; sets in the original in-memory record can print in another order.
-  (doseq [{:keys [ranked beta decision-bytes]} (:cases (baseline))]
-    ;; Precision metadata was added after this historical snapshot. Assert
-    ;; its values explicitly; compare every original decision field unchanged.
-    ;; Only the new diagnostic records are projected away (tested independently
-    ;; against the frozen narrative runs in selection-discrimination-test).
-    (is (= (pr-str (update (edn/read-string decision-bytes) :selection-law
-                          assoc :gamma (/ 1.0 beta) :tau beta :tau-source :declared-beta))
-           (pr-str (-> (select ranked beta)
-                       (dissoc :selection-certificate)
-                       (update :selection-law dissoc
-                               :policy-comparison :action-comparison :near-tie-threshold
-                               ;; :enacted-steps joined the law in b1979ce2
-                               ;; (2026-09-23) AFTER this baseline was captured.
-                               ;; It is the same class as the three above --
-                               ;; additive reporting that changes no winner, no
-                               ;; marginal key and no tie-break -- and is pinned
-                               ;; independently in enacted-step-test. Projected
-                               ;; away rather than RE-CAPTURING the baseline:
-                               ;; re-recording the bytes to make a byte-identity
-                               ;; test pass is how such a test stops meaning
-                               ;; anything (claude-5, 2026-09-24, found by
-                               ;; kimi-6 while checking a different stop-line).
-                               :enacted-steps
-                               ;; :candidate joined the law with M-wm-wiring
-                               ;; row 9 (claude-10, 2026-09-25): the chosen
-                               ;; entry's :cascade-id, additive, same class;
-                               ;; pinned in selection-law-candidate-test.
-                               :candidate
-                               ;; :e-source joined with M-wm-wiring step 8 (claude-10,
-                               ;; 2026-09-25): where E came from, the enactment fold;
-                               ;; pinned in selection-reads-fold-test.
-                               :e-source)))))))
+  (doseq [{:keys [ranked beta decision-bytes refusal]}
+          (:cases (edn/read-string
+                   (slurp (io/resource "fixtures/selection-certificate/strict-minimum.edn"))))]
+    (if refusal
+      (is (= refusal
+             (try (policy/select-action-cascades ranked {:beta beta})
+                  nil
+                  (catch clojure.lang.ExceptionInfo e (get-in (ex-data e) [:refusal :kind])))))
+      (is (= (pr-str (edn/read-string decision-bytes))
+             (pr-str (edn/read-string
+                      (pr-str (-> (policy/select-action-cascades ranked {:beta beta})
+                                  (dissoc :selection-certificate)
+                                  (update :selection-law dissoc :e-source :enacted-steps))))))))))
 
 (deftest computed-and-consumed-are-distinct
   (let [{:keys [ranked beta]} (first (:cases (baseline)))
@@ -185,32 +164,60 @@
     (is (nil? (first-action (co-action :empty [] [] {})))
         "zero units are the same absence as an empty vector precedence")))
 
-(deftest co-application-marginal-pools-cascades-with-the-same-roots
-  (let [a (co-pattern :a [] [] [:a-done])
+(deftest same-prediction-cascades-form-one-class
+  (let [steps [{:prediction {[0 false] 1/2 [1 false] 1/2}}]
+        emission {:certificate {:steps [{:prediction {:stop-the-line 1}}]}}
+        a (co-pattern :a [] [] [:a-done])
         b (co-pattern :b [:a-done] [] [:b-done])
         c (co-pattern :c [:a-done] [] [:c-done])
         x (co-pattern :x [] [] [:x-done])
         y (co-pattern :y [] [] [:y-done])
-        actions [(co-action :ab [:a :b] [[:a :b]] {:a a :b b})
-                 (co-action :ac [:a :c] [[:a :c]] {:a a :c c})
-                 (co-action :xy [:x :y] [] {:x x :y y})]
-        ranked (mapv (fn [action g]
-                       {:action action :cascade-id (:id action)
-                        :controller-score g :certificate {:f nil}})
-                     actions [1.0 2.0 3.0])
-        decision (policy/select-action-cascades ranked {:beta 1})
-        posterior (get-in decision [:selection-law :posterior])
-        marginal (get-in decision [:selection-law :action-marginal])
-        shared-root [a]
-        shared-mass (+ (posterior (actions 0)) (posterior (actions 1)))]
-    (is (= 2 (count marginal)))
-    (is (== shared-mass (marginal shared-root)))
-    (is (= #{[:a] [:x :y]}
-           (set (map #(mapv :id %) (keys marginal)))))
-    (is (not-any? #(and (vector? %) (= :co-apply (first %))) (keys marginal))
-        "the precedence container is never an action-marginal key")
-    (is (= #{[:a] [:x :y]}
-           (set (keys (get-in decision [:selection-law :enacted-steps])))))))
+        entry (fn [action g steps]
+                {:action action :cascade-id (:id action) :controller-score g
+                 :certificate {:f nil :steps steps} :class-emission emission})
+        ab (co-action :ab [:a :b] [[:a :b]] {:a a :b b})
+        ac (co-action :ac [:a :c] [[:a :c]] {:a a :c c})
+        xy (co-action :xy [:x :y] [] {:x x :y y})
+        decision (policy/select-action-cascades
+                  [(entry xy 2.0 [{:prediction {[0 false] 1}}])
+                   (entry ab 1.0 steps) (entry ac 1.0 steps)]
+                  {:beta 1})
+        law (:selection-law decision)]
+    (is (= :ab (:id (:action decision))) "the class's first in ranked order is enacted")
+    (is (= [:ab :ac] (:class-members law)))
+    (is (= :ab (:enacted law)))
+    (is (= :first-in-ranked-order-within-one-prediction-class (:representative-rule law)))
+    (is (= :G (get-in law [:policy-comparison :decided-by])))
+    (is (= :prediction-class (get-in law [:policy-comparison :comparison-domain])))
+    (testing "the two equal G are one class, so they do not tie"
+      (is (== (:chosen-action-mass decision)
+              (+ (get-in law [:posterior ab]) (get-in law [:posterior ac])))))))
+
+(deftest same-prediction-different-g-compete
+  ;; What the digest leaves out (fit-ambiguity, parameter information) can
+  ;; separate two policies that predict alike. They are two policies.
+  (let [steps [{:prediction {[0 false] 1}}]
+        entry (fn [id g] {:action {:kind :cascade-candidate :id id :target "M"
+                                   :precedence [{:id id :target "M"}]}
+                          :controller-score g :certificate {:f nil :steps steps}})
+        decision (policy/select-action-cascades [(entry :q 2.0) (entry :p 1.0)] {:beta 1})
+        law (:selection-law decision)]
+    (is (= :p (:id (:action decision))))
+    (is (= [:p] (:class-members law)))
+    (is (= :G (get-in law [:policy-comparison :decided-by])))))
+
+(deftest g-within-a-scale-unit-is-a-tie
+  (let [entry (fn [id g steps]
+                {:action {:kind :cascade-candidate :id id :target "M"
+                          :precedence [{:id id :target "M"}]}
+                 :controller-score g :certificate {:f nil :steps steps}})
+        refusal (try (policy/select-action-cascades
+                      [(entry :p 1.23456701 [{:prediction {[0 false] 1}}])
+                       (entry :q 1.23456708 [{:prediction {[1 false] 1}}])]
+                      {:beta 1})
+                     (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e))))]
+    (is (= :tie-at-minimum (:kind refusal)))
+    (is (= 2 (count (get-in refusal [:detail :digests]))))))
 
 (deftest co-application-enacted-step-is-the-enabled-frontier
   (let [patterns {:a (co-pattern :a [] [:a-done] [:a-done])
@@ -239,40 +246,30 @@
         "and their mass is recorded, not silently dropped")
     (is (== (:chosen-action-mass decision)
             (get (:softmax-weights decision) (pattern :pattern/do-the-thing "M-real")))
-        "the recorded marginal carries the mass that actually decided")))
+        "the recorded mass is the enacted class's")))
 
-(deftest recorded-marginal-sums-duplicate-keys-rather-than-overwriting
-  ;; The certificate defect: `into {}` overwrote duplicate keys, so the record
-  ;; showed the winning key with ONE candidate's probability instead of the
-  ;; summed mass. Two cascades whose FIRST acting pattern is the same pattern
-  ;; must sum in the record; that is what an action marginal means.
+(deftest softmax-weights-still-sum-duplicate-keys
+  ;; :softmax-weights decides nothing now, and its readers keep a true record:
+  ;; two cascades sharing a first acting pattern sum.
   (let [shared (pattern :pattern/shared "M-shared")
         a {:action {:kind :cascade-candidate :target "M-shared"
                     :precedence [shared (pattern :pattern/tail-a "M-shared")]}
            :controller-score 10.0 :certificate {:f nil}}
         b {:action {:kind :cascade-candidate :target "M-shared"
                     :precedence [shared (pattern :pattern/tail-b "M-shared")]}
-           :controller-score 10.0 :certificate {:f nil}}
-        other (cascade "M-three" [:pattern/other] 10.0)
+           :controller-score 11.0 :certificate {:f nil}}
+        other (cascade "M-three" [:pattern/other] 12.0)
         decision (policy/select-action-cascades [a b other] {:beta 1})
-        weights (:softmax-weights decision)
-        posterior (get-in decision [:selection-law :posterior])
-        shared-mass (reduce + 0.0 (keep (fn [[act p]]
-                                          (when (= shared (first (:precedence act))) p))
-                                        posterior))]
-    (is (= 2 (count (filter (fn [[act _]] (= shared (first (:precedence act)))) posterior)))
-        "two policies share the first acting pattern")
-    (is (== (get weights shared) shared-mass)
-        "the marginal SUMS them; `into {}` would have kept only one")
-    (is (= shared (:chosen-action decision))
-        "and the summed key is what wins")))
+        posterior (get-in decision [:selection-law :posterior])]
+    (is (== (get (:softmax-weights decision) shared)
+            (+ (posterior (:action a)) (posterior (:action b)))))))
 
 (deftest a-lone-typed-no-op-still-competes-and-can-win
   ;; The other side: the guard must not swallow a GENUINE abstention. A typed
   ;; no-op carries :type, keeps its own key, and must remain selectable.
   (let [no-op {:action {:kind :no-op :type :abstain/stand-down}
                :controller-score 10.0 :certificate {:f nil}}
-        acting (cascade "M-real" [:pattern/do-the-thing] 10.0)
+        acting (cascade "M-real" [:pattern/do-the-thing] 11.0)
         decision (policy/select-action-cascades [no-op acting] {:beta 1})
         weights (:softmax-weights decision)]
     (is (contains? weights :abstain/stand-down)
@@ -291,43 +288,3 @@
     (is (= :no-acting-cascade-candidate (:kind refusal)))
     (is (= 3 (get-in refusal [:detail :empty-cascades])))
     (is (string? (get-in refusal [:detail :reason])))))
-
-(deftest the-2026-09-21-recapture-is-exactly-the-pooled-nil-exclusion
-  ;; `decisions-byte-identical` compares against a baseline captured from the
-  ;; selector. Excluding empty cascades from the action marginal CHANGED that
-  ;; baseline, so it was re-captured -- and a blanket re-capture would accept
-  ;; any other drift silently, which is the whole hazard the byte test exists
-  ;; to catch. This pins the delta against the PRE-FIX fixture, kept beside
-  ;; the new one as evidence: every case either flipped from an empty cascade
-  ;; to an acting one, or kept its selection and only had its record fixed.
-  (let [before (edn/read-string
-                (slurp (io/resource "fixtures/selection-certificate/before-2026-09-20-pooled-nil.edn")))]
-    (is (= 6 (count (:cases before))))
-    (doseq [[i {:keys [ranked beta decision-bytes]}] (map-indexed vector (:cases before))]
-      (let [old (edn/read-string decision-bytes)
-            new (dissoc (select ranked beta) :selection-certificate)]
-        (is (some? (get (:softmax-weights old) nil))
-            (str "case " i ": sanity -- every pre-fix case DID carry a nil key, "
-                 "which is the defect being removed"))
-        (if (nil? (:chosen-action old))
-          ;; The defect: an empty cascade had won. It must not win now.
-          (do (is (some? (:chosen-action new))
-                  (str "case " i ": an empty cascade won before and must not now"))
-              (is (not= (:action old) (:action new))
-                  (str "case " i ": the selected action must actually change"))
-              (is (seq (:precedence (:action new)))
-                  (str "case " i ": the new selection is an acting cascade")))
-          ;; Selection was already correct: it must be untouched, and ONLY the
-          ;; record may differ.
-          (do (is (= (:action old) (:action new))
-                  (str "case " i ": a correct selection must not move"))
-              (is (= (:chosen-action old) (:chosen-action new))
-                  (str "case " i ": nor its action key"))
-              (is (== (:chosen-action-mass old) (:chosen-action-mass new))
-                  (str "case " i ": nor the mass that decided"))))
-        ;; In every case, the nil key is gone from the recorded marginal and
-        ;; the excluded mass is accounted for rather than dropped.
-        (is (nil? (get (:softmax-weights new) nil))
-            (str "case " i ": nil never appears in the new marginal"))
-        (is (some? (get-in new [:selection-law :excluded-non-actions]))
-            (str "case " i ": exclusions are recorded"))))))

@@ -1,7 +1,8 @@
 (ns futon2.aif.d-predecessor-task-authority
   "D-only executed-with-artifacts authority. Does not establish E1 portfolio
    membership, the R6-R11 domain, or broader machine-enactment correspondence."
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.data-paths :as data-paths]
+            [futon2.aif.load-identity :as load-identity]
             [clojure.edn :as edn]
             [clojure.set :as set]
             [babashka.http-client :as http]
@@ -24,7 +25,7 @@
 
 (def authority :d-predecessor-task-authority-v1)
 ;; The serving JVM runs from futon3c; never resolve evidence against its cwd.
-(def default-root "/home/joe/code/futon2/data/wm-d-task-enactment")
+(def default-root (data-paths/path "wm-d-task-enactment"))
 (def scope {:certifies :executed-with-artifacts
             :does-not-establish #{:e1-portfolio-membership :r6-r11-domain
                                   :machine-enactment-correspondence}})
