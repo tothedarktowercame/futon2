@@ -113,15 +113,16 @@
          (let [targets (mapv (comp name :id) rows)
                declarations (construction-inputs/target-source-declarations targets authority)
                registry-by-id (registry-entries authority)
-               entries (mapv (fn [{:keys [id status unblocks cone graph-terms completion dependency-reading]} declaration]
+               entries (mapv (fn [{:keys [id status unblocks cone rank graph-terms completion dependency-reading]} declaration]
                                (let [target (name id)]
                                  {:candidate {:target target
-                                              :reach (:default-reach makeup)}
+                                              :reach (:default-reach makeup)
+                                              :reach-source :default-reach}
                                   :target target
                                   :declaration declaration
                                   :fact {:status status
                                          :unblocks unblocks
-                                         :cone cone :graph-terms graph-terms
+                                         :cone cone :rank rank :reach-source :default-reach :graph-terms graph-terms
                                          :completion completion :dependency-reading dependency-reading}}))
                              rows declarations)
                available (filterv #(nil? (get-in % [:declaration :source-absent])) entries)
@@ -180,11 +181,20 @@
   (let [giraffe (giraffe-field run-dir makeup)
         focus-result (focus-receipt/decision-focus focus-inputs decision-as-of previous-focus)
         focus-info (:info focus-result)
+        receipts (into {} (map (fn [target]
+                                 [target (focus-receipt/classify-target
+                                          focus-inputs focus-info decision-as-of target relation-context)])
+                               (distinct (map :target (:field giraffe)))))
+        ;; One retained receipt supplies both the scoring class and its evidence.
         relation (fn [focus target]
-                   (:class (focus-receipt/classify-target
-                            focus-inputs
-                            (assoc focus-info :focus focus)
-                            decision-as-of target relation-context)))]
+                   (if (= focus (:focus focus-info))
+                     (get-in receipts [target :class] :unknown) :unknown))
+        giraffe (update giraffe :facts
+                        (fn [facts]
+                          (reduce-kv (fn [m target receipt]
+                                       (assoc-in m [target :relation]
+                                                 {:class (:class receipt) :receipt receipt}))
+                                     facts receipts)))]
     (merge giraffe
            {:focus (:focus focus-info)
             :relation relation

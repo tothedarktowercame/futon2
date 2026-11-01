@@ -1,7 +1,7 @@
 (ns futon2.aif.outer-select-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [futon2.aif.action-identity :as identity]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.outer-state :as outer-state]))
@@ -19,8 +19,8 @@
 (def base-observation
   {:focus "M-focus"
    :relation (fn [_ target] (if (= target "M-ready") :focus :associated))
-   :field [{:target "M-ready" :reach 1/2}
-           {:target "M-unknown" :reach 1/2}]
+   :field [{:target "M-ready" :reach 1/2 :reach-source :default-reach}
+           {:target "M-unknown" :reach 1/2 :reach-source :default-reach}]
    :facts {"M-ready" {:status :ready :unblocks 1 :cone 2}
            "M-unknown" {:status :undetermined :unblocks 0 :cone 1}}})
 
@@ -112,12 +112,14 @@
     (let [result (outer-select/select base-makeup base-state base-observation)]
       (is (some #{(get-in result [:selection :selected])} (:field base-observation)))
       (is (= (:field base-observation) (get-in result [:selection :candidates])))))
-  (testing "the chosen cascade can gate everything out"
+  (testing "a no-pick cascade cannot beat explicit abstention"
     (let [makeup {:cascades [{:id :none :patterns ["test"]
                               :steps [{:gate-status :not-ready}]}]}
-          result (outer-select/select makeup base-state base-observation)]
-      (is (nil? (:selection result)))
-      (is (nil? (:prediction result))))))
+          refusal (try (outer-select/select makeup base-state base-observation)
+                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :pick-not-below-abstention (:kind refusal)))
+      (is (= (:G refusal) (:abstention-G refusal)))
+      (is (= :no-pick (get-in refusal [:selection-evidence :cascades 0 :pick]))))))
 
 (deftest chosen-prediction-is-the-chosen-model-push
   (let [result (outer-select/select base-makeup base-state base-observation)
@@ -133,55 +135,45 @@
     (is (< (Math/abs (- 1.0 (reduce + (vals (:outcomes prediction)))))
            1.0e-12))))
 
-(deftest tie-means-distinct-tied-picks
-  (testing "two cascades with the same minimum and the same pick are not a tie"
-    (let [makeup {:cascades [{:id :a :patterns ["test"] :steps [{:gate-status :ready}]}
-                             {:id :b :patterns ["test"] :steps [:ready-gate]}]}
-          result (outer-select/select makeup base-state base-observation)]
-      (is (= [:a :b] (:tied-cascades result)))
-      (is (false? (:tie? result)))))
-  (testing "equal scores with different picks are a tie, and it is recorded"
-    (let [observation (assoc base-observation
-                             :relation (fn [_ _] :focus)
+(deftest ties-refuse-even-with-the-same-pick
+  (doseq [different-picks? [false true]]
+    (let [observation (assoc base-observation :relation (fn [_ _] :focus)
                              :facts {"M-ready" {:status :ready :unblocks 0 :cone 0}
                                      "M-unknown" {:status :ready :unblocks 0 :cone 0}})
-          makeup {:cascades [{:id :a :patterns ["test"] :steps [{:gate #(= "M-ready" (:target %))}]}
-                             {:id :b :patterns ["test"] :steps [{:gate #(= "M-unknown" (:target %))}]}]}]
-      (is (true? (:tie? (outer-select/select makeup base-state observation)))))))
-
-(defonce ^:private giraffe-loader
-  (doto (clojure.lang.DynamicClassLoader.
-         (.getContextClassLoader (Thread/currentThread)))
-    (.addURL (.toURL (.toURI (io/file "/home/joe/code/futon3c/src"))))))
-
-(defn actual-var [symbol]
-  (with-bindings {clojure.lang.Compiler/LOADER giraffe-loader}
-    (requiring-resolve symbol)))
+          makeup {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
+                             {:id :b :patterns ["test"]
+                              :steps (if different-picks? [{:gate #(= "M-unknown" (:target %))}]
+                                         [:ready-gate])}]}
+          refusal (try (outer-select/select makeup base-state observation)
+                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :tie-at-minimum (:kind refusal)))
+      (is (= [:a :b] (:cascades refusal) (:tied-cascades refusal)))
+      (is (= 2 (count (get-in refusal [:selection-evidence :cascades])))))))
 
 (deftest real-giraffe-selection-demonstration
-  (let [dir (io/file "/home/joe/code/storage/giraffe/20261028T154151.285Z-b916cd4e")]
-    (is (.isDirectory dir) "the retained Giraffe evidence must be present")
-    (let [makeup (outer-state/load-makeup)
-            state (outer-state/init-state makeup)
-            field (binding [outer-observation/*resolve-var* actual-var]
-                    (outer-observation/giraffe-field dir makeup))
-            observation (assoc field
-                               :focus "M-wm-outer-selection"
-                               ;; Relation evidence is packet 4b's integration
-                               ;; input.  This demonstration holds it constant
-                               ;; so the real Giraffe field isolates the menu.
-                               :relation (fn [_ _] :focus))
-            result (outer-select/select makeup state observation)]
-        (println "outer-select real run demonstration"
-                 (pr-str {:cascade-id (:cascade-id result)
-                          :mission (get-in result [:selection :selected :target])
-                          :scores (:cascade-scores result)
-                          :tie? (:tie? result)}))
-        (is (some? (:selection result)))
-        (is (not= "M-repl-wins-over-cli"
-                  (get-in result [:selection :selected :target])))
-        (is (every? #(and (number? %) (Double/isFinite (double %)))
-                    (:cascade-scores result))))))
+  ;; Fixed pass bytes, not the host/cwd-sensitive historical-run verifier.
+  (let [text (slurp "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5/pass.edn")
+        expected "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91"]
+    (is (= expected (identity/sha256 text)))
+    (when-not (= expected (identity/sha256 text)) (throw (ex-info "Pass pin drift" {})))
+    (let [rows (:order (edn/read-string text))
+          makeup (outer-state/load-makeup)
+          state (outer-state/init-state makeup)
+          observation {:field (mapv #(hash-map :target (name (:id %)) :reach (:default-reach makeup)
+                                               :reach-source :default-reach) rows)
+                       :facts (into {} (map #(vector (name (:id %)) %) rows))
+                       :focus "WM" :relation (fn [_ _] :associated)}
+          result (try (outer-select/select makeup state observation)
+                      (catch clojure.lang.ExceptionInfo e (ex-data e)))
+          evidence (or (:selection-evidence result) result)]
+      (is (= :tie-at-minimum (:kind result)))
+      (is (= 3 (count (:cascades evidence))))
+      (is (= (:cascade-scores evidence) (mapv :G (:cascades evidence))))
+      (is (every? #(= :default-reach (get-in % [:reach :source]))
+                  (remove #(= :no-pick (:pick %)) (:cascades evidence))))
+      (is (= [:ready-gate :by-cone :by-unblocks] (get-in evidence [:cascades 0 :steps])))
+      (is (every? #(and (:sha256 %) (= :present (:status %)))
+                  (mapcat :units (:cascades evidence)))))))
 
 (deftest unknown-graph-member-is-excluded-with-a-producer-request
   (let [graph {:status :unknown :reason :prerequisite-unresolved
@@ -208,3 +200,52 @@
     (is (thrown? clojure.lang.ExceptionInfo
                  (outer-score/apply-selection-step (:facts obs) (:field obs) :by-cone))
         "The numeric scorer still refuses an unknown; the boundary never supplies a zero.")))
+
+(deftest every-policy-retains-terms-prediction-and-separate-stop
+  (let [r (outer-select/select base-makeup base-state base-observation)
+        input {:ending-counts (:c base-state) :gain-counts (:gain-counts base-state)}]
+    (is (= 2 (count (:cascades r))))
+    (doseq [c (:cascades r)]
+      (let [{:keys [risk ambiguity novelty]} (:terms c)]
+        (is (< (Math/abs (- (:G c) (- (+ risk ambiguity) novelty))) 1.0e-9)))
+      (is (< (Math/abs (- 1.0 (reduce + (vals (get-in c [:prediction :outcomes]))))) 1.0e-9))
+      (is (= :default-reach (get-in c [:reach :source])))
+      (is (re-matches #"[0-9a-f]{64}" (:digest c))))
+    (is (= (:cascade-scores r) (mapv :G (:cascades r))))
+    (is (= (:cascade-picks r) (mapv :pick (:cascades r))))
+    (is (= (:prediction r) (:prediction (nth (:cascades r) (:cascade-index r)))))
+    (is (= (:abstention r) (outer-score/abstention-score input)))
+    (is (< (nth (:cascade-scores r) (:cascade-index r)) (get-in r [:abstention :G])))
+    (is (= :pinned (get-in r [:library :status])))))
+
+(deftest single-unknown-relation-pick-cannot-beat-stopping
+  (let [r (try (outer-select/select (update base-makeup :cascades #(vec (take 1 %))) base-state
+                                    (assoc base-observation :relation (fn [_ _] :unknown)))
+               (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= :pick-not-below-abstention (:kind r)))
+    (is (= :unknown (get-in r [:selection-evidence :cascades 0 :relation :class])))
+    (is (= (:G r) (:abstention-G r)))))
+
+(deftest absent-relation-receipt-is-not-a-hash-of-the-class
+  (let [r (outer-select/select base-makeup base-state base-observation)]
+    (is (every? #(= :receipt-unavailable (get-in % [:relation :reason])) (:cascades r)))
+    (is (every? #(nil? (get-in % [:relation :receipt-digest])) (:cascades r)))))
+
+(deftest library-and-cascade-identities-are-stable-and-honest
+  (let [m {:cascades [{:id :custom :patterns ["only-what-can-start-now"]
+                       :steps [{:gate #(= "M-ready" (:target %))}]}]}
+        a (outer-select/select m base-state base-observation)
+        b (outer-select/select m base-state base-observation)
+        c (first (:cascades a))]
+    (is (= (get-in a [:library :sha256]) (get-in b [:library :sha256])))
+    (is (= (:digest c) (get-in b [:cascades 0 :digest])))
+    (is (= [{:named "custom/step-0"}] (:steps c)))
+    (is (= :absent (:lineage-status c)))
+    (is (nil? (:readme-cascade c)))
+    (is (nil? (:edges c)))
+    (is (= (get-in a [:library :patterns "only-what-can-start-now"])
+           (get-in c [:units 0 :sha256])))
+    (let [missing (outer-select/select (assoc m :task-selection-library-root "/nonexistent/l5-4a-library")
+                                      base-state base-observation)]
+      (is (= :absent (get-in missing [:library :status])))
+      (is (= :library-root-absent (get-in missing [:library :reason]))))))

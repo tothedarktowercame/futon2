@@ -108,7 +108,7 @@
     (is (= {:absent :no-verified-giraffe-run} result))
     (is (false? @called?))))
 
-(deftest empty-chosen-cascade-is-typed-absent
+(deftest empty-chosen-cascade-refuses-at-abstention-floor
   (let [called? (atom false)
         gates-out (assoc makeup :cascades
                          [{:id :none :patterns ["test"]
@@ -116,10 +116,15 @@
         result (call-ordinary
                 {:decision-as-of "2026-10-28T12:00:00Z"}
                 {#'outer-state/load-makeup (fn [_] gates-out)
+                 #'outer-observation/outer-observation
+                 (fn [_] {:field [{:target "M-selected" :reach 1/2 :reach-source :default-reach}]
+                          :facts {"M-selected" {:status :ready :cone 1 :unblocks 1}}
+                          :focus "WM" :relation (fn [_ _] :associated)})
                  #'runtime/run-ordinary-opportunity-with-task!
                  (fn [_] (reset! called? true))})]
-    (is (= :no-task-selected (:absent result)))
-    (is (= :none (get-in result [:outer/selection :cascade-id])))
+    (is (= :outer-selection-refused (:absent result)))
+    (is (= :pick-not-below-abstention (:reason result)))
+    (is (= :none (get-in result [:details :cascade])))
     (is (false? @called?))))
 
 (defn- record-files [dir]

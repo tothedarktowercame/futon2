@@ -1,0 +1,93 @@
+{
+  "packet": "L5-4a",
+  "base": "42994a7c5",
+  "scope_expansion_authority": "invoke-1793535841785-9301-19a661b6",
+  "behavior": [
+    "Per-menu-cascade score terms, prediction, typed steps, task facts, relation receipt digest and reach source retained; legacy arrays derive from these entries.",
+    "Independent stopped-kernel abstention score.",
+    "Exact minimum ties refuse even for identical picks; unique minimum must strictly beat abstention.",
+    "One classify-target result per distinct target supplies both legacy class function and retained fact receipt; no downstream reclassification.",
+    "Existing q2-construction/library-manifest pins task-selection patterns; no new manifest implementation."
+  ],
+  "validation": {
+    "focused": "24 tests / 109 assertions / 0 failures / 0 errors",
+    "receipt_and_wiring": "3 tests / 28 assertions / 0 failures / 0 errors",
+    "all_12_namespaces": "63 tests / 267 assertions / 17 failures / 2 errors",
+    "unmodified_base": "58 tests / 219 assertions / 20 failures / 3 errors",
+    "new_failure_instances": [],
+    "remaining_failure_instances": [
+      {
+        "type": "ERROR",
+        "test": "retained-run-consumed-and-replaced-atomically-on-real-outer-path",
+        "count": 1
+      },
+      {
+        "type": "ERROR",
+        "test": "real-giraffe-run-shape",
+        "count": 1
+      },
+      {
+        "type": "FAIL",
+        "test": "missing-task-selects-and-enters-existing-path",
+        "count": 5
+      },
+      {
+        "type": "FAIL",
+        "test": "selection-pends-and-next-selection-learns",
+        "count": 7
+      },
+      {
+        "type": "FAIL",
+        "test": "retained-qualified-already-satisfied-advances-c",
+        "count": 4
+      },
+      {
+        "type": "FAIL",
+        "test": "missing-run-record-defers-without-replacing-pending",
+        "count": 1
+      }
+    ],
+    "clj_kondo": "0 errors, 0 warnings",
+    "check_parens": "OK"
+  },
+  "existing_tests_changed": {
+    "outer_select_test": "Same-pick and distinct-pick ties now refuse; no-pick menu refuses at abstention floor. Historical cwd-sensitive Giraffe demonstration replaced with SHA-verified 2026-11-01 raw pass and a truthful tie witness.",
+    "outer_relation_admission_test": "Former unknown/known-relation same-pick selection witnesses now assert tie refusal while retaining each relation, score and prediction; stopped-model and novelty checks retained in refusal evidence.",
+    "outer_observation_test": "Fact assertion names core and new rank/reach fields instead of asserting the entire extensible map equals three keys; exact same-object receipt-to-class-to-digest witness added.",
+    "outer_selection_wiring_test": "No-pick path expects outer-selection-refused/pick-not-below-abstention; supplies a bounded admitted field to isolate that branch instead of unrelated registry exclusions."
+  },
+  "limits": [
+    "All-namespace gate is NOT green; baseline failures remain in observation/consumption historical verifier and selection/state wiring fixtures.",
+    "Current live makeup has zero named steps: ready/cone/unblocks, ready, gate-status-undetermined/cone. README repair prose is not an executable runtime step and remains refused. Generic function steps retain stable cascade-name/position labels, never printed function objects.",
+    "by-rank is additive; live makeup is unchanged. Known-term field admission and inner-policy-based exclusions are untouched for L5-4b.",
+    "Production digest uses [name nil pinned-units nil] for absent README row/edges; explicitly not the same identity as the richer hand-witness digest. No lineage fabricated.",
+    "Reach source is default-reach only when carried from observation/makeup; unmarked injected candidates retain reach-source-unavailable. No observed reach estimated.",
+    "No serving reload, click, merge, or live data write. Tests use temporary roots; retained pass read-only."
+  ],
+  "logs": {
+    "baseline-tests.log": {
+      "path": "/home/joe/notes/l5-4a/baseline-tests.log",
+      "sha256": "78ee65ffa863e247f168a275d8a65c27b7cc80956243bc833185221d886a7421"
+    },
+    "final-outer-tests.log": {
+      "path": "/home/joe/notes/l5-4a/final-outer-tests.log",
+      "sha256": "4462edc05553522c1bdeb34a340a470310e369549229954ad18196f0e0ceb8db"
+    },
+    "final-focused-tests.log": {
+      "path": "/home/joe/notes/l5-4a/final-focused-tests.log",
+      "sha256": "42632a169494e76e40d8aecb298ea6018b54481b01d9e4c5f03dfd0c7ebe1479"
+    },
+    "final-receipt-tests.log": {
+      "path": "/home/joe/notes/l5-4a/final-receipt-tests.log",
+      "sha256": "334d65229039f539aed82f05e20c1e299273b81ee4e2b32588aaaa5d31978c28"
+    },
+    "kondo.log": {
+      "path": "/home/joe/notes/l5-4a/kondo.log",
+      "sha256": "59ea45bc65827f8e041d410da4f25d1979b012509abf9bf1f51978f83a5a363a"
+    },
+    "parens.log": {
+      "path": "/home/joe/notes/l5-4a/parens.log",
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    }
+  }
+}
