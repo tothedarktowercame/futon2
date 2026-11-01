@@ -7,7 +7,8 @@
             [futon2.aif.meta-injury-observation :as injury]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-terminal-injury :as terminal]
-            [futon2.aif.standing-authority :as standing])
+            [futon2.aif.standing-authority :as standing]
+            [futon2.aif.repair-obligation :as repair])
   (:import [java.io PushbackReader StringReader]
            [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
@@ -220,6 +221,8 @@
     (catch Throwable t
       (refusal :store/medic-transaction-failed {:detail (ex-message t)})))))
 
+(declare publish-ingested-injury!)
+
 (defn transact-cause-reattribution!
   "Locked atomic persistence for the medic correction and its replacement
   opening.  No intermediate one-entry ledger is ever written."
@@ -250,17 +253,44 @@
                                      (ledger/validate-ledger
                                       (:ledger result) authority-verifier))]
                   (cond
+                    (= :duplicate (:status result))
+                    (publish-ingested-injury! path
+                      {:classification :injury
+                       :injury-id (get-in operation [:request :candidate :replacement-injury-id])}
+                      result)
                     (not= :appended (:status result)) result
                     (not= :valid (:status result-check))
                     (refusal :store/invalid-medic-reattribution-result
                              {:defects (:defects result-check)})
                     :else (do (atomic-write! path (:ledger result))
-                              (assoc result
-                                     :durability :atomic-locked-one-form))))))))))
+                              (publish-ingested-injury! path
+                                {:classification :injury
+                                 :injury-id (get-in result [:replacement-entry :injury-id])}
+                                (assoc result :durability :atomic-locked-one-form)))))))))))
     (catch java.nio.channels.OverlappingFileLockException _
       (refusal :store/lock-contended))
     (catch Throwable t
       (refusal :store/medic-reattribution-failed {:detail (ex-message t)}))))
+
+(defn- publish-ingested-injury! [ledger-path classification result]
+  (if-let [entry (when (and (#{:appended :duplicate} (:status result))
+                            (= :injury (:classification classification)))
+                  (first (filter #(and (= (:injury-id classification) (:injury-id %))
+                                       (= :open (:state %)))
+                                 (get-in result [:ledger :entries]))))]
+    (try
+      (let [root (if (= (.getCanonicalFile (io/file default-root))
+                         (.getCanonicalFile (.getParentFile (io/file ledger-path))))
+                   repair/default-root
+                   (str (io/file (.getParentFile (io/file ledger-path)) "repair-obligations")))
+            record (edn/read-string (slurp (get-in entry [:cause-record-pin :path])))
+            publication (repair/publish-injury-ticket! root entry record)]
+        (assoc result :injury-ticket publication))
+      (catch Throwable t
+        {:status :refused :reason :injury-ticket-publication-failed
+         :ledger-result result :ledger-durable? true
+         :detail (ex-message t) :publication-error (ex-data t)}))
+    result))
 
 (defn ingest-record-file!
   "Pin exact record bytes, require exactly one EDN form, classify, then perform
@@ -277,7 +307,8 @@
               classification (terminal/classify (:value parsed) pin)]
           (if-not (= :classified (:status classification))
             classification
-            (transact-classification! ledger-path classification authority-verifier)))))
+            (publish-ingested-injury! ledger-path classification
+              (transact-classification! ledger-path classification authority-verifier))))))
     (catch Throwable t
       (refusal :store/record-ingest-failed {:detail (ex-message t)})))))
 

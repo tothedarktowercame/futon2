@@ -15,7 +15,8 @@
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.substrate :as substrate]
-            [futon2.aif.finding-ticket :as finding-ticket])
+            [futon2.aif.finding-ticket :as finding-ticket]
+            [futon2.aif.injury-ticket-join :as injury-join])
   (:import [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
            [java.nio.file Files StandardOpenOption LinkOption OpenOption]
@@ -2128,3 +2129,74 @@
        :resolution (when admitted? resolution)
        :derived-from (cond-> [:finding]
                        admitted? (conj :resolution))})))
+
+
+(defn publish-injury-ticket!
+  "Complete the durable injury's publication, retryable after a ledger append.
+  Existing findings remain immutable: append a byte-pinned attachment using
+  the same CREATE_NEW/force path as administrative dispositions. New findings
+  carry the join inline. No join by failure-kind or target coincidence."
+  [root entry record]
+  (let [pin (:cause-record-pin entry)
+        bytes (Files/readAllBytes (.toPath (io/file (:path pin))))
+        run-id (or (:run/id record) (:run-id record))
+        join {:injury-id (:injury-id entry) :cause-record-pin pin :origin-run/id run-id}
+        new-id (str "repair-injury-" (subs (:injury-id entry) 7))]
+    (when-not (and (seq run-id) (= (:sha256 pin) (load-identity/sha256 bytes))
+                  (= record (edn/read-string (String. bytes "UTF-8"))))
+      (throw (ex-info "Injury publication requires pinned cause bytes"
+                      {:reason :injury-ticket-cause-pin-invalid})))
+    (.mkdirs (io/file root))
+    (with-contended-store-lock root
+      (fn []
+        (let [matches (->> (.listFiles (io/file root "findings"))
+                           (filter #(.endsWith (.getName %) ".edn"))
+                           (map #(edn/read-string (slurp %)))
+                           (filter (fn [finding]
+                                     (let [resolved (injury-join/resolve-join root (:repair/id finding))
+                                           owner (or (:injury-id finding)
+                                                     (get-in resolved [:join :injury-id]))]
+                                       (or (= (:injury-id entry) owner)
+                                           (and (nil? owner)
+                                                (or (= pin (:cause-record-pin finding))
+                                                    (= run-id (:origin-run/id finding)))))))))
+              _ (when (> (count matches) 1)
+                  (throw (ex-info "Ambiguous injury finding join"
+                                  {:reason :injury-ticket-ambiguous-findings
+                                   :findings (mapv :repair/id matches)})))
+              existing (first matches)
+              id (or (:repair/id existing) new-id)
+              target (or (get-in record [:failure :target])
+                         (get-in record [:failure :detail :target])
+                         (get-in record [:selection-event :target]))
+              finding (or existing
+                          (merge join
+                                 {:repair/id id :repair/schema-version 3
+                                  :repair/status :open :repair/class :machine-failure
+                                  :attempt-id (:detected-click entry)
+                                  :failure-kind (:failure-kind entry)
+                                  :failure-stage (:failure-stage entry)
+                                  :failure-error (str (:failure-kind entry))
+                                  :opened-at (or (:startedAt record) (str (Instant/now)))
+                                  :target target
+                                  :discharge-contract (:discharge-contract record)}))]
+          (when-not existing (write-new-or-identical! root id finding))
+          (when existing
+            (let [sha (load-identity/sha256
+                        (Files/readAllBytes (.toPath (io/file root "findings" (str id ".edn")))))
+                  attachment (merge join {:schema :wm/injury-finding-join-v1
+                                          :finding/id id :finding-sha256 sha
+                                          :ticket/id (str "T-" id)})
+                  aid (injury-join/attachment-id (:injury-id entry) id)
+                  file (io/file root "injury-joins" (str aid ".edn"))]
+              (when-not (= join (select-keys existing injury-join/join-keys))
+                (try (write-new-durable! root "injury-joins" aid attachment)
+                     (catch java.nio.file.FileAlreadyExistsException e
+                       (when-not (= (pr-str attachment) (slurp file))
+                         (throw (ex-info "Injury attachment conflicts"
+                                         {:reason :injury-join-conflict} e))))))))
+          (let [resolved (injury-join/resolve-join root id)]
+            (when-not (and (= :present (:status resolved)) (= join (:join resolved)))
+              (throw (ex-info "Injury join refused" resolved)))
+            {:status :published :finding/id id
+             :join resolved :ticket (finding-ticket/publish! root id)}))))))
