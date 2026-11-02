@@ -96,3 +96,9 @@ batches of 50 with a sample after each batch.
 ## Not in this plan
 
 Reading by Fable; any geometric partition; new fields without a case; a second loop script.
+
+## Harvest log
+
+| when | batch | result |
+|---|---|---|
+| 21:01Z (11-02) | witness 1 (kimi-1, `invoke-1793653085441-10491-d1eb6f8a`, E-kimi-task-230), witness 2 (kimi-2, `invoke-1793653085767-10492-2778afc8`, E-231), rehome 1 (kimi-3, `invoke-1793653086189-10493-6cf9c248`, E-232) | all three `done` within ~2 min of dispatch; replies 6.1k–7.3k chars, 4 blocks each, none truncated. 58 citations: first pass failed 9; **six of the nine were checker gaps**, not ant errors: multi-line quotes compared by their first 60 chars (3), bare path for a file that exists (2), bare path for an honest absence with the `ls` line as the quote (3, one overlapping). Checker now accepts `path:a-b`, bare path + quote-in-file (`ok-path`), bare missing path + `value:false` (`ok-absent`); COMMON.md states the forms. Second pass: **51 ok, 2 unsure, 3 failed** (E-btoa cites the Worked Sample table at :32 and :32-38; it is at :36/:40, a real mis-cite; M-essay-corpus cites two files in one cite). Sample read in full: M-populate-substrate-2 (3 deps, each with a cited futon1b route) and M-actuator-spec-A3-executor (executor exists; residue notes two live `:mode :dispatch` runs in the log against the doc's "do NOT live-fire" rule). Rows in `futon3c/holes/excursions/ant-reads/`; export attaches them per item; page column "ant reads". futon3c `8def14436`. |
