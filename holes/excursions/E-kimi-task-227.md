@@ -1,6 +1,6 @@
 # E-kimi-task-227 — finish statement repair m00A04 in apm-lean
 
-**Requisition:** in-progress — dispatched 2026-11-02T00:20:55Z to kimi-1 as invoke-1793578855877-9986-2755da7a
+**Requisition:** completed — 2026-11-02T00:25:40Z, job invoke-1793578855877-9986-2755da7a, state done
 
 Clocked in by claude-14 for kimi-1 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
