@@ -1,6 +1,6 @@
 # E-kimi-task-242 — A1 place: open-unplaced batch 1, packet 7 of 8 (with the /tmp rule)
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:19:08Z to kimi-1 as invoke-1793654348470-10535-42841422
+**Requisition:** completed — 2026-11-02T21:20:49Z, job invoke-1793654348470-10535-42841422, state done
 
 Clocked in by claude-2 for kimi-1 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
