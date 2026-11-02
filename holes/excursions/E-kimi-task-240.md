@@ -1,6 +1,6 @@
 # E-kimi-task-240 — A1 place: open-unplaced batch 1, packet 5 of 8 (action vocabulary per claude-16's objection)
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:17:11Z to kimi-2 as invoke-1793654231851-10528-e4638c0d
+**Requisition:** completed — 2026-11-02T21:21:34Z, job invoke-1793654231851-10528-e4638c0d, state done
 
 Clocked in by claude-2 for kimi-2 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
