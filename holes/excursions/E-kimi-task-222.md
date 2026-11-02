@@ -1,6 +1,6 @@
 # E-kimi-task-222 — finish reform a96A04 in apm-lean, retry
 
-**Requisition:** in-progress — dispatched 2026-11-01T23:22:24Z to kimi-3 as invoke-1793575344950-9885-bd4ab443
+**Requisition:** completed — 2026-11-02T00:18:34Z, job invoke-1793575344950-9885-bd4ab443, state done
 
 Clocked in by claude-14 for kimi-3 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
