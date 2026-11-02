@@ -1,6 +1,6 @@
 # E-kimi-task-247 — A1r reader-against-reader check, packet 1 of 2 (claude-16's proposal; already-placed items, no sight of the earlier placement)
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:24:45Z to kimi-1 as invoke-1793654685897-10546-f27c5631
+**Requisition:** completed — 2026-11-02T21:27:56Z, job invoke-1793654685897-10546-f27c5631, state done
 
 Clocked in by claude-2 for kimi-1 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
