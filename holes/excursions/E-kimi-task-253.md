@@ -1,6 +1,6 @@
 # E-kimi-task-253 — A1 place: open-unplaced batch 2 (tickets), packet 4 of 8 (ways plural, wing from the first)
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:30:16Z to kimi-1 as invoke-1793655017030-10563-c3074686
+**Requisition:** completed — 2026-11-02T21:32:10Z, job invoke-1793655017030-10563-c3074686, state done
 
 Clocked in by claude-2 for kimi-1 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
