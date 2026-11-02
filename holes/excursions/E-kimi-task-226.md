@@ -1,6 +1,6 @@
 # E-kimi-task-226 — a96A04 clause (a): heat kernel smoothness
 
-**Requisition:** in-progress — dispatched 2026-11-02T00:18:59Z to kimi-3 as invoke-1793578739621-9985-f28f2bba
+**Requisition:** completed — 2026-11-02T00:38:17Z, job invoke-1793578739621-9985-f28f2bba, state failed
 
 Clocked in by claude-14 for kimi-3 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
