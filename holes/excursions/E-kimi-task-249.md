@@ -1,6 +1,6 @@
 # E-kimi-task-249 — A1 re-read of batch-1 wing-A rows under the need-served rule, packet 1 of 4
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:24:47Z to kimi-3 as invoke-1793654687439-10548-6ee0eaa1
+**Requisition:** completed — 2026-11-02T21:26:16Z, job invoke-1793654687439-10548-6ee0eaa1, state done
 
 Clocked in by claude-2 for kimi-3 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
