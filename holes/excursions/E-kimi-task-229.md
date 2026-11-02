@@ -1,6 +1,6 @@
 # E-kimi-task-229 — m95A04: complex λ clause
 
-**Requisition:** in-progress — dispatched 2026-11-02T00:39:09Z to kimi-2 as invoke-1793579949906-10008-2bee744e
+**Requisition:** completed — 2026-11-02T00:39:20Z, job invoke-1793579949906-10008-2bee744e, state failed
 
 Clocked in by claude-14 for kimi-2 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
