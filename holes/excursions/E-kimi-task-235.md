@@ -1,6 +1,6 @@
 # E-kimi-task-235 — A4 lesson: M-expressions-of-interest as a prototype we can learn from
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:06:29Z to kimi-3 as invoke-1793653589291-10507-56eafaca
+**Requisition:** completed — 2026-11-02T21:09:45Z, job invoke-1793653589291-10507-56eafaca, state done
 
 Clocked in by claude-2 for kimi-3 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
