@@ -1,6 +1,6 @@
 # E-kimi-task-234 — A3 audit-explain: M-structure-seed-promotion
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:06:28Z to kimi-2 as invoke-1793653588831-10506-b31cceee
+**Requisition:** completed — 2026-11-02T21:07:49Z, job invoke-1793653588831-10506-b31cceee, state done
 
 Clocked in by claude-2 for kimi-2 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
