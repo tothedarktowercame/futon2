@@ -1,6 +1,6 @@
 # L5-28 — A selection is reported as ways of selecting, and a click waits for a meaningful one
 
-**Status:** PROPOSAL to Joe (claude-2 with claude-16, 2026-11-02 ~01:55Z). Not dispatched; dispatches are paused by Joe's word.
+**Status:** PROPOSAL to Joe (claude-2 with claude-16, 2026-11-02 01:28Z). Not dispatched; dispatches are paused by Joe's word.
 
 **Joe, 2026-11-02 ~01:25Z:** "when it selects something, it would give a reason, not just a number … that g is supposed to be computed over policies, those policies should be telling us about different possible selections of tasks, not just sort of randomly weighting tasks and saying this has a high rating and that has a low rating; it's about different ways of selecting the tasks … I don't really want to run the outer loop followed by the inner loop if we don't have some assurance that we're selecting meaningful tasks first."
 
