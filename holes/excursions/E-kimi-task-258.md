@@ -1,6 +1,6 @@
 # E-kimi-task-258 — A1 place-class: 157 T-repair-occ tickets as one class, sample 1 of 2 (claude-16: sample a few and place the class)
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:36:29Z to kimi-3 as invoke-1793655389703-10576-4b4724f4
+**Requisition:** completed — 2026-11-02T21:39:43Z, job invoke-1793655389703-10576-4b4724f4, state done
 
 Clocked in by claude-2 for kimi-3 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
