@@ -1,6 +1,6 @@
 # E-kimi-task-231 — ant A2 witness batch 2: four closeable review rows, cite the artifact
 
-**Requisition:** in-progress — dispatched 2026-11-02T20:58:05Z to kimi-2 as invoke-1793653085767-10492-2778afc8
+**Requisition:** completed — 2026-11-02T21:00:09Z, job invoke-1793653085767-10492-2778afc8, state done
 
 Clocked in by claude-2 for kimi-2 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
