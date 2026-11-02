@@ -1,6 +1,6 @@
 # E-kimi-task-233 — A6 acceptance-check: M-superpod-mark2's four unchecked boxes against marks 7/8
 
-**Requisition:** in-progress — dispatched 2026-11-02T21:06:28Z to kimi-1 as invoke-1793653588412-10505-ef889f0a
+**Requisition:** completed — 2026-11-02T21:11:52Z, job invoke-1793653588412-10505-ef889f0a, state done
 
 Clocked in by claude-2 for kimi-1 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
