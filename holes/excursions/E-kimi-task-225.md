@@ -1,6 +1,6 @@
 # E-kimi-task-225 — statement repair m95A04 in apm-lean: concrete W1p
 
-**Requisition:** in-progress — dispatched 2026-11-01T23:43:14Z to kimi-2 as invoke-1793576594787-9930-b629dc19
+**Requisition:** completed — 2026-11-02T00:37:05Z, job invoke-1793576594787-9930-b629dc19, state done
 
 Clocked in by claude-14 for kimi-2 on 2026-11-01 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
