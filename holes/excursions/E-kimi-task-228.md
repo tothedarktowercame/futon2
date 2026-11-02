@@ -1,6 +1,6 @@
 # E-kimi-task-228 — statement repair m96J05 in apm-lean: physical difference operators
 
-**Requisition:** in-progress — dispatched 2026-11-02T00:27:49Z to kimi-1 as invoke-1793579270000-9994-9b858c79
+**Requisition:** completed — 2026-11-02T00:38:27Z, job invoke-1793579270000-9994-9b858c79, state failed
 
 Clocked in by claude-14 for kimi-1 on 2026-11-02 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
