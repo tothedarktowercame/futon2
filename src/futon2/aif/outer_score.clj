@@ -6,6 +6,7 @@
   its pinned resource."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.load-identity :as identity]))
 
 (def ^:dynamic *abstention-altitude-path*
@@ -102,6 +103,22 @@
                        :producer (or (get-in fact [:graph-terms :producer]) :dependency-reader-reviewer)})))
     value))
 
+(defn placed-workable?
+  "Lean `SelectionStep.gate keep` with keep = this predicate. A fact with no
+  :placement key refuses: the adapter was not wired, which is not a placement."
+  [facts target]
+  (let [fact (value-of facts target)]
+    (when-not (contains? fact :placement)
+      (throw (ex-info "Placement fact unavailable"
+                      {:kind :outer-score/placement-unavailable :target target})))
+    (let [p (:placement fact)]
+      (boolean (and (map? p) (not= :absent (:status p))
+                    (= "open" (:status p))
+                    (seq (:ways p))
+                    (or (= "work" (:action p))
+                        (and (string? (:action p))
+                             (str/starts-with? (:action p) "cluster:"))))))))
+
 (defn apply-selection-step
   "Lean `applySelectionStep`: apply one gate or stable ordering using Giraffe facts."
   [facts field step]
@@ -114,6 +131,9 @@
 
     (= :ready-gate step)
     (filterv #(= :ready (:status (value-of facts (:target %)))) field)
+
+    (= :placed-gate step)
+    (filterv #(placed-workable? facts (:target %)) field)
 
     (and (map? step) (or (contains? step :gate-status) (contains? step :status-gate)))
     (filterv #(= (or (:status-gate step) (:gate-status step))
@@ -237,7 +257,7 @@
     (= :ready-gate step) :ready-gate
     (and (map? step) (contains? step :gate-status)) {:status-gate (:gate-status step)}
     (and (map? step) (contains? step :status-gate)) step
-    (contains? #{:by-cone :by-unblocks :by-rank} step) step
+    (contains? #{:placed-gate :by-cone :by-unblocks :by-rank} step) step
     :else {:named (if (string? step) step (pr-str step))})))
 
 (defn outer-model

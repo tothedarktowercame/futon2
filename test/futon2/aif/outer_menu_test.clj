@@ -11,7 +11,7 @@
 
 (def library-root
   (or (System/getenv "L54D_LIBRARY_ROOT")
-      "/home/joe/worktrees/futon3-l5-4d-2/library/task-selection"))
+      "/home/joe/worktrees/futon3/placement-adapter-B/library/task-selection"))
 (def pass-root "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5")
 (def pass-sha "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91")
 (def input-sha "730407c514e2fd21905da2b533d92e046a454372c919fbd89089fc953ebf1667")
@@ -39,8 +39,9 @@
         w (first (:cascades witness))
         giraffe (first (filter #(= :giraffe-order (:id %)) (:cascades c)))
         all (concat (:included retrieval) (map :pattern (:excluded retrieval)))]
-    (is (= 3 (:policy-count c)))
-    (is (= 19 (:count lib) (count all) (count (set all))))
+    (is (= 4 (:policy-count c)))
+    (is (= 20 (:count lib) (count all) (count (set all))))
+    (is (some #(= :serves-a-way (:id %)) (:cascades c)))
     (is (= (set (keys (:patterns lib))) (set all)))
     (is (= (:slice c) (:pool c) (:included retrieval)))
     (is (every? :reason (:excluded retrieval)))
@@ -61,6 +62,8 @@
            [#(assoc-in % [:cascades 1 :steps] [{:status-gate :undetermined} :by-cone])
             :outer-menu/unavailable-metric-order]
            [#(assoc-in % [:cascades 1 :steps] [:by-unblocks :ready-gate])
+            :outer-menu/unavailable-metric-order]
+           [#(assoc-in % [:cascades 1 :steps] [:placed-gate :by-cone])
             :outer-menu/unavailable-metric-order]
            [#(assoc-in % [:cascades 1 :patterns] ["not-in-library"])
             :outer-menu/pattern-outside-manifest]

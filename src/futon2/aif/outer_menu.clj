@@ -22,7 +22,7 @@
       {:sha256 (identity/sha256 bytes) :text (String. bytes "UTF-8")})))
 
 (defn- valid-step? [step]
-  (or (contains? #{:ready-gate :by-cone :by-unblocks :by-rank} step)
+  (or (contains? #{:ready-gate :placed-gate :by-cone :by-unblocks :by-rank} step)
       (and (map? step) (= #{:status-gate} (set (keys step)))
            (contains? #{:ready :not-ready :undetermined} (:status-gate step)))))
 
@@ -38,6 +38,7 @@
               (refuse! :outer-menu/unavailable-metric-order
                        {:cascade (:id cascade) :step step :statuses statuses}))
             (cond (= :ready-gate step) (set/intersection statuses #{:ready})
+                  (= :placed-gate step) statuses
                   (map? step) (set/intersection statuses #{(:status-gate step)})
                   :else statuses))
           #{:ready :not-ready :undetermined} (:steps cascade)))

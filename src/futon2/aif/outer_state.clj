@@ -190,7 +190,7 @@
                            (:edges entry)])))
         steps (if digest (:steps entry) (or (:steps entry) (:steps selection-result)))
         typed? (and (vector? steps)
-                    (every? #(or (contains? #{:ready-gate :by-cone :by-unblocks :by-rank} %)
+                    (every? #(or (contains? #{:ready-gate :placed-gate :by-cone :by-unblocks :by-rank} %)
                                  (and (map? %) (= 1 (count %))
                                       (contains? #{:ready :not-ready :undetermined}
                                                  (or (:status-gate %) (:gate-status %))))) steps))]
