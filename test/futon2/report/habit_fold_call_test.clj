@@ -38,12 +38,16 @@
 (def ^:private fx
   "One reading-family field for the namespace (Q5 migration 2026-10-15):
   the selection E reaches is the production reading-family decision."
-  (delay (route/fixture)))
+  (delay (route/fixture [["p/a" "p/c"] "p/b"])))
 
 (def ^:private pkey
-  "The structural history key of the first policy the decision compares:
-  the key Prefix-F, the census, the flight writer and now E all share."
-  (delay (first (vals (route/policy-keys (:decision (route/decide @fx)))))))
+  "The structural history key of the p/a→p/b policy: the key Prefix-F, the
+  census, the flight writer and now E all share."
+  (delay
+    (some (fn [key]
+            (when (= #{"p/a" "p/b"} (set (map second (get-in key [3 :nodes]))))
+              key))
+          (vals (route/policy-keys (:decision (route/decide @fx)))))))
 
 (defn- receipt [click & [verdict attempts key]]
   (eh/increment {:click click :candidate :cas/a :attempts (or attempts [{:pattern "p/a"}])}
@@ -76,7 +80,8 @@
       #(try ((ns-resolve ns 'judge) {} (merge {:cascade-sources-dir tmp :cascade-proposals-dir tmp
                                                 :repair-obligations-root tmp
                                                 :machine-interpretations-dir store
-                                                :ticket-queue ticket-queue/empty-declaration}
+                                                :ticket-queue ticket-queue/empty-declaration
+                                                :task {:id route/target}}
                                                judge-opts))
             (catch clojure.lang.ExceptionInfo e
               (when-not (::stop (ex-data e)) (throw e)))))
