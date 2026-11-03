@@ -2,7 +2,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.outer-argue :as argue]))
+            [futon2.aif.outer-argue :as argue]
+            [futon2.aif.outer-select :as outer-select]))
 
 (def library-root
   (or (System/getenv "L54D_LIBRARY_ROOT")
@@ -86,3 +87,14 @@
                                   {:from :unknown :to :serves-a-way})))
       (is (false? (argue/defeats? arguments
                                   {:from :serves-a-way :to :serves-a-way}))))))
+
+(deftest frame-failure-never-refuses-the-click
+  (testing "a malformed why makes the wiring return an unavailable frame, not a throw"
+    (let [frame (#'outer-select/argument-frame {:why {:classes [{}]} :cascades [] :relations []
+                                                :library-root library-root})]
+      (is (= :unavailable (:status frame)))
+      (is (= :cascade/argument-frame-v1 (:schema frame)))
+      (is (some? (:reason frame)))))
+  (testing "the bad case really throws without the wrapper"
+    (is (thrown? Throwable (argue/frame {:why {:classes [{}]} :cascades [] :relations []
+                                         :library-root library-root})))))
