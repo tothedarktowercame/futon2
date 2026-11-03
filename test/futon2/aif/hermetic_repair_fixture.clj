@@ -2,6 +2,7 @@
   "Suite fixture that makes production repair/trip stores unreachable."
   (:require [clojure.java.io :as io]
             [clojure.test :refer [is testing]]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
@@ -11,14 +12,26 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
-(def production-repair-root repair/default-root)
-(def production-trip-root tripwire/default-trip-root)
-(def production-phase-log runner/default-phase-log)
-(def production-meta-injury-root meta-injury-store/default-root)
-(def production-meta-injury-ledger-path meta-self-heal/default-ledger-path)
-(def production-meta-injury-transaction-path meta-self-heal/default-transaction-path)
-(def production-learning-manifest-path outer-learning-manifest/default-path)
-(def production-run-record-dir runner/default-run-record-dir)
+;; b13461d2e makes producer defaults derive from a fresh hermetic data root in
+;; test JVMs. Capturing those defaults would make the production-isolation
+;; checks compare the hermetic stores with themselves, so spell the canonical
+;; production tails against the non-dynamic production data root instead.
+(def production-repair-root
+  (str (io/file data-paths/production-data-root "wm-repair-obligations")))
+(def production-trip-root
+  (str (io/file data-paths/production-data-root "wm-tripwires" "trips")))
+(def production-phase-log
+  (str (io/file data-paths/production-data-root "wm-full-loop-phases.edn.log")))
+(def production-meta-injury-root
+  (str (io/file data-paths/production-data-root "wm-meta-injuries-live-2026-10-22")))
+(def production-meta-injury-ledger-path
+  (str (io/file production-meta-injury-root "ledger.edn")))
+(def production-meta-injury-transaction-path
+  (str (io/file production-meta-injury-root "transaction.edn")))
+(def production-learning-manifest-path
+  (str (io/file data-paths/production-data-root "wm-learning" "run-record-manifest.edn")))
+(def production-run-record-dir
+  (str (io/file data-paths/production-data-root "wm-runs")))
 
 (defn- temp-root [prefix]
   (.getPath (.toFile (Files/createTempDirectory
