@@ -7,7 +7,8 @@
             [clojure.string :as str]
             [clojure.test :as t :refer [deftest is testing]]
             [futon2.aif.meta-injury-store :as store]
-            [futon2.aif.meta-self-heal-production :as production]))
+            [futon2.aif.meta-self-heal-production :as production]
+            [futon2.data-paths :as data-paths]))
 
 (def live-root "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22")
 (def live-dir-name "wm-meta-injuries-live-2026-10-22")
@@ -24,11 +25,20 @@
 
 (deftest every-live-default-resolves-under-the-fresh-live-root
   (testing "the four live defaults share the single live root"
-    (is (= live-root store/default-root))
-    (is (= (str live-root "/ledger.edn") production/default-ledger-path))
-    (is (= (str live-root "/transaction.edn") production/default-transaction-path))
-    (is (= (str live-root "/diagnoses") production/default-diagnosis-root))
-    (is (= (str live-root "/acceptances") production/default-acceptance-root)))
+    ;; b13461d2e made test defaults hermetic: retain both the active-root
+    ;; contracts and the canonical production locations as separate assertions.
+    (let [active-root (data-paths/path live-dir-name)
+          production-root (str (io/file data-paths/production-data-root live-dir-name))]
+      (is (= active-root store/default-root))
+      (is (= (str active-root "/ledger.edn") production/default-ledger-path))
+      (is (= (str active-root "/transaction.edn") production/default-transaction-path))
+      (is (= (str active-root "/diagnoses") production/default-diagnosis-root))
+      (is (= (str active-root "/acceptances") production/default-acceptance-root))
+      (is (= live-root production-root))
+      (is (= (str live-root "/ledger.edn") (str (io/file production-root "ledger.edn"))))
+      (is (= (str live-root "/transaction.edn") (str (io/file production-root "transaction.edn"))))
+      (is (= (str live-root "/diagnoses") (str (io/file production-root "diagnoses"))))
+      (is (= (str live-root "/acceptances") (str (io/file production-root "acceptances"))))))
   (testing "no live default resolves under the archived root"
     (doseq [[_ default] {:root store/default-root
                      :ledger production/default-ledger-path
@@ -67,8 +77,12 @@
     (let [result (store/ingest-record-file! ledger-path record-path)
           ledger (store/load-ledger ledger-path)]
       (testing "the locked atomic write creates the ledger on first append"
-        (is (= :appended (:status result)))
-        (is (= :atomic-locked-one-form (:durability result)))
+        (is (= :appended (:status result)) (pr-str result))
+        (is (= :atomic-locked-one-form (:durability result)) (pr-str result))
+        (is (= :published (get-in result [:injury-ticket :status])))
+        (is (str/starts-with? (get-in result [:injury-ticket :ticket :finding/ticket :path])
+                              (.getPath dir))
+            "post-ingest ticket publication stays in the test-owned tree")
         (is (.isFile (io/file ledger-path))))
       (testing "the fresh ledger has one entry with no predecessor chain"
         (is (= :loaded (:status ledger)))

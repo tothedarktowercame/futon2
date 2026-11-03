@@ -9,6 +9,7 @@
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.observation-labels :as labels]
             [futon2.aif.observation-label-store :as store]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.observation-label-reader :as reader]
             [futon2.aif.observation-label-wire :as wire])
   (:import [java.nio.file Files]
@@ -130,6 +131,11 @@
     (is (= 34 (+ (:written receipt) (:skipped receipt) (:refused receipt))))
     (is (= (:sha256 (store/snapshot (path))) (:snapshot-sha256 receipt)))
     (is (not (contains? (:decision record) :observation-labels))))
-  (is (= "/home/joe/code/futon2/data/wm-observation-labels/labels.edn"
+  ;; b13461d2e made test defaults hermetic: retain both the active-root
+  ;; contract and the canonical production location as separate assertions.
+  (is (= (data-paths/path "wm-observation-labels" "labels.edn")
          (:observation-labels-path (runner/config {}))))
+  (is (= "/home/joe/code/futon2/data/wm-observation-labels/labels.edn"
+         (str (io/file data-paths/production-data-root
+                       "wm-observation-labels" "labels.edn"))))
   (is (nil? (:observation-labels-path (runner/config {:observation-labels-path nil})))))

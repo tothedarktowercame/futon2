@@ -12,6 +12,7 @@
             [futon2.aif.task-execution-evidence :as execution]
             [futon2.aif.token-belief-predecessor :as predecessor]
             [futon2.aif.trace :as trace]
+            [futon2.data-paths :as data-paths]
             [clojure.edn :as edn])
   (:import (java.nio.file Files) (java.time Instant) (java.util UUID)))
 
@@ -540,10 +541,14 @@
   ;; Do not chdir or write either live store. Resolve exactly as a default
   ;; consumer does, including the actual process working directory.
   (is (.isAbsolute (io/file task/default-root)))
-  (is (= "/home/joe/code/futon2/data/wm-d-task-enactment"
+  ;; b13461d2e made test defaults hermetic: retain both the active-root
+  ;; contract and the canonical production location as separate assertions.
+  (is (= (data-paths/path "wm-d-task-enactment")
          (.getCanonicalPath (io/file task/default-root))))
+  (is (= "/home/joe/code/futon2/data/wm-d-task-enactment"
+         (str (io/file data-paths/production-data-root "wm-d-task-enactment"))))
   (doseq [cwd ["/home/joe/code/futon3c" "/tmp"]]
     (let [base (.toPath (io/file cwd))
           root (.toPath (io/file task/default-root))]
-      (is (= "/home/joe/code/futon2/data/wm-d-task-enactment"
+      (is (= (data-paths/path "wm-d-task-enactment")
              (str (.normalize (.resolve base root))))))))
