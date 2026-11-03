@@ -16,8 +16,10 @@
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.standing-authority :as standing]))
 
-(def live-path "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/ledger.edn")
-(def live-sha "f7b5a7aac642b35302f30e1254c707805e95188ffd3c8158c51ae6bde56a0074")
+(def live-path
+  (.getCanonicalPath
+   (io/file (io/resource "fixtures/meta-injury-ledgers/live-2026-11-03-156.edn"))))
+(def live-sha "123d972144b0ca4fd3216a5ada100b413e7087cad56365d3f973170e01356eeb")
 (def recovered-ordinals #{38 39 40 41 42 43 44 46 48 50 71})
 (def retained-genuine-ordinals #{116 120 122})
 (def deny-failing-ordinals #{38 39 40 41 42 43 44 46 48 50 71 116 118 120 122 125})
@@ -98,7 +100,7 @@
                       #(store/load-ledger live-path)]]
         (let [r (loader)]
           (is (= :loaded (:status r)) (pr-str (select-keys r [:status :defects])))
-          (is (= 129 (count (:entries (:ledger r))))))))
+          (is (= 156 (count (:entries (:ledger r))))))))
     (testing "default loads stamp the resolving authority identity (P4)"
       (let [r (store/load-durable-ledger live-path)]
         (is (= (:identity (standing/standing-context)) (:authority-identity r)))
@@ -288,7 +290,7 @@
             (str "(require '[futon2.aif.meta-injury-store :as store])"
                  "(let [r (store/load-durable-ledger \"" live-path "\")]"
                  "  (when (and (= :loaded (:status r))"
-                 "             (= 129 (count (:entries (:ledger r))))"
+                 "             (= 156 (count (:entries (:ledger r))))"
                  "             (:authority-identity r))"
                  "    (println :cold-ok)))")
           proc (doto (ProcessBuilder. ["clojure" "-M" "-e" script])
