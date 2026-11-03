@@ -163,7 +163,8 @@
                                                                            :construction-receipt {:kind :hand-admitted}}]}]
                        :refusals []}
             recorded (proposals/record-supply assembled {} supplied)
-            result (wm-cd/cascade-decision recorded {})]
+            ;; Since a04b157d2 the caller supplies the selected task.
+            result (wm-cd/cascade-decision recorded {:task {:id target}})]
         (is (= 1 (count (:proposals supplied))))
         (is (empty? (:problems recorded)))
         (is (= :repair-closure-observation-unavailable (get-in recorded [:refusals 0 :reason])))
