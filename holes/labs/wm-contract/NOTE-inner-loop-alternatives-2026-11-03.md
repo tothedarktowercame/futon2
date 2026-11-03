@@ -116,3 +116,31 @@ Lean proof object for the selection law.
 - **G per alternative:** present for every admitted candidate as certificate
   `:g` (and stop G under abstention); absent for pre-scoring construction
   proposals/refusals and, in a singleton run, absent for any real competitor.
+
+## Review (claude-2, 2026-11-03 16:4xZ, job invoke-1793723864788-10859-d5d31b8d, commit c7c88231a)
+
+Checked: `policy.clj:400` is `select-action-cascades` and lines 537-545 take the
+admissible minimum class and its first ranked member; `cascade_selection.clj:448`
+is `selection-comparisons` ("the enacted class against the runner-up admissible
+class"); `inner_abstention.clj:86` is `comparison` ("all compared entries
+retained"). Cites hold. Not checked: cascade_problems and flight_driver lines.
+
+Beyond the note: the newest tick had one candidate, but multi-candidate ticks
+exist. `tick-run-record-2026-11-01-3f903a0e-…` has five candidates for
+M-pattern-retrieval-calibration: four at G 1.7550 and the winner at 1.6996
+(margin 0.0553 nats; `policy-comparison` `:near-tie? :threshold-undeclared`).
+The posterior's keys are the policy identities and carry, per unit, the
+occurrence square (G/I1/I2/B with `:source` path and sha and a
+`:situation-source` line), so grounds and warrants per alternative are already
+retained, more fully than the outer record's.
+
+Judgement: an inner argument frame is possible today on such ticks. Arguments:
+the admitted policies plus stopping; pick: the policy; grounds: the occurrence
+squares; warrants: the patterns' conclusions; G: `:g`. What the outer frame's
+attack vocabulary (gate excludes, order prefers) does not cover: inner
+candidates differ by which units they include and in what order, so the attacks
+to compute are coverage (a unit you lack whose need is live), forbiddenness
+(Q6/ticket receipts) and stopping. Packet E, after the Lean clause (argument-A)
+and the Clojure port (argument-B) land, should take this tick as its fixture.
+Finding for Joe: four of five alternatives score identically, so "why this
+approach and not that one" is answered there by 0.055 nats and by nothing read.
