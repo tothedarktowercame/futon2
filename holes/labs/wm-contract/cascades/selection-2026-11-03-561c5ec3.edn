@@ -10,6 +10,7 @@
 ;; selection of a mission ... then I'll have a pretty good 'feel' for whether or
 ;; not it is valid or useful".
 {:schema :cascade/record-draft-v0
+ :title "The cascade that selected M-typed-holes-mathlib-handoff (run 561c5ec3, 2026-11-03)"
  :id :serves-a-way
  :status :scored
  :applies-to "the outer selection: which open task the War Machine works on next"

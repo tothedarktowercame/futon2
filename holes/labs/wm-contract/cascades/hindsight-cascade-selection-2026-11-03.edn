@@ -10,6 +10,7 @@
 ;; we were to try to explain (with the benefit of hindsight) why I have selected
 ;; working on 'cascade selection' ... the rationale may be a bit complex."
 {:schema :cascade/record-draft-v0
+ :title "Why Joe selected 'cascade selection' tonight, with hindsight (2026-11-02/03)"
  :id :why-cascade-selection-tonight
  :status :stated-with-hindsight
  :applies-to "what Joe chose to work on, 2026-11-02 21:5xZ to 2026-11-03 01:1xZ"
