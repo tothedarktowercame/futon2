@@ -69,12 +69,42 @@ EXTERNAL_INPUTS = {
 }
 
 
+def ns_name(text):
+    """The symbol after `(ns`, skipping reader metadata (`^{...}` or `^:kw`,
+    possibly repeated): an `(ns ^{:clj-kondo/config ...} name)` form used
+    to read as the namespace `^{:clj-kondo/config` (2026-11-03)."""
+    m = re.search(r"\(ns\s+", text)
+    if not m:
+        return None
+    i = m.end()
+    while i < len(text) and text[i] == "^":
+        i += 1
+        if text[i] == "{":
+            depth = 0
+            while i < len(text):
+                if text[i] == "{":
+                    depth += 1
+                elif text[i] == "}":
+                    depth -= 1
+                    if depth == 0:
+                        i += 1
+                        break
+                i += 1
+        else:
+            while i < len(text) and not text[i].isspace():
+                i += 1
+        while i < len(text) and text[i].isspace():
+            i += 1
+    m = re.match(r"[^\s()]+", text[i:])
+    return m.group(0) if m else None
+
+
 def namespaces():
     out = {}
     for f in sorted((REPO / "test").rglob("*_test.clj")):
-        m = re.search(r"\(ns\s+([^\s()]+)", f.read_text(errors="replace"))
-        if m:
-            out[m.group(1)] = f.relative_to(REPO).as_posix()
+        name = ns_name(f.read_text(errors="replace"))
+        if name:
+            out[name] = f.relative_to(REPO).as_posix()
     return out
 
 
