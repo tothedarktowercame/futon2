@@ -6,8 +6,13 @@
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.report.war-machine :as wm]))
 
-(def missions {:missions [{:id "M-live" :status-class :active}
-                          {:id "M-done" :status-class :complete}]})
+(def missions
+  ;; a live mission carries its file path and source sha (mission-registry
+  ;; live-mission?, a4bd3eaf8); without them the registry enumerates nothing
+  {:missions [{:id "M-live" :status-class :active
+               :path "/fixture/futon2/M-live.md" :source {:sha256 "fixture"}}
+              {:id "M-done" :status-class :complete
+               :path "/fixture/futon2/M-done.md" :source {:sha256 "fixture"}}]})
 
 (defn- tmp-dir []
   (str (java.nio.file.Files/createTempDirectory
