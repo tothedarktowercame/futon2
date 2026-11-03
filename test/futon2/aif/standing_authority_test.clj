@@ -198,8 +198,8 @@
                      "evidence")]
     (into {}
           (keep (fn [^java.io.File f]
-                  (when (.isFile f)
-                    (io/resource (str "wm/standing-authority/evidence/" (.getName f)))
+                  (when (and (.isFile f)
+                             (io/resource (str "wm/standing-authority/evidence/" (.getName f))))
                     [(.getName f) (slurp f)])))
           (file-seq dir))))
 
