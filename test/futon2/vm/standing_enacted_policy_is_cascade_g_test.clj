@@ -27,8 +27,8 @@
             [futon2.aif.enactment-fold-source :as fold-source]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.report.cascade-decision-test :as fixture]
-            [futon2.report.preference-schedule-decision-test :as schedule-fixture]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm]
+            [futon2.test-support.reading-route :as route]))
 
 ;; The production judge reads the repair store through its default root; in a
 ;; test JVM that root is the hermetic data root (b13461d2e), where the store
@@ -37,17 +37,20 @@
 (use-fixtures :once hermetic/with-hermetic-stores)
 
 (deftest standing-enacted-policy-is-cascade-g
-  (let [assembled (#'fixture/assemble*
-                   {:targets [fixture/tick-1-target]
-                    :sources fixture/tick-1-sources})
-        history (#'schedule-fixture/admitted-history assembled)]
+  ;; Rebuilt 2026-11-03 on the reading-route fixture: since a04b157d2 judge
+  ;; takes the caller's task, and since the 2026-11-01 restoration the task's
+  ;; policy family comes from its published reading (:target-sources on the
+  ;; assembly, :target-reading-root in opts). The call still goes through the
+  ;; production `judge`.
+  (let [fx (route/fixture)
+        assembled (route/assembled fx 1)
+        steps (route/ledger-steps fx)]
     (with-redefs [wm/assemble-cascade-problems-with-published
                   (fn [& _] assembled)
                   fold-source/conditioning-steps
-                  (fn [& _] history)]
+                  (fn [& _] steps)]
       (let [decision (:decision
-                      (wm/judge {} (assoc fixture/live-c-opts
-                                         :task {:id (name fixture/tick-1-target)})))
+                      (wm/judge {} (merge fixture/live-c-opts (route/opts fx {}))))
             law (:selection-law decision)]
         (is (map? decision) "the production tick produces a decision")
         (is (= :cascade-candidate (get-in decision [:action :kind]))
@@ -56,7 +59,17 @@
         (is (= :cascade-selection-posterior (:applied law))
             (str "the enacted choice applies the cascade G posterior; got :applied "
                  (:applied law)))
-        (is (= :declared (get-in decision [:beta :status]))
-            "the enacted choice records a declared beta")
-        (is (number? (get-in decision [:horizon-steps]))
-            "the enacted choice records the declared common horizon T it was scored at")))))
+        ;; Since 6a36b6006 (2026-10-30) the reading-family route scores at the
+        ;; R20 fixed-count betaPosterior, not an operator-declared beta; the
+        ;; decision records that provenance and the value.
+        (is (= :r20-computed (get-in decision [:beta :status]))
+            "the enacted choice records the R20-computed beta")
+        (is (number? (get-in decision [:beta :value])))
+        ;; The common horizon each compared policy was scored at is carried by
+        ;; the certificate's Q4 carrier (Requirements Q4), per policy key.
+        (let [q4 (get-in decision [:selection-certificate :q4])
+              enacted (:enacted law)
+              row (some #(when (= enacted (:policy-key %)) %) (:policies q4))]
+          (is (= :certified (:status q4)))
+          (is (number? (:horizon row))
+              "the enacted policy's Q4 row records the horizon it was scored at"))))))
