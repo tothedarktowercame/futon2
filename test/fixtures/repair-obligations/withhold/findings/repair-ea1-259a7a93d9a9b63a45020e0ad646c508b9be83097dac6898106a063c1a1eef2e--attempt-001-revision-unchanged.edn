@@ -1,0 +1,26 @@
+{:discharge-contract
+ {:requires
+  [:distinct-repair-commit
+   :independent-review
+   :grounded-repair
+   :distinct-production-shaped-successor],
+  :artifact-shape :code-commit},
+ :repair/status :open,
+ :opened-at "2026-09-14T23:53:20.021474557Z",
+ :repair/class :machine-failure,
+ :repair/id
+ "repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-001-revision-unchanged",
+ :backtrace nil,
+ :failure-data
+ {:limb-evidence/refusal :revision-unchanged, :path [:revision-pair]},
+ :failure-error "Limb evidence refused",
+ :failure-kind :revision-unchanged,
+ :attempt-id
+ "ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-001",
+ :selected-entry nil,
+ :machine-repo "/home/joe/code/futon2",
+ :failure-stage :close,
+ :target
+ "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-003-artifact-binding-mismatch",
+ :repair/schema-version 3,
+ :failure-outcome :build-failed}
