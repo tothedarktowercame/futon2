@@ -1,0 +1,91 @@
+;; The cascade that justified one outer selection, written in the shared record
+;; shape (claude-16's :cascade/record-draft-v0, futon3c/holes/labs/M-象-cascade/
+;; disposition-cascade-v0.edn). Constructed by claude-2, 2026-11-03 01:1xZ, from
+;; the retained selection record of run 2026-11-03-561c5ec3 (futon2
+;; data/wm-runs/selection-record-2026-11-03-wm-click-2780abb9-f6f8-4db6-9b8f-95d156737774.edn),
+;; the ant read of the picked mission (futon3c holes/excursions/ant-reads/
+;; M-typed-holes-mathlib-handoff.A1.json) and the three pattern files. Every read
+;; names its source; :kind :read means a cited line exists, :proxy means a
+;; stand-in. Joe, 2026-11-03: "If I can see the cascade that justifies the
+;; selection of a mission ... then I'll have a pretty good 'feel' for whether or
+;; not it is valid or useful".
+{:schema :cascade/record-draft-v0
+ :id :serves-a-way
+ :status :scored
+ :applies-to "the outer selection: which open task the War Machine works on next"
+ :selected "M-typed-holes-mathlib-handoff"
+ :run "2026-11-03-561c5ec3-6510-42a3-930b-331ef089feb4"
+ :click "wm-click-2780abb9-f6f8-4db6-9b8f-95d156737774"
+ :selected-at "2026-11-03T00:07:34Z"
+
+ :units
+ [{:index 0 :pattern "futon3/library/task-selection/only-what-can-start-now.flexiarg"
+   :sha256 "c0d2464a682f91d942450151040829a05e439960c651e83f8ec3c3866d5fb475"
+   :step :ready-gate
+   :needs [:giraffe-status] :establishes :ready-field
+   :quote "Select only work whose needs are met, and say which need blocks each item that is left out."
+   :applied "ready gate left 508 of 599"}
+  {:index 1 :pattern "futon3/library/task-selection/serves-a-way.flexiarg"
+   :sha256 "de6603a9036da4ae3b23b02d545777c091b9e6b92c290078c127032f7fe14950"
+   :step :placed-gate
+   :needs [:placement-status :placement-way :placement-action] :establishes :placed-field
+   :quote "Keep work placed under a cited way and name that way in the reason."
+   :applied "placed gate kept the ready items whose placement is open, under a cited way, with action work or a work cluster"}
+  {:index 2 :pattern "futon3/library/task-selection/what-others-wait-on-first.flexiarg"
+   :sha256 "a582e82e22f66b4bf7be5e7c81d886f137bda923b8e6a481eb9635ee3f9d80be"
+   :step [:by-cone :by-unblocks]
+   :needs [:giraffe-cone :giraffe-unblocks] :establishes :order
+   :quote "orders ready candidates by how many items their completion makes ready at once"
+   :applied "by-cone took cone 0 (runner-up E-kimi-task-157 at cone 0); by-unblocks took unblocks 0 (runner-up E-kimi-task-157 at unblocks 0): a tie, so source order decided"}]
+
+ :edges [[0 1 :precedes] [1 2 :precedes]]
+ :independent []
+
+ :reads
+ {:giraffe-status {:value :ready :kind :read
+                   :source "Giraffe pass 20261103T000636.077Z-f9e80eee, pass.edn sha256 c2570bb704ebdec52dc62e8675fe406130e4943ce88cbac766037ded401fcffd, row M-typed-holes-mathlib-handoff"}
+  :giraffe-cone {:value 0 :kind :read :source "same pass row"}
+  :giraffe-unblocks {:value 0 :kind :read :source "same pass row"}
+  :giraffe-rank {:value 98 :kind :read :source "same pass row"}
+  :placement-status {:value "open" :kind :read
+                     :source "kimi-3 ant read, A1-placements.tsv sha256 30bceb1812fd54835e68f845b5e08e87da6e7abc5231748b8ceadfcafe3557f8"
+                     :cite "futon3c/holes/missions/M-typed-holes-mathlib-handoff.md:3"
+                     :quote "**Status:** OPEN — DISPATCHED to Codex (2026-06-14). **Owner of result:** claude-2"}
+  :placement-way {:value "backlog-understood" :wing "B" :kind :read
+                  :source "same ant read"
+                  :cite "futon3c/holes/missions/M-typed-holes-mathlib-handoff.md:27"
+                  :quote "- `:build-scope` — for :partial/:absent: what mathlib gives you to build on +"}
+  :placement-action {:value "work" :kind :read
+                     :source "same ant read"
+                     :cite "futon3c/holes/missions/M-typed-holes-mathlib-handoff.md:16"
+                     :quote "- [ ] A result record shows claude-2's review disposition and receipt of the audit path with summary counts."}
+  :placement-what {:value "Dispatched Codex audit classifying each of 10 typed-holes manifest concepts as PRESENT/PARTIAL/ABSENT in mathlib4 plus cross-system formalisations; audit delivered, claude-2's review disposition still unrecorded."
+                   :kind :read :source "same ant read"
+                   :cite "futon3c/holes/missions/M-typed-holes-mathlib-handoff.md:5"}
+  :placement-finish {:value "All four acceptance boxes checked, i.e. claude-2 records a review disposition and receipt of the audit path with summary counts."
+                     :kind :read :source "same ant read"
+                     :cite "futon3c/holes/missions/M-typed-holes-mathlib-handoff.md:16"}
+  :source-header {:value "dated absent, status OPEN, timebox absent" :kind :read
+                  :source "outer-select/source-header on the pinned mission file at selection time"}
+  :focus-relation {:value :unknown :kind :proxy
+                   :source "focus WM; the relation receipt classed the target :unknown, so the reach is the readiness prior 3/4, not a reading"}}
+
+ :rationale
+ "Of 599 open tasks, 508 can start now. Among those, keep the ones an ant has placed under a way of working with the action work: this mission is open, serves backlog-understood (wing B), and its action is work, each on a cited line of the mission file. Among the placed items, prefer the one whose completion frees the most others; here every remaining candidate frees nothing (cone 0, unblocks 0), so the order fell to source order and M-typed-holes-mathlib-handoff came first. What the selection did not know: whether this mission relates to the current focus (proxy), and anything about the mission beyond its placement row. What it would finish: claude-2 records a review disposition and receipt of the audit path with summary counts."
+
+ :attestation
+ {:source "run 2026-11-03-561c5ec3 (outer-selection-only, stopped after :selection-world and aborted), selection record as above"
+  :readers [{:who "kimi-3" :what "placement (A1 read, 6 cites ok, 1 drifted)" :job "invoke-1793654687439-10548-6ee0eaa1" :at "2026-11-02T21:26Z"}
+            {:who "codex-7" :what "selected-target reading of the pick, after the choice" :job "invoke-1793664574667-10653-9f6084f5" :at "2026-11-03T00:09Z"}
+            {:who "codex-7" :what "occurrence-square maps of the pick, after the choice" :job "invoke-1793664648653-10665-3409b2fa" :at "2026-11-03T00:10Z"}]
+  :held-out nil
+  :note "The cascade's steps are classical and pinned; the only judgement in it is the ant's placement. The two orders were ties, so the pick among the placed items was source order."}
+
+ :alternatives
+ [{:id :only-what-can-start-now :steps [:ready-gate] :pick "M-war-machine-aif-completion" :G 2.4694636005859008}
+  {:id :giraffe-order :steps [:ready-gate :by-cone :by-unblocks] :pick "M-war-machine-aif-completion" :G 2.4694636005859008}
+  {:id :find-out-before-building :steps [{:status-gate :undetermined} :by-rank] :pick "M-patterns-done-right" :G 2.8567834606757225}
+  {:id :stopping :pick nil :G 13.730053366819615}]
+
+ :G 2.1432169255819717
+ :G-note "lowest of the four, so selected; margin to stopping 11.5868 nats. G saw the pick's readiness prior and prediction class, not the placement: the reason rides with the pick, the number does not read it (Joe 2026-11-03: a rationale and a number, the number relative to the alternatives explored)."}
