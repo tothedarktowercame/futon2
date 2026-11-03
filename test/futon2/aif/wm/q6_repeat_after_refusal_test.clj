@@ -68,7 +68,9 @@
         (not= (f "previousChoice") (f "currentChoice")))))
 
 (deftest repeat-after-refusal-on-same-inputs-selects-a-distinct-policy
-  (let [fx (route/fixture)
+  ;; 4089b46f3 excludes retractions from canonical families; Q6 needs this
+  ;; co-cited reading's three policies so forbidding one leaves a choice.
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         dir (route/temp-dir "q6-stream-")
         one (click! fx dir)
         two (click! fx dir)
@@ -91,7 +93,7 @@
              (get-in two [:record :q6 :terminal :input-digest])))
       (is (= :forbidden (:status (q6 two))))
       (is (= [k1] (:forbidden-keys (q6 two))))
-      (is (= 2 (:menu (q6 two))))
+      (is (= 3 (:menu (q6 two))))
       (is (previous-run/reading-key? (chosen-key two)))
       (is (not= k1 (chosen-key two)))
       (is (some #(= k1 (get-in % [:id :policy-key]))
@@ -138,7 +140,7 @@
         (is (= (chosen-key one) (chosen-key four)))))))
 
 (deftest changed-inputs-allow-the-same-policy
-  (let [fx (route/fixture)
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         dir (route/temp-dir "q6-stream-")
         one (click! fx dir)
         two (with-redefs [ledger/pattern-theta
@@ -171,7 +173,7 @@
     (route/decide fx)))
 
 (deftest same-day-runs-are-ordered-by-recorded-start-not-by-name
-  (let [fx (route/fixture)
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         d (decision fx)
         refused {:decision d :downstream {:kind :reading-policy-execution-semantics-owed}}
         ok {:decision d :outcome :grounded-change}
@@ -194,7 +196,7 @@
 (defn- carrier-of [result] (get-in result [:decision :selection-certificate :q6]))
 
 (deftest absent-unreadable-and-tampered-predecessors-never-certify
-  (let [fx (route/fixture)
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         d (decision fx)
         refused {:decision d :downstream {:kind :reading-policy-execution-semantics-owed}}
         now "2026-10-15T12:00:00Z"
@@ -244,7 +246,7 @@
             (is (contains? (f "previousChoice") "not-recomputable"))))))))
 
 (deftest only-the-exact-structural-identity-is-forbidden
-  (let [fx (route/fixture)
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         d (decision fx)
         p0 (previous-run/predecessor
             (closed-stream! (route/temp-dir "q6-id-")
@@ -271,10 +273,10 @@
       (testing (name label)
         (let [r (decide-after fx (reseal key))]
           (is (= [] (:forbidden-classes (carrier-of r))) "a different identity forbids nothing")
-          (is (= 2 (count (get-in r [:decision :selection-certificate :candidates])))))))))
+          (is (= 3 (count (get-in r [:decision :selection-certificate :candidates])))))))))
 
 (deftest exporter-reads-only-the-run-carrier
-  (let [fx (route/fixture)
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         dir (route/temp-dir "q6-stream-")
         _one (click! fx dir)
         two (click! fx dir)
@@ -295,7 +297,7 @@
 
 (deftest work-predecessor-passes-over-a-tick-that-never-decided
   (let [dir (route/temp-dir "q6-work-skip-")
-        fx (route/fixture)
+        fx (route/fixture [["p/a" "p/c"] "p/b"])
         decided (previous-run/terminal {:run-id "decided" :started-at "2026-11-01T10:00:00Z"
                                         :decision (decision fx) :outcome :changed})
         failed (previous-run/terminal {:run-id "failed" :started-at "2026-11-01T11:00:00Z"
@@ -330,7 +332,8 @@
   (let [dir (route/temp-dir "q6-work-refused-")
         terminal (previous-run/terminal
                   {:run-id "refused" :started-at "2026-11-01T10:00:00Z"
-                   :decision (decision (route/fixture)) :downstream {:kind :execution-refused}})
+                   :decision (decision (route/fixture [["p/a" "p/c"] "p/b"]))
+                   :downstream {:kind :execution-refused}})
         file (io/file dir "refused.edn")]
     (spit file (pr-str {:run/id "refused" :q6 {:terminal terminal}}))
     (previous-run/start! dir "refused" "2026-11-01T10:00:00Z")

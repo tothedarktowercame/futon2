@@ -104,16 +104,23 @@
 ;; :policy-prefixes; the reading-family route records each candidate's own
 ;; prefix on its certificate row, keyed by its reading-policy history key.
 (deftest the-tick-records-the-prefix
-  (let [fx (route/fixture)
-        [k1 k2] (vals (route/policy-keys (:decision (route/decide fx))))
+  ;; 4089b46f3 excludes retractions from canonical families; this co-cited
+  ;; reading supplies one admitted policy and two certified-zero competitors.
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
+        policy-keys (vals (route/policy-keys (:decision (route/decide fx))))
+        k1 (some #(when (= #{"p/a" "p/b"}
+                            (set (map second (get-in % [3 :nodes])))) %)
+                 policy-keys)
+        others (remove #{k1} policy-keys)
         decision (:decision (route/decide fx 1 {:conditioning-steps
                                                 (route/with-prefixes fx {k1 0.25})}))
         rows (into {} (map (fn [c] [(adm/candidate-key (:id c)) c])
                            (get-in decision [:selection-certificate :candidates])))]
-    (is (= #{k1 k2} (set (keys rows))))
+    (is (= 3 (count rows)))
+    (is (= (set policy-keys) (set (keys rows))))
     (is (= :computed (get-in rows [k1 :f-prefix :status])))
     (is (= 0.25 (get-in rows [k1 :f-prefix :f])))
     (is (= k1 (adm/candidate-key (get-in rows [k1 :f-prefix :policy]))))
-    (is (= :not-applicable (get-in rows [k2 :f-prefix :status]))
-        "the other policy has no recorded step: certified zero history")
-    (is (= k2 (get-in rows [k2 :f-prefix :policy-key])))))
+    (is (every? #(= :not-applicable (get-in rows [% :f-prefix :status])) others)
+        "the other policies have no recorded step: certified zero history")
+    (is (every? #(= % (get-in rows [% :f-prefix :policy-key])) others))))
