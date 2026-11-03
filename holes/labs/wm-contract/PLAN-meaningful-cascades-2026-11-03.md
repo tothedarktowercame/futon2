@@ -133,6 +133,27 @@ three classical ones, rationale rendered from the terms).
 2. Judging the cascade by agreement with Joe is a fair first test and cannot
    be the last: the system also has to find things he would not have said.
 
+## Joe's criterion (01:08Z 11-03)
+
+"So, I'd much rather see some real cascades being constructed (e.g. this could
+be a use for WebArxana) than do a reply of 47 rows. If I can see the cascade
+that justifies the selection of a mission, or a cascade that is being mined
+from my turns, etc., then I'll have a pretty good 'feel' for whether or not it
+is valid or useful". So C's replay is dropped. Two constructed cascades, one
+each side, in the shared shape, each rendered so Joe can read it:
+
+- WM: `cascades/selection-2026-11-03-561c5ec3.edn` (this directory), the
+  cascade that selected M-typed-holes-mathlib-handoff tonight: three pinned
+  units with needs/establishes/quote and what each did; eleven reads, ten
+  cited and one proxy (the focus relation); rationale; attestation (the run,
+  the three readers); the three alternatives and stopping with G beside each.
+  Rendered by `scripts/render_cascade_record.bb` to
+  wip/cascade-selection-2026-11-03.html. WebArxana's diagram view
+  (`/wa#/diagram/<name>/expanded`, a node graph) is the later surface: units,
+  edges and reads are a graph.
+- 象: a cascade mined from Joe's turns (claude-16), same shape, same renderer.
+  The stated disposition cascade stays as the example of the shape.
+
 ## Open
 
 - Joe's criterion for the first demo (the blind sample size; whether the
