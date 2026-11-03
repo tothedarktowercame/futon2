@@ -11,7 +11,7 @@
 
 (def library-root
   (or (System/getenv "L54D_LIBRARY_ROOT")
-      "/home/joe/worktrees/futon3/placement-adapter-B/library/task-selection"))
+      "/home/joe/code/futon3/library/task-selection"))
 (def pass-root "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5")
 (def pass-sha "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91")
 (def input-sha "730407c514e2fd21905da2b533d92e046a454372c919fbd89089fc953ebf1667")

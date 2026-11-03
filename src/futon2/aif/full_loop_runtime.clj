@@ -36,6 +36,7 @@
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.selected-target-reading :as selected-target-reading]
+            [futon2.aif.placement-adapter :as placement-adapter]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.handoff-contract :as handoff]
@@ -1403,6 +1404,14 @@
                             (assoc (focus-receipt/relation-context
                                     (or (:code-root opts) "/home/joe/code"))
                                    :giraffe-run-dir giraffe-dir)})
+              ;; Ant placements as a per-target fact (SPEC-placement-adapter-2026-11-02).
+              ;; A missing file is a typed absence on every fact; :placed-gate then
+              ;; keeps nothing, and a menu without the fact refuses, never passes.
+              placements (placement-adapter/load-placements
+                          (if-let [tsv (:outer/placements-path opts)]
+                            (assoc placement-adapter/default-paths :tsv tsv)
+                            placement-adapter/default-paths))
+              observation (placement-adapter/annotate observation placements)
               learning (resolve-pending-learning opts makeup state giraffe-dir observation)
               _ (swap! (:selection-record/evidence opts) assoc :outer/learning
                        (select-keys learning [:status :reason :ending-class :observed-gain :receipt]))
@@ -1424,7 +1433,7 @@
                                   (:run-id opts) (or (:startedAt opts) (str (Instant/now)))))
               _ (swap! (:selection-record/evidence opts) merge
                         (assoc (select-keys observation [:giraffe/run-id :giraffe/manifest-sha256
-                                                         :focus :field-facts])
+                                                         :focus :field-facts :placement/source])
                                :makeup/sha256 (:makeup/sha256 makeup)
                                :previous (:previous-selection observation)))
               selection (outer-select/select makeup state observation)
@@ -1434,6 +1443,7 @@
                                             (:outer-score/admitted selection))
                                      (update :selection #(some-> % (dissoc :candidates)))
                                      (assoc :giraffe/run-id (:giraffe/run-id observation)
+                                            :placement/source (:placement/source observation)
                                             :giraffe/manifest-sha256
                                             (:giraffe/manifest-sha256 observation)
                                             :makeup/sha256 (:makeup/sha256 makeup)
