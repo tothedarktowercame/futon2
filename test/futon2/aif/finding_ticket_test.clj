@@ -8,6 +8,7 @@
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.ticket-queue :as queue]
+            [futon2.data-paths :as data-paths]
             [futon2.test-support.git-fixture :as git-fixture]))
 
 (defn- fixture [kind]
@@ -153,7 +154,12 @@
 (deftest canonical-store-queue-is-untracked-runtime-state
   ;; The live queue must not be written into a tracked resource.
   (let [{:keys [queue-path ticket-dir]} (publisher/destinations publisher/canonical-store)]
-    (is (= "/home/joe/code/futon2/data/wm-ticket-queue/queue.edn" queue-path))
+    ;; b13461d2e made test defaults hermetic: retain both the active-root
+    ;; contract and the canonical production location as separate assertions.
+    (is (= (data-paths/path "wm-ticket-queue" "queue.edn") queue-path))
+    (is (= "/home/joe/code/futon2/data/wm-ticket-queue/queue.edn"
+           (str (io/file data-paths/production-data-root
+                         "wm-ticket-queue" "queue.edn"))))
     (is (= "/home/joe/code/futon2/holes/tickets" ticket-dir))))
 
 (defn- git! [repo & args]
