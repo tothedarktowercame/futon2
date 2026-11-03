@@ -6,8 +6,9 @@
   cascade-selection's posterior. It must not come from the controller head or
   channel scoring over flat :type actions.
 
-  This test calls the production `judge` WITHOUT :cascade-problem, i.e. the
-  path the machine actually runs. The VM cascade lane (`cascade-lane`), shadow
+  This test calls the production `judge` WITHOUT :cascade-problem and with the
+  caller-supplied task used by the runtime, i.e. the path the machine actually
+  runs. The VM cascade lane (`cascade-lane`), shadow
   G and contract bundles do not satisfy it. It fails until the production
   decision itself is a cascade decision. Do not weaken, skip or re-point it
   to the lane.
@@ -37,7 +38,9 @@
                   (fn [& _] assembled)
                   fold-source/conditioning-steps
                   (fn [& _] history)]
-      (let [decision (:decision (wm/judge {} fixture/live-c-opts))
+      (let [decision (:decision
+                      (wm/judge {} (assoc fixture/live-c-opts
+                                         :task {:id (name fixture/tick-1-target)})))
             law (:selection-law decision)]
         (is (map? decision) "the production tick produces a decision")
         (is (= :cascade-candidate (get-in decision [:action :kind]))

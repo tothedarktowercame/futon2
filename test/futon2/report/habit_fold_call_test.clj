@@ -76,7 +76,8 @@
       #(try ((ns-resolve ns 'judge) {} (merge {:cascade-sources-dir tmp :cascade-proposals-dir tmp
                                                 :repair-obligations-root tmp
                                                 :machine-interpretations-dir store
-                                                :ticket-queue ticket-queue/empty-declaration}
+                                                :ticket-queue ticket-queue/empty-declaration
+                                                :task {:id route/target}}
                                                judge-opts))
             (catch clojure.lang.ExceptionInfo e
               (when-not (::stop (ex-data e)) (throw e)))))
