@@ -9,7 +9,6 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-shape-g :as shape-g]
-            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.learning-trial-ledger :as ledger]
@@ -39,9 +38,6 @@
 (def other "p/other")
 
 (defn- sha [c] (apply str (repeat 64 c)))
-
-(defn- old-seal-sha [body]
-  (load-identity/sha256 (.getBytes (pr-str body) "UTF-8")))
 
 ;; occurrence ids of the production-shaped reading: p/dup cited at fragments
 ;; 0, 1 and 2; p/other sharing fragment 1 (witnessed overlap).
@@ -130,100 +126,11 @@
 (def join-opts
   {:bind-cascade-identity {:readings (fn [_] readings)}})
 
-(defn- pinned-field [families ch]
-  {:schema :wm/pre-choice-policy-field-v1
-   :source-pin {:path "wm://fixture-field" :sha256 (sha ch)}
-   :coverage {:targets (count families) :current (count families)}
-   :families families})
-
-(deftest sealed-menu-is-occurrence-grain-canonical-and-deterministic
-  (let [f1 (family (occurrence-policy 1) (occurrence-policy 2))
-        f2 (assoc (family (assoc (occurrence-policy 3)
-                                 :target "T-other" :mission "T-other"
-                                 :policy-id "T-other/policy-3"))
-                  :target-id "T-other")
-        field (pinned-field [f1 f2] "1")
-        a (family-selection/sealed-pre-choice-menu
-           field (:bind-cascade-identity join-opts))
-        b (family-selection/sealed-pre-choice-menu
-           field (:bind-cascade-identity join-opts))]
-    (is (= :sealed (:status a)))
-    (is (= 3 (count (:entries a))))
-    (is (= (:menu-pin a) (:menu-pin b)))
-    (is (= (:source-pin field) (:field-source-pin a)))
-    (doseq [entry (:entries a)]
-      (is (string? (:policy-id entry)))
-      (is (string? (:target-id entry)))
-      (is (string? (:cascade-digest entry)))
-      (is (= :wm/executable-cascade-v1
-             (get-in entry [:canonical-cascade :schema])))
-      (is (= :nats (get-in entry [:certificate :g-terms :units]))))
-    (let [mutated (family-selection/sealed-pre-choice-menu
-                   (assoc field :source-pin {:path "wm://fixture-field"
-                                             :sha256 (sha "2")})
-                   (:bind-cascade-identity join-opts))]
-      (is (not= (:menu-pin a) (:menu-pin mutated))))))
-
-(deftest sealed-menu-measures-incomplete-coverage-and-scores-present-targets
-  (let [incomplete {:status :failed :target-id "T-missing" :policies []
-                    :failures [{:kind :no-current-target-reading}]}
-        result (family-selection/sealed-pre-choice-menu
-                  (pinned-field [(family (occurrence-policy 1)) incomplete] "3")
-                  (:bind-cascade-identity join-opts))]
-    (is (= :sealed (:status result)))
-    (is (= {:eligible 2 :assessed 1 :reading-absent 1}
-           (select-keys (:frontier result) [:eligible :assessed :reading-absent])))
-    (is (= ["T-missing"] (get-in result [:frontier :reading-absent-ids])))
-    (is (= 1 (count (:entries result))))
-    (is (nil? (family-selection/verify-sealed-menu result)))))
-
-(deftest sealed-menu-keeps-bound-entries-when-other-entries-are-unbound
-  (let [menu (family-selection/sealed-pre-choice-menu
-              (pinned-field [(family (occurrence-policy 1))
-                             (family (pattern-grain-policy 9))] "7")
-              (:bind-cascade-identity join-opts))]
-    (is (= :sealed (:status menu)))
-    (is (= 1 (count (:entries menu))))
-    (is (seq (:refusals menu)))
-    (is (nil? (family-selection/verify-sealed-menu menu)))))
-
-(deftest sealed-menu-refuses-all-unbound-and-forged-menus-atomically
-  (let [all-unbound (family-selection/sealed-pre-choice-menu
-                     (pinned-field [(family (pattern-grain-policy 9))] "4")
-                     (:bind-cascade-identity join-opts))
-        forged (with-redefs [sut/bind-ranked
-                             (fn [& _]
-                               {:ranked [] :digests {}
-                                :refusals [{:kind :identity-forged
-                                            :policy-id "T-occ/policy-1"
-                                            :carried (sha "f")
-                                            :rebuilt (sha "e")} ]})]
-                 (family-selection/sealed-pre-choice-menu
-                  (pinned-field [(family (occurrence-policy 1))] "5")
-                  (:bind-cascade-identity join-opts)))]
-    (is (= :refused (:status all-unbound)))
-    (is (= :canonical-binding-refused (:reason all-unbound)))
-    (is (empty? (:entries all-unbound)))
-    (is (seq (:refusals all-unbound)))
-    (is (= :refused (:status forged)))
-    (is (= :canonical-binding-refused (:reason forged)))
-    (is (empty? (:entries forged)))
-    (is (= :identity-forged (get-in forged [:refusals 0 :kind])))))
-
-(deftest sealed-menu-pin-rejects-whole-chain-substitution
-  (let [field (pinned-field [(family (occurrence-policy 1))] "6")
-        sealed (family-selection/sealed-pre-choice-menu
-                field (:bind-cascade-identity join-opts))
-        record (get-in sealed [:entries 0 :canonical-cascade])
-        changed (assoc-in record [:structural :policy-id] "T-occ/substituted")
-        changed (assoc changed :digest (xc/digest changed))
-        substituted (-> sealed
-                        (assoc-in [:entries 0 :canonical-cascade] changed)
-                        (assoc-in [:entries 0 :cascade-digest] (:digest changed)))]
-    (is (= :sealed (:status sealed)))
-    (is (= :menu-pin-mismatch
-           (family-selection/verify-sealed-menu substituted)))
-    (is (not= (:digest record) (:digest changed)))))
+;; Retired with a04b157d2 (2026-10-28, "Remove outer selection machinery;
+;; require a caller-supplied task"): `family-selection/sealed-pre-choice-menu`
+;; and `verify-sealed-menu` no longer exist, so the five sealed-menu deftests
+;; that exercised them are gone from this file (sealed-menu-is-occurrence-grain-canonical-and-deterministic, sealed-menu-measures-incomplete-coverage-and-scores-present-targets, sealed-menu-keeps-bound-entries-when-other-entries-are-unbound, sealed-menu-refuses-all-unbound-and-forged-menus-atomically, sealed-menu-pin-rejects-whole-chain-substitution). The two deftests below
+;; are on `select-over-families`, which remains.
 
 (deftest canonical-identity-binds-before-the-one-selector
   (let [result (family-selection/select-over-families
@@ -407,69 +314,7 @@
            (get-in result [:refusal :identity-check :clause])))))
 
 ;; ---------------------------------------------------------------------------
-;; Packet A2: the frozen focus class reaches score-policy through the sealed
-;; menu, not through a direct score-arranged call.
-
-(defn- other-family []
-  (assoc (family (assoc (occurrence-policy 3) :target "T-other" :mission "T-other"
-                        :policy-id "T-other/policy-3"))
-         :target-id "T-other"))
-
-(defn- frozen-class [relation]
-  {:class relation :scorer-class (get focus-receipt/scorer-class relation)
-   :reason (when (= :unknown relation) :relation-not-declared)
-   :provenance {:status :frozen-focus :as-of "2026-10-22T00:00:00Z"}})
-
-(defn- class-menu [classes]
-  (family-selection/sealed-pre-choice-menu
-   (pinned-field [(family (occurrence-policy 1)) (other-family)] "8")
-   (assoc (:bind-cascade-identity join-opts)
-          :focus-receipt {:status :present :as-of "2026-10-22T00:00:00Z" :focus "WM"}
-          :target-classes (update-vals classes frozen-class))))
-
-(defn- lower-g-target [menu]
-  (:target-id (first (sort-by :controller-score (:entries menu)))))
-
-(deftest swapping-focus-classes-reverses-the-menu-order
-  (let [a (class-menu {"T-occ" :focus "T-other" :useful-elsewhere})
-        b (class-menu {"T-occ" :useful-elsewhere "T-other" :focus})]
-    (is (= :sealed (:status a) (:status b)))
-    (is (= "T-occ" (lower-g-target a)))
-    (is (= "T-other" (lower-g-target b)))
-    (is (= {:focus 1 :useful-elsewhere 1} (get-in a [:class-census :by-class])))
-    (is (nil? (family-selection/verify-sealed-menu a)))))
-
-(deftest unknown-and-missing-classes-refuse-before-score-arranged
-  (let [scored (atom [])
-        menu (with-redefs [shape-g/score-arranged
-                           (let [real shape-g/score-arranged]
-                             (fn [target & more]
-                               (swap! scored conj target)
-                               (apply real target more)))]
-               (family-selection/sealed-pre-choice-menu
-                (pinned-field [(family (occurrence-policy 1)) (other-family)] "9")
-                (assoc (:bind-cascade-identity join-opts)
-                       :target-classes {"T-other" (frozen-class :unknown)})))
-        by-target (group-by :target-id (:failures menu))]
-    (is (empty? @scored) "neither target reached score-arranged")
-    (is (= [:target-class-required] (mapv :kind (by-target "T-occ"))))
-    (is (= [[:target-class-unknown :relation-not-declared]]
-           (mapv (juxt :kind :reason) (by-target "T-other"))))
-    (is (= {:relation-not-declared 1} (get-in menu [:class-census :unknown-by-reason])))
-    (is (not= :sealed (:status menu)))))
-
-(deftest pre-a2-sealed-menu-still-verifies
-  ;; A menu sealed before A2 has no :focus-receipt or :class-census; the pin
-  ;; selects body keys, so its old seal must still check.
-  (let [current (class-menu {"T-occ" :focus "T-other" :focus})
-        old-keys [:schema :field-source-pin :family-census :frontier
-                  :entries :refusals :failures]
-        old-body (select-keys current old-keys)
-        pre-a2 (assoc old-body :status :sealed
-                      :menu-pin {:path "wm://sealed-outer-policy-menu-v1"
-                                 :sha256 (old-seal-sha old-body)})]
-    (is (nil? (family-selection/verify-sealed-menu pre-a2)))
-    (is (= :menu-pin-mismatch
-           (family-selection/verify-sealed-menu
-            (assoc-in current [:class-census :by-class] {:focus 2 :unrelated 0})))
-        "the census is inside the seal")))
+;; Packet A2 (2026-10-22) proved the frozen focus class reached score-policy
+;; through the sealed menu. Retired with a04b157d2 for the same reason as
+;; above: `sealed-pre-choice-menu` and `verify-sealed-menu` are gone
+;; (swapping-focus-classes-reverses-the-menu-order, unknown-and-missing-classes-refuse-before-score-arranged, pre-a2-sealed-menu-still-verifies).
