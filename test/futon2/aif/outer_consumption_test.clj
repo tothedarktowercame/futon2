@@ -13,9 +13,14 @@
 (def run-id "2026-10-29-f74df9cc-c27b-420b-91ec-7a32db708c41")
 (defn read-edn [p] (edn/read-string (slurp p)))
 (defn copy-fixture []
-  (let [source (io/file (io/resource "fixtures/outer-consumption"))
+  (let [source (.getParentFile (io/file (io/resource "fixtures/outer-consumption/README.md")))
+           ;; resolved from a FILE resource: a directory resource enters the
+           ;; Test Registry closure as an entry it cannot hash and the warrant
+           ;; dies on it (zai-16, 2026-09-17; cascade_sources/load-declared)
         root (.toFile (java.nio.file.Files/createTempDirectory "outer-consumption-" (make-array java.nio.file.attribute.FileAttribute 0)))]
-    (doseq [file (file-seq source) :when (.isFile file)]
+    (doseq [file (file-seq source) :when (.isFile file)
+              :let [_ (io/resource (str "fixtures/outer-consumption/"
+                                        (.relativize (.toPath source) (.toPath file))))]]
       (let [target (io/file root (str (.relativize (.toPath source) (.toPath file))))]
         (io/make-parents target) (io/copy file target)))
     root))
