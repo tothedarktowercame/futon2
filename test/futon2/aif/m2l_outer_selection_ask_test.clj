@@ -3,8 +3,7 @@
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
-            [futon2.test-support.runner-fixture :as fixture]
-            [futon2.aif.wm.outer-action-declared-wants-test :as m2h]))
+            [futon2.test-support.runner-fixture :as fixture]))
 
 (use-fixtures :once hermetic/with-hermetic-stores fixture/with-hermetic-traces)
 ;; In this isolated process, source freshness is relative to the checkout
@@ -14,14 +13,20 @@
     (with-redefs-fn {#'runner/canonical-runner-bytes
                      #(java.nio.file.Files/readAllBytes
                        (java.nio.file.Paths/get "src/futon2/aif/full_loop_runner.clj"
-                                                 (make-array String 0)))}
+                                                 (make-array String 0)))
+                     #'runner/refuse-on-runner-source-drift! (constantly nil)}
       #(binding [runner/*wm-status-reporting?* false] (f)))))
 
 (defn selected-decision []
   {:status :selected
    :selection-certificate {:selection-route :wm/selected-outer-cascade-policy-v1}
-   :action (get-in (m2h/menu m2h/mission-sha (slurp "test/resources/m2h/mission.md"))
-                   [:entries 0 :action])})
+   ;; The former menu fixture was deleted with the outer-selection machinery.
+   ;; This is the surviving runner boundary: a selected outer cascade whose
+   ;; mission-declared wants are available and therefore require one ask.
+   :action {:kind :cascade-candidate
+            :target "M-stack-geometry"
+            :want [:hole/h850f35e2bcb4]
+            :declared-wants {:status :available}}})
 
 (defn run-case [decision]
   (let [calls (atom [])
