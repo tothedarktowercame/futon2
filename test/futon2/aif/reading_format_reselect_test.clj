@@ -65,7 +65,11 @@
 (deftest frozen-field-replacement-updates-all-selection-carriers
   (let [{:keys [observation state relation-classes]}
         (edn/read-string (slurp (io/resource "fixtures/reading-format-reselect/outer.edn")))
-        observation (assoc observation :relation (fn [_ t] (get relation-classes t)))
+        observation (-> observation
+                        (assoc :relation (fn [_ t] (get relation-classes t)))
+                        (update :facts #(update-vals % (fn [fact]
+                                                        (assoc fact :placement
+                                                               {:status "open" :ways ["fixture"] :action "work"})))))
         makeup (outer-state/load-makeup)
         first-choice (outer-select/select makeup state observation)
         selection-state (atom {:task {:id "M-pattern-retrieval-calibration"} :outer/selection first-choice})

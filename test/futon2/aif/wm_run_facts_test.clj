@@ -825,8 +825,10 @@
              :giraffe/pass-sha256 "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91"
              :giraffe/input-sha256 "730407c514e2fd21905da2b533d92e046a454372c919fbd89089fc953ebf1667"
              :field [{:target "M-first" :reach 3/4} {:target "M-large" :reach 3/4}]
-             :facts {"M-first" {:status :ready :cone 0 :unblocks 0 :rank 2}
-                     "M-large" {:status :ready :cone 3 :unblocks 3 :rank 1}}}
+             :facts {"M-first" {:status :ready :cone 0 :unblocks 0 :rank 2
+                                :placement {:status "open" :ways ["fixture"] :action "work"}}
+                     "M-large" {:status :ready :cone 3 :unblocks 3 :rank 1
+                                :placement {:status "open" :ways ["fixture"] :action "work"}}}}
         s (select m (init-state m) obs)
         r {:outer/selection s}
         export #(:facts (facts/selection-facts-for-record % "tooling" snap {}))
@@ -1087,7 +1089,10 @@
                                     {:target target
                                      :reach (get-in admitted [target :reach :value])
                                      :reach-source (get-in admitted [target :reach :source])}) targets)
-                     :facts admitted :field-facts (:field-facts retained)
+                     :facts (update-vals admitted
+                                         #(assoc % :placement
+                                                 {:status "open" :ways ["fixture"] :action "work"}))
+                     :field-facts (:field-facts retained)
                      :previous-selection (:previous retained)
                      :giraffe/pass-sha256 (:giraffe/pass-sha256 retained)
                      :giraffe/input-sha256 (get-in retained [:construction :graph])}

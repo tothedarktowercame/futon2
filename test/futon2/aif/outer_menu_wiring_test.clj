@@ -15,12 +15,16 @@
 (defn- makeup []
   (assoc (state/load-makeup "data/wm-learning/outer-makeup.edn")
          :task-selection-library-root pins/library-root))
+(def placed {:status "open" :ways ["fixture"] :action "work"})
+(defn- place-facts [obs]
+  (update obs :facts #(update-vals % (fn [fact] (assoc fact :placement placed)))))
 (def observation
-  {:focus "M-large" :relation (fn [_ target] (if (= "M-large" target) :focus :associated))
-   :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
-   :field [{:target "M-first" :reach 3/4} {:target "M-large" :reach 3/4}]
-   :facts {"M-first" {:status :ready :cone 0 :unblocks 0 :rank 2}
-           "M-large" {:status :ready :cone 3 :unblocks 3 :rank 1}}})
+  (place-facts
+   {:focus "M-large" :relation (fn [_ target] (if (= "M-large" target) :focus :associated))
+    :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
+    :field [{:target "M-first" :reach 3/4} {:target "M-large" :reach 3/4}]
+    :facts {"M-first" {:status :ready :cone 0 :unblocks 0 :rank 2}
+            "M-large" {:status :ready :cone 3 :unblocks 3 :rank 1}}}))
 (defn- kind [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))
 
@@ -98,10 +102,11 @@
             (throw (ex-info "Retained pass drift" {})))
         rows (:order (edn/read-string text))
         m (makeup)
-        obs {:focus "WM" :relation (fn [_ _] :associated)
-             :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
-             :field (mapv #(hash-map :target (name (:id %)) :reach (:value (observation/task-reach %))) rows)
-             :facts (into {} (map #(vector (name (:id %)) %) rows))}
+        obs (place-facts
+             {:focus "WM" :relation (fn [_ _] :associated)
+              :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
+              :field (mapv #(hash-map :target (name (:id %)) :reach (:value (observation/task-reach %))) rows)
+              :facts (into {} (map #(vector (name (:id %)) %) rows))})
         result (try (select/select m (state/init-state m) obs)
                     (catch clojure.lang.ExceptionInfo e
                       (is false (str "Unexpected refusal " (:kind (ex-data e))))
@@ -154,10 +159,11 @@
       (let [rows (:order (edn/read-string text))
             makeup (state/load-makeup "data/wm-learning/outer-makeup.edn")
             st (state/init-state makeup)
-            obs {:field (mapv #(hash-map :target (name (:id %)) :reach (:default-reach makeup)
-                                         :reach-source :default-reach) rows)
-                 :facts (into {} (map #(vector (name (:id %)) %) rows))
-                 :focus "WM" :relation (fn [_ _] :associated)}
+            obs (place-facts
+                 {:field (mapv #(hash-map :target (name (:id %)) :reach (:default-reach makeup)
+                                            :reach-source :default-reach) rows)
+                  :facts (into {} (map #(vector (name (:id %)) %) rows))
+                  :focus "WM" :relation (fn [_ _] :associated)})
             r (select/select makeup st obs)
             chosen (first (filter #(= (:chosen-class r) (:id %)) (:classes r)))]
         (is (nil? (:kind r)) "the real field decides; it does not refuse")
