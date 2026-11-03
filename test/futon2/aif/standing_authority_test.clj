@@ -189,10 +189,19 @@
   (edn/read-string (slurp (io/resource "wm/standing-authority/policy.edn"))))
 
 (defn- production-evidence []
-  (into {}
-        (keep (fn [^java.io.File f]
-                (when (.isFile f) [(.getName f) (slurp f)])))
-        (file-seq (io/file (.getFile (io/resource "wm/standing-authority/evidence"))))))
+  ;; The evidence dir is resolved as a sibling of policy.edn, never as a
+  ;; directory resource: the Test Registry hashes every resource a run looks
+  ;; up and refused this namespace's warrant on the directory ("Is a
+  ;; directory", 2026-11-03). Each file is then opened by resource name so
+  ;; the warrant pins it.
+  (let [dir (io/file (.getParentFile (io/file (io/resource "wm/standing-authority/policy.edn")))
+                     "evidence")]
+    (into {}
+          (keep (fn [^java.io.File f]
+                  (when (.isFile f)
+                    (io/resource (str "wm/standing-authority/evidence/" (.getName f)))
+                    [(.getName f) (slurp f)])))
+          (file-seq dir))))
 
 (deftest typed-failures-without-writes
   (let [policy (production-policy)
