@@ -1,7 +1,8 @@
 #!/usr/bin/env bb
 ;; argue_tick_record.bb TICK.edn OUT.html FRAME.edn FRAME.json
 ;; Read one ordinary inner-loop tick as an argument over solution approaches.
-(require '[clojure.edn :as edn]
+(require '[clojure.set]
+         '[clojure.edn :as edn]
          '[clojure.pprint :as pprint]
          '[clojure.string :as str]
          '[cheshire.core :as json])
@@ -89,7 +90,9 @@
 
 (def args (mapv argument candidates))
 (def stopping {:id :stopping :policy-id :stopping :pick nil :G stop-G
-               :terms (:terms stop-row) :grounds [] :warrants []})
+               :terms (:terms stop-row) :grounds [] :warrants []
+               ;; the no-action reference is recorded per policy; the frame carries the chosen policy's
+               :per-policy-G (into {} (for [[k v] (:per-policy abstention)] [(short-id k) (:G v)]))})
 (def all-args (conj args stopping))
 (def by-id (into {} (map (juxt :id identity) all-args)))
 
@@ -137,16 +140,38 @@
 (def contribution-summary
   (select-keys (:contributions comparison) [:habit :free-energy :G :total]))
 
+(defn unit-name [[pattern occurrence]] (str pattern "#" occurrence))
 (defn unit-text [argument]
-  (str/join " → " (map (fn [[pattern occurrence]]
-                           (str pattern "#" occurrence)) (:pick argument))))
+  (let [units (:pick argument)]
+    (str (count units) " occurrences in order (" (str/join ", " (map unit-name (take 3 units)))
+         (when (> (count units) 3) ", …") ")")))
+(defn difference-text
+  "What y applies that x does not, and the reverse: the only thing that separates two approaches a reader can see."
+  [x y]
+  (let [ux (set (:pick x)) uy (set (:pick y))
+        only-y (sort (map unit-name (remove ux uy))) only-x (sort (map unit-name (remove uy ux)))]
+    (str (name (:id y)) " applies "
+         (if (seq only-y) (str (str/join ", " only-y) " that " (name (:id x)) " does not") (str "nothing " (name (:id x)) " lacks"))
+         (when (seq only-x) (str ", and lacks " (str/join ", " only-x)))
+         ".")))
 (defn warrant-text [argument]
-  (str/join " " (map #(str "“" (:conclusion %) "”")
-                     (filter :conclusion (:warrants argument)))))
+  (str/join " " (map #(str "“" % "”")
+                     (distinct (keep :conclusion (:warrants argument))))))
 (defn grounds-text [argument]
   (str (count (:grounds argument)) " occurrence squares, each retaining G/I1/I2/B, source SHA, and situation-source"))
 (defn attack-sentence [attack]
   (str (:text attack) (if (:succeeds attack) " (stands)." " (fails under G).")))
+
+(defn coverage-text
+  "What the unit sets show, read not scored: whether the winner applies everything the alternatives apply."
+  []
+  (let [wu (set (:pick winner))
+        shared (reduce clojure.set/intersection wu (map (comp set :pick) losers))
+        extra (sort (map unit-name (remove shared wu)))]
+    (if (every? #(clojure.set/subset? (set (:pick %)) wu) losers)
+      (str "What the unit sets show: " (name (:id winner)) " applies every occurrence that any alternative applies, and the "
+           (count extra) " not shared by all (" (str/join ", " extra) ") are what each alternative drops in a different combination. Whether that is why its G is lower, the record does not say.")
+      (str "What the unit sets show: no approach applies every occurrence the others apply."))))
 
 (def prose
   (str/join
@@ -157,7 +182,8 @@
             ". Warrants: " (warrant-text winner) " Grounds: " (grounds-text winner) ".")]
       (for [loser losers]
         (str (name (:id loser)) " argues instead for " (unit-text loser)
-             ". Warrants: " (warrant-text loser) " Grounds: " (grounds-text loser) ". "
+             ". " (difference-text loser winner)
+             " Warrants: " (warrant-text loser) " Grounds: " (grounds-text loser) ". "
              (str/join " " (map attack-sentence
                                   (filter #(and (= (:from %) (:id loser))
                                                 (= (:to %) (:id winner))) attacks*)))
@@ -169,7 +195,7 @@
             (str/join " < " (map #(str (name (:id %)) " " (fmt (:G %)))
                                   (sort-by :G all-args)))
             ". Four of five approaches have exactly the same recorded G; none of habit, free energy, or another retained contribution separates those four. The chosen approach is lower by "
-            (fmt margin) " nats. Grounded extension: {"
+            (fmt margin) " nats. " (coverage-text) " Grounded extension: {"
             (str/join ", " (map name grounded)) "}"
             (if (contains? grounded (:id winner))
               ", which is the record's decision."
@@ -180,6 +206,10 @@
        (pr-str contribution-summary)
        ". Raw candidate G separates the winner by " (fmt margin)
        " nats from four alternatives tied at " (fmt (second ordered-G))
+       (let [habit (:habit winner) weighted (* (- 1 habit) margin) recorded (:G contribution-summary)]
+         (if (and (number? recorded) (< (Math/abs (- weighted recorded)) 1e-9))
+           (str "; the comparison's G contribution is that margin weighted by 1 − habit = " (fmt (- 1 habit)) ", which is why it reads " (fmt recorded))
+           (str "; the comparison's G contribution " (fmt recorded) " is not the margin weighted by 1 − habit (" (fmt weighted) "), and the record does not say what it is")))
        ". The g-term-decomposition has status "
        (get-in certificate [:g-term-decomposition :status])
        ", with consumed A and Q unrecorded, so the record does not retain a further term-level explanation of that difference. Between the four tied alternatives, the choice is made by nothing read. policy-comparison declares no numerical near-tie threshold ("
