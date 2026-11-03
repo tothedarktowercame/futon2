@@ -13,10 +13,16 @@
                     (.iterator (.sorted paths (Comparator/reverseOrder))))]
         (Files/deleteIfExists ^Path path)))))
 
-(defn- old-entry? [^Path path cutoff-ms]
-  (< (.toMillis (Files/getLastModifiedTime
-                 path (make-array java.nio.file.LinkOption 0)))
-     cutoff-ms))
+(defn- old-entry?
+  "False for an entry that vanished between listing and stat: concurrent test
+  JVMs (the warrant runner uses -j 3) create and remove entries under the same
+  root, and a sweep must never fail the JVM that runs it."
+  [^Path path cutoff-ms]
+  (try
+    (< (.toMillis (Files/getLastModifiedTime
+                   path (make-array java.nio.file.LinkOption 0)))
+       cutoff-ms)
+    (catch java.nio.file.NoSuchFileException _ false)))
 
 (defn- sweep-old-fixtures! []
   (Files/createDirectories fixtures-root (make-array FileAttribute 0))
@@ -25,6 +31,7 @@
       (with-open [entries (Files/list fixtures-root)]
         (doseq [entry (iterator-seq (.iterator entries))
                 :when (old-entry? entry cutoff-ms)]
-          (delete-tree! entry))))))
+          (try (delete-tree! entry)
+               (catch java.nio.file.NoSuchFileException _ nil)))))))
 
 (sweep-old-fixtures!)
