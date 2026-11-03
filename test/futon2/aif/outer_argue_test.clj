@@ -15,11 +15,22 @@
 
 (def selection (:outer/selection fixture))
 
-(defn- fixture-frame []
+(def fixture-ratings
+  (mapv (fn [class]
+          {:target (:pick class)
+           :status (get-in class [:giraffe :status])
+           :cone (get-in class [:giraffe :cone])
+           :unblocks (get-in class [:giraffe :unblocks])})
+        (get-in selection [:why :classes])))
+
+(defn- selection-frame [selection]
   (argue/frame {:why (:why selection)
                 :cascades (:cascades selection)
                 :relations (:cascade-pick-relations selection)
+                :per-task-rating fixture-ratings
                 :library-root library-root}))
+
+(defn- fixture-frame [] (selection-frame selection))
 
 (def frozen-attacks
   [[:giraffe-order :find-out-before-building :gate true]
@@ -33,7 +44,8 @@
    [:serves-a-way :stopping :stopping true]
    [:stopping :giraffe-order :stopping false]
    [:stopping :find-out-before-building :stopping false]
-   [:stopping :serves-a-way :stopping false]])
+   [:stopping :serves-a-way :stopping false]
+   [:giraffe-order :serves-a-way :undercut-unshown false]])
 
 (deftest frozen-frame-conforms
   (let [frame (fixture-frame)]
@@ -43,6 +55,56 @@
     (is (true? (:agrees frame)))
     (is (= :cascade/argument-frame-v1 (:schema frame)))
     (is (every? :sha256 (mapcat :warrants (:arguments frame))))))
+
+(defn- update-class [selection id f]
+  (update-in selection [:why :classes]
+             (fn [classes]
+               (mapv #(if (= id (keyword (name (first (:cascades %)))))
+                        (f %)
+                        %)
+                     classes))))
+
+(deftest shown-undercut-is-resolved-only-by-g
+  (let [shown-selection
+        (update-class selection :serves-a-way
+                      #(assoc-in (assoc-in % [:giraffe :cone] 11)
+                                 [:giraffe :unblocks] 0))
+        frame (selection-frame shown-selection)
+        undercut (last (:attacks frame))]
+    (is (= [:giraffe-order :serves-a-way :undercut false true]
+           ((juxt :from :to :kind :succeeds :shown) undercut)))
+    (testing "the target's lower G defeats the shown undercut"
+      (is (= [:serves-a-way] (:grounded frame))))
+    (testing "swapping the two G values lets the undercut defeat"
+      (let [swapped (-> shown-selection
+                        (update-class :giraffe-order #(assoc % :G 2.1432169255819717))
+                        (update-class :serves-a-way #(assoc % :G 2.4694636005859008)))
+            swapped-frame (selection-frame swapped)
+            swapped-undercut (last (:attacks swapped-frame))]
+        (is (true? (:succeeds swapped-undercut)))
+        (is (not-any? #{:serves-a-way} (:grounded swapped-frame)))))))
+
+(deftest typed-undercut-predicate-cases
+  (let [predicate-result #'argue/predicate-result
+        ratings [{:target "own" :status :ready :unblocks 0}
+                 {:target "other" :status :ready :unblocks 3}]
+        other-predicate
+        "giraffe.unblocks < other.giraffe.unblocks (other is any other ready candidate in the field)"
+        cone-predicate "giraffe.cone > 0 and giraffe.unblocks = 0"]
+    (testing "another ready candidate can show the comparison"
+      (is (true? (:shown (predicate-result ratings {:unblocks 0} "own"
+                                                   other-predicate))))
+      (is (false? (:shown (predicate-result ratings {:unblocks 5} "own"
+                                                    other-predicate)))))
+    (testing "nil is absence, not a value making the comparison false"
+      (let [result (predicate-result ratings {:cone nil :unblocks 0} "own"
+                                     cone-predicate)]
+        (is (false? (:shown result)))
+        (is (re-find #"not recorded" (:why result)))
+        (is (not (re-find #"cone.*is false" (:why result))))))
+    (testing "an explicitly unrecorded predicate stays unshown"
+      (is (= {:shown false :why "predicate is unrecorded"}
+             (predicate-result ratings {} "own" "unrecorded"))))))
 
 (deftest lean-example-conforms
   (let [arguments [{:id :giraffe-order :G 2.4694636005859008}

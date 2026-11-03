@@ -390,6 +390,7 @@
                                (:id prospective))
             argument (argument-frame {:why why :cascades cascades
                                       :relations legacy-relations
+                                      :per-task-rating ratings
                                       :library-root library-root})
             evidence (assoc evidence :why why :argument argument)]
         (if (empty? classes)
