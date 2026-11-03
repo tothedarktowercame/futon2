@@ -167,6 +167,22 @@ reader cannot say: what a blend added (the rationale) and why an order holds
 `:units :edges :independent` and the needs from the record itself, so the
 prose comes from the record and not from the figure's copy of it.
 
+## The reading owed is an argument (Joe, 16:2xZ 11-03)
+
+A reader that redescribes the picture describes it "in its own local
+coordinate system, not as something that really does anything". The reading
+owed is ARGUE: why this problem and not that one (outer loop), later why this
+approach and not that one (inner loop). Done for the one record with
+alternatives: `scripts/argue_selection_record.bb` computes attacks from the
+steps and the facts and resolves them with G as the preference
+(grounded extension under preference); frame schema
+`:cascade/argument-frame-v0`. What it showed on run 561c5ec3: the decisive
+reply and the decisive preference both rest on absence (no placement row for
+the counter-pick; unknown focus relation scored on the optimistic prior).
+Next: the frame as the WM's rendered `why` (so every click argues, not only
+this page); the same frame for the inner loop's approach choice; attacks that
+read the patterns' HOWEVER clauses, not only gates and orders.
+
 ## Open
 
 - Joe's criterion for the first demo (the blind sample size; whether the
