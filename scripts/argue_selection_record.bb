@@ -93,15 +93,18 @@
 (def order-dir {:by-cone :max :by-unblocks :max :by-rank :min})
 (defn order-term [step facts] (get facts (case step :by-cone :cone :by-unblocks :unblocks :by-rank :rank)))
 
-(defn fact-value [facts field]
-  (case field
-    "giraffe.cone" (:cone facts)
-    "giraffe.unblocks" (:unblocks facts)
-    "giraffe.rank" (:rank facts)
-    "placement.status" (get-in facts [:placement :status])
-    "placement.action" (get-in facts [:placement :action])
-    "placement.way" (first (get-in facts [:placement :ways]))
-    ::unrecorded))
+(defn fact-value
+  "A nil fact (an undetermined Giraffe row has :cone nil) is unrecorded, not a value a comparison can be false on."
+  [facts field]
+  (let [v (case field
+            "giraffe.cone" (:cone facts)
+            "giraffe.unblocks" (:unblocks facts)
+            "giraffe.rank" (:rank facts)
+            "placement.status" (get-in facts [:placement :status])
+            "placement.action" (get-in facts [:placement :action])
+            "placement.way" (first (get-in facts [:placement :ways]))
+            ::unrecorded)]
+    (if (nil? v) ::unrecorded v)))
 
 (def comparison-re #"^([^ ]+)\s*(>|<|=)\s*([^ ]+)(?:\s+\(other is any other ready candidate in the field\))?$")
 
@@ -130,7 +133,7 @@
     (let [left (fact-value facts left-field)]
       (cond
         (= ::unrecorded left)
-        {:shown false :why (str left-field " is not a recorded field")}
+        {:shown false :why (str left-field " is not recorded")}
 
         (str/starts-with? right-token "other.giraffe.")
         (let [values (ready-other-values pick right-token)]
