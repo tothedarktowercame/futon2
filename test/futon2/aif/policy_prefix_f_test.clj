@@ -96,19 +96,29 @@
 ;; without a difference in admitted Prefix-F.
 
 (deftest the-tick-selects-with-its-f-term
-  (let [fx (route/fixture)
+  ;; 4089b46f3 excludes retractions from canonical families; this co-cited
+  ;; reading supplies three structural policies, of which two isolate ΔF.
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         keys (vals (route/policy-keys (:decision (route/decide fx))))
-        [k1 k2] keys
+        key-for (fn [patterns]
+                  (some #(when (= patterns (set (map second (get-in % [3 :nodes])))) %)
+                        keys))
+        k1 (key-for #{"p/a" "p/b"})
+        k2 (key-for #{"p/c" "p/b"})
+        other (first (remove #{k1 k2} keys))
         unread {:steps [] :read [] :unread [] :dir-status {:absent :no-flights-dir}}
-        missing (route/refusal-of #(route/decide fx 1 {:conditioning-steps unread}))
+        ;; since 6a36b6006 the selection-law refusal is carried by a typed
+        ;; abstention at :certification, not thrown (route/carried-refusal)
+        missing (route/carried-refusal (route/decide fx 1 {:conditioning-steps unread}))
         posterior (fn [f1 f2]
                     (let [d (:decision (route/decide fx 1 {:conditioning-steps
-                                                           (route/with-prefixes fx {k1 f1 k2 f2})}))]
+                                                           (route/with-prefixes
+                                                            fx {k1 f1 k2 f2 other 0.0})}))]
                       [d (into {} (map (fn [[c v]] [(adm/candidate-key c) v])
                                        (get-in d [:selection-law :posterior])))]))
         [_ equal] (posterior 0.0 0.0)
         [with p] (posterior 1.0 0.5)]
-    (is (= 2 (count keys)))
+    (is (= 3 (count keys)))
     (is (= :free-energy-not-supplied (get-in missing [:refusal :kind])))
     (testing "the posterior moves, in the direction F dictates, by exactly exp(-dF)"
       (is (< (Math/abs (- (/ (/ (get p k2) (get p k1)) (/ (get equal k2) (get equal k1)))
@@ -117,4 +127,5 @@
           "k1's F is 0.5 higher: its weight falls by exp(0.5) relative to k2"))
     (testing "the certificate says which candidates' F was computed"
       (is (= #{:computed} (set (map :f-status (get-in with [:selection-certificate :candidates])))))
-      (is (= #{1.0 0.5} (set (map :f-consumed (get-in with [:selection-certificate :candidates]))))))))
+      (is (= #{0.0 1.0 0.5}
+             (set (map :f-consumed (get-in with [:selection-certificate :candidates]))))))))

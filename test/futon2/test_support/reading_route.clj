@@ -157,6 +157,20 @@
   [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (ex-data e))))
 
+(defn carried-refusal
+  "The selection-law refusal a decision carries when it abstains. Since
+  6a36b6006 (R20 fixed-count betaPosterior) the reading-precision carry runs
+  the selection law over the candidates before the one selector, so a
+  cascade-selection refuse! (e.g. :free-energy-not-supplied) no longer
+  throws out of the decision: it is caught into the carry and the decision
+  abstains at :certification, :kind :model-contract-refused,
+  :certification-kind :reading-precision-refused. Returns that first
+  refusal with the selection refusal itself under :refusal, so a caller
+  reads [:refusal :kind] and [:refusal :detail ...] as it would ex-data."
+  [result]
+  (let [r (first (get-in result [:decision :refusals]))]
+    (assoc r :refusal (get-in r [:carry :cause :refusal]))))
+
 (defn policy-keys
   "Every compared policy's history key in DECISION, by policy id."
   [decision]
