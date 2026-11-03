@@ -23,11 +23,18 @@
   the requirement the production tick failed. It costs ~1 minute: `judge`
   observes each declared cascade source's facts, and a C1/C2 fact runs the
   Test Registry check in its own JVM."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.enactment-fold-source :as fold-source]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.report.preference-schedule-decision-test :as schedule-fixture]
             [futon2.report.war-machine :as wm]))
+
+;; The production judge reads the repair store through its default root; in a
+;; test JVM that root is the hermetic data root (b13461d2e), where the store
+;; does not exist and the authority guard refuses. The suite fixture gives the
+;; test a store of its own.
+(use-fixtures :once hermetic/with-hermetic-stores)
 
 (deftest standing-enacted-policy-is-cascade-g
   (let [assembled (#'fixture/assemble*
