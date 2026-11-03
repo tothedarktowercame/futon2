@@ -154,6 +154,19 @@ each side, in the shared shape, each rendered so Joe can read it:
 - 象: a cascade mined from Joe's turns (claude-16), same shape, same renderer.
   The stated disposition cascade stays as the example of the shape.
 
+## Pictures and prose from one structure (Joe, 01:4xZ 11-03)
+
+Joe, on the pictures post: "they can provide a DSL for design, but we could
+just as well describe what's going on in the designs." Done on the post
+(p4ng `blog-cascade-pictures-2026-11-03.py`, `read_back`): every figure's
+data (units, edges, independent pairs, verdicts) is read out as a paragraph
+under the figure, in the drawing's own vocabulary (source, stands on the
+blend of, join, shared corner, incomparable, held, weak, absent). What the
+reader cannot say: what a blend added (the rationale) and why an order holds
+(the needs). Next: the same reader in the two record renderers, reading
+`:units :edges :independent` and the needs from the record itself, so the
+prose comes from the record and not from the figure's copy of it.
+
 ## Open
 
 - Joe's criterion for the first demo (the blind sample size; whether the
