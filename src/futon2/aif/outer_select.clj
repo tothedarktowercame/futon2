@@ -3,11 +3,20 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
+            [futon2.aif.outer-argue :as outer-argue]
             [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-observation :as observation]
             [futon2.aif.outer-score :as outer-score]))
 
 (declare value-of)
+
+(defn- argument-frame [input]
+  (try
+    (outer-argue/frame input)
+    (catch Throwable error
+      {:schema :cascade/argument-frame-v1
+       :status :unavailable
+       :reason (or (ex-data error) (ex-message error) (str error))})))
 
 (defn source-header
   "Parse the three operator-facing header fields and compare the live bytes to PIN."
@@ -265,10 +274,11 @@
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection."
   [makeup state observation]
-  (let [construction (menu/construct
-                       (.getCanonicalPath (io/file (or (:task-selection-library-root makeup)
-                         (str (System/getProperty "user.home") "/code/futon3/library/task-selection"))))
-                       makeup observation)
+  (let [library-root (.getCanonicalPath
+                      (io/file (or (:task-selection-library-root makeup)
+                                   (str (System/getProperty "user.home")
+                                        "/code/futon3/library/task-selection"))))
+        construction (menu/construct library-root makeup observation)
         menu (:cascades construction)
         partition (known-term-field observation)
         observation (assoc observation :field (:field partition))
@@ -378,7 +388,10 @@
             why (selection-why all-classes cascades abstention traces (:facts observation)
                                (if prospective {:status :chosen} {:status :abstained})
                                (:id prospective))
-            evidence (assoc evidence :why why)]
+            argument (argument-frame {:why why :cascades cascades
+                                      :relations legacy-relations
+                                      :library-root library-root})
+            evidence (assoc evidence :why why :argument argument)]
         (if (empty? classes)
           (assoc evidence :outcome {:status :abstained :case :all-policies-predict-stopping}
                  :selection nil :prediction (:prediction abstention))
