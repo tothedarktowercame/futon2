@@ -1,6 +1,6 @@
 # PLAN: meaningful cascades across the WM outer loop and M-象-cascade
 
-2026-11-03 01:0xZ, claude-2 with claude-16 (bell `invoke-1793667350190-10751-bb2d4872`
+2026-11-03 00:5xZ, claude-2 with claude-16 (bell `invoke-1793667350190-10751-bb2d4872`
 and its reply). Joe's criterion is not yet set; nothing below is dispatched.
 
 ## Joe's words (2026-11-03, 00:4x–00:5xZ)
