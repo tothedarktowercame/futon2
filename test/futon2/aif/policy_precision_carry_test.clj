@@ -6,6 +6,7 @@
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.cascade-shape-g :as shape-g]
             [futon2.aif.d-predecessor-task-authority :as task]
             [futon2.aif.d-predecessor-task-authority-test :as task-fixture]
             [futon2.aif.policy :as policy]
@@ -130,36 +131,53 @@
 ;; (rates, q0, precision-carry/advance) is retired from selection, and its
 ;; module tests above stay as the module's own controls.
 
-(deftest default-joint-tick-freezes-and-consumes-initialized-carry
+(deftest default-joint-tick-computes-and-consumes-the-r20-carry
+  ;; 6a36b6006 (2026-10-30): the declared beta is no longer consumed; the
+  ;; tick computes the R20 betaPosterior from carried valence on the prepared
+  ;; E/G/F menu and seals it as the reading-precision carry.
   (let [fx (route/fixture)
         result (route/decide fx)
         decision (:decision result)
         carry (get-in decision [:selection-certificate :reading-precision-carry])]
     (is (= 1 (:selector-calls result)))
-    (is (= :initialized (:status carry)))
+    (is (= :computed (:status carry)))
+    (is (= :r20-beta-from-valence (:authority carry)))
     (is (precision/intact? carry) "the consumed receipt is sealed")
-    (is (= :declared (get-in decision [:beta :status])))
-    (is (= (:beta carry) (get-in decision [:selection-law :beta]))
-        "the selector's beta is the receipt's")
+    (is (= :r20-computed (get-in decision [:beta :status])))
+    (is (number? (:beta-posterior carry)))
+    (is (= (:beta-posterior carry)
+           (get-in decision [:selection-law :beta])
+           (get-in decision [:beta :value]))
+        "the selector's beta is the receipt's posterior")
     (is (= (:identity carry) (get-in decision [:selection-certificate :reading-precision-identity])))
     (is (nil? (get-in decision [:selection-certificate :policy-precision-state]))
         "the retired q0/class carry is not consumed")))
 
 (deftest abstention-does-not-drop-a-learned-rate
-  ;; tick 1 carries a beta; tick 2 abstains before any precision receipt of
-  ;; its own (no declared beta); tick 3 must still find tick 1's receipt
+  ;; tick 1 selects; tick 2 abstains (every policy unscorable, so no declared
+  ;; beta could rescue it: since 6a36b6006 a missing declared beta no longer
+  ;; abstains, the posterior is computed from carried valence); tick 3 must
+  ;; still compute the same rate under the same identity, reading tick 2 as
+  ;; its predecessor.
   (let [fx (route/fixture)
         tick-1 (:decision (route/decide fx))
-        tick-2 (route/decide fx nil {:token-belief-predecessor-trace {:decision tick-1}})
+        carry-1 (get-in tick-1 [:selection-certificate :reading-precision-carry])
+        tick-2 (with-redefs [shape-g/score-policy
+                             (fn [p] {:status :refused :reason :fixture-unscorable
+                                      :policy-id (:policy-id p)})]
+                 (route/decide fx 1 {:token-belief-predecessor-trace {:decision tick-1}}))
+        carry-2 (get-in tick-2 [:decision :selection-certificate :reading-precision-carry])
         tick-3 (route/decide fx 1 {:token-belief-predecessor-trace {:decision (:decision tick-2)}})
-        kept (get-in tick-2 [:decision :selection-certificate :reading-precision-carry])]
+        carry-3 (get-in tick-3 [:decision :selection-certificate :reading-precision-carry])]
     (is (= :abstained (get-in tick-2 [:decision :status])))
     (is (= 0 (:selector-calls tick-2)))
-    (is (= (get-in tick-1 [:selection-certificate :reading-precision-carry]) kept)
-        "the abstention keeps the predecessor's receipt verbatim")
-    (is (= :carried (get-in tick-3 [:decision :selection-certificate :reading-precision-carry :status])))
-    (is (= (:beta kept)
-           (get-in tick-3 [:decision :selection-certificate :reading-precision-carry :beta])))))
+    (is (= (:identity carry-1) (:identity carry-2))
+        "the abstention still records the rate under the predecessor's identity")
+    (is (= :computed (:status carry-3)))
+    (is (= (:beta-posterior carry-1) (:beta-posterior carry-3)))
+    (is (= (:identity carry-1) (:identity carry-3)))
+    (is (= (:identity carry-2) (:previous-identity carry-3)))
+    (is (false? (:identity-changed carry-3)))))
 
 (deftest evidence-boundaries-never-invent-a-successful-update
   (let [state (advance nil admission family)
