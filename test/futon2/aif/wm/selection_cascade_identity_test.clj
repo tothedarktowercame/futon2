@@ -12,7 +12,6 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.learning-trial-ledger :as ledger]
-            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.policy :as policy]
             [futon2.aif.wm.executable-cascade :as xc]
             [futon2.aif.wm.family-selection :as family-selection]
