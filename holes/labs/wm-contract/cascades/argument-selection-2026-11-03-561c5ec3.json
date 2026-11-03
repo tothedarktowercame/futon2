@@ -1,0 +1,300 @@
+{
+  "schema" : "cascade/argument-frame-v0",
+  "grounded" : [ "serves-a-way" ],
+  "run" : "2026-11-03-561c5ec3-6510-42a3-930b-331ef089feb4",
+  "semantics" : "grounded-under-preference",
+  "arguments" : [ {
+    "terms" : {
+      "risk" : 2.1868280338973367,
+      "ambiguity" : 0.4217513584641062,
+      "novelty" : 0.13911579177554237
+    },
+    "pick" : "M-war-machine-aif-completion",
+    "steps" : [ "ready-gate", "by-cone", "by-unblocks" ],
+    "cascades" : [ "only-what-can-start-now", "giraffe-order" ],
+    "step-results" : [ {
+      "step" : "ready-gate",
+      "in" : 599,
+      "out" : 508
+    }, {
+      "step" : "by-cone",
+      "pick-value" : 11,
+      "runner-up" : {
+        "target" : "E-memory-whitepaper-v2-programme",
+        "value" : 3
+      },
+      "margin" : 8.0
+    }, {
+      "step" : "by-unblocks",
+      "pick-value" : 1,
+      "runner-up" : {
+        "target" : "E-memory-whitepaper-v2-programme",
+        "value" : 1
+      },
+      "margin" : 0.0
+    } ],
+    "G" : 2.4694636005859008,
+    "id" : "giraffe-order",
+    "warrants" : [ {
+      "pattern" : "only-what-can-start-now",
+      "conclusion" : "Select only work whose needs are met, and say which need blocks each item that is left out.",
+      "because" : "A blocked item selected anyway spends a dispatch discovering the block."
+    }, {
+      "pattern" : "prepare-the-ground",
+      "conclusion" : "Some work is selected not for its own output but because it shapes a later build; select it under that name, and say which later item it serves.",
+      "because" : "Without the name of the item it serves, groundwork cannot be checked, and is easily reported as more than it is."
+    }, {
+      "pattern" : "what-others-wait-on-first",
+      "conclusion" : "Among items that can start now, do first the one that the most other items are waiting on.",
+      "because" : "The pieces many others wait on, done first, let several chains close; skipped, those chains grow without closing."
+    } ],
+    "facts" : {
+      "rank" : 1,
+      "header" : {
+        "date" : "2026-05-17",
+        "status" : "OPEN — exit criterion #2 satisfied; HEAD-as-escrow scaffold (claude-1, PM pass for the futon-stack-as-Hyperreal-business mission cluster); awaiting Joe verbatims via simulated `eoi-engine` `eoi-inward-mission` flash. **Exit criterion source:** §0 of `~/code/futon7/holes/M-descriptive-essay-of-the-stack.md`, criterion #2.",
+        "timebox" : "estimated 3-4 weeks; final cap is Joe's call at §1.5 verbatim authoring."
+      },
+      "reason" : null,
+      "status" : "ready",
+      "cone" : 11,
+      "prerequisites" : [ ],
+      "placement" : {
+        "status" : "absent",
+        "action" : null,
+        "ways" : [ ]
+      },
+      "relation" : "associated",
+      "unblocks" : 1
+    }
+  }, {
+    "terms" : {
+      "risk" : 2.431608477409196,
+      "ambiguity" : 0.5563909792272503,
+      "novelty" : 0.13121599596072353
+    },
+    "pick" : "M-patterns-done-right",
+    "steps" : [ {
+      "status-gate" : "undetermined"
+    }, "by-rank" ],
+    "cascades" : [ "find-out-before-building" ],
+    "step-results" : [ {
+      "step" : {
+        "status-gate" : "undetermined"
+      },
+      "in" : 599,
+      "out" : 37
+    }, {
+      "step" : "by-rank",
+      "pick-value" : 509,
+      "runner-up" : {
+        "target" : "M-usage-hacking",
+        "value" : 510
+      },
+      "margin" : 1.0
+    } ],
+    "G" : 2.8567834606757225,
+    "id" : "find-out-before-building",
+    "warrants" : [ {
+      "pattern" : "find-out-before-building",
+      "conclusion" : "When the right build depends on something not yet observed, select the task that finds it out first, and keep it separate from the build.",
+      "because" : "A wrong premise in a combined packet ships unchallenged; a separate answer can be read before anything is built on it."
+    } ],
+    "facts" : {
+      "rank" : 509,
+      "header" : {
+        "date" : "absent",
+        "status" : "OPEN — OPEN (drafted 2026-05-04; sibling to M-the-futon-stack).",
+        "timebox" : "absent"
+      },
+      "reason" : "prerequisite-unresolved",
+      "status" : "undetermined",
+      "cone" : null,
+      "prerequisites" : [ "E-clause-vocabulary-survey" ],
+      "placement" : {
+        "status" : "absent",
+        "action" : null,
+        "ways" : [ ]
+      },
+      "relation" : "unknown",
+      "unblocks" : null
+    }
+  }, {
+    "terms" : {
+      "risk" : 1.3884922337620331,
+      "ambiguity" : 0.893840483595481,
+      "novelty" : 0.13911579177554237
+    },
+    "pick" : "M-typed-holes-mathlib-handoff",
+    "steps" : [ "ready-gate", "placed-gate", "by-cone", "by-unblocks" ],
+    "cascades" : [ "serves-a-way" ],
+    "step-results" : [ {
+      "step" : "ready-gate",
+      "in" : 599,
+      "out" : 508
+    }, {
+      "step" : "placed-gate",
+      "in" : 508,
+      "out" : 184
+    }, {
+      "step" : "by-cone",
+      "pick-value" : 0,
+      "runner-up" : {
+        "target" : "E-kimi-task-157",
+        "value" : 0
+      },
+      "margin" : 0.0
+    }, {
+      "step" : "by-unblocks",
+      "pick-value" : 0,
+      "runner-up" : {
+        "target" : "E-kimi-task-157",
+        "value" : 0
+      },
+      "margin" : 0.0
+    } ],
+    "G" : 2.1432169255819717,
+    "id" : "serves-a-way",
+    "warrants" : [ {
+      "pattern" : "only-what-can-start-now",
+      "conclusion" : "Select only work whose needs are met, and say which need blocks each item that is left out.",
+      "because" : "A blocked item selected anyway spends a dispatch discovering the block."
+    }, {
+      "pattern" : "serves-a-way",
+      "conclusion" : "Keep work placed under a cited way and name that way in the reason.",
+      "because" : "A dispatch should say which way the selected work serves."
+    }, {
+      "pattern" : "what-others-wait-on-first",
+      "conclusion" : "Among items that can start now, do first the one that the most other items are waiting on.",
+      "because" : "The pieces many others wait on, done first, let several chains close; skipped, those chains grow without closing."
+    } ],
+    "facts" : {
+      "rank" : 98,
+      "header" : {
+        "date" : "absent",
+        "status" : "OPEN — DISPATCHED to Codex (2026-06-14). **Owner of result:** claude-2",
+        "timebox" : "absent"
+      },
+      "reason" : null,
+      "status" : "ready",
+      "cone" : 0,
+      "prerequisites" : [ ],
+      "placement" : {
+        "status" : "open",
+        "action" : "work",
+        "ways" : [ "backlog-understood" ]
+      },
+      "relation" : "unknown",
+      "unblocks" : 0
+    }
+  }, {
+    "id" : "stopping",
+    "cascades" : [ "stopping" ],
+    "pick" : null,
+    "G" : 13.730053366819615,
+    "terms" : {
+      "risk" : 3.730053366819614,
+      "ambiguity" : 0.0,
+      "novelty" : 0.0,
+      "altitude" : 10
+    },
+    "steps" : [ ],
+    "facts" : { },
+    "warrants" : [ ]
+  } ],
+  "problem" : "which open task the War Machine works on next",
+  "click" : "wm-click-2780abb9-f6f8-4db6-9b8f-95d156737774",
+  "preference" : "G-lower-is-better",
+  "what-G-read" : "What G read: the pick's Giraffe status (reach prior), its relation to the focus (a known relation lands on that ending; an unknown one lands on the pinned prior 11/19 focused, 7/19 related, 1/19 unrelated) and its unblocks as gain (outer_score.clj kernel-parameters). It did not read the placement, so the winning cascade's own gate contributed nothing to the number that made it win. Here M-war-machine-aif-completion is known to be associated with the focus and lands on the related ending; M-typed-holes-mathlib-handoff's relation is unknown and lands on the prior, which puts most mass on the focused ending that the preference likes best. The lower risk of the winner (1.3885 against 2.1868) comes from not knowing, not from knowing.",
+  "agrees" : true,
+  "attacks" : [ {
+    "kind" : "gate",
+    "step" : "ready-gate",
+    "fact" : "status undetermined (prerequisite-unresolved)",
+    "from" : "giraffe-order",
+    "to" : "find-out-before-building",
+    "text" : "giraffe-order's ready-gate excludes M-patterns-done-right: status undetermined (prerequisite-unresolved)",
+    "succeeds" : true
+  }, {
+    "kind" : "order",
+    "from" : "giraffe-order",
+    "to" : "serves-a-way",
+    "step" : "by-cone",
+    "text" : "giraffe-order's by-cone prefers its own pick: M-war-machine-aif-completion 11 against M-typed-holes-mathlib-handoff 0",
+    "succeeds" : false
+  }, {
+    "kind" : "gate",
+    "step" : {
+      "status-gate" : "undetermined"
+    },
+    "fact" : "status ready, not undetermined",
+    "from" : "find-out-before-building",
+    "to" : "giraffe-order",
+    "text" : "find-out-before-building's {:status-gate :undetermined} excludes M-war-machine-aif-completion: status ready, not undetermined",
+    "succeeds" : false
+  }, {
+    "kind" : "gate",
+    "step" : {
+      "status-gate" : "undetermined"
+    },
+    "fact" : "status ready, not undetermined",
+    "from" : "find-out-before-building",
+    "to" : "serves-a-way",
+    "text" : "find-out-before-building's {:status-gate :undetermined} excludes M-typed-holes-mathlib-handoff: status ready, not undetermined",
+    "succeeds" : false
+  }, {
+    "kind" : "absence",
+    "step" : "placed-gate",
+    "fact" : "no placement row: nobody has read where this item is placed",
+    "from" : "serves-a-way",
+    "to" : "giraffe-order",
+    "text" : "serves-a-way's placed-gate excludes M-war-machine-aif-completion: no placement row: nobody has read where this item is placed",
+    "succeeds" : true
+  }, {
+    "kind" : "gate",
+    "step" : "ready-gate",
+    "fact" : "status undetermined (prerequisite-unresolved)",
+    "from" : "serves-a-way",
+    "to" : "find-out-before-building",
+    "text" : "serves-a-way's ready-gate excludes M-patterns-done-right: status undetermined (prerequisite-unresolved)",
+    "succeeds" : true
+  }, {
+    "kind" : "stopping",
+    "from" : "giraffe-order",
+    "to" : "stopping",
+    "text" : "giraffe-order has a pick below abstention: M-war-machine-aif-completion",
+    "succeeds" : true
+  }, {
+    "kind" : "stopping",
+    "from" : "find-out-before-building",
+    "to" : "stopping",
+    "text" : "find-out-before-building has a pick below abstention: M-patterns-done-right",
+    "succeeds" : true
+  }, {
+    "kind" : "stopping",
+    "from" : "serves-a-way",
+    "to" : "stopping",
+    "text" : "serves-a-way has a pick below abstention: M-typed-holes-mathlib-handoff",
+    "succeeds" : true
+  }, {
+    "kind" : "stopping",
+    "from" : "stopping",
+    "to" : "giraffe-order",
+    "text" : "stopping: no pick is worth more than abstaining, against M-war-machine-aif-completion",
+    "succeeds" : false
+  }, {
+    "kind" : "stopping",
+    "from" : "stopping",
+    "to" : "find-out-before-building",
+    "text" : "stopping: no pick is worth more than abstaining, against M-patterns-done-right",
+    "succeeds" : false
+  }, {
+    "kind" : "stopping",
+    "from" : "stopping",
+    "to" : "serves-a-way",
+    "text" : "stopping: no pick is worth more than abstaining, against M-typed-holes-mathlib-handoff",
+    "succeeds" : false
+  } ],
+  "decision" : "M-typed-holes-mathlib-handoff",
+  "prose" : "The problem: of the open tasks, which should the War Machine work on next. The claim: M-typed-holes-mathlib-handoff, by serves-a-way. Warrants: “Select only work whose needs are met, and say which need blocks each item that is left out.” “Keep work placed under a cited way and name that way in the reason.” “Among items that can start now, do first the one that the most other items are waiting on.” Grounds: Giraffe reads it ready, rank 98; cone 0, unblocks 0; placement open under backlog-understood, action work; relation to the focus unknown.\n\ngiraffe-order (its class also holds only-what-can-start-now) argues instead for M-war-machine-aif-completion. Warrants: “Select only work whose needs are met, and say which need blocks each item that is left out.” “Some work is selected not for its own output but because it shapes a later build; select it under that name, and say which later item it serves.” “Among items that can start now, do first the one that the most other items are waiting on.” Grounds: Giraffe reads it ready, rank 1; cone 11, unblocks 1; no placement row; relation to the focus associated. giraffe-order's by-cone prefers its own pick: M-war-machine-aif-completion 11 against M-typed-holes-mathlib-handoff 0 (fails under G). From absence, serves-a-way's placed-gate excludes M-war-machine-aif-completion: no placement row: nobody has read where this item is placed.\n\nfind-out-before-building argues instead for M-patterns-done-right. Warrants: “When the right build depends on something not yet observed, select the task that finds it out first, and keep it separate from the build.” Grounds: Giraffe reads it undetermined (prerequisite-unresolved), rank 509; no placement row; relation to the focus unknown. find-out-before-building's {:status-gate :undetermined} excludes M-typed-holes-mathlib-handoff: status ready, not undetermined (fails under G). serves-a-way's ready-gate excludes M-patterns-done-right: status undetermined (prerequisite-unresolved).\n\nWhat decided: G. serves-a-way 2.1432 < giraffe-order 2.4695 < find-out-before-building 2.8568 < stopping 13.7301. Under that preference an attack from a higher-G argument on a lower-G one fails, so giraffe-order against find-out-before-building stands; giraffe-order against serves-a-way fails; find-out-before-building against giraffe-order fails; find-out-before-building against serves-a-way fails; serves-a-way against giraffe-order stands; serves-a-way against find-out-before-building stands; giraffe-order against stopping stands; find-out-before-building against stopping stands; serves-a-way against stopping stands; stopping against giraffe-order fails; stopping against find-out-before-building fails; stopping against serves-a-way fails. Grounded extension: {serves-a-way}, which is the record's decision."
+}
