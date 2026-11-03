@@ -1,13 +1,39 @@
 (ns futon2.aif.hermetic-repair-fixture-test
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.declaration-reads-test :as declaration-reads]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.hermetic-repair-fixture :as fixture]
             [futon2.aif.meta-injury-store :as meta-injury-store]
+            [futon2.aif.meta-self-heal-production :as meta-self-heal]
+            [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.tripwire :as tripwire]
             [futon2.aif.previous-run :as previous-run]))
 
 (use-fixtures :once fixture/with-hermetic-stores)
+
+(deftest production-paths-cannot-collapse-into-test-defaults
+  (let [production-prefix (str data-paths/production-data-root java.io.File/separator)
+        production-paths [fixture/production-repair-root
+                          fixture/production-trip-root
+                          fixture/production-phase-log
+                          fixture/production-meta-injury-root
+                          fixture/production-meta-injury-ledger-path
+                          fixture/production-meta-injury-transaction-path
+                          fixture/production-learning-manifest-path
+                          fixture/production-run-record-dir]
+        producer-defaults [repair/default-root
+                           tripwire/default-trip-root
+                           runner/default-phase-log
+                           meta-injury-store/default-root
+                           meta-self-heal/default-ledger-path
+                           meta-self-heal/default-transaction-path
+                           outer-learning-manifest/default-path
+                           runner/default-run-record-dir]]
+    (is (every? #(.startsWith ^String % production-prefix) production-paths))
+    (is (not-any? #(.startsWith ^String % production-prefix) producer-defaults))))
 
 (deftest phase-log-default-is-hermetic-under-the-repair-fixture
   (let [before (.length (io/file fixture/production-phase-log))
