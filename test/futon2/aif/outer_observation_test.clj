@@ -191,7 +191,9 @@
     (is (= :unknown (get-in result [:focus/source :status])))))
 
 (deftest real-giraffe-run-shape
-  (let [dir (io/file "/home/joe/code/storage/giraffe/20261028T154151.285Z-b916cd4e")]
+  ;; Retained row: M-futonzero-prelim-practice is :ready at rank 43,
+  ;; source-order 14, with dependency record pin 225b1fa5... and 0 reach.
+  (let [dir (io/file "/home/joe/code/storage/giraffe/20261101T224600.983Z-6f02dbc0")]
     (is (.isDirectory dir) "the retained Giraffe evidence must be present")
     (let [result (binding [observation/*resolve-var* actual-var]
                    (observation/giraffe-field dir makeup))
