@@ -5,6 +5,7 @@
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.placement-adapter :as placement-adapter]
             [futon2.aif.policy-authoring-resolution :as resolution]
             [futon2.aif.policy-satisfaction :as sut]
             [futon2.aif.wm.authored.req-f0ba279a :as authored]))
@@ -95,10 +96,19 @@
   (with-bindings {clojure.lang.Compiler/LOADER giraffe-loader}
     (requiring-resolve symbol)))
 
-(deftest qualified-close-removes-target-from-real-outer-field
+(deftest qualified-close-does-not-exclude-target-from-real-outer-field
+  ;; Since 1cbe9f55b (2026-11-01) the outer field is the registry-open task
+  ;; population and its exclusions are task-level evidence gaps only
+  ;; (`outer-observation/task-exclusion-reasons`): "registry statuses and
+  ;; inner-policy satisfaction are not exclusions". The producer above still
+  ;; reports the qualified close; the real field does not consume it. Before
+  ;; that commit this test pinned the opposite (the close removed the target).
+  ;; Retained row (run 20261101T224600.983Z-6f02dbc0): M-futonzero-prelim-practice
+  ;; is :ready at rank 43, source-order 14, dependency record pin 225b1fa5...,
+  ;; reach 0.
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-policy-outer" (make-array java.nio.file.attribute.FileAttribute 0)))
-        run-dir (io/file "/home/joe/code/storage/giraffe/20261028T154151.285Z-b916cd4e")
+        run-dir (io/file "/home/joe/code/storage/giraffe/20261101T224600.983Z-6f02dbc0")
         makeup (outer-state/load-makeup)
         state (outer-state/init-state makeup)]
     (with-redefs [sut/default-root (.getAbsolutePath root)]
@@ -109,33 +119,26 @@
                     (outer-observation/giraffe-field run-dir makeup))
             exclusion (some #(when (= mission (:target %)) %)
                             (:outer-field/excluded outer))
+            ;; the runtime attaches placements between the field and the
+            ;; selector (full_loop_runtime.clj:1407-1414); so does this test
+            placed-outer (placement-adapter/annotate
+                          outer
+                          (placement-adapter/load-placements
+                           placement-adapter/default-paths))
             result (outer-select/select
                     makeup state
-                    (assoc outer :focus "M-wm-outer-selection"
+                    (assoc placed-outer :focus "M-wm-outer-selection"
                            :relation (fn [_ _] :focus)))]
-        (is (= :all-policies-already-satisfied (:reason exclusion)))
-        (is (= [policy-id] (:policy-ids exclusion)))
-        (is (not (some #{mission} (map :target (:field outer)))))
-        (is (= "M-reachable-from-boot"
-               (get-in result [:selection :selected :target])))))
-    (let [changed-source (io/file root "changed-mission.md")
-          empty-root (io/file root "empty")
-          authority (fn [path]
-                      {:loaded-missions {:missions [{:id mission :path path
-                                                     :status-class :open}]}
-                       :loaded-tickets {:tickets []}
-                       :loaded-excursions {:excursions []}
-                       :ticket-targets [] :excursion-targets []})]
-      (spit changed-source "changed mission bytes\n")
-      (with-redefs [sut/default-root (.getAbsolutePath root)]
-        (let [changed (binding [outer-observation/*resolve-var* actual-var]
-                        (outer-observation/giraffe-field
-                         run-dir makeup (authority (.getAbsolutePath changed-source))))]
-          (is (some #{mission} (map :target (:field changed))))))
-      (.mkdirs empty-root)
-      (with-redefs [sut/default-root (.getAbsolutePath empty-root)]
-        (let [without-records (binding [outer-observation/*resolve-var* actual-var]
-                                (outer-observation/giraffe-field
-                                 run-dir makeup
-                                 (authority "/home/joe/code/futon0/holes/missions/M-futonzero-prelim-practice.md")))]
-          (is (some #{mission} (map :target (:field without-records)))))))))
+        (is (= :all-policies-already-satisfied
+               (:reason (sut/all-satisfied-exclusion root mission mission-sha)))
+            "the producer still reports the qualified close")
+        (is (nil? exclusion) "satisfaction is not an outer exclusion (1cbe9f55b)")
+        (is (some #{mission} (map :target (:field outer))))
+        (is (every? outer-observation/task-exclusion-reasons
+                    (map :reason (:outer-field/excluded outer))))
+        ;; Selected over the real pin-era field with the real placements:
+        ;; E-memory-whitepaper-v2-programme, row :ready, rank 2, source-order
+        ;; 540, cone 3, unblocks 1; no placement row, so its placement is the
+        ;; typed absence and a non-placement cascade selects it.
+        (is (= "E-memory-whitepaper-v2-programme"
+               (get-in result [:selection :selected :target])))))))
