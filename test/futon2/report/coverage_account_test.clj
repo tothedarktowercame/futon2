@@ -64,8 +64,11 @@
         ;; an unresolved relation gets no scalar G (futon2 84f81cb42): the
         ;; decision refuses :class-unknown-no-scalar-g. The fixture supplies a
         ;; sourced relation for its own targets, as cascade_decision_test does.
+        ;; a04b157d2: the decision needs the selected task; both targets stay
+        ;; in the assembled field.
         result (wm-cd/cascade-decision assembled
-                                   {:focus-inputs (focus-inputs)
+                                   {:task {:id "M-a"}
+                                    :focus-inputs (focus-inputs)
                                     :live-c {:sources live-sources}
                                     :cascade-habit-path (str (io/file *root* "habit.edn"))})]
     {:sources sources :result result}))
@@ -90,8 +93,10 @@
     ;; Q5 migration: live C is observation only on the reading-family route
     ;; (codex-68 ruling), so the decision records that role, not a projection
     (is (= {:status :observation-only :reason :shape-policy-c-is-decision-c} live))
-    (is (= #{"M-a" "M-b"} (set (map :target (get-in record [:decision :refusals]))))
-        "every target the assembly accounted for lands in the field and is refused typed")
+    ;; a04b157d2: the field is the supplied task's reading-policy family; the
+    ;; other assembled target is accounted in coverage but not in the field.
+    (is (= #{"M-a"} (set (map :target (get-in record [:decision :refusals]))))
+        "the task lands in the field and is refused typed")
     (is (every? #(= :no-policy-family (:kind %)) (get-in record [:decision :refusals])))
     (is (some #(and (= "M-a" (:target %)) (= :universe-not-admitted (:kind %)))
               (get-in record [:cascade-problems :refusals])))
@@ -135,7 +140,7 @@
 (deftest abstention-retains-hole-census-and-types-uncomputed-projection
   (let [sources (holes/merge-into-sources declared "/fixture" missions :WM)
         assembled (construction-inputs/assemble-cascade-problems {:targets ["M-b"] :sources sources})
-        result (wm-cd/cascade-decision assembled {})
+        result (wm-cd/cascade-decision assembled {:task {:id "M-b"}}) ; a04b157d2
         record (trace/trace-record {:decision (:decision result)})]
     (is (= :abstained (get-in record [:decision :status])))
     (is (= (:mission-hole-coverage sources) (:mission-hole-coverage record)))
@@ -170,7 +175,8 @@
                                    (range) candidates)]
                    (wm-cd/cascade-decision
                     assembled
-                    {:focus-inputs (focus-inputs)
+                    {:task {:id "M-b"} ; a04b157d2
+                     :focus-inputs (focus-inputs)
                      :live-c {:sources live-sources}
                      :conditioning-steps {:steps steps :read [] :unread []}
                      :cascade-habit-path (str (io/file *root* "habit.edn"))})))
