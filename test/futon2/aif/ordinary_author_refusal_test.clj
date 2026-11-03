@@ -10,9 +10,10 @@
             [futon2.aif.ordinary-author-refusal :as refusal]))
 
 (def live-ledger
-  "/home/joe/code/futon2/data/wm-meta-injuries-live-2026-10-22/ledger.edn")
+  (.getCanonicalPath
+   (io/file (io/resource "fixtures/meta-injury-ledgers/live-2026-11-03-156.edn"))))
 (def live-ledger-sha
-  "6bfbd39c444c2235153b288ad2d2331ffa3903a91f21d36a4a4e95ff40f828f0")
+  "123d972144b0ca4fd3216a5ada100b413e7087cad56365d3f973170e01356eeb")
 (def live-record
   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-10-29-39a845a3-496a-4bce-888c-e8b0ca2835ab.edn")
 (def live-record-sha
@@ -129,8 +130,15 @@
   ;; This fixture preserves the property under correction: ordinal 124's
   ;; exact retained answer is undecodable, while current terminal policy names
   ;; that exhausted author-format refusal as a non-injury.
+  ;; The ledger as it stood at ordinal 124 is reconstructed from the frozen
+  ;; copy (its first 124 entries, re-sealed by the producer's own seal): the
+  ;; bytes pinned on 2026-10-2x no longer exist anywhere, and on the full
+  ;; 156-entry copy the replay conflicts with the occurrences recorded after
+  ;; ordinal 124 (:medic/occurrence-conflict), which is not this claim.
   (let [ledger-bytes (java.nio.file.Files/readAllBytes (.toPath (io/file live-ledger)))
-        history (edn/read-string (String. ledger-bytes "UTF-8"))
+        frozen (edn/read-string (String. ledger-bytes "UTF-8"))
+        history (ledger/seal-ledger
+                 (assoc frozen :entries (subvec (:entries frozen) 0 124)))
         current (last (:entries history))
         root (root)
         candidate {:kind :ordinary-author-refusal
@@ -162,7 +170,9 @@
         ledger-path (str (io/file root "ledger.edn"))
         transaction-path (str (io/file root "transaction.edn"))]
     (is (= live-ledger-sha (identity/sha256 ledger-bytes)))
+    (is (= 156 (count (:entries frozen))))
     (is (= 124 (count (:entries history))))
+    (is (= 124 (:ordinal current)))
     (is (= :appended (:status appended)) (pr-str appended))
     (is (= (:entries history) (subvec (get-in appended [:ledger :entries]) 0 124)))
     (is (empty? (get-in (ledger/effective-active-injuries
