@@ -1,6 +1,6 @@
 ;; With hindsight: the cascade that explains why Joe selected working on
 ;; "cascade selection" on the evening of 2026-11-02/03. Constructed by claude-2
-;; at 01:2xZ 2026-11-03 from Joe's turns in this REPL session (quoted, with the
+;; at 01:1xZ 2026-11-03 from Joe's turns in this REPL session (quoted, with the
 ;; time each was said, to the minute where the clock was read and "~" where it
 ;; is placed from the turn order) and from the task-selection library
 ;; (futon3/library/task-selection, sha per unit). Shape: claude-16's
@@ -116,7 +116,7 @@
 
  :attestation
  {:source "claude-2's REPL session with Joe, 2026-11-02 21:5xZ to 2026-11-03 01:1xZ; trail rows in PLAN-outer-selection-restoration-claude2-2026-11-01.md and PLAN-meaningful-cascades-2026-11-03.md"
-  :readers [{:who "claude-2" :what "read the turns and chose the units, with hindsight" :at "2026-11-03T01:2xZ"}]
+  :readers [{:who "claude-2" :what "read the turns and chose the units, with hindsight" :at "2026-11-03T01:1xZ"}]
   :held-out nil
   :note "Stated with hindsight by the agent who was in the conversation; a cascade mined from the same turns by a reader who was not would be the test of this one. The unit shas are the first 12 hex digits of each flexiarg's sha256."}
 
