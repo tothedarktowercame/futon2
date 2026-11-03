@@ -3,10 +3,10 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.cascade-habit-store :as habit]
-            [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runner-test :as fixture]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
+            [futon2.aif.reviewer-falsifier :as reviewer-falsifier]
             [futon2.report.cascade-habit-read-test :as stores]))
 
 (use-fixtures :once hermetic/with-hermetic-stores fixture/with-hermetic-traces)
@@ -49,7 +49,13 @@
      (spit path (pr-str (habit/read-state path)))
      (let [before (slurp path)
            {:keys [result]}
-           (with-redefs [d-task/artifact-tokens (fn [& _] [])]
+           ;; 797ba0306 requires the real artifact rows to capture the
+           ;; pre-author mission baseline. Refuse at the later falsifier seam.
+           (with-redefs [reviewer-falsifier/verify
+                         (fn [_ _]
+                           {:status :refused
+                            :reason :fixture-reviewer-falsifier-refusal
+                            :failed-checks [:fixture-reviewer-refusal]})]
              (close-through-current-evidence path))]
        (is (= :build-failed (:outcome result)))
        (is (= :reviewer-falsifier-failed
