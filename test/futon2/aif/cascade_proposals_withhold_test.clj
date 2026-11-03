@@ -19,8 +19,26 @@
 (def source-template-target
   "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
+(def fixture-dir "fixtures/repair-obligations/withhold")
+
+(def fixture-files
+  ["README.md"
+   (str "findings/" declared-id ".edn")
+   (str "findings/" sourceless-id ".edn")
+   (str "ticket-links/" declared-id ".edn")])
+
 (def repair-root
-  (.getPath (io/file (io/resource "fixtures/repair-obligations/withhold"))))
+  ;; Resolve the root from a FILE resource, never the directory: a directory
+  ;; resource enters the Test Registry's load closure as an entry it cannot
+  ;; hash, and the warrant dies on it instead of pinning the fixture (the
+  ;; zai-16 trap of 2026-09-17, see cascade-sources/load-declared). Opening
+  ;; each fixture file by resource name is what pins it in the warrant.
+  (let [root (.getParentFile (io/file (io/resource (str fixture-dir "/README.md"))))]
+    (doseq [f fixture-files]
+      (when-not (io/resource (str fixture-dir "/" f))
+        (throw (ex-info "Withhold fixture file missing from the classpath"
+                        {:file f}))))
+    (.getPath root)))
 
 (defn- tick-assembly [target]
   ;; the tick's own path: declared loader, assemble, real supply scan,
