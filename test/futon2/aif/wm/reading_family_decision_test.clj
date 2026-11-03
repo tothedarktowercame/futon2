@@ -6,6 +6,7 @@
   decision's ledger pin."
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.efe :as efe]
             [futon2.aif.decision-gate :as decision-gate]
@@ -41,12 +42,17 @@
    :sentences
    [{:id "s1"
      :fragments (vec (map-indexed
-                      (fn [i pattern]
-                        {:start i :end (inc i) :text pattern :intent "act" :target "target"
-                         :rationale "fixture fit" :relations ["action"]
-                         :pattern_refs [{:id pattern :status "candidate"
-                                         :rationale "fixture fit"
-                                         :source_sha256 (apply str (repeat 64 "a"))}]})
+                      (fn [i cited]
+                        (let [cited (if (string? cited) [cited] cited)]
+                          {:start i :end (inc i) :text (str/join " " cited)
+                           :intent "act" :target "target"
+                           :rationale "fixture fit" :relations ["action"]
+                           :pattern_refs
+                           (mapv (fn [pattern]
+                                   {:id pattern :status "candidate"
+                                    :rationale "fixture fit"
+                                    :source_sha256 (apply str (repeat 64 "a"))})
+                                 cited)}))
                       patterns))}]})
 
 (defn- pinned-graph []
@@ -108,6 +114,8 @@
                     (assembled rows betas)
                     (merge {:pattern-graph-path (str graph)
                             :target-reading-root (str root)
+                            ;; a04b157d2: selection policy is task-scoped.
+                            :task {:id "M-current"}
                             :conditioning-steps (fold-source/conditioning-steps (str flights))
                             :ticket-queue ticket-queue/empty-declaration
                             :novelty-inputs {}}
@@ -121,16 +129,16 @@
   (runner/reading-interpretation-status decision))
 
 (deftest one-g-selection-over-the-reading-family
-  ;; The reading names p/a and p/c; the graph connects them through p/b, so a
-  ;; retraction policy owes the interpretation of p/b.
-  (let [fx (fixture ["p/a" "p/c"])
+  ;; The nested reading supplies three canonical competitors; the selected
+  ;; arrangement can still owe the interpretation of p/b.
+  (let [fx (fixture [["p/a" "p/c"] "p/b"])
         result (decide fx [(get-in fx [:rows :current])] {"M-current" 1})
         decision (:decision result)
         cert (:selection-certificate decision)
         family (first (:target-policy-families cert))
         action (:action decision)]
     (testing "the family has structurally distinct policies, all scored"
-      (is (<= 2 (count (:policies family))))
+      (is (= 3 (:distinct-count family) (count (:policies family))))
       (is (= (count (:policies family)) (count (distinct (map :policy-id (:policies family)))))))
     (testing "exactly one selector call; the old scorer and lane were never reached"
       (is (= 1 (::selector-calls result)))
@@ -216,7 +224,7 @@
      :receipts (:receipts (selected-reading/validate request response {:library-root (str lib)}))}))
 
 (deftest debt-binding-is-immutable
-  (let [fx (fixture ["p/a" "p/c"])
+  (let [fx (fixture [["p/a" "p/c"] "p/b"])
         decision (:decision (decide fx [(get-in fx [:rows :current])] {"M-current" 1}))
         action (:action decision)
         carrier (:interpretation-debt action)

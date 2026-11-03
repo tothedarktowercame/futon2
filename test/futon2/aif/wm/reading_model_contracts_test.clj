@@ -40,7 +40,7 @@
     [(:kind r) (:certification-kind r) (get-in r [:carry :reason])]))
 
 (deftest certified-contracts-are-consumed
-  (let [fx (#'rfd/fixture ["p/a" "p/c"])
+  (let [fx (#'rfd/fixture [["p/a" "p/c"] "p/b"])
         result (run-decision fx)
         c (cert result)
         carry (:reading-precision-carry c)]
@@ -60,7 +60,7 @@
              (set (map :policy-id (:preference-receipts c))))))))
 
 (deftest beta-carries-only-across-the-same-identity
-  (let [fx (#'rfd/fixture ["p/a" "p/c"])
+  (let [fx (#'rfd/fixture [["p/a" "p/c"] "p/b"])
         first-run (:decision (run-decision fx))]
     (testing "the same scored family carries"
       (let [r (run-decision fx first-run)]
@@ -89,7 +89,7 @@
         (is (= :reading-precision-identity-changed (last (refused-with r))))))))
 
 (deftest refused-precision-authority-never-selects
-  (let [fx (#'rfd/fixture ["p/a" "p/c"])
+  (let [fx (#'rfd/fixture [["p/a" "p/c"] "p/b"])
         first-run (:decision (run-decision fx))
         carry (get-in first-run [:selection-certificate :reading-precision-carry])]
     (testing "a tampered receipt"
@@ -105,7 +105,7 @@
         (is (= :old-class-q0-model-identity (last (refused-with r))))))))
 
 (deftest refused-preference-authority-never-selects
-  (let [fx (#'rfd/fixture ["p/a" "p/c"])
+  (let [fx (#'rfd/fixture [["p/a" "p/c"] "p/b"])
         score shape-g/score-policy]
     (testing "an absent preference authority"
       (let [r (with-redefs [shape-g/score-policy
@@ -137,7 +137,7 @@
   ;; codex-68 ruling (b): a changed identity re-arms only on a sealed beta
   ;; declaration for exactly the new identity; an abstained tick does not
   ;; let the next one reinitialize from beta-by-context.
-  (let [fx (#'rfd/fixture ["p/a" "p/c"])
+  (let [fx (#'rfd/fixture [["p/a" "p/c"] "p/b"])
         first-run (:decision (run-decision fx))
         changed (fn [predecessor & [declaration]]
                   (with-redefs [shape-g/scorer-version :wm/cascade-shape-g-score-policy-v2]
