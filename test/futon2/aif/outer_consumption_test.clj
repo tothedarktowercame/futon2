@@ -30,7 +30,21 @@
     (assoc observation :relation (fn [_ target] (get relation-classes target)))))
 (defn approx [a b] (< (Math/abs (- (double a) (double b))) 1e-12))
 
+(defonce ^:private giraffe-loader
+  ;; The retained Giraffe run under the fixture is verified by Giraffe's own
+  ;; verifier, which lives in futon3c. The serving JVM has that source root;
+  ;; this isolated process adds it, as outer_observation_test does, without
+  ;; making futon2 depend on futon3c.
+  (doto (clojure.lang.DynamicClassLoader.
+         (.getContextClassLoader (Thread/currentThread)))
+    (.addURL (.toURL (.toURI (io/file "/home/joe/code/futon3c/src"))))))
+
+(defn- actual-var [symbol]
+  (with-bindings {clojure.lang.Compiler/LOADER giraffe-loader}
+    (requiring-resolve symbol)))
+
 (deftest retained-run-consumed-and-replaced-atomically-on-real-outer-path
+  (binding [observation/*resolve-var* actual-var]
   (let [root (copy-fixture) m (makeup root) state-path (io/file root "outer-state.edn")
         before (state/read-state m state-path) old-pending (:pending before)
         current (current-observation) current-dir (io/file root "current")
@@ -83,8 +97,7 @@
     (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Outer state refused"
                          (state/replace-pending before {:run-id "overwrite"})))
     (println :consumption {:click-count (:click-count after) :gain gain
-                          :target (get-in after [:pending :selection :selection :selected :target])})))
-
+                          :target (get-in after [:pending :selection :selection :selected :target])}))))
 (deftest in-flight-and-tampered-records-defer
   (let [root (copy-fixture) stream (io/file root "run-stream.edn")
         saved (slurp stream) file (io/file root (str "tick-run-record-" run-id ".edn"))]
