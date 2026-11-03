@@ -46,10 +46,12 @@
         carry (:reading-precision-carry c)]
     (is (= 1 (:futon2.aif.wm.reading-family-decision-test/selector-calls result)))
     (testing "precision: a sealed module receipt, consumed as the selector's beta"
-      (is (= precision/carry-schema (:schema carry)))
+      (is (= :wm/r20-reading-precision-v1 (:schema carry)))
       (is (precision/intact? carry))
-      (is (= :initialized (:status carry)))
-      (is (= (:beta carry) (get-in result [:decision :beta :value])))
+      (is (= :computed (:status carry)))
+      (is (= :r20-beta-from-valence (:authority carry)))
+      ;; 6a36b6006: certification passes :beta-posterior to family selection.
+      (is (= (:beta-posterior carry) (get-in result [:decision :beta :value])))
       (is (= (:identity carry) (:reading-precision-identity c))))
     (testing "preference: one certified receipt per scored record, live C diagnostic only"
       (is (= (count (:candidates c)) (count (:preference-receipts c))))
@@ -59,12 +61,16 @@
       (is (= (set (map (comp :id :id) (:candidates c)))
              (set (map :policy-id (:preference-receipts c))))))))
 
-(deftest beta-carries-only-across-the-same-identity
+(deftest identity-drift-is-recorded-as-r20-evidence
+  ;; 6a36b6006 retains identity drift as evidence instead of refusing selection.
   (let [fx (#'rfd/fixture [["p/a" "p/c"] "p/b"])
-        first-run (:decision (run-decision fx))]
-    (testing "the same scored family carries"
+        first-run (:decision (run-decision fx))
+        first-carry (:reading-precision-carry (:selection-certificate first-run))]
+    (testing "the same scored family records continuity"
       (let [r (run-decision fx first-run)]
-        (is (= :carried (:status (:reading-precision-carry (cert r)))))
+        (is (= false (get-in (cert r) [:reading-precision-carry :identity-changed])))
+        (is (= (:identity first-carry)
+               (get-in (cert r) [:reading-precision-carry :previous-identity])))
         (is (= 1 (:futon2.aif.wm.reading-family-decision-test/selector-calls r)))))
     (testing "theta-only learning leaves the identity whole"
       (let [r (with-redefs [ledger/pattern-theta
@@ -74,19 +80,25 @@
         (is (not= (map :g (get-in first-run [:selection-certificate :candidates]))
                   (map :g (:candidates (cert r))))
             "the theta change reached the scored G")
-        (is (= :carried (:status (:reading-precision-carry (cert r)))))))
-    (testing "a scorer version change divides it, before selection"
+        (is (= false (get-in (cert r) [:reading-precision-carry :identity-changed])))
+        (is (= (:identity first-carry)
+               (get-in (cert r) [:reading-precision-carry :previous-identity])))))
+    (testing "a scorer version change is recorded and still selects"
       (let [r (with-redefs [shape-g/scorer-version :wm/cascade-shape-g-score-policy-v2]
-                (run-decision fx first-run))]
-        (is (= 0 (:futon2.aif.wm.reading-family-decision-test/selector-calls r)))
-        (is (= [:model-contract-refused :reading-precision-refused
-                :reading-precision-identity-changed]
-               (refused-with r)))))
-    (testing "a kernel version change divides it, before selection"
+                (run-decision fx first-run))
+            carry (:reading-precision-carry (cert r))]
+        (is (= 1 (:futon2.aif.wm.reading-family-decision-test/selector-calls r)))
+        (is (= true (:identity-changed carry)))
+        (is (= (:identity first-carry) (:previous-identity carry)))
+        (is (not= (:previous-identity carry) (:identity carry)))))
+    (testing "a kernel version change is recorded and still selects"
       (let [r (with-redefs [family-selection/kernel-version :co-application-frontier-theta-v2]
-                (run-decision fx first-run))]
-        (is (= 0 (:futon2.aif.wm.reading-family-decision-test/selector-calls r)))
-        (is (= :reading-precision-identity-changed (last (refused-with r))))))))
+                (run-decision fx first-run))
+            carry (:reading-precision-carry (cert r))]
+        (is (= 1 (:futon2.aif.wm.reading-family-decision-test/selector-calls r)))
+        (is (= true (:identity-changed carry)))
+        (is (= (:identity first-carry) (:previous-identity carry)))
+        (is (not= (:previous-identity carry) (:identity carry)))))))
 
 (deftest refused-precision-authority-never-selects
   (let [fx (#'rfd/fixture [["p/a" "p/c"] "p/b"])
@@ -133,50 +145,11 @@
         (is (= :g-composition-mismatch
                (get-in r [:decision :refusals 0 :refusals 0 :kind])))))))
 
-(deftest identity-change-stays-refused-until-an-explicit-declaration
-  ;; codex-68 ruling (b): a changed identity re-arms only on a sealed beta
-  ;; declaration for exactly the new identity; an abstained tick does not
-  ;; let the next one reinitialize from beta-by-context.
-  (let [fx (#'rfd/fixture [["p/a" "p/c"] "p/b"])
-        first-run (:decision (run-decision fx))
-        changed (fn [predecessor & [declaration]]
-                  (with-redefs [shape-g/scorer-version :wm/cascade-shape-g-score-policy-v2]
-                    (#'rfd/decide fx [(get-in fx [:rows :current])] {"M-current" 1}
-                                  (cond-> {:token-belief-predecessor-trace {:decision predecessor}}
-                                    declaration (assoc :reading-precision-declaration declaration)))))
-        calls :futon2.aif.wm.reading-family-decision-test/selector-calls
-        tick-1 (changed first-run)
-        refused-carry (:reading-precision-carry (cert tick-1))
-        new-identity (get-in refused-carry [:rearm :identity])
-        authority {:status :declared :version "operator declaration v1"}]
-    (testing "tick 1 refuses and records what re-arms it"
-      (is (= 0 (calls tick-1)))
-      (is (= :refused (:status refused-carry)))
-      (is (precision/intact? refused-carry))
-      (is (= :beta-declaration-for-identity (get-in refused-carry [:rearm :condition])))
-      (is (string? new-identity)))
-    (testing "tick 2 without a declaration still refuses"
-      (let [tick-2 (changed (:decision tick-1))]
-        (is (= 0 (calls tick-2)))
-        (is (= :abstained (get-in tick-2 [:decision :status])))
-        (is (= :refused (get-in (cert tick-2) [:reading-precision-carry :status])))))
-    (testing "declarations that do not fit refuse"
-      (doseq [[label d] {:another-identity (precision/declare-beta (apply str (repeat 64 "e")) 1 authority)
-                         :tampered (assoc (precision/declare-beta new-identity 1 authority) :beta 7)}]
-        (testing (name label)
-          (let [t (changed (:decision tick-1) d)]
-            (is (= 0 (calls t)))
-            (is (= :refused (get-in (cert t) [:reading-precision-carry :status])))))))
-    (testing "a sealed declaration for the new identity re-arms selection"
-      (let [declaration (precision/declare-beta new-identity 2 authority)
-            tick-2 (changed (:decision tick-1) declaration)
-            carry (:reading-precision-carry (cert tick-2))]
-        (is (= 1 (calls tick-2)))
-        (is (= :redeclared (:status carry)))
-        (is (= 2 (:beta carry)))
-        (is (= (:sha256 declaration) (:declaration-sha256 carry)))
-        (is (= 2 (get-in tick-2 [:decision :beta :value])))
-        (testing "and the tick after carries it"
-          (let [tick-3 (changed (:decision tick-2))]
-            (is (= 1 (calls tick-3)))
-            (is (= :carried (:status (:reading-precision-carry (cert tick-3)))))))))))
+;; Retired 2026-11-03 (claude-2 review of F9c-a2): the deftest
+;; identity-change-stays-refused-until-an-explicit-declaration pinned the
+;; codex-68 ruling (b) that a changed reading-precision identity refuses until
+;; a sealed operator beta declaration for the new identity is consumed.
+;; 6a36b6006 retains identity drift as R20 evidence and selects; nothing in
+;; src reads :reading-precision-declaration any more (the declare-beta path in
+;; reading_policy_precision.clj is unreached). The new behaviour is pinned by
+;; identity-drift-is-recorded-as-r20-evidence above.
