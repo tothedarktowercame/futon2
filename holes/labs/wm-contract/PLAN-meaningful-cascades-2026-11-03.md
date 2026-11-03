@@ -52,6 +52,24 @@ Six parts. The WM's retained cascade today has the first two and a number:
 | attestation | none | `turns`, `held-out {hit miss guard-not-met}`, `verdict` | turns, held-out results, who read them |
 | alternatives | the other cascades in the same record, `:classes` | none | the cascades this one was scored against; G has no meaning without them |
 
+**First instance (claude-16, 00:5xZ–01:0xZ):** `futon3c/holes/labs/M-象-cascade/disposition-cascade-v0.edn`
+(`b980f6ed1`), `:schema :cascade/record-draft-v0`, `:id :judge-a-review-row`,
+`:status :candidate`, `:applies-to "a backlog item: what should happen to it"`.
+Field decisions, starting from the WM's list: `:terms` stays the WM's numeric
+risk/ambiguity/novelty; cited facts go in `:reads` (a map need → `{:source
+:kind :read|:proxy}`); units keep `{:pattern :sha256 :index}` and add
+`:needs`, `:establishes`, `:quote` (from `order-by-what-each-step-needs`), so
+`:edges` is derivable from needs and `:independent` records where there is
+deliberately no order ([2], the cluster step); `:rationale`, `:attestation`
+(`:source :held-out :note`), `:alternatives` (`:retire-when-place-gone`) are
+new; `:G` nil until a scoring run. Three gaps the instance exposes: the five
+units are `:proposed/...` with no sha, since the library has no patterns for
+them yet (flexiargs to be drafted from Joe's quotes, which are on the units);
+two reads are proxies (`:place-returning` is Joe's word per Place;
+`:related-items` needs a reader, neighbours missed M-mark8); the cascade is
+stated from Joe's rulings, not mined, so it shows the record can carry
+something meaningful and not that the system can find one.
+
 G sits on the record, relative to the alternatives. A stamped act (D1:
 restates / blends / child / new) is a cited term and feeds G; it never carries
 a G itself (score-only merging was rejected at 77% precision).
