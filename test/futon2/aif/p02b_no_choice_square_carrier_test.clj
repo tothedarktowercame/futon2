@@ -34,7 +34,9 @@
                 {:pattern-graph-path (str graph)
                  :target-reading-root (str (temp-dir "p02b-readings-"))})
         judgement {:decision (:decision result)}]
-    (is (= :abstained (get-in judgement [:decision :status])))
-    (is (= [] (get-in judgement [:decision :selection-certificate
-                                 :target-policy-field :families])))
+    ;; Since a04b157d2 (2026-10-28) the decision needs a caller-supplied task:
+    ;; with no selected task there is no inner field at all, only the typed
+    ;; absence, and the outer refusal is not dressed up as a decision.
+    (is (= {:absent :no-task-selection-policy} result))
+    (is (nil? (:decision judgement)))
     (is (nil? (square-authoring/selected-need judgement)))))
