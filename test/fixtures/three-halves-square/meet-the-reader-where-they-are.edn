@@ -1,0 +1,17 @@
+{:schema :wm/three-halves-square-v1
+ :pattern :writing-coherence/meet-the-reader-where-they-are
+ :objects
+ {:G {:text "Minimal operational anchors let the reader land without carrying the argument or replacing its abstraction."
+      :source {:path "futon3/library/writing-coherence/meet-the-reader-where-they-are.flexiarg" :sha256 "78a273be1e399bd3e728ab67effce58ddb9da437c207f0c60a44df47e8c313d7"}
+      :theory {:elems #{0} :names {0 "reason"} :axioms #{}}}
+  :I1 {:text "A principled abstraction must remain rigorous while becoming legible to an operational reader."
+       :source {:path "futon3/library/writing-coherence/meet-the-reader-where-they-are.flexiarg" :sha256 "78a273be1e399bd3e728ab67effce58ddb9da437c207f0c60a44df47e8c313d7"}
+       :theory {:elems #{10} :names {10 "condition"} :axioms #{}}}
+  :I2 {:text "Rewriting everything as a project plan destroys openness, while leaving it unanchored makes the document appear evasive."
+       :source {:path "futon3/library/writing-coherence/meet-the-reader-where-they-are.flexiarg" :sha256 "78a273be1e399bd3e728ab67effce58ddb9da437c207f0c60a44df47e8c313d7"}
+       :theory {:elems #{20} :names {20 "tension"} :axioms #{}}}
+  :B {:text "Add parenthetical and elidable anchors, and restate the abstraction's disclaimer in the same eyeshot."
+      :source {:path "futon3/library/writing-coherence/meet-the-reader-where-they-are.flexiarg" :sha256 "78a273be1e399bd3e728ab67effce58ddb9da437c207f0c60a44df47e8c313d7"}
+      :theory {:elems #{30} :names {30 "move"} :axioms #{}}}}
+ :maps {:a1 #{[0 10]} :a2 #{[0 20]} :b1 #{[10 30]} :b2 #{[20 30]}}
+ :auxiliary {:b1 false :b2 false}}

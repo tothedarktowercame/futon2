@@ -30,9 +30,11 @@
 (def mission-file "test/fixtures/mission-criteria/M-futon-seams@futon3c-20959e4f.md")
 (def mission-text (slurp mission-file))
 (def proposals (edn/read-string (slurp "test/fixtures/want-interp-library/M-futon-seams-interpretations@futon2-78439f58.edn")))
-(def blend-square
-  (edn/read-string
-   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
+(def blend-squares
+  (into {} (for [id [:writing-coherence/meet-the-reader-where-they-are
+                    :writing-coherence/plain-language-thesis]]
+             [id (edn/read-string
+                  (slurp (str "test/fixtures/three-halves-square/" (name id) ".edn")))])))
 (def document :exit/h54d16050a9dc)
 (def argue :exit/hac75428b9c97)
 (def by-want {document :writing-coherence/meet-the-reader-where-they-are
@@ -43,7 +45,7 @@
        (with-out-str (pp/pprint (merge {:schema wi/response-schema :pattern id
                                         :receipt (assoc
                                                   (get-in proposals [:interpretation-receipts id])
-                                                  :blend-square blend-square)}
+                                                  :blend-square (blend-squares id))}
                                        (get-in proposals [:patterns id])
                                        extra)))
        "```\n"))
@@ -116,8 +118,9 @@
                         :max-clicks 1})]
     (is (= #{:writing-coherence/meet-the-reader-where-they-are :writing-coherence/plain-language-thesis} @seen)
         "published before the click posted")
-    (is (every? #(= blend-square (:blend-square %))
-                (vals (:receipts @published)))
+    (is (every? (fn [[id receipt]]
+                  (= (blend-squares id) (:blend-square receipt)))
+                (:receipts @published))
         "the durable publication retains the exact admission evidence")
     (is (not= :awaiting-answer (:status f)))))
 
