@@ -101,7 +101,8 @@
             no-evidence (proposals/record-supply assembled source {:proposals [] :declines []})
             supply (:record (proposals/generate-retrieval! "M-proposal" :mission root options))
             supplied (proposals/record-supply assembled source supply)
-            decision (wm-cd/cascade-decision supplied {})]
+            ;; Since a04b157d2 the caller supplies the selected task.
+            decision (wm-cd/cascade-decision supplied {:task {:id "M-proposal"}})]
         (is (empty? (:candidates want)))
         (is (empty? (get-in want [:interpretation :patterns])))
         (is (some #(= :no-evidenced-proposal (:reason %)) (:dropped-candidates no-evidence)))
