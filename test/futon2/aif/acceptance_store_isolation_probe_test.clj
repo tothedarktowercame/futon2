@@ -12,19 +12,19 @@
   (let [root (or (System/getenv "FUTON_WM_PHASE_REPLAY_INPUT_ROOT")
                  (str (java.nio.file.Files/createTempDirectory
                        "acceptance-store-isolation-probe"
-                       (make-array java.nio.file.attribute.FileAttribute 0))))]
-    (let [selection (runner/strategic-selection!
-                     {:phase-replay-input-root root
-                      :strategic-selection-invoke-fn
-                      (fn [_]
-                        {:ok true
-                         :selection {:status :verified-live-selection
-                                     :selected-mission-ids ["M-isolated"]}})}
-                     {:scheduler-habit-ranking ["M-isolated"]})
-          files (filter #(.isFile ^java.io.File %)
-                        (file-seq (io/file root)))]
-      (is (= :verified-live-selection (:status selection)))
-      (is (= 2 (count files)))
-      (is (every? #(.startsWith (.getCanonicalPath ^java.io.File %)
-                                (.getCanonicalPath (io/file root)))
-                  files)))))
+                       (make-array java.nio.file.attribute.FileAttribute 0))))
+        selection (runner/strategic-selection!
+                   {:phase-replay-input-root root
+                    :strategic-selection-invoke-fn
+                    (fn [_]
+                      {:ok true
+                       :selection {:status :verified-live-selection
+                                   :selected-mission-ids ["M-isolated"]}})}
+                   {:scheduler-habit-ranking ["M-isolated"]})
+        files (filter #(.isFile ^java.io.File %)
+                      (file-seq (io/file root)))]
+    (is (= :verified-live-selection (:status selection)))
+    (is (= 2 (count files)))
+    (is (every? #(.startsWith (.getCanonicalPath ^java.io.File %)
+                              (.getCanonicalPath (io/file root)))
+                files))))
