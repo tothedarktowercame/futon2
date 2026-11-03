@@ -277,13 +277,16 @@
   ;; retired: construction-receipt matching. Preserved: a policy that cannot
   ;; be admitted to the posterior is dropped with a recorded reason, never
   ;; passed through, and the rest of the family still selects.
-  (let [fx (route/fixture)
+  ;; The default read (p/a, p/b) now yields one policy, so the family has no
+  ;; "rest" to select from; read [["p/a" "p/c"] "p/b"] gives three competing
+  ;; policies (as habit-fold-call-test does since 9868e3e0a).
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         ids (keys (route/policy-keys (:decision (route/decide fx))))
         dropped (first ids)
         r (with-redefs [shape-g/score-policy (refusing-policies #{dropped})]
             (route/decide fx))
         cert (get-in r [:decision :selection-certificate])]
-    (is (= 2 (count ids)))
+    (is (= 3 (count ids)))
     (is (some #(and (= dropped (:policy-id %)) (= :fixture-unscorable (:reason %)))
               (:family-failures cert))
         "the unscorable policy is recorded with its reason")
@@ -351,13 +354,19 @@
 
 (deftest all-declined-family-is-a-recorded-abstention
   (let [fx (route/fixture)]
-    (doseq [[label r]
-            [[:no-reading (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {:task {:id "M-a"}})]
-             [:every-policy-unscorable
+    ;; The decision's reason is the first typed refusal's own reason
+    ;; (e93175bb9e, 2026-10-19), and a per-policy failure's reason is lifted
+    ;; onto its refusal (2d8d107ac, 2026-10-29): the unscorable family
+    ;; reports the scorer's reason; a family with no policies at all keeps
+    ;; the generic :no-acting-cascade-candidate.
+    (doseq [[label reason r]
+            [[:no-reading :no-acting-cascade-candidate
+              (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {:task {:id "M-a"}})]
+             [:every-policy-unscorable :fixture-unscorable
               (with-redefs [shape-g/score-policy (refusing-policies (constantly true))]
                 (route/decide fx))]]]
       (is (= :abstained (get-in r [:decision :status])) (str label))
-      (is (= :no-acting-cascade-candidate (get-in r [:decision :reason])) (str label))
+      (is (= reason (get-in r [:decision :reason])) (str label))
       (is (empty? (posterior-of r)) (str label))
       (is (= 0 (:selector-calls r)) (str label))
       (is (every? #(and (:target %) (= :no-policy-family (:kind %)) (seq (:failures %)))
