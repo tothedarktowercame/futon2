@@ -24,7 +24,10 @@
         phases (atom [])
         charge (atom 0)
         result (runner/review-already-satisfied-claim!
-                 {:phase-log-fn #(swap! phases conj %)
+                 {;; 3216b63c6 requires an existing-artifact claim to cite
+                  ;; the selected target before reviewer dispatch.
+                  :commit-message-fn (fn [_ _] (str "Complete " target))
+                  :phase-log-fn #(swap! phases conj %)
                   :dispatch-fn (fn [_ seat caller t prompt]
                                  (swap! contacts conj {:seat seat :caller caller :target t :prompt prompt})
                                  {:job-id "retained-claim-review"})
