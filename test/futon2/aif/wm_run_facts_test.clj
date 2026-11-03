@@ -859,7 +859,9 @@
       (is (= 1 (count (:classes collapsed)) (count (f2 "policyG"))))
       (is (= (f2 "comparedPolicies") (f2 "constructedCascades")
              (get-in f2 ["targetConstruction" 0 "policies"])))
-      (is (= 2 (reduce + (map #(count (get % "members")) (f2 "classMembers"))))))
+      ;; Three members since 90c7273eb: serves-a-way shares the single class
+      ;; once the fixture facts carry a uniform placement.
+      (is (= 3 (reduce + (map #(count (get % "members")) (f2 "classMembers"))))))
     (is (= old-before (selection-of live-record)) "Historical projection is unchanged")))
 
 (deftest retained-refusal-history-replaces-the-one-step

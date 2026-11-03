@@ -34,7 +34,9 @@
         poisoned (select/select (assoc m :cascades [{:id :poison :steps [:invalid]}]) s observation)
         construction (menu/construct pins/library-root m observation)]
     (is (= r poisoned))
-    (is (= 3 (count (:cascades r))))
+    ;; Four since 90c7273eb: with every fact placed, the serves-a-way cascade
+    ;; (placed-gate) is executable and joins the constructed menu.
+    (is (= 4 (count (:cascades r))))
     (is (= 2 (get-in r [:construction :policy-count])))
     (is (= (assoc construction :policy-count 2) (-> (:construction r) (update :cascades #(mapv (fn [c] (dissoc c :class)) %)))))
     (is (= :giraffe-order (:cascade-id r)))
@@ -114,7 +116,9 @@
         discovery (first (filter #(= :find-out-before-building (:id %)) (:cascades result)))]
     (is (= 2 (get-in result [:construction :policy-count]) (count (:classes result))))
     (is (= 2768528 (:g-units (first (:classes result)))))
-    (is (= [:only-what-can-start-now :giraffe-order] (:members (first (:classes result)))))
+    ;; serves-a-way joins the class since 90c7273eb: every fixture fact is
+    ;; placed the same way, so its pick and G coincide with the ready-gated pair.
+    (is (= [:only-what-can-start-now :giraffe-order :serves-a-way] (:members (first (:classes result)))))
     (is (= "M-pattern-retrieval-calibration" (get-in result [:selection :selected :target])))
     (is (= :discovery-yields-no-ready (:gain-source discovery)))
     (is (= [:related :none] (get-in discovery [:prediction :landing])))
@@ -169,6 +173,7 @@
         (is (nil? (:kind r)) "the real field decides; it does not refuse")
         (is (= 609 (count (:outer-score/admitted r))))
         (is (= 2 (count (:classes r))) "two prediction classes: the two ready-gated arrangements, and discovery")
-        (is (= [:only-what-can-start-now :giraffe-order] (:members chosen)))
+        ;; serves-a-way joins the chosen class since 90c7273eb (uniform fixture placement).
+        (is (= [:only-what-can-start-now :giraffe-order :serves-a-way] (:members chosen)))
         (is (= "M-pattern-retrieval-calibration" (get-in r [:selection :selected :target])))
         (is (< (:G chosen) (get-in r [:abstention :G])) "the chosen class is strictly below stopping")))))
