@@ -15,12 +15,16 @@
 (defn- makeup []
   (assoc (state/load-makeup "data/wm-learning/outer-makeup.edn")
          :task-selection-library-root pins/library-root))
+(def placed {:status "open" :ways ["fixture"] :action "work"})
+(defn- place-facts [obs]
+  (update obs :facts #(update-vals % (fn [fact] (assoc fact :placement placed)))))
 (def observation
-  {:focus "M-large" :relation (fn [_ target] (if (= "M-large" target) :focus :associated))
-   :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
-   :field [{:target "M-first" :reach 3/4} {:target "M-large" :reach 3/4}]
-   :facts {"M-first" {:status :ready :cone 0 :unblocks 0 :rank 2}
-           "M-large" {:status :ready :cone 3 :unblocks 3 :rank 1}}})
+  (place-facts
+   {:focus "M-large" :relation (fn [_ target] (if (= "M-large" target) :focus :associated))
+    :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
+    :field [{:target "M-first" :reach 3/4} {:target "M-large" :reach 3/4}]
+    :facts {"M-first" {:status :ready :cone 0 :unblocks 0 :rank 2}
+            "M-large" {:status :ready :cone 3 :unblocks 3 :rank 1}}}))
 (defn- kind [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))
 
@@ -30,7 +34,9 @@
         poisoned (select/select (assoc m :cascades [{:id :poison :steps [:invalid]}]) s observation)
         construction (menu/construct pins/library-root m observation)]
     (is (= r poisoned))
-    (is (= 3 (count (:cascades r))))
+    ;; Four since 90c7273eb: with every fact placed, the serves-a-way cascade
+    ;; (placed-gate) is executable and joins the constructed menu.
+    (is (= 4 (count (:cascades r))))
     (is (= 2 (get-in r [:construction :policy-count])))
     (is (= (assoc construction :policy-count 2) (-> (:construction r) (update :cascades #(mapv (fn [c] (dissoc c :class)) %)))))
     (is (= :giraffe-order (:cascade-id r)))
@@ -98,10 +104,11 @@
             (throw (ex-info "Retained pass drift" {})))
         rows (:order (edn/read-string text))
         m (makeup)
-        obs {:focus "WM" :relation (fn [_ _] :associated)
-             :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
-             :field (mapv #(hash-map :target (name (:id %)) :reach (:value (observation/task-reach %))) rows)
-             :facts (into {} (map #(vector (name (:id %)) %) rows))}
+        obs (place-facts
+             {:focus "WM" :relation (fn [_ _] :associated)
+              :giraffe/pass-sha256 pins/pass-sha :giraffe/input-sha256 pins/input-sha
+              :field (mapv #(hash-map :target (name (:id %)) :reach (:value (observation/task-reach %))) rows)
+              :facts (into {} (map #(vector (name (:id %)) %) rows))})
         result (try (select/select m (state/init-state m) obs)
                     (catch clojure.lang.ExceptionInfo e
                       (is false (str "Unexpected refusal " (:kind (ex-data e))))
@@ -109,7 +116,9 @@
         discovery (first (filter #(= :find-out-before-building (:id %)) (:cascades result)))]
     (is (= 2 (get-in result [:construction :policy-count]) (count (:classes result))))
     (is (= 2768528 (:g-units (first (:classes result)))))
-    (is (= [:only-what-can-start-now :giraffe-order] (:members (first (:classes result)))))
+    ;; serves-a-way joins the class since 90c7273eb: every fixture fact is
+    ;; placed the same way, so its pick and G coincide with the ready-gated pair.
+    (is (= [:only-what-can-start-now :giraffe-order :serves-a-way] (:members (first (:classes result)))))
     (is (= "M-pattern-retrieval-calibration" (get-in result [:selection :selected :target])))
     (is (= :discovery-yields-no-ready (:gain-source discovery)))
     (is (= [:related :none] (get-in discovery [:prediction :landing])))
@@ -154,15 +163,17 @@
       (let [rows (:order (edn/read-string text))
             makeup (state/load-makeup "data/wm-learning/outer-makeup.edn")
             st (state/init-state makeup)
-            obs {:field (mapv #(hash-map :target (name (:id %)) :reach (:default-reach makeup)
-                                         :reach-source :default-reach) rows)
-                 :facts (into {} (map #(vector (name (:id %)) %) rows))
-                 :focus "WM" :relation (fn [_ _] :associated)}
+            obs (place-facts
+                 {:field (mapv #(hash-map :target (name (:id %)) :reach (:default-reach makeup)
+                                            :reach-source :default-reach) rows)
+                  :facts (into {} (map #(vector (name (:id %)) %) rows))
+                  :focus "WM" :relation (fn [_ _] :associated)})
             r (select/select makeup st obs)
             chosen (first (filter #(= (:chosen-class r) (:id %)) (:classes r)))]
         (is (nil? (:kind r)) "the real field decides; it does not refuse")
         (is (= 609 (count (:outer-score/admitted r))))
         (is (= 2 (count (:classes r))) "two prediction classes: the two ready-gated arrangements, and discovery")
-        (is (= [:only-what-can-start-now :giraffe-order] (:members chosen)))
+        ;; serves-a-way joins the chosen class since 90c7273eb (uniform fixture placement).
+        (is (= [:only-what-can-start-now :giraffe-order :serves-a-way] (:members chosen)))
         (is (= "M-pattern-retrieval-calibration" (get-in r [:selection :selected :target])))
         (is (< (:G chosen) (get-in r [:abstention :G])) "the chosen class is strictly below stopping")))))

@@ -15,7 +15,11 @@
   (edn/read-string (slurp (io/resource "fixtures/q6-reselection/preview.edn"))))
 (defn setup []
   (let [{:keys [observation state relation-classes] :as data} (retained)
-        observation (assoc observation :relation (fn [_ t] (get relation-classes t)))
+        observation (-> observation
+                        (assoc :relation (fn [_ t] (get relation-classes t)))
+                        (update :facts #(update-vals % (fn [fact]
+                                                        (assoc fact :placement
+                                                               {:status "open" :ways ["fixture"] :action "work"})))))
         makeup (state/load-makeup)
         selection (outer/select makeup state observation)
         carrier (atom {:task {:id (get-in selection [:selection :selected :target])}
