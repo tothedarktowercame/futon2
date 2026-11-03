@@ -271,7 +271,7 @@
                                                                 [good-receipt] request)))))
           (is (refused? (receipts (with-action decision f) [good-receipt] request))))))))
 
-(deftest unread-targets-are-counted-and-never-chosen
+(deftest targets-outside-the-task-neither-refuse-nor-enter-the-field
   (let [fx (fixture)
         rows (vals (select-keys (:rows fx) [:current :unread :no-path]))
         result (decide fx (vec rows) {"M-current" 1 "M-unread" 1 "T-no-path" 1})
@@ -295,13 +295,14 @@
       (let [result (decide fx rows betas task nil)
             decision (:decision result)
             refusal (first (:refusals decision))]
+        (is (= 1 (count (:refusals decision))))
         (is (= 0 (::selector-calls result)))
         (is (= :abstained (:status decision)))
         (is (nil? (:action decision)))
         (is (= [:no-policy-family failure-kind]
                ((juxt :kind :failure-kind) refusal)))))))
 
-(deftest undeclared-beta-abstains-without-a-default
+(deftest undeclared-beta-runs-on-the-r20-posterior
   (let [fx (fixture)
         result (decide fx [(get-in fx [:rows :current])] {})]
     ;; 6a36b6006 makes beta the R20 posterior carried from valence; a declared
