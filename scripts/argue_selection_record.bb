@@ -13,7 +13,7 @@
 ;; picture ... without using it to explain *why* it is selecting this problem vs
 ;; that problem" is not enough; "reading the rationale off of a cascade isn't
 ;; hype, but argumentation".
-(require '[clojure.edn :as edn] '[clojure.string :as str] '[cheshire.core :as json])
+(require '[clojure.edn :as edn] '[clojure.pprint :as pprint] '[clojure.string :as str] '[cheshire.core :as json])
 
 (def in (nth *command-line-args* 0)) (def out (nth *command-line-args* 1))
 (def frame-edn (nth *command-line-args* 2)) (def frame-json (nth *command-line-args* 3))
@@ -33,12 +33,24 @@
             rest-lines (->> (drop (inc i) lines) (take-while #(not (str/blank? %))) (map str/trim))]
         (str/trim (str/join " " (cons first-line rest-lines)))))))
 
+(def undercut-line
+  #"^@undercuts ([^ ]+) \| shown-by (.*?) \| \"(.*)\"$")
+
+(defn parse-undercut [line]
+  (when-let [[_ target predicate quote] (re-matches undercut-line (str/trim line))]
+    {:target (str/replace target #"^task-selection/" "")
+     :predicate predicate
+     :quote quote}))
+
 (defn warrant [pattern]
   (let [f (str library pattern ".flexiarg")]
     (if (.exists (java.io.File. f))
       (let [lines (str/split-lines (slurp f))]
-        {:pattern pattern :conclusion (flexiarg-part lines "! conclusion:") :because (flexiarg-part lines "+ BECAUSE:")})
-      {:pattern pattern :conclusion nil :because nil :missing true})))
+        {:pattern pattern
+         :conclusion (flexiarg-part lines "! conclusion:")
+         :because (flexiarg-part lines "+ BECAUSE:")
+         :undercuts (vec (keep parse-undercut lines))})
+      {:pattern pattern :conclusion nil :because nil :undercuts [] :missing true})))
 
 (def cascade-patterns (into {} (for [c (:cascades sel)] [(:id c) (:patterns c)])))
 (def cascade-steps (into {} (for [c (:cascades sel)] [(:id c) (:steps c)])))  ; the executable steps, not the why's step results
@@ -81,8 +93,77 @@
 (def order-dir {:by-cone :max :by-unblocks :max :by-rank :min})
 (defn order-term [step facts] (get facts (case step :by-cone :cone :by-unblocks :unblocks :by-rank :rank)))
 
-(defn attacks-between [x y]
+(defn fact-value [facts field]
+  (case field
+    "giraffe.cone" (:cone facts)
+    "giraffe.unblocks" (:unblocks facts)
+    "giraffe.rank" (:rank facts)
+    "placement.status" (get-in facts [:placement :status])
+    "placement.action" (get-in facts [:placement :action])
+    "placement.way" (first (get-in facts [:placement :ways]))
+    ::unrecorded))
+
+(def comparison-re #"^([^ ]+)\s*(>|<|=)\s*([^ ]+)(?:\s+\(other is any other ready candidate in the field\))?$")
+
+(defn compare-values [op left right]
+  (case op
+    ">" (and (number? left) (number? right) (> left right))
+    "<" (and (number? left) (number? right) (< left right))
+    "=" (= left right)
+    false))
+
+(defn parse-literal [s]
+  (if (re-matches #"-?\d+(?:\.\d+)?" s)
+    (edn/read-string s)
+    ::not-literal))
+
+(defn ready-other-values [pick field]
+  (let [k (keyword (last (str/split field #"\.")))]
+    (when (seq (:per-task-rating sel))
+      (->> (:per-task-rating sel)
+           (filter #(and (= :ready (:status %)) (not= pick (:target %))))
+           (keep #(get % k))
+           vec))))
+
+(defn comparison-result [facts pick expression]
+  (if-let [[_ left-field op right-token] (re-matches comparison-re expression)]
+    (let [left (fact-value facts left-field)]
+      (cond
+        (= ::unrecorded left)
+        {:shown false :why (str left-field " is not a recorded field")}
+
+        (str/starts-with? right-token "other.giraffe.")
+        (let [values (ready-other-values pick right-token)]
+          (cond
+            (nil? values) {:shown false :why "other ready-candidate field facts are unrecorded"}
+            (empty? values) {:shown false :why (str right-token " is unrecorded for every other ready candidate")}
+            :else (let [shown (boolean (some #(compare-values op left %) values))]
+                    {:shown shown
+                     :why (str left-field " is " left ", other ready values " (pr-str values)
+                               " (comparison " (if shown "holds" "is false") ")")})))
+
+        :else
+        (let [literal (parse-literal right-token)
+              right (if (= ::not-literal literal) (fact-value facts right-token) literal)]
+          (if (= ::unrecorded right)
+            {:shown false :why (str right-token " is not recorded")}
+            (let [shown (boolean (compare-values op left right))]
+              {:shown shown
+               :why (str left-field " is " left " (comparison " op " " right " "
+                         (if shown "holds" "is false") ")")})))))
+    {:shown false :why (str "predicate cannot be evaluated: " expression)}))
+
+(defn predicate-result [facts pick predicate]
+  (if (= "unrecorded" predicate)
+    {:shown false :why "predicate is unrecorded"}
+    (let [parts (str/split predicate #"\s+and\s+")
+          results (mapv #(comparison-result facts pick %) parts)]
+      {:shown (every? :shown results)
+       :why (str/join "; " (map :why results))})))
+
+(defn attacks-between
   "What x's cascade says about y's pick: a gate that excludes it (x attacks y), or an order of x's that prefers y's pick (y attacks x)."
+  [x y]
   (let [steps (:steps x)
         gate (some #(gate-fails % (:facts y)) steps)]
     (if gate
@@ -100,14 +181,38 @@
           :else [{:kind :order :from (:id y) :to (:id x) :step (:order decided)
                   :text (str (name (:id x)) "'s own " (kw (:order decided)) " prefers " (:pick y) " (" (:vy decided) ") over its pick " (:pick x) " (" (:vx decided) ")")}])))))
 
+(defn undercuts-between [x y]
+  (let [y-patterns (set (map :pattern (:warrants y)))]
+    (for [w (:warrants x)
+          u (:undercuts w)
+          :when (and (contains? y-patterns (:target u))
+                     (not (contains? y-patterns (:pattern w))))
+          :let [result (predicate-result (:facts y) (:pick y) (:predicate u))
+                shown (:shown result)]]
+      {:kind (if shown :undercut :undercut-unshown)
+       :from (:id x)
+       :to (:id y)
+       :pattern (:pattern w)
+       :target-pattern (:target u)
+       :predicate (:predicate u)
+       :quote (:quote u)
+       :shown shown
+       :why (:why result)
+       :text (str (:pattern w) " undercuts " (:target u) ": '" (:quote u) "' — "
+                  (if shown
+                    (str "shown by " (:predicate u))
+                    (str "not shown (" (:why result) ")")))})))
+
 (def attacks (vec (distinct (concat (for [x args y args :when (not= x y) a (attacks-between x y)] a)
+                                    (for [x args y args :when (not= x y) a (undercuts-between x y)] a)
                                     ;; stopping and each pick attack each other; G (the abstention rule) resolves it
                                     (for [x args] {:kind :stopping :from (:id x) :to :stopping :text (str (name (:id x)) " has a pick below abstention: " (:pick x))})
                                     (for [x args] {:kind :stopping :from :stopping :to (:id x) :text (str "stopping: no pick is worth more than abstaining, against " (:pick x))})))))
 
 ;; ---- preference = G (lower is better); an attack from a less-preferred argument on a more-preferred one fails
 (defn G [id] (:G (by-id id)))
-(def attacks* (mapv #(assoc % :succeeds (not (< (G (:to %)) (G (:from %))))) attacks))
+(def attacks* (mapv #(assoc % :succeeds (and (not= :undercut-unshown (:kind %))
+                                             (not (< (G (:to %)) (G (:from %)))))) attacks))
 (def defeats (filter :succeeds attacks*))
 (defn defeaters [id] (map :from (filter #(= id (:to %)) defeats)))
 (defn acceptable? [S id] (every? (fn [d] (some #(contains? S %) (defeaters d))) (defeaters id)))
@@ -129,11 +234,13 @@
 
 (def losers (remove #(= (:id winner) (:id %)) args))
 (defn attack-sentence [at]
-  (str (if (= :absence (:kind at)) "From absence, " "") (:text at) (if (:succeeds at) "" " (fails under G)") "."))
+  (str (if (= :absence (:kind at)) "From absence, " "") (:text at)
+       (cond (:succeeds at) ""
+             (= :undercut-unshown (:kind at)) " (does not defeat: undercut unshown)"
+             :else " (fails under G)") "."))
 
 (def prose
-  (let [n-open (get-in sel [:field-facts :open-tasks] "?")
-        w winner]
+  (let [w winner]
     (str/join "\n\n"
       (concat
         [(str "The problem: of the open tasks, which should the War Machine work on next. The claim: " (:pick w)
@@ -158,7 +265,7 @@
                 "'s relation is unknown and lands on the prior, which puts most mass on the focused ending that the preference likes best. The lower risk of the winner (" (fmt (get-in winner [:terms :risk])) " against " (fmt (get-in l [:terms :risk]))
                 ") comes from not knowing, not from knowing.")))))
 
-(def frame {:schema :cascade/argument-frame-v0
+(def frame {:schema :cascade/argument-frame-v1
             :run (:run/id r) :click (:click/id r)
             :problem "which open task the War Machine works on next"
             :arguments all-args :attacks attacks* :preference :G-lower-is-better
@@ -183,12 +290,12 @@ table{border-collapse:collapse;font-size:90%}td,th{border:1px solid #ccc;padding
 <p>Run <code>" (esc (:run/id r)) "</code>, click <code>" (esc (:click/id r)) "</code>. Each scored cascade class is an argument for its pick; attacks are computed from the steps and the facts, never written by hand; G is the preference that resolves them.</p>
 <h2>The argument, in prose</h2><div class=prose>" (str/join "" (map #(str "<p>" (esc %) "</p>") (str/split prose #"\n\n"))) "<p><i>" (esc what-G-read) "</i></p></div>
 <h2>The arguments</h2><table><tr><th>argument</th><th>pick</th><th>grounds (facts read)</th><th>warrants (pattern conclusions)</th><th>G</th></tr>" (str/join "\n" (map arg-row all-args)) "</table>
-<h2>The attacks</h2><ul>" (str/join "\n" (for [a attacks*] (str "<li class=" (cond (not (:succeeds a)) "fails" (= :absence (:kind a)) "absence" :else "ok") ">" (esc (name (:from a))) " → " (esc (name (:to a))) " (" (name (:kind a)) "): " (esc (:text a)) (if (:succeeds a) " — stands under G" " — fails under G: the target is preferred") "</li>"))) "</ul>
+<h2>The attacks</h2><ul>" (str/join "\n" (for [a attacks*] (str "<li class=" (cond (not (:succeeds a)) "fails" (= :absence (:kind a)) "absence" :else "ok") ">" (esc (name (:from a))) " → " (esc (name (:to a))) " (" (name (:kind a)) "): " (esc (:text a)) (cond (:succeeds a) " — stands under G" (= :undercut-unshown (:kind a)) " — does not defeat: undercut unshown" :else " — fails under G: the target is preferred") "</li>"))) "</ul>
 <p>Semantics: grounded extension under preference (an attack from a less-preferred argument on a more-preferred one does not defeat). Grounded: {" (esc (str/join ", " (map name grounded))) "}. Record's decision: " (esc (:pick decision)) (if (:agrees frame) " — agrees." " — DISAGREES.") "</p>
-<p>Frame: <code>" (esc frame-edn) "</code> (schema :cascade/argument-frame-v0). Record: <code>" (esc in) "</code>.</p>"))
+<p>Frame: <code>" (esc frame-edn) "</code> (schema :cascade/argument-frame-v1). Record: <code>" (esc in) "</code>.</p>"))
 
 (spit out html)
-(spit frame-edn (with-out-str (clojure.pprint/pprint frame)))
+(spit frame-edn (with-out-str (pprint/pprint frame)))
 (spit frame-json (json/generate-string frame {:pretty true}))
 (println "wrote" out "," frame-edn "," frame-json)
 (println "grounded:" grounded "agrees:" (:agrees frame))
