@@ -1,0 +1,6 @@
+id	what	status	wing	way	action	need_goes_to	finish	beneficiary	confidence	seat	job	at	ok	unsure	failed
+E-work	Work item	open	A	a, b	work	E-next	Finish work	self	high	codex-1	job-1	2026-11-02T00:00Z	1	0	
+E-held	Held item	open	B	none	held		Wait	self	medium	codex-2	job-2	2026-11-02T00:01Z	1	0	
+E-closed	Closed item	closed	C	none	close		Closed	self	high	codex-3	job-3	2026-11-02T00:02Z	1	0	
+E-overlap	Explicit cluster item	open	D	stem-way	cluster:x		Per stem	self	high	codex-4	job-4	2026-11-02T00:03Z	1	0	
+E-audit	Audit item	stopped	E	audit-way	audit		Audited	self	low	codex-5	job-5	2026-11-02T00:04Z	1	0	
