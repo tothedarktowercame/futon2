@@ -6,7 +6,8 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.attempt-learning :as attempt]
-            [futon2.aif.learning-trial-ledger :as ledger]))
+            [futon2.aif.learning-trial-ledger :as ledger]
+            [futon2.data-paths :as data-paths]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
@@ -24,7 +25,9 @@
     (is (= :record-only (:mode v1)))))
 
 (deftest reader-interprets-old-trials-never-duplicates
-  (let [snapshot (slurp (io/file ledger/default-root "attempts.edn"))
+  ;; Historical production rows, read-only, declared as a warrant input.
+  (let [snapshot (slurp (io/file data-paths/production-data-root
+                                 "wm-learning-trials" "attempts.edn"))
         recorded (with-open [reader (java.io.PushbackReader. (java.io.StringReader. snapshot))]
                    (loop [rows []]
                      (let [row (edn/read {:eof ::eof} reader)]
