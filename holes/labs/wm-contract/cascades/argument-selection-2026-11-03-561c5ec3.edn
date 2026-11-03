@@ -1,4 +1,4 @@
-{:schema :cascade/argument-frame-v0,
+{:schema :cascade/argument-frame-v1,
  :grounded [:serves-a-way],
  :run "2026-11-03-561c5ec3-6510-42a3-930b-331ef089feb4",
  :semantics :grounded-under-preference,
@@ -27,17 +27,29 @@
      :conclusion
      "Select only work whose needs are met, and say which need blocks each item that is left out.",
      :because
-     "A blocked item selected anyway spends a dispatch discovering the block."}
+     "A blocked item selected anyway spends a dispatch discovering the block.",
+     :undercuts []}
     {:pattern "prepare-the-ground",
      :conclusion
      "Some work is selected not for its own output but because it shapes a later build; select it under that name, and say which later item it serves.",
      :because
-     "Without the name of the item it serves, groundwork cannot be checked, and is easily reported as more than it is."}
+     "Without the name of the item it serves, groundwork cannot be checked, and is easily reported as more than it is.",
+     :undercuts
+     [{:target "what-others-wait-on-first",
+       :predicate "giraffe.cone > 0 and giraffe.unblocks = 0",
+       :quote
+       "Groundwork frees nothing at once, so ordering by immediate unblocking ranks it low; and a day of groundwork reported as output overstates it."}]}
     {:pattern "what-others-wait-on-first",
      :conclusion
      "Among items that can start now, do first the one that the most other items are waiting on.",
      :because
-     "The pieces many others wait on, done first, let several chains close; skipped, those chains grow without closing."}],
+     "The pieces many others wait on, done first, let several chains close; skipped, those chains grow without closing.",
+     :undercuts
+     [{:target "take-the-cheap-win",
+       :predicate
+       "giraffe.unblocks < other.giraffe.unblocks (other is any other ready candidate in the field)",
+       :quote
+       "Plans are often written in another order (the order pieces were thought of), and the item many others need may be harder or less visible than a cheap uncoupled one."}]}],
    :facts
    {:rank 1,
     :header
@@ -73,7 +85,8 @@
      :conclusion
      "When the right build depends on something not yet observed, select the task that finds it out first, and keep it separate from the build.",
      :because
-     "A wrong premise in a combined packet ships unchallenged; a separate answer can be read before anything is built on it."}],
+     "A wrong premise in a combined packet ships unchallenged; a separate answer can be read before anything is built on it.",
+     :undercuts []}],
    :facts
    {:rank 509,
     :header
@@ -113,17 +126,25 @@
      :conclusion
      "Select only work whose needs are met, and say which need blocks each item that is left out.",
      :because
-     "A blocked item selected anyway spends a dispatch discovering the block."}
+     "A blocked item selected anyway spends a dispatch discovering the block.",
+     :undercuts []}
     {:pattern "serves-a-way",
      :conclusion
      "Keep work placed under a cited way and name that way in the reason.",
      :because
-     "A dispatch should say which way the selected work serves."}
+     "A dispatch should say which way the selected work serves.",
+     :undercuts []}
     {:pattern "what-others-wait-on-first",
      :conclusion
      "Among items that can start now, do first the one that the most other items are waiting on.",
      :because
-     "The pieces many others wait on, done first, let several chains close; skipped, those chains grow without closing."}],
+     "The pieces many others wait on, done first, let several chains close; skipped, those chains grow without closing.",
+     :undercuts
+     [{:target "take-the-cheap-win",
+       :predicate
+       "giraffe.unblocks < other.giraffe.unblocks (other is any other ready candidate in the field)",
+       :quote
+       "Plans are often written in another order (the order pieces were thought of), and the item many others need may be harder or less visible than a cheap uncoupled one."}]}],
    :facts
    {:rank 98,
     :header
@@ -205,6 +226,20 @@
    :text
    "serves-a-way's ready-gate excludes M-patterns-done-right: status undetermined (prerequisite-unresolved)",
    :succeeds true}
+  {:why
+   "giraffe.cone is 0 (comparison > 0 is false); giraffe.unblocks is 0 (comparison = 0 holds)",
+   :target-pattern "what-others-wait-on-first",
+   :shown false,
+   :succeeds false,
+   :quote
+   "Groundwork frees nothing at once, so ordering by immediate unblocking ranks it low; and a day of groundwork reported as output overstates it.",
+   :from :giraffe-order,
+   :kind :undercut-unshown,
+   :predicate "giraffe.cone > 0 and giraffe.unblocks = 0",
+   :pattern "prepare-the-ground",
+   :text
+   "prepare-the-ground undercuts what-others-wait-on-first: 'Groundwork frees nothing at once, so ordering by immediate unblocking ranks it low; and a day of groundwork reported as output overstates it.' — not shown (giraffe.cone is 0 (comparison > 0 is false); giraffe.unblocks is 0 (comparison = 0 holds))",
+   :to :serves-a-way}
   {:kind :stopping,
    :from :giraffe-order,
    :to :stopping,
@@ -243,4 +278,4 @@
    :succeeds false}],
  :decision "M-typed-holes-mathlib-handoff",
  :prose
- "The problem: of the open tasks, which should the War Machine work on next. The claim: M-typed-holes-mathlib-handoff, by serves-a-way. Warrants: “Select only work whose needs are met, and say which need blocks each item that is left out.” “Keep work placed under a cited way and name that way in the reason.” “Among items that can start now, do first the one that the most other items are waiting on.” Grounds: Giraffe reads it ready, rank 98; cone 0, unblocks 0; placement open under backlog-understood, action work; relation to the focus unknown.\n\ngiraffe-order (its class also holds only-what-can-start-now) argues instead for M-war-machine-aif-completion. Warrants: “Select only work whose needs are met, and say which need blocks each item that is left out.” “Some work is selected not for its own output but because it shapes a later build; select it under that name, and say which later item it serves.” “Among items that can start now, do first the one that the most other items are waiting on.” Grounds: Giraffe reads it ready, rank 1; cone 11, unblocks 1; no placement row; relation to the focus associated. giraffe-order's by-cone prefers its own pick: M-war-machine-aif-completion 11 against M-typed-holes-mathlib-handoff 0 (fails under G). From absence, serves-a-way's placed-gate excludes M-war-machine-aif-completion: no placement row: nobody has read where this item is placed.\n\nfind-out-before-building argues instead for M-patterns-done-right. Warrants: “When the right build depends on something not yet observed, select the task that finds it out first, and keep it separate from the build.” Grounds: Giraffe reads it undetermined (prerequisite-unresolved), rank 509; no placement row; relation to the focus unknown. find-out-before-building's {:status-gate :undetermined} excludes M-typed-holes-mathlib-handoff: status ready, not undetermined (fails under G). serves-a-way's ready-gate excludes M-patterns-done-right: status undetermined (prerequisite-unresolved).\n\nWhat decided: G. serves-a-way 2.1432 < giraffe-order 2.4695 < find-out-before-building 2.8568 < stopping 13.7301. Under that preference an attack from a higher-G argument on a lower-G one fails, so giraffe-order against find-out-before-building stands; giraffe-order against serves-a-way fails; find-out-before-building against giraffe-order fails; find-out-before-building against serves-a-way fails; serves-a-way against giraffe-order stands; serves-a-way against find-out-before-building stands; giraffe-order against stopping stands; find-out-before-building against stopping stands; serves-a-way against stopping stands; stopping against giraffe-order fails; stopping against find-out-before-building fails; stopping against serves-a-way fails. Grounded extension: {serves-a-way}, which is the record's decision."}
+ "The problem: of the open tasks, which should the War Machine work on next. The claim: M-typed-holes-mathlib-handoff, by serves-a-way. Warrants: “Select only work whose needs are met, and say which need blocks each item that is left out.” “Keep work placed under a cited way and name that way in the reason.” “Among items that can start now, do first the one that the most other items are waiting on.” Grounds: Giraffe reads it ready, rank 98; cone 0, unblocks 0; placement open under backlog-understood, action work; relation to the focus unknown.\n\ngiraffe-order (its class also holds only-what-can-start-now) argues instead for M-war-machine-aif-completion. Warrants: “Select only work whose needs are met, and say which need blocks each item that is left out.” “Some work is selected not for its own output but because it shapes a later build; select it under that name, and say which later item it serves.” “Among items that can start now, do first the one that the most other items are waiting on.” Grounds: Giraffe reads it ready, rank 1; cone 11, unblocks 1; no placement row; relation to the focus associated. giraffe-order's by-cone prefers its own pick: M-war-machine-aif-completion 11 against M-typed-holes-mathlib-handoff 0 (fails under G). prepare-the-ground undercuts what-others-wait-on-first: 'Groundwork frees nothing at once, so ordering by immediate unblocking ranks it low; and a day of groundwork reported as output overstates it.' — not shown (giraffe.cone is 0 (comparison > 0 is false); giraffe.unblocks is 0 (comparison = 0 holds)) (does not defeat: undercut unshown). From absence, serves-a-way's placed-gate excludes M-war-machine-aif-completion: no placement row: nobody has read where this item is placed.\n\nfind-out-before-building argues instead for M-patterns-done-right. Warrants: “When the right build depends on something not yet observed, select the task that finds it out first, and keep it separate from the build.” Grounds: Giraffe reads it undetermined (prerequisite-unresolved), rank 509; no placement row; relation to the focus unknown. find-out-before-building's {:status-gate :undetermined} excludes M-typed-holes-mathlib-handoff: status ready, not undetermined (fails under G). serves-a-way's ready-gate excludes M-patterns-done-right: status undetermined (prerequisite-unresolved).\n\nWhat decided: G. serves-a-way 2.1432 < giraffe-order 2.4695 < find-out-before-building 2.8568 < stopping 13.7301. Under that preference an attack from a higher-G argument on a lower-G one fails, so giraffe-order against find-out-before-building stands; giraffe-order against serves-a-way fails; find-out-before-building against giraffe-order fails; find-out-before-building against serves-a-way fails; serves-a-way against giraffe-order stands; serves-a-way against find-out-before-building stands; giraffe-order against serves-a-way fails; giraffe-order against stopping stands; find-out-before-building against stopping stands; serves-a-way against stopping stands; stopping against giraffe-order fails; stopping against find-out-before-building fails; stopping against serves-a-way fails. Grounded extension: {serves-a-way}, which is the record's decision."}

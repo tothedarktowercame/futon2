@@ -19,12 +19,12 @@
     {:pattern
      "futon3/library/task-selection/prepare-the-ground.flexiarg",
      :sha256
-     "16108c59bf0dd84c4ac9d42197a19699423b3e14f96833db3599bfd5d3746f3a",
+     "012d0639aea84541b0eb63b6ade601fdbfb5a1c9ca43a3293a8881a2d1687718",
      :index 1}
     {:pattern
      "futon3/library/task-selection/what-others-wait-on-first.flexiarg",
      :sha256
-     "a582e82e22f66b4bf7be5e7c81d886f137bda923b8e6a481eb9635ee3f9d80be",
+     "f9e5f2aab1013d767652219967b6829756108e3fb60dc91d5526ee091f6fd606",
      :index 2}],
    :edges [[0 1 :precedes] [1 2 :precedes]],
    :applied
