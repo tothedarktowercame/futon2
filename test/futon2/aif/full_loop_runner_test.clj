@@ -112,7 +112,15 @@
                    (str "qa-" (:attempt-id item))})]
     (f)))
 
-(use-fixtures :each with-field-desk-stub without-live-wm-status)
+(defn- with-fresh-run-records
+  [f]
+  ;; 12fe754c6 rejects unchanged inputs after a terminal refusal. Keep that
+  ;; history within one deftest so unrelated tests cannot refuse each other.
+  (with-redefs [runner/default-run-record-dir
+                (#'hermetic/temp-root "wm-runner-record-test-")]
+    (f)))
+
+(use-fixtures :each with-fresh-run-records with-field-desk-stub without-live-wm-status)
 
 (deftest entity-state-at-close-retains-the-in-force-row
   (let [row {:strengthened 0.4 :addressed 0.1 :falsified 0.1
