@@ -1,0 +1,135 @@
+;; With hindsight: the cascade that explains why Joe selected working on
+;; "cascade selection" on the evening of 2026-11-02/03. Constructed by claude-2
+;; at 01:2xZ 2026-11-03 from Joe's turns in this REPL session (quoted, with the
+;; time each was said, to the minute where the clock was read and "~" where it
+;; is placed from the turn order) and from the task-selection library
+;; (futon3/library/task-selection, sha per unit). Shape: claude-16's
+;; :cascade/record-draft-v0. Not a chain: two sources join at prepare-the-ground,
+;; a discovery line and the ground join at end-in-something-shown, and the
+;; hard-one line joins the second source at the portfolio. Joe, 01:1xZ: "Supposing
+;; we were to try to explain (with the benefit of hindsight) why I have selected
+;; working on 'cascade selection' ... the rationale may be a bit complex."
+{:schema :cascade/record-draft-v0
+ :id :why-cascade-selection-tonight
+ :status :stated-with-hindsight
+ :applies-to "what Joe chose to work on, 2026-11-02 21:5xZ to 2026-11-03 01:1xZ"
+ :selected "cascade selection: the placement adapter in the WM outer loop, an outer-selection-only run, and a shared cascade record with claude-16"
+ :run nil
+ :click nil
+ :selected-at "2026-11-02T23:50Z (the go) and 2026-11-03T00:5xZ (the joint plan)"
+
+ :units
+ [{:index 0 :pattern "futon3/library/task-selection/the-operator-asked.flexiarg"
+   :sha256 "60715416db6a" :step :source
+   :needs [:want-improve-wm :ask-adapter] :establishes :want-a
+   :quote "An operator want enters selection as a candidate chartered by the operator's own words"
+   :applied "want A: improve how the War Machine works; its charter is the 21:5xZ ask whether the placement work informs selection and, if not, whether an adapter can"}
+  {:index 1 :pattern "futon3/library/task-selection/the-operator-asked.flexiarg"
+   :sha256 "60715416db6a" :step :source
+   :needs [:want-giraffe-understanding :benefit-of-xiang] :establishes :want-b
+   :quote "An operator want enters selection as a candidate chartered by the operator's own words"
+   :applied "want B: the Giraffe and 象 effort to understand the work in progress and its priorities, which the outer loop is supposed to benefit from"}
+  {:index 2 :pattern "futon3/library/task-selection/prepare-the-ground.flexiarg"
+   :sha256 "16108c59bf0d" :step :order
+   :needs [:want-a :want-b] :establishes :ground
+   :quote "Some work is selected not for its own output but because it shapes a later build; select it under that name, and say which later item it serves."
+   :applied "JOIN of A and B: 'cascade selection' frees nothing tonight, but it shapes the later item both wants name, a WM outer loop that reads the same cascade records the interactive side produces"}
+  {:index 3 :pattern "futon3/library/task-selection/find-out-before-building.flexiarg"
+   :sha256 "6654bd9b1f34" :step :reshape
+   :needs [:want-a :no-reader-found] :establishes :discovery-first
+   :quote "When the right build depends on something not yet observed, select the task that finds it out first, and keep it separate from the build."
+   :applied "the ask was a question before a build: does anything in the running code read the placements? Found: nothing under futon2/src or futon3c/src does. Only then the adapter"}
+  {:index 4 :pattern "futon3/library/task-selection/bound-the-bet.flexiarg"
+   :sha256 "eedd5c216220" :step :reshape
+   :needs [:discovery-first :go-outer-only :stop-rule] :establishes :bounded-run
+   :quote "Select an uncertain task only with a stop rule written in advance, so that selecting it is cheap to undo and a failure is a finding."
+   :applied "the run was outer-selection-only, with the stop written in advance: a breakpoint after selection-world and an abort at the stop; its one failure (the abort opened an injury) is a finding, R31"}
+  {:index 5 :pattern "futon3/library/task-selection/spend-what-the-seats-have.flexiarg"
+   :sha256 "63f47d44a164" :step :gate
+   :needs [:bounded-run :codex-cast :zai-capped] :establishes :runnable-tonight
+   :quote "What can be selected depends on which agents have usage now; select work the available seats can finish, and route around exhausted ones."
+   :applied "Zai, the usual cast, is capped until 02:04Z; Joe routed the cast to Codex seats, so the run could happen tonight"}
+  {:index 6 :pattern "futon3/library/task-selection/end-in-something-shown.flexiarg"
+   :sha256 "3a1af79cd2f4" :step :gate
+   :needs [:ground :runnable-tonight :show-not-replay] :establishes :shown
+   :quote "Select only work that ends in a capability someone can verify, and shrink work that cannot until it does."
+   :applied "JOIN of the ground and the run: the deliverable is a cascade Joe can look at (the selection record page), not a 47-row replay; the replay was shrunk away"}
+  {:index 7 :pattern "futon3/library/task-selection/take-the-hard-one-to-learn.flexiarg"
+   :sha256 "c55fb43af570" :step :order
+   :needs [:ground :doubt-meaningful :g-is-a-number] :establishes :hard-kept-whole
+   :quote "Select hard work, and keep it whole, when its parts depend on each other or when it will teach what later work needs; difficulty alone is not a reason."
+   :applied "the hard part is meaning, not validity: a valid chain was shown and judged thin; the rationale and the number G are kept together because each is empty without the other"}
+  {:index 8 :pattern "futon3/library/task-selection/a-portfolio-not-a-winner.flexiarg"
+   :sha256 "f9576997d126" :step :compose
+   :needs [:hard-kept-whole :want-b :coordinate] :establishes :selected
+   :quote "Real selections mix kinds ... fill the round from several orderings, not from the top of one."
+   :applied "JOIN of the hard one and want B: two subsystems in one round, the WM consumer (claude-2) and the mined cascade from turns (claude-16), on one record shape"}]
+
+ :edges [[0 2 :precedes] [1 2 :precedes]
+         [0 3 :precedes] [3 4 :precedes] [4 5 :precedes]
+         [2 6 :precedes] [5 6 :precedes]
+         [2 7 :precedes] [7 8 :precedes] [1 8 :precedes]]
+ :independent [[0 1] [3 7] [6 8]]
+
+ :reads
+ {:want-improve-wm {:value "I want to improve the way the War Machine works" :kind :read
+                    :source "Joe, REPL turn to claude-2, 2026-11-03 ~01:1xZ"
+                    :quote "On the one hand, I want to improve the way the War Machine works."}
+  :want-giraffe-understanding {:value "the Giraffe effort to understand the work in progress and its priorities" :kind :read
+                               :source "Joe, same turn"
+                               :quote "On the other hand, I know this links to ongoing effort in Giraffe to build a clear understanding of my work in progress and what the priorities are."}
+  :ask-adapter {:value "does the placement work inform selection; if not, an adapter" :kind :read
+                :source "Joe, REPL turn, 2026-11-02 ~21:53Z"
+                :quote "whether the work we're doing is actually usable in the War Machine's outer loop, i.e., has the work we've been doing started to inform selection in a meaningful way, and if not, can we spin off an adapter that will improve the WM's selection?"}
+  :benefit-of-xiang {:value "the outer loop should benefit from M-象-cascade" :kind :read
+                     :source "Joe, REPL turn, 2026-11-03 ~00:53Z"
+                     :quote "The outer loop, in my view, is supposed to be able to get the benefit of that. But I have yet to see real/meaningful pattern cascades being generated by either subsystem."}
+  :no-reader-found {:value "no namespace under futon2/src or futon3c/src reads the placements" :kind :read
+                    :source "claude-2, trail row 21:55Z 2026-11-02, PLAN-ant-reads-2026-11-02.md"}
+  :go-outer-only {:value "develop the adapter; test with an outer-selection-only run" :kind :read
+                  :source "Joe, REPL turn, 2026-11-02 23:50Z"
+                  :quote "OK, please develop the adapter and test it out w/ an outer-selection-only run."}
+  :stop-rule {:value "breakpoint [:after :selection-world], then abort" :kind :read
+              :source "claude-2, trail rows 23:58Z and 00:41Z, PLAN-outer-selection-restoration-claude2-2026-11-01.md"}
+  :codex-cast {:value "Codex seats as the WM cast" :kind :read
+               :source "Joe, same 23:50Z turn"
+               :quote "You can use Codex agents for the WM cast (such as it is in outer-only)"}
+  :zai-capped {:value "Zai monthly cap exhausted; resets 2026-11-03 02:04Z" :kind :read
+               :source "claude-2 memory, zai-monthly-cap-exhausted-2026-11-01"}
+  :show-not-replay {:value "constructed cascades to look at, not a 47-row replay" :kind :read
+                    :source "Joe, REPL turn, 2026-11-03 ~01:05Z"
+                    :quote "I'd much rather see some real cascades being constructed (e.g. this could be a use for WebArxana) than do a reply of 47 rows."}
+  :doubt-meaningful {:value "classical code can make a valid cascade, doubtfully a meaningful one" :kind :read
+                     :source "Joe, REPL turn, 2026-11-03 ~00:50Z"
+                     :quote "I'm a bit dubious of classical code's ability to produce a *meaningful* cascade even if it can produce a *valid* one"}
+  :g-is-a-number {:value "rationale and a number, the number relative to explored alternatives" :kind :read
+                  :source "Joe, REPL turn, 2026-11-03 ~00:53Z"
+                  :quote "the cascade should be readable as a rationale, but the cascade itself should be scored with a number (G). It's like saying 'honesty is the best policy'."}
+  :coordinate {:value "one plan across interactive and non-interactive settings" :kind :read
+               :source "Joe, same ~00:53Z turn"
+               :quote "we should coordinate across both interactive and non-interactive settings because they share the same data structures (or are supposed to)."}
+  :priorities-elsewhere {:value "what else was open tonight and how it ranked" :kind :proxy
+                         :source "not read: the Giraffe field for Joe's own work has no pass; the alternatives below are named from the session, not from a field"}}
+
+ :rationale
+ "Two wants were in the room. A: improve how the War Machine works, chartered at 21:53Z as a question, whether the placement reads inform selection, and if not, whether an adapter could. B: the Giraffe and 象 effort to understand the work in progress and its priorities, which the outer loop is supposed to benefit from. Neither want frees anything tonight; what they share is a later item, an outer loop that reads the same cascade records the interactive side produces, and 'cascade selection' was selected under that name (prepare-the-ground, the first join). From A, the question was answered before anything was built: nothing in the running code read the placements, so the adapter was a build with a known gap (find-out-before-building). The build was bounded: an outer-selection-only run with its stop written in advance, so its one failure is a finding (bound-the-bet), and it was routed to Codex seats because Zai is capped (spend-what-the-seats-have). The ground and the run join at the deliverable: a cascade Joe can look at, with the 47-row replay shrunk away (end-in-something-shown). The hard part was kept whole: meaning rather than validity, with the rationale and the number G held together (take-the-hard-one-to-learn). And the round was filled from two orderings, the WM consumer and the mined cascade from turns, on one record shape with claude-16 (a-portfolio-not-a-winner, the last join, where B re-enters). What the cascade did not read: the field of Joe's other open work tonight, so the alternatives below are named from the session, not ranked from a pass."
+
+ :attestation
+ {:source "claude-2's REPL session with Joe, 2026-11-02 21:5xZ to 2026-11-03 01:1xZ; trail rows in PLAN-outer-selection-restoration-claude2-2026-11-01.md and PLAN-meaningful-cascades-2026-11-03.md"
+  :readers [{:who "claude-2" :what "read the turns and chose the units, with hindsight" :at "2026-11-03T01:2xZ"}]
+  :held-out nil
+  :note "Stated with hindsight by the agent who was in the conversation; a cascade mined from the same turns by a reader who was not would be the test of this one. The unit shas are the first 12 hex digits of each flexiarg's sha256."}
+
+ :alternatives
+ [{:id :repair-first :pattern "repair-goes-to-the-front" :pick "repair R31 (the abort that opens an injury) before anything else" :G nil
+   :note "an open repair obligation sits on the path of the next ordinary click; left for Joe's word because it changes the machine-failure contract"}
+  {:id :hold-until-zai :pattern "hold-with-a-rearm-condition" :pick "wait for the Zai reset at 02:04Z and run with the usual cast" :G nil
+   :note "rejected by Joe at 23:50Z: Codex seats for the cast"}
+  {:id :replay-47 :pattern "find-out-before-building (as a test)" :pick "replay the disposition cascade on the 47 review rows blind" :G nil
+   :note "rejected by Joe at ~01:05Z: see cascades being constructed instead"}
+  {:id :finish-placements :pattern "finish-what-is-nearly-done" :pick "more ant placement batches and Cascade Live polish" :G nil
+   :note "not raised by anyone tonight; the placements were done at 21:48Z"}
+  {:id :stopping :pick nil :G nil :note "Joe did not stop; the session ran to 01:1xZ"}]
+
+ :G nil
+ :G-note "No scoring run exists for a cascade over Joe's own choices: the WM's G needs a makeup (C, state and gain kits) and Joe has said C is not fixed and that his rulings are observations for learning it. The alternatives are named so that a number, when there is one, is relative to them, as Joe asked ('best' relative to 'deceit' and 'strategic vagueness')."}
