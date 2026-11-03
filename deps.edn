@@ -31,11 +31,14 @@
   ;; they assert what the model requires of the real tick and FAIL until the node is
   ;; wired, so they live outside the default :test path.
   ;; Run: clojure -M:test:vm-test -m cognitect.test-runner -d vm-test
-  :vm-test {:extra-paths ["vm-test"]}
+  :vm-test {:extra-paths ["vm-test"]
+            :jvm-opts ["-Djava.io.tmpdir=/home/joe/code/storage/test-fixtures"]}
   :test-slow {:extra-paths ["test-slow"]
+              :jvm-opts ["-Djava.io.tmpdir=/home/joe/code/storage/test-fixtures"]
               :main-opts ["-m" "cognitect.test-runner" "-d" "test-slow"]}
   :test {:extra-paths ["test"]
-         :jvm-opts ["-Dfuton2.test-run=true" "-Dfuton2.data-root.test=true"]
+         :jvm-opts ["-Dfuton2.test-run=true" "-Dfuton2.data-root.test=true"
+                    "-Djava.io.tmpdir=/home/joe/code/storage/test-fixtures"]
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                       babashka/fs {:mvn/version "0.5.25"}
                       babashka/process {:mvn/version "0.5.22"}
