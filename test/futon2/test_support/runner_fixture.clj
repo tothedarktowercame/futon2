@@ -3,6 +3,7 @@
   (:require [clojure.java.io :as io]
             [clojure.test :refer [is]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.selected-mission-contract :as mission-contract]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.meta-injury-store :as meta-injury-store]
@@ -171,12 +172,12 @@
       (finally
         (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
 
-(def ^:private judgement
+(defn- judgement-for-action [action]
   {:decision (assoc-in
               (select-with-prefix-history
-               [(loop-exercised-ranked-entry selected-action -2.0 1)
+               [(loop-exercised-ranked-entry action -2.0 1)
                 (loop-exercised-ranked-entry
-                 (assoc selected-action
+                 (assoc action
                         :cascade-id "M-rank-head" :id "M-rank-head"
                         :precedence [:test/other-pattern :test/other-followup])
                  -1.0 2)]
@@ -212,32 +213,47 @@
             :obligation/id (str "test/" pattern-id)})
          shown)})
 
-(defn isolated-runner-opts []
-  (merge
-   (hermetic/runner-repair-options)
-   {:cohort? false
-    :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
-    :phase-log-fn (fn [_])
-    :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                        :codex-7 {:status "idle" :invoke-ready? true}
-                        :codex-1 {:status "idle" :invoke-ready? true}})
-    :judge-fn (fn [_] {:judgement judgement})
-    :refresh-fn (fn [])
-    :substrate-preflight-fn (fn [_] {:route :test})
-    :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
-                           :git-dirty? false :repo-heads {}})
-    :mode-flags-fn (fn [] {})
-    :scan-render-fn (fn [& _] nil)
-    :effective-run-configuration-fn declared-effective-configuration
-    :version-stamp-fn identity
-    :mission-fn (fn [target] {:id target})
-    :construct-fn runner/construct-for-decision
-    :construction-wiring-fn enriched-test-fold
-    :author-artifact-observer-fn synthetic-artifact-binding
-    :r16-park-fn (fn [_ finding]
-                   {:ok true :id (str "test-park/" (:repair/id finding))
-                    :status :parked})
-    :delivery-qa-fn
-    (fn [_ item]
-      {:morning-brief/addendum-id (str "qa-" (:attempt-id item))})
-    :queue-fn identity}))
+(defn isolated-runner-opts
+  ([] (isolated-runner-opts {}))
+  ([{:keys [mission-source-text]
+     :or {mission-source-text
+          "# Test mission\n\n- [ ] the selected feature card is persisted\n"}}]
+   (let [repair-opts (hermetic/runner-repair-options)
+         code-root (:repair-root repair-opts)
+         mission-file (io/file code-root "futon2/holes/missions/M-selected.md")
+         _ (io/make-parents mission-file)
+         _ (spit mission-file mission-source-text)
+         ;; 5712b9067 requires the selected want to come from mission bytes.
+         contract (mission-contract/source-contract
+                   code-root "M-selected" (.getPath mission-file) (slurp mission-file))
+         ;; Rebuild selection with the same action in its certificate and decision.
+         mission-judgement (judgement-for-action
+                            (mission-contract/attach selected-action contract))]
+     (merge
+      repair-opts
+      {:cohort? false
+       :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
+       :phase-log-fn (fn [_])
+       :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                           :codex-7 {:status "idle" :invoke-ready? true}
+                           :codex-1 {:status "idle" :invoke-ready? true}})
+       :judge-fn (fn [_] {:judgement mission-judgement})
+       :refresh-fn (fn [])
+       :substrate-preflight-fn (fn [_] {:route :test})
+       :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                              :git-dirty? false :repo-heads {}})
+       :mode-flags-fn (fn [] {})
+       :scan-render-fn (fn [& _] nil)
+       :effective-run-configuration-fn declared-effective-configuration
+       :version-stamp-fn identity
+       :mission-fn (fn [target] {:id target :path (.getPath mission-file)})
+       :construct-fn runner/construct-for-decision
+       :construction-wiring-fn enriched-test-fold
+       :author-artifact-observer-fn synthetic-artifact-binding
+       :r16-park-fn (fn [_ finding]
+                      {:ok true :id (str "test-park/" (:repair/id finding))
+                       :status :parked})
+       :delivery-qa-fn
+       (fn [_ item]
+         {:morning-brief/addendum-id (str "qa-" (:attempt-id item))})
+       :queue-fn identity}))))

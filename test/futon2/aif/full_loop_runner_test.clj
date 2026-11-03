@@ -27,6 +27,7 @@
             [futon2.aif.accepted-increment :as accepted-increment]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.selected-mission-contract :as mission-contract]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.substrate]
@@ -804,12 +805,12 @@
                   (get-in token-decision [:selection-certificate :token-belief-stage]))
         with-test-carry)))
 
-(def judgement
+(defn- judgement-for-action [action]
   {:decision (with-test-carry
               (runner-fixture/select-with-prefix-history
-               [(loop-exercised-ranked-entry selected-action -2.0 1)
+               [(loop-exercised-ranked-entry action -2.0 1)
                 (loop-exercised-ranked-entry
-                 (assoc selected-action
+                 (assoc action
                         :cascade-id "M-rank-head" :id "M-rank-head"
                         :precedence [:test/other-pattern :test/other-followup])
                  -1.0 2)]
@@ -817,6 +818,8 @@
    :belief {} :belief-pre {} :observation {} :free-energy {}
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :mode :maintain})
+
+(def judgement (judgement-for-action selected-action))
 
 (deftest selection-without-retained-loop-evidence-records-absence
   (let [decision (policy/select-action-cascades
@@ -925,10 +928,12 @@
     (is (= output-digest (:input-sha256 shape) (:fold-output-sha256 correspondence)))
     (is (= (digest/sha256 (pr-str (:patterns j))) (:cascade-sha256 correspondence)))))
 
-(defn isolated-runner-opts []
-  (assoc (runner-fixture/isolated-runner-opts)
-         :effective-run-configuration-fn
-         (:effective-run-configuration-fn (runtime/production-defaults {}))))
+(defn isolated-runner-opts
+  ([] (isolated-runner-opts {}))
+  ([opts]
+   (assoc (runner-fixture/isolated-runner-opts opts)
+          :effective-run-configuration-fn
+          (:effective-run-configuration-fn (runtime/production-defaults {})))))
 
 (def feature-card-claim
   {:built "Build-time feature cards now survive grounding into Morning Brief."
@@ -963,7 +968,15 @@
         queued-operator-actions (atom [])
         dispatches (atom [])
         dispatch-requests (atom {})
-        _ (spit mission-file "# test mission\n")
+        _ (spit mission-file
+                "# Test mission\n\n- [ ] the selected feature card is persisted\n")
+        ;; 5712b9067: derive the fixture's want from its own mission snapshot.
+        contract (mission-contract/source-contract
+                  (.getParent root) "M-selected" (.getPath mission-file)
+                  (slurp mission-file))
+        ;; Attach before selection: the action is also the certificate's identity.
+        mission-judgement (judgement-for-action
+                           (mission-contract/attach selected-action contract))
         _ (when artifacts?
             (io/make-parents fold-file)
             (spit fold-file (pr-str {:boxes [:author :store]
@@ -976,7 +989,7 @@
               (isolated-runner-opts)
               {:repair-open-fn (constantly [])
                :judge-fn (fn [_]
-                           {:judgement (assoc judgement
+                           {:judgement (assoc mission-judgement
                                               :operator-actions
                                               (vec operator-actions))})
                :operator-gate-queue-fn
@@ -6216,9 +6229,9 @@
                :cohort-id :test-cohort-exhaustion
                :sha256 (digest/sha256 (slurp path))}}))
 
-(defn- retention-success-opts [{:keys [root binding]}]
+(defn- retention-success-opts [{:keys [root binding] :as cohort}]
   (merge
-   (isolated-runner-opts)
+   (isolated-runner-opts (select-keys cohort [:mission-source-text]))
    {:cohort? true :execution-cohort binding
     :run-id "close-retention-success"
     :repair-open-fn (constantly [])
@@ -7218,7 +7231,8 @@
   ;; an ordinary cascade whose selected action declares no wants (and whose
   ;; mission has no pinned source) must be refused before build approval.
   (let [{:as c} (retention-cohort "effective-config-bare")
-        base (retention-success-opts c)
+        ;; Keep this missing-want control bare while other fixtures own a want.
+        base (retention-success-opts (assoc c :mission-source-text "# Test mission\n"))
         result (runner/run-opportunity!
                 (assoc base
                        :author-artifact-observer-fn
