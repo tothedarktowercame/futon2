@@ -1,0 +1,17 @@
+{:schema :wm/three-halves-square-v1
+ :pattern :writing-coherence/plain-language-thesis
+ :objects
+ {:G {:text "A standalone thesis is the reader's first entry point and cannot depend on terminology that the document has not yet earned."
+      :source {:path "futon3/library/writing-coherence/plain-language-thesis.flexiarg" :sha256 "ee59b145c4f90f0e983d754a0e923f181228c812d5c65a385f8723f1d13999a3"}
+      :theory {:elems #{0} :names {0 "reason"} :axioms #{}}}
+  :I1 {:text "A top-level claim must be understandable by a reader who has not read the rest of the document."
+       :source {:path "futon3/library/writing-coherence/plain-language-thesis.flexiarg" :sha256 "ee59b145c4f90f0e983d754a0e923f181228c812d5c65a385f8723f1d13999a3"}
+       :theory {:elems #{10} :names {10 "condition"} :axioms #{}}}
+  :I2 {:text "Technical vocabulary compresses meaning, but at thesis position that compression charges readers who lack the prior context."
+       :source {:path "futon3/library/writing-coherence/plain-language-thesis.flexiarg" :sha256 "ee59b145c4f90f0e983d754a0e923f181228c812d5c65a385f8723f1d13999a3"}
+       :theory {:elems #{20} :names {20 "tension"} :axioms #{}}}
+  :B {:text "State the claim with a concrete subject and familiar terms before introducing any technical sharpening."
+      :source {:path "futon3/library/writing-coherence/plain-language-thesis.flexiarg" :sha256 "ee59b145c4f90f0e983d754a0e923f181228c812d5c65a385f8723f1d13999a3"}
+      :theory {:elems #{30} :names {30 "move"} :axioms #{}}}}
+ :maps {:a1 #{[0 10]} :a2 #{[0 20]} :b1 #{[10 30]} :b2 #{[20 30]}}
+ :auxiliary {:b1 false :b2 false}}
