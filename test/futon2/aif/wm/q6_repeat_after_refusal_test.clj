@@ -78,7 +78,10 @@
     (testing "run one: no earlier run, nothing excluded, refused after selection"
       (is (= 1 (:calls one)))
       (is (= [:not-recomputable :no-earlier-started-run] ((juxt :status :reason) (q6 one))))
-      (is (= {:status :present :outcome :refused :kind :reading-policy-execution-semantics-owed}
+      ;; since f36d6c1ac a selected cascade is held in the open enactment
+      ;; phase rather than refused for owed execution semantics; the close
+      ;; is still a refusal, which is all Q6 reads
+      (is (= {:status :present :outcome :refused :kind :cascade-enactment-open}
              (get-in one [:record :q6 :terminal :outcome])))
       (is (previous-run/reading-key? k1))
       (is (= :nr (lean-q6 (exported one)))))
@@ -261,11 +264,15 @@
                    ;; the history names the same run, so it moves with the key
                    (previous-run/seal (-> p0 (dissoc :sha256) (assoc :previous prev)
                                           (assoc-in [:refusal-history :entries] [])))))]
-    (testing "the same key, same inputs: forbidden, and this fixture's two policies
-              predict alike, so its class is the whole menu and nothing is left"
-      (is (= [:refused true [k]]
-             ((juxt :status :no-admissible-class :forbidden-keys)
-              (carrier-of (decide-after fx p0))))))
+    (testing "the same key, same inputs: forbidden; of this fixture's three
+              policies the refused class does not cover the menu, so selection
+              goes on over what is left (the whole-menu refusal is pinned in
+              q6-forbidden-class-test)"
+      (let [c (carrier-of (decide-after fx p0))]
+        (is (= [:forbidden nil [k]]
+               ((juxt :status :no-admissible-class :forbidden-keys) c)))
+        (is (seq (:forbidden-classes c)))
+        (is (= 3 (:menu c)))))
     (doseq [[label key] {:arrangement [tag target id (update structure :edges conj ["p/a" "p/a" :overlap])]
                          :target [tag "M-elsewhere" id structure]
                          :policy [tag target (str target "/policy-0000000000000000ffff") structure]

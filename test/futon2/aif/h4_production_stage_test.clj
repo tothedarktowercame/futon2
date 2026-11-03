@@ -22,10 +22,16 @@
         ;; the policy keys the decision compares, from a run on the complete ledger
         keys (vals (route/policy-keys (:decision (route/decide fx))))
         unread-ledger {:steps [] :read [] :unread [] :dir-status {:absent :no-flights-dir}}
-        refusal (route/refusal-of #(route/decide fx 1 {:conditioning-steps unread-ledger}))
+        ;; since 6a36b6006 the selection-law refusal is carried by a typed
+        ;; abstention at :certification, not thrown (route/carried-refusal)
+        abstained (route/decide fx 1 {:conditioning-steps unread-ledger})
+        refusal (route/carried-refusal abstained)
         selected (route/decide fx 1 {:conditioning-steps
                                      (route/with-prefixes fx (zipmap keys (repeat 0.0)))})]
     (is (= 3 (count keys)))
+    (is (= [:abstained :certification :model-contract-refused :reading-precision-refused]
+           [(get-in abstained [:decision :status])
+            (:stage refusal) (:kind refusal) (:certification-kind refusal)]))
     (is (= :free-energy-not-supplied (get-in refusal [:refusal :kind]))
         "unknown history: Prefix-F not supplied, the selector refuses")
     (is (= 3 (get-in refusal [:refusal :detail :n-candidates])))

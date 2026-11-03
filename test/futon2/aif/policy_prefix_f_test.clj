@@ -107,7 +107,9 @@
         k2 (key-for #{"p/c" "p/b"})
         other (first (remove #{k1 k2} keys))
         unread {:steps [] :read [] :unread [] :dir-status {:absent :no-flights-dir}}
-        missing (route/refusal-of #(route/decide fx 1 {:conditioning-steps unread}))
+        ;; since 6a36b6006 the selection-law refusal is carried by a typed
+        ;; abstention at :certification, not thrown (route/carried-refusal)
+        missing (route/carried-refusal (route/decide fx 1 {:conditioning-steps unread}))
         posterior (fn [f1 f2]
                     (let [d (:decision (route/decide fx 1 {:conditioning-steps
                                                            (route/with-prefixes
@@ -125,5 +127,5 @@
           "k1's F is 0.5 higher: its weight falls by exp(0.5) relative to k2"))
     (testing "the certificate says which candidates' F was computed"
       (is (= #{:computed} (set (map :f-status (get-in with [:selection-certificate :candidates])))))
-      (is (= #{0 1.0 0.5}
+      (is (= #{0.0 1.0 0.5}
              (set (map :f-consumed (get-in with [:selection-certificate :candidates]))))))))
