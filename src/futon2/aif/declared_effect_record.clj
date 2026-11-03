@@ -66,8 +66,12 @@
 
 (def default-declaration-dir
   "Same resolution rule as cascade-sources/default-dir: classpath first,
-  working directory as fallback."
-  (or (some-> (io/resource "wm/cascade-sources") .getPath)
+  working directory as fallback. Resolved from a sibling FILE resource, never
+  the directory itself: the Test Registry hashes every resource a run looks
+  up, and a directory lookup refused every warrant of a namespace loading
+  this file with \"(Is a directory)\" (declared-effect-record-test, 2026-11-03)."
+  (or (some-> (io/resource "wm/observation-contract.edn")
+              io/file .getParentFile (io/file "cascade-sources") .getPath)
       "resources/wm/cascade-sources"))
 
 (defn default-resolve-revision
