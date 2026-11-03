@@ -1,14 +1,17 @@
 (ns futon2.aif.full-loop-cli-test
   (:require [clojure.edn :as edn]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
             [clojure.string :as str]
             [futon2.aif.full-loop-cli :as cli]
-            [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.morning-brief :as brief]))
+
+(use-fixtures :once hermetic/with-hermetic-stores)
 
 (deftest continuous-count-is-parsed-and-bounds-opportunities
   (let [calls (atom [])]
-    (with-redefs [runner/run-opportunity!
+    (with-redefs [runtime/run-opportunity!
                   (fn [opts]
                     (swap! calls conj opts)
                     {:outcome :grounded-change})]
@@ -52,7 +55,7 @@
 (deftest continuous-stops-after-first-non-grounded-opportunity
   (let [calls (atom 0)
         outcomes [:grounded-change :agent-unavailable :grounded-change]
-        failure (with-redefs [runner/run-opportunity!
+        failure (with-redefs [runtime/run-opportunity!
                               (fn [_opts]
                                 {:outcome (nth outcomes (dec (swap! calls inc)))})]
                   (try
@@ -72,7 +75,7 @@
 (deftest continuous-stops-after-consecutive-repeated-target
   (let [calls (atom 0)
         targets ["M-one" "M-one" "M-two"]
-        failure (with-redefs [runner/run-opportunity!
+        failure (with-redefs [runtime/run-opportunity!
                               (fn [_opts]
                                 {:outcome :grounded-change
                                  :checkpoints
@@ -91,7 +94,7 @@
 
 (deftest consumed-live-learning-can-explicitly-authorize-a-repeat
   (let [calls (atom 0)]
-    (with-redefs [runner/run-opportunity!
+    (with-redefs [runtime/run-opportunity!
                   (fn [_opts]
                     (swap! calls inc)
                     {:outcome :grounded-change
@@ -251,7 +254,7 @@
         (.delete fold-file)))))
 
 (deftest completed-click-prints-its-operator-qa-document
-  (with-redefs [runner/run-opportunity!
+  (with-redefs [runtime/run-opportunity!
                 (fn [_]
                   {:attempt-id "attempt-qa"
                    :outcome :grounded-change

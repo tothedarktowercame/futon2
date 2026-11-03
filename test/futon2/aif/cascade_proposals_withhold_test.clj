@@ -4,20 +4,42 @@
   target with an ADMITTED DECLARED cascade source is not withheld and is
   recorded supplied-by-declaration. All through the tick's own assembly
   path (load-declared + assemble + load-supply + record-supply)."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.cascade-proposals :as cprop]
-            [futon2.aif.cascade-sources :as cs]))
+            [futon2.aif.cascade-sources :as cs]
+            [futon2.aif.repair-obligation :as repair]))
 
-(def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
+(def declared-id
+  "repair-ea1-19929445d661380bc279f9e439dd2808eec422ce3bf96f7efd0c168da7e3b153--attempt-002-author-delivery-wrong-repository")
+(def sourceless-id
+  "repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-001-revision-unchanged")
+(def t (str "T-" declared-id))
+(def source-template-target
+  "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
+
+(def repair-root
+  (.getPath (io/file (io/resource "fixtures/repair-obligations/withhold"))))
 
 (defn- tick-assembly [target]
   ;; the tick's own path: declared loader, assemble, real supply scan,
   ;; record-supply — exactly what withheld the ticket in run 1790110142.
-  (let [sources (cs/with-context-fn (cs/load-declared))
+  (let [loaded (cs/load-declared)
+        declared-candidate (first (get-in loaded [:candidates source-template-target]))
+        declared (reduce-kv
+                  (fn [sources k section]
+                    (if (and (map? section) (contains? section source-template-target))
+                      (assoc-in sources [k t] (get section source-template-target))
+                      sources))
+                  loaded
+                  loaded)
+        sources (-> declared
+                    (assoc-in [:candidates t] [declared-candidate])
+                    cs/with-context-fn)
         assembled (cp/assemble {:targets [target]
                                 :sources (assoc sources :horizon-steps 4)})
-        supply (cprop/load-supply {})
+        supply (cprop/load-supply {:repair-root repair-root})
         recorded (cprop/record-supply assembled sources supply)]
     {:assembled assembled
      :supply supply
@@ -25,10 +47,10 @@
 
 (deftest reference-ticket-with-declared-source-is-not-withheld
   (let [{:keys [assembled supply recorded]} (tick-assembly t)]
-    ;; the finding IS open in the real scan (the precondition of the bug)
-    (is (some #(= (str "repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
-                  %)
-              (get-in supply [:repair-scan :open-finding-ids]))
+    ;; 444fb018 no longer witnesses this rule: its finding now says
+    ;; `:repair/class :environmental-hold`. Use a pinned actionable finding
+    ;; and a test-owned declaration to isolate the withhold distinction.
+    (is (some #{declared-id} (get-in supply [:repair-scan :actionable-ids]))
         "precondition: the ticket's finding is an open repair obligation")
     ;; the ticket HAS a declared source with candidates
     (is (seq (get-in (first (:problems assembled)) [:constructed-candidates])))
@@ -57,11 +79,14 @@
   ;; mission-hole path or a hand-built problem, so we supply the problem
   ;; directly and run the REAL record-supply with the REAL scan.)
   (let [sources (cs/with-context-fn (cs/load-declared))
-        supply (cprop/load-supply {})
-        open-ids (get-in supply [:repair-scan :open-finding-ids])
-        sourceless-id (first (remove #(seq (get-in sources [:candidates (str "T-" %)])) open-ids))
+        supply (cprop/load-supply {:repair-root repair-root})
+        actionable-ids (get-in supply [:repair-scan :actionable-ids])
         sourceless (str "T-" sourceless-id)]
-    (is (some? sourceless) "there is at least one sourceless open repair target")
+    ;; `:actionable-ids` replaced `:open-finding-ids` in 072dc0404.
+    (is (some #{sourceless-id} actionable-ids)
+        "the pinned finding is actionable-open")
+    (is (empty? (get-in sources [:candidates sourceless]))
+        "the pinned actionable target has no declared source")
     (let [assembled {:problems [{:target sourceless
                                  :cascade-problem {:facts {} :want [:x]
                                                    :interpretations {}
@@ -80,8 +105,8 @@
 
 (deftest published-interpretation-with-checkable-closure-is-not-withheld
   (let [sources (cs/with-context-fn (cs/load-declared))
-        supply (cprop/load-supply {})
-        id (first (get-in supply [:repair-scan :open-finding-ids]))
+        supply (cprop/load-supply {:repair-root repair-root})
+        id declared-id
         target (str "T-" id)
         token :ticket-closure/hfixture
         problem {:target target
@@ -104,7 +129,7 @@
   ;; keeps the withhold; the generated proposal itself stays out of
   ;; admissions (no admitted receipt).
   (let [sources (cs/with-context-fn (cs/load-declared))
-        supply (assoc (cprop/load-supply {})
+        supply (assoc (cprop/load-supply {:repair-root repair-root})
                       :proposals [{:proposal-id "gen-1"
                                    :target "T-no-source-generated"
                                    :origin :repair-finding-proposed
@@ -122,3 +147,8 @@
         "generated repair proposals with no declared source keep the withhold")
     (is (some #(= "T-no-source-generated" (:target %))
               (get-in recorded [:repair-withhold-distinction :withheld-generated-or-sourceless])))))
+
+(deftest pinned-findings-classify-as-actionable-open
+  (let [ids (set (get-in (repair/lifecycle-census repair-root)
+                         [:actionable-open :ids]))]
+    (is (= #{declared-id sourceless-id} ids))))
