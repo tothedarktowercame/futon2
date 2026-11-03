@@ -22,7 +22,8 @@
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.ticket-queue :as ticket-queue]
-            [futon2.aif.wm.cascade-decision :as wm-cd])
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.test-support.reading-route :as route])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -101,26 +102,30 @@
 (defn- decide
   "Run the production decision, counting selector calls, with the old
   interpreted scorer and lane made to throw if they are ever reached."
-  [{:keys [root flights graph]} rows betas & [extra-opts]]
-  (let [selector-calls (atom 0)
-        select policy/select-action-cascades]
-    (with-redefs [policy/select-action-cascades
-                  (fn [& args] (swap! selector-calls inc) (apply select args))
-                  efe/rank-actions
-                  (fn [& _] (throw (ex-info "old scorer reached" {:kind :old-scorer-reached})))
-                  wm-cd/cascade-lane
-                  (fn [& _] (throw (ex-info "old lane reached" {:kind :old-lane-reached})))]
-      (let [result (wm-cd/cascade-decision
-                    (assembled rows betas)
-                    (merge {:pattern-graph-path (str graph)
-                            :target-reading-root (str root)
-                            ;; a04b157d2: selection policy is task-scoped.
-                            :task {:id "M-current"}
-                            :conditioning-steps (fold-source/conditioning-steps (str flights))
-                            :ticket-queue ticket-queue/empty-declaration
-                            :novelty-inputs {}}
-                           extra-opts))]
-        (assoc result ::selector-calls @selector-calls)))))
+  ([fx rows betas]
+   (decide fx rows betas "M-current" nil))
+  ([fx rows betas extra-opts]
+   (decide fx rows betas "M-current" extra-opts))
+  ([{:keys [root flights graph]} rows betas task extra-opts]
+   (let [selector-calls (atom 0)
+         select policy/select-action-cascades]
+     (with-redefs [policy/select-action-cascades
+                   (fn [& args] (swap! selector-calls inc) (apply select args))
+                   efe/rank-actions
+                   (fn [& _] (throw (ex-info "old scorer reached" {:kind :old-scorer-reached})))
+                   wm-cd/cascade-lane
+                   (fn [& _] (throw (ex-info "old lane reached" {:kind :old-lane-reached})))]
+       (let [result (wm-cd/cascade-decision
+                     (assembled rows betas)
+                     (merge {:pattern-graph-path (str graph)
+                             :target-reading-root (str root)
+                             ;; a04b157d2: selection policy is task-scoped.
+                             :task {:id task}
+                             :conditioning-steps (fold-source/conditioning-steps (str flights))
+                             :ticket-queue ticket-queue/empty-declaration
+                             :novelty-inputs {}}
+                            extra-opts))]
+         (assoc result ::selector-calls @selector-calls))))))
 
 (defn- selected-entry [decision]
   ((ns-resolve 'futon2.aif.full-loop-runner 'selected-entry) {:decision decision}))
@@ -266,43 +271,45 @@
                                                                 [good-receipt] request)))))
           (is (refused? (receipts (with-action decision f) [good-receipt] request))))))))
 
-(deftest unread-targets-are-counted-and-never-chosen
+(deftest targets-outside-the-task-neither-refuse-nor-enter-the-field
   (let [fx (fixture)
         rows (vals (select-keys (:rows fx) [:current :unread :no-path]))
         result (decide fx (vec rows) {"M-current" 1 "M-unread" 1 "T-no-path" 1})
         decision (:decision result)
         cert (:selection-certificate decision)]
-    ;; Incomplete menu coverage abstains before selection (532e30be8f).
-    ;; The computed target remains in the field; unavailable targets remain
-    ;; explicit refusals rather than disappearing from the comparison.
-    (is (= 0 (::selector-calls result)))
-    (is (= :abstained (:status decision)))
-    (is (nil? (get-in decision [:action :target])))
-    (is (= #{{:target "M-unread" :failure-kind :no-current-target-reading}
-             {:target "T-no-path" :failure-kind :target-source-path-absent}}
-           (set (map #(select-keys % [:target :failure-kind]) (:refusals decision)))))
-    (is (= :computed
-           (:status (first (filter #(= "M-current" (:target-id %))
-                                   (get-in cert [:target-policy-field :families]))))))))
+    ;; a04b157d2 scopes the decision to the caller-selected task; other
+    ;; assembled targets neither refuse nor enter M-current's comparison.
+    (is (= 1 (::selector-calls result)))
+    (is (= "M-current" (get-in decision [:action :target])))
+    (is (empty? (:refusals decision)))
+    (is (= [{:target-id "M-current" :status :computed}]
+           (mapv #(select-keys % [:target-id :status])
+                 (get-in cert [:target-policy-field :families]))))))
 
 (deftest all-failed-field-abstains-typed-with-no-selector-call
   (let [fx (fixture)
         rows [(get-in fx [:rows :unread]) (get-in fx [:rows :no-path])]
-        result (decide fx rows {"M-unread" 1 "T-no-path" 1})
-        decision (:decision result)]
-    (is (= 0 (::selector-calls result)))
-    (is (= :abstained (:status decision)))
-    (is (nil? (:action decision)))
-    (is (= [[:no-policy-family :no-current-target-reading]
-            [:no-policy-family :target-source-path-absent]]
-           (mapv (juxt :kind :failure-kind) (:refusals decision))))
-    (is (= 2 (count (get-in decision [:selection-certificate :target-policy-field :families]))))))
+        betas {"M-unread" 1 "T-no-path" 1}]
+    (doseq [[task failure-kind] [["M-unread" :no-current-target-reading]
+                                 ["T-no-path" :target-source-path-absent]]]
+      (let [result (decide fx rows betas task nil)
+            decision (:decision result)
+            refusal (first (:refusals decision))]
+        (is (= 1 (count (:refusals decision))))
+        (is (= 0 (::selector-calls result)))
+        (is (= :abstained (:status decision)))
+        (is (nil? (:action decision)))
+        (is (= [:no-policy-family failure-kind]
+               ((juxt :kind :failure-kind) refusal)))))))
 
-(deftest undeclared-beta-abstains-without-a-default
+(deftest undeclared-beta-runs-on-the-r20-posterior
   (let [fx (fixture)
         result (decide fx [(get-in fx [:rows :current])] {})]
-    (is (= 0 (::selector-calls result)))
-    (is (= :beta-not-declared (get-in result [:decision :refusals 0 :kind])))))
+    ;; 6a36b6006 makes beta the R20 posterior carried from valence; a declared
+    ;; beta is no longer required to run the selector.
+    (is (= 1 (::selector-calls result)))
+    (is (= :r20-computed
+           (get-in result [:decision :selection-law :beta-status])))))
 
 (defn- chosen-action [fx]
   (get-in (decide fx [(get-in fx [:rows :current])] {"M-current" 1}) [:decision :action]))
@@ -346,8 +353,12 @@
                                                        :status :refused :reason :unmeasured-class
                                                        :policy-key (admission/candidate-key action)
                                                        :occurrence {:click "c1" :flight "f-mine"}}}]}}))
-        refusal (try (decide fx [(get-in fx [:rows :current])] {"M-current" 1}) nil
-                     (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        result (decide fx [(get-in fx [:rows :current])] {"M-current" 1})
+        refusal (route/carried-refusal result)]
+    (is (= :abstained (get-in result [:decision :status])))
+    (is (= :certification (:stage refusal)))
+    (is (= :model-contract-refused (:kind refusal)))
+    (is (= :reading-precision-refused (:certification-kind refusal)))
     (is (= :free-energy-not-supplied (get-in refusal [:refusal :kind])))))
 
 (deftest foreign-ledger-pin-refuses-enactment
