@@ -45,6 +45,7 @@
 (defn- render-step [step]
   (cond
     (= :ready-gate step) "ready gate"
+    (= :placed-gate step) "placed gate"
     (map? step) (str "status gate " (:status-gate step))
     :else (name step)))
 
@@ -68,12 +69,18 @@
           rank-note (if (= :computed-before-reading (get-in row [:giraffe :rank-basis]))
                       (str " Rank was computed before the reading stage demoted it (prerequisite "
                            (first (get-in row [:giraffe :prerequisites])) " unresolved).") "")
-          altitude (get-in row [:terms :altitude])]
+          altitude (get-in row [:terms :altitude])
+          ways (get-in row [:placement :ways])
+          action (get-in row [:placement :action])]
       (str (str/join ", " (map name (:cascades row))) " picked " (:pick row) ": "
            (when gate (str (render-step (:step gate)) " left " (:out gate) " of " (:in gate) "; "))
            order-text "." rank-note " " (short-header (get-in row [:source :header]))
            " G " (fmt4 (:G row))
-           (when altitude (str " (+" altitude " altitude: predicts stopping)")) "."))
+           (when altitude (str " (+" altitude " altitude: predicts stopping)")) "."
+           (when (seq ways)
+             (str " Serves " (first ways)
+                  (when-let [also (second ways)] (str ", also " also))
+                  " (" action ")."))))
     :abstention
     (str "stopping: G " (fmt4 (:G row)) " = risk " (fmt4 (get-in row [:terms :risk]))
          " + altitude " (get-in row [:terms :altitude]) " ("
@@ -103,6 +110,7 @@
                                          :computed-before-reading :as-ranked))
                        :prerequisites prerequisites
                        :evidence (get-in fact [:graph-terms :prerequisites 0 :evidence])}
+             :placement (select-keys (:placement fact) [:ways :action :status :wing])
              :source source :terms (:terms class) :G (:G class)}]
     (assoc row :rendered (render-selection-why :class row))))
 

@@ -105,6 +105,30 @@
           cascade [:ready-gate :by-cone :by-unblocks]]
       (is (= {:target 1 :reach 1} (score/cascade-pick cascade fs field))))))
 
+(deftest placed-gate-keeps-only-open-work-placements
+  (let [placements {:work {:status "open" :ways ["x"] :action "work"}
+                    :cluster {:status "open" :ways ["x"] :action "cluster:y"}
+                    :held {:status "open" :ways ["x"] :action "held"}
+                    :audit {:status "open" :ways ["x"] :action "audit"}
+                    :close {:status "open" :ways ["x"] :action "close"}
+                    :closed {:status "closed" :ways ["x"] :action "work"}
+                    :absent {:status :absent :reason :no-placement-yet}
+                    :no-ways {:status "open" :ways [] :action "work"}}
+        field (mapv (fn [target] {:target target}) (keys placements))
+        fs (update-vals placements #(hash-map :placement %))]
+    (is (= [{:target :work} {:target :cluster}]
+           (score/apply-selection-step fs field :placed-gate)))
+    (doseq [target [:held :audit :close :closed :absent :no-ways]]
+      (is (empty? (score/apply-selection-step fs [{:target target}] :placed-gate))
+          (str target " must be dropped")))
+    (try
+      (score/apply-selection-step {:unwired {:status :ready}}
+                                  [{:target :unwired}] :placed-gate)
+      (is false "missing :placement must refuse")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :outer-score/placement-unavailable (:kind (ex-data e))))
+        (is (= :unwired (:target (ex-data e))))))))
+
 (deftest novelty-decides-outer-choice
   (testing "Lean slice 3f-iii (novelty decides): equal q, class, reach and gain;
             only the status's total counts differ, so the less-known pick scores lower"
@@ -143,8 +167,8 @@
         "known-relation prediction is byte-identical")))
 
 (deftest typed-steps-and-rank-match-the-interpreter
-  (is (= [:ready-gate :by-cone :by-unblocks]
-         (mapv score/typed-step [:ready-gate :by-cone :by-unblocks])))
+  (is (= [:ready-gate :placed-gate :by-cone :by-unblocks]
+         (mapv score/typed-step [:ready-gate :placed-gate :by-cone :by-unblocks])))
   (is (= [{:named "repair obligation?"} :ready-gate {:named "verifiable result required"}]
          (mapv score/typed-step ["repair obligation?" :ready-gate "verifiable result required"])))
   (is (= [{:status-gate :undetermined} :by-rank]
