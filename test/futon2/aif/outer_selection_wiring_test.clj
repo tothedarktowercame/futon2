@@ -1,6 +1,12 @@
 (ns futon2.aif.outer-selection-wiring-test
   (:require [futon2.aif.outer-menu-fixture :as menu-fixture]
             [clojure.edn :as edn]
+            [babashka.http-client :as http]
+            [futon2.aif.area-focus :as area-focus]
+            [futon2.aif.operator-focus :as operator-focus]
+            [futon2.aif.mission-registry :as registry]
+            [futon2.aif.placement-adapter :as placement]
+            [futon2.aif.serving-envelope :as serving-envelope]
             [clojure.java.io :as io]
             [wm-run-facts :as run-facts]
             [clojure.test :refer [deftest is use-fixtures]]
@@ -14,8 +20,6 @@
             [futon2.aif.action-identity :as identity]
             [futon2.aif.outer-state :as outer-state]
             [futon2.test-support.runner-fixture :as runner-fixture]))
-
-(clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
 (use-fixtures :once hermetic/with-hermetic-stores
               runner-fixture/with-hermetic-traces)
@@ -33,6 +37,47 @@
   (.toFile (java.nio.file.Files/createTempDirectory
             "outer-selection-wiring-test"
             (make-array java.nio.file.attribute.FileAttribute 0))))
+
+(def fixture-missions
+  {:missions (mapv (fn [id]
+                     {:id id :path (str "/fixture/" id ".md") :status-class :open
+                      :source {:path (str "/fixture/" id ".md") :sha256 "fixture-sha"}})
+                   ["M-selected" "M-unknown"])})
+
+(defn with-selection-inputs [f]
+  (let [root (temp-dir)
+        corpus {:rows {"M-selected" {:target "M-selected" :area "WM"}
+                       "M-unknown" {:target "M-unknown" :area "WM"}}
+                :sha256 (identity/sha256 "fixture task areas")}
+        live-calls (atom [])
+        forbidden (fn [& _]
+                    (swap! live-calls conj :http-request)
+                    (throw (AssertionError. "Live I/O forbidden in wiring tests")))]
+    (with-redefs [operator-focus/dispatch-reader!
+                  (fn [& _]
+                    (swap! live-calls conj :dispatch-reader)
+                    (throw (AssertionError. "dispatch-reader! forbidden in wiring tests")))
+                  http/request forbidden
+                  runner/*wm-status-reporting?* false
+                  runner/ensure-dispatch-seat! (fn [_] nil)
+                  registry/load-missions (fn [& _] fixture-missions)
+                  registry/load-excursions (fn [& _] {:excursions []})
+                  registry/load-tickets (fn [& _] {:tickets []})
+                  area-focus/load-corpus (fn [& _] corpus)
+                  placement/default-paths {:tsv (str (io/file root "placements.tsv"))
+                                           :classes (str (io/file root "classes.tsv"))}]
+      (f)
+      ;; Also detect a caller swallowing the guard's exception.
+      (is (empty? @live-calls) (str "Unexpected live calls: " @live-calls)))))
+
+(use-fixtures :each menu-fixture/with-fixture-constructor with-selection-inputs)
+
+(defn fixture-focus-options [opts]
+  (let [root (temp-dir)
+        as-of (or (:decision-as-of opts) "2026-10-28T12:00:00Z")]
+    (operator-focus/write-manifest!
+     root {:as-of as-of :result {:status :present :ranked [{:area "WM"}]}})
+    (merge {:decision-as-of as-of :operator-focus/manifest-dir (str root)} opts)))
 
 (defn fixture-run! []
   (let [root (temp-dir)
@@ -55,7 +100,11 @@
                             :adapter-result {:input {:as-of "2026-10-28"
                                                      :items [] :edges []}
                                              :rejected []}
-                            :pass-output pass})]
+                            :pass-output (update pass :order
+                                                 #(mapv (fn [row]
+                                                          (assoc row :dependency-reading
+                                                                 {:record-pin {:sha256 (identity/sha256 (pr-str row))}}))
+                                                        %))})]
     (io/file (:dir result))))
 
 (def makeup
@@ -78,7 +127,7 @@
               #'outer-state/read-state (fn [m _] (outer-state/init-state m))
               #'outer-state/write-state! (fn [& _] {:status :written})}
              redefs)
-      (fn [] (#'runtime/run-ordinary-opportunity! opts)))))
+      (fn [] (#'runtime/run-ordinary-opportunity! (fixture-focus-options opts))))))
 
 (deftest missing-task-selects-and-enters-existing-path
   (let [received (atom nil)
@@ -86,7 +135,14 @@
                 {:decision-as-of "2026-10-28T12:00:00Z"}
                 {#'runtime/run-ordinary-opportunity-with-task!
                  (fn [opts] (reset! received opts) {:ran true})})]
-    (is (= {:ran true} result))
+    ;; Ordinary selection now always retains its decision. Check that additional
+    ;; result field as well as the unchanged runner payload.
+    (is (= {:ran true :selection-record (:selection-record result)} result))
+    (let [pin (:selection-record result)
+          text (slurp (:path pin))
+          record (edn/read-string text)]
+      (is (= (:sha256 pin) (identity/sha256 text)))
+      (is (= :chosen (get-in record [:selection-outcome :status]))))
     (is (= {:id "M-selected"} (:task @received)))
     (is (= :ready (get-in @received [:outer/selection :cascade-id])))
     (is (vector? (get-in @received [:outer/selection :cascade-scores])))
@@ -155,6 +211,7 @@
                                 :gain {:several 2/3}}}
         base-opts (merge (hermetic/runner-repair-options)
                          {:run-record-dir (.getPath record-dir)
+                          :serving-envelope-fn (constantly serving-envelope/absent-receipt)
                           :scan-render-fn (fn [& _] nil)
                           :meta-injury-root (.getPath (io/file root "injuries"))
                           :meta-injury-ledger-path (.getPath (io/file root "injuries/ledger.edn"))})]
@@ -196,12 +253,14 @@
         (is (= 2 (count (record-files record-dir))))))))
 
 (deftest reading-refusal-forbids-without-changing-the-field
-  ;; Two ready rows from the pinned 11-01 pass; retained facts, not invented
-  ;; graph metrics. Named fixture gates isolate the minimum-selection law.
-  (let [text (slurp "/home/joe/code/storage/giraffe/20261101T044121.422Z-730407c5/pass.edn")
-        _ (is (= "a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91"
+  ;; First two ready rows extracted unchanged from pass
+  ;; 20261101T044121.422Z-730407c5 (original SHA256
+  ;; a9ad27a8cb6fd0c808413ce639019b117aed746fbcb6b2945560cfc71423ff91).
+  ;; Keep these retained facts in the test classpath, independent of live storage.
+  (let [text (slurp (io/resource "futon2/fixtures/outer-selection-ready-rows.edn"))
+        _ (is (= "7cd3197af9549f7b7dbe10ec397590511a54605aa7edfdaa58d936f247a91d49"
                  (identity/sha256 text)))
-        rows (take 2 (filter #(= :ready (:status %)) (:order (edn/read-string text))))
+        rows (edn/read-string text)
         targets (mapv (comp name :id) rows)
         facts (into {} (map (fn [row] [(name (:id row))
                                        (assoc row :pin (get-in row [:dependency-reading :record-pin :sha256]))]) rows))
