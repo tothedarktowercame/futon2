@@ -270,14 +270,19 @@
   (let [m (edn/read-string (slurp path))]
     {:manifest m :result (:result m)}))
 
-(defn dispatch-reader! [sent {:keys [prompt-resource reader-seat caller kimi-script task-repo agency-base reader-timeout-ms clock-inputs]
+(defn dispatch-reader! [sent {:keys [prompt-resource reader-seat caller kimi-script task-repo agency-base reader-timeout-ms clock-inputs a7-path code-root]
                               :or {reader-seat "zai-1" caller "operator-focus"
-                                   kimi-script "/home/joe/code/futon3c/scripts/kimi-task.sh"
                                    agency-base "http://127.0.0.1:7070" reader-timeout-ms 600000}}]
-  (let [resource (slurp (io/resource prompt-resource))
+  (let [code-root (or code-root (System/getenv "FUTON_CODE_ROOT"))
+        _ (when (str/blank? code-root) (throw (ex-info "FUTON_CODE_ROOT is required" {:reason :code-root-absent})))
+        kimi-script (or kimi-script (str code-root "/futon3c/scripts/kimi-task.sh"))
+        a7-path (or a7-path (str code-root "/futon3c/holes/excursions/ant-prompts/A7-relate.md"))
+        resource (slurp (io/resource prompt-resource))
+        a7 (slurp a7-path)
         f (java.io.File/createTempFile "operator-focus-" ".md")
         clipped (mapv #(update % :text (fn [s] (subs (str s) 0 (min 600 (count (str s)))))) sent)
-        _ (spit f (str resource "\n\nINPUT TURNS (JSON):\n" (json/generate-string clipped)
+        _ (spit f (str resource "\n\nA7 AREA AUTHORITY (VERBATIM):\n" a7
+                       "\n\nINPUT TURNS (JSON):\n" (json/generate-string clipped)
                        "\n\nCLOCK TARGETS (JSON):\n" (json/generate-string clock-inputs)))
         r (shell/sh kimi-script "--from" caller "--to" reader-seat
                     "--purpose" "read operator focus areas" (.getPath f)
@@ -290,7 +295,8 @@
               body (when (= 200 (:status response)) (json/parse-string (:body response) true))
               j (or (:job body) body) state (or (:status j) (:state j)) raw (or (:result j) (:response j))]
           (cond raw {:status :ok :job-id job :seat reader-seat :prompt-sha256 (identity/sha256 resource)
-                     :raw-reply raw :raw-reply-sha256 (identity/sha256 raw) :sent-turns clipped}
+                     :raw-reply raw :raw-reply-sha256 (identity/sha256 raw) :sent-turns clipped
+                     :area-authority-sha256 (identity/sha256 a7)}
                 (contains? #{"failed" "cancelled" :failed :cancelled} state) {:status :absent :reason :reader-job-failed :job-id job}
                 (<= left 0) {:status :absent :reason :reader-job-timeout :job-id job}
                 :else (do (Thread/sleep 2000) (recur (- left 2000)))))))))
@@ -310,11 +316,14 @@
             sent (reader-turns (:turns turn-read) (:seats preliminary))
             clock-targets (->> (:clocks clock-read) (filter #(some #{(:seat %)} (:seats preliminary)))
                                (map :target) distinct (remove rows))
-            resolved (keep #(resolve-task (or (:code-root opts) "/home/joe/code") %) clock-targets)
+            resolved (keep #(resolve-task (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")) %) clock-targets)
             dispatch-opts (assoc opts :clock-inputs resolved)
             dispatch (if (:reader-raw-reply opts)
-                       {:status :ok :seat (:reader-seat opts) :job-id (:reader-job-id opts)
-                        :prompt-sha256 (identity/sha256 (slurp (io/resource (:prompt-resource opts))))}
+                       (let [root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT"))
+                             a7 (slurp (or (:a7-path opts) (str root "/futon3c/holes/excursions/ant-prompts/A7-relate.md")))]
+                         {:status :ok :seat (:reader-seat opts) :job-id (:reader-job-id opts)
+                          :prompt-sha256 (identity/sha256 (slurp (io/resource (:prompt-resource opts))))
+                          :area-authority-sha256 (identity/sha256 a7)})
                        (dispatch-reader! sent dispatch-opts))
             raw (or (:reader-raw-reply opts) (:raw-reply dispatch))
             answers (when raw (check-reply raw sent (:seats preliminary)))
@@ -325,7 +334,8 @@
                                  (:response-sha256 clock-read)
                                  :reader {:sent-turns (mapv #(assoc (select-keys % [:evidence-id :seat])
                                                                    :body-sha256 (identity/sha256 (str (:text %)))) sent)
-                                          :prompt-sha256 (:prompt-sha256 dispatch) :seat (:seat dispatch)
+                                          :prompt-sha256 (:prompt-sha256 dispatch)
+                                          :area-authority-sha256 (:area-authority-sha256 dispatch) :seat (:seat dispatch)
                                           :job-id (:job-id dispatch) :raw-reply-sha256 (when raw (identity/sha256 raw))
                                           :parsed-answers answers :clock-inputs (mapv #(dissoc % :text) resolved)
                                           :parsed-clock-answers clock-answers})
