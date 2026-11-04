@@ -8,7 +8,16 @@
 (defn- patterns [action]
   (let [precedence (:precedence action)]
     (cond
-      (sequential? precedence) (filter map? precedence)
+      (sequential? precedence)
+      (mapcat (fn [entry]
+                (cond
+                  (map? entry) [entry]
+                  (and (vector? entry)
+                       (= 2 (count entry))
+                       (map? (get-in entry [1 :patterns])))
+                  (vals (get-in entry [1 :patterns]))
+                  :else []))
+              precedence)
       (map? (get-in precedence [:co-apply :patterns]))
       (vals (get-in precedence [:co-apply :patterns]))
       :else [])))
