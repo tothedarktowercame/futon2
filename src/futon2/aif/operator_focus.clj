@@ -12,7 +12,7 @@
   (:import [java.net URLEncoder]
            [java.time Duration Instant]))
 
-(def keyword-table-version "operator-focus-keywords-v1")
+(def keyword-table-version "operator-focus-keywords-v2")
 
 (def keyword-table
   ;; WM's own name and outer-selection vocabulary are stronger than generic "machine".
@@ -31,8 +31,14 @@
    {:area "memory" :pattern #"(?i)\b(memory system|memory retrieval|long.?term memory|minus40)\b"}
    ;; 象 is named directly or via its operator-turn interpretation service.
    {:area "象" :pattern #"(?i)(象|\bxiang\b|operator turn analysis|turn interpretation)"}
+   ;; Futonzero includes its prelim-practice, self-play, MVP and generative work.
+   {:area "futonzero" :pattern #"(?i)\b(futonzero|futon zero|self.?play)\b"}
+   ;; futon5 is a named repository/subsystem.
+   {:area "futon5" :pattern #"(?i)\bfuton5\b"}
    ;; futon6 is a named repository/subsystem.
    {:area "futon6" :pattern #"(?i)\bfuton6\b"}
+   ;; Business covers explicit commercial/customer/company work.
+   {:area "business" :pattern #"(?i)\b(business|customer|commercial|sales|company)\b"}
    ;; voxterm is a named voice surface.
    {:area "voxterm" :pattern #"(?i)\bvoxterm\b"}])
 
@@ -69,12 +75,8 @@
           best (apply max (vals counts))]
       (->> counts (keep (fn [[x n]] (when (= n best) x))) sort vec))))
 
-(defn- captured-target [turn]
-  (or (:captured-target turn) (:clocked-target turn) (:ticket-id turn)
-      (:excursion-id turn) (:mission-id turn) (:campaign-id turn)))
-
 (defn map-turn
-  "Map one normalized turn to an area, recording precedence step a-d."
+  "Map one normalized turn's text to an area, recording task/keyword precedence."
   [turn area-of-task]
   (let [text (str (or (:text turn) ""))
         named (re-seq task-pattern text)
@@ -87,13 +89,11 @@
       :else
       (if-let [hit (first (filter #(re-find (:pattern %) text) keyword-table))]
         {:areas [(:area hit)] :area (:area hit) :step :keyword}
-        (if-let [area (some-> (captured-target turn) area-of-task)]
-          {:areas [area] :area area :step :captured-target
-           :task (captured-target turn)}
-          {:areas [] :step :abstain :reason :turn-unmapped})))))
+        {:areas [] :step :abstain :reason :turn-unmapped}))))
 
 (defn- instant [x]
   (cond (instance? Instant x) x
+        (number? x) (Instant/ofEpochMilli (long x))
         (string? x) (Instant/parse x)
         :else (throw (ex-info "as-of/turn time must be an Instant or ISO string" {:value x}))))
 
@@ -101,7 +101,7 @@
   "Pure vote over normalized turns. `area-of-task` maps task id to area.
    Options: `:as-of`, `:window-days` (7), `:seat-count` (10), and
    `:turns-per-seat` (10)."
-  [turns area-of-task {:keys [as-of window-days seat-count turns-per-seat]
+  [turns area-of-task {:keys [as-of window-days seat-count turns-per-seat clocks]
                        :or {window-days 7 seat-count 10 turns-per-seat 10}}]
   (let [as-of (instant as-of)
         since (.minus as-of (Duration/ofDays window-days))
@@ -114,31 +114,60 @@
         seats (->> eligible (map :seat) distinct (take seat-count) vec)
         selected? (set seats)
         per-seat (group-by :seat (filter #(selected? (:seat %)) eligible))
+        clocks-by-seat (into {} (map (juxt :seat identity)) clocks)
         seat-results
         (mapv (fn [seat]
                 (let [turns (take turns-per-seat (get per-seat seat))
                       mapped (mapv #(assoc (map-turn % area-of-task)
                                            :evidence-id (:evidence-id %)
                                            :at (str (:at %))) turns)
-                      areas (mapcat :areas mapped)]
-                  (if (empty? areas)
-                    {:seat seat :status :abstained :reason :no-mappable-turns
-                     :turns mapped}
-                    (let [winners (majority areas)
-                          share (/ 1 (count winners))]
-                      {:seat seat :status :voted
-                       :votes (into (sorted-map) (map (fn [a] [a share]) winners))
-                       :turns mapped}))))
+                      areas (mapcat :areas mapped)
+                      text-half (if (seq areas)
+                                  (let [winners (majority areas)
+                                        share (/ 1 (* 2 (count winners)))]
+                                    {:status :voted
+                                     :votes (into (sorted-map)
+                                                  (map (fn [a] [a share]) winners))})
+                                  {:status :abstained :reason :no-mappable-turns})
+                      clock (get clocks-by-seat seat)
+                      clock-half
+                      (cond
+                        (nil? clock) {:status :abstained :reason :clock-absent}
+                        (.isBefore (instant (:at clock)) since)
+                        {:status :abstained :reason :clock-outside-window
+                         :at (str (:at clock)) :target (:target clock)}
+                        (.isAfter (instant (:at clock)) as-of)
+                        {:status :abstained :reason :clock-after-as-of
+                         :at (str (:at clock)) :target (:target clock)}
+                        :else
+                        (if-let [area (area-of-task (:target clock))]
+                          {:status :voted :votes (sorted-map area 1/2)
+                           :at (str (:at clock)) :target (:target clock)}
+                          {:status :abstained :reason :clock-target-unmapped
+                           :at (str (:at clock)) :target (:target clock)}))
+                      votes (merge-with + (:votes text-half) (:votes clock-half))]
+                  (cond-> {:seat seat
+                           :status (if (seq votes) :voted :abstained)
+                           :text-half text-half :clock-half clock-half
+                           :turns mapped}
+                    (seq votes) (assoc :votes (into (sorted-map) votes))
+                    (empty? votes) (assoc :reason :both-halves-abstained))))
               seats)
         totals (reduce (fn [m {:keys [votes]}]
                          (reduce-kv #(update %1 %2 (fnil + 0) %3) m (or votes {})))
                        (sorted-map) seat-results)
         result (if (empty? totals)
                  {:status :absent :reason :no-recent-operator-turns}
-                 (let [best (apply max (vals totals))]
+                 (let [ordered (sort-by (juxt (comp - double val) key) totals)
+                       threshold (val (nth ordered (min 2 (dec (count ordered)))))
+                       retained (take-while #(>= (val %) threshold) ordered)
+                       total (reduce + (vals totals))
+                       ranked (mapv (fn [[area votes]]
+                                      {:area area :votes votes :share (/ votes total)})
+                                    retained)]
                    {:status :present
-                    :focus (into (sorted-set) (keep (fn [[a v]] (when (= v best) a)) totals))
-                    :totals totals}))]
+                    :focus (into (sorted-set) (map :area ranked))
+                    :ranked ranked :total-votes total :totals totals}))]
     {:as-of (str as-of) :window-days window-days :seat-count seat-count
      :turns-per-seat turns-per-seat :seats seats :seat-votes seat-results
      :abstentions (filterv #(= :abstained (:status %)) seat-results)
@@ -194,6 +223,32 @@
         {:status :absent :reason :evidence-read-timeout}
         {:status :absent :reason :evidence-read-failed :message (.getMessage e)}))))
 
+(defn read-clocks
+  "Read the bounded current clock projection and retain a hash of its exact response."
+  [{:keys [base-url timeout-ms] :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
+  (try
+    (let [url (str base-url
+                   "/api/alpha/hyperedges?type=clock%2Fclocked-on&limit=1000&include-total=false")
+          resp (http/get url {:timeout timeout-ms :throw false})]
+      (cond
+        (= 503 (:status resp)) {:status :absent :reason :expensive-read-busy}
+        (not= 200 (:status resp)) {:status :absent :reason :clock-read-failed
+                                   :http-status (:status resp)}
+        :else
+        (let [body (:body resp)
+              rows (:hyperedges (edn/read-string body))]
+          {:status :ok :response-sha256 (identity/sha256 body)
+           :clocks (mapv (fn [row]
+                           (let [p (:hx/props row)]
+                             {:seat (:agent-id p) :at (:clocked-at-ms p)
+                              :target (or (:ticket-id p) (:excursion-id p)
+                                          (:mission-id p) (:campaign-id p))}))
+                         rows)})))
+    (catch Exception e
+      (if (timeout-exception? e)
+        {:status :absent :reason :clock-read-timeout}
+        {:status :absent :reason :clock-read-failed :message (.getMessage e)}))))
+
 (defn manifest
   [turns vote area-corpus-sha opts]
   (let [mapped (into {} (for [seat (:seat-votes vote)
@@ -205,6 +260,7 @@
      :K (:seat-count vote) :turns-per-seat (:turns-per-seat vote)
      :keyword-table-version keyword-table-version
      :area-corpus-sha256 area-corpus-sha
+     :clock-response-sha256 (:clock-response-sha256 opts)
      :turns (mapv (fn [t]
                     (let [classification (get mapped (:evidence-id t))]
                       (merge {:evidence-id (:evidence-id t) :at (str (:at t)) :seat (:seat t)
@@ -234,11 +290,17 @@
 (defn read-focus!
   "Read, vote, and retain exactly the authoritative turns read."
   [{:keys [area-corpus-path manifest-dir as-of] :as opts}]
-  (let [read-result (read-turns opts)]
-    (if (not= :ok (:status read-result))
-      read-result
+  (let [turn-read (read-turns opts)
+        clock-read (when (= :ok (:status turn-read)) (read-clocks opts))]
+    (if (not= :ok (:status turn-read))
+      turn-read
+      (if (not= :ok (:status clock-read))
+        clock-read
       (let [{:keys [rows sha256]} (load-area-corpus area-corpus-path)
-            vote (focus-vote (:turns read-result) rows
-                             (merge {:as-of (or as-of (Instant/now))} opts))
-            m (manifest (:turns read-result) vote sha256 opts)]
-        (merge {:status :ok :vote vote} (write-manifest! manifest-dir m))))))
+            vote-opts (merge {:as-of (or as-of (Instant/now))}
+                             opts {:clocks (:clocks clock-read)})
+            vote (focus-vote (:turns turn-read) rows vote-opts)
+            manifest-opts (assoc opts :clock-response-sha256
+                                 (:response-sha256 clock-read))
+            m (manifest (:turns turn-read) vote sha256 manifest-opts)]
+        (merge {:status :ok :vote vote} (write-manifest! manifest-dir m)))))))
