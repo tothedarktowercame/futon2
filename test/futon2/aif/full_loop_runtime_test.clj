@@ -7,6 +7,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-feedback :as cascade-feedback]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
@@ -15,6 +16,7 @@
             [futon2.aif.meta-field-observation :as meta-field]
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-state :as outer-state]
+            [futon2.aif.placement-adapter :as placement-adapter]
             [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
             [futon2.aif.ticket-readiness :as ticket-readiness]
@@ -82,17 +84,19 @@
                               [:pending :selection :placement/source :tsv :sha256]
                               (apply str (repeat 64 "f")))
             result (resolve! changed)]
-        (is (= :deferred (:status result)))
-        (is (= :placement-source-changed (:reason result)))
-        (is (= changed (:state result))))
+        (is (= :applied (:status result)))
+        (is (nil? (get-in result [:state :pending])))
+        (is (= :typed-absence (get-in result [:placement-source :resolution]))))
 
       (let [missing (assoc-in base-state
                               [:pending :selection :placement/source :tsv :path]
                               (str root "/missing.tsv"))
-            result (resolve! missing)]
-        (is (= :deferred (:status result)))
-        (is (= :placement-source-absent (:reason result)))
-        (is (= missing (:state result))))
+            result (resolve! missing)
+            next-click (resolve! (:state result))]
+        (is (= :applied (:status result)))
+        (is (nil? (get-in result [:state :pending])))
+        (is (= :typed-absence (get-in result [:placement-source :resolution])))
+        (is (= :none (:status next-click))))
 
       (let [unpinned (-> base-state
                          (update-in [:pending :selection] dissoc :placement/source)
@@ -118,7 +122,49 @@
             result (resolve! classes-absent)]
         (is (= :applied (:status result)))
         (is (not-any? #(= :class (get-in % [:placement :source]))
-                      (vals (:facts @replayed)))))))))
+                      (vals (:facts @replayed)))))
+
+      (let [repo (.toFile (java.nio.file.Files/createTempDirectory
+                           "placement-history" (make-array java.nio.file.attribute.FileAttribute 0)))
+            source (io/file repo "placements.tsv")
+            store (io/file repo "retained")
+            old-text (slurp tsv)
+            old-sha (action-identity/sha256 old-text)]
+        (spit source old-text)
+        (shell/sh "git" "init" "-q" (.getPath repo))
+        (shell/sh "git" "-C" (.getPath repo) "add" "placements.tsv")
+        (shell/sh "git" "-C" (.getPath repo) "-c" "user.name=Test"
+                  "-c" "user.email=test@example.invalid" "commit" "-qm" "old placements")
+        (spit source (str old-text "\nchanged\n"))
+        (let [historical (assoc-in base-state [:pending :selection :placement/source]
+                                   {:status :pinned
+                                    :tsv {:path (.getPath source) :sha256 old-sha}})
+              result (#'runtime/resolve-pending-learning
+                      {:placement/source-store-dir (.getPath store)}
+                      makeup historical current-dir current-observation)]
+          (is (= :applied (:status result)))
+          (is (nil? (get-in result [:state :pending])))
+          (is (= :git-history
+                 (get-in result [:placement-source :resolution :tsv :resolution])))))))))
+
+(deftest retained-placement-bytes-survive-authority-edit
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "placement-retention" (make-array java.nio.file.attribute.FileAttribute 0)))
+        source (io/file root "placements.tsv")
+        store (io/file root "store")
+        text "id\twhat\tstatus\twing\tway\taction\tneed_goes_to\tfinish\nM-a\tx\tready\tleft\tnone\tdo\t\tok\n"]
+    (spit source text)
+    (let [loaded (placement-adapter/load-placements
+                  {:tsv (.getPath source) :classes nil})
+          retained (placement-adapter/retain-sources! loaded store)
+          pin (assoc (:source retained) :status :pinned)]
+      (spit source (str text "M-b\ty\tready\tright\tnone\tdo\t\tok\n"))
+      (let [replayed (#'runtime/replay-placements
+                      {:placement/source-store-dir (.getPath store)} pin)]
+        (is (= :pinned (:status replayed)))
+        (is (= #{"M-a"} (set (keys (:rows replayed)))))
+        (is (= :retained-store
+               (get-in replayed [:source :resolution :tsv :resolution])))))))
 
 (deftest production-self-heal-options-carry-declared-static-correction-limit
   (let [declared (runtime/self-heal-runtime-config)
