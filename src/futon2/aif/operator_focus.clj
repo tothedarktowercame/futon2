@@ -286,7 +286,10 @@
       (let [{:keys [rows sha256]} (load-area-corpus area-corpus-path)
             preliminary (focus-vote (:turns turn-read) rows (assoc opts :clocks (:clocks clock-read)))
             sent (reader-turns (:turns turn-read) (:seats preliminary))
-            dispatch (dispatch-reader! sent opts)
+            dispatch (if (:reader-raw-reply opts)
+                       {:status :ok :seat (:reader-seat opts) :job-id (:reader-job-id opts)
+                        :prompt-sha256 (identity/sha256 (slurp (io/resource (:prompt-resource opts))))}
+                       (dispatch-reader! sent opts))
             raw (or (:reader-raw-reply opts) (:raw-reply dispatch))
             answers (when raw (check-reply raw sent (:seats preliminary)))
             vote (focus-vote (:turns turn-read) rows (assoc opts :clocks (:clocks clock-read) :text-answers answers))
