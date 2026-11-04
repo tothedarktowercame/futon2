@@ -149,7 +149,7 @@ giraffe_field_freshness() {
   GIRAFFE_GATE_DONE=1
   root="${GIRAFFE_ROOT:-/home/joe/code/storage/giraffe}"
   edges="${GIRAFFE_EDGES:-$F3C/holes/missions/giraffe-mission-edges.json}"
-  readings="${GIRAFFE_READINGS_ROOT:-/home/joe/notes/wm-next/giraffe-excursions-2026-10-31}"
+  readings="${GIRAFFE_READINGS_ROOT:-/home/joe/notes/wm-next/giraffe-reads-2026-11-04/corpus}"
   if [ "${GIRAFFE_MINT:-1}" != "1" ]; then
     say "giraffe field" "staleness gate skipped (GIRAFFE_MINT=0)"
     return 0
