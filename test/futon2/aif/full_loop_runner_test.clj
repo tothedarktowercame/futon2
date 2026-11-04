@@ -1827,7 +1827,8 @@
         reviewer (#'runner/reviewer-prompt opts "target" {} "/repo" "abc123"
                   {:job-id "author-job"} [])
         revision-author (#'runner/revision-author-prompt
-                         "author" "reviewer" dir "target" {} ["abc123"]
+                         "author" "reviewer" dir "/repo" "base123"
+                         "target" {} ["abc123"]
                          "requested changes")
         revision-reviewer (#'runner/revision-reviewer-prompt
                            opts "target" {} "/repo" "abc123" "def456"
@@ -1864,6 +1865,30 @@
     (is (re-find #"nested in the mission record are context" prompt))
     (is (re-find #"commit elsewhere is an artifact-binding mismatch" prompt))
     (is (re-find #"make no commit and REFUSE" prompt))))
+
+(deftest revision-contract-names-the-bound-repository
+  ;; Planted regression, run 2026-11-04-880b97dd (repair
+  ;; wm-click-loop-repair-1a8bdbe5): the revision prompt said only "the
+  ;; existing repository" and never restated round 1's artifact contract, so
+  ;; the revision author committed the amendment in futon4 on the reviewer's
+  ;; "commit in futon4" directive and the run stopped at :revision-build with
+  ;; :artifact-ref-unresolved.
+  (let [prompt (#'runner/revision-author-prompt
+                "author" "reviewer" "/tmp/attempt-001/evidence"
+                "/home/joe/code/futon2" "fbe2d376e47a097a7b5e6cc0737ef3f092459391"
+                "T-arxana-direct-reads" {}
+                ["fbe2d376e47a097a7b5e6cc0737ef3f092459391"]
+                "FULL_LOOP_REVIEW: REQUEST_CHANGES the ticket status line is stale; "
+                "commit in futon4, or wherever the ticket is canonically edited.")]
+    (is (re-find #"TARGET REPOSITORY: \"/home/joe/code/futon2\"" prompt))
+    (is (re-find #"TARGET REPOSITORY BASE HEAD: \"fbe2d376e47a097a7b5e6cc0737ef3f092459391\"" prompt))
+    (is (re-find #"same repository as your prior commits" prompt))
+    (is (re-find #"a commit in any other repository" prompt))
+    ;; The reviewer's verbatim findings stay verbatim, but the contract must
+    ;; say they never move the artifact binding.
+    (is (re-find #"even when the\s+reviewer's findings name that location" prompt))
+    (is (re-find #"artifact-binding mismatch" prompt))
+    (is (re-find #"make no\s+commit and REFUSE" prompt))))
 
 (deftest grounded-author-feature-card-is-persisted-and-rendered
   (let [cohort (retention-cohort "grounded-author-feature-card")

@@ -4971,16 +4971,19 @@
    :gate review-gate})
 
 (defn- revision-author-prompt
-  ([author reviewer evidence-dir target construction prior-commits findings]
-   (revision-author-prompt author reviewer evidence-dir false target construction
-                           prior-commits findings))
-  ([author reviewer evidence-dir measured-acquisition?
+  ([author reviewer evidence-dir repo base-head target construction
+    prior-commits findings]
+   (revision-author-prompt author reviewer evidence-dir repo base-head false
+                           target construction prior-commits findings))
+  ([author reviewer evidence-dir repo base-head measured-acquisition?
     target construction prior-commits findings]
    (str author ": FULL-LOOP REVISION ROUND 2. The independent reviewer requested "
        "changes to your implementation. Amend the same selected target using new "
        "commits in the existing repository.\n\n"
        "SELECTED TARGET: " (pr-str target) "\n"
-       "CONSTRUCTION CONTRACT: " (pr-str (prompt-construction construction)) "\n"
+       "TARGET REPOSITORY: " (pr-str repo) "\n"
+       "TARGET REPOSITORY BASE HEAD: " (pr-str base-head) "\n"
+       "CONSTRUCTION CONTRACT: " (pr-str (prompt-construction construction)) "\n\n"
        ;; ⟨1⟩6: the retry knows the test it must satisfy — the same block the
        ;; first dispatch stated, rendered from the candidate's own
        ;; declarations (carried on the construction record).
@@ -5001,6 +5004,13 @@
        "Address the findings without widening scope. Preserve existing history: "
        "make new commits only; do not force-push, reset, amend, rebase, rewrite, "
        "or otherwise replace prior commits. Run the repository-required gates.\n"
+       "REPOSITORY ARTIFACT CONTRACT: The amendment is a new commit in the TARGET "
+       "REPOSITORY above, the same repository as your prior commits. The artifact "
+       "gate observes only that repository; a commit in any other repository — "
+       "including wherever a finding's file canonically lives, even when the "
+       "reviewer's findings name that location — is an artifact-binding mismatch "
+       "and the run refuses it. If the correction cannot be made there, make no "
+       "commit and REFUSE with a typed reason.\n"
        "Report pattern application on one exact EDN line: "
        revision-pattern-use/author-marker
        " {:schema :wm/revision-pattern-application-claim-v1 "
@@ -5161,6 +5171,7 @@
                 "wm-full-loop" target
                 (revision-author-prompt author reviewer
                                         (:attempt-evidence-dir opts)
+                                        repo pre-revision-head
                                         (:measured-acquisition? opts)
                                         target effective-construction
                                         prior-commits findings)))
