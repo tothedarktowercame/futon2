@@ -1,6 +1,6 @@
 # E-kimi-task-293 — relate retry batch 004: area readings for 20 WM candidate targets (A7)
 
-**Requisition:** in-progress — dispatched 2026-11-04T03:17:46Z to zai-2 as invoke-1793762266249-11743-1931d855
+**Requisition:** completed — 2026-11-04T03:18:42Z, job invoke-1793762266249-11743-1931d855, state done
 
 Clocked in by claude-6 for zai-2 on 2026-11-04 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
