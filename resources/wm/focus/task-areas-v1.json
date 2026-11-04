@@ -6104,6 +6104,28 @@
    "seat": "zai-2",
    "job": "invoke-1793819927773-12173-82f9e8c5",
    "source": "futon3c/holes/excursions/ant-reads/M-the-perfect-crime.relate.json"
+  },
+  {
+   "target": "M-typed-holes-mathlib-handoff",
+   "area": "other:lean-mathlib-audit",
+   "read-area": "other:lean-mathlib-audit",
+   "cite": "/home/joe/code/futon3c/holes/missions/M-typed-holes-mathlib-handoff.md:6",
+   "quote": "decide its mathlib4 status (PRESENT / PARTIAL / ABSENT); for anything not fully",
+   "confidence": "medium",
+   "seat": "zai-1",
+   "job": "invoke-1793820075091-12179-a0c4bd01",
+   "source": "futon3c/holes/excursions/ant-reads/M-typed-holes-mathlib-handoff.relate.json"
+  },
+  {
+   "target": "M-peradam-grounding",
+   "area": "futonzero",
+   "read-area": "futonzero",
+   "cite": "/home/joe/code/futon7/holes/M-peradam-grounding.md:11",
+   "quote": "planning session over `futonzero-alphazero.md`; PM handoff → Opus pool, build → codex pool).",
+   "confidence": "medium",
+   "seat": "zai-1",
+   "job": "invoke-1793820075091-12179-a0c4bd01",
+   "source": "futon3c/holes/excursions/ant-reads/M-peradam-grounding.relate.json"
   }
  ]
 }
