@@ -1,9 +1,8 @@
 (ns futon2.aif.wm.terminal-receipt
   "PROOF-2b step ⟨0⟩0: every click's run record ends in EXACTLY ONE terminal
-  receipt, either an :action-receipt (the click selected and enacted work,
-  or — injury f6be547e — selected work whose construction carrier dropped
-  the selected wants before enactment) or a :failure (an abstention, a
-  refusal to select, or an exception before selection reached the record). Never both, never neither; persisting the
+  receipt, either an :action-receipt (the click selected and enacted work)
+  or a :failure (an abstention, a refusal to select, or an exception before
+  selection reached the record). Never both, never neither; persisting the
   run record never fails because of its receipt.
 
   The receipt reuses fields the run record already holds (click id,
@@ -56,36 +55,6 @@
   {:absent :no-failure} reads false here) or an abstention."
   [record]
   (boolean (or (:kind (:failure record)) (abstained? record))))
-
-(defn retained-selection-wants
-  "The qualified want set the record's own selection universe retained at
-  selection time: the policy key's :nodes first elements, the same
-  [pattern occurrence] pairs the cascade prediction universe carried. This
-  is a read of what the record says, never a re-derivation from substrate."
-  [record]
-  (->> (get-in record [:selection-event :policy-key])
-       (filter map?)
-       (mapcat :nodes)
-       (mapv first)
-       (filterv vector?)))
-
-(defn- construction-carrier-defect?
-  "True when RECORD's failure is the pre-author construction refusal whose
-  stated reason is an empty selected-want set (:selected-wants-empty) that
-  the record's own retained selection universe contradicts — the wants were
-  selected (retained in the policy key's nodes) and were dropped by the
-  construction carrier between selection and baseline capture, so the
-  refusal is a defect of a seam inside the click, not a terminal state of
-  the click itself: the click selected work, and the receipt reads that
-  selection. Any other failure — a close exception after selection, a
-  build failure before it, an abstention — remains the click's own
-  terminal state and still routes to failure-receipt."
-  [record]
-  (and (= :pre-author-baseline-unavailable (get-in record [:failure :kind]))
-       (= :construction (get-in record [:failure :stage]))
-       (= :selected-wants-empty
-          (get-in record [:failure :detail :baseline :reason]))
-       (seq (retained-selection-wants record))))
 
 (defn selected-g-decomposition
   "Project the selected candidate's retained scalar G and term decomposition.
@@ -213,23 +182,16 @@
 (defn terminal-receipt
   "The one terminal receipt for RECORD, validated. A record whose
   :selection-event says :cascade-selected and which carries no failure and
-  no abstention gets an :action-receipt. A selected record whose only
-  failure is a construction-carrier defect (see construction-carrier-defect?:
-  a pre-author baseline refusal for :selected-wants-empty contradicted by
-  the record's own retained selection universe) also gets an :action-receipt —
-  the click selected work; the dropped carrier is a seam defect inside the
-  click, not the click's terminal state (injury f6be547e, 2026-11-04). Every
-  other record gets a :failure: an abstention, a failure after selection
-  (the receipt names the target), or a record showing neither a selection
-  nor a failure (:no-terminal-state, itself a defect to repair). The
-  RECEIPT is exactly one kind; the record's state never makes this throw
-  (review, claude-1 2026-09-30: 35 of 63 past records were both or neither,
-  and a throw here would have left their run records unwritten)."
+  no abstention gets an :action-receipt. Every other record gets a :failure:
+  an abstention, a failure after selection (the receipt names the target),
+  or a record showing neither a selection nor a failure
+  (:no-terminal-state, itself a defect to repair). The RECEIPT is exactly
+  one kind; the record's state never makes this throw (review, claude-1
+  2026-09-30: 35 of 63 past records were both or neither, and a throw here
+  would have left their run records unwritten)."
   [record]
   (validate-receipt
-   (if (and (selected-target record)
-            (or (not (failed? record))
-                (construction-carrier-defect? record)))
+   (if (and (selected-target record) (not (failed? record)))
      (action-receipt record)
      (failure-receipt record))))
 
