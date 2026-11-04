@@ -8,8 +8,9 @@
   {:path path :sha256 (apply str (repeat 64 ch))})
 
 (defn- task [id status-class requisition ch]
-  {:id id :status-class status-class :status-line (name status-class)
-   :requisition requisition :source (pin (str "/code/holes/" id ".md") ch)})
+  (let [path (str "/code/holes/" id ".md")]
+    {:id id :path path :status-class status-class :status-line (name status-class)
+     :requisition requisition :source (pin path ch)}))
 
 (def current-registry
   {:missions
@@ -20,6 +21,17 @@
                  (task "E-running" :live {:state :in-progress :raw "in-progress"} "d")]}
    :tickets
    {:tickets [(task "T-open" :live {:absent :no-requisition} "e")]}})
+
+(def requisition-population-registry
+  {:missions {:missions []}
+   :excursions
+   {:excursions [(task "E-ordinary" :live {:absent :no-requisition} "1")
+                 (task "E-req-completed" :live {:state :completed} "2")
+                 (task "E-req-in-progress" :live {:state :in-progress} "3")
+                 (task "E-req-other" :live {:malformed "**Requisition:** queued"} "4")]}
+   :tickets
+   {:tickets [(assoc (task "T-parent-only" :live {:absent :no-requisition} "5")
+                     :parent "E-ordinary")]}})
 
 (defn- resign [observation]
   (assoc-in observation [:source-pin :sha256]
@@ -76,13 +88,12 @@
                      {:registry-snapshot current-registry
                       :read-bytes #(do (swap! reads conj %) (throw (ex-info "unexpected read" {})))})]
     (is (= :observed (:status observation)))
-    (is (= {:algorithm 0 :excursion 1 :mission 1 :ticket 1} (:counts observation)))
-    (is (= #{"M-open" "E-open" "T-open"} (set (map :id (:rows observation)))))
-    (is (= #{:registry/lifecycle-ineligible :requisition/in-progress
-             :algorithm/catalog-unavailable}
+    (is (= {:algorithm 0 :excursion 0 :mission 1 :ticket 1} (:counts observation)))
+    (is (= #{"M-open" "T-open"} (set (map :id (:rows observation)))))
+    (is (= #{:registry/lifecycle-ineligible :algorithm/catalog-unavailable}
            (set (map :ineligible-reason (:exclusions observation)))))
-    (is (= 5 (get-in observation [:registry-proof :observed-total])))
-    (is (= 5 (get-in observation [:registry-proof :accounted-total])))
+    (is (= 3 (get-in observation [:registry-proof :observed-total])))
+    (is (= 3 (get-in observation [:registry-proof :accounted-total])))
     (is (= [] @reads) "registry pins are retained; task files are not reread")
     (is (= :external-snapshot-authority-required
            (:reason (field/verify observation))))
@@ -90,6 +101,16 @@
     (is (= observation
            (field/observe {:registry-snapshot current-registry
                            :read-bytes #(throw (ex-info "unexpected read" {}))})))))
+
+(deftest requisitions-are-not-in-the-meta-population
+  (let [observation (field/observe {:registry-snapshot requisition-population-registry})
+        visible (filter :id (concat (:rows observation) (:exclusions observation)))]
+    (is (= #{"E-ordinary" "T-parent-only"} (set (map :id (:rows observation)))))
+    (is (= #{:algorithm/catalog-unavailable}
+           (set (map :ineligible-reason (:exclusions observation)))))
+    (is (not-any? #(re-find #"req" (:id %)) visible))
+    (is (= 2 (get-in observation [:registry-proof :observed-total])))
+    (is (= 2 (get-in observation [:registry-proof :accounted-total])))))
 
 (deftest algorithms-require-an-explicit-pinned-approved-catalog
   (let [algorithm-bytes (.getBytes "approved algorithm body" "UTF-8")
@@ -272,7 +293,7 @@
     (is (= {:path nil :sha256 nil}
            (get-in excluded [:ineligibility-evidence :retained-source])))
     (is (not (some #(= "M-open" (:id %)) (:rows observation))))
-    (is (= 5 (get-in observation [:registry-proof :observed-total])
+    (is (= 3 (get-in observation [:registry-proof :observed-total])
            (get-in observation [:registry-proof :accounted-total])))
     (is (= :verified (:status (verify-produced observation))))))
 

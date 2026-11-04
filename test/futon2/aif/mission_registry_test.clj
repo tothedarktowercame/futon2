@@ -76,6 +76,17 @@
       (is (= (get-in (first rows) [:source :sha256])
              (:provenance/sha256 mission-props))))))
 
+(deftest registry-rows-retain-a-requisition-marker-below-status-metadata
+  (write-primary-mission! "futon0/holes/excursions/E-status-first.md"
+                          (str "# E-status-first\n\n"
+                               "**Status:** DONE\n\n"
+                               "**Requisition:** completed — retained receipt\n"))
+  (let [row (first (:excursions (mr/load-excursions *tmpdir*)))]
+    (is (= {:absent :no-requisition} (:requisition row))
+        "state parsing keeps its first-line contract")
+    (is (true? (:requisition-record? row))
+        "population membership follows the marker wherever it occurs")))
+
 (deftest load-missions-excludes-sandbox-and-derived-docs-test
   (write-primary-mission! "futon0/holes/missions/M-alpha.md"
                   (str "Status: OPEN\n"

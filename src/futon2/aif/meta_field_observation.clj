@@ -1,14 +1,15 @@
 (ns futon2.aif.meta-field-observation
   "Pure/replayable META field observation over an authoritative registry read.
 
-  M/E/T lifecycle decisions remain owned by mission-registry and
-  requisition state. This namespace preserves their rows and reasons; it
-  does not parse status prose or infer completion.  Algorithm rows require a
+  M/E/T lifecycle decisions remain owned by mission-registry. Requisition
+  records are dispatch receipts, not members of the task population. This
+  namespace does not parse status prose or infer completion. Algorithm rows require a
   separately pinned, explicit approval catalog."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.meta-injury-observation :as injury]
-            [futon2.aif.mission-registry :as registry])
+            [futon2.aif.mission-registry :as registry]
+            [futon2.aif.task-requisition :as task-requisition])
   (:import [java.security MessageDigest]))
 
 (def schema :wm/meta-field-observation-v1)
@@ -49,9 +50,11 @@
 
 (defn- registry-material
   [{:keys [missions tickets excursions]}]
-  (let [all (concat (map #(assoc % :kind :mission) (:missions missions))
-                    (map #(assoc % :kind :excursion) (:excursions excursions))
-                    (map #(assoc % :kind :ticket) (:tickets tickets)))
+  (let [all (->> (concat (map #(assoc % :kind :mission) (:missions missions))
+                         (map #(assoc % :kind :excursion) (:excursions excursions))
+                         (map #(assoc % :kind :ticket) (:tickets tickets)))
+                 (remove task-requisition/requisition-record?)
+                 vec)
         lifecycle-live? (fn [{:keys [kind] :as row}]
                           (case kind
                             :mission (registry/live-mission? row)
@@ -59,22 +62,14 @@
                             :ticket (registry/live-ticket? row)
                             false))
         lifecycle-live (filterv lifecycle-live? all)
-        requisition-ineligible? #(contains? #{:in-progress :completed}
-                                            (get-in % [:requisition :state]))
         supported? #(and (string? (:id %)) (seq (:id %)))
-        eligible? #(and (supported? %) (not (requisition-ineligible? %)))
         proposed-support (mapv #(task-row (:kind %) %)
-                               (filter eligible? lifecycle-live))
-        requisition-exclusions
+                               (filter supported? lifecycle-live))
+        shape-exclusions
         (mapv (fn [row]
-                (if-not (supported? row)
-                  (assoc (task-row (:kind row) row)
-                         :ineligible-reason :unsupported-task-shape)
-                  (assoc (task-row (:kind row) row)
-                         :ineligible-reason (keyword "requisition" (name (get-in row [:requisition :state])))
-                         :ineligibility-evidence
-                         {:requisition (:requisition row) :source (:source row)})))
-              (remove eligible? lifecycle-live))
+                (assoc (task-row (:kind row) row)
+                       :ineligible-reason :unsupported-task-shape))
+              (remove supported? lifecycle-live))
         lifecycle-exclusions
         (->> all
              (remove lifecycle-live?)
@@ -85,7 +80,7 @@
                             {:status-class (:status-class row)
                              :status-line (:status-line row)
                              :source (:source row)}))))
-        registry-exclusions (vec (concat lifecycle-exclusions requisition-exclusions))
+        registry-exclusions (vec (concat lifecycle-exclusions shape-exclusions))
         source-unavailable (->> (concat proposed-support registry-exclusions)
                                 (remove #(pin? (:source %)))
                                 (mapv (fn [row]

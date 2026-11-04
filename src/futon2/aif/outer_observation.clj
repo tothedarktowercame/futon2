@@ -97,18 +97,17 @@
 (defn- registry-entries [{:keys [loaded-missions loaded-tickets loaded-excursions]}]
   (into {}
         (map (juxt :id identity))
-        (concat (:missions loaded-missions)
-                (:tickets loaded-tickets)
-                (:excursions loaded-excursions))))
+        (remove task-requisition/requisition-record?
+                (concat (:missions loaded-missions)
+                        (:tickets loaded-tickets)
+                        (:excursions loaded-excursions)))))
 
 (def task-exclusion-reasons
-  "Typed task-admission exclusions. Evidence gaps have no in-flight producer;
-  requisition states are ineligible by the shared task-requisition authority.
-  Registry statuses and inner-policy satisfaction are not exclusions."
-  (into #{:target-source-path-absent :target-source-conflict :target-item-line-absent
-          :unread-new :reading-source-changed :completion-definition-not-found}
-        (keep (comp task-requisition/ineligible-reason #(hash-map :state %)))
-        (vals task-requisition/states)))
+  "Typed task-admission exclusions. Evidence gaps have no in-flight producer.
+  Registry statuses, requisition records, and inner-policy satisfaction are
+  not exclusions."
+  #{:target-source-path-absent :target-source-conflict :target-item-line-absent
+    :unread-new :reading-source-changed :completion-definition-not-found})
 
 (defn validate-exclusion! [{:keys [target reason pin] :as row}]
   (when-not (and (string? target) (task-exclusion-reasons reason)
@@ -146,9 +145,10 @@
        :inputs inputs})))
 
 (defn- open-entries [authority]
-  (concat (filter mission-registry/live-mission? (get-in authority [:loaded-missions :missions]))
-          (filter mission-registry/live-excursion? (get-in authority [:loaded-excursions :excursions]))
-          (filter mission-registry/live-ticket? (get-in authority [:loaded-tickets :tickets]))))
+  (remove task-requisition/requisition-record?
+          (concat (filter mission-registry/live-mission? (get-in authority [:loaded-missions :missions]))
+                  (filter mission-registry/live-excursion? (get-in authority [:loaded-excursions :excursions]))
+                  (filter mission-registry/live-ticket? (get-in authority [:loaded-tickets :tickets])))))
 
 (defn- data-pin [x] (sha256 (.getBytes (pr-str x) "UTF-8")))
 
@@ -201,11 +201,7 @@
              (mapv (fn [target declaration]
                      (let [row (get by-id target)
                            registry-entry (get registry target)
-                           requisition-reason
-                           (task-requisition/ineligible-reason
-                            (:requisition registry-entry))
-                           reason (cond requisition-reason requisition-reason
-                                        (contains? changed target) :reading-source-changed
+                           reason (cond (contains? changed target) :reading-source-changed
                                         (undefined-completion? row) :completion-definition-not-found
                                         (nil? row) :unread-new
                                         :else (:source-absent declaration))

@@ -275,6 +275,7 @@
      :operator-gated? operator-gated?
      :operator-gate-lines gate-lines
      :requisition (task-requisition/read-state text)
+     :requisition-record? (task-requisition/requisition-record? {:text text})
      :source {:path path :sha256 (sha256-text text)}
      :open-holes (open-holes mission-id status-class lines)
      :open-hole-count (open-hole-count mission-id status-class lines)}))
@@ -844,6 +845,7 @@
                    :title (mission-title-from-lines id lines)
                    :status-line status :status-class (classify-ticket-status status)
                    :requisition (task-requisition/read-state text)
+                   :requisition-record? (task-requisition/requisition-record? {:text text})
                    :source {:path path :sha256 (sha256-text text)}
                    :parent (some #(when (re-find #"(?i)parent" %)
                                     (re-find #"M-[A-Za-z0-9_-]+" %)) lines)})))
@@ -899,6 +901,7 @@
      :status-line status-line
      :status-class (classify-status status-line)
      :requisition (task-requisition/read-state text)
+     :requisition-record? (task-requisition/requisition-record? {:text text})
      :source {:path path :sha256 (sha256-text text)}}))
 
 (defn load-excursions

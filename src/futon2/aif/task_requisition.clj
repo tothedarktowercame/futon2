@@ -21,6 +21,20 @@
           {:malformed line}
           (cond-> {:state state} (seq text) (assoc :text text)))))))
 
+(defn requisition-record?
+  "True when a loaded registry ITEM carries the requisition marker.
+  Registry readers retain :requisition-record? from their source text so a
+  marker below status metadata is not lost. Hand-built snapshots may supply
+  :text, or the parsed :requisition fact used before that retained bit existed."
+  [item]
+  (let [requisition (:requisition item)]
+    (boolean
+     (or (:requisition-record? item)
+         (when-let [text (:text item)]
+           (re-find #"(?m)^\*\*Requisition:\*\*" text))
+         (contains? requisition :state)
+         (contains? requisition :malformed)))))
+
 (defn ineligible-reason [requisition]
   (when-let [state (:state requisition)]
     (keyword "requisition" (name state))))
