@@ -56,6 +56,7 @@
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold-cascade :as fold-cascade]
             [futon2.aif.wm.compiled-cascade-construction :as compiled-construction]
+            [futon2.aif.cascade-want-projection :as cascade-wants]
             [futon2.aif.wm.executable-cascade :as executable-cascade]
             [futon2.aif.fold :as fold]
             [futon2.aif.delivery-qa :as delivery-qa]
@@ -3145,7 +3146,7 @@
         ;; the chain-head fallback -- the fix was inert in production while
         ;; its tests passed on hand-assembled actions. selected-entry now
         ;; carries :enacted-steps and this reads it from there.
-        action (cond-> (:action entry)
+        action (cond-> (cascade-wants/attach (:action entry))
                  ;; Absence means this caller supplied no decision evidence.
                  ;; Preserve it rather than manufacturing explicit nil; an
                  ;; explicitly present nil remains evidence in its own right.

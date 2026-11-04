@@ -1,11 +1,12 @@
 (ns futon2.aif.wm.compiled-cascade-construction
   "Carry certified operational clauses into the ordinary build prompt and fold.
   Construction is a plan; it never asserts that its completion checks passed."
-  (:require [futon2.aif.wm.executable-cascade :as cascade]))
+  (:require [futon2.aif.cascade-want-projection :as cascade-wants]
+            [futon2.aif.wm.executable-cascade :as cascade]))
 
 (defn construct [entry compiled]
   (let [selected (:canonical-cascade entry)
-        action (:action entry)
+        action (cascade-wants/attach (:action entry))
         nodes (:executable-nodes compiled)
         selected-check (cascade/validate-cascade selected)
         compiled-check (cascade/validate-cascade compiled)]
