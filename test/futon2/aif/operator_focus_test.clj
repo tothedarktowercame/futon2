@@ -102,3 +102,20 @@
         bad (focus/check-clock-reply "{\"clock_answers\":[{\"target\":\"M-x\",\"area\":\"Agency\",\"line\":2}]}" input)]
     (is (= "Agency" (get-in good ["M-x" :area])))
     (is (= :reader-invalid-line-citation (get-in bad ["M-x" :reason])))))
+
+(deftest evidence-page-honors-bounded-retry-advice
+  (let [calls (atom 0)
+        get' (fn [_ _] (if (< (swap! calls inc) 3)
+                         {:status 503 :body "{:retry-after-seconds 1}"}
+                         {:status 200 :body "{:entries []}"}))
+        r (focus/read-turns {:as-of as-of :http-get get' :sleep-fn (fn [_])})]
+    (is (= :ok (:status r)))
+    (is (= [3] (:page-attempts r)))))
+
+(deftest evidence-page-busy-exhausts-within-bound
+  (let [calls (atom 0)
+        get' (fn [_ _] (swap! calls inc) {:status 503 :body "{:retry-after-seconds 1}"})
+        r (focus/read-turns {:as-of as-of :http-get get' :sleep-fn (fn [_])})]
+    (is (= :expensive-read-busy (:reason r)))
+    (is (= [6] (:page-attempts r)))
+    (is (= 6 @calls))))

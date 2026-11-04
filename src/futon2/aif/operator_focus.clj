@@ -183,19 +183,37 @@
               (instance? java.net.SocketTimeoutException e)) true
           :else (recur (.getCause ^Throwable e)))))
 
+(defn get-page-with-retry
+  "GET one evidence page, honoring bounded 503 retry advice for the same URL."
+  [url {:keys [timeout-ms http-get sleep-fn]
+        :or {timeout-ms 10000 http-get http/get sleep-fn #(Thread/sleep (* 1000 %))}}]
+  (let [started (System/nanoTime)]
+    (loop [attempt 1 waited 0]
+      (let [resp (http-get url {:timeout timeout-ms :throw false})
+            advice (when (= 503 (:status resp))
+                     (try (:retry-after-seconds (edn/read-string (:body resp)))
+                          (catch Exception _ nil)))
+            elapsed (/ (- (System/nanoTime) started) 1e9)]
+        (if (and (= 503 (:status resp)) (number? advice) (< attempt 6)
+                 (<= (+ waited advice) 30) (< (+ elapsed advice) 30))
+          (do (sleep-fn advice) (recur (inc attempt) (+ waited advice)))
+          {:response resp :attempts attempt})))))
+
 (defn read-turns
   "Bounded authoritative read: at most three pages of 100. No file fallback."
-  [{:keys [base-url timeout-ms as-of] :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
+  [{:keys [base-url timeout-ms as-of] :as opts :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
   (try
-    (loop [page 0 cursor nil rows []]
+    (loop [page 0 cursor nil rows [] page-attempts []]
       (if (= page 3)
-        {:status :ok :turns (vec (keep evidence-row->turn rows)) :pages page}
+        {:status :ok :turns (vec (keep evidence-row->turn rows)) :pages page :page-attempts page-attempts}
         (let [url (str base-url "/api/alpha/evidence?author=joe&tags=turn&limit=100&system-as-of=" (enc as-of)
                        (when cursor (str "&cursor-at=" (enc (:at cursor))
                                          "&cursor-id=" (enc (:id cursor)))))
-              resp (http/get url {:timeout timeout-ms :throw false})]
+              {:keys [response attempts]} (get-page-with-retry url (assoc opts :timeout-ms timeout-ms))
+              resp response
+              attempts' (conj page-attempts attempts)]
           (cond
-            (= 503 (:status resp)) {:status :absent :reason :expensive-read-busy}
+            (= 503 (:status resp)) {:status :absent :reason :expensive-read-busy :page-attempts attempts'}
             (not= 200 (:status resp)) {:status :absent :reason :evidence-read-failed
                                        :http-status (:status resp)}
             :else
@@ -204,8 +222,8 @@
                   next (:next-cursor body)]
               (if (or (nil? next) (>= (count rows') 300))
                 {:status :ok :turns (vec (keep evidence-row->turn rows'))
-                 :pages (inc page)}
-                (recur (inc page) next rows')))))))
+                 :pages (inc page) :page-attempts attempts'}
+                (recur (inc page) next rows' attempts')))))))
     (catch Exception e
       (if (timeout-exception? e)
         {:status :absent :reason :evidence-read-timeout}
@@ -247,6 +265,7 @@
      :as-of (:as-of vote) :window-days (:window-days vote)
      :K (:seat-count vote) :turns-per-seat (:turns-per-seat vote)
      :area-corpus-sha256 area-corpus-sha
+     :evidence-page-attempts (:evidence-page-attempts opts)
      :clock-response-sha256 (:clock-response-sha256 opts)
      :turns (mapv (fn [t]
                     (let [classification (get mapped (:evidence-id t))]
@@ -335,7 +354,8 @@
             clock-answers (when raw (check-clock-reply raw resolved))
             area-map (merge rows (into {} (keep (fn [[t a]] (when (= :voted (:status a)) [t (:area a)])) clock-answers)))
             vote (focus-vote (:turns turn-read) area-map (assoc opts :text-answers answers))
-            manifest-opts (assoc opts :reader {:sent-turns (mapv #(assoc (select-keys % [:evidence-id :seat])
+            manifest-opts (assoc opts :evidence-page-attempts (:page-attempts turn-read)
+                                 :reader {:sent-turns (mapv #(assoc (select-keys % [:evidence-id :seat])
                                                                    :body-sha256 (identity/sha256 (str (:text %)))) sent)
                                           :prompt-sha256 (:prompt-sha256 dispatch)
                                           :area-authority-sha256 (:area-authority-sha256 dispatch) :seat (:seat dispatch)
