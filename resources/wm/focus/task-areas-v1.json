@@ -5927,6 +5927,183 @@
    "seat": "claude-6",
    "job": "invoke-1793765208225-11797-89c964c4",
    "source": "claude-6 hand check 2026-11-04: zai-2 row WM, its quote was on a different line than cited; title line cited instead"
+  },
+  {
+   "target": "E-candidate-queue-xtdb-shape-v0",
+   "area": "Arxana",
+   "read-area": "Arxana",
+   "cite": "/home/joe/code/futon5a/holes/excursions/E-candidate-queue-xtdb-shape-v0.md:212",
+   "quote": "- [ ] Arxana reads ranked queue state directly from XTDB instead of family-sorted placeholders",
+   "confidence": "medium",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/E-candidate-queue-xtdb-shape-v0.relate.json"
+  },
+  {
+   "target": "E-capability-graph-ui-polish",
+   "area": "Arxana",
+   "read-area": "Arxana",
+   "cite": "/home/joe/code/futon5a/holes/excursions/E-capability-graph-ui-polish.md:16",
+   "quote": "Verify and polish the WebArxana capability-graph UI",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/E-capability-graph-ui-polish.relate.json"
+  },
+  {
+   "target": "E-comprehension-foundation",
+   "area": "futon6",
+   "read-area": "futon6",
+   "cite": "/home/joe/code/futon6/holes/excursions/E-comprehension-foundation.md:1",
+   "quote": "# E-comprehension-foundation — corpus-relative comprehension as the foundation",
+   "confidence": "medium",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/E-comprehension-foundation.relate.json"
+  },
+  {
+   "target": "E-interim-director-followups",
+   "area": "business",
+   "read-area": "business",
+   "cite": "/home/joe/code/futon7/holes/E-interim-director-followups.md:17",
+   "quote": "- [ ] The VSAT resolution is recorded as a typed checkpoint delta with buyer, budget, and evidence references.",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/E-interim-director-followups.relate.json"
+  },
+  {
+   "target": "M-action-cost-modelling",
+   "area": "WM",
+   "read-area": "WM",
+   "cite": "/home/joe/code/futon3c/holes/missions/M-action-cost-modelling.md:1",
+   "quote": "# Mission: Action Cost/Benefit Modelling for the WM",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-action-cost-modelling.relate.json"
+  },
+  {
+   "target": "M-apm-capability-ratchet",
+   "area": "APM",
+   "read-area": "APM",
+   "cite": "/home/joe/code/futon0/holes/missions/M-apm-capability-ratchet.md:35",
+   "quote": "reusable mathematical capability.",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-apm-capability-ratchet.relate.json"
+  },
+  {
+   "target": "M-apm-on-lean36",
+   "area": "APM",
+   "read-area": "APM",
+   "cite": "/home/joe/code/futon3c/holes/missions/M-apm-on-lean36.md:13",
+   "quote": "1. **Reuse.** The openai/math drop and the other external Lean material (Schoenflies,",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-apm-on-lean36.relate.json"
+  },
+  {
+   "target": "M-autoclock-in",
+   "area": "Agency",
+   "read-area": "Agency",
+   "cite": "/home/joe/code/futon3c/holes/missions/M-autoclock-in.md:13",
+   "quote": "**Repo:** futon3c (clock-in lives in the agent-chat/REPL surface).",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-autoclock-in.relate.json"
+  },
+  {
+   "target": "M-daily-scan-multi-axis-queue",
+   "area": "business",
+   "read-area": "business",
+   "cite": "/home/joe/code/futon7/holes/M-daily-scan-multi-axis-queue.md:5",
+   "quote": "to explore Github-side demand signals for any of the arms/buckets/clusters that we have been building a supply-side model of?",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-daily-scan-multi-axis-queue.relate.json"
+  },
+  {
+   "target": "M-f11-find-production-successor",
+   "area": "WM",
+   "read-area": "WM",
+   "cite": "/home/joe/code/futon2/holes/missions/M-f11-find-production-successor.md:13",
+   "quote": "evidence-producing finder and state its laws in Lean, witness every law on a",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-f11-find-production-successor.relate.json"
+  },
+  {
+   "target": "M-formal-agency",
+   "area": "Agency",
+   "read-area": "Agency",
+   "cite": "/home/joe/code/futon3c/holes/missions/M-formal-agency.md:5",
+   "quote": "**One-line:** State and eventually check the conditions under which a network of",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-formal-agency.relate.json"
+  },
+  {
+   "target": "M-futonzero-prelim-practice",
+   "area": "futonzero",
+   "read-area": "futonzero",
+   "cite": "/home/joe/code/futon0/holes/missions/M-futonzero-prelim-practice.md:17",
+   "quote": "> if we can adapt the python-practice routines to prelim-practice. […] What we",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-futonzero-prelim-practice.relate.json"
+  },
+  {
+   "target": "M-interim-director-proxy-metric-inventory",
+   "area": "business",
+   "read-area": "business",
+   "cite": "/home/joe/code/futon7/holes/M-interim-director-proxy-metric-inventory.md:18",
+   "quote": "3. **Enumerates the value-generating arms** — concrete domains where futon-stack work might be purchasable — and scaffolds each end-to-end as `retrieve → process → evaluate → report`, with handoff candidates per arm.",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-interim-director-proxy-metric-inventory.relate.json"
+  },
+  {
+   "target": "M-pattern-retrieval-calibration",
+   "area": "patterns",
+   "read-area": "patterns",
+   "cite": "/home/joe/code/futon3/holes/missions/M-pattern-retrieval-calibration.md:1",
+   "quote": "# Mission: Pattern Retrieval Calibration",
+   "confidence": "high",
+   "seat": "zai-1",
+   "job": "invoke-1793819897425-12171-757b1c0d",
+   "source": "futon3c/holes/excursions/ant-reads/M-pattern-retrieval-calibration.relate.json"
+  },
+  {
+   "target": "M-象-cascade",
+   "area": "象",
+   "read-area": "象",
+   "cite": "/home/joe/code/futon3c/holes/missions/M-象-cascade.md:62",
+   "quote": "象 labels every operator turn with a move and a pattern, but nothing turns those labels into such rules. So the labels are only recorded, and the pattern library does not grow from them.",
+   "confidence": "high",
+   "seat": "zai-2",
+   "job": "invoke-1793819927773-12173-82f9e8c5",
+   "source": "futon3c/holes/excursions/ant-reads/M-象-cascade.relate.json",
+   "also": "patterns"
+  },
+  {
+   "target": "M-the-perfect-crime",
+   "area": "other:claim-discipline",
+   "read-area": "other:claim-discipline",
+   "cite": "/home/joe/code/futon3c/holes/missions/M-the-perfect-crime.md:53",
+   "quote": "futonic discipline needs a **forensic** mode whose *target* is not the code (Tornhill's target) but the *authoring practice*",
+   "confidence": "medium",
+   "seat": "zai-2",
+   "job": "invoke-1793819927773-12173-82f9e8c5",
+   "source": "futon3c/holes/excursions/ant-reads/M-the-perfect-crime.relate.json"
   }
  ]
 }
