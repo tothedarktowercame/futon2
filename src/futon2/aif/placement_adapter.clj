@@ -16,6 +16,30 @@
                           (.update bytes)))]
     (apply str (map #(format "%02x" (bit-and 255 %)) digest))))
 
+(defn retain-sources!
+  "Copy every available placement authority into DIR under its content hash."
+  [placements dir]
+  (let [root (doto (io/file dir) .mkdirs)]
+    (update placements :source
+            (fn [sources]
+              (reduce-kv
+               (fn [m kind source]
+                 (if (and (:sha256 source) (:path source))
+                   (try
+                     (let [bytes (Files/readAllBytes (.toPath (io/file (:path source))))
+                           sha (sha256 bytes)
+                           retained (io/file root (str sha ".placement-source"))]
+                       (when-not (= sha (:sha256 source))
+                         (throw (ex-info "placement source changed before retention"
+                                         {:kind kind :expected (:sha256 source) :loaded sha})))
+                       (when-not (.isFile retained)
+                         (Files/write (.toPath retained) bytes
+                                      (into-array java.nio.file.OpenOption [])))
+                       (assoc m kind (assoc source :retained-path (.getCanonicalPath retained))))
+                     (catch Exception _ (assoc m kind source)))
+                   (assoc m kind source)))
+               {} sources)))))
+
 (defn- read-source [path]
   (try
     (let [file (io/file path)

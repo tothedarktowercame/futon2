@@ -7,6 +7,7 @@
             [futon2.aif.wm.cascade-capability-dispatch :as capability-dispatch]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.cascade-feedback :as cascade-feedback]
@@ -1249,6 +1250,70 @@
   (pending-observation/observe
    (or (:run-record-dir opts) runner/default-run-record-dir) run-id))
 
+(defn- placement-store-dir [opts]
+  (or (:placement/source-store-dir opts) (str (data-paths/path "wm-runs"))))
+
+(defn- file-sha256 [file]
+  (when (.isFile (io/file file))
+    (action-identity/sha256 (slurp (io/file file)))))
+
+(defn- git-placement-source
+  "Find EXPECTED in the last 200 versions of PATH and materialize those exact
+   bytes in the content-addressed placement store."
+  [path expected store-dir]
+  (try
+    (let [parent (.getParentFile (io/file path))
+          root (str/trim (:out (shell/sh "git" "-C" (.getPath parent)
+                                        "rev-parse" "--show-toplevel")))
+          rel (.toString (.relativize (.toPath (io/file root)) (.toPath (io/file path))))
+          commits (str/split-lines
+                   (:out (shell/sh "git" "-C" root "log" "-n" "200" "--format=%H" "--" rel)))]
+      (some (fn [commit]
+              (let [shown (shell/sh "git" "-C" root "show" (str commit ":" rel))]
+                (when (and (zero? (:exit shown))
+                           (= expected (action-identity/sha256 (:out shown))))
+                  (let [retained (io/file (doto (io/file store-dir) .mkdirs)
+                                          (str expected ".placement-source"))]
+                    (spit retained (:out shown))
+                    {:path (.getCanonicalPath retained) :resolution :git-history
+                     :commit commit}))))
+            commits))
+    (catch Exception _ nil)))
+
+(defn- resolve-placement-source [opts source]
+  (when-let [expected (:sha256 source)]
+    (let [store-dir (placement-store-dir opts)
+          retained (or (:retained-path source)
+                       (.getPath (io/file store-dir (str expected ".placement-source"))))]
+      (cond
+        (= expected (file-sha256 retained))
+        {:path retained :resolution :retained-store}
+
+        (= expected (file-sha256 (:path source)))
+        {:path (:path source) :resolution :current-path}
+
+        :else (git-placement-source (:path source) expected store-dir)))))
+
+(defn- replay-placements [opts pinned]
+  (let [pinned-sources (select-keys pinned [:tsv :classes])
+        resolved (into {} (keep (fn [[kind source]]
+                                  (when-let [r (resolve-placement-source opts source)]
+                                    [kind r]))) pinned-sources)
+        required (into #{} (keep (fn [[kind source]] (when (:sha256 source) kind))) pinned-sources)]
+    (if-not (= required (set (keys resolved)))
+      ;; PlacementReplay.scored_means_pinned_or_absent: after bounded recovery
+      ;; exhausts, score the explicit absence branch rather than substituting
+      ;; current bytes or preserving an immortal pending.
+      {:status :absent :reason :placement-source-unavailable :rows {}
+       :source (merge pinned-sources {:resolution :typed-absence})}
+      (let [paths (merge (assoc placement-adapter/default-paths :classes nil)
+                         (into {} (map (fn [[kind r]] [kind (:path r)])) resolved))
+            loaded (placement-adapter/load-placements paths)]
+        (assoc loaded :source (merge (:source loaded)
+                                     {:resolution (into {} (map (fn [[k r]] [k (dissoc r :path)]) resolved))}))))))
+
+(def ^:dynamic *placement-replay-opts* {})
+
 (defn- previous-giraffe-observation [current-dir makeup pending]
   (let [run-id (:giraffe/run-id pending)
         previous-dir (when run-id (io/file (.getParentFile (io/file current-dir)) run-id))]
@@ -1269,37 +1334,7 @@
                {:status :absent :rows {}
                 :source (select-keys pinned [:tsv :classes])
                 :reason (or (:reason pinned) :no-pinned-source)})
-              (let [paths (cond-> (assoc placement-adapter/default-paths
-                                         :classes nil)
-                          (get-in pinned [:tsv :path])
-                          (assoc :tsv (get-in pinned [:tsv :path]))
-                          (and (get-in pinned [:classes :sha256])
-                               (get-in pinned [:classes :path]))
-                          (assoc :classes (get-in pinned [:classes :path])))
-                  placements (placement-adapter/load-placements paths)
-                  loaded (:source placements)
-                  pinned-sources (select-keys pinned [:tsv :classes])
-                  source-absent?
-                  (or (= :absent (:status placements))
-                      (some (fn [[kind source]]
-                              (and (:sha256 source)
-                                   (= :absent (get-in loaded [kind :status]))))
-                            pinned-sources))
-                  source-changed?
-                  (some (fn [[kind source]]
-                          (and (:sha256 source)
-                               (not= (:sha256 source)
-                                     (get-in loaded [kind :sha256]))))
-                        pinned-sources)]
-              (cond
-                source-absent?
-                {:deferred :placement-source-absent :pinned pinned}
-
-                source-changed?
-                {:deferred :placement-source-changed
-                 :pinned pinned :loaded loaded}
-
-                :else (placement-adapter/annotate observation placements))))
+              (placement-adapter/annotate observation (replay-placements *placement-replay-opts* pinned)))
             (placement-adapter/annotate
              observation
              {:status :absent :rows {} :source {}
@@ -1335,7 +1370,8 @@
     (let [ending (pending-run-ending opts (:run-id pending))]
       (if-not (= :ready (:status ending))
         {:status :deferred :state state :reason (:reason ending)}
-        (if-let [previous (previous-giraffe-observation current-dir makeup pending)]
+        (if-let [previous (binding [*placement-replay-opts* opts]
+                            (previous-giraffe-observation current-dir makeup pending))]
           (if-let [reason (:deferred previous)]
             {:status :deferred :state state :reason reason
              :placement-source (select-keys previous [:pinned :loaded])}
@@ -1345,7 +1381,8 @@
                             makeup state pending
                             (learning-observation pending previous)
                             (assoc ending :observed-gain gain))]
-              (assoc consumed :ending-class (:ending-class ending) :observed-gain gain)))
+              (assoc consumed :ending-class (:ending-class ending) :observed-gain gain
+                     :placement-source (:placement/source previous))))
           {:status :deferred :state state :reason :previous-giraffe-run-absent})))
     {:status :none :state state}))
 
@@ -1496,6 +1533,8 @@
                           (if-let [tsv (:outer/placements-path opts)]
                             (assoc placement-adapter/default-paths :tsv tsv)
                             placement-adapter/default-paths))
+              placements (placement-adapter/retain-sources!
+                          placements (placement-store-dir opts))
               observation (placement-adapter/annotate observation placements)
               learning (resolve-pending-learning opts makeup state giraffe-dir observation)
               _ (swap! (:selection-record/evidence opts) assoc :outer/learning
