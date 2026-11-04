@@ -8522,7 +8522,7 @@
                (or (:interpretation-ask-classify-fn opts)
                    (interpretation-ask-classifier
                     (pinned-ask-focus-context
-                     @(:selection-record/evidence opts))))))
+                     (some-> (:selection-record/evidence opts) deref))))))
             interpretation-ask-record
             (cond
               ;; every refused target classifies :unknown: no ask — the
