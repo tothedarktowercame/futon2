@@ -1,0 +1,25 @@
+{:schema :wm/status-refresh-v1
+ :target "T-arxana-direct-reads"
+ :ticket {:path "/home/joe/code/futon4/holes/tickets/T-arxana-direct-reads.md"
+          :sha256 "70f4e45a96ed66618bd494f35739b7ee8223aaf99d9d9b816b42ea7f2f919080"}
+ :cached-status "open, parked. The file exporter ships first (lean-docs-align, the `lean/doc-source` edges) so browsing is not blocked on this."
+ :re-derived-status "open, unverified-live: the cached 'parked / browsing unblocked' banner no longer matches the territory. The futon1b store on :7073 is listening but currently answers 404 (\"No context found for request\") on every hyperedge route probed (/hyperedges, /hyperedges?type=lean/doc-source, /hyperedge), so the ticket's 'the client can already fetch them' precondition cannot be re-verified live today; and futon4-base-url's docstring still names :7071, which is not listening at all. Next move: restore or relocate the serving route for hyperedges on futon1b and fix the stale base-URL default before (or as part of) the live browser work."
+ :checked
+ [{:what "futon1b :7073 liveness and hyperedge routes"
+   :how "curl http://127.0.0.1:7073/{,/hyperedges?type=lean/doc-source,/hyperedge} with Accept: application/json"
+   :observed "port 7073 LISTEN (java pid 2471981, same process as 7072); all routes 404 No context found for request"}
+  {:what "futon1a :7071 named by futon4-base-url docstring"
+   :how "curl http://127.0.0.1:7071/api/alpha/agents; ss -ltn"
+   :observed "connection refused; no listener on 7071 — ticket missing-item 3 (stale base URL default) confirmed still open"}
+  {:what "arxana-store.el Accept header handling (ticket missing-item 4)"
+   :how "read futon4/dev/arxana-store.el arxana-store--default-headers (:235 region)"
+   :observed "explicit (\"Accept\" . \"application/json\") is always prepended; interactive url.el override behavior still unverified"}
+  {:what "ticket body past the banner"
+   :how "read futon4/holes/tickets/T-arxana-direct-reads.md sections What exists / What is missing / Done when"
+   :observed "hypergraph browser still file-fed per body; no in-body ruling found that revises the banner"}]
+ :derived-at "2026-11-04T02:55:01Z"
+ :derived-by "wm-author"
+ :pattern "process-coherence/status-refresh-before-work"
+ :cascade {:selected-digest "96de03c329120d2a9ccd497b38f0612c2130c758c89168eb010aa07e230f133d"
+           :compiled-digest "cd485c4c7c6cb989afdfe86ce9fe93745fca91d643278b9d31f4eb36f775a0b8"
+           :step ["process-coherence/status-refresh-before-work" 4]}}
