@@ -1,6 +1,6 @@
 # E-kimi-task-295 — relate final batch 1: area readings for unplaced WM candidates (A7)
 
-**Requisition:** in-progress — dispatched 2026-11-04T03:20:47Z to zai-2 as invoke-1793762447925-11748-ac90f932
+**Requisition:** completed — 2026-11-04T03:23:42Z, job invoke-1793762447925-11748-ac90f932, state done
 
 Clocked in by claude-6 for zai-2 on 2026-11-04 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
