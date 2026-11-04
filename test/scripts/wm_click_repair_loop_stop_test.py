@@ -1,0 +1,128 @@
+import importlib.util
+import json
+import tempfile
+import unittest
+import warnings
+from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
+
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def load_loop():
+    path = ROOT / "scripts" / "wm_click_repair_loop.py"
+    spec = importlib.util.spec_from_file_location("wm_click_repair_loop_under_test", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class SelfHealStopTest(unittest.TestCase):
+    def setUp(self):
+        warnings.simplefilter("ignore", ResourceWarning)
+        self.loop = load_loop()
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        root = Path(self.temp.name)
+        self.loop.STATE = root / "state"
+        self.loop.STATE.mkdir()
+        self.loop.LEDGER = self.loop.STATE / "ledger.jsonl"
+        self.loop.LOGFILE = self.loop.STATE / "loop.log"
+        self.loop.STOP_FILE = self.loop.STATE / "STOP"
+        self.loop.META_INJURY_ROOT = root / "injuries"
+        self.args = SimpleNamespace(
+            clicks=2, ticks=99, stall=3, max_repairs=3,
+            repair_seat="repair", continuous=True, observe_only=False,
+            owner="owner", issuing_caller="caller", author="author",
+            reviewer="reviewer", repair_reviewer="repair-reviewer")
+
+    def click(self, disposition, carried=False, click_id="click-1"):
+        return {
+            "n": 1, "rc": 1, "click-id": click_id, "spent": True,
+            "outcome": "unknown", "run-id": None, "carried": carried,
+            "last-result": {"runtime-disposition": disposition},
+            "log": "unused", "run-record": None, "verdict": None,
+            "alert": None, "why": None, "since-epoch": 0,
+            "in-flight-repairs": [],
+        }
+
+    def run_with(self, clicks):
+        with (mock.patch.object(self.loop, "jvm_start_epoch", return_value=0),
+              mock.patch.object(self.loop, "reload_when_idle", return_value=(True, "", 0)),
+              mock.patch.object(self.loop, "fire", side_effect=clicks) as fire,
+              mock.patch.object(self.loop, "notify")):
+            rc = self.loop.run(self.args)
+        rows = [json.loads(line) for line in self.loop.LEDGER.read_text().splitlines()]
+        return rc, fire.call_count, rows
+
+    def assert_typed_stop(self, disposition):
+        rc, calls, rows = self.run_with([self.click(disposition)])
+        self.assertEqual(1, rc)
+        self.assertEqual(1, calls)
+        typed = [row for row in rows
+                 if row.get("event") == "stop" and
+                 row.get("kind") == "machine-self-heal-failed"]
+        self.assertEqual(1, len(typed))
+        self.assertEqual("click-1", typed[0]["click-id"])
+        self.assertIn("no next iteration started", self.loop.LOGFILE.read_text())
+
+    def test_dedicated_self_heal_refusal_stops(self):
+        self.assert_typed_stop({
+            "route": "dedicated-meta-self-heal", "status": "refused",
+            "ordinary-selection-called?": False,
+            "reason": "meta-self-heal/acceptance-run-refused",
+            "injury-id": "injury/one", "attempt": 1,
+        })
+
+    def test_open_out_of_band_held_stops(self):
+        self.assert_typed_stop({
+            "route": "open-out-of-band", "status": "held",
+            "reason": "out-of-band/historical-cause-mismatch",
+            "phase": "open-out-of-band", "injury-id": "injury/two",
+        })
+
+    def test_abandoned_latest_transition_stops(self):
+        transition = (self.loop.META_INJURY_ROOT / "meta-injury-ledger" /
+                      "injury" / "three")
+        transition.mkdir(parents=True)
+        (transition / "9.edn").write_text(
+            '{:state :abandoned, :reason :attempt-limit-exhausted, '
+            ':injury-id "injury/three", :attempt 3}')
+        self.assert_typed_stop({
+            "route": "dedicated-meta-self-heal", "status": "discharged",
+            "ordinary-selection-called?": False, "injury-id": "injury/three",
+        })
+
+    def test_ordinary_carried_run_still_reaches_second_iteration(self):
+        ordinary = self.click({
+            "route": "ordinary", "status": "complete",
+            "ordinary-selection-called?": True,
+        }, carried=True, click_id="click-1")
+        second = self.click({
+            "route": "ordinary", "status": "complete",
+            "ordinary-selection-called?": True,
+        }, carried=True, click_id="click-2")
+        rc, calls, rows = self.run_with([ordinary, second])
+        self.assertEqual(0, rc)
+        self.assertEqual(2, calls)
+        self.assertFalse(any(row.get("kind") == "machine-self-heal-failed" for row in rows))
+
+    def test_medic_discharge_does_not_stop(self):
+        first = self.click({
+            "route": "open-out-of-band-medic", "status": "discharged",
+            "ordinary-selection-called?": False, "injury-id": "injury/four",
+        }, click_id="click-1")
+        second = self.click({
+            "route": "ordinary", "status": "complete",
+            "ordinary-selection-called?": True,
+        }, carried=True, click_id="click-2")
+        rc, calls, rows = self.run_with([first, second])
+        self.assertEqual(0, rc)
+        self.assertEqual(2, calls)
+        self.assertFalse(any(row.get("kind") == "machine-self-heal-failed" for row in rows))
+
+
+if __name__ == "__main__":
+    unittest.main()

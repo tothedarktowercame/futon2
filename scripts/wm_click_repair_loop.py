@@ -73,6 +73,7 @@ from pathlib import Path
 CODE = Path.home() / "code"
 F2 = CODE / "futon2"
 F3C = CODE / "futon3c"
+META_INJURY_ROOT = F2 / "data" / "wm-meta-injuries-live-2026-10-22"
 STATE = F2 / "data" / "wm-click-loop"
 LEDGER = STATE / "ledger.jsonl"
 LOGFILE = STATE / "loop.log"
@@ -120,6 +121,100 @@ def log(msg: str) -> None:
 def record(row: dict) -> None:
     with LEDGER.open("a") as fh:
         fh.write(json.dumps({"at": now(), **row}, ensure_ascii=False) + "\n")
+
+
+def _plain(value):
+    """Normalize JSON strings and EDN-like keyword strings for comparison."""
+    return value[1:] if isinstance(value, str) and value.startswith(":") else value
+
+
+def _runtime_disposition(value):
+    """Find a retained runtime disposition in a JSON last-result."""
+    if not isinstance(value, dict):
+        return None
+    for key in ("runtime-disposition", "runtime_disposition", "disposition"):
+        if isinstance(value.get(key), dict):
+            return value[key]
+    if any(key in value for key in ("route", "ordinary-selection-called?", "ordinary_selection_called")):
+        return value
+    for child in value.values():
+        found = _runtime_disposition(child)
+        if found:
+            return found
+    return None
+
+
+def _edn_field(text: str, key: str):
+    match = re.search(rf':{re.escape(key)}\s+(?:"([^"]*)"|:([^\s,}}\]]+)|(true|false)|(-?\d+))', text)
+    if not match:
+        return None
+    quoted, keyword, boolean, integer = match.groups()
+    if quoted is not None:
+        return quoted
+    if keyword is not None:
+        return keyword
+    if boolean is not None:
+        return boolean == "true"
+    return int(integer)
+
+
+def _binding_disposition(click_id: str | None):
+    if not click_id:
+        return None
+    safe = re.sub(r"[^A-Za-z0-9._-]", "_", click_id)
+    path = F3C / "data" / "wm-click-run-bindings" / f"click-run-binding-{safe}.edn"
+    try:
+        text = path.read_text()
+    except (OSError, UnicodeError):
+        return None
+    start = text.find(":runtime-disposition")
+    if start < 0:
+        return None
+    body = text[start:]
+    return {key: _edn_field(body, key) for key in
+            ("route", "status", "reason", "phase", "injury-id", "attempt",
+             "ordinary-selection-called?")}
+
+
+def _latest_injury_transition(injury_id: str | None):
+    if not injury_id:
+        return None
+    injury_dir = META_INJURY_ROOT / "meta-injury-ledger" / "injury" / injury_id.rsplit("/", 1)[-1]
+    try:
+        files = sorted(injury_dir.glob("*.edn"),
+                       key=lambda path: int(path.stem) if path.stem.isdigit() else -1)
+        text = files[-1].read_text() if files else ""
+    except (OSError, UnicodeError):
+        return None
+    if not text:
+        return None
+    return {key: _edn_field(text, key) for key in
+            ("state", "reason", "injury-id", "attempt")}
+
+
+def machine_self_heal_failure(click: dict):
+    """Return the retained failing disposition, or None without guessing."""
+    disposition = (_runtime_disposition(click.get("last-result")) or
+                   _binding_disposition(click.get("click-id")))
+    if not disposition:
+        return None
+    disposition = {key: _plain(value) for key, value in disposition.items()}
+    route = disposition.get("route")
+    status = disposition.get("status")
+    ordinary = disposition.get("ordinary-selection-called?",
+                               disposition.get("ordinary_selection_called"))
+    route_failed = (route == "dedicated-meta-self-heal" and ordinary is False and
+                    status in {"refused", "held", "threw"})
+    out_of_band_failed = route == "open-out-of-band" and status == "held"
+    latest = _latest_injury_transition(disposition.get("injury-id"))
+    abandoned = latest and _plain(latest.get("state")) == "abandoned"
+    if not (route_failed or out_of_band_failed or abandoned):
+        return None
+    if abandoned:
+        disposition.setdefault("reason", _plain(latest.get("reason")))
+        disposition.setdefault("attempt", latest.get("attempt"))
+        disposition["state"] = "abandoned"
+    return disposition
 
 
 def sh(*args, cwd=None, timeout=None, input=None) -> subprocess.CompletedProcess:
@@ -1093,6 +1188,21 @@ def run(args) -> int:
             f"carried={c['carried']} rc={c['rc']}  [spent {spent}/{args.clicks}, carrying {ticks}/{args.ticks}]")
         record({"event": "click", **{k: v for k, v in c.items() if k != "last-result"},
                 "last-result": c["last-result"], "spent-total": spent, "carrying-total": ticks})
+        failure = machine_self_heal_failure(c)
+        if failure:
+            fields = {key: failure.get(key) for key in
+                      ("route", "status", "reason", "phase", "injury-id", "attempt")
+                      if failure.get(key) is not None}
+            record({"event": "stop", "kind": "machine-self-heal-failed",
+                    "click-id": c["click-id"], **fields})
+            detail = ", ".join(f"{key} {value}" for key, value in fields.items())
+            reason = (f"machine-self-heal-failed: click {c['click-id']}"
+                      f"{', ' if detail else ''}{detail}; no next iteration started")
+            return stop(args, reason, 1)
+        if (_runtime_disposition(c.get("last-result")) is None and
+                _binding_disposition(c.get("click-id")) is None):
+            log(f"click {c['click-id']}: retained runtime disposition unreadable; "
+                "keeping current loop behaviour")
         if c["outcome"] == "preflight-refused":
             return stop(args, c["last-result"]["reason"], 1)
         if c["rc"] == 3 and not c["spent"]:
