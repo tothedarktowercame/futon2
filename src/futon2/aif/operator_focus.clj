@@ -260,7 +260,7 @@
         r (shell/sh kimi-script "--from" caller "--to" reader-seat
                     "--purpose" "read operator focus areas" (.getPath f)
                     :env (assoc (into {} (System/getenv)) "KIMI_TASK_REPO" (or task-repo (System/getProperty "user.dir"))))
-        job (second (re-find #"job=([^ ]+)" (:out r)))]
+        job (second (re-find #"job=(\S+)" (:out r)))]
     (if-not (and (zero? (:exit r)) job)
       {:status :absent :reason :reader-dispatch-failed :stderr (:err r)}
       (loop [left reader-timeout-ms]
