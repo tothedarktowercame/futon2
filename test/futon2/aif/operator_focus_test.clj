@@ -119,3 +119,26 @@
     (is (= :expensive-read-busy (:reason r)))
     (is (= [6] (:page-attempts r)))
     (is (= 6 @calls))))
+
+(deftest evidence-read-applies-as-of-with-initial-cursor
+  (let [seen-url (atom nil)
+        get' (fn [url _]
+               (reset! seen-url url)
+               {:status 200 :body "{:entries []}"})
+        r (focus/read-turns {:as-of as-of :http-get get'})]
+    (is (= :ok (:status r)))
+    (is (re-find #"cursor-at=2026-11-04T00%3A00%3A00Z" @seen-url))
+    (is (re-find #"cursor-id=" @seen-url))
+    (is (not (re-find #"system-as-of" @seen-url)))
+    (is (= :event-time-cursor (:as-of-mode r)))))
+
+(deftest evidence-read-post-filters-rows-after-as-of
+  (let [row (fn [id at turn-id]
+              {:evidence/id id :evidence/at at
+               :evidence/origin {:kind :operator}
+               :evidence/body {:role "user" :turn-id turn-id :text id}})
+        body (pr-str {:entries [(row "future" "2026-11-04T00:00:01Z" "a-turn-2")
+                                (row "kept" "2026-11-04T00:00:00Z" "a-turn-1")]})
+        r (focus/read-turns {:as-of as-of
+                             :http-get (fn [_ _] {:status 200 :body body})})]
+    (is (= ["kept"] (mapv :evidence-id (:turns r))))))
