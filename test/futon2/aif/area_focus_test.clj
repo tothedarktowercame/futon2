@@ -11,15 +11,26 @@
 (def present {:result {:status :present :ranked [{:area "WM" :share 1/2}]}})
 
 (deftest area-relation-rule
-  (is (= [:focus :focused]
-         ((juxt :relation-key :class)
+  (is (= [:focus :focus :focused]
+         ((juxt :relation-key :class :scored-class)
           (sut/classify-target rows "corpus" present "focus" "direct"))))
-  (is (= :related (:class (sut/classify-target rows "c" present "f" "also"))))
-  (is (= :unrelated (:class (sut/classify-target rows "c" present "f" "other"))))
+  (is (= :associated (:class (sut/classify-target rows "c" present "f" "also"))))
+  (is (= :useful-elsewhere (:class (sut/classify-target rows "c" present "f" "other"))))
   (is (= :no-area-row (get-in (sut/classify-target rows "c" present "f" "missing") [:relation :reason])))
   (is (= :no-recent-operator-turns
          (get-in (sut/classify-target rows "c" {:result {:status :absent :reason :no-recent-operator-turns}}
                                             "f" "direct") [:relation :reason]))))
+
+(deftest receipt-class-is-the-class-the-scorer-sees
+  ;; wm-click-loop-repair-260438a7: held run 2026-11-04-ede75c1a stopped at
+  ;; outer-selection with :relation-receipt-class-mismatch because the area
+  ;; receipt recorded the Lean projection (:unrelated) in :class while the
+  ;; scorer's relation fn returned the relation (:useful-elsewhere). One
+  ;; classification for both the scoring path and the receipt.
+  (let [receipt (sut/classify-target rows "c" present "f" "other")
+        scorer-class (:relation-key receipt)]
+    (is (= scorer-class (:class receipt))
+        "receipt :class must equal the class the scorer's relation fn returns")))
 
 (deftest third-place-ties-are-all-focus
   (let [focus {:result {:status :present :ranked [{:area "A"} {:area "B"} {:area "C"} {:area "D"}]}}]

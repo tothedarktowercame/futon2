@@ -34,12 +34,18 @@
                        (areas (:area row)) :focus
                        (areas (:also row)) :associated
                        :else :useful-elsewhere)
-        class (get {:focus :focused :associated :related
-                    :useful-elsewhere :unrelated} relation :unknown)
+        ;; The receipt keeps the relation vocabulary in :class — the class the
+        ;; scorer's relation fn returns and outer-select's mismatch check
+        ;; compares against (same contract as focus-receipt/classify-target,
+        ;; codex-20 ruling; see the focus-receipt note in apparatus
+        ;; certificates). The Lean terminal-class projection is recorded
+        ;; separately in :scored-class.
+        scored-class (get {:focus :focused :associated :related
+                           :useful-elsewhere :unrelated} relation :unknown)
         derived {:kind :task-area :area (:area row) :also (:also row)
                  :focus-areas (vec (sort areas)) :corpus-sha256 corpus-sha
                  :focus-manifest-sha256 focus-manifest-sha}]
-    {:target target :class class :relation-key relation
+    {:target target :class relation :scored-class scored-class :relation-key relation
      :relation (if (= :unknown relation)
                  {:status :absent :reason (or reason :no-area-row)}
                  {:target target :relation (name relation) :facet (:area row)
