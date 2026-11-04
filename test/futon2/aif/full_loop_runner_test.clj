@@ -7242,12 +7242,14 @@
                                             (= id "retention-author")
                                             (assoc :feature-card feature-card-claim)))))
         falsifier (get-in result [:data :error-data :reviewer-falsifier])]
-    (is (= :build-failed (:outcome result)))
-    (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
-    (is (= :selected-want-identity-missing
-           (get-in falsifier [:checks :selected-want-accounting :evidence :reason])))
-    (is (= #{:mission-standing :selected-want-accounting :evidence-authority}
-           (set (:failed-checks falsifier))))))
+    ;; Re-pinned 2026-11-03 (claude-2, F12b-b2 review). Since 5712b9067 the
+    ;; want contract refuses a bare selection at require-before-author!, ahead
+    ;; of the reviewer falsifier this control used to reach, and since
+    ;; 8b833eed9 a typed guard refusal closes :guardrail-refusal, not
+    ;; :build-failed. The claim is unchanged: refused before build approval.
+    (is (= :guardrail-refusal (:outcome result)))
+    (is (= :selected-want-contract-missing (get-in result [:data :failure-kind])))
+    (is (nil? falsifier) "the refusal precedes the reviewer falsifier")))
 
 (deftest pre-judge-failure-keeps-loaded-configuration-only
   (let [{:keys [root] :as c} (retention-cohort "effective-config-early")
