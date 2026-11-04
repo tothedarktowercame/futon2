@@ -1,6 +1,6 @@
 # E-kimi-task-261 — A1 place: the two losing-class targets of click 1729e007 (selection Q7, Joe option 1)
 
-**Requisition:** in-progress — dispatched 2026-11-04T01:31:24Z to kimi-1 as invoke-1793755884332-11485-3cd02389
+**Requisition:** completed — 2026-11-04T01:33:19Z, job invoke-1793755884332-11485-3cd02389, state done
 
 Clocked in by claude-6 for kimi-1 on 2026-11-04 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
