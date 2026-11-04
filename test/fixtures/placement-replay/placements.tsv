@@ -1,0 +1,3 @@
+id	what	status	wing	way	action	need_goes_to	finish
+M-alpha	alpha	placed	left	work	act	M-beta	done
+M-beta	beta	placed	right	work	act	none	done

@@ -2,6 +2,7 @@
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
@@ -12,6 +13,8 @@
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.meta-field-observation :as meta-field]
+            [futon2.aif.outer-observation :as outer-observation]
+            [futon2.aif.outer-state :as outer-state]
             [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
             [futon2.aif.ticket-readiness :as ticket-readiness]
@@ -30,6 +33,92 @@
   (runtime/run-opportunity! (merge {:task {:id "M-production"}} opts)))
 
 (defn- digest [x] (evidence/value-digest x))
+
+(deftest pending-learning-replays-the-selection-pinned-placements
+  ;; Before R32-b the placed-gate witness reached outer-score and threw
+  ;; :outer-score/placement-unavailable because this replay field had no
+  ;; :placement keys (PlacementReplay.witness_refuses_today_scores_repaired).
+  (let [root (io/file "test/fixtures/placement-replay")
+        previous-dir (io/file root "giraffe/previous")
+        current-dir (io/file root "giraffe/current")
+        tsv (io/file root "placements.tsv")
+        tsv-sha "30a6c848c8c4a8c93116ea3fea7e1bdb9a7d696b39b95dc3e5af7b739ba609fb"
+        observation (edn/read-string
+                     (slurp (io/file previous-dir "observation.edn")))
+        makeup {:fixture :placement-replay}
+        base-selection
+        {:selection {:selected {:target "M-alpha"
+                                :steps [:ready-gate :placed-gate]}}
+         :selected-relation :focused}
+        pending {:run-id "pending-run" :giraffe/run-id "previous"
+                 :selection (assoc base-selection :placement/source
+                                   {:status :pinned
+                                    :tsv {:path (.getPath tsv)
+                                          :sha256 tsv-sha}})}
+        base-state {:pending pending}
+        current-observation observation
+        replayed (atom nil)
+        resolve! (fn [state]
+                   (#'runtime/resolve-pending-learning
+                    {} makeup state current-dir current-observation))
+        consume (fn [_ state _ replay _]
+                  (reset! replayed replay)
+                  (is (every? #(contains? % :placement)
+                              (vals (:facts replay))))
+                  {:status :applied :state (dissoc state :pending)})]
+    (with-redefs-fn {#'runtime/pending-run-ending
+                     (fn [_ run-id]
+                       {:status :ready :run-id run-id :record-pin "fixture"
+                        :ending-class :ordinary})
+                     #'outer-observation/giraffe-field
+                     (fn [_ _] observation)
+                     #'outer-state/consume-observation consume}
+      (fn []
+       (let [applied (resolve! base-state)]
+        (is (= :applied (:status applied)))
+        (is (nil? (get-in applied [:state :pending]))))
+
+      (let [changed (assoc-in base-state
+                              [:pending :selection :placement/source :tsv :sha256]
+                              (apply str (repeat 64 "f")))
+            result (resolve! changed)]
+        (is (= :deferred (:status result)))
+        (is (= :placement-source-changed (:reason result)))
+        (is (= changed (:state result))))
+
+      (let [missing (assoc-in base-state
+                              [:pending :selection :placement/source :tsv :path]
+                              (str root "/missing.tsv"))
+            result (resolve! missing)]
+        (is (= :deferred (:status result)))
+        (is (= :placement-source-absent (:reason result)))
+        (is (= missing (:state result))))
+
+      (let [unpinned (-> base-state
+                         (update-in [:pending :selection] dissoc :placement/source)
+                         (assoc-in [:pending :selection :selection :selected :steps]
+                                   [:ready-gate]))
+            result (resolve! unpinned)]
+        (is (= :applied (:status result)))
+        (is (nil? (get-in result [:state :pending]))))
+
+      (let [selection-absent
+            (assoc-in base-state [:pending :selection :placement/source]
+                      {:status :absent :reason :placements-unavailable
+                       :tsv {:path (.getPath tsv) :status :absent}})
+            result (resolve! selection-absent)]
+        (is (= :applied (:status result)))
+        (is (every? #(= :absent (get-in % [:placement :status]))
+                    (vals (:facts @replayed)))))
+
+      (let [classes (io/file root "classes.tsv")
+            classes-absent
+            (assoc-in base-state [:pending :selection :placement/source :classes]
+                      {:path (.getPath classes) :status :absent})
+            result (resolve! classes-absent)]
+        (is (= :applied (:status result)))
+        (is (not-any? #(= :class (get-in % [:placement :source]))
+                      (vals (:facts @replayed)))))))))
 
 (deftest production-self-heal-options-carry-declared-static-correction-limit
   (let [declared (runtime/self-heal-runtime-config)

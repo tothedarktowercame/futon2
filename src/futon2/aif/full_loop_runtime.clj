@@ -1228,7 +1228,52 @@
         previous-dir (when run-id (io/file (.getParentFile (io/file current-dir)) run-id))]
     (when (and previous-dir (.isDirectory previous-dir))
       (let [observation (outer-observation/giraffe-field previous-dir makeup)]
-        (when (= run-id (:giraffe/run-id observation)) observation)))))
+        (when (= run-id (:giraffe/run-id observation))
+          ;; R32 / DarkTower.WarMachine.PlacementReplay / R32-b: replay is a
+          ;; second observation site. It must use the placement bytes pinned by
+          ;; the selection, never silently substitute today's default source.
+          (if-let [pinned (get-in pending [:selection :placement/source])]
+            (if (not= :pinned (:status pinned))
+              (placement-adapter/annotate
+               observation
+               {:status :absent :rows {}
+                :source (select-keys pinned [:tsv :classes])
+                :reason (or (:reason pinned) :no-pinned-source)})
+              (let [paths (cond-> (assoc placement-adapter/default-paths
+                                         :classes nil)
+                          (get-in pinned [:tsv :path])
+                          (assoc :tsv (get-in pinned [:tsv :path]))
+                          (and (get-in pinned [:classes :sha256])
+                               (get-in pinned [:classes :path]))
+                          (assoc :classes (get-in pinned [:classes :path])))
+                  placements (placement-adapter/load-placements paths)
+                  loaded (:source placements)
+                  pinned-sources (select-keys pinned [:tsv :classes])
+                  source-absent?
+                  (or (= :absent (:status placements))
+                      (some (fn [[kind source]]
+                              (and (:sha256 source)
+                                   (= :absent (get-in loaded [kind :status]))))
+                            pinned-sources))
+                  source-changed?
+                  (some (fn [[kind source]]
+                          (and (:sha256 source)
+                               (not= (:sha256 source)
+                                     (get-in loaded [kind :sha256]))))
+                        pinned-sources)]
+              (cond
+                source-absent?
+                {:deferred :placement-source-absent :pinned pinned}
+
+                source-changed?
+                {:deferred :placement-source-changed
+                 :pinned pinned :loaded loaded}
+
+                :else (placement-adapter/annotate observation placements))))
+            (placement-adapter/annotate
+             observation
+             {:status :absent :rows {} :source {}
+              :reason :no-pinned-source})))))))
 
 (defn- ready-targets [observation]
   (into #{} (comp (filter #(= :ready (get-in observation [:facts (:target %) :status])))
@@ -1261,13 +1306,16 @@
       (if-not (= :ready (:status ending))
         {:status :deferred :state state :reason (:reason ending)}
         (if-let [previous (previous-giraffe-observation current-dir makeup pending)]
-          (let [selected-target (get-in pending [:selection :selection :selected :target])
-                gain (ready-gain previous current-observation selected-target)
-                consumed (outer-state/consume-observation
-                          makeup state pending
-                          (learning-observation pending previous)
-                          (assoc ending :observed-gain gain))]
-            (assoc consumed :ending-class (:ending-class ending) :observed-gain gain))
+          (if-let [reason (:deferred previous)]
+            {:status :deferred :state state :reason reason
+             :placement-source (select-keys previous [:pinned :loaded])}
+            (let [selected-target (get-in pending [:selection :selection :selected :target])
+                  gain (ready-gain previous current-observation selected-target)
+                  consumed (outer-state/consume-observation
+                            makeup state pending
+                            (learning-observation pending previous)
+                            (assoc ending :observed-gain gain))]
+              (assoc consumed :ending-class (:ending-class ending) :observed-gain gain)))
           {:status :deferred :state state :reason :previous-giraffe-run-absent})))
     {:status :none :state state}))
 
