@@ -30,6 +30,13 @@
               opts (-> (fixture/isolated-runner-opts)
                        (dissoc :judge-fn)
                        (assoc :run-id id :run-record-dir (.getPath root)
+                              ;; a04b157d2 (2026-10-28): the decision is scoped
+                              ;; to the caller's task; without [:task :id] the
+                              ;; runner takes the Giraffe path and returns
+                              ;; {:absent :no-verified-giraffe-run} with no run
+                              ;; record. The fixture's selected action targets
+                              ;; "M-selected" (runner_fixture selected-action).
+                              :task {:id "M-selected"}
                               :repair-open-fn (constantly [])
                               :judgement-transform-fn
                               #(assoc % :active-mission (get-in scan-test/input [:judgement :active-mission]))
