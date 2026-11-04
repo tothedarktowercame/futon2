@@ -729,6 +729,20 @@ if child_record and binding.exists():
         print(f"self-heal-child {child_record}")
         raise SystemExit(0)
 
+# A medic-only discharge is read from the binding BEFORE any record: the
+# runtime may still retain a selection record for the click (2026-11-04,
+# wm-click-906a54c6), and taking ownership from that record sent the click
+# to the Q1-Q10 check, which alerted "unverifiable" on a run that by design
+# never selected.  The binding's disposition is the authority here.
+if binding.exists():
+    text = binding.read_text(encoding="utf-8")
+    if (value(text, ":click/id") == expected_click
+            and re.search(r':runtime-disposition\s*\{[^}]*:status\s+:discharged', text)
+            and re.search(r':runtime-disposition\s*\{[^}]*:route\s+:open-out-of-band-medic\b', text)
+            and re.search(r':runtime-disposition\s*\{[^}]*:ordinary-selection-called\?\s+false', text)):
+        print("medic-only-discharge")
+        raise SystemExit(0)
+
 record = pathlib.Path(record_path)
 if record.exists():
     text = record.read_text(encoding="utf-8")
