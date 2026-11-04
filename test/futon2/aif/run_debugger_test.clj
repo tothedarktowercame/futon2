@@ -140,6 +140,48 @@
       (finally
         (debugger/clear-breakpoint! [:after :phase-x])))))
 
+(deftest retained-value-breakpoint-abort-is-a-typed-operator-cancellation
+  (let [run-id "after-abort"
+        phase :phase-x
+        value {:answer 42}
+        discharged (atom nil)
+        original-discharge debugger/discharge!]
+    (is (= value
+           (runner/run-phase! (phase-opts "after-abort-detached" (atom []))
+                              {} phase (constantly value)))
+        "without an attached debugger the same miniature returns its value")
+    (debugger/attach!)
+    (debugger/arm-breakpoint! [:after phase])
+    (try
+      (with-redefs [debugger/discharge!
+                    (fn [throwable]
+                      (reset! discharged throwable)
+                      (original-discharge throwable))]
+        (let [running (future
+                        (try
+                          (runner/run-phase!
+                           (phase-opts run-id (atom []))
+                           {:opportunity-id "op" :attempt-id "attempt"}
+                           phase (constantly value))
+                          (catch clojure.lang.ExceptionInfo e e)))]
+          (wait-for-condition run-id :wm/phase-breakpoint)
+          (debugger/continue! run-id :abort :nothing-to-fix)
+          (let [aborted (deref running 2000 ::timeout)
+                original (ex-cause aborted)]
+            (is (instance? clojure.lang.ExceptionInfo aborted))
+            (is (= {:failure-kind :debugger/aborted
+                    :outcome :cancelled
+                    :debugger/disposition :nothing-to-fix}
+                   (select-keys (ex-data aborted)
+                                [:failure-kind :outcome
+                                 :debugger/disposition])))
+            (is (identical? @discharged original))
+            (is (= :wm/phase-breakpoint (:kind (ex-data original))))
+            (is (= :environmental-hold
+                   (#'runner/repair-class-for :debugger/aborted))))))
+      (finally
+        (debugger/clear-breakpoint! [:after phase])))))
+
 (deftest after-phase-retry-reruns-and-use-value-overrides
   (debugger/attach!)
   (debugger/arm-breakpoint! [:after :phase-x])

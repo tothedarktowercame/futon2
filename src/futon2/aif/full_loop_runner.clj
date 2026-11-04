@@ -454,7 +454,7 @@
                                            :readiness/wake-result
                                            :readiness/substrate-transient])))
                (throw throwable))
-             (let [{:keys [action value debugger-dwell]}
+             (let [{:keys [action value debugger-dwell disposition]}
                    (debugger/await-restart!
                     (assoc context
                            :run-id (:run-id opts) :phase phase
@@ -499,13 +499,33 @@
                                   :error-class (.getName (class throwable))
                                   :error (.getMessage throwable)
                                   :debugger/restart :abort
+                                  :debugger/disposition disposition
                                   :debugger/dwell debugger-dwell}
                                  (select-keys (ex-data throwable)
                                               [:readiness/wake-attempted
                                                :readiness/wake-result
                                                :readiness/substrate-transient])))
                    (debugger/discharge! throwable)
-                   (throw throwable)))))))))))
+                   ;; R31 / DarkTower.WarMachine.DebuggerAbortVerdict / R31-b:
+                   ;; only an armed retained-value breakpoint is an operator
+                   ;; cancellation. Ordinary typed and untyped failures retain
+                   ;; their existing identity when the operator aborts a stop.
+                   (if (and (= :wm/phase-breakpoint
+                               (:kind (ex-data throwable)))
+                            (true? (:debugger/has-result?
+                                    (ex-data throwable))))
+                     (throw
+                      (ex-info
+                       "War Machine run aborted by the operator at a breakpoint"
+                       {:failure-kind :debugger/aborted
+                        :outcome :cancelled
+                        :debugger/disposition disposition
+                        :debugger/restart :abort
+                        :failure-stage phase
+                        :phase phase
+                        :debugger/discharged? true}
+                       throwable))
+                     (throw throwable))))))))))))
 
 (defn capture-selection-world!
   "Capture the post-selection census inside a restartable debugger phase.
@@ -6716,7 +6736,9 @@
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
        :dispatch-failed :abstained :no-selection :guardrail-refusal
        :transport-timeout :transport-unavailable :trigger-ineligible
-       :operator-cancelled}
+       ;; R31-b: an explicit retained-value breakpoint abort is the same
+       ;; environmental hold class as the existing Agency cancellation.
+       :operator-cancelled :debugger/aborted}
      failure-kind)
     :environmental-hold
 

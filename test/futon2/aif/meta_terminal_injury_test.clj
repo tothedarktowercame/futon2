@@ -130,6 +130,22 @@
       (is (= :injury (:classification classification)))
       (is (= (or stage :unknown-stage) (:failure-stage classification))))))
 
+(deftest debugger-abort-is-non-injury-and-untyped-failure-stays-injury
+  (let [record {:run/id "debugger-abort" :click/id "debugger-abort-click"
+                :terminal-receipt {:outcome :cancelled}
+                :failure {:kind :debugger/aborted :stage :selection-world}}
+        aborted (classify record pin-a)
+        untyped (classify (assoc-in record [:failure :kind] :untyped-failure)
+                          pin-a)]
+    (is (= {:classification :non-injury
+            :non-injury-reason :operator-aborted-run
+            :observation-class :operator-aborted-run}
+           (select-keys aborted [:classification :non-injury-reason
+                                 :observation-class])))
+    ;; DebuggerAbortVerdict.untyped_still_injury: cancellation does not widen
+    ;; the escape hatch for an untyped machine failure.
+    (is (= :injury (:classification untyped)))))
+
 (deftest abstention-cause-classification-requires-retained-evidence
   ;; Synthetic provider fixture in the P10 retained-cause shape. Recorded L1
   ;; instead stopped at :incomplete-policy-menu-coverage / :no-current-target-

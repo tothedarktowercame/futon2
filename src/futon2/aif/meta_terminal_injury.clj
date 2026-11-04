@@ -18,6 +18,9 @@
    :claimed-artifact-not-on-selected-target :claimed-artifact-not-on-selected-target
    :abstained :ordinary-selection-abstention
    :operator-cancelled :operator-cancelled
+   ;; R31-b, DebuggerAbortVerdict.repairedKindVerdict: an operator ending a
+   ;; retained-value breakpoint run is a decision, not a machine injury.
+   :debugger/aborted :operator-aborted-run
    :declared-no-work :declared-no-work
    :diagnostic-only :diagnostic-only
    ;; Typed guard refusals.  The guards did their job; the attempt closes
@@ -318,6 +321,7 @@
                                       :producer-qualified-already-satisfied
                                       :producer-qualified-already-satisfied
                                       :operator-cancelled :operator-cancelled
+                                      :operator-aborted-run :operator-aborted-run
                                       :declared-no-work :declared-no-work
                                       :diagnostic-only :diagnostic-only
                                       :absent-terminal-failure :absent-terminal-failure
