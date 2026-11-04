@@ -11,6 +11,7 @@
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.outer-state :as outer-state]
             [futon2.aif.outer-score :as outer-score]
+            [futon2.aif.task-requisition :as task-requisition]
             [futon2.aif.wm.construction-inputs :as construction-inputs])
   (:import [java.nio.file Files]
            [java.security MessageDigest]))
@@ -75,10 +76,13 @@
                 (:excursions loaded-excursions))))
 
 (def task-exclusion-reasons
-  "Task-level evidence gaps only; no in-flight producer exists yet.
+  "Typed task-admission exclusions. Evidence gaps have no in-flight producer;
+  requisition states are ineligible by the shared task-requisition authority.
   Registry statuses and inner-policy satisfaction are not exclusions."
-  #{:target-source-path-absent :target-source-conflict :target-item-line-absent
-    :unread-new :reading-source-changed})
+  (into #{:target-source-path-absent :target-source-conflict :target-item-line-absent
+          :unread-new :reading-source-changed}
+        (keep (comp task-requisition/ineligible-reason #(hash-map :state %)))
+        (vals task-requisition/states)))
 
 (defn validate-exclusion! [{:keys [target reason pin] :as row}]
   (when-not (and (string? target) (task-exclusion-reasons reason)
@@ -169,7 +173,12 @@
              entries
              (mapv (fn [target declaration]
                      (let [row (get by-id target)
-                           reason (cond (contains? changed target) :reading-source-changed
+                           registry-entry (get registry target)
+                           requisition-reason
+                           (task-requisition/ineligible-reason
+                            (:requisition registry-entry))
+                           reason (cond requisition-reason requisition-reason
+                                        (contains? changed target) :reading-source-changed
                                         (nil? row) :unread-new
                                         :else (:source-absent declaration))
                            pin (get-in row [:dependency-reading :record-pin :sha256])]
@@ -181,11 +190,11 @@
                                       :pin (case reason
                                              :reading-source-changed manifest-sha
                                              :unread-new pass-sha
-                                             (data-pin (get registry target)))
+                                             (data-pin registry-entry))
                                       :evidence (if (contains? #{:unread-new :reading-source-changed} reason)
                                                   {:pass-sha256 pass-sha :manifest-sha256 manifest-sha
-                                                   :registry-entry (get registry target)}
-                                                  {:registry-entry (get registry target) :declaration declaration})})}
+                                                   :registry-entry registry-entry}
+                                                  {:registry-entry registry-entry :declaration declaration})})}
                          (do
                            (when-not (and (string? pin) (seq pin))
                              (refuse! :giraffe-row-pin-unavailable {:target target :pass-sha256 pass-sha}))
