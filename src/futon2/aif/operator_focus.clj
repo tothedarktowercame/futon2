@@ -176,6 +176,11 @@
 
 (defn- enc [x] (URLEncoder/encode (str x) "UTF-8"))
 
+(def ^:private as-of-cursor-id
+  "An initial cursor id after ordinary evidence ids, so rows exactly at the
+   requested event time are included by futon1b's strict keyset predicate."
+  "\uffff")
+
 (defn- timeout-exception? [e]
   (loop [e e]
     (cond (nil? e) false
@@ -200,30 +205,43 @@
           {:response resp :attempts attempt})))))
 
 (defn read-turns
-  "Bounded authoritative read: at most three pages of 100. No file fallback."
+  "Bounded authoritative read: at most three pages of 100. The first keyset
+   cursor applies event-time as-of without XTDB's slower system-as-of path.
+   No file fallback."
   [{:keys [base-url timeout-ms as-of] :as opts :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
   (try
-    (loop [page 0 cursor nil rows [] page-attempts []]
-      (if (= page 3)
-        {:status :ok :turns (vec (keep evidence-row->turn rows)) :pages page :page-attempts page-attempts}
-        (let [url (str base-url "/api/alpha/evidence?author=joe&tags=turn&limit=100&system-as-of=" (enc as-of)
-                       (when cursor (str "&cursor-at=" (enc (:at cursor))
-                                         "&cursor-id=" (enc (:id cursor)))))
-              {:keys [response attempts]} (get-page-with-retry url (assoc opts :timeout-ms timeout-ms))
-              resp response
-              attempts' (conj page-attempts attempts)]
-          (cond
-            (= 503 (:status resp)) {:status :absent :reason :expensive-read-busy :page-attempts attempts'}
-            (not= 200 (:status resp)) {:status :absent :reason :evidence-read-failed
-                                       :http-status (:status resp)}
-            :else
-            (let [body (edn/read-string (:body resp))
-                  rows' (into rows (:entries body))
-                  next (:next-cursor body)]
-              (if (or (nil? next) (>= (count rows') 300))
-                {:status :ok :turns (vec (keep evidence-row->turn rows'))
-                 :pages (inc page) :page-attempts attempts'}
-                (recur (inc page) next rows' attempts')))))))
+    (let [as-of-instant (instant as-of)
+          initial-cursor {:at (str as-of-instant) :id as-of-cursor-id}
+          finish (fn [rows pages page-attempts]
+                   {:status :ok
+                    :turns (->> rows
+                                (keep evidence-row->turn)
+                                (filter #(not (.isAfter (instant (:at %)) as-of-instant)))
+                                vec)
+                    :pages pages
+                    :page-attempts page-attempts
+                    :as-of-mode :event-time-cursor
+                    :initial-cursor initial-cursor})]
+      (loop [page 0 cursor initial-cursor rows [] page-attempts []]
+        (if (= page 3)
+          (finish rows page page-attempts)
+          (let [url (str base-url "/api/alpha/evidence?author=joe&tags=turn&limit=100"
+                         "&cursor-at=" (enc (:at cursor))
+                         "&cursor-id=" (enc (:id cursor)))
+                {:keys [response attempts]} (get-page-with-retry url (assoc opts :timeout-ms timeout-ms))
+                resp response
+                attempts' (conj page-attempts attempts)]
+            (cond
+              (= 503 (:status resp)) {:status :absent :reason :expensive-read-busy :page-attempts attempts'}
+              (not= 200 (:status resp)) {:status :absent :reason :evidence-read-failed
+                                         :http-status (:status resp)}
+              :else
+              (let [body (edn/read-string (:body resp))
+                    rows' (into rows (:entries body))
+                    next (:next-cursor body)]
+                (if (or (nil? next) (>= (count rows') 300))
+                  (finish rows' (inc page) attempts')
+                  (recur (inc page) next rows' attempts'))))))))
     (catch Exception e
       (if (timeout-exception? e)
         {:status :absent :reason :evidence-read-timeout}
@@ -266,6 +284,8 @@
      :K (:seat-count vote) :turns-per-seat (:turns-per-seat vote)
      :area-corpus-sha256 area-corpus-sha
      :evidence-page-attempts (:evidence-page-attempts opts)
+     :evidence-as-of-mode (:evidence-as-of-mode opts)
+     :evidence-initial-cursor (:evidence-initial-cursor opts)
      :clock-response-sha256 (:clock-response-sha256 opts)
      :turns (mapv (fn [t]
                     (let [classification (get mapped (:evidence-id t))]
@@ -355,6 +375,8 @@
             area-map (merge rows (into {} (keep (fn [[t a]] (when (= :voted (:status a)) [t (:area a)])) clock-answers)))
             vote (focus-vote (:turns turn-read) area-map (assoc opts :text-answers answers))
             manifest-opts (assoc opts :evidence-page-attempts (:page-attempts turn-read)
+                                 :evidence-as-of-mode (:as-of-mode turn-read)
+                                 :evidence-initial-cursor (:initial-cursor turn-read)
                                  :reader {:sent-turns (mapv #(assoc (select-keys % [:evidence-id :seat])
                                                                    :body-sha256 (identity/sha256 (str (:text %)))) sent)
                                           :prompt-sha256 (:prompt-sha256 dispatch)
