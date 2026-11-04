@@ -1,0 +1,4 @@
+{:giraffe/run-id "previous"
+ :field [{:target "M-alpha"} {:target "M-beta"}]
+ :facts {"M-alpha" {:status :ready :reach {:value 3/4}}
+         "M-beta" {:status :ready :reach {:value 3/4}}}}
