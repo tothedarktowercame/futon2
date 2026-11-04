@@ -1,0 +1,60 @@
+{:schema :wm/design-note-record-set-v1
+ :ticket-id "T-car3-queue-routing-design-note"
+ :ticket-source {:path "/home/joe/code/futon3c/holes/tickets/T-car3-queue-routing-design-note.md" :sha256 "e539d69d02ab28760e704dbfa825e015ba49a813d933e1f086471c5e4808282c"}
+ :cascade {:selected-digest "ee265eb24a6847d330826a8fec9f47aa10e770eb6ddb68e29bf23bf95878f9cb"
+           :compiled-digest "38af15fe15b6ae3243aaf8bb6b3ab72902f2a1850dd207c9a7ed0853a891c583"
+           :phase :compile}
+ :scope "Phase 1 textual records only: the design note's scope declaration, dated
+  partial-status ledger entry, closure-route claim, source anchors, ratification
+  handoff status and phase fence, mechanically verified against the pinned ticket
+  bytes. Queue-routing implementation is explicitly out of scope of Phase 1."
+ :records [
+  {:hole ["agent/scope-before-action" 0]
+   :operation :declare-phase-1-design-scope
+   :capability :wm/pattern-apply
+   :produces :phase-1-scope-record
+   :completion-check :heading-names-design-note
+   :locator "data/wm-d-task-enactment-artifacts/T-car3-queue-routing-design-note/phase-1-records.edn#record=heading-names-design-note"
+   :quote "# T-car3-queue-routing — Phase 1 design note"
+   :verified-against-ticket-sha256 true}
+  {:hole ["agent/provisional-claims-ledger" 1]
+   :operation :record-dated-partial-status
+   :capability :wm/pattern-apply
+   :produces :partial-status-ledger-entry
+   :completion-check :status-dated-partial
+   :locator "data/wm-d-task-enactment-artifacts/T-car3-queue-routing-design-note/phase-1-records.edn#record=status-dated-partial"
+   :quote "**Status (triaged 2026-09-01): PARTIAL -- mechanism landed, capture-gap fallback still tolerated.**"
+   :verified-against-ticket-sha256 true}
+  {:hole ["contracts/holder-states-the-claim" 2]
+   :operation :state-exact-closure-route-claim
+   :capability :wm/pattern-apply
+   :produces :closure-route-claim
+   :completion-check :closure-route-exactly-stated
+   :locator "data/wm-d-task-enactment-artifacts/T-car3-queue-routing-design-note/phase-1-records.edn#record=closure-route-exactly-stated"
+   :quote "Close after either proving all accept sites supply stable :from/:surface/:msg-id or accepting the fallback as the contract."
+   :verified-against-ticket-sha256 true}
+  {:hole ["agent/evidence-over-assertion" 2]
+   :operation :anchor-accept-site-claim-to-source
+   :capability :wm/pattern-apply
+   :produces :anchored-accept-site-claim
+   :completion-check :accept-sites-cited-by-line
+   :locator "data/wm-d-task-enactment-artifacts/T-car3-queue-routing-design-note/phase-1-records.edn#record=accept-sites-cited-by-line"
+   :quote "turn_queue.clj:213,241,523"
+   :verified-against-ticket-sha256 true}
+  {:hole ["agent/handoff-preserves-context" 3]
+   :operation :emit-ratification-handoff-status
+   :capability :wm/pattern-apply
+   :produces :ratification-handoff-record
+   :completion-check :status-reads-model-only
+   :locator "data/wm-d-task-enactment-artifacts/T-car3-queue-routing-design-note/phase-1-records.edn#record=status-reads-model-only"
+   :quote "Status: model-only proposal for ratification."
+   :verified-against-ticket-sha256 true}
+  {:hole ["agent/scope-before-action" 4]
+   :operation :fence-implementation-out-of-phase
+   :capability :wm/pattern-apply
+   :produces :phase-scope-fence
+   :completion-check :implementation-excluded-this-phase
+   :locator "data/wm-d-task-enactment-artifacts/T-car3-queue-routing-design-note/phase-1-records.edn#record=implementation-excluded-this-phase"
+   :quote "No implementation is included in"
+   :verified-against-ticket-sha256 true}
+]}

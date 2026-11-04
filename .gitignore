@@ -71,6 +71,14 @@ data/*
 !data/capability_zones/
 data/capability_zones/*
 !data/capability_zones/harvest-2026-07-19.edn
+# T-car3-queue-routing-design-note Phase 1 record set (wm-author, 2026-11-04):
+# the produced tokens of compiled cascade 38af15fe15b6ae3243... are located in
+# this artifact and must be observable at a commit; same whitelist reason as
+# resources/wm/rechecks/ above (PROOF-wm-works 1.2 2.3).
+!data/wm-d-task-enactment-artifacts/
+data/wm-d-task-enactment-artifacts/*
+!data/wm-d-task-enactment-artifacts/T-car3-queue-routing-design-note/
+!data/wm-d-task-enactment-artifacts/T-car3-queue-routing-design-note/phase-1-records.edn
 logs/
 *~arxana~
 
