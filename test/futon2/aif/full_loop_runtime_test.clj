@@ -57,10 +57,12 @@
                                           :sha256 tsv-sha}})}
         base-state {:pending pending}
         current-observation observation
+        replayed (atom nil)
         resolve! (fn [state]
                    (#'runtime/resolve-pending-learning
                     {} makeup state current-dir current-observation))
         consume (fn [_ state _ replay _]
+                  (reset! replayed replay)
                   (is (every? #(contains? % :placement)
                               (vals (:facts replay))))
                   {:status :applied :state (dissoc state :pending)})]
@@ -98,7 +100,25 @@
                                    [:ready-gate]))
             result (resolve! unpinned)]
         (is (= :applied (:status result)))
-        (is (nil? (get-in result [:state :pending]))))))))
+        (is (nil? (get-in result [:state :pending]))))
+
+      (let [selection-absent
+            (assoc-in base-state [:pending :selection :placement/source]
+                      {:status :absent :reason :placements-unavailable
+                       :tsv {:path (.getPath tsv) :status :absent}})
+            result (resolve! selection-absent)]
+        (is (= :applied (:status result)))
+        (is (every? #(= :absent (get-in % [:placement :status]))
+                    (vals (:facts @replayed)))))
+
+      (let [classes (io/file root "classes.tsv")
+            classes-absent
+            (assoc-in base-state [:pending :selection :placement/source :classes]
+                      {:path (.getPath classes) :status :absent})
+            result (resolve! classes-absent)]
+        (is (= :applied (:status result)))
+        (is (not-any? #(= :class (get-in % [:placement :source]))
+                      (vals (:facts @replayed)))))))))
 
 (deftest production-self-heal-options-carry-declared-static-correction-limit
   (let [declared (runtime/self-heal-runtime-config)

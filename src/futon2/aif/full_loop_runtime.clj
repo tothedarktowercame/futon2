@@ -1233,10 +1233,17 @@
           ;; second observation site. It must use the placement bytes pinned by
           ;; the selection, never silently substitute today's default source.
           (if-let [pinned (get-in pending [:selection :placement/source])]
-            (let [paths (cond-> placement-adapter/default-paths
+            (if (not= :pinned (:status pinned))
+              (placement-adapter/annotate
+               observation
+               {:status :absent :rows {}
+                :source (select-keys pinned [:tsv :classes])
+                :reason (or (:reason pinned) :no-pinned-source)})
+              (let [paths (cond-> (assoc placement-adapter/default-paths
+                                         :classes nil)
                           (get-in pinned [:tsv :path])
                           (assoc :tsv (get-in pinned [:tsv :path]))
-                          (and (contains? placement-adapter/default-paths :classes)
+                          (and (get-in pinned [:classes :sha256])
                                (get-in pinned [:classes :path]))
                           (assoc :classes (get-in pinned [:classes :path])))
                   placements (placement-adapter/load-placements paths)
@@ -1245,7 +1252,7 @@
                   source-absent?
                   (or (= :absent (:status placements))
                       (some (fn [[kind source]]
-                              (and (:path source)
+                              (and (:sha256 source)
                                    (= :absent (get-in loaded [kind :status]))))
                             pinned-sources))
                   source-changed?
@@ -1262,7 +1269,7 @@
                 {:deferred :placement-source-changed
                  :pinned pinned :loaded loaded}
 
-                :else (placement-adapter/annotate observation placements)))
+                :else (placement-adapter/annotate observation placements))))
             (placement-adapter/annotate
              observation
              {:status :absent :rows {} :source {}
