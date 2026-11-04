@@ -1,5 +1,6 @@
 (ns futon2.aif.selection-world-test
   (:require [clojure.test :refer [deftest is]]
+            [futon2.aif.mission-registry :as registry]
             [futon2.aif.selection-world :as world]
             [wm-run-facts :as facts]))
 
@@ -11,6 +12,20 @@
 (def opts {:world-task-sets-fn (fn [_] tasks)
            :world-pattern-manifest-fn (fn [_] {:file-count 2 :digest "patterns"})
            :world-now-fn (constantly "2026-09-30T00:00:00Z")})
+
+(deftest independent-census-omits-requisitions-but-keeps-parent-tickets
+  (let [requisition {:id "E-requisition" :path "/fixture/E-requisition.md"
+                     :status-class :open :requisition-record? true
+                     :source {:path "/fixture/E-requisition.md" :sha256 "fixture"}}
+        parent-ticket {:id "T-parent-only" :path "/fixture/T-parent-only.md"
+                       :status-class :live :parent "E-parent"
+                       :requisition-record? false}
+        census (with-redefs [registry/load-missions (constantly {:missions []})
+                             registry/load-excursions (constantly {:excursions [requisition]})
+                             registry/load-tickets (constantly {:tickets [parent-ticket]})]
+                 (world/capture-census {:code-root "/fixture"}))]
+    (is (= [] (get-in census [:open-tasks :excursions])))
+    (is (= ["T-parent-only"] (get-in census [:open-tasks :tickets])))))
 
 (deftest snapshot-is-complete-and-deterministic
   (let [a (world/capture decision {:author {:type :codex}} nil opts)

@@ -8,7 +8,8 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.enumeration-completeness :as enumeration]
-            [futon2.aif.mission-registry :as registry])
+            [futon2.aif.mission-registry :as registry]
+            [futon2.aif.task-requisition :as task-requisition])
   (:import [java.security MessageDigest]
            [java.time Instant]))
 
@@ -34,9 +35,12 @@
   (let [missions (registry/load-missions code-root)
         excursions (registry/load-excursions code-root)
         tickets (registry/load-tickets code-root)]
-    {:missions (map :id (registry/open-missions missions))
-     :excursions (map :id (filter registry/live-excursion? (:excursions excursions)))
-     :tickets (map :id (filter registry/live-ticket? (:tickets tickets)))}))
+    {:missions (map :id (remove task-requisition/requisition-record?
+                               (registry/open-missions missions)))
+     :excursions (map :id (remove task-requisition/requisition-record?
+                                 (filter registry/live-excursion? (:excursions excursions))))
+     :tickets (map :id (remove task-requisition/requisition-record?
+                              (filter registry/live-ticket? (:tickets tickets))))}))
 
 (defn capture-census
   "Independent file-registry census for an immutable outer decision, never its field."
