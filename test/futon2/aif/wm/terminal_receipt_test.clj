@@ -133,6 +133,63 @@
     (is (= (get-in selected-record [:selection-event :target]) (:target r)))
     (is (= :ticket (:target-kind r)))))
 
+(def carrier-defect-record
+  "The injury f6be547e shape (click wm-click-82532da0, run record
+  2026-11-04-25c81574): cascade-selected for a mission, then a
+  construction-stage :pre-author-baseline-unavailable failure whose baseline
+  refused :selected-wants-empty — while the record's own selection-event
+  policy key retained eight qualified wants. The construction carrier
+  dropped them; the receipt must not launder the click's terminal state
+  into that carrier defect."
+  (-> selected-record
+      (assoc :selection-event
+             {:event :cascade-selected
+              :target "M-typed-holes-mathlib-handoff"
+              :policy-key
+              [:wm/reading-policy-v1 "M-typed-holes-mathlib-handoff"
+               "M-typed-holes-mathlib-handoff/policy-182bb89516e5bc51e5ed"
+               {:nodes [[["musn/fulab-report-block" 0] "musn/fulab-report-block"]
+                        [["agency/identifier-separation" 1]
+                         "agency/identifier-separation"]]}]})
+      (assoc :failure {:kind :pre-author-baseline-unavailable
+                       :stage :construction
+                       :detail {:failure-kind :pre-author-baseline-unavailable
+                                :baseline {:schema :wm/mission-observation-projection-v1
+                                           :status :refused
+                                           :reason :selected-wants-empty}}})))
+
+(deftest a-construction-carrier-defect-after-selection-yields-action-receipt
+  ;; injury f6be547e: the wants were selected (retained in the policy key's
+  ;; nodes) and dropped by the construction carrier; the click selected
+  ;; work, so its receipt is the action-receipt of what the record retains.
+  (let [r (tr/terminal-receipt carrier-defect-record)]
+    (is (= :action-receipt (:kind r)))
+    (is (= "M-typed-holes-mathlib-handoff" (:target r)))
+    (is (= :mission (:target-kind r)))
+    (is (= :grounded-change (:outcome r)))))
+
+(deftest an-honestly-empty-selection-universe-still-fails
+  ;; The same construction refusal but with NO wants retained at selection:
+  ;; nothing contradicts the :selected-wants-empty refusal, so it is the
+  ;; click's own terminal state and routes to failure.
+  (let [record (assoc-in carrier-defect-record
+                         [:selection-event :policy-key]
+                         [:wm/reading-policy-v1 "M-x" "M-x/policy-1" {:nodes []}])
+        r (tr/terminal-receipt record)]
+    (is (= :failure (:kind r)))
+    (is (= :pre-author-baseline-unavailable (:failure-kind r)))
+    (is (= "M-typed-holes-mathlib-handoff" (:target r)))))
+
+(deftest other-post-selection-failures-still-yield-failure
+  ;; The carrier-defect rule admits exactly the construction seam: a
+  ;; baseline refusal for a different reason stays a failure.
+  (let [record (assoc-in carrier-defect-record
+                         [:failure :detail :baseline :reason]
+                         :measurement-missing)
+        r (tr/terminal-receipt record)]
+    (is (= :failure (:kind r)))
+    (is (= :pre-author-baseline-unavailable (:failure-kind r)))))
+
 (deftest a-record-that-is-neither-yields-no-terminal-state-failure
   (let [r (tr/terminal-receipt (assoc exception-record :failure {:absent :no-failure}))]
     (is (= :failure (:kind r)))
