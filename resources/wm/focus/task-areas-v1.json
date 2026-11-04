@@ -5882,6 +5882,51 @@
    "seat": "zai-2",
    "job": "invoke-1793762447925-11748-ac90f932",
    "source": "futon3c/holes/excursions/ant-reads/T-outer-target-g-policy-prior.relate.json"
+  },
+  {
+   "target": "M-aif-policy-conditioned-eig",
+   "area": "WM",
+   "read-area": "WM",
+   "cite": "/home/joe/code/futon2/holes/missions/M-aif-policy-conditioned-eig.md:14",
+   "quote": "The live `model-uncertainty-bonus` is posterior spread. It can identify a model",
+   "confidence": "high",
+   "seat": "zai-2",
+   "job": "invoke-1793765208225-11797-89c964c4",
+   "source": "futon3c/holes/excursions/ant-reads/M-aif-policy-conditioned-eig.relate.json"
+  },
+  {
+   "target": "M-G-wm-wiring",
+   "area": "WM",
+   "read-area": "WM",
+   "cite": "/home/joe/code/futon2/holes/missions/M-G-wm-wiring.md:24",
+   "quote": "The campaign's gap is the set of checklist items that stand between \"canonical Lean cascade-G definition exists\" and \"G is computed, selected on, and witnessed in a production run.\" In dependency order, not checklist order:",
+   "confidence": "high",
+   "seat": "zai-2",
+   "job": "invoke-1793765208225-11797-89c964c4",
+   "source": "futon3c/holes/excursions/ant-reads/M-G-wm-wiring.relate.json"
+  },
+  {
+   "target": "M-futonzero-generative",
+   "area": "futonzero",
+   "read-area": "futonzero",
+   "cite": "/home/joe/code/futon0/holes/missions/M-futonzero-generative.md:16",
+   "quote": "FutonZero currently names a **monitor**: it reads evidence and measures capability",
+   "confidence": "medium",
+   "seat": "zai-2",
+   "job": "invoke-1793765208225-11797-89c964c4",
+   "source": "futon3c/holes/excursions/ant-reads/M-futonzero-generative.relate.json",
+   "also": "WM"
+  },
+  {
+   "target": "M-wm-aif-policy-grain-compliance",
+   "area": "WM",
+   "read-area": "WM",
+   "cite": "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md:1",
+   "quote": "# Mission: War Machine AIF policy-grain compliance",
+   "confidence": "high",
+   "seat": "claude-6",
+   "job": "invoke-1793765208225-11797-89c964c4",
+   "source": "claude-6 hand check 2026-11-04: zai-2 row WM, its quote was on a different line than cited; title line cited instead"
   }
  ]
 }
