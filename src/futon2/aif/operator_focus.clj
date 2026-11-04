@@ -97,7 +97,7 @@
   "Pure vote over normalized turns. `area-of-task` maps task id to area.
    Options: `:as-of`, `:window-days` (7), `:seat-count` (10), and
    `:turns-per-seat` (10)."
-  [turns area-of-task {:keys [as-of window-days seat-count turns-per-seat clocks text-answers]
+  [turns area-of-task {:keys [as-of window-days seat-count turns-per-seat text-answers]
                        :or {window-days 7 seat-count 10 turns-per-seat 10}}]
   (let [as-of (instant as-of)
         since (.minus as-of (Duration/ofDays window-days))
@@ -110,7 +110,11 @@
         seats (->> eligible (map :seat) distinct (take seat-count) vec)
         selected? (set seats)
         per-seat (group-by :seat (filter #(selected? (:seat %)) eligible))
-        clocks-by-seat (into {} (map (juxt :seat identity)) clocks)
+        clocks-by-seat (into {}
+                             (keep (fn [seat]
+                                     (when-let [turn (first (filter :captured-target (get per-seat seat)))]
+                                       [seat {:seat seat :at (:at turn) :target (:captured-target turn)
+                                              :evidence-id (:evidence-id turn)}]))) seats)
         seat-results
         (mapv (fn [seat]
                 (let [turns (take turns-per-seat (get per-seat seat))
@@ -122,18 +126,13 @@
                       clock-half
                       (cond
                         (nil? clock) {:status :abstained :reason :clock-absent}
-                        (.isBefore (instant (:at clock)) since)
-                        {:status :abstained :reason :clock-outside-window
-                         :at (str (:at clock)) :target (:target clock)}
-                        (.isAfter (instant (:at clock)) as-of)
-                        {:status :abstained :reason :clock-after-as-of
-                         :at (str (:at clock)) :target (:target clock)}
-                        :else
-                        (if-let [area (area-of-task (:target clock))]
+                        :else (if-let [area (area-of-task (:target clock))]
                           {:status :voted :votes (sorted-map area 1/2)
-                           :at (str (:at clock)) :target (:target clock)}
+                           :at (str (:at clock)) :target (:target clock)
+                           :source-evidence-id (:evidence-id clock)}
                           {:status :abstained :reason :clock-target-unmapped
-                           :at (str (:at clock)) :target (:target clock)}))
+                           :at (str (:at clock)) :target (:target clock)
+                           :source-evidence-id (:evidence-id clock)}))
                       votes (merge-with + (:votes text-half) (:votes clock-half))]
                   (cond-> {:seat seat
                            :status (if (seq votes) :voted :abstained)
@@ -311,16 +310,14 @@
   [{:keys [area-corpus-path manifest-dir as-of] :as opts}]
   (let [opts (assoc opts :as-of (or as-of (str (Instant/now))))
         turn-read (read-turns opts)
-        clock-read (when (= :ok (:status turn-read)) (read-clocks opts))]
+        ]
     (if (not= :ok (:status turn-read))
       turn-read
-      (if (not= :ok (:status clock-read))
-        clock-read
       (let [{:keys [rows sha256]} (load-area-corpus area-corpus-path)
-            preliminary (focus-vote (:turns turn-read) rows (assoc opts :clocks (:clocks clock-read)))
+            preliminary (focus-vote (:turns turn-read) rows opts)
             sent (reader-turns (:turns turn-read) (:seats preliminary))
-            clock-targets (->> (:clocks clock-read) (filter #(some #{(:seat %)} (:seats preliminary)))
-                               (map :target) distinct (remove rows))
+            clock-targets (->> (:seat-votes preliminary) (keep #(get-in % [:clock-half :target]))
+                               distinct (remove rows))
             resolved (keep #(resolve-task (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")) %) clock-targets)
             dispatch-opts (assoc opts :clock-inputs resolved)
             dispatch (if (:reader-raw-reply opts)
@@ -331,13 +328,14 @@
                           :area-authority-sha256 (identity/sha256 a7)})
                        (dispatch-reader! sent dispatch-opts))
             raw (or (:reader-raw-reply opts) (:raw-reply dispatch))
-            answers (when raw (check-reply raw sent (:seats preliminary)))
+            answers (if raw (check-reply raw sent (:seats preliminary))
+                        (into {} (map (fn [seat] [seat {:status :abstained
+                                                       :reason (or (:reason dispatch) :reader-failed)}])
+                                      (:seats preliminary))))
             clock-answers (when raw (check-clock-reply raw resolved))
             area-map (merge rows (into {} (keep (fn [[t a]] (when (= :voted (:status a)) [t (:area a)])) clock-answers)))
-            vote (focus-vote (:turns turn-read) area-map (assoc opts :clocks (:clocks clock-read) :text-answers answers))
-            manifest-opts (assoc opts :clock-response-sha256
-                                 (:response-sha256 clock-read)
-                                 :reader {:sent-turns (mapv #(assoc (select-keys % [:evidence-id :seat])
+            vote (focus-vote (:turns turn-read) area-map (assoc opts :text-answers answers))
+            manifest-opts (assoc opts :reader {:sent-turns (mapv #(assoc (select-keys % [:evidence-id :seat])
                                                                    :body-sha256 (identity/sha256 (str (:text %)))) sent)
                                           :prompt-sha256 (:prompt-sha256 dispatch)
                                           :area-authority-sha256 (:area-authority-sha256 dispatch) :seat (:seat dispatch)
@@ -345,4 +343,6 @@
                                           :parsed-answers answers :clock-inputs (mapv #(dissoc % :text) resolved)
                                           :parsed-clock-answers clock-answers})
             m (manifest (:turns turn-read) vote sha256 manifest-opts)]
-        (if raw (merge {:status :ok :vote vote} (write-manifest! manifest-dir m)) dispatch))))))
+        (merge {:status :ok :vote vote :reader-status (:status dispatch)
+                :reader-reason (:reason dispatch)}
+               (write-manifest! manifest-dir m))))))

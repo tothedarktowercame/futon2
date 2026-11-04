@@ -55,20 +55,18 @@
       (is (= :both-halves-abstained (get-in v [:abstentions 0 :reason])))))
   (testing "a recent clock and contrary text each cast half"
     (let [v (focus/focus-vote
-             [(turn "x" "a" "2026-11-03T12:00:00Z" "please work on M-giraffe")]
-             areas {:as-of as-of :text-answers {"a" {:status :voted :area "Giraffe"}}
-                    :clocks [(clock "a" "2026-11-03T11:00:00Z"
-                                    "M-futonzero-prelim-practice")]})]
+             [(assoc (turn "x" "a" "2026-11-03T12:00:00Z" "please work on M-giraffe")
+                     :captured-target "M-futonzero-prelim-practice")]
+             areas {:as-of as-of :text-answers {"a" {:status :voted :area "Giraffe"}}})]
       (is (= {"Giraffe" 1/2 "futonzero" 1/2}
              (get-in v [:seat-votes 0 :votes])))
       (is (= "Giraffe" (get-in v [:seat-votes 0 :text-half :area])))))
-  (testing "a nine-day-old clock abstains while text still casts its half"
+  (testing "the captured clock records its source turn"
     (let [v (focus/focus-vote
-             [(turn "x" "a" "2026-11-03T12:00:00Z" "M-giraffe")]
-             areas {:as-of as-of :text-answers {"a" {:status :voted :area "Giraffe"}}
-                    :clocks [(clock "a" "2026-10-26T00:00:00Z" "M-wm")]})]
-      (is (= {"Giraffe" 1/2} (get-in v [:seat-votes 0 :votes])))
-      (is (= :clock-outside-window (get-in v [:seat-votes 0 :clock-half :reason]))))))
+             [(assoc (turn "x" "a" "2026-11-03T12:00:00Z" "M-giraffe") :captured-target "M-wm")]
+             areas {:as-of as-of :text-answers {"a" {:status :voted :area "Giraffe"}}})]
+      (is (= {"Giraffe" 1/2 "WM" 1/2} (get-in v [:seat-votes 0 :votes])))
+      (is (= "x" (get-in v [:seat-votes 0 :clock-half :source-evidence-id]))))))
 
 (deftest replay-is-retained
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory
