@@ -77,11 +77,23 @@ class SelfHealStopTest(unittest.TestCase):
         })
 
     def test_open_out_of_band_held_stops(self):
+        # The live shape (meta_self_heal_production open-out-of-band-route!):
+        # no :route key, only :phase :open-out-of-band.
         self.assert_typed_stop({
-            "route": "open-out-of-band", "status": "held",
+            "status": "held",
             "reason": "out-of-band/historical-cause-mismatch",
             "phase": "open-out-of-band", "injury-id": "injury/two",
         })
+
+    def test_binding_reads_the_disposition_status_not_a_nested_one(self):
+        text = ('{:click/id "click-x" :runtime-disposition '
+                '{:medic-write {:status :refused :entry {:status :open}} '
+                ':reason :out-of-band/medic-append-refused :status :held '
+                ':phase :open-out-of-band :injury-id "injury/five"}}')
+        body = self.loop._top_level_map(text, text.find("{", text.find(":runtime-disposition")))
+        self.assertEqual("held", self.loop._edn_field(body, "status"))
+        self.assertEqual("open-out-of-band", self.loop._edn_field(body, "phase"))
+        self.assertEqual("injury/five", self.loop._edn_field(body, "injury-id"))
 
     def test_abandoned_latest_transition_stops(self):
         transition = (self.loop.META_INJURY_ROOT / "meta-injury-ledger" /

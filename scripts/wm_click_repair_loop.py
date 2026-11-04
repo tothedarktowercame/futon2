@@ -170,10 +170,50 @@ def _binding_disposition(click_id: str | None):
     start = text.find(":runtime-disposition")
     if start < 0:
         return None
-    body = text[start:]
+    body = _top_level_map(text, text.find("{", start))
+    if body is None:
+        return None
     return {key: _edn_field(body, key) for key in
             ("route", "status", "reason", "phase", "injury-id", "attempt",
              "ordinary-selection-called?")}
+
+
+def _top_level_map(text: str, open_at: int):
+    """The disposition map's own entries, with nested maps, vectors and strings
+    blanked out, so a nested :status (e.g. :medic-write's) is never read as
+    the disposition's.  None when the map is not closed."""
+    if open_at < 0:
+        return None
+    out, depth, i, in_str = [], 0, open_at, False
+    while i < len(text):
+        ch = text[i]
+        if in_str:
+            if ch == "\\":
+                i += 2
+                continue
+            if ch == '"':
+                in_str = False
+            if depth == 1:
+                out.append(ch)
+        elif ch == '"':
+            in_str = True
+            if depth == 1:
+                out.append(ch)
+        elif ch in "{[(":
+            depth += 1
+            if depth == 1:
+                out.append(ch)
+            elif depth == 2:
+                out.append(" nested ")
+        elif ch in "}])":
+            depth -= 1
+            if depth == 0:
+                out.append(ch)
+                return "".join(out)
+        elif depth == 1:
+            out.append(ch)
+        i += 1
+    return None
 
 
 def _latest_injury_transition(injury_id: str | None):
@@ -205,7 +245,10 @@ def machine_self_heal_failure(click: dict):
                                disposition.get("ordinary_selection_called"))
     route_failed = (route == "dedicated-meta-self-heal" and ordinary is False and
                     status in {"refused", "held", "threw"})
-    out_of_band_failed = route == "open-out-of-band" and status == "held"
+    # A held out-of-band result carries :phase :open-out-of-band and no :route
+    # (meta_self_heal_production open-out-of-band-route!).
+    out_of_band_failed = status == "held" and "open-out-of-band" in (
+        route, disposition.get("phase"))
     latest = _latest_injury_transition(disposition.get("injury-id"))
     abandoned = latest and _plain(latest.get("state")) == "abandoned"
     if not (route_failed or out_of_band_failed or abandoned):
