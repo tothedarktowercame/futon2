@@ -123,55 +123,57 @@
          (is (nil? (get-in result [:data :retention-inputs])))
          (is (nil? (get-in result [:data :evidence-manifest]))))))))
 
-(deftest retained-receipt-is-consumed-as-not-yet-evaluated-by-the-reader
-  (isolated
-   (fn []
-     ;; known-typed-failure is not a terminal R20Step EndingClass
-     ;; (CTauClassPreference.lean:43-49; endingDelta R20Step:286-288 adds C
-     ;; evidence only for the four terminal classes). The completed-run
-     ;; adapter must map the producer's receipt to :not-yet-evaluated with
-     ;; explicit provenance. Reuses the outer-consumption fixture's real
-     ;; record/stream/index shape; only the classification receipt is
-     ;; replaced with a producer-shaped one and the pin re-published.
-     (let [source (.getParentFile (io/file (io/resource "fixtures/outer-consumption/README.md")))
+(defn known-typed-failure-ending
+  "Read a content-verified completed fixture whose producer classification is
+  known-typed-failure rather than a terminal outer EndingClass."
+  []
+  ;; Reuses the outer-consumption fixture's real record/stream/index shape;
+  ;; only the classification receipt is replaced and its pin re-published.
+  (let [source (.getParentFile (io/file (io/resource "fixtures/outer-consumption/README.md")))
            ;; resolved from a FILE resource: a directory resource enters the
            ;; Test Registry closure as an entry it cannot hash and the warrant
            ;; dies on it (zai-16, 2026-09-17; cascade_sources/load-declared)
-           root (.toFile (java.nio.file.Files/createTempDirectory
-                          "classification-producer-reader-"
-                          (make-array java.nio.file.attribute.FileAttribute 0)))]
-       (doseq [file (file-seq source) :when (.isFile file)
-              :let [_ (io/resource (str "fixtures/outer-consumption/"
-                                        (.relativize (.toPath source) (.toPath file))))]]
-         (let [target (io/file root (str (.relativize (.toPath source)
-                                                      (.toPath file))))]
-           (io/make-parents target) (io/copy file target)))
-       (let [record-file (io/file root (str "tick-run-record-"
-                                            "2026-10-29-f74df9cc-c27b-420b-91ec-7a32db708c41"
-                                            ".edn"))
-             index (io/file root "reading-policy-class-history-index.ednl")
-             receipt {:schema :wm/run-ending-classification-receipt-v1
-                      :kernel/id :wm/run-ending-classification-kernel-v1
-                      :mode :record-only :status :recorded
-                      :class :known-typed-failure
-                      :failure-kind :dispatch-failed :missing []
-                      :identity {:occurrence nil}}
-             ending
-             (do (spit record-file
-                       (pr-str (assoc (edn/read-string (slurp record-file))
-                                      :run-ending-classification receipt)))
-                 (spit index
-                       (str (pr-str (assoc (edn/read-string (slurp index))
-                                           :record-sha256
-                                           (#'durable/sha256-file record-file)))
-                            "\n"))
-                 (pending/observe
-                  root "2026-10-29-f74df9cc-c27b-420b-91ec-7a32db708c41"))]
-         (is (= :ready (:status ending)))
-         (is (= :not-yet-evaluated (:ending-class ending)))
-         (is (= :terminal-ending-class-unavailable
-                (get-in ending [:classification-absence :reason])))
-         (is (= :known-typed-failure
-                (get-in ending [:classification-absence :recorded-class])))
-         (is (= true (get-in ending [:classification-absence :completed]))))))))
+        root (.toFile (java.nio.file.Files/createTempDirectory
+                       "classification-producer-reader-"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (doseq [file (file-seq source) :when (.isFile file)
+            :let [_ (io/resource (str "fixtures/outer-consumption/"
+                                      (.relativize (.toPath source) (.toPath file))))]]
+      (let [target (io/file root (str (.relativize (.toPath source)
+                                                   (.toPath file))))]
+        (io/make-parents target) (io/copy file target)))
+    (let [record-file (io/file root (str "tick-run-record-"
+                                         "2026-10-29-f74df9cc-c27b-420b-91ec-7a32db708c41"
+                                         ".edn"))
+          index (io/file root "reading-policy-class-history-index.ednl")
+          receipt {:schema :wm/run-ending-classification-receipt-v1
+                   :kernel/id :wm/run-ending-classification-kernel-v1
+                   :mode :record-only :status :recorded
+                   :class :known-typed-failure
+                   :failure-kind :dispatch-failed :missing []
+                   :identity {:occurrence nil}}]
+      (spit record-file
+            (pr-str (assoc (edn/read-string (slurp record-file))
+                           :run-ending-classification receipt)))
+      (spit index
+            (str (pr-str (assoc (edn/read-string (slurp index))
+                                :record-sha256
+                                (#'durable/sha256-file record-file)))
+                 "\n"))
+      (pending/observe
+       root "2026-10-29-f74df9cc-c27b-420b-91ec-7a32db708c41"))))
 
+(deftest retained-unclassified-receipt-defers-learning
+  (isolated
+   (fn []
+     ;; known-typed-failure is not a terminal R20Step EndingClass. Lean Q7's
+     ;; honest projection leaves it pending and does not apply learning.
+     (let [ending (known-typed-failure-ending)]
+       (is (= :deferred (:status ending)))
+       (is (= :terminal-ending-class-absent (:reason ending)))
+       (is (not (contains? ending :ending-class)))
+       (is (= :terminal-ending-class-unavailable
+              (get-in ending [:classification-absence :reason])))
+       (is (= :known-typed-failure
+              (get-in ending [:classification-absence :recorded-class])))
+       (is (= true (get-in ending [:classification-absence :completed])))))))

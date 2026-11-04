@@ -14,6 +14,7 @@
 
 (def makeup-schema :wm/outer-makeup-v1)
 (def state-schema :wm/outer-state-v1)
+(def terminal-ending-classes #{:focused :related :unrelated :stop-the-line})
 ;; The serving JVM runs from futon3c; live stores belong to canonical futon2.
 (def default-makeup-path "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn")
 (def default-state-path (data-paths/path "wm-learning" "outer-state.edn"))
@@ -247,6 +248,12 @@
         (refuse! :consumed-observation-conflict {:run-id run-id}))
       (not= pending (:pending state))
       (refuse! :pending-observation-mismatch {:run-id run-id})
+      (or (:classification-absence ending)
+          (not (contains? terminal-ending-classes (:ending-class ending))))
+      (refuse! :outer-ending-unclassified
+               {:run-id run-id
+                :ending-class (:ending-class ending)
+                :classification-absence (:classification-absence ending)})
       (not (and (string? run-id) (= :ready (:status ending))
                 (= run-id (:run-id ending)) (:record-pin ending)))
       (refuse! :outer-observation-unverified {:run-id run-id})

@@ -1,8 +1,7 @@
 (ns futon2.aif.outer-pending-observation
-  "Completed-run adapter for R20Step.Observation. Lean's notYetEvaluated
-  constructor contributes no endingDelta (R20Step:286); advanceC (:726)
-  still decays C and step (:887) advances the other learned fields. Missing
-  or corrupt evidence is not a completed observation."
+  "Completed-run adapter for R20Step.Observation. Only the four terminal
+  EndingClass values are completed learning observations. An absent terminal
+  class, and missing or corrupt evidence, defer consumption."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -58,16 +57,18 @@
                            (= :recorded (:status classification)))))
             (defer :run-ending-classification-invalid)
             :else
-            (cond-> {:status :ready :run-id run-id
-                     :record-pin {:path (str file) :sha256 digest}
-                     :completion-pin (:sha256 terminal)
-                     :ending-class (if (contains? terminal-classes class) class :not-yet-evaluated)}
-              (not (contains? terminal-classes class))
-              (assoc :classification-absence
-                     {:reason (if classification :terminal-ending-class-unavailable
-                                                 :classification-receipt-absent)
-                      :recorded-class class
-                      :completed true
-                      :failure (select-keys (:failure record) [:kind :stage :error])}))))))
+            (let [verified {:run-id run-id
+                            :record-pin {:path (str file) :sha256 digest}
+                            :completion-pin (:sha256 terminal)}]
+              (if (contains? terminal-classes class)
+                (assoc verified :status :ready :ending-class class)
+                (defer :terminal-ending-class-absent
+                       (assoc verified :classification-absence
+                              {:reason (if classification :terminal-ending-class-unavailable
+                                                          :classification-receipt-absent)
+                               :recorded-class class
+                               :completed true
+                               :failure (select-keys (:failure record)
+                                                     [:kind :stage :error])}))))))))
     (catch Exception e
       (defer :run-record-unreadable {:message (.getMessage e)}))))
