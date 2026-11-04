@@ -404,3 +404,65 @@
            (run-facts/facts-for-record
             (update-in record [:outer/selection :field-facts] dissoc :open-tasks)
             "pinned-record" snap)))))
+
+(defn completion-fixture-field [surfaces]
+  (let [entries (mapv (fn [i]
+                        {:id (str "M-completion-" i) :status-class :open :status-line "OPEN"
+                         :path (str "/fixture/completion-" i ".md")
+                         :source {:path (str "/fixture/completion-" i ".md")
+                                  :sha256 "fixture-sha"}})
+                      (range (count surfaces)))
+        rows (mapv (fn [entry surface]
+                     (let [row (cond-> {:id (keyword (:id entry)) :status :ready}
+                                 surface (assoc :completion surface))]
+                       (assoc row :dependency-reading
+                              {:record-pin {:sha256 (identity/sha256 (pr-str row))}})))
+                   entries surfaces)
+        result ((actual-var 'futon3c.giraffe.run/write-run!)
+                {:root (.getPath (temp-dir)) :run-id "completion-fixture"
+                 :git-sha "fixture"
+                 :adapter-result {:input {:as-of "2026-11-04" :items [] :edges []}
+                                  :rejected []}
+                 :pass-output {:as-of "2026-11-04" :order rows}})
+        authority (assoc fixture-authority :loaded-missions {:missions entries})]
+    (binding [observation/*resolve-var* actual-var]
+      (observation/giraffe-field (:dir result) makeup authority))))
+
+(deftest undefined-completion-v2-is-excluded-before-selection
+  (let [undefined {:schema :wm/completion-surface-v2
+                   :completion-class :completion-definition-not-found}
+        defined {:schema :wm/completion-surface-v2 :completion-class :criteria-locators}
+        result (completion-fixture-field [undefined defined])
+        exclusion (first (:outer-field/excluded result))]
+    (is (= ["M-completion-1"] (mapv :target (:field result))))
+    (is (= 1 (count (:outer-field/excluded result))))
+    (is (= "M-completion-0" (:target exclusion)))
+    (is (= :completion-definition-not-found (:reason exclusion)))
+    (is (= {:completion undefined :switch-mode :exclude
+            :switch-sha256 (identity/sha256 (slurp (io/resource "wm/outer-admission.edn")))}
+           (:evidence exclusion)))
+    (is (= exclusion (observation/validate-exclusion! exclusion)))
+    (is (observation/validate-field! (:enumerated-open-tasks result)
+                                    (mapv :target (:field result))
+                                    (:outer-field/excluded result)))))
+
+(deftest completion-derivation-mode-refuses-unbuilt
+  (let [config (io/file (temp-dir) "outer-admission.edn")]
+    (spit config (pr-str {:completion-undefined {:mode :admit-with-derivation}}))
+    (binding [observation/*admission-config-path* config]
+      (is (= :completion-derivation-not-built
+             (try (completion-fixture-field [nil])
+                  :unexpected-admission
+                  (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))))))
+
+(deftest missing-completion-remains-admitted
+  (let [result (completion-fixture-field [nil])]
+    (is (= ["M-completion-0"] (mapv :target (:field result))))
+    (is (empty? (:outer-field/excluded result)))))
+
+(deftest v1-completion-remains-admitted
+  (let [result (completion-fixture-field
+                [{:schema :wm/completion-surface-v1
+                  :completion-class :completion-definition-not-found}])]
+    (is (= ["M-completion-0"] (mapv :target (:field result))))
+    (is (empty? (:outer-field/excluded result)))))

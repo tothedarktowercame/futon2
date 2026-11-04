@@ -1,0 +1,3 @@
+{:completion-undefined
+ {:mode :exclude
+  :re-arm-condition "Switch to :admit-with-derivation only after ordinary clicks on admitted targets (those that have a completion definition) show Q7 pathAbsenceCount = 0 and no reviewer-falsifier refusal for missing completion over at least 5 consecutive ordinary clicks, and after the derivation step itself is built and reviewed (Joe, 2026-11-04)."}}

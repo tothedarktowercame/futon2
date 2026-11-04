@@ -18,6 +18,7 @@
            [java.security MessageDigest]))
 
 (def ^:dynamic *resolve-var* requiring-resolve)
+(def ^:dynamic *admission-config-path* nil)
 
 (defn- refuse! [kind data]
   (throw (ex-info "Outer observation refused" (assoc data :kind kind))))
@@ -26,6 +27,30 @@
   (let [digest (.digest (doto (MessageDigest/getInstance "SHA-256")
                           (.update bytes)))]
     (apply str (map #(format "%02x" (bit-and 255 %)) digest))))
+
+(defn load-admission-config
+  "Read the admission switch and pin the exact bytes used for this field."
+  []
+  (let [path (or *admission-config-path* (io/resource "wm/outer-admission.edn"))
+        bytes (try
+                (with-open [stream (io/input-stream path)] (.readAllBytes stream))
+                (catch Exception e
+                  (refuse! :outer-admission-unreadable
+                           {:path (str path) :message (.getMessage e)})))
+        config (try (edn/read-string (String. ^bytes bytes "UTF-8"))
+                    (catch Exception e
+                      (refuse! :outer-admission-malformed {:message (.getMessage e)})))
+        mode (get-in config [:completion-undefined :mode])]
+    (case mode
+      :exclude {:mode mode :sha256 (sha256 bytes)}
+      :admit-with-derivation
+      (refuse! :completion-derivation-not-built
+               {:mode mode :message "Completion derivation is not built yet"})
+      (refuse! :outer-admission-invalid-mode {:mode mode}))))
+
+(defn- undefined-completion? [row]
+  (and (= :wm/completion-surface-v2 (get-in row [:completion :schema]))
+       (= :completion-definition-not-found (get-in row [:completion :completion-class]))))
 
 (defn- read-edn-file [file kind]
   (try
@@ -81,7 +106,7 @@
   requisition states are ineligible by the shared task-requisition authority.
   Registry statuses and inner-policy satisfaction are not exclusions."
   (into #{:target-source-path-absent :target-source-conflict :target-item-line-absent
-          :unread-new :reading-source-changed}
+          :unread-new :reading-source-changed :completion-definition-not-found}
         (keep (comp task-requisition/ineligible-reason #(hash-map :state %)))
         (vals task-requisition/states)))
 
@@ -150,7 +175,8 @@
      (let [manifest-file (io/file dir "manifest.edn") pass-file (io/file dir "pass.edn")]
        (when-not (and (.isFile manifest-file) (.isFile pass-file))
          (refuse! :giraffe-run-incomplete {:run-dir (.getPath dir)}))
-       (let [manifest (read-edn-file manifest-file :giraffe-manifest-malformed)
+       (let [admission (load-admission-config)
+             manifest (read-edn-file manifest-file :giraffe-manifest-malformed)
              pass (read-edn-file pass-file :giraffe-pass-malformed)
              manifest-sha (sha256 (Files/readAllBytes (.toPath manifest-file)))
              pass-sha (sha256 (Files/readAllBytes (.toPath pass-file)))
@@ -180,6 +206,7 @@
                             (:requisition registry-entry))
                            reason (cond requisition-reason requisition-reason
                                         (contains? changed target) :reading-source-changed
+                                        (undefined-completion? row) :completion-definition-not-found
                                         (nil? row) :unread-new
                                         :else (:source-absent declaration))
                            pin (get-in row [:dependency-reading :record-pin :sha256])]
@@ -191,10 +218,17 @@
                                       :pin (case reason
                                              :reading-source-changed manifest-sha
                                              :unread-new pass-sha
+                                             :completion-definition-not-found pass-sha
                                              (data-pin registry-entry))
-                                      :evidence (if (contains? #{:unread-new :reading-source-changed} reason)
+                                      :evidence (cond
+                                                  (= reason :completion-definition-not-found)
+                                                  {:completion (:completion row)
+                                                   :switch-mode (:mode admission)
+                                                   :switch-sha256 (:sha256 admission)}
+                                                  (contains? #{:unread-new :reading-source-changed} reason)
                                                   {:pass-sha256 pass-sha :manifest-sha256 manifest-sha
                                                    :registry-entry registry-entry}
+                                                  :else
                                                   {:registry-entry registry-entry :declaration declaration})})}
                          (do
                            (when-not (and (string? pin) (seq pin))
