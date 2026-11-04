@@ -38,11 +38,15 @@
       {:path (str target) :sha256 (sha text)}
       (finally (java.nio.file.Files/deleteIfExists tmp)))))
 
-(defn artifact-for [root injury]
+(defn artifact-for
+  "Select retained evidence for one occurrence of an injury. Artifacts from
+  earlier occurrences remain retained but do not participate in ambiguity."
+  [root injury cause-record-pin]
   (let [matches (for [f (or (.listFiles (io/file root "out-of-band")) [])
                       :when (and (.isFile f) (str/ends-with? (.getName f) ".edn"))
                       :let [text (slurp f) a (edn/read-string text)]
-                      :when (= injury (:injury-id a))]
+                      :when (and (= injury (:injury-id a))
+                                 (= cause-record-pin (:historical-pin a)))]
                   (do (when-not (= (.getName f) (str (sha text) ".edn"))
                         (refuse! :out-of-band/artifact-pin-mismatch))
                       {:artifact a :pin {:path (.getCanonicalPath f) :sha256 (sha text)}}))]
@@ -62,7 +66,8 @@
                  (string? (get-in artifact [:acceptance-test :source :text])))
     (refuse! :out-of-band/invalid-artifact))
   (read-pin (:historical-pin artifact))
-  (when-let [existing (artifact-for root (:injury-id artifact))]
+  (when-let [existing (artifact-for root (:injury-id artifact)
+                                    (:historical-pin artifact))]
     (when-not (= artifact (:artifact existing))
       (refuse! :out-of-band/artifact-already-present)))
   (retain! root "out-of-band" artifact))
@@ -220,7 +225,8 @@
   Failed worktrees are retained. No work order or injury ledger is changed."
   [root order run-acceptance]
   (try
-    (when-let [{:keys [artifact pin]} (artifact-for root (:injury-id order))]
+    (when-let [{:keys [artifact pin]}
+               (artifact-for root (:injury-id order) (:cause-record-pin order))]
       (let [repo (:target-repository order)
             base (checked-git repo "rev-parse" "HEAD")
             fix (:fixed-by artifact)

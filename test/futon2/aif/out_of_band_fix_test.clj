@@ -1,5 +1,6 @@
 (ns futon2.aif.out-of-band-fix-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.medic-disposition :as medic]
             [futon2.aif.out-of-band-fix :as fix]
             [futon2.aif.meta-self-heal-production :as production]))
@@ -25,6 +26,36 @@
            ((production/acceptance-replay-port run root) request)))
     (is (zero? @calls))))
 
+(deftest artifact-selection-is-scoped-to-the-current-occurrence
+  (let [root (str (java.nio.file.Files/createTempDirectory
+                   "oob-reopened" (make-array java.nio.file.attribute.FileAttribute 0)))
+        injury "injury/reopened"
+        first-pin {:path "/records/first.edn" :sha256 "first"}
+        second-pin {:path "/records/second.edn" :sha256 "second"}
+        first-artifact {:injury-id injury :historical-pin first-pin :occurrence 1}
+        second-artifact {:injury-id injury :historical-pin second-pin :occurrence 2}]
+    (fix/retain! root "out-of-band" first-artifact)
+    (fix/retain! root "out-of-band" second-artifact)
+    (is (= second-artifact
+           (:artifact (fix/artifact-for root injury second-pin))))
+    (is (= first-artifact
+           (:artifact (fix/artifact-for root injury first-pin))))))
+
+(deftest duplicate-artifacts-for-one-occurrence-remain-ambiguous
+  (let [root (str (java.nio.file.Files/createTempDirectory
+                   "oob-ambiguous" (make-array java.nio.file.attribute.FileAttribute 0)))
+        injury "injury/ambiguous"
+        cause-pin {:path "/records/current.edn" :sha256 "current"}]
+    (fix/retain! root "out-of-band"
+                 {:injury-id injury :historical-pin cause-pin :artifact 1})
+    (fix/retain! root "out-of-band"
+                 {:injury-id injury :historical-pin cause-pin :artifact 2})
+    (try
+      (fix/artifact-for root injury cause-pin)
+      (is false "two artifacts for the same occurrence must refuse")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :out-of-band/ambiguous-artifact (:reason (ex-data e))))))))
+
 (deftest artifact-refusal-does-not-fall-through-to-ordinary-discharge
   (let [root (str (java.nio.file.Files/createTempDirectory
                    "oob-refusal" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -34,7 +65,7 @@
                  ((production/acceptance-replay-port (fn [_] (swap! calls inc)) root)
                   {:work-order {}}))]
     (is (= :refused (:status result)))
-    (is (= refused (clojure.edn/read-string
+    (is (= refused (edn/read-string
                     (fix/read-pin (:out-of-band-receipt-pin result)))))
     (is (zero? @calls))))
 

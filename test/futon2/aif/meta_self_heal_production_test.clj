@@ -116,7 +116,7 @@
                          (:ledger loaded) out-of-band/retained-checked-medic-authority)
                         [:injuries])))))
 
-(deftest mismatched-open-out-of-band-artifact-holds-before-diagnosis
+(deftest artifact-from-another-occurrence-preserves-existing-route
   (let [env (harness/prepare-environment! (root))
         acceptance-root (str (:root env) "/acceptances")
         wrong-path (str (:root env) "/wrong-history.edn")
@@ -132,9 +132,9 @@
                        :target-repository (:repo env)
                        :meta-acceptance-root acceptance-root
                        :meta-diagnosis-fn (fn [_] (throw (ex-info "diagnosis contacted" {}))))) ]
-    (is (= :held (:status result)))
-    (is (= :out-of-band/historical-cause-mismatch (:reason result)))
-    (is (= :open-out-of-band (:phase result)))))
+    (is (= :discharged (:status result)))
+    (is (= :final (:phase result)))
+    (is (nil? (:out-of-band-receipt-pin result)))))
 
 (deftest absent-open-out-of-band-artifact-preserves-existing-route
   (let [env (harness/prepare-environment! (root))

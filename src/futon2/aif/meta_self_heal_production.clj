@@ -1882,10 +1882,11 @@
           root (or (:meta-acceptance-root opts) default-acceptance-root)
           repair-root (or (:meta-repair-store-root opts) finding-ticket/canonical-store)]
       (when (and (= :loaded (:status durable-ledger)) (out-of-band/eligible? entry))
-        (when-let [{:keys [pin]} (out-of-band/artifact-for root injury-id)]
-          (let [current (ledger/medic-current-occurrence (:ledger durable-ledger) injury-id)
-                cause-pin (out-of-band/cause-record-pin current)
-                subject {:injury-id injury-id
+        (let [current (ledger/medic-current-occurrence (:ledger durable-ledger) injury-id)
+              cause-pin (out-of-band/cause-record-pin current)]
+          (when-let [{:keys [pin]}
+                     (out-of-band/artifact-for root injury-id cause-pin)]
+            (let [subject {:injury-id injury-id
                          :cause-record-pin cause-pin
                          :target-repository (:target-repository opts)}
                 run-acceptance (:meta-acceptance-run-fn opts)
@@ -1929,7 +1930,7 @@
                   {:status :held :reason (:reason written)
                    :phase :open-out-of-band :medic-write written
                    :out-of-band-receipt-pin receipt-pin
-                   :ordinary-selection-called? false})))))))
+                   :ordinary-selection-called? false}))))))))
     (catch Throwable t
       {:status :held :reason :out-of-band/artifact-unavailable
        :phase :open-out-of-band :detail (ex-message t)
