@@ -4,90 +4,81 @@
   (phase :compile, requisition
   27201b126abf6bc3f15ec6fda2b9ed2b14f9c5f8ae24d97877c7c08bc452f3e1).
 
-  Resolutions for the eight :operational-clause-owed holes, each grounded
-  in the named library pattern body (musn/fulab-report-block,
-  agency/identifier-separation, problems/r4-forward-model as pinned by
-  the requisition's source pins).  The operation names what the pattern's
-  THEN clause enacts, the completion-check names the pattern's own
-  evidence condition, and :consumes/:produces describe the transition.
-  No application-order edge is authored and nothing here claims a
-  completion that the pattern text does not state."
+  Resolutions for the eight :operational-clause-owed holes owned by
+  :wm/enactment-compiler.  Each decision is an operational clause routed
+  through the single routable capability :wm/pattern-apply; the operation
+  names the pattern application that repairs the hole, completion-check
+  names the observable condition, and :consumes/:produces describe the
+  transition.  No claim is made about holes outside this requisition."
   (:require [futon2.aif.load-identity :as load-identity]))
 
 (load-identity/register! *ns* *file*)
 
 (def clauses
   {["musn/fulab-report-block" 0]
-   {:operation :emit-fulab-report-block
+   {:operation :apply-fulab-report-block-to-enactment-completion-record
     :capability :wm/pattern-apply
-    :consumes :turn-applied-patterns
-    :produces :pattern-use-evidence-record
+    :consumes :compile-phase-completion-without-report-block
+    :produces :fulab-report-block-anchoring-applied-patterns
     :completion-check
-    [:report-block-present-with-fields
-     "response contains a [FULAB-REPORT] block with :applied, :action and :notes fields"]}
-
+    [:response-ends-with-populated-fulab-report-block
+     "the compile-phase response carrying these clauses ends with a [FULAB-REPORT] block whose :applied, :action and :notes fields list the patterns actually applied, so MUSN can record pattern-use evidence anchored in the log"]}
    ["agency/identifier-separation" 1]
-   {:operation :enforce-typed-identifier-vocabulary
+   {:operation :apply-identifier-separation-to-cascade-thread-addressing
     :capability :wm/pattern-apply
-    :consumes :identifier-call-sites
-    :produces :typed-identifier-vocabulary-record
+    :consumes :overloaded-thread-id-in-cascade-bookkeeping
+    :produces :typed-identifier-vocabulary-in-cascade-state
     :completion-check
-    [:zero-ambiguous-keys
-     "audit of endpoints shows zero ambiguous keys (no key used with multiple identifier meanings)"]}
-
+    [:cascade-state-uses-layer-typed-identifier-keys
+     "cascade compile-phase state stores LLM continuity identifiers only under continuity keys and transport identifiers (forum thread, MUSN session, WS connection) only inside their transport-specific payloads, with no top-level overloaded thread-id; a grep over the touched state shape shows each identifier key names exactly one layer"]}
    ["agency/identifier-separation" 2]
-   {:operation :separate-continuity-from-transport-ids
+   {:operation :apply-identifier-separation-to-resume-id-binding
     :capability :wm/pattern-apply
-    :consumes :continuity-state-and-transport-payloads
-    :produces :layer-separated-identifier-state
+    :consumes :resume-id-clobbered-by-transport-id
+    :produces :resume-id-bound-to-llm-continuity-only
     :completion-check
-    [:no-id-swap-or-overwrite
-     "a property test generating payloads with forum-thread-id and resume-id asserts they never swap or overwrite one another; only LLM continuity ids live in continuity state, transport ids only inside transport payloads"]}
-
+    [:resume-uses-llm-continuity-id-never-transport-id
+     "resuming the cascade's compile phase binds the LLM resume id from the continuity store only; no forum-thread, MUSN-session or WS-connection id reaches the resume call, verified by a check that fails when a transport id is substituted"]}
    ["problems/r4-forward-model" 3]
-   {:operation :apply-pure-state-action-transition
+   {:operation :apply-r4-forward-model-to-pure-dynamics-kernel
     :capability :wm/pattern-apply
-    :consumes :candidate-action-and-belief
-    :produces :scored-candidate-action
+    :consumes :two-divergent-implementations-of-same-dynamics
+    :produces :one-pure-deterministic-dynamics-kernel-shared
     :completion-check
-    [:pure-transition-scores-actions
-     "a pure (state, action) -> next-state-distribution is used to score candidate actions before they are taken"]}
-
+    [:live-and-predicted-dynamics-call-one-kernel
+     "the live enactment path and the predictor path both call a single pure deterministic (state, action) -> next-state kernel; the predictor adds uncertainty on top rather than reimplementing dynamics, verified by both call sites resolving to the same var"]}
    ["problems/r4-forward-model" 4]
-   {:operation :bind-live-and-predictor-to-one-dynamics-kernel
+   {:operation :apply-r4-forward-model-to-policy-conditioned-outcome-distribution
     :capability :wm/pattern-apply
-    :consumes :live-dynamics-and-predictor
-    :produces :shared-deterministic-dynamics-kernel
+    :consumes :channel-delta-forecast-used-as-outcome-distribution
+    :produces :q-o-pi-constructed-from-belief-and-declared-models
     :completion-check
-    [:single-dynamics-kernel
-     "the live dynamics and the predictor both call one pure deterministic dynamics kernel; only the predictor adds uncertainty"]}
-
+    [:outcome-distribution-is-policy-conditioned
+     "candidate-action scoring uses Q(o|pi) = sum_s A(o|s) Q(s|pi) with state rolled forward from mu through B over depth T per the equation registry, so the evaluated object is a policy-conditioned outcome distribution from declared models, not a bare channel delta"]}
    ["problems/r4-forward-model" 5]
-   {:operation :construct-policy-conditioned-outcome-distribution
+   {:operation :apply-r4-forward-model-to-pre-enactment-action-scoring
     :capability :wm/pattern-apply
-    :consumes :belief-and-declared-models
-    :produces :policy-conditioned-outcome-distribution
+    :consumes :candidate-actions-enacted-before-evaluation
+    :produces :candidates-scored-before-enactment
     :completion-check
-    [:q-of-o-pi-computed
-     "Q(o|pi) := sum_s A(o|s) Q(s|pi) is produced, with state rolled forward from mu through B over depth T"]}
-
+    [:scoring-precedes-enactment-in-control-order
+     "every enacted candidate action in the compile-phase control flow passes through forward-model scoring first; an enactment reached without a recorded score fails the check"]}
    ["problems/r4-forward-model" 6]
-   {:operation :land-why-edges-on-problem-node
+   {:operation :apply-r4-forward-model-to-fidelity-maintenance
     :capability :wm/pattern-apply
-    :consumes :pattern-rationale-edges
-    :produces :r4-problem-node-landing
+    :consumes :untracked-divergence-risk-between-model-and-world
+    :produces :declared-model-fidelity-residual-problem-records
     :completion-check
-    [:why-edges-land-on-node
-     "patterns whose rationale answers the R4 forward-model problem carry @why edges landing on this problem node"]}
-
+    [:residual-problems-of-forward-model-fidelity-recorded
+     "the maintenance and fidelity residuals of the shared-kernel forward model (where predicted and live dynamics can drift, and what recalibration owes) are recorded on the R4 problem node rather than left implicit, so later work measures against the stated residuals"]}
    ["musn/fulab-report-block" 7]
-   {:operation :keep-report-block-concise
+   {:operation :apply-fulab-report-block-to-pattern-use-evidence
     :capability :wm/pattern-apply
-    :consumes :turn-summary
-    :produces :concise-report-block
+    :consumes :pattern-use-not-anchored-in-log
+    :produces :musn-parseable-pattern-use-record
     :completion-check
-    [:concise-annotated-report
-     "the response stays concise at the end of the turn while the FULAB-REPORT block anchors the pattern use record in the log"]}})
+    [:report-block-parseable-by-musn-records-applied-patterns
+     "the terminal report block of the compile phase is well-formed for MUSN parsing (:applied names the applied patterns, :action the repair, :notes qualifications), and its evidence-shape is {:applied :string, :action :string, :notes :string}"]}})
 
 (defn decisions
   "The hole resolutions for this requisition, bound to the cascade digest
