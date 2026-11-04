@@ -114,3 +114,33 @@
             :details {:detail :bad-wire}}
            result))
     (is (empty? (debugger/stopped)))))
+
+(deftest attached-work-failure-after-decision-does-not-stop-as-selection
+  (debugger/attach!)
+  (let [run-id "outer-selection-work-failure"
+        work-calls (atom 0)
+        run-opts (opts run-id)
+        selection {:selection {:selected {:target "M-selected"}}
+                   :chosen-class :mission}
+        running
+        (future
+          (with-outer-selection-fixture
+            (constantly selection)
+            (fn []
+              (with-redefs-fn
+                {#'runtime/run-ordinary-opportunity-with-task!
+                 (fn [_]
+                   (swap! work-calls inc)
+                   (throw (ex-info "work broke"
+                                   {:kind :test/work-failure
+                                    :detail :outside-phase})))}
+                #(#'runtime/run-ordinary-opportunity-impl! run-opts)))))
+        erroneous-stop (wait-for-stop run-id running)]
+    (is (empty? (debugger/stopped)))
+    (when erroneous-stop
+      (debugger/continue! run-id :abort))
+    (is (= {:absent :outer-selection-refused
+            :reason :test/work-failure
+            :details {:detail :outside-phase}}
+           (deref running 2000 ::timeout)))
+    (is (= 1 @work-calls))))

@@ -1227,7 +1227,8 @@
   while stopped supplies the next attempt rather than a stale closure."
   [opts throwable]
   (if-not (and (debugger/attached?)
-               (debugger/stoppable-failure? throwable))
+               (debugger/stoppable-failure? throwable)
+               (nil? (some-> opts :selection-record/decided deref)))
     (outer-selection-refusal throwable)
     (let [{:keys [action value]}
           (debugger/await-restart!
