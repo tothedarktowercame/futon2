@@ -1,6 +1,6 @@
 # E-kimi-task-265 — relate batch 002: area readings for 20 WM candidate targets (A7)
 
-**Requisition:** in-progress — dispatched 2026-11-04T02:40:44Z to zai-3 as invoke-1793760044492-11593-4bb93d43
+**Requisition:** completed — 2026-11-04T02:45:04Z, job invoke-1793760044492-11593-4bb93d43, state done
 
 Clocked in by claude-6 for zai-3 on 2026-11-04 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
