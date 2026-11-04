@@ -48,6 +48,7 @@
             [futon2.aif.wm.on-prod-history :as on-prod-history]
             [futon2.aif.wm.cascade-continuation :as cascade-continuation]
             [futon2.aif.wm.cascade-decision :as cascade-decision]
+            [futon2.aif.wm.debugger :as debugger]
             [futon2.report.war-machine :as wm])
   (:import [java.time Instant]
            [java.util UUID]))
@@ -1187,6 +1188,7 @@
      :mode-flags-fn wm/arena-mode-flags}))
 
 (declare run-ordinary-opportunity-with-task!)
+(declare run-ordinary-opportunity-impl!)
 
 (defn- missions-giraffe-manifest? [manifest]
   (let [edge-path (get-in manifest [:sources :edges :path])]
@@ -1218,6 +1220,29 @@
   {:absent :outer-selection-refused
    :reason (or (:kind (ex-data e)) :outer-selection-failed)
    :details (dissoc (ex-data e) :kind)})
+
+(defn- outer-selection-failure
+  "Stop an attached outer-selection refusal before projecting it to absence.
+  Retry resolves the implementation Var again, so a namespace reload made
+  while stopped supplies the next attempt rather than a stale closure."
+  [opts throwable]
+  (if-not (and (debugger/attached?)
+               (debugger/stoppable-failure? throwable))
+    (outer-selection-refusal throwable)
+    (let [{:keys [action value]}
+          (debugger/await-restart!
+           (assoc (select-keys opts [:attempt-id :opportunity-id])
+                  :run-id (:run-id opts)
+                  :phase :outer-selection
+                  :nano-time-fn (:nano-time-fn opts)
+                  :debugger-dwell-ledger (:debugger-dwell/state opts))
+           throwable)]
+      (case action
+        :retry ((var-get #'run-ordinary-opportunity-impl!) opts)
+        (:continue :use-value) value
+        :abort (do
+                 (debugger/discharge! throwable)
+                 (outer-selection-refusal throwable))))))
 
 (defn- pending-run-ending [opts run-id]
   (pending-observation/observe
@@ -1569,9 +1594,9 @@
                 (outer-state/write-state! state-path state))
               {:absent :no-task-selected :outer/selection retained-selection})))
         (catch clojure.lang.ExceptionInfo e
-          (outer-selection-refusal e))
+          (outer-selection-failure opts e))
         (catch Exception e
-          (outer-selection-refusal e)))
+          (outer-selection-failure opts e)))
       {:absent :no-verified-giraffe-run})))
 
 (defn- run-ordinary-opportunity! [opts]
