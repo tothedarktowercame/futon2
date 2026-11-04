@@ -3122,6 +3122,41 @@
       (first (filter #(= target (:id %))
                      (:excursions (missions/load-excursions)))))))
 
+(defn- source-backed-ticket-with-wants?
+  [mission action]
+  (let [source (:source mission)]
+    (and (mission-contract/ticket? action)
+         (string? (:path source))
+         (seq (:path source))
+         (string? (:sha256 source))
+         (seq (:sha256 source))
+         (seq (:want action)))))
+
+(defn- mission-measurement-applicable?
+  "Whether the selected work must traverse the durable before/after selected-
+  want observation path. Preparation tickets retain their existing admission;
+  ordinary tickets additionally need a source-pinned registry carrier."
+  [mission action deferred-author-job deferred-author-context]
+  (or (mission-contract/mission? action)
+      (and (mission-contract/excursion? action) (seq (:want action)))
+      (source-backed-ticket-with-wants? mission action)
+      (and (= :preparation (get-in action [:ticket-readiness :increment]))
+           (seq (:want action)))
+      (and deferred-author-job
+           (contains? deferred-author-context :mission-observation-baseline))))
+
+(defn- capture-pre-author-mission-baseline
+  [applicable? dispatch repository revision]
+  (when applicable?
+    (mission-observation/capture-before
+     {:dispatch dispatch :repository repository :revision revision})))
+
+(defn- terminal-measurement-action
+  [applicable? d-task-dispatch construction]
+  (if applicable?
+    (get-in d-task-dispatch [:dispatch :occurrence :action/value])
+    (get-in construction [:selected-action])))
+
 (defmulti construct-selected-action
   "Production constructor dispatch. Every selectable meta-action needs its
   own construction contract; it must not be made to look like an ordinary
@@ -9294,28 +9329,9 @@
                                  target mission construction stop-lines))
                 _ (mission-contract/require-before-author! (:selected-action construction))
                 mission-applicable?
-                (or (mission-contract/mission? (:selected-action construction))
-                    ;; EXCURSION-TARGET-FALSIFIER-AND-REVISION, wants half:
-                    ;; an excursion selected with a derived want contract is
-                    ;; an exact selected-want observation like a mission —
-                    ;; D-task dispatch, pre-author baseline and the immutable
-                    ;; C3/C4 readers all apply, so the author prompt's
-                    ;; SELECTED WANTS block and the measurement share one
-                    ;; derivation.
-                    (and (mission-contract/excursion? (:selected-action construction))
-                         (seq (get-in construction [:selected-action :want])))
-                    ;; A ticket preparation selected by the canonical outer
-                    ;; policy is also an exact selected-want observation. It
-                    ;; must traverse the durable pre-author baseline and the
-                    ;; same immutable C3/C4 readers; a readiness label alone
-                    ;; never supplies its before state.
-                    (and (= :preparation
-                            (get-in construction
-                                    [:selected-action :ticket-readiness :increment]))
-                         (seq (get-in construction [:selected-action :want])))
-                    (and deferred-author-job
-                         (contains? deferred-author-context
-                                    :mission-observation-baseline)))
+                (mission-measurement-applicable?
+                 mission (:selected-action construction)
+                 deferred-author-job deferred-author-context)
                 _ (reset! d-task-dispatch
                           (if (and deferred-author-job mission-applicable?)
                             (:d-task-dispatch deferred-author-context)
@@ -9341,10 +9357,9 @@
                        cohort-source (:data-root execution-cohort) (:attempt-id origin))
                       (cohort/read-pre-author-baseline (:attempt-id origin)))))
                 fresh-mission-baseline
-                (when mission-applicable?
-                  (mission-observation/capture-before
-                   {:dispatch (:dispatch @d-task-dispatch)
-                    :repository author-repo :revision (:head pre-author-head)}))
+                (capture-pre-author-mission-baseline
+                 mission-applicable? (:dispatch @d-task-dispatch)
+                 author-repo (:head pre-author-head))
                 mission-baseline
                 (if (and mission-applicable? deferred-author-job)
                   (:baseline retained-mission-event)
@@ -9745,10 +9760,8 @@
                             (selected-want-outcome/receipt
                              (cond->
                               {:selected-action
-                               (if mission-applicable?
-                                 (get-in @d-task-dispatch
-                                         [:dispatch :occurrence :action/value])
-                                 (get-in construction [:selected-action]))
+                               (terminal-measurement-action
+                                mission-applicable? @d-task-dispatch construction)
                                :token-comparison comparison}
                                mission-applicable?
                                (assoc :mission-observation mission-comparison)))]
