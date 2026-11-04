@@ -13,6 +13,11 @@
 (def selected-action
   {:kind :cascade-candidate :target target :want wants
    :observation-locators {}})
+(def located-action
+  (assoc selected-action :observation-locators
+         (into {} (map (fn [want]
+                         [want {:repo "/repo" :class :C3 :path (str "proof/" (hash want))}])
+                       wants))))
 
 (defn- runner-var [sym]
   (ns-resolve 'futon2.aif.full-loop-runner sym))
@@ -41,34 +46,33 @@
       (get-in d-task-dispatch [:dispatch :occurrence :action/value])
       (get-in construction [:selected-action]))))
 
-(deftest run-ede75c1a-ticket-enters-the-durable-measurement-path
+(deftest run-23ab2833-ticket-without-locators-stays-off-measurement-path
   (let [occurrence-action selected-action
         d-task-dispatch {:dispatch {:occurrence {:action/value occurrence-action}}}
         construction {:selected-action (assoc selected-action :want [:late-copy])}
-        captured (atom nil)
         route? (boolean (applicable? ticket-carrier selected-action))]
-    (is (true? route?))
+    (is (false? route?))
     (with-redefs [observation/capture-before
-                  (fn [input]
-                    (reset! captured input)
-                    {:status :captured :rows []})]
-      (is (= {:status :captured :rows []}
-             (capture-baseline route? (:dispatch d-task-dispatch)
-                               "/repo" "before-sha")))
-      (is (= {:dispatch (:dispatch d-task-dispatch)
-              :repository "/repo" :revision "before-sha"}
-             @captured)))
-    (testing "terminal accounting consumes the occurrence, not a late construction copy"
-      (is (= occurrence-action
+                  (fn [_] (throw (ex-info "baseline must not run" {})))]
+      (is (nil? (capture-baseline route? (:dispatch d-task-dispatch)
+                                  "/repo" "before-sha"))))
+    (testing "terminal accounting keeps the pre-measurement construction path"
+      (is (= (:selected-action construction)
              (terminal-action route? d-task-dispatch construction)))
-      (is (not= (get-in construction [:selected-action :want])
-                (:want (terminal-action route? d-task-dispatch construction)))))))
+      (is (not= occurrence-action
+                (terminal-action route? d-task-dispatch construction))))))
+
+(deftest source-backed-ticket-with-wants-and-locators-is-measurement-applicable
+  (is (true? (boolean (applicable? ticket-carrier located-action)))))
 
 (deftest ordinary-ticket-requires-both-source-and-wants
   (is (false? (boolean (applicable? (dissoc ticket-carrier :source)
                                     selected-action))))
   (is (false? (boolean (applicable? ticket-carrier
-                                    (assoc selected-action :want []))))))
+                                    (assoc selected-action :want [])))))
+  (let [partially-located
+        (update located-action :observation-locators dissoc (first wants))]
+    (is (false? (boolean (applicable? ticket-carrier partially-located))))))
 
 (deftest existing-preparation-mission-and-excursion-admissions-are-unchanged
   (let [preparation (assoc selected-action

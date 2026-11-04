@@ -3122,7 +3122,7 @@
       (first (filter #(= target (:id %))
                      (:excursions (missions/load-excursions)))))))
 
-(defn- source-backed-ticket-with-wants?
+(defn- source-backed-ticket-with-located-wants?
   [mission action]
   (let [source (:source mission)]
     (and (mission-contract/ticket? action)
@@ -3130,16 +3130,17 @@
          (seq (:path source))
          (string? (:sha256 source))
          (seq (:sha256 source))
-         (seq (:want action)))))
+         (mission-observation/selected-wants-located? action))))
 
 (defn- mission-measurement-applicable?
   "Whether the selected work must traverse the durable before/after selected-
   want observation path. Preparation tickets retain their existing admission;
-  ordinary tickets additionally need a source-pinned registry carrier."
+  ordinary tickets additionally need a source-pinned registry carrier and an
+  observation locator for every selected want."
   [mission action deferred-author-job deferred-author-context]
   (or (mission-contract/mission? action)
       (and (mission-contract/excursion? action) (seq (:want action)))
-      (source-backed-ticket-with-wants? mission action)
+      (source-backed-ticket-with-located-wants? mission action)
       (and (= :preparation (get-in action [:ticket-readiness :increment]))
            (seq (:want action)))
       (and deferred-author-job
