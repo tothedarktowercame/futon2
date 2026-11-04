@@ -50,9 +50,13 @@
     (->> (concat newest (remove #(used (:evidence-id %)) xs))
          (sort-by (comp str :at) #(compare %2 %1)) (take 20) vec)))
 
+(defn- reply-json [raw]
+  (let [start (str/index-of raw "{") end (str/last-index-of raw "}")]
+    (when (and start end (< start end)) (subs raw start (inc end)))))
+
 (defn check-reply [raw sent seats]
   (try
-    (let [rows (:answers (json/parse-string raw true)) by (group-by :seat rows)
+    (let [rows (:answers (json/parse-string (reply-json raw) true)) by (group-by :seat rows)
           ids (update-vals (group-by :seat sent) #(set (map :evidence-id %)))]
       (into {} (for [s seats :let [a (first (get by s)) cited (set (:evidence_ids a))]]
                  [s (cond (not= 1 (count (get by s))) {:status :abstained :reason :reader-answer-missing-or-duplicate}
@@ -71,7 +75,7 @@
 
 (defn check-clock-reply [raw clock-inputs]
   (try
-    (let [rows (:clock_answers (json/parse-string raw true)) by (group-by :target rows)
+    (let [rows (:clock_answers (json/parse-string (reply-json raw) true)) by (group-by :target rows)
           inputs (into {} (map (juxt :target identity)) clock-inputs)]
       (into {} (for [[target input] inputs :let [a (first (get by target))
                                                 lines (str/split-lines (:text input)) line (:line a)]]
