@@ -3479,7 +3479,11 @@
        :procedure-source (str "holes/labs/" target ".md")
        :required-evidence [:started :completed :independently-verified]}
 
-      (= :advance-ticket (:type action)) (missions/ticket-entry target)
+      ;; Work carriers are target-registry evidence, not action-type evidence.
+      ;; A ticket selected through a cascade needs the same source-pinned entry
+      ;; as one selected through :advance-ticket (run ede75c1a, 2026-11-04).
+      (and (some? target) (str/starts-with? (str target) "T-"))
+      (missions/ticket-entry (str target))
       ;; An excursion target is not a mission: mission-entry returns nil for
       ;; it, which starved cascade revision of a source path. Resolve it to
       ;; its real excursion doc entry (kind :excursion, real :source pin).
