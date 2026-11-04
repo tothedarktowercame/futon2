@@ -7,40 +7,14 @@
             [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.action-identity :as identity])
   (:import [java.net URLEncoder]
            [java.time Duration Instant]))
 
-(def keyword-table-version "operator-focus-keywords-v2")
-
-(def keyword-table
-  ;; WM's own name and outer-selection vocabulary are stronger than generic "machine".
-  [{:area "WM" :pattern #"(?i)\b(war machine|outer selection|focus selection|commit.?facets|retained focus|wm)\b"}
-   ;; Giraffe is a named subsystem and has no useful generic synonym.
-   {:area "Giraffe" :pattern #"(?i)\bgiraffe\b"}
-   ;; Pattern work includes retrieval/mining/cascade discussion, not every use of "pattern" in prose.
-   {:area "patterns" :pattern #"(?i)\b(pattern retrieval|pattern mining|pattern library|cascade construction|flexiarg)\b"}
-   ;; APM is principally the Lean proof campaign.
-   {:area "APM" :pattern #"(?i)\b(apm|lean proof|mathlib|theorem|lemma)\b"}
-   ;; Arxana includes its user-facing browse/read surfaces.
-   {:area "Arxana" :pattern #"(?i)\b(arxana|arxana-browse|scope browser)\b"}
-   ;; Agency covers clocks, seats, dispatch and agent coordination.
-   {:area "Agency" :pattern #"(?i)\b(agency|auto.?clock|clocked|dispatch|agent registry|seat)\b"}
-   ;; Memory means explicit memory/retrieval apparatus, not ordinary remembering.
-   {:area "memory" :pattern #"(?i)\b(memory system|memory retrieval|long.?term memory|minus40)\b"}
-   ;; 象 is named directly or via its operator-turn interpretation service.
-   {:area "象" :pattern #"(?i)(象|\bxiang\b|operator turn analysis|turn interpretation)"}
-   ;; Futonzero includes its prelim-practice, self-play, MVP and generative work.
-   {:area "futonzero" :pattern #"(?i)\b(futonzero|futon zero|self.?play)\b"}
-   ;; futon5 is a named repository/subsystem.
-   {:area "futon5" :pattern #"(?i)\bfuton5\b"}
-   ;; futon6 is a named repository/subsystem.
-   {:area "futon6" :pattern #"(?i)\bfuton6\b"}
-   ;; Business covers explicit commercial/customer/company work.
-   {:area "business" :pattern #"(?i)\b(business|customer|commercial|sales|company)\b"}
-   ;; voxterm is a named voice surface.
-   {:area "voxterm" :pattern #"(?i)\bvoxterm\b"}])
+(def area-vocabulary #{"WM" "Giraffe" "patterns" "APM" "Arxana" "Agency" "memory" "象"
+                       "futon6" "voxterm" "futon5" "futonzero" "business"})
 
 (defn load-area-corpus
   "Read accepted `*.relate.json` rows under PATH. A row is accepted only when
@@ -66,30 +40,26 @@
                   (into (sorted-map)))]
     {:rows rows :sha256 (identity/digest rows)}))
 
-(def ^:private task-pattern #"(?<![A-Za-z0-9_-])(?:M|E|T)-[A-Za-z0-9][A-Za-z0-9_-]*")
 (def ^:private seat-pattern #"(.+)-turn-[0-9]+")
 
-(defn- majority [xs]
-  (when (seq xs)
-    (let [counts (frequencies xs)
-          best (apply max (vals counts))]
-      (->> counts (keep (fn [[x n]] (when (= n best) x))) sort vec))))
+(defn reader-turns [turns seats]
+  (let [chosen (set seats) xs (filter #(chosen (:seat %)) turns)
+        newest (map (fn [seat] (first (sort-by (comp str :at) (fn [a b] (compare b a))
+                                               (filter (fn [t] (= seat (:seat t))) xs)))) seats)
+        used (set (map :evidence-id newest))]
+    (->> (concat newest (remove #(used (:evidence-id %)) xs))
+         (sort-by (comp str :at) #(compare %2 %1)) (take 20) vec)))
 
-(defn map-turn
-  "Map one normalized turn's text to an area, recording task/keyword precedence."
-  [turn area-of-task]
-  (let [text (str (or (:text turn) ""))
-        named (re-seq task-pattern text)
-        named-areas (keep area-of-task named)]
-    (cond
-      (seq named-areas)
-      (let [areas (majority named-areas)]
-        {:areas areas :area (first areas) :step :text-task :tasks (vec named)})
-
-      :else
-      (if-let [hit (first (filter #(re-find (:pattern %) text) keyword-table))]
-        {:areas [(:area hit)] :area (:area hit) :step :keyword}
-        {:areas [] :step :abstain :reason :turn-unmapped}))))
+(defn check-reply [raw sent seats]
+  (try
+    (let [rows (:answers (json/parse-string raw true)) by (group-by :seat rows)
+          ids (update-vals (group-by :seat sent) #(set (map :evidence-id %)))]
+      (into {} (for [s seats :let [a (first (get by s)) cited (set (:evidence_ids a))]]
+                 [s (cond (not= 1 (count (get by s))) {:status :abstained :reason :reader-answer-missing-or-duplicate}
+                          (not (or (area-vocabulary (:area a)) (str/starts-with? (str (:area a)) "other:"))) {:status :abstained :reason :reader-unknown-area}
+                          (or (empty? cited) (not (every? (get ids s #{}) cited))) {:status :abstained :reason :reader-unknown-evidence-id}
+                          :else {:status :voted :area (:area a) :evidence-ids (vec cited)})])))
+    (catch Exception _ (into {} (map (fn [s] [s {:status :abstained :reason :reader-invalid-json}]) seats)))))
 
 (defn- instant [x]
   (cond (instance? Instant x) x
@@ -101,7 +71,7 @@
   "Pure vote over normalized turns. `area-of-task` maps task id to area.
    Options: `:as-of`, `:window-days` (7), `:seat-count` (10), and
    `:turns-per-seat` (10)."
-  [turns area-of-task {:keys [as-of window-days seat-count turns-per-seat clocks]
+  [turns area-of-task {:keys [as-of window-days seat-count turns-per-seat clocks text-answers]
                        :or {window-days 7 seat-count 10 turns-per-seat 10}}]
   (let [as-of (instant as-of)
         since (.minus as-of (Duration/ofDays window-days))
@@ -118,17 +88,10 @@
         seat-results
         (mapv (fn [seat]
                 (let [turns (take turns-per-seat (get per-seat seat))
-                      mapped (mapv #(assoc (map-turn % area-of-task)
-                                           :evidence-id (:evidence-id %)
-                                           :at (str (:at %))) turns)
-                      areas (mapcat :areas mapped)
-                      text-half (if (seq areas)
-                                  (let [winners (majority areas)
-                                        share (/ 1 (* 2 (count winners)))]
-                                    {:status :voted
-                                     :votes (into (sorted-map)
-                                                  (map (fn [a] [a share]) winners))})
-                                  {:status :abstained :reason :no-mappable-turns})
+                      answer (get text-answers seat)
+                      text-half (if (= :voted (:status answer))
+                                  (assoc answer :votes (sorted-map (:area answer) 1/2))
+                                  (or answer {:status :abstained :reason :reader-answer-missing}))
                       clock (get clocks-by-seat seat)
                       clock-half
                       (cond
@@ -149,7 +112,7 @@
                   (cond-> {:seat seat
                            :status (if (seq votes) :voted :abstained)
                            :text-half text-half :clock-half clock-half
-                           :turns mapped}
+                           :turns (mapv #(select-keys % [:evidence-id :at]) turns)}
                     (seq votes) (assoc :votes (into (sorted-map) votes))
                     (empty? votes) (assoc :reason :both-halves-abstained))))
               seats)
@@ -197,12 +160,12 @@
 
 (defn read-turns
   "Bounded authoritative read: at most three pages of 100. No file fallback."
-  [{:keys [base-url timeout-ms] :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
+  [{:keys [base-url timeout-ms as-of] :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
   (try
     (loop [page 0 cursor nil rows []]
       (if (= page 3)
         {:status :ok :turns (vec (keep evidence-row->turn rows)) :pages page}
-        (let [url (str base-url "/api/alpha/evidence?author=joe&tags=turn&limit=100"
+        (let [url (str base-url "/api/alpha/evidence?author=joe&tags=turn&limit=100&system-as-of=" (enc as-of)
                        (when cursor (str "&cursor-at=" (enc (:at cursor))
                                          "&cursor-id=" (enc (:id cursor)))))
               resp (http/get url {:timeout timeout-ms :throw false})]
@@ -225,10 +188,10 @@
 
 (defn read-clocks
   "Read the bounded current clock projection and retain a hash of its exact response."
-  [{:keys [base-url timeout-ms] :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
+  [{:keys [base-url timeout-ms as-of] :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
   (try
     (let [url (str base-url
-                   "/api/alpha/hyperedges?type=clock%2Fclocked-on&limit=1000&include-total=false")
+                   "/api/alpha/hyperedges?type=clock%2Fclocked-on&limit=1000&include-total=false&system-as-of=" (enc as-of))
           resp (http/get url {:timeout timeout-ms :throw false})]
       (cond
         (= 503 (:status resp)) {:status :absent :reason :expensive-read-busy}
@@ -258,7 +221,6 @@
      :source :futon1b-evidence-landscape
      :as-of (:as-of vote) :window-days (:window-days vote)
      :K (:seat-count vote) :turns-per-seat (:turns-per-seat vote)
-     :keyword-table-version keyword-table-version
      :area-corpus-sha256 area-corpus-sha
      :clock-response-sha256 (:clock-response-sha256 opts)
      :turns (mapv (fn [t]
@@ -271,7 +233,7 @@
                                 :reason :outside-selected-window-or-seat-cap}))))
                   turns)
      :seat-votes (:seat-votes vote) :abstentions (:abstentions vote)
-     :result (:result vote) :reader (select-keys opts [:base-url])}))
+     :result (:result vote) :reader (:reader opts)}))
 
 (defn write-manifest!
   "Write MANIFEST as content-addressed EDN under DIR and return its pin."
@@ -287,20 +249,52 @@
   (let [m (edn/read-string (slurp path))]
     {:manifest m :result (:result m)}))
 
+(defn dispatch-reader! [sent {:keys [prompt-resource reader-seat caller kimi-script task-repo agency-base reader-timeout-ms]
+                              :or {reader-seat "zai-1" caller "operator-focus"
+                                   kimi-script "/home/joe/code/futon3c/scripts/kimi-task.sh"
+                                   agency-base "http://127.0.0.1:7070" reader-timeout-ms 600000}}]
+  (let [resource (slurp (io/resource prompt-resource))
+        f (java.io.File/createTempFile "operator-focus-" ".md")
+        clipped (mapv #(update % :text (fn [s] (subs (str s) 0 (min 600 (count (str s)))))) sent)
+        _ (spit f (str resource "\n\nINPUT TURNS (JSON):\n" (json/generate-string clipped)))
+        r (shell/sh kimi-script "--seat" reader-seat "--caller" caller "--packet" (.getPath f)
+                    :env (assoc (into {} (System/getenv)) "KIMI_TASK_REPO" (or task-repo (System/getProperty "user.dir"))))
+        job (second (re-find #"job=([^ ]+)" (:out r)))]
+    (if-not (and (zero? (:exit r)) job)
+      {:status :absent :reason :reader-dispatch-failed :stderr (:err r)}
+      (loop [left reader-timeout-ms]
+        (let [response (http/get (str agency-base "/api/alpha/invoke/jobs/" job) {:timeout 10000 :throw false})
+              body (when (= 200 (:status response)) (json/parse-string (:body response) true))
+              j (or (:job body) body) state (or (:status j) (:state j)) raw (or (:result j) (:response j))]
+          (cond raw {:status :ok :job-id job :seat reader-seat :prompt-sha256 (identity/sha256 resource)
+                     :raw-reply raw :raw-reply-sha256 (identity/sha256 raw) :sent-turns clipped}
+                (contains? #{"failed" "cancelled" :failed :cancelled} state) {:status :absent :reason :reader-job-failed :job-id job}
+                (<= left 0) {:status :absent :reason :reader-job-timeout :job-id job}
+                :else (do (Thread/sleep 2000) (recur (- left 2000)))))))))
+
 (defn read-focus!
   "Read, vote, and retain exactly the authoritative turns read."
   [{:keys [area-corpus-path manifest-dir as-of] :as opts}]
-  (let [turn-read (read-turns opts)
+  (let [opts (assoc opts :as-of (or as-of (str (Instant/now))))
+        turn-read (read-turns opts)
         clock-read (when (= :ok (:status turn-read)) (read-clocks opts))]
     (if (not= :ok (:status turn-read))
       turn-read
       (if (not= :ok (:status clock-read))
         clock-read
       (let [{:keys [rows sha256]} (load-area-corpus area-corpus-path)
-            vote-opts (merge {:as-of (or as-of (Instant/now))}
-                             opts {:clocks (:clocks clock-read)})
-            vote (focus-vote (:turns turn-read) rows vote-opts)
+            preliminary (focus-vote (:turns turn-read) rows (assoc opts :clocks (:clocks clock-read)))
+            sent (reader-turns (:turns turn-read) (:seats preliminary))
+            dispatch (dispatch-reader! sent opts)
+            raw (or (:reader-raw-reply opts) (:raw-reply dispatch))
+            answers (when raw (check-reply raw sent (:seats preliminary)))
+            vote (focus-vote (:turns turn-read) rows (assoc opts :clocks (:clocks clock-read) :text-answers answers))
             manifest-opts (assoc opts :clock-response-sha256
-                                 (:response-sha256 clock-read))
+                                 (:response-sha256 clock-read)
+                                 :reader {:sent-turns (mapv #(assoc (select-keys % [:evidence-id :seat])
+                                                                   :body-sha256 (identity/sha256 (str (:text %)))) sent)
+                                          :prompt-sha256 (:prompt-sha256 dispatch) :seat (:seat dispatch)
+                                          :job-id (:job-id dispatch) :raw-reply-sha256 (when raw (identity/sha256 raw))
+                                          :parsed-answers answers})
             m (manifest (:turns turn-read) vote sha256 manifest-opts)]
-        (merge {:status :ok :vote vote} (write-manifest! manifest-dir m)))))))
+        (if raw (merge {:status :ok :vote vote} (write-manifest! manifest-dir m)) dispatch))))))
