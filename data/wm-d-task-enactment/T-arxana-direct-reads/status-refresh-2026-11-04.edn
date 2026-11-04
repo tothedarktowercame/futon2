@@ -17,6 +17,12 @@
   {:what "ticket body past the banner"
    :how "read futon4/holes/tickets/T-arxana-direct-reads.md sections What exists / What is missing / Done when"
    :observed "hypergraph browser still file-fed per body; no in-body ruling found that revises the banner"}]
+ :enactment
+ {:ticket-status-line-updated true
+  :ticket-repository "/home/joe/code/futon4"
+  :ticket-commit "b2293c0efde848850fc60ab5920022823ad433aa"
+  :enacted-at "2026-11-04T03:20:00Z"
+  :note "reviewer-requested round 2: the status line itself (futon4 ticket line 7) now carries the re-derived phase and the citations; this record is the evidence trail."}
  :derived-at "2026-11-04T02:55:01Z"
  :derived-by "wm-author"
  :pattern "process-coherence/status-refresh-before-work"
