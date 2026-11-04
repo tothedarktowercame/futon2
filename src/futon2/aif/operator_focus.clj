@@ -46,9 +46,10 @@
   (let [chosen (set seats) xs (filter #(chosen (:seat %)) turns)
         newest (map (fn [seat] (first (sort-by (comp str :at) (fn [a b] (compare b a))
                                                (filter (fn [t] (= seat (:seat t))) xs)))) seats)
-        used (set (map :evidence-id newest))]
-    (->> (concat newest (remove #(used (:evidence-id %)) xs))
-         (sort-by (comp str :at) #(compare %2 %1)) (take 20) vec)))
+        used (set (map :evidence-id newest))
+        remaining (sort-by (comp str :at) #(compare %2 %1)
+                           (remove #(used (:evidence-id %)) xs))]
+    (vec (concat newest (take (- 20 (count newest)) remaining)))))
 
 (defn- reply-json [raw]
   (let [start (str/index-of raw "{") end (str/last-index-of raw "}")]

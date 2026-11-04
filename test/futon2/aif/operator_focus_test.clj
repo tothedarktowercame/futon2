@@ -94,6 +94,10 @@
         checked (focus/check-reply raw [(turn "e1" "a" as-of "x")] ["a"])]
     (is (= "WM" (get-in checked ["a" :area])))))
 
+(deftest reader-packet-represents-every-selected-seat
+  (let [turns (mapv (fn [i] (turn (str i) (str "s" i) (str "2026-11-03T" (format "%02d" i) ":00:00Z") "x")) (range 10))]
+    (is (= (set (map :seat turns)) (set (map :seat (focus/reader-turns turns (mapv :seat turns))))))))
+
 (deftest unresolved-clock-reply-is-checked
   (let [input [{:target "M-x" :text "# X\n\nUseful work"}]
         good (focus/check-clock-reply "{\"clock_answers\":[{\"target\":\"M-x\",\"area\":\"Agency\",\"line\":3}]}" input)
