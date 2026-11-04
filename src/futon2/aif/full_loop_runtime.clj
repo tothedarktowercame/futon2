@@ -10,12 +10,12 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.cascade-feedback :as cascade-feedback]
+            [futon2.aif.area-focus :as area-focus]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.effective-run-history :as effective-run-history]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.flight-runner :as flight-runner]
-            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.meta-pipeline-selector :as meta-pipeline]
             [futon2.aif.meta-field-observation :as meta-field]
@@ -1255,6 +1255,10 @@
     (when (and previous-dir (.isDirectory previous-dir))
       (let [observation (outer-observation/giraffe-field previous-dir makeup)]
         (when (= run-id (:giraffe/run-id observation))
+          (let [focus-check (when-let [pin (get-in pending [:selection :focus/source :manifest])]
+                              (area-focus/verify-pin pin))]
+            (if (:deferred focus-check)
+              focus-check
           ;; R32 / DarkTower.WarMachine.PlacementReplay / R32-b: replay is a
           ;; second observation site. It must use the placement bytes pinned by
           ;; the selection, never silently substitute today's default source.
@@ -1299,7 +1303,7 @@
             (placement-adapter/annotate
              observation
              {:status :absent :rows {} :source {}
-              :reason :no-pinned-source})))))))
+              :reason :no-pinned-source})))))))))
 
 (defn- ready-targets [observation]
   (into #{} (comp (filter #(= :ready (get-in observation [:facts (:target %) :status])))
@@ -1467,17 +1471,23 @@
                       (or (:outer/makeup-path opts) outer-state/default-makeup-path))
               state (outer-state/read-state
                      makeup (or (:outer/state-path opts) outer-state/default-state-path))
-              focus-inputs (focus-receipt/read-inputs)
+              decision-as-of (or (:decision-as-of opts) (str (Instant/now)))
+              area-corpus (area-focus/load-corpus)
+              focus-pin (area-focus/acquire-focus!
+                         {:decision-as-of decision-as-of
+                          :manifest-dir (or (:operator-focus/manifest-dir opts)
+                                            (str (data-paths/path "wm-runs")))
+                          :code-root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT"))})
               observation (outer-observation/outer-observation
                            {:run-dir giraffe-dir
                             :makeup makeup
-                            :focus-inputs focus-inputs
-                            :decision-as-of (or (:decision-as-of opts) (str (Instant/now)))
-                            :previous-focus (:previous-focus opts)
-                            :relation-context
-                            (assoc (focus-receipt/relation-context
-                                    (or (:code-root opts) "/home/joe/code"))
-                                   :giraffe-run-dir giraffe-dir)})
+                            :decision-as-of decision-as-of
+                            :area-corpus area-corpus
+                            :focus-manifest (or (:manifest focus-pin)
+                                                {:result {:status :absent
+                                                          :reason :no-recent-operator-turns}})
+                            :focus-manifest-sha256 (:sha256 focus-pin)
+                            :focus-manifest-source (select-keys focus-pin [:path :as-of :age-minutes])})
               ;; Ant placements as a per-target fact (SPEC-placement-adapter-2026-11-02).
               ;; A missing file is a typed absence on every fact; :placed-gate then
               ;; keeps nothing, and a menu without the fact refuses, never passes.
@@ -1507,7 +1517,7 @@
                                   (:run-id opts) (or (:startedAt opts) (str (Instant/now)))))
               _ (swap! (:selection-record/evidence opts) merge
                         (assoc (select-keys observation [:giraffe/run-id :giraffe/manifest-sha256
-                                                         :focus :field-facts :placement/source])
+                                                         :focus :focus/source :field-facts :placement/source])
                                :makeup/sha256 (:makeup/sha256 makeup)
                                :previous (:previous-selection observation)))
               selection (outer-select/select makeup state observation)
@@ -1517,6 +1527,7 @@
                                             (:outer-score/admitted selection))
                                      (update :selection #(some-> % (dissoc :candidates)))
                                      (assoc :giraffe/run-id (:giraffe/run-id observation)
+                                            :focus/source (:focus/source observation)
                                             :placement/source (:placement/source observation)
                                             :giraffe/manifest-sha256
                                             (:giraffe/manifest-sha256 observation)

@@ -7,6 +7,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
+            [futon2.aif.area-focus :as area-focus]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.outer-state :as outer-state]
@@ -229,18 +230,24 @@
   Required keys are `:run-dir`, `:makeup`, `:focus-inputs`, and
   `:decision-as-of`.  Optional `:previous-focus` and `:relation-context` are
   passed to the shared focus producer.  Unknown relations remain `:unknown`."
-  [{:keys [run-dir makeup focus-inputs decision-as-of previous-focus relation-context]}]
+  [{:keys [run-dir makeup focus-inputs decision-as-of previous-focus relation-context
+           area-corpus focus-manifest focus-manifest-sha256 focus-manifest-source]}]
   (let [giraffe (giraffe-field run-dir makeup)
-        focus-result (focus-receipt/decision-focus focus-inputs decision-as-of previous-focus)
-        focus-info (:info focus-result)
+        area-mode? (and area-corpus focus-manifest)
+        focus-result (when-not area-mode? (focus-receipt/decision-focus focus-inputs decision-as-of previous-focus))
+        focus-info (when focus-result (:info focus-result))
         receipts (into {} (map (fn [target]
-                                 [target (focus-receipt/classify-target
-                                          focus-inputs focus-info decision-as-of target relation-context)])
+                                 [target (if area-mode?
+                                           (area-focus/classify-target
+                                            (:rows area-corpus) (:sha256 area-corpus) focus-manifest
+                                            focus-manifest-sha256 target)
+                                           (focus-receipt/classify-target
+                                            focus-inputs focus-info decision-as-of target relation-context))])
                                (distinct (map :target (:field giraffe)))))
         ;; One retained receipt supplies both the scoring class and its evidence.
         relation (fn [focus target]
-                   (if (= focus (:focus focus-info))
-                     (get-in receipts [target :class] :unknown) :unknown))
+                   (if (or area-mode? (= focus (:focus focus-info)))
+                     (get-in receipts [target (if area-mode? :relation-key :class)] :unknown) :unknown))
         giraffe (update giraffe :facts
                         (fn [facts]
                           (reduce-kv (fn [m target receipt]
@@ -248,8 +255,14 @@
                                                  {:class (:class receipt) :receipt receipt}))
                                      facts receipts)))]
     (merge giraffe
-           {:focus (:focus focus-info)
+           {:focus (if area-mode? (area-focus/focus-areas focus-manifest) (:focus focus-info))
             :relation relation
-            :focus/source (select-keys focus-info
-                                       [:status :focus-origin :as-of
-                                        :retained-evidence-as-of])})))
+            :focus/source (if area-mode?
+                            {:status (get-in focus-manifest [:result :status])
+                             :as-of (:as-of focus-manifest)
+                             :manifest (merge focus-manifest-source
+                                              {:sha256 focus-manifest-sha256})
+                             :corpus-sha256 (:sha256 area-corpus)}
+                            (select-keys focus-info
+                                         [:status :focus-origin :as-of
+                                          :retained-evidence-as-of]))})))

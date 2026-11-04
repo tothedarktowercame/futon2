@@ -19,6 +19,7 @@
             [clojure.set :as cset]
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
+            [futon2.aif.area-focus :as area-focus]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.cascade-structure :as cascade-structure]
             [futon2.aif.cascade-feedback :as cascade-feedback]
@@ -57,7 +58,6 @@
             [futon2.aif.wm.compiled-cascade-construction :as compiled-construction]
             [futon2.aif.wm.executable-cascade :as executable-cascade]
             [futon2.aif.fold :as fold]
-            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.g-term-decomposition :as decomposition]
@@ -2520,23 +2520,21 @@
 
 (defn interpretation-ask-classifier
   "PROOF-2b (click 17): the target classifier the ask selection uses — the
-  SAME focus-receipt/classify-target the cascade decision scores with, same
-  relation context (registry code root; futon2 ticket and findings dirs),
-  over a fresh focus read. A target classifying :unknown can never be scored
+  SAME area-focus/classify-target producer the cascade decision scores with,
+  over the same retained focus manifest. A target classifying :unknown can never be scored
   (click 15/17: the ask bought interpretations, then the decision declined
   the target :class-unknown-no-scalar-g). Injectable per click via
   :interpretation-ask-classify-fn (tests stub it); target -> class keyword."
   ([] (interpretation-ask-classifier {}))
-  ([{:keys [focus-inputs focus-as-of]}]
-   (let [inputs (or focus-inputs (focus-receipt/read-inputs))
-         as-of (or focus-as-of (str (Instant/now)))
-         ;; the SAME focus the decision classifies against (retained
-         ;; prior focus when no window covers now); a bare discover at now
-         ;; made every target :unknown (click 18)
-         discovery (focus-receipt/decision-focus-info inputs as-of)
-         ctx (focus-receipt/relation-context missions/default-code-root)]
+  ([{:keys [focus-as-of focus-pin area-corpus operator-focus-manifest-dir]}]
+   (let [as-of (or focus-as-of (str (Instant/now)))
+         corpus (or area-corpus (area-focus/load-corpus))
+         pin (or focus-pin (area-focus/newest-retained
+                            (or operator-focus-manifest-dir area-focus/default-manifest-dir) as-of))
+         manifest (or (:manifest pin) {:result {:status :absent :reason :no-recent-operator-turns}})]
      (fn [target]
-       (:class (focus-receipt/classify-target inputs discovery (:as-of discovery) target ctx))))))
+       (:relation-key (area-focus/classify-target (:rows corpus) (:sha256 corpus)
+                                                  manifest (:sha256 pin) target))))))
 
 (defn- interpretation-needed-refusals
   "Ask inputs in refusal order, or the selected outer target's declared wants.
