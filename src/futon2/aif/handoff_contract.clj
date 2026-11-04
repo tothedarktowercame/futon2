@@ -158,7 +158,8 @@
   the value the consumer validates; VALIDATE returns the consumer result.
   No caller needs to inspect Agency's :state, :result or legacy :text fields.
   Every failure is returned in the same typed shape and retains the job id
-  when Agency created one."
+  when Agency created one, except a typed pre-dispatch clock-store hold: that
+  throwable remains intact for the surrounding restartable phase."
   [{:keys [contact request decode validate]
     :or {decode identity validate identity}}]
   (if-not (fn? contact)
@@ -166,7 +167,11 @@
      :reason :contact-unavailable :contacted? false}
     (let [answer (try (contact request)
                       (catch Throwable e
-                        {::contact-threw e}))]
+                        (let [data (ex-data e)]
+                          (if (and (= :clock/store-busy (:failure-kind data))
+                                   (true? (:dispatch/not-created? data)))
+                            (throw e)
+                            {::contact-threw e}))))]
       (cond
         (::contact-threw answer)
         {:schema :wm/handoff-exchange-v1 :status :refused

@@ -3,7 +3,10 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
-            [futon2.aif.handoff-contract :as sut]))
+            [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.handoff-contract :as sut]
+            [futon2.aif.tripwire :as tripwire]
+            [futon2.aif.wm.debugger :as debugger]))
 
 (def example
   {:id :wm/example :version 1
@@ -87,6 +90,72 @@
     (is (= :response-validation-threw
            (:reason (sut/exchange {:contact (constantly {:ok true}) :request {}
                                    :validate #(throw (ex-info "bad" {}))}))))))
+
+(defn- clock-store-busy []
+  (ex-info "Agency clock store busy; dispatch not created"
+           {:outcome :clock-store-busy
+            :failure-kind :clock/store-busy
+            :error/code :clock/store-busy
+            :dispatch/not-created? true
+            :status 503}))
+
+(deftest exchange-preserves-pre-dispatch-clock-store-busy
+  (let [busy (clock-store-busy)
+        thrown (try
+                 (sut/exchange {:contact (fn [_] (throw busy)) :request {}})
+                 nil
+                 (catch clojure.lang.ExceptionInfo e e))]
+    (is (identical? busy thrown))
+    (is (= (ex-data busy) (ex-data thrown)))))
+
+(deftest exchange-keeps-ordinary-contact-throws-as-refusals
+  (let [result (sut/exchange
+                {:contact (fn [_]
+                            (throw (ex-info "ordinary contact failure" {:kind :ordinary})))
+                 :request {}})]
+    (is (= {:status :refused :reason :contact-threw :contacted? true}
+           (select-keys result [:status :reason :contacted?])))))
+
+(deftest detached-clock-store-busy-keeps-its-explicit-failure-kind
+  (debugger/detach!)
+  (let [busy (clock-store-busy)
+        thrown (try
+                 (sut/exchange {:contact (fn [_] (throw busy)) :request {}})
+                 (catch clojure.lang.ExceptionInfo e e))]
+    (is (= :clock/store-busy (#'runner/failure-kind-from thrown)))
+    (is (empty? (debugger/stopped)))))
+
+(deftest clock-store-busy-stops-and-retries-the-containing-phase
+  (debugger/attach!)
+  (let [run-id "handoff-clock-store-busy"
+        calls (atom 0)
+        running (future
+                  (binding [runner/*wm-status-reporting?* false]
+                    (with-redefs [tripwire/observe! (fn [& _])]
+                      (runner/run-phase!
+                       {:run-id run-id} {} :occurrence-square-authoring
+                       #(sut/exchange
+                         {:contact (fn [_]
+                                     (if (= 1 (swap! calls inc))
+                                       (throw (clock-store-busy))
+                                       {:ok true}))
+                          :request {}})))))
+        stop (loop [remaining 400]
+               (if-let [stop (first (filter #(= run-id (:run-id %))
+                                            (debugger/stopped)))]
+                 stop
+                 (when (pos? remaining)
+                   (Thread/sleep 5)
+                   (recur (dec remaining)))))]
+    (try
+      (is (= :occurrence-square-authoring (:phase stop)))
+      (debugger/continue! run-id :retry)
+      (is (= :validated (:status (deref running 2000 ::timeout))))
+      (is (= 2 @calls))
+      (finally
+        (when (some #(= run-id (:run-id %)) (debugger/stopped))
+          (debugger/continue! run-id :abort))
+        (debugger/detach!)))))
 
 (deftest live-handoffs-use-the-shared-boundary
   (let [source #(slurp (io/resource %))
