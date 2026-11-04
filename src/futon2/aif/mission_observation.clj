@@ -19,6 +19,18 @@
 (defn- qualified-wants [action]
   (mapv #(if (vector? %) % [(:target action) %]) (:want action)))
 
+(defn selected-wants-located?
+  "Whether every selected want has an observation authority for the census
+   performed by capture-before.  This is the structural admission half of
+   capture-before's measurement-missing refusal: token-authorities can only
+   produce a row for selected-action locators keyed by the qualified want."
+  [action]
+  (let [wants (qualified-wants action)
+        locators (:observation-locators action)]
+    (and (seq wants)
+         (map? locators)
+         (every? #(map? (get locators %)) wants))))
+
 (defn- canonical [path] (.getCanonicalPath (io/file path)))
 
 (defn- selected-dispatch [dispatch wants]
