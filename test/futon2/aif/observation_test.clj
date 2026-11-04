@@ -138,5 +138,5 @@
                                              (obs/observation-envelope
                                               (obs/observe {})))))
     (is (thrown? clojure.lang.ArityException
-                 (obs/sense->vector o))
+                 (apply obs/sense->vector [o]))
         "a new caller cannot obtain the vector without supplying an envelope")))

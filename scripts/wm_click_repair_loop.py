@@ -991,7 +991,11 @@ def kondo_errors(commits: list[tuple[Path, str]]) -> str:
                 files.add(str(p))
     if not files:
         return ""
-    r = sh("clj-kondo", "--lint", *sorted(files), timeout=600)
+    # This is a changed-file judgment, not a project analysis pass.  A project
+    # cache may hold dependency metadata from before a helper's arities changed
+    # and falsely reject a valid call in the touched file.  Read the current
+    # files and dependencies afresh for every repair judgment.
+    r = sh("clj-kondo", "--cache", "false", "--lint", *sorted(files), timeout=600)
     return r.stdout[-2000:] if r.returncode >= 3 else ""
 
 

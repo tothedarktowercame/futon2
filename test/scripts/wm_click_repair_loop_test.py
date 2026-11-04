@@ -22,6 +22,18 @@ def load_loop():
 
 
 class RepairLoopCastTest(unittest.TestCase):
+    def test_repair_kondo_judgment_does_not_use_stale_project_cache(self):
+        loop = load_loop()
+        with mock.patch.object(loop, "git", return_value="scripts/example.clj\n"), \
+             mock.patch.object(Path, "exists", return_value=True), \
+             mock.patch.object(loop, "sh",
+                               return_value=subprocess.CompletedProcess([], 0, "", "")) as run:
+            self.assertEqual("", loop.kondo_errors([(loop.F2, "abc123")]))
+        self.assertEqual(
+            ("clj-kondo", "--cache", "false", "--lint",
+             str(loop.F2 / "scripts/example.clj")),
+            run.call_args.args)
+
     def test_changed_identity_dependency_reloads_when_runner_is_unchanged(self):
         loop = load_loop()
         family = loop.F2 / "src/futon2/aif/wm/family_selection.clj"

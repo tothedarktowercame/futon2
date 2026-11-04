@@ -1,0 +1,10 @@
+{:exclude-files "test/(fixtures|resources)/"
+ :lint-as {clojure.test.check.clojure-test/defspec clojure.core/def
+           clojure.core.logic/fresh clojure.core/fn
+           clojure.core.logic/run* clojure.core/fn}
+ :config-in-ns
+ {futon2.aif.operational-witness
+  {:linters {:unresolved-symbol
+             {:exclude [pre post d c m n row witness-key]}}}
+  futon2.aif.wm.preregistration-test
+  {:linters {:unresolved-symbol {:exclude [path p _]}}}}}
