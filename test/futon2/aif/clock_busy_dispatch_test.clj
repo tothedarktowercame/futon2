@@ -41,6 +41,66 @@
     (with-redefs [http/post (fn [& _] (throw original))]
       (is (identical? original (try (dispatch) (catch Throwable t t)))))))
 
+(deftest charge-only-when-dispatch-created
+  ;; Planted regression, run 2026-11-04-880b97dd (repair wm-click-loop-repair-4b3fe5d5):
+  ;; a typed clock-store-busy refusal at :reviewer-dispatch charged a ration
+  ;; turn for a dispatch that was never created, and a debugger :retry would
+  ;; have charged a second turn for the one job that finally exists.
+  (let [turns (atom 0)
+        calls (atom 0)
+        opts {:agency-base "http://agency.invalid"}]
+    (with-redefs [http/post (fn [& _]
+                              (if (= 1 (swap! calls inc))
+                                (response 503 busy-body)
+                                (response 200 {:ok true :job-id "j1"})))]
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (#'runner/charge-dispatched-turn!
+                    opts turns "wm-reviewer" "wm-full-loop" "M-test" "ask")))
+      (is (= 0 @turns) "a not-created busy dispatch charges no turn")
+      (is (= {:ok true :job-id "j1"}
+             (#'runner/charge-dispatched-turn!
+              opts turns "wm-reviewer" "wm-full-loop" "M-test" "ask")))
+      (is (= 1 @turns) "the created dispatch charges exactly one turn")
+      (is (= 2 @calls)))))
+
+(deftest held-dispatch-phase-charges-one-turn-across-busy-and-retry
+  (let [calls (atom 0)
+        turns (atom 0)
+        events (atom [])
+        run-id "clock-busy-charge-test"
+        opts {:agency-base "http://agency.invalid"}
+        task (atom nil)]
+    (debugger/attach!)
+    (try
+      (binding [runner/*wm-status-reporting?* false]
+        (with-redefs [http/post (fn [& _]
+                                  (if (= 1 (swap! calls inc))
+                                    (response 503 busy-body)
+                                    (response 200 {:ok true :job-id "j1"})))]
+          (reset! task (future (runner/run-phase!
+                                {:run-id run-id :phase-log-fn #(swap! events conj %)}
+                                {} :reviewer-dispatch
+                                #(#'runner/charge-dispatched-turn!
+                                  opts turns "wm-reviewer" "wm-full-loop" "M-test" "ask"))))
+          (let [deadline (+ (System/nanoTime) 5000000000)
+                stop (loop []
+                       (or (first (filter #(= run-id (:run-id %)) (debugger/stopped)))
+                           (when (< (System/nanoTime) deadline)
+                             (Thread/sleep 10) (recur))))]
+            (is (some? stop))
+            (is (= :clock/store-busy (get-in stop [:ex-data :failure-kind])))
+            (is (= 0 @turns) "the held busy attempt charged no turn")
+            (when stop (debugger/continue! run-id :retry :fixed))
+            (is (= {:ok true :job-id "j1"} (deref @task 5000 ::timeout)))
+            (is (= 2 @calls))
+            (is (= 1 @turns) "one created dispatch across busy hold and retry")
+            (is (empty? (debugger/stopped))))))
+      (finally
+        (when (some #(= run-id (:run-id %)) (debugger/stopped))
+          (debugger/continue! run-id :abort :failed))
+        (when @task (future-cancel @task))
+        (debugger/detach!)))))
+
 (deftest held-phase-retains-refusal-and-retries-after-recovery
   (let [calls (atom 0)
         events (atom [])

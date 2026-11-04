@@ -2343,6 +2343,19 @@
       (flush))
     (vary-meta response assoc ::job-texts/dispatched-prompt prompt)))
 
+(defn- charge-dispatched-turn!
+  "Run one Agency dispatch and charge the ration only when the dispatch was
+   actually created. A typed :clock/store-busy refusal proves no job exists
+   (Agency refuses before job creation, R34), so a busy attempt must not
+   count as a dispatched turn, and a debugger :retry re-running the phase
+   thunk charges exactly once for the one job that finally exists. Run
+   2026-11-04-880b97dd charged a turn at :reviewer-dispatch for a dispatch
+   that was never created and would have charged again on :retry."
+  [opts dispatched-turns & args]
+  (let [response (apply (or (:dispatch-fn opts) dispatch!) opts args)]
+    (swap! dispatched-turns inc)
+    response))
+
 (defn cancel-job!
   "Cancel one Agency job through its single-finalizer endpoint. The Agency
    records cancelled/operator-cancelled before interrupting the process tree."
@@ -4521,9 +4534,9 @@
                     :returned (:value @dispatch-result)
                     :threw (throw (:throwable @dispatch-result))
                     (try
-                      (swap! dispatched-turns inc)
                       (let [response ((or (:dispatch-fn opts) dispatch!)
                                       opts author "wm-full-loop" target prompt)]
+                        (swap! dispatched-turns inc)
                         (reset! dispatch-result {:status :returned :value response})
                         response)
                       (catch Throwable t
@@ -4686,9 +4699,9 @@
                     :returned (:value @dispatch-result)
                     :threw (throw (:throwable @dispatch-result))
                     (try
-                      (swap! dispatched-turns inc)
                       (let [response ((or (:dispatch-fn opts) dispatch!)
                                       opts author "wm-full-loop" target prompt)]
+                        (swap! dispatched-turns inc)
                         (reset! dispatch-result {:status :returned :value response})
                         response)
                       (catch Throwable t
@@ -4865,9 +4878,9 @@
                     :returned (:value @dispatch-result)
                     :threw (throw (:throwable @dispatch-result))
                     (try
-                      (swap! dispatched-turns inc)
                       (let [response ((or (:dispatch-fn opts) dispatch!)
                                       opts reviewer "wm-full-loop" target prompt)]
+                        (swap! dispatched-turns inc)
                         (reset! dispatch-result
                                 {:status :returned :value response})
                         response)
@@ -5089,10 +5102,10 @@
                                       (io/file "cascade-revision"))
                :ask!
                (fn [prompt]
-                 (swap! dispatched-turns inc)
                  (let [response ((or (:dispatch-fn opts) dispatch!)
                                  opts author "wm-cascade-revision" target prompt)
-                       job ((or (:poll-fn opts) poll-job!) opts (:job-id response))]
+                       job (do (swap! dispatched-turns inc)
+                               ((or (:poll-fn opts) poll-job!) opts (:job-id response)))]
                    (when-not (= "done" (:state job))
                      (throw (ex-info "Cascade revision interpretation did not complete"
                                      {:outcome :incomplete
@@ -5144,15 +5157,13 @@
             revision-response
             (run-phase!
              opts phase-context :revision-dispatch
-             #(do
-                (swap! dispatched-turns inc)
-                ((or (:dispatch-fn opts) dispatch!) opts author
-                 "wm-full-loop" target
-                 (revision-author-prompt author reviewer
-                                         (:attempt-evidence-dir opts)
-                                         (:measured-acquisition? opts)
-                                         target effective-construction
-                                         prior-commits findings))))
+             #(charge-dispatched-turn! opts dispatched-turns author
+                "wm-full-loop" target
+                (revision-author-prompt author reviewer
+                                        (:attempt-evidence-dir opts)
+                                        (:measured-acquisition? opts)
+                                        target effective-construction
+                                        prior-commits findings)))
             revision-author-job
             (run-phase!
              opts phase-context :revision-wait
@@ -5222,11 +5233,9 @@
             re-review-response
             (run-phase!
              opts phase-context :re-review-dispatch
-             #(do
-                (swap! dispatched-turns inc)
-                ((or (:dispatch-fn opts) dispatch!) opts reviewer
-                 "wm-full-loop" target
-                 re-review-prompt-text)))
+             #(charge-dispatched-turn! opts dispatched-turns reviewer
+                "wm-full-loop" target
+                re-review-prompt-text))
             initial-re-review-job
             (run-phase!
              opts phase-context :re-review-wait
@@ -5236,9 +5245,8 @@
             (when retry-re-review?
               (run-phase!
                opts phase-context :re-review-retry-dispatch
-               #(do (swap! dispatched-turns inc)
-                    ((or (:dispatch-fn opts) dispatch!) opts reviewer
-                     "wm-full-loop" target re-review-prompt-text))))
+               #(charge-dispatched-turn! opts dispatched-turns reviewer
+                  "wm-full-loop" target re-review-prompt-text)))
             re-review-job
             (if retry-re-review?
               (run-phase! opts phase-context :re-review-retry-wait
@@ -5479,9 +5487,10 @@
                     "\nA task-satisfaction refusal is ordinary; if the apparatus itself is defective, "
                     "also return FULL_LOOP_APPARATUS_DEFECT: <specific reason>.\n")
         response (run-phase! opts phase-context :reviewer-dispatch
-                   #(do (charge!)
-                        ((or (:dispatch-fn opts) dispatch!) opts (:reviewer prompt-opts)
-                         "wm-full-loop" target prompt)))
+                   #(let [r ((or (:dispatch-fn opts) dispatch!) opts (:reviewer prompt-opts)
+                             "wm-full-loop" target prompt)]
+                      (charge!)
+                      r))
         job (run-phase! opts phase-context :reviewer-wait
               #((or (:poll-fn opts) poll-job!) opts (:job-id response)))
         _ (when-not (and (= "done" (:state job)) (= (:job-id response) (:job-id job)))
@@ -5639,10 +5648,8 @@
                                 (observe-repo-head opts (:repo artifact-binding)))
                 cure-response
                 (run-phase! opts phase-context :build-cure-dispatch
-                            #(do
-                               (swap! dispatched-turns inc)
-                               ((or (:dispatch-fn opts) dispatch!) opts author
-                                "wm-full-loop" target cure-prompt)))
+                            #(charge-dispatched-turn! opts dispatched-turns author
+                               "wm-full-loop" target cure-prompt))
                 cure-job-id (:job-id cure-response)
                 cure-job
                 (run-phase! opts phase-context :build-cure-wait
@@ -9411,11 +9418,9 @@
                                 :state "done"
                                 :deferred-completion? true
                                 :completes-attempt (:attempt-id stop-line)}
-                               (do
-                                 (swap! dispatched-turns inc)
-                                 ((or (:dispatch-fn opts) dispatch!) opts author
-                                  "wm-full-loop" target
-                                  author-prompt-text))))
+                               (charge-dispatched-turn! opts dispatched-turns author
+                                "wm-full-loop" target
+                                author-prompt-text)))
                 author-job-id (:job-id author-response)]
             (checkpoint! :dispatch
                          (term {:agent author
@@ -9473,11 +9478,9 @@
                   retry-response
                   (when retry-author?
                     (run-phase! opts @phase-context :author-retry-dispatch
-                                #(do
-                                   (swap! dispatched-turns inc)
-                                   ((or (:dispatch-fn opts) dispatch!)
-                                    opts author "wm-full-loop" target
-                                    retry-author-prompt-text))))
+                                #(charge-dispatched-turn! opts dispatched-turns author
+                                   "wm-full-loop" target
+                                   retry-author-prompt-text)))
                   retry-job
                   (when retry-author?
                     (run-phase! opts @phase-context :author-retry-wait
@@ -9625,11 +9628,9 @@
                           {:job-id (:job-id deferred-review-job)
                            :state "done" :deferred-completion? true
                            :completes-attempt (:attempt-id stop-line)}
-                          (do
-                            (swap! dispatched-turns inc)
-                            ((or (:dispatch-fn opts) dispatch!) opts reviewer
-                             "wm-full-loop" target
-                             reviewer-prompt-text))))
+                          (charge-dispatched-turn! opts dispatched-turns reviewer
+                           "wm-full-loop" target
+                           reviewer-prompt-text)))
                       initial-review-job
                       (if deferred-review-job
                         deferred-review-job
@@ -9656,9 +9657,8 @@
                       (when retry-review?
                         (run-phase!
                          opts @phase-context :reviewer-retry-dispatch
-                         #(do (swap! dispatched-turns inc)
-                              ((or (:dispatch-fn opts) dispatch!) opts reviewer
-                               "wm-full-loop" target reviewer-prompt-text))))
+                         #(charge-dispatched-turn! opts dispatched-turns reviewer
+                            "wm-full-loop" target reviewer-prompt-text)))
                       initial-effective-review-job
                       (if retry-review?
                         (run-phase! opts @phase-context :reviewer-retry-wait
@@ -9873,9 +9873,8 @@
                      (fn [prompt]
                        (run-phase!
                         opts @phase-context :standing-completion-dispatch
-                        #(do (swap! dispatched-turns inc)
-                             ((or (:dispatch-fn opts) dispatch!)
-                              opts reviewer "wm-full-loop" target prompt))))
+                        #(charge-dispatched-turn! opts dispatched-turns reviewer
+                           "wm-full-loop" target prompt)))
                      (fn [response]
                        (run-phase!
                        opts @phase-context :standing-completion-wait
