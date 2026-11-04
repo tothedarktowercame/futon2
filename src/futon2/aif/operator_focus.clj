@@ -257,7 +257,8 @@
         f (java.io.File/createTempFile "operator-focus-" ".md")
         clipped (mapv #(update % :text (fn [s] (subs (str s) 0 (min 600 (count (str s)))))) sent)
         _ (spit f (str resource "\n\nINPUT TURNS (JSON):\n" (json/generate-string clipped)))
-        r (shell/sh kimi-script "--seat" reader-seat "--caller" caller "--packet" (.getPath f)
+        r (shell/sh kimi-script "--from" caller "--to" reader-seat
+                    "--purpose" "read operator focus areas" (.getPath f)
                     :env (assoc (into {} (System/getenv)) "KIMI_TASK_REPO" (or task-repo (System/getProperty "user.dir"))))
         job (second (re-find #"job=([^ ]+)" (:out r)))]
     (if-not (and (zero? (:exit r)) job)
