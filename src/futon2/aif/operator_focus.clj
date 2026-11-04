@@ -61,6 +61,27 @@
                           :else {:status :voted :area (:area a) :evidence-ids (vec cited)})])))
     (catch Exception _ (into {} (map (fn [s] [s {:status :abstained :reason :reader-invalid-json}]) seats)))))
 
+(defn resolve-task [code-root target]
+  (some (fn [repo]
+          (some (fn [sub] (let [f (io/file repo sub (str target ".md"))]
+                            (when (.isFile f) {:target target :path (.getCanonicalPath f)
+                                               :text (str/join "\n" (take 20 (str/split-lines (slurp f))))})))
+                ["holes/missions" "holes/excursions" "holes/tickets" "holes"]))
+        (sort-by #(.getName %) (filter #(.isDirectory %) (or (.listFiles (io/file code-root)) [])))))
+
+(defn check-clock-reply [raw clock-inputs]
+  (try
+    (let [rows (:clock_answers (json/parse-string raw true)) by (group-by :target rows)
+          inputs (into {} (map (juxt :target identity)) clock-inputs)]
+      (into {} (for [[target input] inputs :let [a (first (get by target))
+                                                lines (str/split-lines (:text input)) line (:line a)]]
+                 [target (cond (not= 1 (count (get by target))) {:status :abstained :reason :reader-clock-answer-missing-or-duplicate}
+                               (not (or (area-vocabulary (:area a)) (str/starts-with? (str (:area a)) "other:"))) {:status :abstained :reason :reader-unknown-area}
+                               (or (not (int? line)) (< line 1) (> line (count lines)) (str/blank? (nth lines (dec line))))
+                               {:status :abstained :reason :reader-invalid-line-citation}
+                               :else {:status :voted :area (:area a) :line line})])))
+    (catch Exception _ {})))
+
 (defn- instant [x]
   (cond (instance? Instant x) x
         (number? x) (Instant/ofEpochMilli (long x))
@@ -249,14 +270,15 @@
   (let [m (edn/read-string (slurp path))]
     {:manifest m :result (:result m)}))
 
-(defn dispatch-reader! [sent {:keys [prompt-resource reader-seat caller kimi-script task-repo agency-base reader-timeout-ms]
+(defn dispatch-reader! [sent {:keys [prompt-resource reader-seat caller kimi-script task-repo agency-base reader-timeout-ms clock-inputs]
                               :or {reader-seat "zai-1" caller "operator-focus"
                                    kimi-script "/home/joe/code/futon3c/scripts/kimi-task.sh"
                                    agency-base "http://127.0.0.1:7070" reader-timeout-ms 600000}}]
   (let [resource (slurp (io/resource prompt-resource))
         f (java.io.File/createTempFile "operator-focus-" ".md")
         clipped (mapv #(update % :text (fn [s] (subs (str s) 0 (min 600 (count (str s)))))) sent)
-        _ (spit f (str resource "\n\nINPUT TURNS (JSON):\n" (json/generate-string clipped)))
+        _ (spit f (str resource "\n\nINPUT TURNS (JSON):\n" (json/generate-string clipped)
+                       "\n\nCLOCK TARGETS (JSON):\n" (json/generate-string clock-inputs)))
         r (shell/sh kimi-script "--from" caller "--to" reader-seat
                     "--purpose" "read operator focus areas" (.getPath f)
                     :env (assoc (into {} (System/getenv)) "KIMI_TASK_REPO" (or task-repo (System/getProperty "user.dir"))))
@@ -286,19 +308,26 @@
       (let [{:keys [rows sha256]} (load-area-corpus area-corpus-path)
             preliminary (focus-vote (:turns turn-read) rows (assoc opts :clocks (:clocks clock-read)))
             sent (reader-turns (:turns turn-read) (:seats preliminary))
+            clock-targets (->> (:clocks clock-read) (filter #(some #{(:seat %)} (:seats preliminary)))
+                               (map :target) distinct (remove rows))
+            resolved (keep #(resolve-task (or (:code-root opts) "/home/joe/code") %) clock-targets)
+            dispatch-opts (assoc opts :clock-inputs resolved)
             dispatch (if (:reader-raw-reply opts)
                        {:status :ok :seat (:reader-seat opts) :job-id (:reader-job-id opts)
                         :prompt-sha256 (identity/sha256 (slurp (io/resource (:prompt-resource opts))))}
-                       (dispatch-reader! sent opts))
+                       (dispatch-reader! sent dispatch-opts))
             raw (or (:reader-raw-reply opts) (:raw-reply dispatch))
             answers (when raw (check-reply raw sent (:seats preliminary)))
-            vote (focus-vote (:turns turn-read) rows (assoc opts :clocks (:clocks clock-read) :text-answers answers))
+            clock-answers (when raw (check-clock-reply raw resolved))
+            area-map (merge rows (into {} (keep (fn [[t a]] (when (= :voted (:status a)) [t (:area a)])) clock-answers)))
+            vote (focus-vote (:turns turn-read) area-map (assoc opts :clocks (:clocks clock-read) :text-answers answers))
             manifest-opts (assoc opts :clock-response-sha256
                                  (:response-sha256 clock-read)
                                  :reader {:sent-turns (mapv #(assoc (select-keys % [:evidence-id :seat])
                                                                    :body-sha256 (identity/sha256 (str (:text %)))) sent)
                                           :prompt-sha256 (:prompt-sha256 dispatch) :seat (:seat dispatch)
                                           :job-id (:job-id dispatch) :raw-reply-sha256 (when raw (identity/sha256 raw))
-                                          :parsed-answers answers})
+                                          :parsed-answers answers :clock-inputs (mapv #(dissoc % :text) resolved)
+                                          :parsed-clock-answers clock-answers})
             m (manifest (:turns turn-read) vote sha256 manifest-opts)]
         (if raw (merge {:status :ok :vote vote} (write-manifest! manifest-dir m)) dispatch))))))

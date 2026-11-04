@@ -88,3 +88,10 @@
         unknown-area (focus/check-reply "{\"answers\":[{\"seat\":\"a\",\"area\":\"bogus\",\"evidence_ids\":[\"e1\"]}]}" sent ["a"])]
     (is (= :reader-unknown-evidence-id (get-in unknown-id ["a" :reason])))
     (is (= :reader-unknown-area (get-in unknown-area ["a" :reason])))))
+
+(deftest unresolved-clock-reply-is-checked
+  (let [input [{:target "M-x" :text "# X\n\nUseful work"}]
+        good (focus/check-clock-reply "{\"clock_answers\":[{\"target\":\"M-x\",\"area\":\"Agency\",\"line\":3}]}" input)
+        bad (focus/check-clock-reply "{\"clock_answers\":[{\"target\":\"M-x\",\"area\":\"Agency\",\"line\":2}]}" input)]
+    (is (= "Agency" (get-in good ["M-x" :area])))
+    (is (= :reader-invalid-line-citation (get-in bad ["M-x" :reason])))))
