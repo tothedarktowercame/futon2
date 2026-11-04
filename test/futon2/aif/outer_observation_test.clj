@@ -70,6 +70,49 @@
                             :pass-output (update pass :order #(mapv (fn [row] (assoc row :dependency-reading {:record-pin {:sha256 (identity/sha256 (pr-str row))}})) %))})]
     (io/file (:dir result))))
 
+(defn requisition-fixture-run! []
+  (let [root (temp-dir)
+        rows (mapv (fn [id]
+                     (let [row {:id (keyword id) :status :ready :rank 1
+                                :unblocks 0 :cone 0}]
+                       (assoc row :dependency-reading
+                              {:record-pin {:sha256 (identity/sha256 (pr-str row))}})))
+                   ["E-requisition-in-progress" "E-requisition-completed" "E-ordinary"])
+        write-run! (actual-var 'futon3c.giraffe.run/write-run!)
+        result (write-run! {:root (.getPath root) :run-id "requisition-fixture-run"
+                            :git-sha "fixture"
+                            :adapter-result {:input {:as-of "2026-11-04" :items [] :edges []}
+                                             :rejected []}
+                            :pass-output {:as-of "2026-11-04" :order rows}})]
+    (io/file (:dir result))))
+
+(deftest requisition-records-are-typed-exclusions-before-scoring
+  (let [entry (fn [id path requisition]
+                {:id id :path path :source {:path path :sha256 "fixture-sha"}
+                 :status-class :open :requisition requisition})
+        entries [(entry "E-requisition-in-progress" "/fixture/in-progress.md"
+                        {:state :in-progress})
+                 (entry "E-requisition-completed" "/fixture/completed.md"
+                        {:state :completed})
+                 (entry "E-ordinary" "/fixture/ordinary.md"
+                        {:absent :no-requisition})]
+        authority {:loaded-missions {:missions []}
+                   :loaded-tickets {:tickets []}
+                   :loaded-excursions {:excursions entries}
+                   :ticket-targets []
+                   :excursion-targets (mapv :id entries)}
+        result (binding [observation/*resolve-var* actual-var]
+                 (observation/giraffe-field
+                  (requisition-fixture-run!) makeup authority))
+        excluded (into {} (map (juxt :target :reason))
+                       (:outer-field/excluded result))]
+    (is (= ["E-ordinary"] (mapv :target (:field result))))
+    (is (= :requisition/in-progress
+           (get excluded "E-requisition-in-progress")))
+    (is (= :requisition/completed
+           (get excluded "E-requisition-completed")))
+    (is (contains? (:facts result) "E-ordinary"))))
+
 (deftest verified-field-carries-open-facts
   (testing "closed items are excluded and Giraffe statuses remain distinct"
     (let [dir (fixture-run!)
