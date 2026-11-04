@@ -6,6 +6,7 @@
             [wm-run-facts :as facts]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.outer-menu :as outer-menu]
             [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-select :as outer-select]
@@ -25,6 +26,21 @@
 (def snap {:open-missions #{"M-x"} :open-excursions #{} :open-tickets #{}
            :patterns #{"p1" "p2"} :seats #{"author"}
            :pins {:test true}})
+
+(deftest fallback-snapshot-omits-requisitions-but-keeps-parent-tickets
+  (let [requisition {:id "E-requisition" :path "/fixture/E-requisition.md"
+                     :status-class :open :requisition-record? true
+                     :source {:path "/fixture/E-requisition.md" :sha256 "fixture"}}
+        parent-ticket {:id "T-parent-only" :path "/fixture/T-parent-only.md"
+                       :status-class :live :parent "E-parent"
+                       :requisition-record? false}
+        snapshot (with-redefs [mission-registry/load-missions (constantly {:missions []})
+                               mission-registry/load-excursions (constantly {:excursions [requisition]})
+                               mission-registry/load-tickets (constantly {:tickets [parent-ticket]})]
+                   (facts/snapshot {:code-root "/fixture"
+                                    :agency-json "/fixture/missing-agency.json"}))]
+    (is (= #{} (:open-excursions snapshot)))
+    (is (= #{"T-parent-only"} (:open-tickets snapshot)))))
 
 (def record
   {:decision {:selection-certificate

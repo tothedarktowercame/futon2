@@ -17,6 +17,7 @@
             [futon2.aif.policy-prefix-evidence :as policy-prefix-evidence]
             [futon2.aif.previous-run :as previous-run]
             [futon2.aif.selection-record :as selection-record]
+            [futon2.aif.task-requisition :as task-requisition]
             [futon2.aif.q4-preference :as q4]
             )
   (:import [java.nio.file Files]))
@@ -178,11 +179,14 @@
                   (catch Exception e
                     {:status :absent :reason :agency-roster-unreadable
                      :message (.getMessage e)}))]
-     {:open-missions (set (map :id (registry/open-missions missions)))
-      :open-excursions (set (map :id (filter registry/live-excursion?
-                                             (:excursions excursions))))
-      :open-tickets (set (map :id (filter registry/live-ticket?
-                                          (:tickets tickets))))
+     {:open-missions (set (map :id (remove task-requisition/requisition-record?
+                                          (registry/open-missions missions))))
+      :open-excursions (set (map :id (remove task-requisition/requisition-record?
+                                            (filter registry/live-excursion?
+                                                    (:excursions excursions)))))
+      :open-tickets (set (map :id (remove task-requisition/requisition-record?
+                                         (filter registry/live-ticket?
+                                                 (:tickets tickets)))))
       :patterns (set (map #(.getAbsolutePath ^java.io.File %) patterns))
       :seats (when-not (= :absent (:status roster))
                (set (map (comp name key) (:agents roster))))
