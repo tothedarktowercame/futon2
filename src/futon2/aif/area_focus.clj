@@ -4,6 +4,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
+            [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.operator-focus :as operator-focus])
   (:import [java.time Duration Instant]))
 
@@ -80,15 +81,16 @@
 
 (defn acquire-focus!
   "Reuse a <=60-minute retained manifest, otherwise perform one canonical read."
-  [{:keys [decision-as-of manifest-dir code-root] :as opts}]
+  [{:keys [decision-as-of manifest-dir code-root getenv-fn] :as opts}]
   (or (newest-retained (or manifest-dir default-manifest-dir) decision-as-of)
-      (let [root (or code-root (System/getenv "FUTON_CODE_ROOT"))
+      (let [root (or code-root ((or getenv-fn #(System/getenv %)) "FUTON_CODE_ROOT")
+                     mission-registry/default-code-root)
             pin (operator-focus/read-focus!
                  (merge {:as-of decision-as-of :manifest-dir (or manifest-dir default-manifest-dir)
                          :area-corpus-path (str root "/futon3c/holes/excursions/ant-reads")
                          :prompt-resource "wm/focus/operator-focus-reader-v1.md"
                          :code-root root :task-repo (str root "/futon2")}
-                        opts))]
+                        (dissoc opts :getenv-fn)))]
         (when (= :ok (:status pin))
           {:path (:path pin) :sha256 (:sha256 pin) :manifest (:manifest pin)
            :as-of (get-in pin [:manifest :as-of]) :age-minutes 0}))))

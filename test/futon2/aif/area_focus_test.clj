@@ -1,6 +1,8 @@
 (ns futon2.aif.area-focus-test
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.area-focus :as sut]
+            [futon2.aif.mission-registry :as mission-registry]
+            [futon2.aif.operator-focus :as operator-focus]
             [futon2.aif.selection-record :as selection-record]))
 
 (def rows {"direct" {:target "direct" :area "WM" :cite "p:1" :quote "q"}
@@ -43,3 +45,13 @@
                                               {:focus/source {:manifest pin}} {:status :selected})]
     (is (= pin (get-in (selection-record/read-reference ref)
                        [:outer/selection :focus/source :manifest])))))
+
+(deftest acquire-focus-defaults-to-canonical-code-root
+  (let [d (.toFile (java.nio.file.Files/createTempDirectory "no-focus" (make-array java.nio.file.attribute.FileAttribute 0)))
+        seen (atom nil)]
+    (with-redefs [operator-focus/read-focus! (fn [opts] (reset! seen opts) {:status :absent})]
+      (is (nil? (sut/acquire-focus! {:decision-as-of "2026-11-04T00:00:00Z"
+                                     :manifest-dir d :code-root nil :getenv-fn (constantly nil)}))))
+    (is (= (str mission-registry/default-code-root "/futon3c/holes/excursions/ant-reads")
+           (:area-corpus-path @seen)))
+    (is (= (str mission-registry/default-code-root "/futon2") (:task-repo @seen)))))

@@ -1477,7 +1477,8 @@
                          {:decision-as-of decision-as-of
                           :manifest-dir (or (:operator-focus/manifest-dir opts)
                                             (str (data-paths/path "wm-runs")))
-                          :code-root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT"))})
+                          :code-root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")
+                                         mission-registry/default-code-root)})
               observation (outer-observation/outer-observation
                            {:run-dir giraffe-dir
                             :makeup makeup

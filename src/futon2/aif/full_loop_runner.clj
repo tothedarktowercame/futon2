@@ -2536,6 +2536,17 @@
        (:relation-key (area-focus/classify-target (:rows corpus) (:sha256 corpus)
                                                   manifest (:sha256 pin) target))))))
 
+(defn pinned-ask-focus-context
+  "Load the exact focus manifest already pinned by this click's selection."
+  [selection-evidence]
+  (when-let [pin (get-in selection-evidence [:focus/source :manifest])]
+    (let [loaded (area-focus/verify-pin pin)]
+      {:focus-pin (if (:deferred loaded)
+                    {:manifest {:result {:status :absent :reason :focus-source-changed}}
+                     :sha256 (:sha256 pin) :path (:path pin)}
+                    loaded)
+       :area-corpus (area-focus/load-corpus)})))
+
 (defn- interpretation-needed-refusals
   "Ask inputs in refusal order, or the selected outer target's declared wants.
   The ask producer determines which wants lack interpretations; the runner
@@ -8509,7 +8520,9 @@
               (interpretable-refusal
                (:decision judgement0-squares)
                (or (:interpretation-ask-classify-fn opts)
-                   (interpretation-ask-classifier))))
+                   (interpretation-ask-classifier
+                    (pinned-ask-focus-context
+                     @(:selection-record/evidence opts))))))
             interpretation-ask-record
             (cond
               ;; every refused target classifies :unknown: no ask — the
