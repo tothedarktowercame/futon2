@@ -67,7 +67,7 @@ class DebuggerAttachTest(unittest.TestCase):
                 {"rc": 0, "out": "{:value []}", "err": ""},
                 {"rc": 0, "out": "{:value []}", "err": ""}],
             "(futon2.aif.wm.debugger/attached?)": [
-                {"rc": 0, "out": "{:value false}", "err": ""},
+                {"rc": 0, "out": "{:ok true, :value false}", "err": ""},
                 {"rc": 0, "out": "{:value true}", "err": ""}],
             "(futon2.aif.wm.debugger/attach!)": {"rc": 0, "out": "{:value :attached}", "err": ""}})
         self.assertEqual((0, 1), (rc, fires))
@@ -77,7 +77,7 @@ class DebuggerAttachTest(unittest.TestCase):
     def test_attach_does_not_take_stops_without_fire(self):
         rc, fires, _, rows = self.run_case({
             "(futon2.aif.wm.debugger/stopped)": {"rc": 0, "out": "{:value []}", "err": ""},
-            "(futon2.aif.wm.debugger/attached?)": {"rc": 0, "out": "{:value false}", "err": ""},
+            "(futon2.aif.wm.debugger/attached?)": {"rc": 0, "out": "{:ok true, :value false}", "err": ""},
             "(futon2.aif.wm.debugger/attach!)": {"rc": 0, "out": "{:value nil}", "err": ""}})
         self.assertEqual((1, 0), (rc, fires))
         self.assertTrue(any(row.get("kind") == "debugger-not-attached" for row in rows))

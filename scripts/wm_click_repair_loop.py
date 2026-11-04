@@ -734,7 +734,7 @@ def debugger_stop(run_id: str | None = None) -> dict | None:
 
 def debugger_attached() -> bool:
     r = jvm_eval("(futon2.aif.wm.debugger/attached?)", timeout=30)
-    return r["rc"] == 0 and bool(re.search(r":value\s+true\b|\btrue\b", r["out"]))
+    return r["rc"] == 0 and bool(re.search(r":value\s+true\b", r["out"]))
 
 
 def attach_debugger() -> dict:
