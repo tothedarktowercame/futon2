@@ -1845,8 +1845,8 @@
       (is (not (re-find #":wm/target-standing-decision-v1" prompt))))
     (doseq [prompt [reviewer revision-reviewer]]
       (is (re-find #":wm/target-standing-decision-v1" prompt))
-      (is (re-find #":explanation \"<review-grade prose, at least 80 characters>\"}   ; top level" prompt))
-      (is (re-find #"a self-decided record refuses" prompt))
+      (is (re-find #":explanation-min-characters 80" prompt))
+      (is (re-find #":decider-differs-from-author true" prompt))
       (is (not (re-find #":wm/limb-receipt-v1" prompt))))))
 
 (deftest author-contract-binds-work-to-the-observed-target-repository
