@@ -1175,6 +1175,34 @@
        :input-digest (or input-digest
                          {:status :absent :reason :previous-input-digest-unretained})})))
 
+(defn- chosen-class-narrative
+  "Keep the selected class and the stopping comparison in narrative carriers.
+   :why and :argument retain population explanations, but Q7 follows only the
+   enacted class.  The stopping row is the selected class's comparator, not a
+   rejected execution alternative."
+  [selection]
+  (let [chosen-class (:chosen-class selection)
+        chosen-cascade (:cascade-id selection)]
+    (-> selection
+        (update :why
+                (fn [why]
+                  (if (map? why)
+                    (update why :classes
+                            (fn [classes]
+                              (when (some? classes)
+                                (vec (filter #(= chosen-class (:class %)) classes)))))
+                    why)))
+        (update :argument
+                (fn [argument]
+                  (if (map? argument)
+                    (update argument :arguments
+                            (fn [arguments]
+                              (when (some? arguments)
+                                (vec (filter #(or (= chosen-cascade (:id %))
+                                                  (= :stopping (:id %)))
+                                             arguments)))))
+                    argument))))))
+
 (defn selection-absence-paths
   "Q7's rule on the selection path.  The field exclusions and knowledge requests
   are population-wide evidence about alternatives, as the work path's rejected
@@ -1195,6 +1223,7 @@
         ;; the section's own carriers (construction, abstention, previous,
         ;; forbidden, learning, prediction, receipt).
         on-path (-> selection
+                    chosen-class-narrative
                     (dissoc :outer-field/excluded :outer-score/excluded :knowledge-producer-requests
                             :field-facts :cascades :classes :cascade-picks :cascade-pick-relations
                             :cascade-scores :tied-cascades)

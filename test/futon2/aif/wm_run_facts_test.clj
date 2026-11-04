@@ -929,6 +929,43 @@
         (is (= (inc base) (count-of (plant pick))) "an absence on the chosen pick's fact counts"))
       (is (< base 50) "the live 11-01 section's path count is small, not the whole field"))))
 
+(deftest selection-path-narratives-count-only-the-chosen-class
+  (let [rejected-placement {:status :absent :reason :no-placement}
+        chosen-placement {:status :open :ways ["backlog-understood"]}
+        selection {:cascade-id :serves-a-way
+                   :chosen-class "chosen-class-hash"
+                   :why {:header "all classes were compared"
+                         :classes [{:class "rejected-class-hash"
+                                    :pick "M-peradam-grounding"
+                                    :placement rejected-placement}
+                                   {:class "chosen-class-hash"
+                                    :pick "M-typed-holes-mathlib-handoff"
+                                    :placement chosen-placement}]}
+                   :argument {:header "retained argument"
+                              :arguments [{:id :giraffe-order
+                                           :facts {:placement rejected-placement}}
+                                          {:id :serves-a-way
+                                           :facts {:placement chosen-placement}}
+                                          {:id :stopping :facts {}}]}}
+        record {:outer/selection selection}
+        paths (facts/selection-absence-paths record)]
+    (is (= [] paths)
+        "the 25c81574 rejected class's missing placement is population evidence, not Q7's path")))
+
+(deftest selection-path-narratives-still-count-the-chosen-class
+  (let [absent {:status :absent :reason :no-placement}
+        record {:outer/selection
+                {:cascade-id :serves-a-way
+                 :chosen-class "chosen-class-hash"
+                 :why {:classes [{:class "chosen-class-hash" :placement absent}]}
+                 :argument {:arguments [{:id :serves-a-way
+                                         :facts {:placement absent}}
+                                        {:id :stopping :facts {}}]}}}
+        paths (set (facts/selection-absence-paths record))]
+    (is (contains? paths [:outer/selection :why :classes 0 :placement]))
+    (is (contains? paths [:outer/selection :argument :arguments 0 :facts :placement]))
+    (is (= 2 (count paths)) "both retained narratives still expose the chosen placement absence")))
+
 (deftest predecessor-refusal-detail-is-not-on-the-current-selection-path
   (let [record (edn/read-string (slurp click-1-selection-record))
         export (facts/selection-facts-for-record record click-1-selection-record snap {})
