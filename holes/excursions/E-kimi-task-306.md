@@ -1,6 +1,6 @@
 # E-kimi-task-306 — relate: area readings for the 5 admitted formerly hand-rowed targets (A7)
 
-**Requisition:** in-progress — dispatched 2026-11-04T04:06:48Z to zai-2 as invoke-1793765208225-11797-89c964c4
+**Requisition:** completed — 2026-11-04T04:07:41Z, job invoke-1793765208225-11797-89c964c4, state done
 
 Clocked in by claude-6 for zai-2 on 2026-11-04 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
