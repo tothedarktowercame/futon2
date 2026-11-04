@@ -51,6 +51,8 @@ class SelfHealStopTest(unittest.TestCase):
     def run_with(self, clicks):
         with (mock.patch.object(self.loop, "jvm_start_epoch", return_value=0),
               mock.patch.object(self.loop, "reload_when_idle", return_value=(True, "", 0)),
+              mock.patch.object(self.loop, "debugger_stops", return_value=[]),
+              mock.patch.object(self.loop, "debugger_attached", return_value=True),
               mock.patch.object(self.loop, "fire", side_effect=clicks) as fire,
               mock.patch.object(self.loop, "notify")):
             rc = self.loop.run(self.args)

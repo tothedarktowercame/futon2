@@ -706,7 +706,7 @@ def notify_alert(args, c: dict) -> None:
     log(f"alert belled to {args.owner}: {r.stdout.strip()[-200:]}")
 
 
-def debugger_stop(run_id: str | None = None) -> dict | None:
+def debugger_stops() -> list[dict]:
     """Read the serving debugger, not the click's coarse public phase.
 
     The value is deliberately reduced to identifiers safe for the loop.  The
@@ -718,13 +718,27 @@ def debugger_stop(run_id: str | None = None) -> dict | None:
     ids = re.findall(r':run-id\s+"([^"]+)"', r["out"])
     phases = re.findall(r':phase\s+:([\w.-]+)', r["out"])
     kinds = re.findall(r':condition\s+\{:kind\s+:([\w./-]+)', r["out"])
-    for i, rid in enumerate(ids):
-        if run_id is None or rid == run_id:
-            return {"run-id": rid,
-                    "phase": phases[i] if i < len(phases) else "unknown",
-                    "condition-kind": kinds[i] if i < len(kinds) else "unknown",
-                    "raw": r["out"]}
+    return [{"run-id": rid,
+             "phase": phases[i] if i < len(phases) else "unknown",
+             "condition-kind": kinds[i] if i < len(kinds) else "unknown",
+             "raw": r["out"]}
+            for i, rid in enumerate(ids)]
+
+
+def debugger_stop(run_id: str | None = None) -> dict | None:
+    for stop in debugger_stops():
+        if run_id is None or stop["run-id"] == run_id:
+            return stop
     return None
+
+
+def debugger_attached() -> bool:
+    r = jvm_eval("(futon2.aif.wm.debugger/attached?)", timeout=30)
+    return r["rc"] == 0 and bool(re.search(r":value\s+true\b|\btrue\b", r["out"]))
+
+
+def attach_debugger() -> dict:
+    return jvm_eval("(futon2.aif.wm.debugger/attach!)", timeout=30)
 
 
 def retry_held_run(run_id: str) -> dict:
@@ -1222,6 +1236,37 @@ def run(args) -> int:
             ok, text, since = reload_when_idle(since)
             if not ok:
                 return stop(args, f"paused: a namespace committed since the last click will not load: {text[:300]}", 1)
+        stops = debugger_stops()
+        if len(stops) > 1:
+            reason = (f"self-heal-debugger-frames-stacked: {len(stops)} debugger stops; "
+                      "no click fired")
+            record({"event": "stop", "kind": "self-heal-debugger-frames-stacked",
+                    "stop-count": len(stops),
+                    "run-ids": [held["run-id"] for held in stops]})
+            return stop(args, reason, 1)
+        if len(stops) == 1:
+            held = stops[0]
+            record({"event": "debugger-held", **{key: held[key] for key in
+                    ("run-id", "phase", "condition-kind")}})
+            live_page = DEBUGGER / f"held-{held['run-id']}.md"
+            DEBUGGER.mkdir(parents=True, exist_ok=True)
+            live_page.write_text("# Live held phase\n\n" + held["raw"] + "\n")
+            since = handle_held_stop(args, held, [], live_page, since)
+            continue
+        attached = debugger_attached()
+        if not attached:
+            result = attach_debugger()
+            record({"event": "debugger-attached", "click-number": spent + 1,
+                    "result": result.get("out", "")[-500:]})
+        attached = debugger_attached()
+        stops_after_attach = debugger_stops()
+        if not attached or stops_after_attach:
+            reason = ("debugger-not-attached: verification failed "
+                      f"(attached={attached}, stops={len(stops_after_attach)}); no click fired")
+            record({"event": "stop", "kind": "debugger-not-attached",
+                    "attached": attached, "stop-count": len(stops_after_attach)})
+            return stop(args, reason, 1)
+        log(f"click {spent + 1}: debugger attached={attached}")
         c = fire(spent + 1, args, since)
         since = c.pop("since-epoch")
         spent += 1 if c["spent"] else 0
