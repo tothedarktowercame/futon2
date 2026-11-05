@@ -6954,10 +6954,9 @@
           (is (= :current (:runner/source-check result)))
           (swap! core-ran inc)
           (is (= 1 @core-ran))
-          (is (str/includes?
-               (get-in @load-identity/registry
-                       ['futon2.aif.full-loop-runner :source-url])
-               "/b1-ticket-readiness/")))))
+          (is (= (str (io/resource "futon2/aif/full_loop_runner.clj"))
+                 (get-in @load-identity/registry
+                         ['futon2.aif.full-loop-runner :source-url]))))))
     (spit runner (str (slurp runner) "\n;; isolated runner drift\n"))
     (with-redefs-fn fixture
       (fn []
