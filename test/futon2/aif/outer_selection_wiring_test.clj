@@ -20,6 +20,7 @@
             [futon2.aif.outer-select-test :as fixtures]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.effective-run-history :as effective-run-history]
+            [futon2.aif.wm.debugger :as debugger]
             [futon2.aif.outer-state :as outer-state]
             [futon2.test-support.runner-fixture :as runner-fixture]))
 
@@ -217,6 +218,17 @@
     (is (nil? (get-in missing-field [:evidence :scoredField])))
     (is (= :debugger-error (:disposition nil-field)))))
 
+(defn- supervisor-predicate
+  "Run the supervisor's own bb predicate (read from
+  scripts/wm_click_repair_loop.py, not a copy) on PATH."
+  [constant path]
+  (let [form (:out (shell/sh "python3" "-c"
+                             (str "import sys; sys.path.insert(0, 'scripts'); "
+                                  "import wm_click_repair_loop as m; "
+                                  "sys.stdout.write(m." constant ")")))]
+    (assert (seq form) (str constant " not readable from the supervisor"))
+    (shell/sh "bb" "-e" form path)))
+
 (deftest legal-terminal-exclusions-make-work-exhaustion-reachable
   ;; RefusalLegality.legal_terminals_bounded: once every member of the scored
   ;; field has a recorded legal-terminal exclusion, selection reaches L1.
@@ -244,11 +256,8 @@
         retained (:outer/selection result)
         record-path (get-in result [:selection-record :path])
         record (edn/read-string (slurp record-path))
-        supervisor-check
-        (shell/sh
-         "bb" "-e"
-         "(let [r (clojure.edn/read-string {:default tagged-literal} (slurp (first *command-line-args*))) a (get-in r [:outer/selection :outer-field/admitted] ::missing)] (println (boolean (and (map? r) (or (= :no-task-selected (:absent r)) (= :abstained (get-in r [:selection-outcome :status]))) (vector? a) (empty? a)))))"
-         record-path)]
+        supervisor-check (supervisor-predicate "_WORK_EXHAUSTED_EDN" record-path)
+        supervisor-claim (supervisor-predicate "_CLAIMS_WORK_EXHAUSTED_EDN" record-path)]
     (is (= :no-task-selected (:absent result)))
     (is (= [] (:outer-field/admitted retained)))
     (is (= #{"M-ready" "M-unknown"}
@@ -261,7 +270,30 @@
     (is (= :loop-stop
            (get-in record [:outer/selection :refusal/disposition :disposition])))
     (is (= 0 (:exit supervisor-check)))
-    (is (= "true\n" (:out supervisor-check)))))
+    (is (= "true\n" (:out supervisor-check)))
+    (is (= "true\n" (:out supervisor-claim)))))
+
+(deftest legal-empty-field-does-not-hold-an-attached-debugger
+  (let [awaited (atom 0)
+        sha "fixture-sha"
+        digest (identity/digest {:mission-source-sha256 sha})
+        rows (mapv (fn [target]
+                     {:c1-exclusion {:status :row
+                                     :row {:target target :evidence-digest digest
+                                           :run-id (str "satisfied-" target)}}})
+                   ["M-ready" "M-unknown"])
+        result (call-ordinary
+                {:decision-as-of "2026-10-28T12:00:00Z"}
+                {#'outer-observation/outer-observation
+                 (fn [_]
+                   (assoc fixtures/base-observation
+                          :mission-source-sha256-by-target {"M-ready" sha "M-unknown" sha}
+                          :giraffe/run-id "fixture-missions-run"))
+                 #'effective-run-history/index-rows (fn [_] rows)
+                 #'debugger/attached? (constantly true)
+                 #'debugger/await-restart! (fn [& _] (swap! awaited inc) {:action :abort})})]
+    (is (zero? @awaited))
+    (is (= :loop-stop (get-in result [:refusal/disposition :disposition])))))
 
 (deftest defect-exclusion-does-not-become-work-exhaustion
   (let [sha "fixture-sha"
