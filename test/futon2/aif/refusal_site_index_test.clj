@@ -39,5 +39,10 @@
                                              #(= "scripts/wm_click_repair_loop.py"
                                                  (:source %))
                                              sites)))]
-                          (filterv #(not= id (:id %)) sites))))]
-    (is (not= (python-stop-call-count) (indexed-python-stop-count index)))))
+                          (filterv #(not= id (:id %)) sites))))
+        result (sut/audit-index repo index)]
+    (is (not= (python-stop-call-count) (indexed-python-stop-count index)))
+    (is (= :refused (:status result)))
+    (is (some #(= :python-stop-coverage-mismatch (:reason %))
+              (:problems result))
+        (pr-str (:problems result)))))

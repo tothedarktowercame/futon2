@@ -1,0 +1,206 @@
+{:schema :wm/refusal-site-index-v1
+ :sites
+ [{:id :selection-empty-field
+   :source "src/futon2/aif/full_loop_runtime.clj"
+   :anchor "{:status :abstained :case :empty-field}"
+   :kinds [:empty-field] :case :L1
+   :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
+   :evidence {:scoredField :present :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :derivable}}
+  {:id :selection-refusal-terminal
+   :source "src/futon2/aif/full_loop_runner.clj"
+   :anchor "(defn- judge-refusal-abstention"
+   :kinds [:abstained] :case :debugger-error
+   :evidence {:scoredField :derivable :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :derivable}}
+  {:id :phase-result-terminal
+   :source "src/futon2/aif/full_loop_runner.clj" :anchor "(defn run-phase!"
+   :kinds [:build-failed]
+   :case :debugger-error
+   :evidence {:scoredField :derivable :operatorSignal :derivable
+              :satisfactionMeasured :derivable :ambiguityCited :derivable
+              :questionInBrief :derivable :harmRuleMatched :derivable
+              :exclusionRecorded :derivable}}
+  {:id :phase-breakpoint-operator-abort
+   :source "src/futon2/aif/full_loop_runner.clj"
+   :anchor "War Machine run aborted by the operator at a breakpoint"
+   :kinds [:debugger/aborted] :case :L2
+   :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
+   :evidence {:scoredField :absent :operatorSignal :present
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :agency-job-cancelled
+   :source "src/futon2/aif/full_loop_runner.clj" :anchor "(defn throw-if-cancelled!"
+   :kinds [:operator-cancelled] :case :L2
+   :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
+   :evidence {:scoredField :absent :operatorSignal :derivable
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :author-already-satisfied
+   :source "src/futon2/aif/full_loop_runner.clj"
+   :anchor "{:outcome :already-satisfied :grounded-commit grounded-commit}"
+   :kinds [:already-satisfied] :case :C1
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :author-guardrail-refusal
+   :source "src/futon2/aif/full_loop_runner.clj"
+   :anchor "{:outcome :guardrail-refusal :refusal-reason reason}"
+   :kinds [:guardrail-refusal] :case :C3
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :author-invalid-refusal
+   :source "src/futon2/aif/full_loop_runner.clj"
+   :anchor ":else {:outcome :invalid-author-refusal}"
+   :kinds [:invalid-author-refusal] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :author-unmeasured-satisfaction
+   :source "src/futon2/aif/full_loop_runner.clj"
+   :anchor "Unmeasured already-satisfied claim refused after one correction round"
+   :kinds [:already-satisfied-wants-unmeasured] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :derivable
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :author-correction-refused
+   :source "src/futon2/aif/full_loop_runner.clj"
+   :anchor "(defn- unmeasured-claim-correction-failure!"
+   :kinds [:unmeasured-claim-correction-refused] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :derivable
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :duplicate-effective-run
+   :source "src/futon2/aif/effective_run_history.clj" :anchor "(defn require-novel!"
+   :kinds [:outer/duplicate-effective-run] :case :C1
+   :evidence {:scoredField :derivable :operatorSignal :absent
+              :satisfactionMeasured :derivable :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :present}}
+  {:id :reading-refusal-reselection-exhausted
+   :source "src/futon2/aif/full_loop_runtime.clj" :anchor "(defn reading-reselection-port"
+   :kinds [:reader-refusal] :case :debugger-error
+   :evidence {:scoredField :derivable :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :derivable
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :open-cascade-author-answer
+   :source "src/futon2/aif/full_loop_runtime.clj"
+   :anchor ":open-cascade-author-answer-invalid)"
+   :kinds [:open-cascade-author-answer-invalid] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :derivable
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :open-cascade-review-answer
+   :source "src/futon2/aif/full_loop_runtime.clj"
+   :anchor ":kind :open-cascade-review-answer-invalid"
+   :kinds [:open-cascade-review-answer-invalid :open-cascade-review-refused]
+   :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :derivable
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :close-dynamic-outcome
+   :source "src/futon2/aif/full_loop_runner.clj" :anchor "close-core! (fn [outcome data]"
+   :kinds [:build-failed] :case :debugger-error
+   :evidence {:scoredField :derivable :operatorSignal :derivable
+              :satisfactionMeasured :derivable :ambiguityCited :derivable
+              :questionInBrief :derivable :harmRuleMatched :derivable
+              :exclusionRecorded :derivable}}
+  {:id :close-fallback
+   :source "src/futon2/aif/full_loop_runner.clj" :anchor "close! (fn [outcome data]"
+   :kinds [:close-exception] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :terminal-route-missing
+   :source "src/futon2/aif/full_loop_runner.clj"
+   :anchor "Terminal result has no recordable route"
+   :kinds [:terminal-route-missing] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent
+              :satisfactionMeasured :absent :ambiguityCited :absent
+              :questionInBrief :absent :harmRuleMatched :absent
+              :exclusionRecorded :absent}}
+  {:id :outer-run-catch
+   :source "src/futon2/aif/full_loop_runner.clj" :anchor "(close! (outcome-from e)"
+   :kinds [:build-failed] :case :debugger-error
+   :evidence {:scoredField :derivable :operatorSignal :derivable
+              :satisfactionMeasured :derivable :ambiguityCited :derivable
+              :questionInBrief :derivable :harmRuleMatched :derivable
+              :exclusionRecorded :derivable}}
+
+  {:id :loop-reload-repair-exhausted :source "scripts/wm_click_repair_loop.py"
+   :anchor "reload still failing after {len(fault_repairs)} repairs" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-reload-repair-refused :source "scripts/wm_click_repair_loop.py"
+   :anchor "reload failing and the repair seat answered" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-stop-file :source "scripts/wm_click_repair_loop.py"
+   :anchor "if STOP_FILE.exists():" :kinds [:supervisor-reason] :case :L2
+   :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
+   :evidence {:scoredField :absent :operatorSignal :present :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-reload-commit-pause :source "scripts/wm_click_repair_loop.py"
+   :anchor "a namespace committed since the last click will not load" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-debugger-frames :source "scripts/wm_click_repair_loop.py"
+   :anchor "self-heal-debugger-frames-stacked:" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-debugger-detached :source "scripts/wm_click_repair_loop.py"
+   :anchor "debugger-not-attached: verification failed" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-self-heal-failed :source "scripts/wm_click_repair_loop.py"
+   :anchor "machine-self-heal-failed: click" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-preflight-refused :source "scripts/wm_click_repair_loop.py"
+   :anchor "c[\"outcome\"] == \"preflight-refused\"" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-launch-failed :source "scripts/wm_click_repair_loop.py"
+   :anchor "launch_failure_text(c.get(\"log\"))" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-repeated-requirements :source "scripts/wm_click_repair_loop.py"
+   :anchor "the same requirements failed on two consecutive clicks" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-repeated-empty-policy-field :source "scripts/wm_click_repair_loop.py"
+   :anchor "on an unchanged field no compared policy's G is below" :kinds [:supervisor-reason] :case :L1
+   :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
+   :evidence {:scoredField :derivable :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :derivable}}
+  {:id :loop-stall-wall :source "scripts/wm_click_repair_loop.py"
+   :anchor "clicks in a row carried no tick without failing" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-repair-budget-exhausted :source "scripts/wm_click_repair_loop.py"
+   :anchor "repairs did not produce a carrying click or move" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-repair-seat-refused :source "scripts/wm_click_repair_loop.py"
+   :anchor "return stop(args, f\"repair seat answered {verdict}:" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-reload-budget-exhausted :source "scripts/wm_click_repair_loop.py"
+   :anchor "reload failing after repairs:" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-reload-seat-refused :source "scripts/wm_click_repair_loop.py"
+   :anchor "reload failing; repair seat answered" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-run-budget-complete :source "scripts/wm_click_repair_loop.py"
+   :anchor "done: {spent} clicks spent" :kinds [:supervisor-reason] :case :L2
+   :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
+   :evidence {:scoredField :absent :operatorSignal :derivable :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-crash :source "scripts/wm_click_repair_loop.py"
+   :anchor "loop crashed: {type(e).__name__}" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :legacy-loop-stop-file :source "scripts/wm_click_loop.sh"
+   :anchor "click-loop STOPPED by stop-file" :kinds [:supervisor-reason] :case :L2
+   :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
+   :evidence {:scoredField :absent :operatorSignal :present :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}]}
