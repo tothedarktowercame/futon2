@@ -354,6 +354,20 @@ records and notifies, and validates nothing).
    refusal outcome is accepted. When the disposition is a debugger error, the
    attached debugger holds. Evidence fields come from the click's carriers;
    none are inferred from the keyword.
+   *Progress (2026-11-05):*
+   - The pure predicates landed as `69709aeb7` and `7c1a4ed59`.
+   - The scored-field carrier `retained-scored-field` landed as `9838e584b` and
+     `883171553`. It returns `:outer-field/admitted` minus this click's
+     reading refusals, as `ReadingRefusalReselection.reducedField` does. A
+     missing carrier is nil, not `[]`, so L1 cannot pass without it.
+   - Holding at `close-core!` does not work, because `close!` catches every
+     throwable. The hold therefore moves to the start of `close!`, before
+     anything is persisted, and calls `debugger/await-restart!` at
+     `:close-refusal`. This is REFUSAL-VALIDATOR-1c, which is in progress.
+   2a. **REFUSAL-VALIDATOR-OUTER.** The outer selector's own empty-field
+   abstention never reaches runner `close!`. It returns `{:absent
+   :no-task-selected}` directly (`full_loop_runtime.clj:1702-1707`), and the
+   scored field is in hand there. That is a separate validation site.
 3. **REFUSAL-VALIDATOR-2 (supervisor).** `stop()` takes a typed case.
    - L2 needs the STOP file or the CLI budget.
    - L1 needs the run record's scored field.
