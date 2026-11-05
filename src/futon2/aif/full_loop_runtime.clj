@@ -1453,7 +1453,9 @@
   (if-let [pending (:pending state)]
     (let [ending (pending-run-ending opts (:run-id pending))]
       (if-not (= :ready (:status ending))
-        {:status :deferred :state state :reason (:reason ending)}
+        (merge {:status :deferred :state state :reason (:reason ending)}
+               (select-keys ending [:run-id :classification-absence
+                                    :classification-provenance]))
         (if-let [previous (binding [*placement-replay-opts* opts]
                             (previous-giraffe-observation current-dir makeup pending))]
           (if-let [reason (:deferred previous)]
@@ -1622,7 +1624,10 @@
               observation (placement-adapter/annotate observation placements)
               learning (resolve-pending-learning opts makeup state giraffe-dir observation)
               _ (swap! (:selection-record/evidence opts) assoc :outer/learning
-                       (select-keys learning [:status :reason :ending-class :observed-gain :receipt]))
+                       (select-keys learning [:status :reason :run-id
+                                              :classification-absence
+                                              :classification-provenance
+                                              :ending-class :observed-gain :receipt]))
               state (:state learning)
               ;; Pre-selection duplicate view (DUPLICATE-TARGET-STILL-SELECTED):
               ;; the same index rows the post-construction guard reads, given
@@ -1699,7 +1704,9 @@
                                      ;; (click 5 of 2026-11-01: Q7 unverifiable).
                                      (assoc :outer/learning
                                             (select-keys learning
-                                                         [:status :reason :ending-class
+                                                         [:status :reason :run-id
+                                                          :classification-absence
+                                                          :classification-provenance :ending-class
                                                           :observed-gain :receipt]))
                                      (cond-> (:selection/q6 opts)
                                        (assoc :q6 (:selection/q6 opts))))

@@ -50,6 +50,9 @@
                      {} makeup before nil observation))]
     (is (= :deferred (:status resolved)))
     (is (= :terminal-ending-class-absent (:reason resolved)))
+    (is (= run-id (:run-id resolved)))
+    (is (= (:classification-absence ending)
+           (:classification-absence resolved)))
     (is (= before (:state resolved)))
     (is (nil? (get-in resolved [:state :outer/consumptions run-id])))))
 

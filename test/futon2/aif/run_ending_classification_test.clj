@@ -62,6 +62,27 @@
            (:facet receipt)))
     (is (nil? (:attestation receipt)))))
 
+(deftest grounded-success-uses-the-selected-target-relation
+  (let [grounded (assoc base-close :route-attestation nil)
+        classify-relation
+        (fn [relation]
+          (result grounded :route nil
+                  :outer-selection
+                  {:selection {:selected {:target target}}
+                   :selected-relation relation}))]
+    (is (= :unrelated (:class (classify-relation :useful-elsewhere))))
+    (is (= :focused (:class (classify-relation :focus))))
+    (let [absent (classify-relation nil)]
+      (is (= :unknown (:class absent)))
+      (is (= [:outer-selection-relation] (:missing absent))))
+    (let [other-target
+          (result grounded :route nil
+                  :outer-selection
+                  {:selection {:selected {:target "M-other"}}
+                   :selected-relation :focus})]
+      (is (= :unknown (:class other-target)))
+      (is (= [:outer-selection-relation] (:missing other-target))))))
+
 (deftest refusals-are-not-unknown
   (let [digest (identity/digest (kernel/projection base-close (kernel/declaration)))]
     (doseq [[expected receipt]

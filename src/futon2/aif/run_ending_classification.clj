@@ -105,6 +105,8 @@
         outer-relation (when (= occurrence-target outer-target)
                          (:selected-relation outer-selection))
         outer-ending (get focus-receipt/scorer-class outer-relation)
+        grounded-success? (and (true? (:grounded? judgment))
+                               (false? (:artifact-only? judgment)))
         facet-rows (filterv #(and (= target (:target %))
                                   (contains? (:facet-map d) (:class %)))
                             (:candidates focus-receipt))
@@ -116,17 +118,21 @@
                 (seq missing-close) :unknown
                 (and qualified-already-satisfied? outer-ending) outer-ending
                 qualified-already-satisfied? :unknown
+                typed-failure? :stop-the-line
+                (and grounded-success? outer-ending) outer-ending
                 (and increment facet) (get-in d [:facet-map facet])
                 increment :unknown
-                typed-failure? :stop-the-line
                 :else :unknown)
         missing (when (= :unknown class)
                   (vec (concat
                         (map #(vector :close-key %) missing-close)
                         (when (and qualified-already-satisfied? (nil? outer-ending))
                           [:outer-selection-relation])
+                        (when (and grounded-success? (nil? outer-ending))
+                          [:outer-selection-relation])
                         (when (and (empty? missing-close) (nil? increment)
-                                   (not typed-failure?) (not qualified-already-satisfied?))
+                                   (not typed-failure?) (not qualified-already-satisfied?)
+                                   (not grounded-success?))
                           [:attested-increment])
                         (when (and increment (nil? facet)) [:commit-facets-v1-relation]))))]
     {:schema :wm/run-ending-classification-receipt-v1

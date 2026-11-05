@@ -8,6 +8,7 @@
             [futon2.aif.previous-run :as previous]
             [futon2.aif.outer-refusal-index :as durable]
             [futon2.aif.reading-policy-class-history-index :as history]
+            [futon2.aif.run-ending-classification :as ending-classification]
             [futon2.aif.load-identity :as load-identity]))
 (load-identity/register! *ns* *file*)
 (def terminal-classes #{:focused :related :unrelated :stop-the-line})
@@ -41,7 +42,26 @@
               pins (set (keep :record-sha256 rows))
               digest (durable/sha256-file file)
               classification (:run-ending-classification record)
-              class (:class classification)]
+              stored-class (:class classification)
+              derived (when (= :unknown stored-class)
+                        (ending-classification/classify
+                         {:close (:close-projection classification)
+                          :occurrence (get-in classification
+                                              [:close-projection :occurrence])
+                          :route-attestation (get-in classification
+                                                     [:close-projection :route-attestation])
+                          :outer-selection (:outer/selection record)}))
+              derived-class (when (and (= :recorded (:status derived))
+                                       (contains? terminal-classes (:class derived)))
+                              (:class derived))
+              class (or derived-class stored-class)
+              classification-provenance
+              (when derived-class
+                {:method :derived-on-read
+                 :classifier 'futon2.aif.run-ending-classification
+                 :record-pin {:path (str file) :sha256 digest}
+                 :stored-class stored-class
+                 :derived-class derived-class})]
           (cond
             (not= run-id (or (:run/id record) (:run-id record)))
             (defer :run-record-identity-mismatch)
@@ -61,12 +81,17 @@
                             :record-pin {:path (str file) :sha256 digest}
                             :completion-pin (:sha256 terminal)}]
               (if (contains? terminal-classes class)
-                (assoc verified :status :ready :ending-class class)
+                (cond-> (assoc verified :status :ready :ending-class class)
+                  classification-provenance
+                  (assoc :classification-provenance classification-provenance))
                 (defer :terminal-ending-class-absent
                        (assoc verified :classification-absence
                               {:reason (if classification :terminal-ending-class-unavailable
                                                           :classification-receipt-absent)
-                               :recorded-class class
+                               :recorded-class stored-class
+                               :derived-on-read (when derived
+                                                  (select-keys derived
+                                                               [:status :class :kind :missing]))
                                :completed true
                                :failure (select-keys (:failure record)
                                                      [:kind :stage :error])}))))))))
