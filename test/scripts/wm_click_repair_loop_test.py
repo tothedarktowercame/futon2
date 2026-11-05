@@ -16,10 +16,27 @@ LOOP = ROOT / "scripts" / "wm_click_repair_loop.py"
 DEBUGGER = ROOT / "scripts" / "wm_click_debugger.bb"
 
 
+# The supervisor's state paths are absolute (~/code/futon2/data/wm-click-loop),
+# so a test that reaches log()/record() without patching them writes the
+# production loop.log or ledger from ANY checkout, worktrees included. That
+# happened on 2026-11-05 (WRITE-REGISTER-5's new log line: 15 fixture lines in
+# the real loop.log). Every loaded module therefore starts with its state in a
+# throwaway directory; tests that need a specific STATE still patch it.
+_TEST_STATE = tempfile.TemporaryDirectory(prefix="wm-click-loop-test-state-")
+
+
 def load_loop():
     spec = importlib.util.spec_from_file_location("wm_click_repair_loop", LOOP)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    state = Path(_TEST_STATE.name)
+    module.STATE = state
+    module.LEDGER = state / "ledger.jsonl"
+    module.LOGFILE = state / "loop.log"
+    module.STOP_FILE = state / "STOP"
+    module.ALERTS = state / "alerts.jsonl"
+    module.ACKNOWLEDGED = state / "acknowledged.json"
+    module.DEBUGGER = state / "debugger"
     return module
 
 
@@ -205,7 +222,8 @@ class RepairLoopCastTest(unittest.TestCase):
 
     def test_click_write_manifest_registers_window_changes_and_ledger_pin(self):
         loop = load_loop()
-        real_data = ROOT / "data"
+        # the data root the supervisor really writes to, not this checkout's
+        real_data = loop.F2 / "data"
         real_mark = max((p.stat().st_mtime_ns for p in real_data.rglob("*")
                          if p.is_file()), default=0)
         with tempfile.TemporaryDirectory() as td:
