@@ -206,6 +206,7 @@
                                     (assoc base-observation :relation (fn [_ _] :unknown)))
                (catch clojure.lang.ExceptionInfo e (ex-data e)))]
     (is (= :outer-score/no-admitted-tasks (:kind r)))
+    (is (= [] (:outer-score/admitted r)))
     (is (= ["M-ready" "M-unknown"]
            (mapv :target (:outer-score/excluded r))))
     (is (every? #(= :relation-unrecognised (:reason %))

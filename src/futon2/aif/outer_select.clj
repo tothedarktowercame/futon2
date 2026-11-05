@@ -344,7 +344,8 @@
     (let [observation (assoc observation :field (:field partition))]
     (when (empty? (:field partition))
       (refuse! :outer-score/no-admitted-tasks
-               {:field-facts field-facts :outer-score/excluded (:excluded partition)}))
+               {:field-facts field-facts :outer-score/admitted []
+                :outer-score/excluded (:excluded partition)}))
     (when-not (seq menu) (refuse! :empty-cascade-menu {}))
     (let [score-input (merge (select-keys observation [:focus :relation :facts :field])
                              {:state-counts (:state-counts state) :ending-counts (:c state)

@@ -2,7 +2,7 @@
  :sites
  [{:id :selection-empty-field
    :source "src/futon2/aif/full_loop_runtime.clj"
-   :anchor "{:status :abstained :case :empty-field}"
+   :anchor "(def legal-terminal-exclusion-reasons"
    :kinds [:empty-field] :case :L1
    :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
    :evidence {:scoredField :present :operatorSignal :absent

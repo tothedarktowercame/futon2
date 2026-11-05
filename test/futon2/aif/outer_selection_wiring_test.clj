@@ -8,6 +8,7 @@
             [futon2.aif.placement-adapter :as placement]
             [futon2.aif.serving-envelope :as serving-envelope]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [wm-run-facts :as run-facts]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
@@ -18,6 +19,7 @@
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.outer-select-test :as fixtures]
             [futon2.aif.action-identity :as identity]
+            [futon2.aif.effective-run-history :as effective-run-history]
             [futon2.aif.outer-state :as outer-state]
             [futon2.test-support.runner-fixture :as runner-fixture]))
 
@@ -214,6 +216,73 @@
     (is (= :debugger-error (:disposition missing-field)))
     (is (nil? (get-in missing-field [:evidence :scoredField])))
     (is (= :debugger-error (:disposition nil-field)))))
+
+(deftest legal-terminal-exclusions-make-work-exhaustion-reachable
+  ;; RefusalLegality.legal_terminals_bounded: once every member of the scored
+  ;; field has a recorded legal-terminal exclusion, selection reaches L1.
+  (let [sha "fixture-sha"
+        digest (identity/digest {:mission-source-sha256 sha})
+        rows (mapv (fn [target]
+                     {:c1-exclusion
+                      {:status :row
+                       :row {:schema :wm/c1-exclusion-v1
+                             :target target
+                             :evidence-digest digest
+                             :run-id (str "satisfied-" target)}}})
+                   ["M-ready" "M-unknown"])
+        result (call-ordinary
+                {:decision-as-of "2026-10-28T12:00:00Z"}
+                {#'outer-observation/outer-observation
+                 (fn [_]
+                   (assoc fixtures/base-observation
+                          :mission-source-sha256-by-target
+                          {"M-ready" sha "M-unknown" sha}
+                          :giraffe/run-id "fixture-missions-run"))
+                 #'effective-run-history/index-rows (fn [_] rows)
+                 #'runtime/run-ordinary-opportunity-with-task!
+                 (fn [_] (throw (AssertionError. "empty field must not run a task")))})
+        retained (:outer/selection result)
+        record-path (get-in result [:selection-record :path])
+        record (edn/read-string (slurp record-path))
+        supervisor-check
+        (shell/sh
+         "bb" "-e"
+         "(let [r (clojure.edn/read-string {:default tagged-literal} (slurp (first *command-line-args*))) a (get-in r [:outer/selection :outer-field/admitted] ::missing)] (println (boolean (and (map? r) (or (= :no-task-selected (:absent r)) (= :abstained (get-in r [:selection-outcome :status]))) (vector? a) (empty? a)))))"
+         record-path)]
+    (is (= :no-task-selected (:absent result)))
+    (is (= [] (:outer-field/admitted retained)))
+    (is (= #{"M-ready" "M-unknown"}
+           (set (map :target (:outer-field/excluded retained)))))
+    (is (every? #(= :c1-already-satisfied (:reason %))
+                (:outer-field/excluded retained)))
+    (is (= :loop-stop (get-in result [:refusal/disposition :disposition])))
+    (is (= {:status :abstained :case :empty-field}
+           (:selection-outcome record)))
+    (is (= :loop-stop
+           (get-in record [:outer/selection :refusal/disposition :disposition])))
+    (is (= 0 (:exit supervisor-check)))
+    (is (= "true\n" (:out supervisor-check)))))
+
+(deftest defect-exclusion-does-not-become-work-exhaustion
+  (let [sha "fixture-sha"
+        row {:c1-exclusion
+             {:status :row
+              :row {:schema :wm/c1-exclusion-v1
+                    :target "M-ready"
+                    :evidence-digest (identity/digest {:mission-source-sha256 sha})
+                    :run-id "satisfied-ready"}}}
+        result (call-ordinary
+                {:decision-as-of "2026-10-28T12:00:00Z"}
+                {#'outer-observation/outer-observation
+                 (fn [_]
+                   (assoc fixtures/base-observation
+                          :relation (fn [_ _] :unknown)
+                          :mission-source-sha256-by-target {"M-ready" sha}
+                          :giraffe/run-id "fixture-missions-run"))
+                 #'effective-run-history/index-rows (fn [_] [row])})]
+    (is (= :outer-selection-refused (:absent result)) (pr-str result))
+    (is (= :outer-score/no-admitted-tasks (:reason result)) (pr-str result))
+    (is (not= :loop-stop (get-in result [:refusal/disposition :disposition])))))
 
 (defn- record-files [dir]
   (filter #(and (.isFile %)

@@ -1262,6 +1262,19 @@
      :case :work-exhausted
      :evidence evidence}))
 
+(def legal-terminal-exclusion-reasons
+  "Reasons whose removal is a legal terminal under RefusalLegality.nextField.
+  Requiring every emptying exclusion to be in this set is stricter than
+  loopStopLegal: missing ingest or relation evidence remains a debugger error."
+  #{:c1-already-satisfied})
+
+(defn- legal-terminal-empty-field? [observation failure-data]
+  (let [excluded (into (vec (:outer-field/excluded observation))
+                       (:outer-score/excluded failure-data))]
+    (and (= [] (:outer-score/admitted failure-data))
+         (seq excluded)
+         (every? #(contains? legal-terminal-exclusion-reasons (:reason %)) excluded))))
+
 (defn- missions-giraffe-manifest? [manifest]
   (let [edge-path (get-in manifest [:sources :edges :path])]
     (and (string? edge-path)
@@ -1638,7 +1651,16 @@
                                                          :focus :focus/source :field-facts :placement/source])
                                :makeup/sha256 (:makeup/sha256 makeup)
                                :previous (:previous-selection observation)))
-              selection (outer-select/select makeup state observation)
+              selection (try
+                          (outer-select/select makeup state observation)
+                          (catch clojure.lang.ExceptionInfo e
+                            (let [data (ex-data e)]
+                              (if (and (= :outer-score/no-admitted-tasks (:kind data))
+                                       (legal-terminal-empty-field? observation data))
+                                {:outer-score/admitted []
+                                 :outer-score/excluded (:outer-score/excluded data)
+                                 :outcome {:status :abstained :case :empty-field}}
+                                (throw e)))))
               retained-selection (-> selection
                                      (assoc :world-census @(:selection-record/census opts))
                                      (assoc :outer-field/admitted
