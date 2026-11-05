@@ -1782,10 +1782,26 @@
      :acceptance-observation acceptance-observation}))
 
 (defn- run-meta-self-heal-route!
-  "Run the potentially long META repair route with ordinary phase telemetry."
+  "Run the potentially long META repair route with start/end phase telemetry
+  only. Deliberately not `runner/run-phase!`: that would also put a failure
+  under the debugger, and a :retry would rerun the whole repair route, which
+  writes ledger transitions and dispatches seats. A throw propagates exactly as
+  before."
   [opts]
-  (runner/run-phase! opts {} :meta-self-heal
-                     #(meta-self-heal/route! opts)))
+  (let [started (System/nanoTime)
+        elapsed #(quot (- (System/nanoTime) started) 1000000)]
+    (runner/emit-phase! opts {} {:phase :meta-self-heal :transition :start})
+    (try
+      (let [result (meta-self-heal/route! opts)]
+        (runner/emit-phase! opts {} {:phase :meta-self-heal :transition :end
+                                     :outcome :ok :duration-ms (elapsed)})
+        result)
+      (catch Throwable t
+        (runner/emit-phase! opts {} {:phase :meta-self-heal :transition :end
+                                     :outcome :error :duration-ms (elapsed)
+                                     :error-class (.getName (class t))
+                                     :error (.getMessage t)})
+        (throw t)))))
 
 (defn- run-opportunity-with-authority!
   "Arbitrate durable META injuries before constructing any ordinary policy
