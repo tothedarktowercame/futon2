@@ -75,6 +75,35 @@
 (deftest work-outcome-has-no-refusal-evidence
   (is (nil? (sut/evidence-for-close :grounded-change {} nil false))))
 
+(deftest close-refusal-controller-restarts
+  (let [calls (atom 0)
+        result (sut/resolve-close-refusal
+                true (fn [_] (if (= 1 (swap! calls inc))
+                               {:action :retry}
+                               {:action :continue}))
+                :already-satisfied {:failure-kind :already-satisfied} nil false)]
+    (is (= 2 @calls))
+    (is (= :debugger-error (get-in result [:data :refusal/disposition :disposition])))
+    (is (= :continue (get-in result [:data :refusal/restart])))))
+
+(deftest close-refusal-controller-use-value-and-abort
+  (let [used (sut/resolve-close-refusal
+              true (constantly {:action :use-value
+                                :value {:outcome :grounded-change :data {:kept true}}})
+              :guardrail-refusal {} nil false)
+        aborted (sut/resolve-close-refusal
+                 true (constantly {:action :abort})
+                 :guardrail-refusal {} nil false)]
+    (is (= {:outcome :grounded-change :data {:kept true}} used))
+    (is (= :debugger/aborted (get-in aborted [:data :failure-kind])))))
+
+(deftest detached-close-retains-disposition-and-work-is-unchanged
+  (is (= :debugger-error
+         (get-in (sut/resolve-close-refusal false nil :already-satisfied {} nil false)
+                 [:data :refusal/disposition :disposition])))
+  (is (= {:outcome :grounded-change :data {:byte :same}}
+         (sut/resolve-close-refusal false nil :grounded-change {:byte :same} nil false))))
+
 (deftest outcome-outside-the-image-is-validated
   ;; `outcome-from` passes unknown thrown outcomes through; they must not
   ;; be mistaken for work.

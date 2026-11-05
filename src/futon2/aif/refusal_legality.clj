@@ -90,3 +90,34 @@
                   :operatorSignal true}}
 
       :else {:refusal :other})))
+
+(defn resolve-close-refusal
+  "Validate a close before persistence. AWAIT-FN receives the illegal-refusal
+  condition data and returns a debugger restart map. The returned outcome/data
+  pair is ready for close persistence."
+  [attached? await-fn outcome data scored-field operator-signal]
+  (loop [outcome outcome, data data]
+    (if-let [refusal (evidence-for-close outcome data scored-field operator-signal)]
+      (let [d (disposition refusal)
+            retained {:disposition d :case (:case refusal)
+                      :evidence (:evidence refusal)}]
+        (if (and attached? (= :debugger-error d))
+          (let [{:keys [action value]} (await-fn
+                                        {:kind :illegal-refusal
+                                         :original-kind (or (:failure-kind data) outcome)
+                                         :disposition retained
+                                         :evidence (:evidence refusal)})]
+            (case action
+              :retry (recur outcome data)
+              :use-value (recur (:outcome value) (:data value))
+              :continue {:outcome outcome
+                         :data (assoc data :refusal/disposition retained
+                                           :refusal/restart :continue)}
+              :abort {:outcome :cancelled
+                      :data (assoc data :failure-kind :debugger/aborted
+                                        :debugger/restart :abort
+                                        :refusal/disposition retained
+                                        :refusal/restart :abort)}
+              (throw (ex-info "Unknown close-refusal restart" {:action action}))))
+          {:outcome outcome :data (assoc data :refusal/disposition retained)}))
+      {:outcome outcome :data data})))
