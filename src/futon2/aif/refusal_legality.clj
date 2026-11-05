@@ -143,6 +143,18 @@
           (let [{:keys [action value]} (await-fn
                                         {:kind :illegal-refusal
                                          :original-kind (or (:failure-kind data) outcome)
+                                         ;; Repair 1b5608db (held run 6d57248a):
+                                         ;; a reading-refusal close held with
+                                         ;; :evidence nil and no target or
+                                         ;; error-data, so the operator page
+                                         ;; could not say what refused.
+                                         ;; D4-READING-REFUSAL-FINDING-CONTEXT
+                                         ;; applies here too: the refusal's
+                                         ;; typed context rides the condition.
+                                         :original-failure
+                                         (select-keys data
+                                                      [:failure-stage :target
+                                                       :error-data])
                                          :disposition retained
                                          :evidence (:evidence refusal)})]
             (case action

@@ -180,6 +180,39 @@
          (into sut/work-outcomes sut/no-work-outcomes)))
   (is (empty? (clojure.set/intersection sut/work-outcomes sut/no-work-outcomes))))
 
+(deftest close-refusal-condition-retains-original-failure
+  ;; bad case from repair wm-click-loop-repair-1b5608db (held run
+  ;; 2026-11-05-6d57248a): a :selected-target-reading-repair-threw
+  ;; no-selection close held with :evidence nil and nothing naming the
+  ;; target or the retained reading record, so the operator debugger page
+  ;; was causeless.  The condition must carry the original failure's
+  ;; retained context.
+  (let [held-condition (atom nil)
+        result (sut/resolve-close-refusal
+                true (fn [condition]
+                       (reset! held-condition condition)
+                       {:action :abort})
+                :no-selection
+                {:failure-kind :selected-target-reading-repair-threw
+                 :failure-stage :selected-target-reading
+                 :target "M-held"
+                 :error-data {:selected-target-reading
+                              {:status :refused
+                               :kind :selected-target-reading-repair-threw
+                               :message "Cannot read the excerpt"}}}
+                (constantly nil) false)]
+    (is (= :cancelled (:outcome result)))
+    (is (= :illegal-refusal (:kind @held-condition)))
+    (is (= :selected-target-reading-repair-threw
+           (:original-kind @held-condition)))
+    (is (= {:failure-stage :selected-target-reading
+            :target "M-held"
+            :error-data {:selected-target-reading
+                         {:status :refused
+                          :kind :selected-target-reading-repair-threw
+                          :message "Cannot read the excerpt"}}}
+           (:original-failure @held-condition)))))
+
 (deftest close-refusal-retry-rereads-the-carrier
   ;; bad case: an empty-field abstention held because the field carrier was
   ;; absent; the operator repairs the carrier live and retries.  The retry

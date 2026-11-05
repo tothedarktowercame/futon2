@@ -171,6 +171,27 @@
     (is (= (:pending reading-record)
            (get-in observed [:reading-frontiers :preparation-backlog :pending])))))
 
+(deftest repair-throw-retains-cause-class-and-ex-data
+  ;; bad case from repair wm-click-loop-repair-1b5608db (held run
+  ;; 2026-11-05-6d57248a): the repair fn threw, the catch kept only
+  ;; :message, and the run later held at close-refusal with no durable
+  ;; trace of what threw.  The record must retain the class and ex-data.
+  (let [cause (ex-info "Cannot read the excerpt"
+                       {:kind :excerpt-unreadable :target "M-held"})
+        result (with-redefs [selected-target-reading/preparation-needed? (constantly true)]
+                 (runner/selected-target-reading-step
+                  {:run-id "repair-threw-retention"
+                   :run-record-dir (.getPath (temp-dir))}
+                  {:decision {}}
+                  (fn [_ _] (throw cause))
+                  (fn [_] (throw (AssertionError. "redecide must not run")))))
+        record (:record result)]
+    (is (= :selected-target-reading-repair-threw (:kind record)))
+    (is (= false (:published record)))
+    (is (= "Cannot read the excerpt" (:message record)))
+    (is (= "clojure.lang.ExceptionInfo" (:error-class record)))
+    (is (= {:kind :excerpt-unreadable :target "M-held"} (:error-data record)))))
+
 (deftest reading-observer-distinguishes-not-started-from-missing-result
   (let [no-checkpoint {:checkpoints {}}]
     (is (= {:status :not-applicable
