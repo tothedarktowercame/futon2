@@ -672,6 +672,12 @@ records and notifies, and validates nothing).
      source change restores the target. The C3 path is complete end to end:
      typed author line -> world match -> close validator -> index row ->
      field exclusion. No historical refusal qualifies (all 7 are prose).
+   - Abstention feedback (Joe's choice 1): `abstention-digest` groups index
+     abstentions by target; a read-only section on the Morning Brief page
+     (`05d3bfd8a`, codex-18; fix `c027b5462`). Legacy rows have no
+     carrier and show as `:not-indexed`; new abstentions carry reasons.
+   - BRIEF-REPLAY-1 (`667a2c1c9`, codex-13): C2 replay rewrites a missing
+     summary/lifecycle file; closes the 1b gap.
 
 Until 4-6 land, the validator classes every C-looking refusal as a debugger
 error, as the survey predicts. That is the intended interim state: those
