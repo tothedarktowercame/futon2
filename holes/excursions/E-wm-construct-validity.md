@@ -468,6 +468,27 @@ records and notifies, and validates nothing).
          might only be known afterwards?
        - How does a validator that runs before persistence know the
          exclusion has been recorded?
+   *C1-EXCLUSION-2-0 decisions (2026-11-05, from codex-15's findings):*
+   - Digest: mission-source SHA only. Policy id and check set exist only
+     after selection, so the full three-part digest cannot be compared
+     before it. C1 claims the mission's wants are satisfied, and the wants
+     live in the mission source. Accepted cost: a policy or check-set change
+     with the same mission source does not bring the target back.
+   - The exclusion removes the target from the admitted field, not via the
+     click-local `:forbidden` set. `:forbidden` leaves the target admitted, so
+     a field whose targets were all C1-excluded would abstain with a non-empty
+     admitted list, which is a debugger error. Lean ends that run at an empty
+     field, where work exhausted is legal. (C1-EXCLUSION-2a, codex-15.)
+   - Order: the close validator cannot claim `exclusionRecorded`, because the
+     run record and index line do not exist yet. A measured C1 is marked
+     `:pending-exclusion` there. The index append writes the row and
+     `:click-terminal` in the same line. A refused row or a failed append is
+     a debugger error. (C1-EXCLUSION-2b, after 2a is reviewed.)
+   - The 3 `:not-c1` historical records are correct. Their index failure
+     label mentions already-satisfied, but the close was a guardrail refusal.
+   - Found in passing: the runtime passes `:effective-run-index-rows` to the
+     selector, but nothing reads it. A test pins that measured inner work
+     does not remove open tasks. C1 rows are a separate input.
 5. **C2-BRIEF-1.** The question carrier: the cited ambiguity and two
    readings, sent to `morning_brief/queue-item!`, plus the exclusion until
    answered.
