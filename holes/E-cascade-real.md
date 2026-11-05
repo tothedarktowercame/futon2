@@ -403,3 +403,10 @@ certificate carries `:cascade-horizon {:value :authority :computed-from}` on
 both selection and abstention; the T=2 literal and the judge-opts
 `:cascade-sources` bypass go. Since 891b4af6 the constructor already receives
 the judge's resolved horizon through `assemble`.
+
+## Completion criteria
+
+- Every defect D1–D18 carries a disposition: fixed (with commit), ruled-out (with the ruling cited), or superseded (with successor item) — check: per-defect status in the file's Defects section **Not met.**
+- The passive formations the excursion targets are removed: the machine constructs cascade candidates inside the tick (the H7f lane) and feasibility is a consideration in choosing work, not a post-hoc gate — check: the tick's cascade-construction path in futon2 source cites this excursion in its commit, and a click record shows a machine-constructed cascade being selected **Not met.**
+- I1 and I2 remain done — check: file Status line still records I1, I2 done; commits 0b06df90 et al. present in futon2 git **Met.**
+- The excursion's findings are written down (they are: D1–D18 with introducing commits) — check: `/home/joe/code/futon2/holes/E-cascade-real.md` Defects section **Met.**

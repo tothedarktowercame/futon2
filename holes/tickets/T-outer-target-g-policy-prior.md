@@ -66,3 +66,10 @@ for Lean (see `T-q2-q4-q8-recomputable-on-every-run.md`).
 Found by claude-4 while annotating R5 for the plop2026 docbook
 (`p4ng/plop-2026-code-annotations.json`), 2026-10-18. Written as a ticket at
 Joe's request so the War Machine may select it.
+
+## Completion criteria
+
+- Joe's decision is recorded: this ticket's change governs, the Lean spec governs, or the ticket is moot given the machinery's removal — check: a dated decision line in the ticket (the pre-work block at lines 44–50 says do not start until it is made) **Not met.**
+- The ticket's disposition against the removed file is written: what a04b157d2 (remove outer selection machinery) and 4c7df871b (separate injury score from engineering priors) already did to the observed failure — check: a note in the ticket naming both commits and whether the clamp/sum ranking still exists anywhere live **Not met.**
+- If the change is still live-relevant: the three acceptance regressions from the ticket hold — resource-cost-only difference moves selection via ln E with both recorded; unclamped scores past 1.0 no longer tie; risk and ambiguity persisted in the same units (nats) — check: regression tests in futon2 naming this ticket **Not met.**
+- If moot: the ticket is closed citing the removal commit — check: closure line citing futon2 a04b157d2 **Not met.**

@@ -199,3 +199,11 @@ gradient in the explorable region (fold-GFN 0.69, s4 +0.21). Decisive next contr
 Artifacts: `futon6/data/fold-embed-gfn/gfn-seed-verdicts-{reduced,full-PARTIAL}.json` · trainer
 `futon6/scripts/fold_embed/gfn_seed_v0.py` (`47c7566`+`928676a`) · proxy `sorry_proxy.py` · positive
 control `futon2/holes/labs/fold-gfn/`. **Pending Joe's ratification before canon.**
+
+## Completion criteria
+
+- Success criterion 1: the hybrid or ablation winner beats popularity AND BGE-text-only at endpoint-recovery on held-out missions (gold corpus), or the measured ceiling is rigorously reported — check: a scorecard artifact under `futon6/` from the completed `{text,struct,hybrid}` runs with the verdict stated **Not met.**
+- Success criterion 2: laptop inference from GPU-trained embeddings confirmed sub-second — check: Stage E artifacts (`laptop-index.npz` + `fold_phase2(cascade)` function) and a timing measurement **Not met.**
+- Success criterion 3: plugs into E-close-the-loop's interface as the phase-2 realizer of `fold(cascade, circumstance)` — check: the interface call site cites this excursion **Not met.**
+- Stage B gold corpus exists as the honest eval set — check: `/home/joe/code/futon2/holes/labs/A-next-gold-corpus.md` and the A-next-* triples **Met.**
+- Stages A+B remain reproducible — check: `futon6/data/fold-embed/manifest.json` and the mk_dataset.py path it records **Met.**

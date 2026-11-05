@@ -622,3 +622,11 @@ last cheap thing standing between us and a real answer.
 If relays fail at realistic density with a homeward preference, the capability
 claim is false and the ants cannot discover bucket chains. That is the finding
 worth having, and it is one probe away.
+
+## Completion criteria
+
+- Each repair R-a through R-e is landed or explicitly abandoned with a recorded reason — check: a dated outcome line per repair in the excursion file, or a successor item linked **Not met.**
+- Every repaired axis either renders as a navigable treatment arm (`:score-varies? true` via the clean_to_lean render gate) or is withdrawn from the catalogue with its non-navigability recorded as a finding — check: render-gate output per repaired axis cited in the file **Not met.**
+- The R-e regime-shift arm is registered (shift tick, recovery threshold, post-shift window fixed) before any repaired-epistemic measurement, with the time-to-recovery sensor gap closed — check: registration block in the file and the `:coverage-check {:status :unmet :reason :sensor-absent}` flag at line ~199 updated **Not met.**
+- Faithfulness and capability claims are reported separately, whichever way each lands — check: a results section distinguishing the two claims **Not met.**
+- The baseline Slice 5 confirmation is reproducible — check: futon2 commit `964462c7` exists and its 540-cell run is citable **Met.**

@@ -353,3 +353,11 @@ move is move-class-conditional intensity (advance × (1−res), close ×
 res, survey for stale-early) + a composition-aware bundle score, THEN
 train. That extension belongs to the action-vocabulary lane the
 handoff flagged.
+
+## Completion criteria
+
+- Exit 1: frozen circumstance set (≥10) and scoring harness with C-proxy verified — check: `holes/labs/E-cascade-sampler-sampler/circumstances-v0.edn` + referee harness tests **Met.**
+- Exit 2: all four minimum contestants (incumbent, GFlowNet, linear rollout, cheap stochastic baselines) have scored entries on the full circumstance set — check: entries in `contest-verdicts-v1.edn` cover all four arms **Not met.**
+- Exit 3: a verdict table with per-method realized-G (median + spread), wall-clock, and the structural column — check: the table in the excursion file or a lab artifact citing it **Not met.**
+- Exit 4: the trainability probe reported — check: `s4/trainability-probe.json` plus its written-up verdict in the file **Met.**
+- Exit 5: the recommendation is written into `futon2/docs/futonzero-alphazero.md` §5 as the tension's resolution or honest survival, with kill-criterion verdicts — check: the §5 text cites this excursion **Not met.**
