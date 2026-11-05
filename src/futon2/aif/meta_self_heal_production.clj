@@ -1400,9 +1400,11 @@
                           :observation-pin (:entry-pin claim)}))
                 {:status :absent :reason :transaction-injury-not-active}))
             {:status :absent :reason :no-transaction})))]
-        (cond-> (merge result visibility)
-          (and (:reason result) (not= (:reason result) (:reason visibility)))
-          (assoc :binding-reason (:reason result)))))))
+        ;; The binding outcome keeps its own :reason (SeamRefusal: a reason
+        ;; is never renamed); the backlog reason rides as :injury-reason and
+        ;; fills :reason only where the binding outcome had none.
+        (merge (assoc visibility :injury-reason (:reason visibility))
+               result)))))
 
 (defn carried-bindings
   "Return persisted diagnosis and acceptance bindings for an active injury."

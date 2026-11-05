@@ -31,7 +31,7 @@
 (defn route [opts]
   (let [seen (atom nil)
         result (with-redefs [coordinator/coordinate
-                            (fn [_ transaction _]
+                            (fn [_ transaction _ & _authority-verifier]
                               (reset! seen (:work-order transaction))
                               {:status :refused :reason :fixture-stop :phase :claim})]
                  (p/route! opts))]

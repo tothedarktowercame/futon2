@@ -62,7 +62,7 @@
       (is (= 1 (:effective-active-count reopened-observation)))
       (is (= [] (:masked reopened-observation)))
       (is (= injury-id (:selected reopened-observation)))
-      (is (= :effective-active-selected (:reason reopened-observation))))
+      (is (= :effective-active-selected (:injury-reason reopened-observation))))
     (testing "an empty ledger is distinguishable from a fully corrected ledger"
       (is (= 0 (:raw-active-count empty-observation)))
       (is (= 0 (:effective-active-count empty-observation)))
