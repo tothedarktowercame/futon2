@@ -35,6 +35,42 @@
     (is (= :appended (:status result)) (pr-str result))
     (:ledger result)))
 
+(def occurrence-square-base
+  {:run/id "run-occurrence-square-answer-invalid"
+   :click/id "click-occurrence-square-answer-invalid"
+   :failure {:kind :occurrence-square-answer-invalid
+             :stage :occurrence-square-authoring
+             :detail {:outcome :incomplete
+                      :failure-kind :occurrence-square-answer-invalid
+                      :failure-stage :occurrence-square-authoring}}})
+
+(deftest occurrence-square-answer-classification-follows-the-handoff-reason
+  (testing "only malformed or invalid author responses are explicit non-injuries"
+    (doseq [reason [:response-invalid :response-decode-threw
+                    :response-validation-threw]]
+      (let [record (assoc-in occurrence-square-base
+                             [:failure :detail :occurrence-square-authoring]
+                             {:schema :wm/occurrence-square-authoring-v1
+                              :status :error
+                              :kind :occurrence-square-answer-invalid
+                              :answer {:reason reason}})
+            result (classify record pin-a)]
+        (is (= :non-injury (:classification result)) (str reason))
+        (is (= :occurrence-square-author-response-invalid
+               (:non-injury-reason result)) (str reason)))))
+  (testing "apparatus handoff failures remain injuries"
+    (doseq [reason [:contact-unavailable :contact-threw :not-contacted
+                    :job-not-done]]
+      (let [record (assoc-in occurrence-square-base
+                             [:failure :detail :occurrence-square-authoring]
+                             {:schema :wm/occurrence-square-authoring-v1
+                              :status :error
+                              :kind :occurrence-square-answer-invalid
+                              :answer {:reason reason}})]
+        (is (= :injury (:classification (classify record pin-a))) (str reason)))))
+  (testing "historical records that omitted the reason remain injuries"
+    (is (= :injury (:classification (classify occurrence-square-base pin-a))))))
+
 (deftest retained-q6-hot-load-failure-does-not-inherit-the-nil-cause-injury
   ;; This is the retained e0b9aab6 record: its close omitted :failure, while
   ;; its pinned Q6 terminal says the cascade-resume hot-load failed.

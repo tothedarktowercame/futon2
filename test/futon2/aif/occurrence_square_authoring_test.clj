@@ -150,6 +150,34 @@
            (:sha256 evidence)))
     (is (not (some #{:answer-evidence} (get-in record [:failure :detail :omitted]))))))
 
+(deftest occurrence-square-terminal-retains-the-rejection-provenance
+  (let [evidence {:schema :wm/rejected-answer-evidence-v1
+                  :answer-prefix "bad json"
+                  :prefix-length-bytes 8
+                  :total-length-bytes 8
+                  :sha256 digest-a}
+        message (apply str (repeat 400 "m"))
+        detail (#'runner/failure-detail
+                {:occurrence-square-authoring
+                 {:schema :wm/occurrence-square-authoring-v1
+                  :status :error
+                  :kind :occurrence-square-answer-invalid
+                  :answer {:reason :response-invalid
+                           :job-id "job-invalid-square-answer"
+                           :message message
+                           :discarded "not retained"}
+                  :answer-evidence evidence}})]
+    (is (= :response-invalid
+           (get-in detail [:occurrence-square-authoring :answer :reason])))
+    (is (= "job-invalid-square-answer"
+           (get-in detail [:occurrence-square-authoring :answer :job-id])))
+    (is (= 300 (count (get-in detail
+                              [:occurrence-square-authoring :answer :message]))))
+    (is (not (contains? (get-in detail [:occurrence-square-authoring :answer])
+                        :discarded)))
+    (is (= evidence
+           (get-in detail [:occurrence-square-authoring :answer-evidence])))))
+
 (deftest held-inner-construction-redecides-once-after-publication
   (let [reading-root (temp-root) square-root (temp-root)
         reading (reading! reading-root) calls (atom 0)
