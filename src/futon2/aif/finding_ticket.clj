@@ -49,11 +49,15 @@
          (if environmental?
            "Verify the reported precondition and restore it if it remains unavailable. If it has cleared, retain a dated recheck showing the current condition."
            "Reproduce the reported behaviour at the named stage and correct its cause. Use the linked evidence to establish the scope; record any missing reproduction inputs explicitly.")
-         "\n\n## Acceptance evidence\n\n"
+         "\n\n## Acceptance criteria\n\n"
          (if environmental?
-           "Retain the dated precondition check, its source and result, and evidence of any restoration."
-           "Retain a reproduction or regression check that detects the reported failure and passes after the change, together with the scoped validation output.")
-         " Review the task evidence through ordinary ticket review; mark this ticket DONE only when its scoped work is accepted.\n\n"
+           (str "- A dated precondition check with its source and result is retained. Check: dated source and result recorded in this ticket. **Not started.**\n"
+                "- Restoration evidence, or a dated recheck showing the condition cleared, is retained. Check: restoration evidence or dated cleared recheck. **Not started.**\n"
+                "- Ticket review accepted the scoped work. Check: Status line reads DONE. **Not started.**")
+           (str "- A reproduction or regression check detects the reported failure at the named stage. Check: a test namespace/name or command recorded in this ticket. **Not started.**\n"
+                "- That check passes after the change, with the scoped validation output retained. Check: commit SHA and test output. **Not started.**\n"
+                "- Ticket review accepted the scoped work. Check: Status line reads DONE. **Not started.**"))
+         "\n\nReview the task evidence through ordinary ticket review; mark this ticket DONE only when its scoped work is accepted.\n\n"
          "## Provenance\n\n"
          "Finding: [" (:repair/id finding) "](" source ")\n\n"
          "Finding SHA-256: `" sha "`\n")))

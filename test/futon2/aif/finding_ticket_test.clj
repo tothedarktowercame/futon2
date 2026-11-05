@@ -7,6 +7,7 @@
             [futon2.aif.load-identity :as identity]
             [futon2.aif.mission-registry :as registry]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.task-completion-surface :as completion-surface]
             [futon2.aif.ticket-queue :as queue]
             [futon2.data-paths :as data-paths]
             [futon2.test-support.git-fixture :as git-fixture]))
@@ -36,6 +37,23 @@
 
 (defn- ticket-path [opts record]
   (io/file (:ticket-dir opts) (str "T-" (:repair/id record) ".md")))
+
+(deftest minted-tickets-have-parser-readable-completion-criteria
+  (doseq [kind ["machine" "environment"]]
+    (testing kind
+      (with-roots
+        (fn [_ store opts]
+          (let [record (fixture kind)
+                _ (repair/record-system-failure! store (input record) opts)
+                path (ticket-path opts record)
+                description (completion-surface/describe
+                             {:id (str "T-" (:repair/id record))
+                              :source {:path (str path)
+                                       :sha256 (identity/sha256
+                                                (identity/read-bytes path))}})]
+            (is (= :criteria-locators (:completion-class description)))
+            (is (= 3 (:criteria-count description)))
+            (is (= 0 (:unlocated-criteria-count description)))))))))
 
 (deftest real-finding-creates-an-ordinary-front-ticket
   (let [live-roots [repair/default-root "/home/joe/code/futon2/holes/tickets"]
