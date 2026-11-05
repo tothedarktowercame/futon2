@@ -8547,8 +8547,10 @@
                                   (cond-> [] (:witness data) (conj (:witness data)))}})
                    result))
         close! (fn [outcome data]
+                 (let [refusal-resolution (volatile! nil)]
                  (try
                    (let [{resolved-outcome :outcome resolved-data :data}
+                         (vreset! refusal-resolution
                          (refusal-legality/resolve-close-refusal
                           (debugger/attached?)
                           (fn [condition]
@@ -8569,7 +8571,7 @@
                           outcome data
                           #(refusal-legality/retained-scored-field
                             (selected-target-reading/current-options opts))
-                          false)]
+                          false))]
                      (observe-end!)
                      (close-core! resolved-outcome resolved-data))
                    (catch Throwable e
@@ -8619,9 +8621,16 @@
                            route (when (and route-file (.isFile route-file))
                                    (cohort/read-edn route-file))
                            sorry-data {:effective-run-configuration @effective-configuration
+                                       ;; Only the controller's own throw is
+                                       ;; :controller-threw; a close-core!
+                                       ;; throw keeps the resolved disposition.
                                        :refusal/disposition
-                                       {:disposition :debugger-error
-                                        :reason :controller-threw}
+                                       (if-let [resolution @refusal-resolution]
+                                         (get-in resolution [:data :refusal/disposition]
+                                                 {:disposition :not-validated
+                                                  :reason :work-outcome})
+                                         {:disposition :debugger-error
+                                          :reason :controller-threw})
                                        :outcome :build-failed
                                        :grounded? false
                                        :artifact-only? false
@@ -8728,7 +8737,7 @@
                                 (:close-refusal close-result)
                                 (assoc :close-refusal
                                        (:close-refusal close-result)))
-                        :closed-event (:closed-event close-result)}))))]
+                        :closed-event (:closed-event close-result)})))))]
     (try
       (when-let [e (:error roster-result)]
         (if (= :agent-unavailable (:failure-kind (ex-data e)))
