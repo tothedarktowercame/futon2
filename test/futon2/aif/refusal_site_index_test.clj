@@ -9,7 +9,7 @@
 (defn- python-stop-call-count []
   (->> (str/split-lines
         (slurp (io/file repo "scripts/wm_click_repair_loop.py")))
-       (filter #(str/includes? % "return stop(args"))
+       (filter #(and (re-find #"(?<![\w.])stop\(args" %) (not (re-find #"^\s*def " %))))
        count))
 
 (defn- indexed-python-stop-count [index]

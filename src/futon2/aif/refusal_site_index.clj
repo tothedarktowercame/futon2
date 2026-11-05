@@ -48,7 +48,7 @@
         id-set (set ids)
         python-source "scripts/wm_click_repair_loop.py"
         python-text (slurp (io/file repo python-source))
-        python-stop-count (count (filter #(str/includes? % "return stop(args")
+        python-stop-count (count (filter #(and (re-find #"(?<![\w.])stop\(args" %) (not (re-find #"^\s*def " %)))
                                          (str/split-lines python-text)))
         indexed-python-count (count (filter #(= python-source (:source %)) sites))
         problems
