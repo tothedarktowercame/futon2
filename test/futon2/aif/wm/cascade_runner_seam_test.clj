@@ -6,7 +6,8 @@
   incomplete authoring the SAME phase is held as a typed, repairable
   open-cascade condition — never abstention, refusal or no-selection — and
   selection is never rerun."
-  (:require [clojure.edn :as edn]
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
@@ -74,7 +75,9 @@
   throw.  SEAM-OPTS reach the runner (cascade roots, readings, authoring);
   DECIDE-OPTS reach cascade-decision (the Packet B opt-in)."
   [read seam-opts decide-opts]
-  (let [selector-calls (atom 0)
+  (let [run-core? (:test/run-core? seam-opts)
+        seam-opts (dissoc seam-opts :test/run-core?)
+        selector-calls (atom 0)
         fx (@#'rfd/fixture read)
         select policy/select-action-cascades
         decision (:decision (with-redefs
@@ -84,15 +87,15 @@
                               (#'rfd/decide fx [(get-in fx [:rows :current])]
                                 {"M-current" 1} decide-opts)))
         cascades (temp-dir "seam-cascades-")
-        journal (temp-dir "seam-journal-")
+        journal (or (some-> (:execution-journal-root seam-opts) io/file)
+                    (temp-dir "seam-journal-"))
         phase-events (atom [])
         ;; this suite runs from an isolated Packet worktree, not the
         ;; canonical checkout the runner's source-drift guard pins to; the
         ;; guard is redef'd away HERE ONLY, with the runner otherwise real
-        result (with-redefs [runner/refuse-on-runner-source-drift! (fn [] nil)]
-                 (runner/run-opportunity!
-                (merge (fixture/isolated-runner-opts)
-                       {:judge-fn (fn [_] {:judgement (judgement-for decision)})
+        runner-opts
+        (merge (fixture/isolated-runner-opts)
+               {:judge-fn (fn [_] {:judgement (judgement-for decision)})
                         :selected-reading-ask-fn (fn [request]
                                                   {:request-id (:request-id request)
                                                    :by "stub-reader"
@@ -109,11 +112,65 @@
                         :dispatch-fn (fn [& _] (throw (ex-info "no enactment" {})))
                         :phase-log-fn #(swap! phase-events conj %)
                         :executable-cascade-root (.getPath cascades)
-                        :execution-journal-root (.getPath journal)}
-                       seam-opts)))]
+                :execution-journal-root (.getPath journal)}
+               seam-opts)
+        result (if run-core?
+                 (#'runner/run-opportunity-core! runner-opts)
+                 (with-redefs [runner/refuse-on-runner-source-drift! (fn [] nil)]
+                   (runner/run-opportunity! runner-opts)))]
     {:result result :decision decision ::selector-calls @selector-calls
      :phase-events @phase-events
      :cascades cascades :journal journal :click true}))
+
+(defn- stamp-rows [stamp-file]
+  (with-open [reader (io/reader stamp-file)]
+    (mapv #(json/parse-string % true) (line-seq reader))))
+
+(deftest execution-journal-files-are-stamped-at-the-write-site
+  (let [base (temp-dir "seam-journal-stamps-")
+        journal (io/file base "wm-execution-journals")
+        foreign (io/file journal "foreign-seat-output.edn")
+        click-id "wm-click-journal-stamps"
+        _ (do (io/make-parents foreign) (spit foreign "{:foreign true}"))
+        _click
+        (click! [px py]
+                {:execution-journal-root (.getPath journal)
+                 :test/run-core? true
+                 :click-id click-id
+                 :run-id "journal-stamp-run"
+                 :cascade-reading-pins
+                 {"M-current" {:excerpt-digest (hex [:excerpt])
+                               :analysis-digest (hex [:analysis])}}
+                 :cascade-occurrence-readings (fn [_] square-readings)}
+                {:bind-cascade-identity
+                 {:readings (fn [_] square-readings)}})
+        journal-files (->> (file-seq journal)
+                           (filter #(.isFile ^java.io.File %))
+                           (map #(.getCanonicalPath ^java.io.File %)) set)
+        stamp-file (io/file base "wm-write-stamps" (str click-id ".jsonl"))
+        rows (stamp-rows stamp-file)
+        stamped (set (map :path rows))]
+    (is (= (disj journal-files (.getCanonicalPath foreign)) stamped))
+    (is (= (count stamped) (count rows)) "one stamp per journal file")
+    (is (not (contains? stamped (.getCanonicalPath foreign))))
+    (is (every? #(= "cascade-decision/execute-selected-cascade!" (:writer %))
+                rows))))
+
+(deftest execution-journal-without-click-id-writes-no-stamps
+  (let [base (temp-dir "seam-journal-no-stamps-")
+        journal (io/file base "wm-execution-journals")]
+    (click! [px py]
+            {:execution-journal-root (.getPath journal)
+             :test/run-core? true
+             :run-id "journal-no-stamp-run"
+             :cascade-reading-pins
+             {"M-current" {:excerpt-digest (hex [:excerpt])
+                           :analysis-digest (hex [:analysis])}}
+             :cascade-occurrence-readings (fn [_] square-readings)}
+            {:bind-cascade-identity
+             {:readings (fn [_] square-readings)}})
+    (is (seq (filter #(.isFile ^java.io.File %) (file-seq journal))))
+    (is (not (.exists (io/file base "wm-write-stamps"))))))
 
 (deftest selected-cascade-is-bound-saved-validated-and-held-open
   (let [runtime-error (atom nil)

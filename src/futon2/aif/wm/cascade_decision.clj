@@ -33,6 +33,7 @@
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.token-outcome :as token-outcome]
+            [futon2.aif.write-stamp :as write-stamp]
             [futon2.aif.three-halves-square :as three-halves-square]
             [futon2.aif.three-halves-policy :as three-halves-policy]
             [futon2.aif.target-reading-registry :as reading-registry]
@@ -1743,9 +1744,24 @@
                         (if (seq bad-entries)
                           (fail :cascade-evidence-error :journal-entry-invalid
                                 {:refusals (mapv :refusal bad-entries)})
-                          (let [appended (vec (for [e journal-entries]
-                                                (execution-journal/append!
-                                                 (io/file journal-root cd) e)))]
+                          (let [appended
+                                (vec
+                                 (for [e journal-entries]
+                                   (let [result
+                                         (execution-journal/append!
+                                          (io/file journal-root cd) e)]
+                                     (when (:appended result)
+                                       (write-stamp/record!
+                                        {:root (io/file
+                                                (.getParentFile
+                                                 (io/file journal-root))
+                                                "wm-write-stamps")
+                                         :click-id (:click-id opts)
+                                         :run-id (:run-id opts)
+                                         :writer "cascade-decision/execute-selected-cascade!"
+                                         :path (.getCanonicalPath
+                                                (io/file (:path result)))}))
+                                     result)))]
                             (cond
                               (seq (get-in compiled-record [:frontier]))
                               (let [routing
