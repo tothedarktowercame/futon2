@@ -596,6 +596,7 @@
          entries (->> (or entities [])
                       (filter #(str/starts-with? (str (:entity/external-id %)) "M-"))
                       (map substrate-entity->entry)
+                      (remove #(derived-mission-id? (:id %)))
                       vec)]
      (when (empty? entries)
        (throw (ex-info "substrate-2 mission registry returned no missions"

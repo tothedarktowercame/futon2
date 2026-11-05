@@ -44,6 +44,17 @@
     [(entity "M-hinge" {})]
     #(is (= :unknown (:status-class (first (:missions (mr/load-missions))))))))
 
+(deftest substrate-reader-excludes-derived-mission-ids-like-file-reader
+  (let [props (fn [id]
+                {:provenance/path (str "/home/joe/code/futon0/holes/missions/" id ".md")
+                 :provenance/sha256 (apply str (repeat 64 "a"))
+                 :mission/status-class "active"})]
+    (with-substrate-entities
+      [(entity "M-parent" (props "M-parent"))
+       (entity "M-parent.derived" (props "M-parent.derived"))]
+      #(is (= ["M-parent"]
+              (mapv :id (:missions (mr/load-missions-from-substrate))))))))
+
 (deftest pathless-foreign-mission-is-typed-and-not-live-test
   (with-substrate-entities
     [(entity "M-ukrns-wp"
