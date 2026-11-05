@@ -371,6 +371,11 @@ records and notifies, and validates nothing).
      no-work set would have let them skip validation. No runner path sets
      `:empty-field`, so a runner abstention always becomes a debugger error.
      L1 is decided at step 2a. The close wiring is REFUSAL-VALIDATOR-1d.
+   - The restart controller `resolve-close-refusal` landed as `61a86354a`,
+     with the fix `ed91ad780`. On `:retry` it reads the carriers again, so a
+     live repair can release the hold. A `:use-value` keeps a record of what it
+     replaced. The only part left is wiring it into `close!`, which is
+     REFUSAL-VALIDATOR-1e.
    2a. **REFUSAL-VALIDATOR-OUTER.** The outer selector's own empty-field
    abstention never reaches runner `close!`. It returns `{:absent
    :no-task-selected}` directly (`full_loop_runtime.clj:1702-1707`), and the
