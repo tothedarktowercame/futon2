@@ -191,6 +191,19 @@
     (is (= [:none] (get-in result [:outer/selection :stopping-equivalent 0 :members])))
     (is (false? @called?))))
 
+(deftest no-target-disposition-is-checked-against-the-retained-admitted-field
+  (let [empty-field (#'runtime/work-exhausted-refusal {:outer-field/admitted []})
+        live-field (#'runtime/work-exhausted-refusal
+                    {:outer-field/admitted ["M-still-selectable"]})
+        missing-field (#'runtime/work-exhausted-refusal {})]
+    (is (= :loop-stop (:refusal/disposition empty-field)))
+    (is (= [] (get-in empty-field [:refusal/evidence :scoredField])))
+    (is (= :debugger-error (:refusal/disposition live-field)))
+    (is (= ["M-still-selectable"]
+           (get-in live-field [:refusal/evidence :scoredField])))
+    (is (= :debugger-error (:refusal/disposition missing-field)))
+    (is (nil? (get-in missing-field [:refusal/evidence :scoredField])))))
+
 (defn- record-files [dir]
   (filter #(and (.isFile %)
                 (.startsWith (.getName %) "tick-run-record-")
