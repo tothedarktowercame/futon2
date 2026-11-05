@@ -27,7 +27,15 @@
     (let [original-digest (:digest plan)
           changed (do (swap! heads assoc "/workspace/repo-c" "c-next")
                       (runner/repository-plan opts code-state entry locators))]
-      (is (not= original-digest (:digest changed))))
+      (is (not= original-digest (:digest changed)))
+      (swap! heads assoc "/workspace/repo-c" "c-base")
+      (is (= original-digest
+             (:digest (runner/repository-plan
+                       (assoc opts :repo-head-observation-fn
+                              (fn [repo] {:repo repo :head (get @heads repo)
+                                          :observed-at-ms 999}))
+                       code-state entry locators)))
+          "same heads observed later give the same plan"))
     (testing "a deferred context cannot drop a member or substitute a head"
       (let [context {:schema :wm/deferred-author-dispatch-context-v1
                      :target "target" :repository "/workspace/repo-a"

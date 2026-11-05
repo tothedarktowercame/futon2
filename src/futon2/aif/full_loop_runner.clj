@@ -1814,9 +1814,11 @@
                                 {:unresolved unresolved :reasons [reason]})))
         allowed (mapv (fn [repo]
                         (let [observation (observe-repo-head opts repo)]
+                          ;; No observation time: the digest binds which
+                          ;; repositories and heads, so the same heads give
+                          ;; the same plan.
                           {:repo repo
-                           :base-head (:head observation)
-                           :observed-at-ms (:observed-at-ms observation)}))
+                           :base-head (:head observation)}))
                       known)
         plan {:schema :wm/repository-plan-v1
               :required (into resolved unresolved)
@@ -9563,8 +9565,7 @@
                        (sort-by pr-str)
                        vec))
                  :mission-source-sha256 (get-in mission [:source :sha256])
-                 :base-head (:head pre-author-head)
-                 :repository-plan repository-plan}
+                 :base-head (:head pre-author-head)}
                 _effective-run-comparison
                 (run-phase!
                  opts @phase-context :effective-run-comparison
@@ -9590,7 +9591,6 @@
                  :construction-sha256 (sha256 construction)
                  :repository author-repo
                  :pre-author-head (:head pre-author-head)
-                 :repository-plan repository-plan
                  :d-task-dispatch-sha256 (sha256 @d-task-dispatch)
                  :mission-baseline-sha256 (sha256 mission-baseline)}
                 _outer-repeat-comparison
