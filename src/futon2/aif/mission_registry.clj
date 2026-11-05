@@ -37,6 +37,26 @@
 (def ^:private mission-path-pattern
   #".*/holes/(?:missions/)?(M-[^/]+)\.md$")
 
+(def ^:private ticket-path-pattern
+  #".*/holes/tickets/(T-[^/]+)\.md$")
+
+(def ^:private excursion-path-pattern
+  #".*/holes/(?:excursions/)?(E-[^/]+)\.md$")
+
+(defn task-document-kind
+  "Return the canonical census kind for PATH, or nil.
+
+  This is the shared structural contract for change triggers and the file
+  census. Checkout authority and duplicate fences remain the loaders' job."
+  [path]
+  (let [path (str "/" (str/replace (str path) #"^/+" ""))]
+    (when (= 1 (count (re-seq #"/holes/" path)))
+      (cond
+        (re-matches mission-path-pattern path) :mission
+        (re-matches excursion-path-pattern path) :excursion
+        (re-matches ticket-path-pattern path) :ticket
+        :else nil))))
+
 (def ^:private status-line-pattern
   #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Status:?(?:\*\*)?\s*:?\s*(.+)$")
 
@@ -580,7 +600,7 @@
          missions (->> mission-files
                        (filter #(.isFile %))
                        (map #(.getAbsolutePath %))
-                       (filter #(re-matches mission-path-pattern %))
+                       (filter #(= :mission (task-document-kind %)))
                        (remove sandbox-path?)
                        ;; Keep cross-repo and known-copy exclusions alongside
                        ;; the structural repository filter above.
@@ -956,7 +976,7 @@
          (mapcat #(or (.listFiles ^File %) (make-array File 0)))
          (filter #(.isFile ^File %))
          (map #(.getAbsolutePath ^File %))
-         (filter #(re-matches #".*/holes/tickets/T-[^/]+\.md$" %))
+         (filter #(= :ticket (task-document-kind %)))
          (remove sandbox-path?)
          (remove #(non-primary-path? (str/replace % "/holes/tickets/" "/holes/missions/")))
          (sort-by (juxt count identity))
@@ -1012,9 +1032,6 @@
 ;; fence, same Status-line classification, same dedupe. The pre-H5b loop had
 ;; no excursion enumerator; the three work-target kinds are M-, E- and T-
 ;; (PROOF-2a Clause T), so this is the third, built like the other two.
-(def ^:private excursion-path-pattern
-  #".*/holes/(?:excursions/)?(E-[^/]+)\.md$")
-
 (defn- excursion-doc->entry [path]
   (let [text (slurp path)
         lines (str/split-lines text)
@@ -1043,7 +1060,7 @@
          (mapcat #(or (.listFiles ^File %) (make-array File 0)))
          (filter #(.isFile ^File %))
          (map #(.getAbsolutePath ^File %))
-         (filter #(re-matches excursion-path-pattern %))
+         (filter #(= :excursion (task-document-kind %)))
          (remove sandbox-path?)
          (remove non-primary-path?)
          (sort-by (juxt count identity))

@@ -23,6 +23,18 @@
 
 (use-fixtures :each with-tmpdir)
 
+(deftest task-document-kind-is-the-census-path-contract
+  (is (= :mission (mr/task-document-kind "/code/futon4/holes/M-root.md")))
+  (is (= :mission (mr/task-document-kind "/code/futon4/holes/missions/M-nested.md")))
+  (is (= :excursion (mr/task-document-kind "/code/futon4/holes/E-root.md")))
+  (is (= :excursion (mr/task-document-kind "/code/futon4/holes/excursions/E-nested.md")))
+  (is (= :ticket (mr/task-document-kind "/code/futon4/holes/tickets/T-one.md")))
+  (is (nil? (mr/task-document-kind "/code/futon4/holes/labs/M-false.md")))
+  (is (nil? (mr/task-document-kind
+             "/code/futon4/holes/labs/run/authority/holes/missions/M-snapshot.md"))
+      "a nested snapshot is not an immediate census document")
+  (is (nil? (mr/task-document-kind "/code/futon4/holes/qa/T-not-a-ticket.md"))))
+
 (defn- write-mission!
   [relative-path body]
   (let [path (io/file *tmpdir* relative-path)]
