@@ -216,20 +216,53 @@
                  :artifact-binding (assoc binding :commit nil)}))))
     binding)))
 
+(defn author-job-ids
+  "Agency job ids under which this author's commits may have been signed: the
+  job itself and the original request of any bounded correction round."
+  [author-job]
+  (->> (concat [(:job-id author-job)]
+               (map #(get-in % [:original :request :job-id])
+                    (:author-response-corrections author-job))
+               (map #(get-in % [:request :job-id])
+                    (:author-response-corrections author-job)))
+       (filter string?)
+       set))
+
+(defn commits-signed-by-jobs?
+  "True when some commit in BASE..HEAD of REPO carries an Agency-Job trailer
+  naming one of JOB-IDS.  Shared checkouts move under other agents, so a moved
+  HEAD alone does not show that this author changed the repository."
+  [opts repo base head job-ids]
+  (if-let [f (:commits-signed-by-jobs-fn opts)]
+    (boolean (f repo base head job-ids))
+    (let [result (git repo "log" "--format=%(trailers:key=Agency-Job,valueonly)"
+                      (str base ".." head))]
+      (and (zero? (:exit result))
+           (boolean (some job-ids (map str/trim (str/split-lines (:out result)))))))))
+
 (defn fresh-artifact-binding-set
   "Corroborate a present multi-repository declaration against PLAN. Every
-  allowed repository is observed so the declared repository set must equal the
-  set that actually changed; each member then passes fresh-artifact-binding in
-  its own repository from its own dispatch base."
+  allowed repository is observed. A repository counts as changed by this
+  author when its HEAD moved and the new range holds a commit signed with the
+  author's Agency job; HEAD movement from other agents in shared checkouts is
+  not the author's change. The declared set must equal that changed set and
+  each member then passes fresh-artifact-binding in its own repository from
+  its own dispatch base."
   [opts plan author-window-start-ms author-job declaration]
   (let [allowed (:allowed plan)
         afters (mapv (fn [{:keys [repo]}] (observe-repo-head opts repo)) allowed)
+        job-ids (author-job-ids author-job)
+        declared (set (map :repo (:members declaration)))
         changed (->> (map vector allowed afters)
                      (keep (fn [[before after]]
-                             (when (not= (:base-head before) (:head after))
-                               (:repo before))))
-                     set)
-        declared (set (map :repo (:members declaration)))]
+                             (let [base (:base-head before) head (:head after)]
+                               (when (and base head (not= base head)
+                                          (or (contains? declared (:repo before))
+                                              (commits-signed-by-jobs?
+                                               opts (:repo before) base head
+                                               job-ids)))
+                                 (:repo before)))))
+                     set)]
     (when-not (= declared changed)
       (throw (ex-info "Declared repositories do not equal changed repositories"
                       {:outcome :build-failed

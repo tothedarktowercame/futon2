@@ -4911,9 +4911,12 @@
         base-head (:head pre-author-head)
         original-request-id (:job-id author-response)
         original-verdict (author-verdict author-job)
+        ;; A job never passed through retain-artifact-declaration has no
+        ;; status; that is not a declaration defect.
+        declaration-status (get-in author-job [:artifact-declaration :status])
         declaration-defect?
-        (not (contains? #{:present :absent}
-                        (get-in author-job [:artifact-declaration :status])))
+        (and (some? declaration-status)
+             (not (contains? #{:present :absent} declaration-status)))
         trigger? (and (= "done" (:state author-job))
                       (not= "cancelled" (:state author-job))
                       (string? original-request-id)
@@ -10024,7 +10027,8 @@
               (throw-if-author-refused! author-job target :author-wait)
               (let [bound-author? (or fresh-author? (some? deferred-author-context))
                     declaration (:artifact-declaration author-job)
-                    _ (when (and (not (contains? #{:present :absent} (:status declaration)))
+                    _ (when (and (some? (:status declaration))
+                                 (not (contains? #{:present :absent} (:status declaration)))
                                  bound-author?)
                         (throw (ex-info "Author artifact declaration is defective"
                                         {:outcome :build-failed

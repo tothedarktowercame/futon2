@@ -21,11 +21,15 @@
     (git repo "commit" "-q" "-m" "base")
     (.getCanonicalPath repo)))
 
-(defn- commit! [repo text]
-  (spit (io/file repo "artifact.txt") text)
-  (git repo "add" "artifact.txt")
-  (git repo "commit" "-q" "-m" text)
-  (git repo "rev-parse" "HEAD"))
+(defn- commit!
+  ([repo text] (commit! repo text nil))
+  ([repo text agency-job]
+   (spit (io/file repo "artifact.txt") text)
+   (git repo "add" "artifact.txt")
+   (if agency-job
+     (git repo "commit" "-q" "-m" text "-m" (str "Agency-Job: " agency-job))
+     (git repo "commit" "-q" "-m" text))
+   (git repo "rev-parse" "HEAD")))
 
 (defn- plan [repos bases]
   {:schema :wm/repository-plan-v1 :required []
@@ -38,10 +42,10 @@
         a (repo! root "repo-a") b (repo! root "repo-b")
         bases {a (git a "rev-parse" "HEAD") b (git b "rev-parse" "HEAD")}
         started (System/currentTimeMillis)
-        ca (commit! a "change-a\n") cb (commit! b "change-b\n")
+        ca (commit! a "change-a\n" "job-author") cb (commit! b "change-b\n" "job-author")
         members [{:repo a :commit ca} {:repo b :commit cb}]
         declaration {:status :present :members members :plan-digest "plan-digest"}
-        job {:state "done" :artifact-ref ca
+        job {:state "done" :job-id "job-author" :artifact-ref ca
              :result (str "FULL_LOOP_ARTIFACTS: " (pr-str members) "\n"
                           "FULL_LOOP_AUTHOR: DONE " ca)}
         receipt (evidence/fresh-artifact-binding-set
@@ -49,7 +53,7 @@
     (is (= :wm/artifact-binding-set-v1 (:schema receipt)))
     (is (= [a b] (mapv :repo (:bindings receipt))))
     (is (every? :corroborates? (:bindings receipt)))
-    (testing "declaring one repository while two changed is a typed defect"
+    (testing "declaring one repository while the author's job signed commits in two is a typed defect"
       (let [ex (try
                  (evidence/fresh-artifact-binding-set
                   {} (plan [a b] bases) started job
@@ -57,6 +61,13 @@
                  nil (catch clojure.lang.ExceptionInfo e e))]
         (is (= :artifact-declaration/repository-set-mismatch
                (get-in (ex-data ex) [:author-response-defect :kind])))))
+    (testing "another agent's commit in an undeclared shared repository is not the author's change"
+      (let [d (repo! root "repo-d") base-d (git d "rev-parse" "HEAD")]
+        (commit! d "other agent\n")
+        (let [receipt (evidence/fresh-artifact-binding-set
+                       {} (plan [a b d] (assoc bases d base-d)) started
+                       job declaration)]
+          (is (= [a b] (mapv :repo (:bindings receipt)))))))
     (testing "a declared commit outside its member base ancestry is typed"
       (let [c (repo! root "repo-c") base (git c "rev-parse" "HEAD")]
         (git c "checkout" "-q" "--orphan" "unrelated")

@@ -1854,7 +1854,11 @@
   (let [prompt (#'runner/author-prompt
                 {:author "author" :reviewer "reviewer"
                  :target-repository "/home/joe/code/futon2"
-                 :target-repository-head "base123"}
+                 :target-repository-head "base123"
+                 :repository-plan
+                 {:allowed [{:repo "/home/joe/code/futon2" :base-head "base123"}
+                            {:repo "/home/joe/code/futon3c" :base-head "base456"}]
+                  :digest "plan-digest"}}
                 "repair-artifact-binding"
                 {:selected-entry
                  {:action
@@ -1863,9 +1867,11 @@
                 {} [])]
     (is (re-find #"TARGET REPOSITORY: \"/home/joe/code/futon2\"" prompt))
     (is (re-find #"TARGET REPOSITORY BASE HEAD: \"base123\"" prompt))
-    (is (re-find #"nested in the mission record are context" prompt))
-    (is (re-find #"commit elsewhere is an artifact-binding mismatch" prompt))
-    (is (re-find #"make no commit and REFUSE" prompt))))
+    (is (re-find #"\"/home/joe/code/futon3c\" @ \"base456\"" prompt)
+        "every planned repository is listed with its runner-observed base")
+    (is (re-find #"no repository outside it" prompt))
+    (is (re-find #"FULL_LOOP_ARTIFACTS: \[" prompt))
+    (is (not (re-find #"only in TARGET REPOSITORY" prompt)))))
 
 (deftest revision-contract-names-the-bound-repository
   ;; Planted regression, run 2026-11-04-880b97dd (repair

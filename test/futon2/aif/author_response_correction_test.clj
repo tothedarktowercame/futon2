@@ -51,6 +51,7 @@
              (#'runner/author-response-correction-loop
               opts {} "author" (atom 0) "M-target" "/repo"
               {:repo "/repo" :head base :observed-at-ms 1}
+              nil
               {:construction-kind :synthetic
                :selected-action {:type :synthetic :target "M-target"}}
               {:job-id "original-1"}
@@ -157,6 +158,7 @@
              (#'runner/author-response-correction-loop
               opts {} "author" (atom 0) "M-target" "/repo"
               {:repo "/repo" :head base}
+              nil
               {:construction-kind :synthetic} {:job-id "original-1"}
               "ORIGINAL PROMPT" (done "original-1" "author" base))
              nil
