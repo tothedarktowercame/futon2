@@ -81,3 +81,26 @@
            (get-in b [:carrier :question-digest])))
     (is (not= (get-in a [:carrier :question-digest])
               (get-in c [:carrier :question-digest])))))
+
+(deftest question-needs-cited-ambiguity-refuses-quote-one-line-off
+  ;; The quote is real mission text, but it sits on line 3, not line 2.
+  (let [result (sut/question-carrier "M-example" mission-text source-pin
+                                     (assoc-in question [:span :lines] [2 2])
+                                     reading-receipt)]
+    (is (= {:status :refused :reason :question-span-does-not-resolve}
+           result))))
+
+(deftest ambiguity-cited-rejects-tampered-or-stale-carrier
+  (let [carrier (:carrier (sut/question-carrier "M-example" mission-text
+                                                source-pin question
+                                                reading-receipt))]
+    (testing "an edited reading no longer matches the stored digest"
+      (is (not (sut/ambiguity-cited?
+                (assoc-in carrier [:ambiguity :alternatives 1] "Use main")
+                mission-text))))
+    (testing "the span moved one line keeps the digest check from passing"
+      (is (not (sut/ambiguity-cited?
+                (assoc-in carrier [:ambiguity :span :lines] [2 2])
+                mission-text))))
+    (testing "mission bytes changed since the pin"
+      (is (not (sut/ambiguity-cited? carrier (str mission-text "x\n")))))))
