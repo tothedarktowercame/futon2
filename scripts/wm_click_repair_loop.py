@@ -279,7 +279,10 @@ def write_click_manifest(click: dict, started: str, ended: str,
         "stamp_lines_unreadable": stamp_lines_unreadable,
         "attribution_note": ("click-window means the path changed while this click ran; "
                              "it does not prove that the click was the writer. Never delete "
-                             "or move a listed path on this evidence."),
+                             "or move a listed path on this evidence. stamped means a writer "
+                             "claimed the path in the click's stamp file; any process that can "
+                             "write that file can make the claim, so it names a writer, it "
+                             "does not prove one."),
     }
     safe_id = re.sub(r"[^A-Za-z0-9._-]", "_",
                      str(click.get("click-id") or f"click-unknown-{click.get('n', 'unknown')}"))

@@ -159,6 +159,45 @@ class RepairLoopCastTest(unittest.TestCase):
             # root once, nested skipped; then root and later
             self.assertEqual(3, walked.call_count)
 
+    def test_stamp_outside_window_or_other_click_adds_nothing(self):
+        # claude-6 review: a stamp only labels a path the census saw change.
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            root = base / "repo"
+            stamps = base / "stamps"
+            root.mkdir()
+            stamps.mkdir()
+            unchanged = root / "unchanged.edn"
+            unchanged.write_text("same")
+            changed = root / "changed.edn"
+
+            def fake_fire(n, args, since):
+                changed.write_text("new")
+                rows = [{"path": str(unchanged.resolve()), "writer": "w",
+                         "click-id": "wm-click-a"},
+                        {"path": str(base / "nowhere.edn"), "writer": "w",
+                         "click-id": "wm-click-a"},
+                        {"path": str(changed.resolve()), "writer": "w",
+                         "click-id": "wm-click-other"}]
+                (stamps / "wm-click-a.jsonl").write_text(
+                    "".join(json.dumps(r) + "\n" for r in rows))
+                return {"n": n, "click-id": "wm-click-a", "outcome": "ok",
+                        "since-epoch": since}
+
+            with mock.patch.object(loop, "STATE", base / "state"), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "WRITE_STAMP_ROOT", stamps), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire):
+                click = loop.fire_with_write_manifest(1, object(), 123)
+
+            manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
+            self.assertEqual([str(changed.resolve())],
+                             [e["path"] for e in manifest["entries"]])
+            self.assertEqual("click-window", manifest["entries"][0]["attribution"])
+            self.assertEqual(0, manifest["stamped_count"])
+            self.assertEqual(1, manifest["stamp_lines_unreadable"])
+
     def test_click_write_manifest_registers_window_changes_and_ledger_pin(self):
         loop = load_loop()
         real_data = ROOT / "data"
