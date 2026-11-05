@@ -10553,7 +10553,8 @@
                       initial-reviewer-falsifier-verification
                       reviewer-falsifier-verification
                       falsifier-revision?
-                      (and (genuine-reviewer-falsification?
+                      (and (:passed? review-gate)
+                           (genuine-reviewer-falsification?
                             reviewer-falsifier-verification)
                            (pos? (long (or (:revision-rounds prompt-opts) 0))))
                       falsifier-revision-state
