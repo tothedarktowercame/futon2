@@ -532,6 +532,19 @@ class ContinuousModeTest(unittest.TestCase):
                 'WM_COST_PHASE {"phase":"server-execution","wall-ms":80,'
                 '"source":"launcher-monotonic"}\n')
             ledger = root / "ledger.jsonl"
+            state = root / "state"
+            state.mkdir()
+            (state / "seat-calls.jsonl").write_text(
+                json.dumps({"schema": "wm/click-seat-call-v1",
+                            "click-id": "wm-click-1", "run-id": "run-1",
+                            "role": "meta-diagnosis", "phase": "meta-self-heal",
+                            "job-id": "job-meta", "seat": "zai-1",
+                            "session-id": "session-1", "at": "2026-11-05T00:00:00Z"}) + "\n" +
+                json.dumps({"schema": "wm/click-seat-call-v1",
+                            "click-id": "some-other-click",
+                            "role": "readiness-author", "phase": "ticket-readiness",
+                            "job-id": {"status": "typed-missing",
+                                       "reason": "job-id-not-retained"}}) + "\n")
             ordinary = {
                 "n": 1, "click-id": "wm-click-1", "run-id": "run-1",
                 "run-record": str(record_path), "log": str(click_log),
@@ -541,6 +554,7 @@ class ContinuousModeTest(unittest.TestCase):
                 "n": 2, "click-id": None, "run-id": None, "run-record": None,
             }
             with mock.patch.object(loop, "LEDGER", ledger), \
+                 mock.patch.object(loop, "STATE", state), \
                  mock.patch.object(loop, "F2", ROOT):
                 loop.record_cost_receipt(ordinary, 321)
                 loop.record({"event": "click", "click-id": "wm-click-1"})
@@ -573,11 +587,13 @@ class ContinuousModeTest(unittest.TestCase):
             job = next(call for call in receipt["model-usage"]["calls"]
                        if call.get("job-id") == "job-1")
             self.assertEqual(120, job["total-tokens"])
-            missing = [call for call in receipt["model-usage"]["calls"]
-                       if call.get("status") == "typed-missing"]
-            self.assertTrue(missing)
-            self.assertTrue(all("total-tokens" not in call for call in missing))
-            self.assertTrue(all(call["reason"] == "job-id-not-retained" for call in missing))
+            direct = [call for call in receipt["model-usage"]["calls"]
+                      if call.get("role") == "meta-diagnosis"]
+            self.assertEqual(1, len(direct))
+            self.assertEqual("job-meta", direct[0]["job-id"])
+            self.assertEqual("identified", direct[0]["status"])
+            self.assertFalse(any(call.get("role") == "readiness-author"
+                                 for call in receipt["model-usage"]["calls"]))
             self.assertEqual("not-applicable",
                              next(call for call in receipt["model-usage"]["calls"]
                                   if call["role"] == "selection")["status"])
@@ -586,6 +602,9 @@ class ContinuousModeTest(unittest.TestCase):
             self.assertEqual(45, absent["wall"]["total-ms"])
             self.assertEqual("typed-missing", absent["wall"]["phases"][0]["status"])
             self.assertNotIn("wall-ms", absent["wall"]["phases"][0])
+            self.assertFalse(any(call.get("role", "").startswith("meta-") or
+                                 call.get("role") == "readiness-author"
+                                 for call in absent["model-usage"]["calls"]))
 
     def test_repeated_signature_pauses_the_loop_once_the_fix_is_due(self):
         r = self.run_continuous([{"alert": ["work Q7 violated"]},

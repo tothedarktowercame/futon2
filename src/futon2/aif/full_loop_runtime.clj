@@ -44,6 +44,7 @@
             [futon2.aif.interpretation-request :as interpretation-request]
             [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
+            [futon2.aif.seat-call-index :as seat-call-index]
             [futon2.aif.wm.click-ask :as click-ask]
             [futon2.aif.wm.open-cascade-resume :as open-resume]
             [futon2.aif.wm.on-prod-history :as on-prod-history]
@@ -365,11 +366,22 @@
      :answer-fn (fn [proposal]
                   (let [prompt-result (ticket-readiness-prompt opts proposal)
                         response (if (= :ready (:status prompt-result))
-                                   (merge (contact prompt-result)
+                                   (let [contact-response (contact prompt-result)]
+                                     (when-not (= :not-contacted (:state contact-response))
+                                       (seat-call-index/append!
+                                        {:click-id (:click-id opts)
+                                         :parent-click-id (:parent-click-id opts)
+                                         :run-id (:run-id opts)
+                                         :role :readiness-author
+                                         :phase :ticket-readiness
+                                         :job-id (seat-call-index/job-id contact-response)
+                                         :seat (:author opts)
+                                         :session-id (:session-id contact-response)}))
+                                     (merge contact-response
                                           (select-keys prompt-result
                                                        [:prompt-chars
                                                         :prompt-budget-chars
-                                                        :proposal-pin]))
+                                                        :proposal-pin])))
                                    prompt-result)
                         answer (handoff/response-map response)
                         result-pin (ticket-readiness/retain-contact-result!

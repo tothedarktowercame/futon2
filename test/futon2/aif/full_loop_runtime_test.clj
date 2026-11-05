@@ -20,6 +20,7 @@
             [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
             [futon2.aif.ticket-readiness :as ticket-readiness]
+            [futon2.aif.seat-call-index :as seat-call-index]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.selected-target-reading :as selected-target-reading]
             [futon2.aif.occurrence-square-authoring :as square-authoring]
@@ -728,11 +729,13 @@
 
 (deftest readiness-dispatch-uses-the-run-local-job-ledger
   (let [dir (f32-root)
+        seat-call-path (str dir "/seat-calls.jsonl")
         ledger (atom {:order [] :jobs {}})
         posted (atom nil)
         resolved-opts (atom nil)
         failure (atom nil)]
-    (with-redefs [runner/agent-roster
+    (binding [seat-call-index/*path* seat-call-path]
+      (with-redefs [runner/agent-roster
                   (constantly {"wm-author" {:status :idle :invoke-ready? true}})
                   http/post (fn [_ request]
                               (reset! posted (json/parse-string (:body request) true))
@@ -754,18 +757,24 @@
                                                :click-id "readiness-live-click")]
                       (runner/ticket-readiness-refresh-step live-opts)
                       {:status :ran}))]
-      (run-supplied-task!
-       {:meta-injury-ledger-path (str dir "/ledger.edn")
-        :meta-repair-transaction-path (str dir "/transaction.edn")
-        :ticket-readiness-manifest-path (str dir "/readiness.edn")
-        :run-id "readiness-live-run" :author "wm-author"}))
+        (run-supplied-task!
+         {:meta-injury-ledger-path (str dir "/ledger.edn")
+          :meta-repair-transaction-path (str dir "/transaction.edn")
+          :ticket-readiness-manifest-path (str dir "/readiness.edn")
+          :run-id "readiness-live-run" :author "wm-author"})))
     (is (nil? @failure) (pr-str @failure))
     (is (= "readiness-live-click" (get-in @posted [:harness :source-ref])))
     (is (= "readiness-live-run" (get-in @posted [:harness :execution-id])))
     (is (= ["readiness-job"] (:order @ledger)))
     (is (= "readiness-live-click" (get-in @ledger [:jobs "readiness-job" :click-id])))
     (is (identical? ledger (:registered-run/job-ledger @resolved-opts)))
-    (is (= "readiness-live-click" (:click-id @resolved-opts)))))
+    (is (= "readiness-live-click" (:click-id @resolved-opts)))
+    (let [rows (map #(json/parse-string % true)
+                    (str/split-lines (slurp seat-call-path)))]
+      (is (= 1 (count rows)))
+      (is (= "readiness-live-click" (:click-id (first rows))))
+      (is (= "readiness-author" (:role (first rows))))
+      (is (= "readiness-job" (:job-id (first rows)))))))
 
 (deftest selected-target-answer-is-built-with-the-run-local-job-ledger
   (let [ledger (atom {:order [] :jobs {}})

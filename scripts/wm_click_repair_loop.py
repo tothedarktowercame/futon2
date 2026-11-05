@@ -140,12 +140,6 @@ CLICK_ENVELOPE_PHASES = [
 ]
 PHASE_BOUNDARY_PREFIX = "WM_COST_PHASE "
 
-MODEL_CALL_GAPS = [
-    "readiness-author", "meta-diagnosis", "meta-acceptance-proposal",
-    "meta-acceptance-review", "meta-repair-author", "meta-repair-reviewer",
-]
-
-
 def run_cost_projection(run_record: str | None) -> dict:
     """Read only the two cost-bearing run fields through Clojure's EDN reader.
 
@@ -172,6 +166,36 @@ def run_cost_projection(run_record: str | None) -> dict:
 
 def _typed_missing(reason: str) -> dict:
     return {"status": "typed-missing", "reason": reason}
+
+
+def indexed_seat_calls(click_id: str | None) -> list[dict]:
+    """Project only durable seat identities belonging to this click."""
+    if not click_id:
+        return []
+    path = STATE / "seat-calls.jsonl"
+    if not path.is_file():
+        return []
+    calls = []
+    for line in path.read_text(errors="replace").splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(row, dict) or row.get("click-id") != click_id:
+            continue
+        job_id = row.get("job-id")
+        call = {key: row[key] for key in
+                ("role", "phase", "seat", "session-id", "run-id", "parent-click-id")
+                if key in row}
+        if isinstance(job_id, str) and job_id:
+            call.update({"job-id": job_id, "status": "identified",
+                         "reason": "usage-not-yet-joined"})
+        elif isinstance(job_id, dict) and job_id.get("status") == "typed-missing":
+            call.update(_typed_missing(job_id.get("reason", "job-id-not-retained")))
+        else:
+            call.update(_typed_missing("job-id-not-retained"))
+        calls.append(call)
+    return calls
 
 
 def launcher_phase_timings(click: dict) -> dict[str, int]:
@@ -236,18 +260,23 @@ def cost_receipt(click: dict, total_ms: int) -> dict:
             calls.append(job)
     calls.append({"role": "selection", "status": "not-applicable",
                   "reason": "in-process-non-model-selection"})
-    calls.extend({"role": role, **_typed_missing("job-id-not-retained")}
-                 for role in MODEL_CALL_GAPS)
+    direct_calls = indexed_seat_calls(click.get("click-id"))
+    calls.extend(direct_calls)
 
     numeric_totals = {key: usage[key] for key in
                       ("input-tokens", "output-tokens", "total-tokens",
                        "cached-input-tokens", "uncached-input-tokens")
                       if isinstance(usage.get(key), int) and usage[key] >= 0}
-    totals = {"status": "partial", **numeric_totals,
-              "missing-call-count": len(MODEL_CALL_GAPS)}
+    unresolved = sum(call.get("status") in {"identified", "typed-missing"}
+                     for call in direct_calls)
+    totals = {"status": "partial" if unresolved else
+              (usage.get("status") or "typed-missing"), **numeric_totals}
+    if unresolved:
+        totals["missing-call-count"] = unresolved
     usage_status = usage.get("status")
     model_usage = {
-        "status": "partial",
+        "status": "partial" if unresolved else
+                  (usage_status if isinstance(usage_status, str) else "typed-missing"),
         "source-status": usage_status if isinstance(usage_status, str) else "typed-missing",
         "unit": "tokens", "calls": calls, "totals": totals,
     }
