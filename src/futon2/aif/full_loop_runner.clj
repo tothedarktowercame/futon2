@@ -2898,6 +2898,19 @@
                                    :occurrence-square-authoring] record))
          :record record}))))
 
+(defn occurrence-square-authoring-terminal-condition
+  "Project an unpublished square-authoring value into the same typed failure
+  that the detached outer boundary throws.  `run-phase!` evaluates this only
+  while the debugger is attached, so detached control flow is unchanged."
+  [result]
+  (let [record (:record result)]
+    (when (and record (not (:published record)))
+      (ex-info "Occurrence-square authoring failed before G"
+               {:outcome :incomplete
+                :failure-kind (:kind record)
+                :failure-stage :occurrence-square-authoring
+                :occurrence-square-authoring record}))))
+
 (defn selected-target-redecision-terminal?
   "False when the selected-target reading redecision reached the typed missing-
   square state that the immediately following authoring phase owns.  A debugger
@@ -8678,7 +8691,8 @@
                               :occurrence-square-authoring record}
                              e)))))))
              (fn [result]
-               {:authoring-status (get-in result [:record :status])}))
+               {:authoring-status (get-in result [:record :status])})
+             occurrence-square-authoring-terminal-condition)
             _occurrence-square-authoring-complete
             (when (and occurrence-square-authoring-record
                        (not (:published occurrence-square-authoring-record)))
