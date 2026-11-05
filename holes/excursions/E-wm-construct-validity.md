@@ -414,6 +414,22 @@ records and notifies, and validates nothing).
    evidence digest, consumed by preselection. It becomes
    `RefusalLegality.nextField`, and is lifted when the digest changes.
    `:already-satisfied` needs a measured satisfaction to qualify.
+   *Discovery (2026-11-05, C1-EXCLUSION-0, plus my count from
+   `outer-refusal-index.ednl`):*
+   - There are 6 indexed C1 closes, and 5 were re-selected on the very next
+     click.
+   - Several of those "already satisfied" claims were followed by grounded
+     work on the same target, with the same mission sha and base head. So
+     they were false.
+   - None of the 6 retained a measured satisfaction.
+   - Decisions:
+     - a row is written only for `:wants-measured true`;
+     - the digest is the mission source sha plus the policy id and the
+       compiled check-set sha, and not base-head;
+     - rows enter as `:forbidden-evidence`, so the existing validation in
+       `outer_select` applies;
+     - non-mission targets are deferred.
+   - Build: C1-EXCLUSION-1 (pure namespace), then the wiring.
 5. **C2-BRIEF-1.** The question carrier: the cited ambiguity and two
    readings, sent to `morning_brief/queue-item!`, plus the exclusion until
    answered.
