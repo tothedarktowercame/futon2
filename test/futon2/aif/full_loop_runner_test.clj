@@ -7678,8 +7678,10 @@
         {:keys [result]}
         (run-token-feature-card-attempt cohort (token-fixture/decision))
         retained (io/file root "test-cohort-exhaustion" "attempt-001" "retained")]
-    (is (= :build-failed (:outcome result)))
-    (is (= :invalid-close-outcome (get-in result [:data :failure-kind])))
+    ;; The incomplete loop receipt is rejected at selection, before close can
+    ;; retain either token-outcome artifact.
+    (is (= :no-selection (:outcome result)))
+    (is (= :no-selection (get-in result [:data :failure-kind])))
     (doseq [name ["token-outcome.edn" "surprises.edn"]]
       (is (not (.exists (io/file retained name)))
           (str "selection refusal precedes retained/" name)))))
