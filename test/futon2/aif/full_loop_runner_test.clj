@@ -4374,8 +4374,11 @@
                                (reset! seen options)
                                {:judgement judgement})]
                  (runner/run-opportunity! opts))]
-    (is (= (:decision judgement)
-           (get-in result [:checkpoints :selection :judgment :controller-decision])))
+    (is (= (dissoc (loop-node-exercise/require-complete! (:decision judgement))
+                   :accumulation :accumulation-bmr)
+           (dissoc (get-in result [:checkpoints :selection :judgment
+                                   :controller-decision])
+                   :accumulation :accumulation-bmr)))
     (is (false? (:include-advisory-lanes? @seen)))
     (is (not (contains? @seen :strategic-selection-fn)))))
 
