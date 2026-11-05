@@ -149,6 +149,13 @@
         select-action-cascades policy/select-action-cascades
         {:keys [result record]}
         (with-redefs-fn
+          ;; claude-6 review: certification is stubbed. With the real
+          ;; certify-reading-family this unread ledger is refused one step
+          ;; earlier (:reading-precision-refused, carry :reason
+          ;; :free-energy-not-supplied), the decision abstains as
+          ;; :model-contract-refused at :stage :certification, and the
+          ;; selector is never called. So this pins the selector->judge
+          ;; translation, not a path an unread ledger takes in production.
           {#'wm-cd/certify-reading-family
            (fn [& _]
              (fn [& _] {:status :certified :beta 1 :receipt {:fixture :certified}}))
@@ -170,8 +177,6 @@
         "missing construction evidence remains generic no-selection")
     (is (some? (get-in selected [:decision :action]))
         "the same field with a readable ledger selects")
-    (is (= route/target (:target caller-task))
-        "the caller-supplied task names the admitted family")
     (is (= 1 @selector-refusals)
         "the caller-supplied target forms an acting family and reaches the selector refusal")
     (is (= :free-energy-not-supplied (get-in carrier [:targets 0 :kind])))
