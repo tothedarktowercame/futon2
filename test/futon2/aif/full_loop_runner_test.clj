@@ -2938,7 +2938,8 @@
 
 (defn- run-revision-attempt
   [review-verdicts & [{:keys [revision-rounds runner-options author-commits]}]]
-  (let [phases (atom [])
+  (let [cohort (retention-cohort "revision-attempt")
+        phases (atom [])
         dispatches (atom [])
         queued (atom [])
         deliveries (atom [])
@@ -2953,7 +2954,9 @@
         (cond->
          (merge
           (isolated-runner-opts)
-          {:phase-log-fn #(swap! phases conj %)
+          {:cohort? true
+           :execution-cohort (:binding cohort)
+           :phase-log-fn #(swap! phases conj %)
            :repair-open-fn (constantly [])
            :repair-record-fn
            (fn [finding] (assoc finding :repair/id "review-finding"))
