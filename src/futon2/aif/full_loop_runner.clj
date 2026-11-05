@@ -5561,6 +5561,25 @@
                     :artifact-binding {:commit revision-commit}
                     :review (second reviews)}})))))
 
+(defn- genuine-reviewer-falsification?
+  "Only an applicable-check failure is a finding about the reviewed artifact.
+  Verification/schema/input failures belong to the falsifier infrastructure and
+  must not be handed to the author as implementation feedback."
+  [verification]
+  (= :reviewer-falsifier-applicable-check-failed (:reason verification)))
+
+(defn- reviewer-falsifier-review-job
+  "Adapt a genuine machine finding to the existing, bounded revision seam."
+  [verification]
+  {:job-id (str "reviewer-falsifier/" (or (get-in verification [:receipt :receipt/id])
+                                           "unidentified"))
+   :state "done"
+   :result-summary
+   (str "FULL_LOOP_REVIEW: REQUEST_CHANGES "
+        "The reviewer falsifier rejected the reviewed artifact.\n"
+        "REVIEWER FALSIFIER FINDING (VERBATIM):\n"
+        (pr-str verification))})
+
 (defn- find-commit-repo [commit]
   (some (fn [repo]
           (let [r (git repo "cat-file" "-e" (str commit "^{commit}"))]
@@ -9975,8 +9994,9 @@
                       review-gate (:review-gate revision-state)
                       reviews (:reviews revision-state)
                       revision (:revision revision-state)
-                      reviewer-falsifier-input
-                      (let [measurements
+                      reviewer-falsifier-input-fn
+                      (fn [repo commit construction artifact-binding review-gate]
+                        (let [measurements
                             (d-task/artifact-tokens
                              (get-in @d-task-dispatch [:dispatch]) repo commit)
                             comparison
@@ -10022,12 +10042,63 @@
                          :selected-want-outcomes outcomes
                          :disposition nil
                          :artifact-binding artifact-binding
-                         :review-gate review-gate})
+                         :review-gate review-gate}))
+                      reviewer-falsifier-input
+                      (reviewer-falsifier-input-fn
+                       repo commit construction artifact-binding review-gate)
                       reviewer-falsifier-receipt
                       (reviewer-falsifier/receipt reviewer-falsifier-input)
                       reviewer-falsifier-verification
                       (reviewer-falsifier/verify reviewer-falsifier-receipt
                                                  reviewer-falsifier-input)
+                      initial-reviewer-falsifier-receipt reviewer-falsifier-receipt
+                      initial-reviewer-falsifier-verification
+                      reviewer-falsifier-verification
+                      falsifier-revision?
+                      (and (genuine-reviewer-falsification?
+                            reviewer-falsifier-verification)
+                           (pos? (long (or (:revision-rounds prompt-opts) 0))))
+                      falsifier-revision-state
+                      (when falsifier-revision?
+                        (let [falsifier-review-job
+                              (reviewer-falsifier-review-job
+                               reviewer-falsifier-verification)]
+                          (run-revision-round
+                           prompt-opts @phase-context author reviewer dispatched-turns
+                           target (assoc construction :mission-entry mission)
+                           repo commit files author-job artifact-binding
+                           falsifier-review-job review-gate stop-lines)))
+                      commit (or (:commit falsifier-revision-state) commit)
+                      repo (or (:repo falsifier-revision-state) repo)
+                      files (or (:files falsifier-revision-state) files)
+                      author-job (or (:author-job falsifier-revision-state) author-job)
+                      artifact-binding
+                      (or (:artifact-binding falsifier-revision-state) artifact-binding)
+                      review-job (or (:review-job falsifier-revision-state) review-job)
+                      review-gate (or (:review-gate falsifier-revision-state) review-gate)
+                      reviews (or (:reviews falsifier-revision-state) reviews)
+                      revision (or (:revision falsifier-revision-state) revision)
+                      reviewer-falsifier-input
+                      (if falsifier-revision-state
+                        (reviewer-falsifier-input-fn
+                         repo commit construction artifact-binding review-gate)
+                        reviewer-falsifier-input)
+                      reviewer-falsifier-receipt
+                      (if falsifier-revision-state
+                        (reviewer-falsifier/receipt reviewer-falsifier-input)
+                        reviewer-falsifier-receipt)
+                      reviewer-falsifier-verification
+                      (if falsifier-revision-state
+                        (reviewer-falsifier/verify reviewer-falsifier-receipt
+                                                   reviewer-falsifier-input)
+                        reviewer-falsifier-verification)
+                      reviewer-falsifier-attempts
+                      (cond-> [{:receipt initial-reviewer-falsifier-receipt
+                                :verification
+                                initial-reviewer-falsifier-verification}]
+                        falsifier-revision-state
+                        (conj {:receipt reviewer-falsifier-receipt
+                               :verification reviewer-falsifier-verification}))
                       preparation-qualification
                       (ticket-readiness/qualify-preparation-run
                        {:selected-action (get-in construction [:selected-action])
@@ -10120,6 +10191,8 @@
                                           reviewer-falsifier-receipt
                                           :reviewer-falsifier-verification
                                           reviewer-falsifier-verification
+                                          :reviewer-falsifier-attempts
+                                          reviewer-falsifier-attempts
                                           :ticket-preparation-qualification
                                           preparation-qualification
                                           :artifact-binding artifact-binding}}
@@ -10173,6 +10246,8 @@
                            :reviewer-falsifier reviewer-falsifier-receipt
                            :reviewer-falsifier-verification
                            reviewer-falsifier-verification
+                           :reviewer-falsifier-attempts
+                           reviewer-falsifier-attempts
                            :selected-entry
                            (select-keys entry
                                         [:action :controller-score :G-efe])}

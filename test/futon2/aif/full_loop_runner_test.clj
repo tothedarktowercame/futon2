@@ -36,6 +36,7 @@
             [futon2.aif.wm.loop-node-exercise :as loop-node-exercise]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.reviewer-falsifier :as reviewer-falsifier]
             [futon2.aif.tripwire :as tripwire]
             [futon2.aif.trace :as trace]
             [futon2.test-support.runner-fixture :as runner-fixture]
@@ -3123,6 +3124,67 @@
       (is (str/includes? revision-prompt first-review)
           "review findings are included verbatim")
       (is (str/includes? revision-prompt "do not force-push")))))))
+
+(deftest genuine-falsifier-refusal-is-amended-once-and-then-closes
+  (let [calls (atom 0)
+        refusal {:status :refused
+                 :reason :reviewer-falsifier-applicable-check-failed
+                 :failed-checks [:selected-want-accounting]
+                 :receipt {:receipt/id "falsifier-first"}}
+        {:keys [result dispatches grounded]}
+        (with-redefs-fn
+          {#'runner/refuse-on-runner-source-drift! (constantly nil)
+           #'reviewer-falsifier/verify
+           (fn [_candidate _inputs]
+             (if (= 1 (swap! calls inc))
+               refusal
+               {:status :verified :receipt/id "falsifier-amended"}))}
+          #(run-revision-attempt
+            ["FULL_LOOP_REVIEW: APPROVE"
+             "FULL_LOOP_REVIEW: APPROVE\nAmended artifact independently verified."]
+            {:revision-rounds 1
+             :author-commits ["abc123" "def456"]}))
+        build (get-in result [:checkpoints :build :judgment])]
+    (is (= :grounded-change (:outcome result))
+        "a passed amended artifact continues through grounding and close")
+    (is (= 2 @calls) "the falsifier is rerun exactly once after amendment")
+    (is (= ["abc123" "def456"] (:commits build)))
+    (is (= :verified
+           (get-in build [:validation :reviewer-falsifier-verification :status])))
+    (is (= [:refused :verified]
+           (mapv #(get-in % [:verification :status])
+                 (get-in build [:validation :reviewer-falsifier-attempts]))))
+    (is (= ["zai-5" "codex-7" "zai-5" "codex-7"]
+           (mapv :agent dispatches)))
+    (is (= 1 (count grounded)))))
+
+(deftest second-genuine-falsifier-refusal-keeps-terminal-failure
+  (let [calls (atom 0)
+        refusal (fn [receipt-id]
+                  {:status :refused
+                   :reason :reviewer-falsifier-applicable-check-failed
+                   :failed-checks [:selected-want-accounting]
+                   :receipt {:receipt/id receipt-id}})
+        {:keys [result grounded]}
+        (with-redefs-fn
+          {#'runner/refuse-on-runner-source-drift! (constantly nil)
+           #'reviewer-falsifier/verify
+           (fn [_candidate _inputs]
+             (refusal (str "falsifier-" (swap! calls inc))))}
+          #(run-revision-attempt
+            ["FULL_LOOP_REVIEW: APPROVE"
+             "FULL_LOOP_REVIEW: APPROVE\nAmended artifact independently verified."]
+            {:revision-rounds 1
+             :author-commits ["abc123" "def456"]}))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
+    (is (= :reviewer-wait (get-in result [:data :failure-stage])))
+    (is (= 2 @calls) "a second refusal terminates without a correction loop")
+    (is (= [:refused :refused]
+           (mapv #(get-in % [:verification :status])
+                 (get-in result [:checkpoints :build :judgment :validation
+                                 :reviewer-falsifier-attempts]))))
+    (is (empty? grounded))))
 
 (deftest second-rejection-closes-with-both-review-records
   (let [{:keys [result deliveries]}
