@@ -541,6 +541,14 @@ class ContinuousModeTest(unittest.TestCase):
                             "job-id": "job-meta", "seat": "zai-1",
                             "session-id": "session-1", "at": "2026-11-05T00:00:00Z"}) + "\n" +
                 json.dumps({"schema": "wm/click-seat-call-v1",
+                            "click-id": "wm-click-1", "role": "meta-acceptance-review",
+                            "phase": "acceptance-review", "job-id": "job-no-usage",
+                            "seat": "wm-reviewer", "session-id": "session-2"}) + "\n" +
+                json.dumps({"schema": "wm/click-seat-call-v1",
+                            "click-id": "wm-click-1", "role": "meta-repair-author",
+                            "phase": "repair-author", "job-id": "job-running",
+                            "seat": "wm-author", "session-id": "session-3"}) + "\n" +
+                json.dumps({"schema": "wm/click-seat-call-v1",
                             "click-id": "some-other-click",
                             "role": "readiness-author", "phase": "ticket-readiness",
                             "job-id": {"status": "typed-missing",
@@ -553,9 +561,18 @@ class ContinuousModeTest(unittest.TestCase):
             not_launched = {
                 "n": 2, "click-id": None, "run-id": None, "run-record": None,
             }
+            jobs = {
+                "job-meta": {"job": {"state": "done", "usage": {
+                    "input_tokens": 30, "output_tokens": 10, "total_tokens": 40,
+                    "cached_input_tokens": 5, "source": "codex"}}},
+                "job-no-usage": {"job": {"state": "done"}},
+                "job-running": {"job": {"state": "running"}},
+            }
+            fetch = lambda path, timeout=5: jobs[path.rsplit("/", 1)[-1]]
             with mock.patch.object(loop, "LEDGER", ledger), \
                  mock.patch.object(loop, "STATE", state), \
-                 mock.patch.object(loop, "F2", ROOT):
+                 mock.patch.object(loop, "F2", ROOT), \
+                 mock.patch.object(loop, "get_json", side_effect=fetch):
                 loop.record_cost_receipt(ordinary, 321)
                 loop.record({"event": "click", "click-id": "wm-click-1"})
                 loop.record_cost_receipt(ordinary, 999)
@@ -583,7 +600,11 @@ class ContinuousModeTest(unittest.TestCase):
             self.assertEqual("not-reached", phases["child-wait"]["reason"])
             self.assertNotIn("wall-ms", phases["child-wait"])
             self.assertEqual(5, receipt["wall"]["debugger"]["debugger-stopped-ms"])
-            self.assertEqual(120, receipt["model-usage"]["totals"]["total-tokens"])
+            self.assertEqual(160, receipt["model-usage"]["totals"]["total-tokens"])
+            self.assertEqual(130, receipt["model-usage"]["totals"]["input-tokens"])
+            self.assertEqual(30, receipt["model-usage"]["totals"]["output-tokens"])
+            self.assertEqual("partial", receipt["model-usage"]["totals"]["status"])
+            self.assertEqual(2, receipt["model-usage"]["totals"]["missing-call-count"])
             job = next(call for call in receipt["model-usage"]["calls"]
                        if call.get("job-id") == "job-1")
             self.assertEqual(120, job["total-tokens"])
@@ -591,7 +612,13 @@ class ContinuousModeTest(unittest.TestCase):
                       if call.get("role") == "meta-diagnosis"]
             self.assertEqual(1, len(direct))
             self.assertEqual("job-meta", direct[0]["job-id"])
-            self.assertEqual("identified", direct[0]["status"])
+            self.assertEqual("complete", direct[0]["status"])
+            self.assertEqual(40, direct[0]["total-tokens"])
+            self.assertEqual(5, direct[0]["cached-input-tokens"])
+            missing_reasons = {call.get("reason") for call in
+                               receipt["model-usage"]["calls"]}
+            self.assertIn("provider-usage-absent", missing_reasons)
+            self.assertIn("job-not-terminal", missing_reasons)
             self.assertFalse(any(call.get("role") == "readiness-author"
                                  for call in receipt["model-usage"]["calls"]))
             self.assertEqual("not-applicable",

@@ -64,7 +64,9 @@
                        :expected-run-id run-id
                        :ledger-run-id (:run-id ledger)})))))))
 
-(defn- normalized-usage [usage]
+(defn normalize-provider-usage
+  "Normalize provider token usage for both run telemetry and click receipts."
+  [usage]
   (let [input (or (:input-tokens usage) (:input_tokens usage)
                   (:prompt-tokens usage) (:prompt_tokens usage)
                   (:cost/input-tokens usage))
@@ -153,7 +155,7 @@
                                    (enum= :producer-context (:basis harness))
                                    (= run-id (:execution-id harness))
                                    (= click-id (:source-ref harness)))
-                      usage (when joined? (normalized-usage (:usage terminal)))
+                      usage (when joined? (normalize-provider-usage (:usage terminal)))
                       reason (cond
                                (nil? terminal) :terminal-receipt-missing
                                (not (contains? #{"done" "failed" "cancelled" "timed-out"}

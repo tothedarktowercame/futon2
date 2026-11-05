@@ -132,6 +132,14 @@ RUN_COST_PROJECTION = r'''
                          [:registered-run/timing :registered-run/model-usage]))))
 '''
 
+USAGE_PROJECTION = r'''
+(require '[cheshire.core :as json]
+         '[futon2.aif.registered-run-telemetry :as telemetry])
+(let [rows (json/parse-string (slurp *in*) true)]
+  (println (json/generate-string
+            (mapv #(telemetry/normalize-provider-usage (:usage %)) rows))))
+'''
+
 CLICK_ENVELOPE_PHASES = [
     "reset", "agency-budget-preflight", "source-giraffe", "heap-gc",
     "tripwire-preflight", "cast-single-flight-wait", "post-admission",
@@ -198,6 +206,56 @@ def indexed_seat_calls(click_id: str | None) -> list[dict]:
     return calls
 
 
+def normalize_provider_usage(rows: list[dict]) -> list[dict | None]:
+    """Use the registered-run telemetry normalizer; provider rules stay in Clojure."""
+    if not rows:
+        return []
+    result = subprocess.run(
+        ["clojure", "-M", "-e", USAGE_PROJECTION], cwd=F2,
+        input=json.dumps(rows), capture_output=True, text=True, timeout=30)
+    if result.returncode != 0:
+        return [None] * len(rows)
+    try:
+        values = json.loads(result.stdout)
+        return values if isinstance(values, list) and len(values) == len(rows) else [None] * len(rows)
+    except (TypeError, json.JSONDecodeError):
+        return [None] * len(rows)
+
+
+def join_indexed_usage(calls: list[dict]) -> list[dict]:
+    """Fetch each indexed terminal job once, then normalize all usage in one batch."""
+    terminal, positions = [], []
+    joined = [dict(call) for call in calls]
+    for index, call in enumerate(joined):
+        job_id = call.get("job-id")
+        if not isinstance(job_id, str) or not job_id:
+            call.update(_typed_missing(call.get("reason", "job-id-not-retained")))
+            continue
+        try:
+            response = get_json(f"/api/alpha/invoke/jobs/{job_id}", timeout=5)
+            job = response.get("job") if isinstance(response, dict) else None
+        except Exception:
+            call.update(_typed_missing("fetch-failed"))
+            continue
+        if not isinstance(job, dict):
+            call.update(_typed_missing("fetch-failed"))
+            continue
+        if job.get("state") not in {"done", "failed", "cancelled", "timed-out"}:
+            call.update(_typed_missing("job-not-terminal"))
+            continue
+        terminal.append({"usage": job.get("usage")})
+        positions.append(index)
+    for index, usage in zip(positions, normalize_provider_usage(terminal)):
+        call = joined[index]
+        if isinstance(usage, dict):
+            call.update({"status": "complete", "unit": "tokens"})
+            call.pop("reason", None)
+            call.update(usage)
+        else:
+            call.update(_typed_missing("provider-usage-absent"))
+    return joined
+
+
 def launcher_phase_timings(click: dict) -> dict[str, int]:
     """Read the launcher's fixed-prefix JSON boundaries from this click's log."""
     phases = {}
@@ -258,25 +316,32 @@ def cost_receipt(click: dict, total_ms: int) -> dict:
     for job in usage.get("jobs", []) if isinstance(usage.get("jobs"), list) else []:
         if isinstance(job, dict):
             calls.append(job)
+    run_calls = list(calls)
     calls.append({"role": "selection", "status": "not-applicable",
                   "reason": "in-process-non-model-selection"})
-    direct_calls = indexed_seat_calls(click.get("click-id"))
+    direct_calls = join_indexed_usage(indexed_seat_calls(click.get("click-id")))
     calls.extend(direct_calls)
 
     numeric_totals = {key: usage[key] for key in
                       ("input-tokens", "output-tokens", "total-tokens",
                        "cached-input-tokens", "uncached-input-tokens")
                       if isinstance(usage.get(key), int) and usage[key] >= 0}
-    unresolved = sum(call.get("status") in {"identified", "typed-missing"}
-                     for call in direct_calls)
-    totals = {"status": "partial" if unresolved else
-              (usage.get("status") or "typed-missing"), **numeric_totals}
+    for call in direct_calls:
+        if call.get("status") == "complete":
+            for key in ("input-tokens", "output-tokens", "total-tokens",
+                        "cached-input-tokens", "uncached-input-tokens"):
+                if isinstance(call.get(key), int):
+                    numeric_totals[key] = numeric_totals.get(key, 0) + call[key]
+    unresolved = (sum(call.get("status") != "complete" for call in direct_calls) +
+                  sum(call.get("status") != "complete" for call in run_calls))
+    cost_calls = len(direct_calls) + len(run_calls)
+    all_complete = cost_calls > 0 and unresolved == 0
+    totals = {"status": "complete" if all_complete else "partial", **numeric_totals}
     if unresolved:
         totals["missing-call-count"] = unresolved
     usage_status = usage.get("status")
     model_usage = {
-        "status": "partial" if unresolved else
-                  (usage_status if isinstance(usage_status, str) else "typed-missing"),
+        "status": "complete" if all_complete else "partial",
         "source-status": usage_status if isinstance(usage_status, str) else "typed-missing",
         "unit": "tokens", "calls": calls, "totals": totals,
     }
