@@ -610,6 +610,12 @@ records and notifies, and validates nothing).
      `REFUSE-HARM` line naming rule + declined action, checked against the
      world, never trusted; plain `REFUSE` stays a debugger error. Build: 1
      pure matcher (dispatched), 2 author grammar, 3 validator + exclusion.
+   - C3-HARM-1 merged (`79a91b069`, codex-15; fix `d5f5b18bd`): pure
+     `harm-rules/match` with injected world checks; unknown rule, operation,
+     missing field, unknown check all refuse. Review found vacuous passes
+     (empty `:paths` matched H1, a nil `:ref` equalled an absent default
+     branch, required fields accepted nil); fixed, 2 new assertions red on
+     codex's commit. C3-HARM-2 (author `REFUSE-HARM` line) dispatched.
    - WRITE-REGISTER-0 (codex-20; window count re-run: 43 files): one real
      click (`2026-11-05-3f57ee95`) registered 4 of 43 changed files with
      path+sha; its record has no `:close-evidence-manifest` value; seat
