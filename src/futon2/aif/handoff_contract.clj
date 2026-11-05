@@ -225,7 +225,7 @@
             (nil? decoded)
             {:schema :wm/handoff-exchange-v1 :status :refused
              :reason :response-invalid :contacted? true
-             :job-id (:job-id answer)}
+             :job-id (:job-id answer) :raw-answer raw}
 
             :else
             (try
@@ -235,7 +235,8 @@
               (catch Throwable e
                 {:schema :wm/handoff-exchange-v1 :status :refused
                  :reason :response-validation-threw :contacted? true
-                 :job-id (:job-id answer) :message (ex-message e)}))))))))
+                 :job-id (:job-id answer) :message (ex-message e)
+                 :raw-answer raw}))))))))
 
 (defn outcome [contract-value request-id state detail]
   (when-not (contains? #{:not-contacted :contacted :answered :refused

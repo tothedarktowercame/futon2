@@ -731,9 +731,12 @@
   reading failure escapes. The returned ex-data carries only the stable file
   reference, so the bounded terminal projection can retain it."
   [opts record error-data]
-  (if (or (nil? record)
-          (contains? error-data :selected-target-reading/failure-record))
-    error-data
+  (let [error-data (cond-> error-data
+                     (:answer-evidence record)
+                     (assoc :answer-evidence (:answer-evidence record)))]
+    (if (or (nil? record)
+            (contains? error-data :selected-target-reading/failure-record))
+      error-data
     (let [dir (io/file (or (:run-record-dir opts) default-run-record-dir))
           target (io/file dir (str (:run-id opts)
                                    "-selected-target-reading-failure.edn"))
@@ -755,7 +758,7 @@
                  {:class (.getName (class write-error))
                   :message (ex-message write-error)}))
         (finally
-          (when (.isFile tmp) (.delete tmp)))))))
+          (when (.isFile tmp) (.delete tmp))))))))
 
 (defn- rethrow-with-selected-target-reading-failure!
   [opts record throwable]
@@ -1050,6 +1053,11 @@
                  ;; only its stable job identity and bounded correction chain.
                  (and (= :author-job k) (corrected-author-job-detail? v))
                  {:kept (assoc kept k (bounded-corrected-author-job v)) :omitted omitted}
+                 (and (= :answer-evidence k)
+                      (= :wm/rejected-answer-evidence-v1 (:schema v))
+                      (string? (:answer-prefix v))
+                      (<= (:prefix-length-bytes v 0) (* 64 1024)))
+                 {:kept (assoc kept k v) :omitted omitted}
                  ;; The pin is nested, and it is the receiver's only route to
                  ;; the retained input, so the scalar-only rule below would
                  ;; keep :status and lose the evidence.
@@ -1151,7 +1159,7 @@
   its nested pin, oversized values are dropped with :omitted naming them."
   [:status :kind :reason :repair :requisition-id :cascade-digest
    :author-job :review-job :reviewer :reviewer-job :patch :answer
-   :delivery-evidence :objection :revision :verdict])
+   :answer-evidence :delivery-evidence :objection :revision :verdict])
 
 (defn- held-resume-data
   "The close data of a held open-cascade resume. A retained delivery failure's
@@ -8786,7 +8794,9 @@
                          :failure-kind (:kind occurrence-square-authoring-record)
                          :failure-stage :occurrence-square-authoring
                          :occurrence-square-authoring
-                         occurrence-square-authoring-record})))
+                         occurrence-square-authoring-record
+                         :answer-evidence
+                         (:answer-evidence occurrence-square-authoring-record)})))
             ;; PROOF-2b: the ordinary click's interpretation ask (D11 ask
             ;; step inside the tick). Only when the decision abstained
             ;; refusing at least one target :no-admitted-interpretation, at

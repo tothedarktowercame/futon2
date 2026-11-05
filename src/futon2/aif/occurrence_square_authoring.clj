@@ -2,6 +2,7 @@
   "Pre-G authoring of situation maps for every occurrence in one retained
   target reading. The machine constructs, validates and publishes squares."
   (:require [cheshire.core :as json]
+            [futon2.aif.answer-evidence :as answer-evidence]
             [futon2.aif.occurrence-index :as occurrence-index]
             [clojure.string :as str]
             [futon2.aif.handoff-contract :as handoff]
@@ -115,7 +116,16 @@
           (cond
             (not= :validated (:status exchange))
             {:schema schema :status :error :kind :occurrence-square-answer-invalid
-             :answer (select-keys exchange [:reason :job-id :message])}
+             :answer (select-keys exchange [:reason :job-id :message])
+             :answer-evidence
+             (answer-evidence/retain
+              {:raw (:raw-answer exchange)
+               :agent author
+               :job-id (:job-id exchange)
+               :defect {:kind (:reason exchange)
+                        :message (or (:message exchange)
+                                     (handoff/response-parse-error
+                                      (:raw-answer exchange)))}})}
 
             (or (not= "wm/occurrence-square-maps-v1" (some-> (:schema answer) name))
                 (not= target (:target answer))

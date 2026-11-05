@@ -41,6 +41,7 @@
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.handoff-contract :as handoff]
+            [futon2.aif.answer-evidence :as answer-evidence]
             [futon2.aif.interpretation-request :as interpretation-request]
             [futon2.aif.ticket-readiness :as ticket-readiness]
             [futon2.aif.ticket-readiness-inputs :as readiness-inputs]
@@ -990,7 +991,14 @@
                :author author
                :format-correction correction
                :parser-error (handoff/response-parse-error author-response)
-               :author-job (contact-job author-response)}
+               :author-job (contact-job author-response)
+               :answer-evidence
+               (answer-evidence/retain
+                {:raw (handoff/response-payload author-response)
+                 :agent author
+                 :job-id (contact-job author-response)
+                 :defect {:kind :response-unparseable
+                          :message (handoff/response-parse-error author-response)}})}
 
               (not= :bound (:status author-binding))
               (assoc author-binding :author-job (contact-job author-response))
@@ -1025,7 +1033,14 @@
               {:status :error
                :kind :open-cascade-review-answer-invalid
                :reviewer reviewer
-               :reviewer-job (contact-job reviewer-response)}
+               :reviewer-job (contact-job reviewer-response)
+               :answer-evidence
+               (answer-evidence/retain
+                {:raw (handoff/response-payload reviewer-response)
+                 :agent reviewer
+                 :job-id (contact-job reviewer-response)
+                 :defect {:kind :response-unparseable
+                          :message (handoff/response-parse-error reviewer-response)}})}
 
               (some? review-refusal)
               (if-let [round objection-round]

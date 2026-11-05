@@ -1,6 +1,7 @@
 (ns futon2.aif.selected-target-reading
   "Same-click repair for a supplied task whose current HEAD has no validated reading."
   (:require [cheshire.core :as json]
+            [futon2.aif.answer-evidence :as answer-evidence]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
@@ -426,7 +427,18 @@
                                       {:path (str f) :sha256 (file-digest f)}))
                                   (range 1 (inc (count (:responses formatted)))))
                             :answer (select-keys exchange
-                                                 [:status :reason :job-id :message])})
+                                                 [:status :reason :job-id :message])
+                            :answer-evidence
+                            (answer-evidence/retain
+                             {:raw (handoff/response-payload (:response formatted))
+                              :agent author
+                              :job-id (:job-id (:response formatted))
+                              :defect {:kind (:reason exchange)
+                                       :message (or (:message exchange)
+                                                    (when @delivery-error
+                                                      (pr-str @delivery-error))
+                                                    (handoff/response-parse-error
+                                                     (:response formatted)))}})})
                   (let [analysis-input (io/file (.getParentFile request-file)
                                                 "analysis-input.json")
                         validation-request (io/file (.getParentFile request-file)

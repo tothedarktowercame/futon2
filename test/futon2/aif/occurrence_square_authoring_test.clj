@@ -1,5 +1,7 @@
 (ns futon2.aif.occurrence-square-authoring-test
   (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.occurrence-square-authoring :as sut]
             [futon2.aif.occurrence-square-registry :as squares]
@@ -109,6 +111,44 @@
                 (judgement reading))]
     (is (= :error (:status result)))
     (is (= :occurrence-square-answer-unbound (:kind result)))))
+
+(deftest rejected-answer-survives-the-persisted-run-record-bounded
+  (let [reading-root (temp-root)
+        reading (reading! reading-root)
+        run-root (temp-root)
+        raw (apply str (repeat (* 200 1024) "x"))
+        refusal (sut/repair!
+                 {:author "wm-square-author"
+                  :target-reading-root reading-root
+                  :occurrence-square-root (temp-root)
+                  :answer-fn (fn [_] {:state "done"
+                                      :job-id "job-invalid-square-answer"
+                                      :result raw})}
+                 (judgement reading))
+        result {:outcome :incomplete
+                :data {:failure-kind (:kind refusal)
+                       :failure-stage :occurrence-square-authoring
+                       :error "Occurrence-square authoring failed before G"
+                       :error-data refusal}}
+        written (runner/persist-run-record!
+                 {:run-record-dir (.getPath run-root)
+                  :observation-labels-path (str (io/file run-root "labels.edn"))
+                  :scan-render-fn (fn [& _] nil)
+                  :nano-time-fn (constantly 0)}
+                 "rejected-occurrence-answer" "2026-11-05T00:00:00Z" result)
+        record (edn/read-string (slurp (:run-record written)))
+        evidence (get-in record [:failure :detail :answer-evidence])]
+    (is (= :occurrence-square-answer-invalid (:kind refusal)))
+    (is (= "wm-square-author" (:agent evidence)))
+    (is (= "job-invalid-square-answer" (:job-id evidence)))
+    (is (= :response-invalid (get-in evidence [:defect :kind])))
+    (is (= (* 200 1024) (:total-length-bytes evidence)))
+    (is (= (* 64 1024) (:prefix-length-bytes evidence)))
+    (is (= (* 64 1024) (count (:answer-prefix evidence))))
+    (is (true? (:truncated? evidence)))
+    (is (= "5d4abf60daba0b11555b6da942dd4f40d5f99ee617e14ba4ba686b47d75a5049"
+           (:sha256 evidence)))
+    (is (not (some #{:answer-evidence} (get-in record [:failure :detail :omitted]))))))
 
 (deftest held-inner-construction-redecides-once-after-publication
   (let [reading-root (temp-root) square-root (temp-root)

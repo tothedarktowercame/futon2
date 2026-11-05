@@ -123,12 +123,37 @@
                 :failure {:kind (:kind result) :stage :cascade-resume}
                 :terminal-receipt {:outcome :guardrail-refusal}}
         pin {:path "tooling-replay.edn" :sha256 (apply str (repeat 64 "a"))}]
+    (is (= raw (get-in result [:answer-evidence :answer-prefix])))
+    (is (= "wm-author" (get-in result [:answer-evidence :agent])))
+    (is (= "invoke-1793312635841-7821-b4aa5251"
+           (get-in result [:answer-evidence :job-id])))
+    (is (= :response-unparseable
+           (get-in result [:answer-evidence :defect :kind])))
     (is (= :non-injury (:classification (injury/classify record pin))))
     (is (= :injury (:classification (injury/classify (assoc-in record [:failure :kind] :hot-load-failed) pin))))
     (is (stop/no-finding-required? {:outcome :guardrail-refusal :failure-kind (:kind result)}))
     (is (empty? (tripwire/evaluate-wire :T3 {:phase :opportunity :transition :end
                                            :tripwire/force? true :outcome :guardrail-refusal
                                            :failure-kind (:kind result)})))))
+
+(deftest invalid-review-retains-the-reviewer-answer-and-defect
+  (let [check delivery/check-delivery
+        handler (runtime/open-cascade-resume-handler
+                 {:author "wm-author" :reviewer "wm-reviewer"
+                  :open-cascade-author-answer-fn answer
+                  :open-cascade-reviewer-answer-fn (constantly malformed)})
+        result (with-redefs [delivery/check-delivery
+                             (fn [a] (check delivery/canonical-repository
+                                      #(-> (io/file delivery/canonical-repository "src" %)
+                                           .toURI .toURL) a))]
+                 (handler held))]
+    (is (= :open-cascade-review-answer-invalid (:kind result)))
+    (is (= raw (get-in result [:answer-evidence :answer-prefix])))
+    (is (= "wm-reviewer" (get-in result [:answer-evidence :agent])))
+    (is (= "invoke-1793312635841-7821-b4aa5251"
+           (get-in result [:answer-evidence :job-id])))
+    (is (= :response-unparseable
+           (get-in result [:answer-evidence :defect :kind])))))
 
 (deftest runner-closes-format-refusal-without-repair-finding
   (let [result (exhausted)
