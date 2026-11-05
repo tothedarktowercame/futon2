@@ -1545,7 +1545,8 @@
   seats would still have dispatched its repair phases to the defaults)."
   ([invoke role] (agency-port invoke role nil))
   ([invoke role prepare-worktree]
-  (fn [{:keys [work-order phase predecessor-pin transaction] :as request}]
+  (fn [{:keys [work-order phase predecessor-pin transaction
+               supersedes-receipt-pin] :as request}]
     (let [workspace (when (and (= role :author) prepare-worktree)
                       (prepare-worktree work-order))
           seat (get work-order role)
@@ -1559,13 +1560,15 @@
                      (invoke {:seat seat :session-id (get work-order session-key)
                               :transaction transaction :request request}))]
       (coordinator/seal-port-receipt
-       {:phase phase :injury-id (:injury-id work-order)
-        :repair-id (:repair-id work-order) :attempt (:attempt work-order)
-        :predecessor-pin predecessor-pin :status (:status response)
-        :payload (assoc (:payload response) :worktree-provision workspace
-                        :agency-job-id (:job-id response)
-                        :agency-session-id (:session-id response)
-                        :agency-seat seat)})))))
+       (cond-> {:phase phase :injury-id (:injury-id work-order)
+                :repair-id (:repair-id work-order) :attempt (:attempt work-order)
+                :predecessor-pin predecessor-pin :status (:status response)
+                :payload (assoc (:payload response) :worktree-provision workspace
+                                :agency-job-id (:job-id response)
+                                :agency-session-id (:session-id response)
+                                :agency-seat seat)}
+         supersedes-receipt-pin
+         (assoc :supersedes-receipt-pin supersedes-receipt-pin)))))))
 (defn endpoint-port [invoke adapter]
   (fn [{:keys [work-order phase predecessor-pin] :as request}]
     (let [response (invoke request)]

@@ -59,10 +59,12 @@
 (defn- receipt [request status payload]
   (let [order (:work-order request)]
     (coordinator/seal-port-receipt
-     {:phase (:phase request) :injury-id (:injury-id order)
-      :repair-id (:repair-id order) :attempt (:attempt order)
-      :predecessor-pin (:predecessor-pin request)
-      :status status :payload payload})))
+     (cond-> {:phase (:phase request) :injury-id (:injury-id order)
+              :repair-id (:repair-id order) :attempt (:attempt order)
+              :predecessor-pin (:predecessor-pin request)
+              :status status :payload payload}
+       (:supersedes-receipt-pin request)
+       (assoc :supersedes-receipt-pin (:supersedes-receipt-pin request))))))
 
 (defn- ports
   ([] (ports {}))
@@ -489,6 +491,50 @@
         (is (= :held (:status result)))
         (is (= expected-reason (:reason result)))
         (is (= expected-state (-> result :ledger :entries last :state)))))))
+
+(deftest failed-review-port-receipt-is-retried-on-resume
+  (let [history (opened-ledger)
+        start (prepared history (options))
+        failed (coordinator/coordinate
+                (durable history) (:transaction start)
+                (ports {:review (fn [r]
+                                  (receipt r :failed {:reason :review-offline}))}))
+        calls (atom 0)
+        resumed (coordinator/coordinate
+                 (durable (:ledger failed)) (:transaction failed)
+                 (ports {:review (fn [r]
+                                   (swap! calls inc)
+                                   (receipt r :succeeded
+                                            {:patch-sha sha-a
+                                             :reviewer-sha sha-a}))}))
+        reviews (filter #(= :review (:phase %))
+                        (get-in resumed [:transaction :receipts]))]
+    (is (= :held (:status failed)))
+    (is (= :review-rejected (:reason failed)))
+    (is (= 1 @calls))
+    (is (some #(= :reviewed (:state %)) (get-in resumed [:ledger :entries])))
+    (is (= [:failed :succeeded] (mapv :status reviews)))
+    (is (not= (get-in (first reviews) [:receipt-pin :path])
+              (get-in (second reviews) [:receipt-pin :path])))))
+
+(deftest rejected-review-verdict-is-replayed-on-resume
+  (let [history (opened-ledger)
+        start (prepared history (options))
+        rejected (coordinator/coordinate
+                  (durable history) (:transaction start)
+                  (ports {:review (fn [r]
+                                    (receipt r :rejected {:reason :changes}))}))
+        calls (atom 0)
+        resumed (coordinator/coordinate
+                 (durable (:ledger rejected)) (:transaction rejected)
+                 (ports {:review (fn [r]
+                                   (swap! calls inc)
+                                   (receipt r :succeeded
+                                            {:patch-sha sha-a
+                                             :reviewer-sha sha-a}))}))]
+    (is (= :held (:status resumed)))
+    (is (= :review-rejected (:reason resumed)))
+    (is (zero? @calls))))
 
 (deftest malformed-and-substituted-port-receipts-refuse-typedly
   (let [history (opened-ledger)

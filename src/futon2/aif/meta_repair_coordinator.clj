@@ -198,7 +198,10 @@
   [receipt]
   (sealed :meta-repair-port-receipt
           (str "meta-repair-port-receipts/" (:repair-id receipt) "/"
-               (:attempt receipt) "/" (name (:phase receipt)) ".edn")
+               (:attempt receipt) "/" (name (:phase receipt))
+               (when-let [pin (:supersedes-receipt-pin receipt)]
+                 (str "-retry-" (:sha256 pin)))
+               ".edn")
           (assoc receipt :schema receipt-schema) :receipt-pin))
 (defn verify-port-receipt [receipt expected]
   (try
@@ -445,7 +448,7 @@
              (:receipts transaction))))
 
 (defn current-receipt-for [transaction phase]
-  (some #(when (= phase (:phase %)) %) (current-receipts transaction)))
+  (last (filter #(= phase (:phase %)) (current-receipts transaction))))
 (defn- append-receipt [transaction receipt]
   (seal-transaction
    (-> transaction
@@ -460,14 +463,26 @@
   ([transaction phase predecessor-pin port]
    (invoke-once transaction phase predecessor-pin port {}))
   ([transaction phase predecessor-pin port extra]
-   (if-let [existing (current-receipt-for transaction phase)]
-     {:status :recorded :receipt existing :transaction transaction}
-     (try
+   (let [existing (current-receipt-for transaction phase)
+         retry-failed-review? (and (= :review phase)
+                                   (= :failed (:status existing)))
+         extra (cond-> extra
+                 retry-failed-review?
+                 (assoc :supersedes-receipt-pin (:receipt-pin existing)))]
+     (if (and existing (not retry-failed-review?))
+       {:status :recorded :receipt existing :transaction transaction}
+       (try
        (let [response (port (merge {:work-order (:work-order transaction)
                                     :transaction transaction
                                     :phase phase
                                     :predecessor-pin predecessor-pin}
                                    extra))
+             response (if-let [supersedes (:supersedes-receipt-pin extra)]
+                        (if (= supersedes (:supersedes-receipt-pin response))
+                          response
+                          (refusal :coordinator/review-retry-receipt-unbound
+                                   {:phase phase :transaction transaction}))
+                        response)
              checked (verify-port-receipt
                       response (expected (:work-order transaction)
                                          phase predecessor-pin))]
@@ -480,7 +495,7 @@
        (catch Throwable t
          (refusal :coordinator/port-threw
                   {:phase phase :detail (ex-message t)
-                   :transaction transaction}))))))
+                   :transaction transaction})))))))
 
 (defn- append-transition! [history event authority-verifier]
   (let [result (ledger/append-transition history event authority-verifier)]
