@@ -469,3 +469,13 @@
                   :completion-class :completion-definition-not-found}])]
     (is (= ["M-completion-0"] (mapv :target (:field result))))
     (is (empty? (:outer-field/excluded result)))))
+(deftest admitted-mission-shas-come-from-the-field-authority-snapshot
+  (let [extra {:id "M-unread" :path "/fixture/M-unread.md"
+               :source {:path "/fixture/M-unread.md" :sha256 "excluded-sha"}
+               :status-class :open :status-line "OPEN"}
+        authority (update-in fixture-authority [:loaded-missions :missions] conj extra)
+        result (binding [observation/*resolve-var* actual-var]
+                 (observation/giraffe-field (fixture-run!) makeup authority))]
+    (is (= "fixture-sha"
+           (get-in result [:mission-source-sha256-by-target "M-ready"])))
+    (is (not (contains? (:mission-source-sha256-by-target result) "M-unread")))))

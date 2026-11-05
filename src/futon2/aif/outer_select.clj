@@ -196,6 +196,18 @@
    {:field [] :excluded [] :requests []}
    field))
 
+(defn apply-c1-exclusions [partition original-field exclusions]
+  (let [targets (set (map :target original-field))]
+    (when-not (and (= (count exclusions) (count (set (map :target exclusions))))
+                   (every? #(and (contains? targets (:target %))
+                                 (= :c1-already-satisfied (:reason %))
+                                 (string? (:pin %)) (seq (:pin %))) exclusions))
+      (refuse! :invalid-c1-exclusions {:c1-exclusions exclusions}))
+    (let [excluded-targets (set (map :target exclusions))]
+      (-> partition
+          (update :field #(filterv (comp not excluded-targets :target) %))
+          (update :excluded into exclusions)))))
+
 (defn- cascade-record [observation cascade model score]
   (let [candidate (:pick model) target (:target candidate)
         class (if candidate (relation-class observation target) :no-pick)
@@ -314,7 +326,9 @@
                                         "/code/futon3/library/task-selection"))))
         construction (menu/construct library-root makeup observation)
         menu (:cascades construction)
-        partition (known-term-field observation)
+        partition (apply-c1-exclusions
+                   (known-term-field observation) (:field observation)
+                   (vec (:c1-exclusions observation)))
         field-facts (:field-facts observation)
         forbidden (or (:forbidden observation) #{})
         forbidden-evidence (vec (:forbidden-evidence observation))]

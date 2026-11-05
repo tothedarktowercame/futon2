@@ -7,6 +7,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
+            [clojure.string :as str]
             [futon2.aif.area-focus :as area-focus]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.mission-registry :as mission-registry]
@@ -241,6 +242,12 @@
              facts (into {} (map (juxt :target :fact)) admitted)]
          (validate-field! enumerated (mapv :target admitted) excluded)
          {:field (mapv :candidate admitted) :facts facts
+          :mission-source-sha256-by-target
+          (into {} (keep (fn [{:keys [target]}]
+                           (let [sha (get-in registry [target :source :sha256])]
+                             (when (and (str/starts-with? target "M-")
+                                        (string? sha) (seq sha))
+                               [target sha])))) admitted)
           :enumerated-open-tasks enumerated
           :field-facts {:open-tasks roster :enumerated enumerated :admitted facts :excluded excluded
                         :giraffe/pass-sha256 pass-sha}

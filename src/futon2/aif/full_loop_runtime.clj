@@ -15,6 +15,7 @@
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.effective-run-history :as effective-run-history]
+            [futon2.aif.c1-exclusion :as c1-exclusion]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.load-identity :as load-identity]
@@ -1621,6 +1622,13 @@
                            observation
                            (assoc observation
                                   :effective-run-index-rows effective-index-rows))
+              c1-rows (keep :c1-exclusion effective-index-rows)
+              c1-exclusions
+              (c1-exclusion/field-exclusions
+               c1-rows
+               #(get-in observation [:mission-source-sha256-by-target %])
+               (mapv :target (:field observation)))
+              observation (assoc observation :c1-exclusions c1-exclusions)
               observation (assoc observation :previous-selection
                                  (previous-run/selection-predecessor
                                   (or (:run-record-dir opts) runner/default-run-record-dir)

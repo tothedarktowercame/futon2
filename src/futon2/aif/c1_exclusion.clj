@@ -2,9 +2,10 @@
   "Pure persistent C1 exclusion corresponding to RefusalLegality.nextField,
   legal_terminal_excludes, new_evidence_restores, and legal_terminals_bounded.
 
-  Mission evidence is the canonical digest of mission-source SHA, policy id,
-  and compiled-check-set SHA from :effective-run-identity. :base-head is
-  deliberately excluded because unrelated commits do not change wants/checks.
+  Mission evidence is the canonical digest of mission-source SHA alone.
+  Policy id and compiled-check-set SHA are retained as provenance but are not
+  compared. Accepted cost: changing policy/checks without changing mission
+  source does not restore the target. :base-head is deliberately excluded.
   Non-mission targets need a canonical retained field-fact/reading digest;
   that carrier is not built here and is refused as :digest-carrier-absent.
   The Lean specification is unchanged."
@@ -16,13 +17,8 @@
 (defn- digest-input [record target]
   (when (str/starts-with? (str target) "M-")
     (let [effective (:effective-run-identity record)
-          input (select-keys effective
-                             [:mission-source-sha256 :policy-id
-                              :compiled-check-set-sha256])]
-      (when (every? #(some? (get input %))
-                    [:mission-source-sha256 :policy-id
-                     :compiled-check-set-sha256])
-        input))))
+          sha (:mission-source-sha256 effective)]
+      (when (some? sha) {:mission-source-sha256 sha}))))
 
 (defn exclusion-row [record]
   (let [outcome (or (get-in record [:terminal-receipt :outcome])
@@ -47,17 +43,22 @@
        :row {:schema :wm/c1-exclusion-v1
              :target target
              :evidence-digest (identity/digest input)
+             :policy-id (get-in record [:effective-run-identity :policy-id])
+             :compiled-check-set-sha256
+             (get-in record [:effective-run-identity :compiled-check-set-sha256])
              :satisfaction-pin (identity/digest satisfaction)
              :run-id (:run/id record)}})))
 
-(defn forbidden-evidence [rows current-digest-fn field]
+(defn field-exclusions [rows current-mission-sha-fn field]
   (let [field (set field)]
     (->> rows
          (keep :row)
          (filter #(and (contains? field (:target %))
-                       (some? (current-digest-fn (:target %)))
+                       (some? (current-mission-sha-fn (:target %)))
                        (= (:evidence-digest %)
-                          (current-digest-fn (:target %)))))
+                          (identity/digest
+                           {:mission-source-sha256
+                            (current-mission-sha-fn (:target %))}))))
          ;; One entry per target: outer_select refuses forbidden evidence
          ;; whose target set and entry count differ, so a duplicated row
          ;; (a retried close, a re-appended index) would refuse the whole
@@ -68,5 +69,6 @@
                      acc
                      (conj acc {:target (:target row)
                                 :reason :c1-already-satisfied
-                                :pin (:evidence-digest row)})))
+                                :pin (:evidence-digest row)
+                                :run-id (:run-id row)})))
                  []))))
