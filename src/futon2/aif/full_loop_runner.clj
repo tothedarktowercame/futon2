@@ -107,6 +107,7 @@
             [futon2.aif.serving-envelope :as serving-envelope]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.stop-line :as stop-line]
+            [futon2.aif.refusal-legality :as refusal-legality]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-discharge :as repair-discharge]
             [futon2.aif.repair-discharge-receipt :as discharge-receipt]
@@ -8547,8 +8548,30 @@
                    result))
         close! (fn [outcome data]
                  (try
-                   (observe-end!)
-                   (close-core! outcome data)
+                   (let [{resolved-outcome :outcome resolved-data :data}
+                         (refusal-legality/resolve-close-refusal
+                          (debugger/attached?)
+                          (fn [condition]
+                            (debugger/await-restart!
+                             (assoc @phase-context
+                                    :run-id (:run-id opts)
+                                    :attempt-id attempt-id
+                                    :opportunity-id opportunity-id
+                                    :phase :close-refusal
+                                    :nano-time-fn (or (:nano-time-fn opts)
+                                                      #(System/nanoTime))
+                                    :debugger-dwell-ledger
+                                    (:debugger-dwell/state opts)
+                                    :debugger-stop-value
+                                    {:outcome outcome :data data}
+                                    :debugger-has-stop-value? true)
+                             (ex-info "Illegal refusal at close" condition)))
+                          outcome data
+                          #(refusal-legality/retained-scored-field
+                            (selected-target-reading/current-options opts))
+                          false)]
+                     (observe-end!)
+                     (close-core! resolved-outcome resolved-data))
                    (catch Throwable e
                      ;; Cohort-53 attempt-001 is retained as the historical
                      ;; counterexample: a close-time evidence refusal escaped
@@ -8596,6 +8619,9 @@
                            route (when (and route-file (.isFile route-file))
                                    (cohort/read-edn route-file))
                            sorry-data {:effective-run-configuration @effective-configuration
+                                       :refusal/disposition
+                                       {:disposition :debugger-error
+                                        :reason :controller-threw}
                                        :outcome :build-failed
                                        :grounded? false
                                        :artifact-only? false
