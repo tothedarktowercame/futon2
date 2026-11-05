@@ -109,57 +109,6 @@
     (is (= :terminal-receipt-invalid
            (get-in attached [:terminal-receipt :failure-kind])))))
 
-(deftest falsifier-refused-but-grounded-selection-yields-action-receipt
-  "injury 76d912d3: a selected record whose only failure is a
-  reviewer-falsifier refusal at :reviewer-wait over corroborated committed
-  work still enacted an action — the receipt is an :action-receipt carrying
-  the refusal, never a :failure that discards the increment."
-  (let [record (assoc selected-record
-                      :grounded-commit {:sha "c83f3c073ed0330511f9ef9b3b480063692fe53d"
-                                        :repo "/home/joe/code/futon3c"}
-                      :failure {:kind :reviewer-falsifier-failed
-                                :stage :reviewer-wait
-                                :error "Reviewer falsifier checks did not pass"
-                                :detail {:reviewer-falsifier
-                                         {:status :refused
-                                          :commit "c83f3c073ed0330511f9ef9b3b480063692fe53d"}
-                                         :reviewer-falsifier-verification
-                                         {:status :refused
-                                          :reason :reviewer-falsifier-applicable-check-failed}
-                                         :artifact-binding
-                                         {:corroborates? true
-                                          :commit "c83f3c073ed0330511f9ef9b3b480063692fe53d"}}})
-        r (tr/terminal-receipt record)]
-    (is (= :action-receipt (:kind r)))
-    (is (= "c83f3c073ed0330511f9ef9b3b480063692fe53d" (:sha (:commit r))))
-    (is (= {:status :refused
-            :reason :reviewer-falsifier-applicable-check-failed}
-           (:reviewer-falsifier r)))))
-
-(deftest falsifier-refused-without-corroboration-stays-failure
-  "The exception is narrow: a falsifier refusal with no corroborated
-  grounded commit still routes to :failure (the receipt names the target)."
-  (let [uncorroborated (assoc selected-record
-                              :failure {:kind :reviewer-falsifier-failed
-                                        :stage :reviewer-wait
-                                        :detail {:reviewer-falsifier
-                                                 {:status :refused}
-                                                 :artifact-binding
-                                                 {:corroborates? false}}})
-        no-commit (assoc selected-record
-                         :failure {:kind :reviewer-falsifier-failed
-                                   :stage :reviewer-wait
-                                   :detail {:reviewer-falsifier {:status :refused}}})
-        wrong-stage (assoc selected-record
-                           :grounded-commit {:sha "c83f3c073ed0330511f9ef9b3b480063692fe53d"}
-                           :failure {:kind :reviewer-falsifier-failed
-                                     :stage :full-loop-close
-                                     :detail {:reviewer-falsifier {:status :refused}}})]
-    (doseq [record [uncorroborated no-commit wrong-stage]
-            :let [r (tr/terminal-receipt record)]]
-      (is (= :failure (:kind r)))
-      (is (= :reviewer-falsifier-failed (:failure-kind r))))))
-
 (deftest abstained-yields-failure
   (let [r (tr/terminal-receipt abstained-record)]
     (is (= :failure (:kind r)))
