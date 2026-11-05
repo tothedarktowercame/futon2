@@ -616,6 +616,19 @@ records and notifies, and validates nothing).
      (empty `:paths` matched H1, a nil `:ref` equalled an absent default
      branch, required fields accepted nil); fixed, 2 new assertions red on
      codex's commit. C3-HARM-2 (author `REFUSE-HARM` line) dispatched.
+   - ABSTAIN-REASON-1 merged (`66286880a`, codex-18; fixes `3c825c6e2`,
+     `53c065ce2`): each `:abstained`/`:no-selection` index line carries
+     `:abstention {:target :reason :missing :source}`, or `{:reason
+     :not-retained}`. Review found the bad case the packet named:
+     `failure-detail` dropped the nested `:missing` vector of a judge/gate
+     carrier, and codex's test passed only through a fixture-only checkpoint
+     copy. Fixed (new test red without it). Selection abstentions now give the
+     target's own cause (e.g. `:target-source-path-absent`) as `:reason`.
+     Projected over the 60 real records: 54 get a reason (42 selection, 10
+     target reading, 2 judge), 6 `:not-retained`.
+   - Red on main before and after (baseline with the old src): 4 in
+     judge-refusal-abstention-test, 10+1 in run-debugger-test, 23 in
+     click-interpretation-ask-test. Add to the red-suite item above.
    - WRITE-REGISTER-0 (codex-20; window count re-run: 43 files): one real
      click (`2026-11-05-3f57ee95`) registered 4 of 43 changed files with
      path+sha; its record has no `:close-evidence-manifest` value; seat
