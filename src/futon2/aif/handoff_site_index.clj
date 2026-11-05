@@ -40,7 +40,8 @@
             [{:reason :duplicate-site-id}])
           (mapcat
            (fn [{:keys [id source anchor kind contract transport status exception
-                        representation decoder retention] site-repo :repo}]
+                        representation decoder retention admission-adapter
+                        lean-contract] site-repo :repo}]
              (let [root (resolve-site-repo repo repos site-repo)
                    file (when root (io/file root source))
                    text (when (and file (.isFile file)) (slurp file))]
@@ -64,7 +65,17 @@
                  ;; the exact refused input, not a response-format rule.
                  (and retention (not (keyword? retention)))
                  (conj {:site id :reason :retention-schema-invalid
-                        :retention retention}))))
+                        :retention retention})
+                 (not= (some? admission-adapter) (some? lean-contract))
+                 (conj {:site id :reason :proof-carrying-binding-incomplete})
+                 (and admission-adapter (not (symbol? admission-adapter)))
+                 (conj {:site id :reason :admission-adapter-invalid
+                        :admission-adapter admission-adapter})
+                 (and lean-contract
+                      (not (and (string? lean-contract)
+                                (not (str/blank? lean-contract)))))
+                 (conj {:site id :reason :lean-contract-invalid
+                        :lean-contract lean-contract}))))
            sites))]
      {:schema :wm/handoff-site-audit-v1
       :status (if (seq problems) :refused :verified)

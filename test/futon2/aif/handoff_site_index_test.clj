@@ -19,23 +19,47 @@
         sites (:sites index)
         audit (sut/audit repo {"futon3c" futon3c-repo})]
     (is (= :verified (:status audit)) (pr-str (:problems audit)))
-    (is (= 21 (:site-count audit)))
+    (is (= 22 (:site-count audit)))
     (is (= (count sites) (count (set (map :id sites)))))
     (is (every? #(and (:contract %) (:transport %) (:status %)) sites))
     (is (every? #(or (not= :agent-reply (:kind %))
                      (and (:representation %) (:decoder %)))
                 sites))))
 
+(deftest proof-carrying-site-binds-adapter-and-lean-contract
+  (let [site (some #(when (= :hygiene/test-registry-currency (:id %)) %)
+                   (:sites (sut/read-index)))]
+    (is (= 'futon3c.file-change.hygiene-delivery/currency-evidence
+           (:admission-adapter site)))
+    (is (= "DarkTower.WarMachine.FileChangeHygieneDelivery.admitted_iff_checked"
+           (:lean-contract site)))
+    (doseq [missing [:admission-adapter :lean-contract]]
+      (let [index (update (sut/read-index) :sites
+                          (fn [sites]
+                            (mapv #(if (= (:id %) (:id site))
+                                     (dissoc % missing) %)
+                                  sites)))
+            result (with-redefs [sut/read-index (constantly index)]
+                     (sut/audit repo {"futon3c" futon3c-repo}))]
+        (is (= :refused (:status result)))
+        (is (some #(and (= (:id site) (:site %))
+                        (= :proof-carrying-binding-incomplete (:reason %)))
+                  (:problems result)))))))
+
 (deftest cross-repo-anchor-is-required-for-verification
   (let [real (io/file futon3c-repo "src/futon3c/wm/meta_self_heal_adapters.clj")
         text (slurp real)
+        hygiene-real (io/file futon3c-repo "src/futon3c/transport/http.clj")
         anchor "(defn- producer-invoke!"
         tmp (io/file (System/getProperty "java.io.tmpdir")
                      (str "handoff-index-cross-repo-" (System/nanoTime)))
-        staged (io/file tmp "src/futon3c/wm/meta_self_heal_adapters.clj")]
+        staged (io/file tmp "src/futon3c/wm/meta_self_heal_adapters.clj")
+        hygiene-staged (io/file tmp "src/futon3c/transport/http.clj")]
     (.mkdirs (.getParentFile staged))
+    (.mkdirs (.getParentFile hygiene-staged))
     (try
       (spit staged text)
+      (spit hygiene-staged (slurp hygiene-real))
       (let [verified (sut/audit repo {"futon3c" (.getCanonicalPath tmp)})]
         (is (= :verified (:status verified)) (pr-str (:problems verified))))
       (spit staged (str/replace text anchor "(defn- producer-invoke-RENAMED"))
@@ -45,14 +69,20 @@
                         (= :self-heal/producer-invoke (:site %)))
                   (:problems refused))
             (pr-str (:problems refused))))
-      (let [unresolved (sut/audit repo {"futon3c" nil})]
+      (let [isolated-repo (io/file tmp "isolated/futon2")
+            _ (.mkdirs isolated-repo)
+            unresolved (sut/audit (.getCanonicalPath isolated-repo)
+                                  {"futon3c" nil})]
         (is (= :refused (:status unresolved)))
         (is (some #(= :repo-unresolved (:reason %)) (:problems unresolved))
             (pr-str (:problems unresolved))))
       (finally
         (.delete staged)
+        (.delete hygiene-staged)
         (.delete (.getParentFile staged))
+        (.delete (.getParentFile hygiene-staged))
         (.delete (io/file tmp "src/futon3c/wm"))
+        (.delete (io/file tmp "src/futon3c/transport"))
         (.delete (io/file tmp "src/futon3c"))
         (.delete (io/file tmp "src"))
         (.delete tmp)))))

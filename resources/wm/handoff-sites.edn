@@ -149,6 +149,18 @@
    :anchor "requirements NOT CHECKED"
    :contract :wm/requirements-check-terminal
    :transport :checked-publication :status :verified-fail-closed}
+  {:id :hygiene/test-registry-currency
+   :producer :test-registry-currency-authority
+   :consumer :test-registry-currency-http-client
+   :kind :service :repo "futon3c"
+   :source "src/futon3c/transport/http.clj"
+   :anchor "(defn handle-test-registry-currency"
+   :contract :file-change/test-registry-currency-v1
+   :transport :http-json
+   :admission-adapter futon3c.file-change.hygiene-delivery/currency-evidence
+   :lean-contract "DarkTower.WarMachine.FileChangeHygieneDelivery.admitted_iff_checked"
+   :recovery-authority :registry-closure-rehash
+   :status :verified-proof-carrying}
   {:id :self-heal/producer-invoke
    :producer :meta-self-heal-adapters :consumer :diagnosis-producer-seat
    :kind :agent-reply :repo "futon3c"
