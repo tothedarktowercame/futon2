@@ -314,7 +314,7 @@
     {:manifest m :result (:result m)}))
 
 (defn dispatch-reader! [sent {:keys [prompt-resource reader-seat caller kimi-script task-repo agency-base reader-timeout-ms clock-inputs a7-path code-root]
-                              :or {reader-seat "zai-1" caller "operator-focus"
+                              :or {reader-seat "猴-1" caller "operator-focus"
                                    agency-base "http://127.0.0.1:7070" reader-timeout-ms 600000}}]
   (let [code-root (or code-root (System/getenv "FUTON_CODE_ROOT"))
         _ (when (str/blank? code-root) (throw (ex-info "FUTON_CODE_ROOT is required" {:reason :code-root-absent})))
