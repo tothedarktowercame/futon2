@@ -15,6 +15,7 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.policy :as policy]
             [futon2.aif.trace :as trace]
             [futon2.aif.wm.cascade-decision :as wm-cd]
             [futon2.test-support.reading-route :as route])
@@ -137,20 +138,42 @@
   ;; :free-energy-not-supplied, and the decision rethrows that as "cascade
   ;; decision refused" (the production repair in this packet). (Retired:
   ;; the live-C refusal guard; live C is observation only.)
-  (let [fx (route/fixture)
+  (let [fx (route/fixture [["p/a" "p/c"] "p/b"])
         unreadable (route/decide-field (route/field {"M-a" nil}) {"M-a" 1} {})
         selected (route/decide fx)
-        unread-ledger {:steps [] :read [] :unread [] :dir-status {:absent :no-flights-dir}}
+        unread-ledger {:steps [] :read []
+                       :unread [{:path "fixture/unread-flight.edn"}]
+                       :dir "fixture/flights"}
+        caller-task {:target route/target}
+        selector-refusals (atom 0)
+        select-action-cascades policy/select-action-cascades
         {:keys [result record]}
-        (run-judge (fn [_] (wm-cd/cascade-decision
-                            (route/assembled fx 1)
-                            (route/opts fx {:conditioning-steps unread-ledger})))
-                   {:target "M-autoclock-in"})
+        (with-redefs-fn
+          {#'wm-cd/certify-reading-family
+           (fn [& _]
+             (fn [& _] {:status :certified :beta 1 :receipt {:fixture :certified}}))
+           #'policy/select-action-cascades
+           (fn [& args]
+             (try
+               (apply select-action-cascades args)
+               (catch clojure.lang.ExceptionInfo e
+                 (when (= :free-energy-not-supplied
+                          (get-in (ex-data e) [:refusal :kind]))
+                   (swap! selector-refusals inc))
+                 (throw e))))}
+          #(run-judge (fn [_] (wm-cd/cascade-decision
+                               (route/assembled fx 1)
+                               (route/opts fx {:conditioning-steps unread-ledger})))
+                      caller-task))
         carrier (get-in record [:decision :abstention])]
     (is (= :no-acting-cascade-candidate (get-in unreadable [:decision :reason]))
         "missing construction evidence remains generic no-selection")
     (is (some? (get-in selected [:decision :action]))
         "the same field with a readable ledger selects")
+    (is (= route/target (:target caller-task))
+        "the caller-supplied task names the admitted family")
+    (is (= 1 @selector-refusals)
+        "the caller-supplied target forms an acting family and reaches the selector refusal")
     (is (= :free-energy-not-supplied (get-in carrier [:targets 0 :kind])))
     (is (= route/target (get-in carrier [:targets 0 :target]))
         "the refusal names the field's one target")
