@@ -1,0 +1,40 @@
+{:schema :wm/run-decision-ledger-v1
+ :occasions
+ [{:schema :wm/occasion-v1
+   :occasion/id "run-2026-10-c1293ae5"
+   :occasion/seq 1
+   :occasion/summary
+   "First run of the M-run-produces-its-own-brief compiled cascade (selected digest 9e79cd21da6114b6c2733939ab679294ece7011738aa93480ef0441d536bc49b): three operational clauses authored, reviewed and enacted for the mission's decisions half."}]
+ :decisions
+ [{:schema :wm/run-decision-entry-v1
+   :decision/id "D-run-brief-1"
+   :occasion/id "run-2026-10-c1293ae5"
+   :decision/status :settled
+   :decision/summary
+   "The run brief's decisions half is produced from a durable typed ledger (futon2.aif.wm.run-brief), not from a conversation buffer."
+   :decision/basis
+   "futon2/src/futon2/aif/wm/run_brief.clj; ledger holes/missions/M-run-produces-its-own-brief/run-decisions.edn; generated brief run-brief.md; tests test/futon2/aif/wm/run_brief_test.clj"}
+  {:schema :wm/run-decision-entry-v1
+   :decision/id "D-run-brief-2"
+   :occasion/id "run-2026-10-c1293ae5"
+   :decision/status :settled
+   :decision/summary
+   "Occasions and decision entries are typed records with ids, statuses and bases; invalid ledger entries are typed errors, never silent drops."
+   :decision/basis
+   "validate-occasion / validate-decision / validate-ledger in futon2.aif.wm.run-brief, pinned by run_brief_test.clj including the exact bad-case entry"}
+  {:schema :wm/run-decision-entry-v1
+   :decision/id "D-run-brief-3"
+   :occasion/id "run-2026-10-c1293ae5"
+   :decision/status :newly-opened
+   :decision/summary
+   "Qualified build-state numbers (established / stale / declared-unestablishable with bases) still need a producer reading the run's own gauges; this parcel built the decisions half only."
+   :decision/basis
+   "mission checklist line 9 remains unticked in holes/missions/M-run-produces-its-own-brief.md; no emitter exists yet for the numbers half"}
+  {:schema :wm/run-decision-entry-v1
+   :decision/id "D-run-brief-4"
+   :occasion/id "run-2026-10-c1293ae5"
+   :decision/status :outstanding
+   :decision/summary
+   "Lane handoff/output recording and a named operator surface presenting decisions and build state together remain open."
+   :decision/basis
+   "mission checklist lines 10-11 remain unticked; no lane-handoff record or operator command exists yet"}]}

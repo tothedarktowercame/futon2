@@ -4,8 +4,8 @@
 
 ## Acceptance checklist (2026-09-30)
 
-- [ ] A typed occasion or milestone record lets a report distinguish decisions settled, newly opened, and still outstanding since the previous run.
-- [ ] A run emits its own operator-level decision list without reconstructing it from a conversation buffer.
+- [x] A typed occasion or milestone record lets a report distinguish decisions settled, newly opened, and still outstanding since the previous run.
+- [x] A run emits its own operator-level decision list without reconstructing it from a conversation buffer.
 - [ ] The same run emits qualified build-state numbers that distinguish established, stale, and declared-unestablishable claims with their bases.
 - [ ] The run architecture records the handoffs and outputs of its participating lanes rather than relying on owner-written coordination prose.
 - [ ] A named operator command or surface presents the generated decisions and qualified build state together.
