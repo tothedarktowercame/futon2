@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.load-identity :as identity]
+            [futon2.aif.meta-medic-authority :as authority]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.repaired-elsewhere-medic :as medic]))
 
@@ -71,6 +72,9 @@
     (is (= :open (get-in persisted [:entries 0 :state])))
     (is (empty? (:injuries (ledger/effective-active-injuries
                             persisted medic/retained-authority))))
+    (is (empty? (:injuries (ledger/effective-active-injuries
+                            persisted (authority/with-retained-authorities
+                                       (constantly false))))))
     (is (.isFile dismissal-path))
     (is (= :dismissed-repaired-elsewhere
            (:repair/status (edn/read-string (slurp dismissal-path)))))))

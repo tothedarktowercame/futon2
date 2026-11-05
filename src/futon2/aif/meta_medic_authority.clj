@@ -45,6 +45,13 @@
   [external]
   (fn [observation]
     (or (try (true? (external observation)) (catch Throwable _ false))
+        (try
+          (and (= "futon2.aif.repaired-elsewhere-medic/retained-authority"
+                  (get-in observation [:candidate :evaluator]))
+               (true? ((requiring-resolve
+                         'futon2.aif.repaired-elsewhere-medic/retained-authority)
+                        observation)))
+          (catch Throwable _ false))
         (out-of-band/retained-checked-medic-authority observation)
         (environmental-probe/retained-checked-medic-authority observation)
         (reattribution/retained-authority observation)
