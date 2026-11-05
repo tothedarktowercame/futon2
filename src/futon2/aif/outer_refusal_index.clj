@@ -5,6 +5,7 @@
   published. Legacy backfill is an explicit tooling-JVM operation."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [futon2.aif.c1-exclusion :as c1-exclusion]
             [futon2.aif.outer-refusal-history :as history]
             [futon2.aif.ticket-publication-io :as publication])
   (:import [java.math BigInteger]
@@ -59,14 +60,42 @@
        true))
     entry))
 
+(defn- terminal-entry [record path sha]
+  (let [terminal (history/index-entry record path sha)]
+    (if (= :pending-exclusion
+           (get-in record [:refusal/disposition :disposition]))
+      (let [exclusion (c1-exclusion/exclusion-row record)]
+        (if (= :row (:status exclusion))
+          (assoc terminal
+                 :c1-exclusion exclusion
+                 :refusal/disposition
+                 {:disposition :click-terminal :case :C1
+                  :evidence {:exclusionRecorded true}})
+          (assoc terminal :refusal/disposition
+                 {:disposition :debugger-error :case :C1
+                  :reason :exclusion-not-recorded
+                  :evidence exclusion})))
+      terminal)))
+
 (defn append-run-record!
   "Append the compact projection of an already-published terminal RECORD."
   [dir record-path record]
   (let [path (.getCanonicalPath (io/file record-path))
         sha (sha256-file path)
-        terminal (history/index-entry record path sha)]
-    (append-entry! (io/file dir history/index-name)
-                   (into [terminal] (history/reading-index-entries record path sha)))
+        terminal (terminal-entry record path sha)]
+    (try
+      (append-entry! (io/file dir history/index-name)
+                     (into [terminal] (history/reading-index-entries record path sha)))
+      (catch Exception e
+        (if (= :pending-exclusion
+               (get-in record [:refusal/disposition :disposition]))
+          (throw (ex-info "C1 exclusion was not recorded"
+                          {:failure-kind :exclusion-not-recorded
+                           :refusal/disposition
+                           {:disposition :debugger-error :case :C1
+                            :reason :exclusion-not-recorded}}
+                          e))
+          (throw e))))
     terminal))
 
 (defn- terminal-files [dir]
@@ -102,7 +131,7 @@
                 row (try
                       (let [record (with-open [reader (java.io.PushbackReader. (io/reader file))]
                                      (edn/read reader))]
-                        (into [(history/index-entry record path pin)]
+                        (into [(terminal-entry record path pin)]
                               (history/reading-index-entries record path pin)))
                       (catch Exception e
                         {:schema :wm/outer-refusal-index-entry-v1

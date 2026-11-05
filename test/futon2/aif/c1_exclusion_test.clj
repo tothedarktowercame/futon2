@@ -1,9 +1,18 @@
 (ns futon2.aif.c1-exclusion-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.c1-exclusion :as sut]
             [futon2.aif.action-identity :as identity]
+            [futon2.aif.outer-refusal-history :as history]
+            [futon2.aif.outer-refusal-index :as index]
             [futon2.aif.refusal-legality :as refusal-legality]
-            [futon2.aif.outer-select :as outer-select]))
+            [futon2.aif.outer-select :as outer-select])
+  (:import [java.nio.file Files]))
+
+(defn temp-dir []
+  (.toFile (Files/createTempDirectory
+            "c1-exclusion-"
+            (make-array java.nio.file.attribute.FileAttribute 0))))
 
 (def identity-row
   {:mission-source-sha256 "mission" :policy-id "policy"
@@ -95,3 +104,59 @@
   (let [partition {:field [{:target "M-a"}] :excluded [{:target "E-x"}]}]
     (is (= partition
            (outer-select/apply-c1-exclusions partition (:field partition) [])))))
+
+(deftest pending-c1-is-resolved-in-the-single-index-line
+  (let [dir (temp-dir)
+        source (io/file dir "tick-run-record-run.edn")
+        pending (assoc (record true) :refusal/disposition
+                       {:disposition :pending-exclusion :case :C1})]
+    (spit source (pr-str pending))
+    (index/append-run-record! dir source pending)
+    (let [lines (history/read-index dir)
+          line (first lines)
+          exclusions (sut/field-exclusions
+                      (keep :c1-exclusion lines)
+                      (constantly "mission") ["M-target" "M-next"])
+          next-field (outer-select/apply-c1-exclusions
+                      {:field [{:target "M-target"} {:target "M-next"}]
+                       :excluded []}
+                      [{:target "M-target"} {:target "M-next"}]
+                      exclusions)]
+      (is (= 1 (count lines)))
+      (is (= :click-terminal
+             (get-in line [:refusal/disposition :disposition])))
+      (is (= :row (get-in line [:c1-exclusion :status])))
+      (is (= "M-target" (get-in line [:c1-exclusion :row :target])))
+      (is (= ["M-next"] (mapv :target (:field next-field)))))))
+
+(deftest refused-c1-resolution-is-debugger-error-without-exclusion-row
+  (let [dir (temp-dir)
+        source (io/file dir "tick-run-record-run.edn")
+        pending (assoc (record false) :refusal/disposition
+                       {:disposition :pending-exclusion :case :C1})]
+    (spit source (pr-str pending))
+    (index/append-run-record! dir source pending)
+    (let [line (first (history/read-index dir))]
+      (is (= :debugger-error
+             (get-in line [:refusal/disposition :disposition])))
+      (is (= :exclusion-not-recorded
+             (get-in line [:refusal/disposition :reason])))
+      (is (nil? (:c1-exclusion line))))))
+
+(deftest append-failure-publishes-no-index-line
+  (let [dir (temp-dir)
+        source (io/file dir "tick-run-record-run.edn")
+        pending (assoc (record true) :refusal/disposition
+                       {:disposition :pending-exclusion :case :C1})]
+    (spit source (pr-str pending))
+    (with-redefs [index/append-entry!
+                  (fn [& _] (throw (ex-info "append failed" {:kind :test})))]
+      (let [failure (try
+                      (index/append-run-record! dir source pending)
+                      nil
+                      (catch clojure.lang.ExceptionInfo e e))]
+        (is (= :exclusion-not-recorded (:failure-kind (ex-data failure))))
+        (is (= :debugger-error
+               (get-in (ex-data failure)
+                       [:refusal/disposition :disposition])))))
+    (is (not (.exists (io/file dir history/index-name))))))

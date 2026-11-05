@@ -1673,6 +1673,9 @@
                     :failure (run-record-failure
                               result
                               #(write-refusal-cause-overflow! dir run-id %))
+                    :refusal/disposition
+                    (or (get-in result [:data :refusal/disposition])
+                        {:disposition :not-applicable})
                     :repair/discharge (:repair/discharge result)
                     :repair/publication (:repair/publication result)
                     :d-task-enactment (:d-task-enactment result)
@@ -8558,7 +8561,17 @@
                                   (cond-> [] (:witness data) (conj (:witness data)))}})
                    result))
         close! (fn [outcome data]
-                 (let [refusal-resolution (volatile! nil)]
+                 (let [refusal-resolution (volatile! nil)
+                       ;; This construction carrier later becomes the same
+                       ;; :effective-run-identity used by exclusion-row.
+                       data (cond-> data
+                              (get-in @checkpoints
+                                      [:construction :judgment
+                                       :mission-source-sha256])
+                              (assoc :mission-source-sha256
+                                     (get-in @checkpoints
+                                             [:construction :judgment
+                                              :mission-source-sha256])))]
                  (try
                    (validated-close!
                     outcome data observe-end! close-core!

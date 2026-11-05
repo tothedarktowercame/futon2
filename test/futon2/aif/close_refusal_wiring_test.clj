@@ -38,6 +38,17 @@
     (is (= :debugger-error
            (get-in result [:data :refusal/disposition :disposition])))))
 
+(deftest pending-exclusion-does-not-hold
+  (let [{:keys [events result]}
+        (drive true (fn [_] (throw (AssertionError. "await called")))
+               :already-satisfied
+               {:failure-kind :already-satisfied
+                :mission-observation {:status :admitted}
+                :mission-source-sha256 "mission"})]
+    (is (= :pending-exclusion
+           (get-in result [:data :refusal/disposition :disposition])))
+    (is (= :observe (first events)))))
+
 (deftest await-throw-prevents-persistence
   (let [events (atom [])]
     (is (thrown-with-msg?

@@ -75,6 +75,28 @@
 (deftest work-outcome-has-no-refusal-evidence
   (is (nil? (sut/evidence-for-close :grounded-change {} nil false))))
 
+(deftest measured-c1-with-digest-carrier-is-pending-exclusion
+  (let [result (sut/resolve-close-refusal
+                true (fn [_] (throw (AssertionError. "must not hold")))
+                :already-satisfied
+                {:failure-kind :already-satisfied
+                 :mission-observation {:status :admitted}
+                 :mission-source-sha256 "mission"}
+                (constantly nil) false)]
+    (is (= :pending-exclusion
+           (get-in result [:data :refusal/disposition :disposition])))
+    (is (= :C1 (get-in result [:data :refusal/disposition :case])))))
+
+(deftest c1-without-measurement-or-digest-remains-debugger-error
+  (doseq [data [{:failure-kind :already-satisfied
+                 :mission-source-sha256 "mission"}
+                {:failure-kind :already-satisfied
+                 :mission-observation {:status :admitted}}]]
+    (is (= :debugger-error
+           (get-in (sut/resolve-close-refusal false nil :already-satisfied data
+                                              (constantly nil) false)
+                   [:data :refusal/disposition :disposition])))))
+
 (deftest close-refusal-controller-restarts
   (let [calls (atom 0)
         result (sut/resolve-close-refusal

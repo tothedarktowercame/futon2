@@ -68,6 +68,15 @@
   [outcome data scored-field operator-signal]
   (when-not (contains? work-outcomes outcome)
     (cond
+      (contains? #{:already-satisfied :grounded-no-change} outcome)
+      {:refusal :terminal :case :C1
+       :evidence {:kind :already-satisfied
+                  :satisfactionMeasured
+                  (= :admitted (get-in data [:mission-observation :status]))
+                  :missionSourceShaPresent
+                  (string? (:mission-source-sha256 data))
+                  :exclusionRecorded false}}
+
       (and (= :abstained outcome) (= :empty-field (:failure-kind data)))
       (if (nil? scored-field)
         {:refusal :other :case :L1
@@ -100,7 +109,15 @@
   [attached? await-fn outcome data read-scored-field operator-signal]
   (loop [outcome outcome, data data, prior nil]
     (if-let [refusal (evidence-for-close outcome data (read-scored-field) operator-signal)]
-      (let [d (disposition refusal)
+      (let [;; :pending-exclusion is a runner intermediate, not a fifth Lean
+            ;; disposition. It means caseChecked holds while
+            ;; exclusionRecorded is unknown until the finished record's
+            ;; compact index line is published.
+            d (if (and (= :C1 (:case refusal))
+                       (case-checked? (:evidence refusal))
+                       (true? (get-in refusal [:evidence :missionSourceShaPresent])))
+                :pending-exclusion
+                (disposition refusal))
             retained {:disposition d :case (:case refusal)
                       :evidence (:evidence refusal)}]
         (if (and attached? (= :debugger-error d))
