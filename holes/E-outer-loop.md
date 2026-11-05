@@ -160,3 +160,9 @@ rather than improving it.
 | I3 | Records: over the tick records before 2026-09-17, what did the outer loop propose and choose — counts by action type and proposer, feasibility exclusions, near-ties — and did the chosen work get done? | kimi-5 | invoke-1790256941064-23670-b64b5491 | done: `1834cc73`; script rerun identical; Q4 outcome claims corrected above |
 
 Read-only: no clicks, no writes under `data/`, no shared-JVM loads.
+
+## Completion criteria
+
+- The history investigations are done and committed — check: futon2 shas 0b06df90a (I1) and 1834cc73e (I3) on the default branch. **Met.**
+- Each defect O1-O8 is either fixed in futon2 (a commit restoring or replacing the capability: a proposing step feeding the cascade decision, feasibility as competition not refusal, value signals reaching a decision, sorry/pattern/tension targets visible, a record of what H5b removed) or explicitly handed to a named successor item — check: for each O-row, a futon2 sha or a linked successor item in this file. **Not met.**
+- The excursion states its disposition (the outer loop is restored, replaced, or the loss is accepted by Joe) — check: a closing paragraph in this file naming the decision and who made it. **Not started.**

@@ -155,3 +155,10 @@ turn↔(mission|excursion) link carries the grain. *Not a course change — a gr
    precedent (DONE — this witness). Rising n=1→10 as structural neighbors are mined; **diagnosable** — a
    mission that still abstains has no structural precedent yet (a genuine island → "needs a foothold",
    surfaced honestly, per the three-kinds-of-off-map split in [[M-wm-policies]] §4).
+
+## Completion criteria
+
+- Structure embedding ported to missions — check: futon6 scripts/mission_structure_embed.py runs and data/mission-structure-embed/ holds 198-mission 161-d vectors (item records 0.79 vs 0.38 same-class NN). **Met.**
+- A mined-move generator covers the abstaining set — check: futon6 data/diffsub-moves-mined.edn exists with 55 canonical + 177 mined moves; item records 177/177 flip abstain→ΔG. **Met.**
+- The LIVE served judgement stops abstaining because of a missing rollout path — check: emit the mined overlay into the served judgement (the item's rung-2 remainder); a live mission that abstained with `:abstain-missing-leg` before now yields a verdict, with the mined move's provenance recorded. **Not started.**
+- The metric rises past the n=1 witness — check: the item's rung-3 metric, n served missions with a non-nil ΔG sourced from ≥1 structural precedent, is ≥ 10; a still-abstaining mission is surfaced as "needs a foothold". **Not started.**
