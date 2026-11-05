@@ -638,6 +638,12 @@ records and notifies, and validates nothing).
      pinned from the ledger row. Attribution is "changed during the click",
      not "written by it". Registration only; no refusals, nothing deleted.
      Later: writer stamps, seat worktrees, an unregistered-write alert.
+   - WRITE-REGISTER-1 merged (`d9e66b9de`, codex-20; fix `139f75b46`):
+     `fire_with_write_manifest` writes `wm-click-loop/write-manifests/<click>.json`
+     (exclusive create) and pins `{path, sha256, count}` on the click's
+     ledger row. Review fix: one file still being appended during hashing
+     made the whole manifest fail; now that entry is `unstable: true`. Cost
+     measured: 350,357 files under the three roots, about 1.9 s per snapshot.
 
 Until 4-6 land, the validator classes every C-looking refusal as a debugger
 error, as the survey predicts. That is the intended interim state: those
