@@ -117,6 +117,10 @@ a recorded defect.
 - The diagnosis step names a cause function and nothing checks it is relevant
   (`meta_self_heal_production.clj:247-260`). This produced the impossible
   acceptance test for injury `57c88b37`.
+  **Closed at file level 2026-11-05** (DIAGNOSIS-CAUSE-2): admission refuses a cause
+  entry whose file is not a registered raise site of the failure kind, and keeps
+  the match as `:path-witness`. The var-level witness of `SelfHealRoute.lean:1633-1684`
+  remains to do.
 - The red `full-loop-runner-test` suite (125 failures, 29 errors on main,
   before and after MULTIREPO-4).
 - The hermeticity guard watches `data/` only. A test of mine wrote 868 files
