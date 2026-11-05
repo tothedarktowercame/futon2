@@ -7,6 +7,10 @@
 
 (def ^:private append-lock (Object.))
 
+(def ^:dynamic *click-context*
+  "The click owning writes in the current dynamic extent, or nil."
+  nil)
+
 (defn record!
   "Append one JSON attribution row. A non-click caller writes nothing."
   [{:keys [root click-id run-id writer path]}]
@@ -23,3 +27,15 @@
         (io/make-parents target)
         (spit target line :append true))
       {:stamped? true :path (.getCanonicalPath target) :stamp row})))
+
+(defn record-in-context!
+  "Stamp a write using the dynamically bound click identity."
+  [{:keys [root writer path]}]
+  (let [click-id (:click-id *click-context*)]
+    (if (or (not (string? click-id)) (str/blank? click-id))
+      {:stamped? false :reason :no-click-context}
+      (record! {:root root
+                :click-id click-id
+                :run-id (:run-id *click-context*)
+                :writer writer
+                :path path}))))

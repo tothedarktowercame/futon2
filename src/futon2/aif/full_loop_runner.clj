@@ -11061,7 +11061,11 @@
   ;; pattern every receipt reader in this repo requires
   (let [run-id (or (:run-id raw-opts)
                    (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
-        started-at (str (Instant/now))
+        click-id (:click-id raw-opts)
+        click-context (when (and (string? click-id) (not (str/blank? click-id)))
+                        {:click-id click-id :run-id run-id})]
+    (binding [write-stamp/*click-context* click-context]
+      (let [started-at (str (Instant/now))
         ;; Requirements Q6: the previous started run in this run-record
         ;; stream, read before this run's own start is appended and before
         ;; anything is selected
@@ -11292,4 +11296,4 @@
       authoritative-injury-ingest
       (assoc :meta-terminal-injury-ingest authoritative-injury-ingest)
       learning-publication
-      (assoc :outer-learning-publication learning-publication))))
+      (assoc :outer-learning-publication learning-publication))))))

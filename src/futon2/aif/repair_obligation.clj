@@ -14,6 +14,7 @@
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.write-stamp :as write-stamp]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.finding-ticket :as finding-ticket]
             [futon2.aif.injury-ticket-join :as injury-join])
@@ -30,6 +31,32 @@
 
 (def artifact-shapes #{:code-commit :data-deposit :spec-document})
 (defonce ^:private finding-publication-monitors (atom {}))
+
+(def ^:private store-child-names
+  #{"dismissals" "discharge-operations" "findings" "implementations"
+    "injury-joins" "occurrence-evidence" "publication-unreachable"
+    "resolutions" "verification-evidence" "verifications"})
+
+(defn- obligation-root-for-path [path]
+  (loop [file (.getCanonicalFile (io/file path))]
+    (when-let [parent (.getParentFile file)]
+      (if (contains? store-child-names (.getName file))
+        parent
+        (recur parent)))))
+
+(defn- stamp-created! [root writer path]
+  (when root
+    (write-stamp/record-in-context!
+     {:root (io/file (.getParentFile (.getCanonicalFile (io/file root)))
+                     "wm-write-stamps")
+      :writer (str "repair-obligation/" writer)
+      :path path})))
+
+(defn- store-lock-file [root]
+  (let [root-file (.getCanonicalFile (io/file root))]
+    (io/file (.getParentFile root-file)
+             (str "." (.getName root-file)
+                  ".wm-interoceptive-snapshot.lock"))))
 
 (defprotocol HistoricalSuccessorAuthority
   (historical-successor-record [authority]
@@ -273,17 +300,24 @@
    {} record))
 
 (defn- write-new! [path value]
-  (with-contended-store-lock (.getParent (io/file path))
-   (fn []
-    (let [file (io/file path)]
-    (io/make-parents file)
-    (Files/write (.toPath file)
-                 ;; pr-str, not pprint: see write-new-or-identical! below.
-                 (.getBytes (pr-str value) "UTF-8")
-                 (into-array StandardOpenOption
-                             [StandardOpenOption/CREATE_NEW
-                              StandardOpenOption/WRITE]))
-      (.getPath file)))))
+  (let [lock-root (.getParent (io/file path))
+        lock-file (store-lock-file lock-root)
+        lock-existed? (.exists lock-file)]
+    (with-contended-store-lock lock-root
+      (fn []
+        (let [file (io/file path)
+              obligation-root (obligation-root-for-path file)]
+          (when-not lock-existed?
+            (stamp-created! obligation-root "write-new!" lock-file))
+          (io/make-parents file)
+          (Files/write (.toPath file)
+                       ;; pr-str, not pprint: see write-new-or-identical! below.
+                       (.getBytes (pr-str value) "UTF-8")
+                       (into-array StandardOpenOption
+                                   [StandardOpenOption/CREATE_NEW
+                                    StandardOpenOption/WRITE]))
+          (stamp-created! obligation-root "write-new!" file)
+          (.getPath file))))))
 
 (defn- finding-directory! [root]
   (let [supplied (io/file root)
@@ -327,7 +361,9 @@
     (let [directory (finding-directory! root)
         file (io/file directory (str record-id ".edn"))
         file-path (.toPath file)
-        lock-path (.toPath (io/file directory ".publication.lock"))
+        lock-file (io/file directory ".publication.lock")
+        lock-path (.toPath lock-file)
+        lock-existed? (.exists lock-file)
         ;; pr-str, not pprint. Measured on a real 19.4 MB finding
         ;; (repair-ea1-dd81768f...--attempt-001-build-failed) on 2026-09-19:
         ;; pprint 47,306 ms / 19,412,725 bytes; pr-str 212 ms / 11,988,996
@@ -367,6 +403,8 @@
           (throw (ex-info "Repair finding publication lock malformed"
                           {:reason :repair-finding-root-refused})))
         (with-open [_lock (.lock lock-channel)]
+          (when-not lock-existed?
+            (stamp-created! root "write-new-or-identical!" lock-file))
           (try
         (with-open [ch (FileChannel/open file-path
                                         (into-array OpenOption
@@ -379,6 +417,7 @@
         (with-open [parent (FileChannel/open (.toPath directory)
                                              (make-array OpenOption 0))]
           (.force parent true))
+        (stamp-created! root "write-new-or-identical!" file)
         (.getPath file)
         (catch java.nio.file.FileAlreadyExistsException e
           (if (and (Files/isRegularFile file-path
@@ -696,6 +735,7 @@
     (with-open [parent (FileChannel/open (.toPath base)
                                          (make-array StandardOpenOption 0))]
       (.force parent true))
+      (stamp-created! root "write-new-durable!" target)
       {:path (.getPath target)
        :sha256 (digest/sha256 (String. bytes "UTF-8"))}))))
 

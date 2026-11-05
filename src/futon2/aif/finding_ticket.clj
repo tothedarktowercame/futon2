@@ -8,12 +8,21 @@
             [futon2.aif.load-identity :as identity]
             [futon2.aif.injury-ticket-join :as injury-join]
             [futon2.aif.interoceptive-store-lock :as store-lock]
+            [futon2.aif.write-stamp :as write-stamp]
             [futon2.aif.ticket-publication-io :as publication]
             [futon2.aif.ticket-queue :as queue]))
 
 (identity/register! *ns* *file*)
 
 (def canonical-store (data-paths/path "wm-repair-obligations"))
+
+(defn- stamp-created! [root writer path existed?]
+  (when (and (not existed?) (.isFile (io/file path)))
+    (write-stamp/record-in-context!
+     {:root (io/file (.getParentFile (.getCanonicalFile (io/file root)))
+                     "wm-write-stamps")
+      :writer (str "finding-ticket/" writer)
+      :path path})))
 
 (defn destinations
   "The canonical store publishes to the primary checkout. Other store roots
@@ -129,7 +138,9 @@
          receipt-file (io/file root "ticket-links" (str id ".edn"))]
      (store-lock/with-store-lock-for root
        (fn []
+         (let [existed? (.exists path)]
          (publication/publish-text! path (ticket-text finding (.getPath source) (identity/sha256 bytes)) false)
+           (stamp-created! root "publish!" path existed?))
          (let [resolved (injury-join/resolve-join root id)]
            (when (= :refused (:status resolved))
              (throw (ex-info "Ticket injury join refused" resolved)))
@@ -146,8 +157,16 @@
                  (throw (ex-info "Ticket injury provenance conflicts"
                                  {:reason :injury-join-conflict}))
                  :else (publication/publish-text! path (str previous block) true)))))
-         (queue/enqueue! queue-path entry)
-         (publication/publish-text! receipt-file (pr-str receipt) false)
+         (let [queue-file (io/file queue-path)
+               queue-lock (io/file (str (.getCanonicalPath queue-file) ".lock"))
+               queue-existed? (.exists queue-file)
+               lock-existed? (.exists queue-lock)]
+           (queue/enqueue! queue-path entry)
+           (stamp-created! root "publish!" queue-file queue-existed?)
+           (stamp-created! root "publish!" queue-lock lock-existed?))
+         (let [receipt-existed? (.exists receipt-file)]
+           (publication/publish-text! receipt-file (pr-str receipt) false)
+           (stamp-created! root "publish!" receipt-file receipt-existed?))
          ;; Retain the first publication's byte pin. The store accepts legacy
          ;; equivalent serializations on replay; that does not rewrite the
          ;; original ticket or its historical provenance receipt.
