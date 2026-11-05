@@ -1,0 +1,59 @@
+;; Named harm rules for RefusalLegality C3 (harmDeclined; Lean field
+;; `harmRuleMatched`, mathlib4/DarkTower/WarMachine/RefusalLegality.lean).
+;;
+;; Approved by Joe, 2026-11-05 ("That's a reasonable default list of guard
+;; rails"). Drafted by claude-6 from the standing rules Joe has given.
+;;
+;; A refusal is C3 only when it carries a typed :declined-action whose
+;; :operation is one of a rule's :operations, every :requires field is
+;; present, and every :checks entry holds against the world. Free text
+;; (:refusal-reason, :doc) is never match evidence. Anything else stays a
+;; debugger error.
+;;
+;; This is the "do not do" list. Joe also wants a soft "should do" check
+;; (work reduces stress, tension and tendencies to violence; top of
+;; futon3/holes/war-room.md). That belongs to a pattern library
+;; (library/militant-pacifism, not yet written), not to this file.
+{:schema :wm/harm-rules-v1
+ :approved {:by "joe" :on "2026-11-05"}
+ :rules
+ [{:id :H1
+   :doc "Destroy or overwrite production data."
+   :operations #{:delete :overwrite}
+   :requires [:paths]
+   ;; every path exists now and lies under a production data root
+   :checks [:paths-exist :paths-under-production-data-root]}
+
+  {:id :H2
+   :doc "Force-push, or push to a shared default branch."
+   :operations #{:git-push}
+   :requires [:repo :remote :ref :force?]
+   ;; force? true, or ref is the remote's default branch
+   :checks [:force-or-default-branch]}
+
+  {:id :H3
+   :doc "Restart a shared JVM (Agency :7070 / Drawbridge :6768, futon1b :7073)."
+   :operations #{:service-restart :process-kill}
+   :requires [:service]
+   :checks [:service-is-shared]
+   :shared-services #{:futon3c-agency :futon1b}}
+
+  {:id :H4
+   :doc "Post as Joe, or publish outside (external services, public repos)."
+   :operations #{:post :publish}
+   :requires [:actor :destination]
+   ;; actor is Joe's identity, or destination is outside this host
+   :checks [:actor-is-joe-or-destination-external]}
+
+  {:id :H5
+   :doc "Spend money."
+   :operations #{:purchase :paid-call}
+   :requires [:vendor :amount :currency]
+   :checks [:amount-positive]}
+
+  {:id :H6
+   :doc "Edit existing Lean."
+   :operations #{:edit :delete :overwrite}
+   :requires [:paths]
+   ;; some path ends in .lean and already exists
+   :checks [:existing-lean-path]}]}
