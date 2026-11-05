@@ -3054,12 +3054,12 @@
 
 (deftest rejected-review-is-revised-and-approved-once
   (token-fixture/with-artifact
-   (fn [_unrelated-sha]
+   (fn [initial-sha]
     (let [first-review
           (str "FULL_LOOP_REVIEW: REQUEST_CHANGES preserve the typed gate\n"
                "Finding: the negative path is untested.")
           token-repo (io/file observation-checks/repo-root "futon2")
-          initial-sha (token-fixture/command token-repo "rev-parse" "HEAD~1")
+          pre-author-sha (token-fixture/command token-repo "rev-parse" "HEAD~1")
           mission-path (io/file token-repo
                                 "holes/missions/M-aif-policy-conditioned-eig.md")
           _ (spit mission-path
@@ -3076,19 +3076,16 @@
           evidence-root (io/file (.getParentFile token-repo)
                                  "revision-evidence")
           _ (.mkdirs evidence-root)
-          evidence-file (io/file evidence-root "d-task.edn")
-          _ (spit evidence-file
-                  (pr-str {:after-token-evidence
-                           (token-fixture/measurements revised-sha)}))
+          production-complete d-task/complete!
+          observed-heads (atom [pre-author-sha initial-sha])
           {:keys [result phases dispatches deliveries grounded]}
           (binding [cascade-sources/*code-roots*
                     ["test/fixtures/library-pins/r7fc6a050"
                      "test/fixtures/library-pins/current"]]
             (with-redefs [d-task/complete!
-                          (fn [& _]
-                            {:source {:path (.getPath evidence-file)
-                                      :sha256 (digest/sha256
-                                               (slurp evidence-file))}})]
+                          (fn [root captured expected data _read-job]
+                            (runner-fixture/complete-occurrence-bound-task!
+                             production-complete root captured expected data))]
               (run-revision-attempt
                [first-review "FULL_LOOP_REVIEW: APPROVE\nAmendment verified."]
                {:author-commits [initial-sha revised-sha]
@@ -3108,6 +3105,11 @@
                     :semilattice []
                     :selected-action (:action entry)})
                  :target-repo-fn (fn [& _] (.getPath token-repo))
+                 :repo-head-observation-fn
+                 (fn [repo]
+                   (let [head (or (first @observed-heads) initial-sha)]
+                     (swap! observed-heads #(if (next %) (subvec % 1) %))
+                     {:repo repo :head head :observed-at-ms 1000}))
                  :resolve-build-fn
                  (fn [_] {:repo (.getPath token-repo)
                           :files ["unrelated.clj"]})
@@ -3216,20 +3218,78 @@
     (is (empty? grounded))))
 
 (deftest second-rejection-closes-with-both-review-records
-  (let [{:keys [result deliveries]}
-        (run-revision-attempt
-         ["FULL_LOOP_REVIEW: REQUEST_CHANGES first defect"
-          "FULL_LOOP_REVIEW: REJECT amendment still violates the contract"])
-        build (get-in result [:checkpoints :build :judgment])]
-    (is (= :build-failed (:outcome result)))
-    (is (true? (get-in result [:data :artifact-binding :fresh-author?])))
-    (is (= (get-in build [:validation :artifact-binding])
-           (get-in result [:data :artifact-binding])))
-    (is (= [:request-changes :reject]
-           (mapv :verdict (:reviews build))))
-    (is (= [:request-changes :reject]
-           (mapv :verdict (get-in result [:data :reviews]))))
-    (is (= (:reviews build) (:reviews (first deliveries))))))
+  (token-fixture/with-artifact
+   (fn [initial-sha]
+     (let [token-repo (io/file observation-checks/repo-root "futon2")
+           pre-author-sha (token-fixture/command token-repo "rev-parse" "HEAD~1")
+           mission-path (io/file token-repo
+                                 "holes/missions/M-aif-policy-conditioned-eig.md")
+           _ (spit mission-path
+                   (str/replace
+                    (slurp mission-path)
+                    "- [ ] **Mint the shared posterior updater, then unify the two paths through"
+                    "- [x] **Mint the shared posterior updater, then unify the two paths through"))
+           _ (token-fixture/command token-repo "add" ".")
+           _ (token-fixture/command
+              token-repo "-c" "user.name=Fixture"
+              "-c" "user.email=fixture@example.invalid"
+              "commit" "-qm" "complete selected updater want")
+           revised-sha (token-fixture/command token-repo "rev-parse" "HEAD")
+           evidence-root (io/file (.getParentFile token-repo)
+                                  "second-rejection-evidence")
+           _ (.mkdirs evidence-root)
+           production-complete d-task/complete!
+           observed-heads (atom [pre-author-sha initial-sha])
+           {:keys [result deliveries]}
+           (binding [cascade-sources/*code-roots*
+                     ["test/fixtures/library-pins/r7fc6a050"
+                      "test/fixtures/library-pins/current"]]
+             (with-redefs
+               [d-task/complete!
+                (fn [root captured expected data _read-job]
+                  (runner-fixture/complete-occurrence-bound-task!
+                   production-complete root captured expected data))]
+               (run-revision-attempt
+                ["FULL_LOOP_REVIEW: REQUEST_CHANGES first defect"
+                 "FULL_LOOP_REVIEW: REJECT amendment still violates the contract"]
+                {:author-commits [initial-sha revised-sha]
+                 :runner-options
+                 {:judge-fn
+                  (fn [_]
+                    {:judgement (assoc judgement :decision
+                                       (token-loop-exercised-decision))})
+                  :mission-fn
+                  (fn [_]
+                    (#'missions/mission-doc->entry (.getPath mission-path)))
+                  :construct-fn
+                  (fn [entry]
+                    {:construction-kind :revision-test
+                     :capability-contract {:must :preserve-contract}
+                     :shown [:P1]
+                     :semilattice []
+                     :selected-action (:action entry)})
+                  :target-repo-fn (fn [& _] (.getPath token-repo))
+                  :repo-head-observation-fn
+                  (fn [repo]
+                    (let [head (or (first @observed-heads) initial-sha)]
+                      (swap! observed-heads #(if (next %) (subvec % 1) %))
+                      {:repo repo :head head :observed-at-ms 1000}))
+                  :resolve-build-fn
+                  (fn [_] {:repo (.getPath token-repo)
+                           :files ["unrelated.clj"]})
+                  :d-task-evidence-root (.getPath evidence-root)}})))
+           build (get-in result [:checkpoints :build :judgment])]
+       (is (= :build-failed (:outcome result)))
+       (is (true? (get-in result [:data :artifact-binding :fresh-author?])))
+       (is (= (get-in build [:validation :artifact-binding])
+              (get-in result [:data :artifact-binding])))
+       (is (= [:request-changes :reject]
+              (mapv :verdict (:reviews build))))
+       (is (= [:request-changes :reject]
+              (mapv :verdict (get-in result [:data :reviews]))))
+       (is (= :verified
+              (get-in build [:validation :reviewer-falsifier-verification :status])))
+       (is (= (:reviews build) (:reviews (first deliveries))))))))
 
 (deftest review-failure-finding-carries-the-authority-qualified-attempt-id
   ;; r6 (2026-09-13): the review-failure finding recorded from the outer
@@ -3312,7 +3372,7 @@
   ;; action (selected-want identity), and D-task measurements at the author's
   ;; commit (evidence authority).
   (token-fixture/with-artifact
-   (fn [_unrelated-sha]
+   (fn [pre-author-sha]
      (let [token-repo (io/file observation-checks/repo-root "futon2")
            mission-path (io/file token-repo
                                  "holes/missions/M-aif-policy-conditioned-eig.md")
@@ -3330,19 +3390,15 @@
            evidence-root (io/file (.getParentFile token-repo)
                                   "first-approval-evidence")
            _ (.mkdirs evidence-root)
-           evidence-file (io/file evidence-root "d-task.edn")
-           _ (spit evidence-file
-                   (pr-str {:after-token-evidence
-                            (token-fixture/measurements approved-sha)}))
+           production-complete d-task/complete!
            {:keys [result phases dispatches]}
            (binding [cascade-sources/*code-roots*
                      ["test/fixtures/library-pins/r7fc6a050"
                       "test/fixtures/library-pins/current"]]
              (with-redefs [d-task/complete!
-                           (fn [& _]
-                             {:source {:path (.getPath evidence-file)
-                                       :sha256 (digest/sha256
-                                                (slurp evidence-file))}})]
+                           (fn [root captured expected data _read-job]
+                             (runner-fixture/complete-occurrence-bound-task!
+                              production-complete root captured expected data))]
                (run-revision-attempt
                 ["FULL_LOOP_REVIEW: APPROVE"]
                 {:author-commits [approved-sha]
@@ -3362,6 +3418,9 @@
                      :semilattice []
                      :selected-action (:action entry)})
                   :target-repo-fn (fn [& _] (.getPath token-repo))
+                  :repo-head-observation-fn
+                  (fn [repo]
+                    {:repo repo :head pre-author-sha :observed-at-ms 1000})
                   :resolve-build-fn
                   (fn [_] {:repo (.getPath token-repo)
                            :files ["unrelated.clj"]})
