@@ -565,6 +565,13 @@ records and notifies, and validates nothing).
      `:stale-citation` when the bytes differ from the pin, and digests
      question + span + readings + source sha canonically.
      `ambiguity-cited?` re-checks a stored carrier.
+   - 1b merged (`e59c9a162`, codex-15; review tests `bad76fdc6`):
+     `morning-brief/queue-c2-question!` uses attempt id `c2-<question
+     digest>`, returns `{:attempt-id :path :sha256 :question-digest}`, writes
+     nothing on replay, and throws `:c2-brief-conflict` on different content.
+     `c2-receipt-valid?` re-reads the pinned bytes. Small gap: replay does not
+     check that the summary and lifecycle files exist. The brief lists items
+     from `items/`, so the question still shows.
 6. **C3-HARM-1.** Named harm rules. A guardrail refusal qualifies only by
    matching one.
 
