@@ -71,7 +71,7 @@
     (is (= result returned))
     (is (empty? (debugger/stopped)))))
 
-(defn- exercise-attached-handoff-wait [phase]
+(defn- exercise-attached-handoff-wait [phase failed-value expected-kind]
   (debugger/attach!)
   (let [run-id (str "debugger-gap-" (name phase))
         calls (atom 0)
@@ -88,19 +88,19 @@
            #(do (swap! calls inc)
                 (if @repaired?
                   {:job-id "job-1" :state "done"}
-                  {:job-id "job-1" :state "timed-out"}))
+                  failed-value))
            nil
            #(runner/handoff-wait-terminal-condition phase %)))
         stop (wait-for-stop run-id running)]
     (is (= phase (:phase stop)))
-    (is (= :untyped-failure (get-in stop [:condition :kind])))
+    (is (= expected-kind (get-in stop [:condition :kind])))
     (reset! repaired? true)
     (debugger/continue! run-id :retry)
     (is (= "done" (:state (deref running 5000 ::timeout))))
     (is (= 2 @calls))))
 
-(defn- exercise-detached-handoff-wait [phase]
-  (let [result {:job-id "job-1" :state "timed-out"}
+(defn- exercise-detached-handoff-wait [phase failed-value]
+  (let [result failed-value
         phase-events (atom [])
         returned
         (runner/run-phase!
@@ -116,25 +116,32 @@
     (is (empty? (debugger/stopped)))))
 
 (deftest attached-author-wait-stops-and-retries
-  (exercise-attached-handoff-wait :author-wait))
+  (exercise-attached-handoff-wait :author-wait "not a job map" :untyped-failure))
 
 (deftest detached-author-wait-is-unchanged
-  (exercise-detached-handoff-wait :author-wait))
+  (exercise-detached-handoff-wait :author-wait "not a job map"))
 
 (deftest attached-author-retry-wait-stops-and-retries
-  (exercise-attached-handoff-wait :author-retry-wait))
+  (exercise-attached-handoff-wait :author-retry-wait nil :untyped-failure))
 
 (deftest detached-author-retry-wait-is-unchanged
-  (exercise-detached-handoff-wait :author-retry-wait))
+  (exercise-detached-handoff-wait :author-retry-wait nil))
 
 (deftest attached-reviewer-wait-stops-and-retries
-  (exercise-attached-handoff-wait :reviewer-wait))
+  (exercise-attached-handoff-wait
+   :reviewer-wait
+   {:job-id "job-1" :state "done" :failure-kind :artifact-binding-mismatch}
+   :artifact-binding-mismatch))
 
 (deftest detached-reviewer-wait-is-unchanged
-  (exercise-detached-handoff-wait :reviewer-wait))
+  (exercise-detached-handoff-wait
+   :reviewer-wait
+   {:job-id "job-1" :state "done" :failure-kind :artifact-binding-mismatch}))
 
 (deftest attached-reviewer-retry-wait-stops-and-retries
-  (exercise-attached-handoff-wait :reviewer-retry-wait))
+  (exercise-attached-handoff-wait
+   :reviewer-retry-wait {:job-id "job-1" :state "timed-out"} :untyped-failure))
 
 (deftest detached-reviewer-retry-wait-is-unchanged
-  (exercise-detached-handoff-wait :reviewer-retry-wait))
+  (exercise-detached-handoff-wait
+   :reviewer-retry-wait {:job-id "job-1" :state "timed-out"}))
