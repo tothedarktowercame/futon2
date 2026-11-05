@@ -4285,6 +4285,9 @@
   {:cohort? false
    :author "zai-5" :reviewer "codex-7"
    :phase-log-fn #(swap! phases conj %)
+   ;; The run-start serving envelope has its own roster observation.  Keep
+   ;; these tests' roster script scoped to the readiness/wake seam.
+   :serving-envelope-fn (fn [_] {:schema :test/serving-envelope})
    :roster-fn roster-fn
    :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
                           :git-dirty? false :repo-heads {}})
