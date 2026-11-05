@@ -443,6 +443,18 @@ records and notifies, and validates nothing).
        `outer_select` applies;
      - non-mission targets are deferred.
    - Build: C1-EXCLUSION-1 (pure namespace), then the wiring.
+   - C1-EXCLUSION-1 landed as `04558bb4c`, with the fix `e102498a9`.
+     - Real data: of the six historical C1 records, the row builder refuses
+       all six, so none would have excluded a target.
+     - Bad case: a duplicated row refused the whole selection. The fix emits
+       one entry per target.
+     - The test now calls `outer-select/valid-forbidden-evidence?`, the
+       predicate `select` itself applies; before, it used a copy.
+     - Wiring questions, in C1-EXCLUSION-2-0:
+       - Can the digest be computed before selection, given that `policy-id`
+         might only be known afterwards?
+       - How does a validator that runs before persistence know the
+         exclusion has been recorded?
 5. **C2-BRIEF-1.** The question carrier: the cited ambiguity and two
    readings, sent to `morning_brief/queue-item!`, plus the exclusion until
    answered.
