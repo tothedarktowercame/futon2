@@ -665,8 +665,19 @@
                       (refresh-mission-substrate-pass code-root scan-fn index-fn upsert-fn)
                       first-pass)
          {:keys [entries errors stale]} final-pass
-         results (if retry? (into (:results first-pass) (:results final-pass))
-                     (:results final-pass))
+         ;; One status per scanned mission: a write made by the first pass
+         ;; (:created/:updated) is not undone by the retry reading it back as
+         ;; :unchanged, and no mission is counted twice (review of a0e3de410).
+         results (if retry?
+                   (let [first-by-id (into {} (map (juxt :id identity)) (:results first-pass))]
+                     (mapv (fn [r]
+                             (let [earlier (get first-by-id (:id r))]
+                               (if (and (= :unchanged (:status r))
+                                        (#{:created :updated} (:status earlier)))
+                                 earlier
+                                 r)))
+                           (:results final-pass)))
+                   (:results final-pass))
          reclassified-ids (if retry?
                             (into (:reclassified-ids first-pass)
                                   (:reclassified-ids final-pass))

@@ -248,6 +248,22 @@
     (is (= 2 @upserts))
     (.delete file)))
 
+(deftest refresh-retry-counts-each-mission-once
+  ;; Review of a0e3de410: the first pass writes, the retry reads the same
+  ;; mission back :unchanged. The report counts it once, as :updated.
+  (let [{:keys [file entry clean]} (retry-fixture)
+        indexes (atom 0) upserts (atom 0)
+        report (mr/refresh-mission-substrate!
+                {:code-root "/fixture"
+                 :scan-fn (fn [_] {:missions [entry]})
+                 :index-fn (fn [] (case (swap! indexes inc) 4 clean {}))
+                 :upsert-fn (fn [_] {:id "M-race"
+                                     :status (if (= 1 (swap! upserts inc)) :updated :unchanged)})})]
+    (is (= :established (:status report)))
+    (is (= 1 (:scanned report)))
+    (is (= [1 0 0] ((juxt :updated :unchanged :created) report)))
+    (.delete file)))
+
 (deftest refresh-stale-twice-throws-after-exactly-two-passes
   (let [{:keys [file entry]} (retry-fixture)
         scans (atom 0)]
