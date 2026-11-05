@@ -1064,5 +1064,25 @@ class ContinuousModeTest(unittest.TestCase):
         self.assertEqual(1, malformed["code"], "a malformed acknowledgement file acknowledges nothing")
 
 
+    def test_injury_limit_allows_one_and_refuses_two_or_unreadable(self):
+        # Joe, 2026-11-05: "maximum one injury allowed at a time".
+        loop = load_loop()
+        cases = [
+            ({"rc": 0, "out": '{:ok true, :value "ACTIVE-INJURIES 0 []"}', "err": ""}, None),
+            ({"rc": 0, "out": '{:ok true, :value "ACTIVE-INJURIES 1 [\\"injury/a\\"]"}', "err": ""}, None),
+            ({"rc": 0, "out": '{:ok true, :value "ACTIVE-INJURIES 2 [\\"injury/a\\" \\"injury/b\\"]"}', "err": ""},
+             "2 injuries open at once"),
+            ({"rc": 0, "out": '{:ok true, :value "ACTIVE-INJURIES-UNREADABLE :ledger/malformed"}', "err": ""},
+             "unreadable"),
+            ({"rc": 1, "out": "", "err": "connection refused"}, "unreadable"),
+        ]
+        for reply, expected in cases:
+            loop.jvm_eval = lambda form, timeout=600, reply=reply: reply
+            breach = loop.injury_limit_breach()
+            if expected is None:
+                self.assertIsNone(breach, reply["out"])
+            else:
+                self.assertIn(expected, breach or "", reply)
+
 if __name__ == "__main__":
     unittest.main()

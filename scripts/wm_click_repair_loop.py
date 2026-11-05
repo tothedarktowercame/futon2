@@ -1176,6 +1176,42 @@ def notify_alert(args, c: dict) -> None:
     log(f"alert belled to {args.owner}: {r.stdout.strip()[-200:]}")
 
 
+# Joe, 2026-11-05: "maximum one injury allowed at a time". The ledger itself
+# tolerates several open injuries (meta_injury_ledger other-open-injury), so the
+# supervisor enforces the limit: it reads the same effective projection the
+# self-heal reads and fires no click while more than one injury is open.
+MAX_ACTIVE_INJURIES = 1
+_ACTIVE_INJURY_FORM = (
+    "(let [d (futon2.aif.meta-injury-store/load-durable-ledger "
+    "futon2.aif.meta-self-heal-production/default-ledger-path)] "
+    "(if (map? (:source-pin d)) "
+    "(let [a (futon2.aif.meta-injury-ledger/effective-active-injuries-from-validated-ledger (:ledger d))] "
+    "(if (= :computed (:status a)) "
+    "(str \"ACTIVE-INJURIES \" (count (:injuries a)) \" \" (pr-str (vec (sort (keys (:injuries a)))))) "
+    "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:status a))))) "
+    "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:reason d)))))")
+
+
+def active_injuries() -> tuple[int | None, str]:
+    """Return (count, detail) of effective active META injuries, or (None,
+    reason) when the ledger cannot be read; an unreadable count is not zero."""
+    r = jvm_eval(_ACTIVE_INJURY_FORM, timeout=120)
+    m = re.search(r'ACTIVE-INJURIES (\d+) (.*?)"?\}?$', r["out"])
+    if r["rc"] == 0 and m:
+        return int(m.group(1)), m.group(2).replace('\\"', '"')
+    return None, (r["out"] or r["err"])[-300:]
+
+
+def injury_limit_breach() -> str | None:
+    count, detail = active_injuries()
+    if count is None:
+        return f"active-injury count unreadable ({detail}); no click fired"
+    if count > MAX_ACTIVE_INJURIES:
+        return (f"{count} injuries open at once (limit {MAX_ACTIVE_INJURIES}): {detail}; "
+                "no click fired")
+    return None
+
+
 def debugger_stops() -> list[dict]:
     """Read the serving debugger, not the click's coarse public phase.
 
@@ -1839,6 +1875,10 @@ def run(args) -> int:
             live_page.write_text("# Live held phase\n\n" + held["raw"] + "\n")
             since = handle_held_stop(args, held, [], live_page, since)
             continue
+        breach = injury_limit_breach()
+        if breach:
+            record({"event": "stop-evidence", "kind": "injury-limit", "detail": breach})
+            return stop(args, "debugger-error", f"injury-limit: {breach}", 1, {})
         attached = debugger_attached()
         if not attached:
             result = attach_debugger()
