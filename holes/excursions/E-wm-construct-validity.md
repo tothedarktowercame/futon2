@@ -541,6 +541,25 @@ records and notifies, and validates nothing).
 5. **C2-BRIEF-1.** The question carrier: the cited ambiguity and two
    readings, sent to `morning_brief/queue-item!`, plus the exclusion until
    answered.
+   *C2-BRIEF-0 (2026-11-05, codex-18; citations spot-checked):*
+   - No C2 close exists today: the refusal index has 0 question-kind
+     failures in 287 rows.
+   - Mission reading already validates questions. Each has an exact span
+     quote and at least two readings (`mission_reading/question-reasons`).
+     These go to the mission owner as needs, "never a refusal".
+   - `queue-item!` returns only a path, and replaying the same item throws.
+   Decisions (`~/notes/wm-next/tests/C2-BRIEF-decisions.md`):
+   - Reuse the mission-reading check as `ambiguityCited`.
+   - A question becomes a C2 close only when the reading has no workable
+     criteria.
+   - The question goes to the Morning Brief through a new enqueue that
+     returns a pinned receipt and is safe to replay.
+   - "Answered" means the mission source sha changed. C2 rows ride the C1
+     index and read path.
+   - `:c2-question-pending` counts as a legal-terminal exclusion for L1.
+   - 1a (pure carrier, codex-18) and 1b (pinned brief enqueue, codex-15)
+     are dispatched. Then 1c (close classification), 1d (row and read side),
+     and 1e (registry).
 6. **C3-HARM-1.** Named harm rules. A guardrail refusal qualifies only by
    matching one.
 
