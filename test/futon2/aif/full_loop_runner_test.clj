@@ -7756,8 +7756,14 @@
   (let [recorded-action (edn/read-string
                          (slurp "test/fixtures/narrative-trace/selected-action-1789964661.edn"))
         action (assoc recorded-action :want (:want token-fixture/declaration))
-        decision (-> (policy/select-action-cascades
-                      [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)]
+        comparator (assoc action
+                          :id :test/mission-baseline-comparator
+                          :cascade-id :test/mission-baseline-comparator
+                          :precedence (conj (:precedence action)
+                                            :test/mission-baseline-followup))
+        decision (-> (runner-fixture/select-with-prefix-history
+                      [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)
+                       (runner-fixture/loop-exercised-ranked-entry comparator -1.0 2)]
                       {:beta 2.0})
                      with-token-fixture-carry)
         cohort (retention-cohort "mission-baseline-real-runner")
