@@ -65,13 +65,4 @@
          nil
          runner/occurrence-square-authoring-terminal-condition)]
     (is (= result returned))
-    (is (empty? (debugger/stopped)))
-    ;; This is the existing outer-boundary classification, which remains in
-    ;; charge when no debugger is attached.
-    (is (= :occurrence-square-answer-invalid
-           (:failure-kind
-            (ex-data
-             (try
-               (throw (ex-info "Occurrence-square authoring failed before G"
-                               {:failure-kind :occurrence-square-answer-invalid}))
-               (catch clojure.lang.ExceptionInfo e e))))))))
+    (is (empty? (debugger/stopped)))))
