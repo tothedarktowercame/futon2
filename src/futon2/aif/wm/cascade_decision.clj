@@ -32,6 +32,7 @@
             [futon2.aif.prefix-free-energy-sut :as prefix-f-sut]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.ticket-queue :as ticket-queue]
+            [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.three-halves-square :as three-halves-square]
             [futon2.aif.three-halves-policy :as three-halves-policy]
             [futon2.aif.target-reading-registry :as reading-registry]
@@ -1348,6 +1349,7 @@
           (let [selected-ranked (first (filter #(= (:action (:decision result))
                                                    (:action %))
                                                (:ranked result)))
+                prediction-input (token-outcome/pattern-prediction-input selected-ranked)
                 decision (-> (:decision result)
                              (assoc-in [:selection-certificate :selection-route]
                                        :wm/reading-policy-family-v1)
@@ -1377,6 +1379,8 @@
                                        (:reading-pin selected-ranked))
                              (assoc-in [:selection-certificate :factorized-preference]
                                        (:factorized-preference opts))
+                             (assoc-in [:selection-certificate :pattern-prediction-input]
+                                       prediction-input)
                              ;; Requirements Q4: horizon, steps, grading and
                              ;; G terms of the compared policies, from their
                              ;; certified preference receipts
@@ -1386,8 +1390,13 @@
                            (= :canonical-coapply (:g-law opts))
                            (assoc-in [:selection-certificate :canonical-g] (:canonical-g result)))
                 authorized (controller-authority/authorize decision (:ranked result))]
-            {:decision (decision-gate/emit! authorized)
-             :ranked (:ranked result)})))))))
+            (if (= :present (:status prediction-input))
+              {:decision (decision-gate/emit! authorized)
+               :ranked (:ranked result)}
+              {:decision (abstain [{:target (get-in selected-ranked [:action :target])
+                                    :stage :prediction-input
+                                    :kind :selected-pattern-model-input-unavailable
+                                    :reason (:reason prediction-input)}])}))))))))
 
 (defn cascade-decision
   "Q5: one G selection over every target's reading policy family. The field

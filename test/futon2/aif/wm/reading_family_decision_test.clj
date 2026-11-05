@@ -22,6 +22,7 @@
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.target-reading-registry :as reading-registry]
             [futon2.aif.ticket-queue :as ticket-queue]
+            [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.wm.cascade-decision :as wm-cd]
             [futon2.test-support.reading-route :as route])
   (:import [java.nio.file Files]
@@ -183,6 +184,18 @@
     (is (= [] (get-in decision [:action :interpretation-debt :owed])))
     (is (= :discharged (:status (debt-status decision))))
     (is (= (:action decision) (:action (selected-entry decision))))))
+
+(deftest reading-policy-selection-retains-freezable-pattern-prediction
+  (let [fx (fixture)
+        result (decide fx [(get-in fx [:rows :current])] {"M-current" 1})
+        decision (:decision result)
+        input (get-in decision [:selection-certificate :pattern-prediction-input])
+        frozen (token-outcome/freeze-prediction decision)]
+    (is (= :wm/pattern-done-prediction-input-v1 (:schema input)))
+    (is (= :present (:status input)))
+    (is (= :frozen (:status frozen)))
+    (is (= (set (:want input))
+           (set (map :token (:wanted frozen)))))))
 
 (defn- with-action
   "DECISION with its chosen action replaced by (F action) everywhere the

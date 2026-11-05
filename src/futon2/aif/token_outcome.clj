@@ -135,8 +135,7 @@
         step (precedence-step (:precedence action))]
     (if-not (and (= :cascade-candidate (:kind action))
                  (if pattern?
-                   (and (= :wm/selected-outer-cascade-policy-v1 (:selection-route certificate))
-                        (= pattern-input-schema (:schema input)) (= :present (:status input))
+                   (and (= pattern-input-schema (:schema input)) (= :present (:status input))
                         (pattern-input-valid? target input)
                         (= (:model-id input) (pattern-model-id input)))
                    (= 1 (count domains))) (seq want)
