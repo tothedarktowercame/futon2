@@ -198,7 +198,8 @@ except Exception:
   say "giraffe field" "stale (newest ${newest:--}) -- minting one run through the supported -main"
   minted=$( (cd "$F3C" && clojure -M -m futon3c.giraffe.run \
                --edges "$edges" --source missions-excursions \
-               --readings-root "$readings" --root "$root") 2>&1)
+               --readings-root "$readings" --root "$root" \
+               --with-retained-focus) 2>&1)
   rc=$?
   if [ "$rc" -ne 0 ]; then
     finding "giraffe field" "mint failed (exit $rc); firing on the newest verified field $newest: $minted"

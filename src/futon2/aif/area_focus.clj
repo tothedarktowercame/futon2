@@ -77,6 +77,32 @@
                              (catch Exception _ nil))))
           (sort-by :as-of #(compare %2 %1)) first))))
 
+(defn retained-relations
+  "Classify TARGETS from the newest retained focus manifest, without acquiring
+  or minting focus. Returns nil when no <=60-minute manifest is available."
+  [targets {:keys [decision-as-of manifest-dir corpus-source]
+            :or {manifest-dir (str mission-registry/default-code-root
+                                   "/futon2/" default-manifest-dir)}}]
+  (when-let [pin (newest-retained manifest-dir decision-as-of)]
+    (let [{:keys [rows sha256]} (if corpus-source
+                                  (load-corpus corpus-source)
+                                  (load-corpus))
+          relations (into {}
+                          (keep (fn [target]
+                                  (let [relation (:relation-key
+                                                  (classify-target rows sha256
+                                                                   (:manifest pin)
+                                                                   (:sha256 pin) target))]
+                                    (when (contains? #{:focus :associated
+                                                       :useful-elsewhere}
+                                                     relation)
+                                      [target relation]))))
+                          targets)]
+      {:relations relations
+       :evidence-pin
+       {:focus-manifest (select-keys pin [:path :sha256])
+        :area-corpus-sha256 sha256}})))
+
 (defn verify-pin [{:keys [path sha256]}]
   (try (let [loaded (read-manifest path)]
          (if (= sha256 (:sha256 loaded)) loaded

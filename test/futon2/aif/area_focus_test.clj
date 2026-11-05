@@ -49,6 +49,33 @@
     (spit f "{:as-of \"2026-11-04T00:00:00Z\"}")
     (is (nil? (sut/newest-retained d "2026-11-04T01:01:00Z")))))
 
+(deftest retained-relations-classifies-with-pinned-sources
+  (let [d (.toFile (java.nio.file.Files/createTempDirectory
+                    "focus-relations" (make-array java.nio.file.attribute.FileAttribute 0)))
+        focus-file (java.io.File. d (str "operator-focus-" (apply str (repeat 64 "b")) ".edn"))
+        corpus-file (java.io.File/createTempFile "area-corpus" ".json")]
+    (spit focus-file
+          "{:as-of \"2026-11-04T00:30:00Z\" :result {:status :present :ranked [{:area \"WM\"}]}}")
+    (spit corpus-file
+          "{\"rows\":[{\"target\":\"A\",\"area\":\"WM\"},{\"target\":\"B\",\"area\":\"APM\",\"also\":\"WM\"},{\"target\":\"C\",\"area\":\"memory\"}]}")
+    (let [result (sut/retained-relations
+                  ["A" "B" "C" "missing"]
+                  {:decision-as-of "2026-11-04T01:00:00Z"
+                   :manifest-dir d :corpus-source corpus-file})]
+      (is (= {"A" :focus "B" :associated "C" :useful-elsewhere}
+             (:relations result)))
+      (is (= (:sha256 (sut/read-manifest focus-file))
+             (get-in result [:evidence-pin :focus-manifest :sha256])))
+      (is (string? (get-in result [:evidence-pin :area-corpus-sha256]))))))
+
+(deftest retained-relations-does-not-acquire-absent-focus
+  (let [d (.toFile (java.nio.file.Files/createTempDirectory
+                    "focus-relations-absent"
+                    (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (is (nil? (sut/retained-relations
+               ["A"] {:decision-as-of "2026-11-04T01:00:00Z"
+                       :manifest-dir d})))))
+
 (deftest selection-record-retains-focus-pin
   (let [d (.toFile (java.nio.file.Files/createTempDirectory "focus-selection" (make-array java.nio.file.attribute.FileAttribute 0)))
         pin {:path "/tmp/focus.edn" :sha256 "abc" :as-of "2026-11-04T00:00:00Z" :age-minutes 4}
