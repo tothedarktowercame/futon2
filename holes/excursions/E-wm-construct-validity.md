@@ -610,6 +610,15 @@ records and notifies, and validates nothing).
      `REFUSE-HARM` line naming rule + declined action, checked against the
      world, never trusted; plain `REFUSE` stays a debugger error. Build: 1
      pure matcher (dispatched), 2 author grammar, 3 validator + exclusion.
+   - WRITE-REGISTER-0 (codex-20; window count re-run: 43 files): one real
+     click (`2026-11-05-3f57ee95`) registered 4 of 43 changed files with
+     path+sha; its record has no `:close-evidence-manifest` value; seat
+     writes are not recorded at all. WRITE-REGISTER-1 (codex-20): the
+     supervisor snapshots `data/`, `evidence/` and futon3c `data/` around
+     each click and writes an immutable manifest (path, sha, change),
+     pinned from the ledger row. Attribution is "changed during the click",
+     not "written by it". Registration only; no refusals, nothing deleted.
+     Later: writer stamps, seat worktrees, an unregistered-write alert.
 
 Until 4-6 land, the validator classes every C-looking refusal as a debugger
 error, as the survey predicts. That is the intended interim state: those
