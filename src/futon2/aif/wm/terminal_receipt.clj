@@ -56,6 +56,21 @@
   [record]
   (boolean (or (:kind (:failure record)) (abstained? record))))
 
+(defn- failure-kind
+  "The receipt's :failure-kind for RECORD. A held cascade's outer chain
+  (e.g. :clock/store-busy at :stage :cascade-resume) can carry the close's
+  real exception in :detail :wrapped-by — run-record-failure's own typed
+  projection of the wrapped error (injury 5ca30d9d: the receipt routed on
+  :clock/store-busy while the authoritative run-ending classification typed
+  the same close :invalid-checkpoint-cell). That wrapped :failure-kind, a
+  key the record itself already states, is the receipt's kind; the outer
+  held kind remains the fallback. Nothing is re-derived here."
+  [record]
+  (or (get-in record [:failure :detail :wrapped-by :failure-kind])
+      (when (abstained? record) :abstained)
+      (:kind (:failure record))
+      :no-terminal-state))
+
 (defn selected-g-decomposition
   "Project the selected candidate's retained scalar G and term decomposition.
   The selection certificate is the sole authority: no term is recomputed.
@@ -125,9 +140,7 @@
   for an abstention, carrying the abstention status), this builder as the
   source, and the record's own startedAt as :at — no new clock is read."
   [record]
-  (let [kind (cond (abstained? record) :abstained
-                   (:kind (:failure record)) (:kind (:failure record))
-                   :else :no-terminal-state)
+  (let [kind (failure-kind record)
         status (get-in record [:decision :abstention :status])]
     (cond-> {:kind :failure
              :id (str (:run/id record) "-" (name kind))

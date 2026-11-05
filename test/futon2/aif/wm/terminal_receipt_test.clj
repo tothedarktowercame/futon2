@@ -187,3 +187,34 @@
   (let [record (cond-> abstained-record true (tr/attach :abstained))]
     (is (map? record))
     (is (= :failure (get-in record [:terminal-receipt :kind])))))
+
+(deftest wrapped-by-failure-kind-routes-the-receipt
+  ;; Injury 5ca30d9d: a held cascade-resume close whose outer chain is
+  ;; :clock/store-busy carries the real close error in :detail :wrapped-by.
+  ;; The receipt's :failure-kind is that wrapped kind — the record's own
+  ;; typed projection, matching the run-ending classification — not the
+  ;; outer held kind. The exact bad case the repair is named for.
+  (let [held-record {:run/id "2026-11-05-d78842b4"
+                     :startedAt "2026-11-05T00:00:00Z"
+                     :failure {:kind :clock/store-busy
+                               :stage :cascade-resume
+                               :error "invalid checkpoint cell"
+                               :detail {:absent :no-error-data
+                                        :wrapped-by {:failure-kind :invalid-checkpoint-cell
+                                                     :failure-stage :close}}}}
+        r (tr/terminal-receipt held-record)]
+    (is (= :failure (:kind r)))
+    (is (= :invalid-checkpoint-cell (:failure-kind r)))
+    (is (= "2026-11-05-d78842b4-invalid-checkpoint-cell" (:id r))))
+  ;; Without a wrapped-by projection the outer kind still routes, and a
+  ;; plain record is unchanged.
+  (is (= :clock/store-busy
+         (:failure-kind (tr/terminal-receipt
+                         {:run/id "r" :startedAt "t"
+                          :failure {:kind :clock/store-busy :stage :cascade-resume}}))))
+  (is (= :abstained
+         (:failure-kind (tr/terminal-receipt
+                         {:run/id "r" :startedAt "t"
+                          :decision {:abstention {:status :abstained}}}))))
+  (is (= :no-terminal-state
+         (:failure-kind (tr/terminal-receipt {:run/id "r" :startedAt "t"})))))
