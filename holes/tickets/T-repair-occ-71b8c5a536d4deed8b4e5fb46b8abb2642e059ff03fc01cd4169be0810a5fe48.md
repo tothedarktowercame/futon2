@@ -12,9 +12,13 @@ ineligible trigger
 
 Verify the reported precondition and restore it if it remains unavailable. If it has cleared, retain a dated recheck showing the current condition.
 
-## Acceptance evidence
+## Acceptance criteria
 
-Retain the dated precondition check, its source and result, and evidence of any restoration. Review the task evidence through ordinary ticket review; mark this ticket DONE only when its scoped work is accepted.
+- A dated precondition check with its source and result is retained. Check: dated source and result recorded in this ticket. **Not started.**
+- Restoration evidence, or a dated recheck showing the condition cleared, is retained. Check: restoration evidence or dated cleared recheck. **Not started.**
+- Ticket review accepted the scoped work. Check: Status line reads DONE. **Not started.**
+
+Review the task evidence through ordinary ticket review; mark this ticket DONE only when its scoped work is accepted.
 
 ## Provenance
 
