@@ -1086,7 +1086,10 @@ def fire(n: int, args, since_epoch: int) -> dict:
     log(f"click {n}: firing ({out.name})")
     in_flight_repairs = []
     handled_stops = set()
-    with out.open("w") as fh:
+    # w+ so the log can be read back through this descriptor: on 2026-11-05
+    # click 5's log was unlinked mid-click (directory changed 04:57:14Z) and
+    # out.read_text() then crashed the loop with FileNotFoundError.
+    with out.open("w+", errors="replace") as fh:
         proc = subprocess.Popen(list(map(str, cmd)), cwd=F2, stdout=fh,
                                 stderr=subprocess.STDOUT)
         deadline = time.time() + 3 * 3600
@@ -1110,7 +1113,14 @@ def fire(n: int, args, since_epoch: int) -> dict:
                         args, stop, in_flight_repairs, live_page, since_epoch)
             time.sleep(10)
         rc = proc.returncode
-    text = out.read_text(errors="replace")
+        fh.flush()
+        fh.seek(0)
+        text = fh.read()
+    if not out.exists():
+        log(f"click {n}: log {out.name} was removed during the click; "
+            "restored from the open descriptor")
+        record({"event": "click-log-restored", "n": n, "log": str(out)})
+        out.write_text(text)
     m = re.search(r"tracking our click: (\S+)", text)
     click_id = m.group(1) if m else None
     spent = budget_lines() > before
