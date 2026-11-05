@@ -75,6 +75,15 @@
                (when (seq changed)
                  (binding [*out* *err*]
                    (println "FUTON2 TEST HERMETICITY FAILURE: production data changed")
+                   ;; LOG-DELETE-1: two agents read this list as their own
+                   ;; test artifacts and deleted live WM click logs.  The
+                   ;; comparison is metadata only and cannot tell a test
+                   ;; write from a concurrent production writer.
+                   (println (str "These paths changed during the test JVM. They may be"
+                                 " concurrent production writes (for example a live WM"
+                                 " click log), not test artifacts. DO NOT DELETE OR"
+                                 " MOVE THEM. Rerun the test when production writers"
+                                 " are idle."))
                    (doseq [path changed] (println path))
                    (flush))
                  ;; Shutdown hooks cannot change an already-selected exit

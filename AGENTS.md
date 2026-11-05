@@ -23,6 +23,17 @@ Ant map keys (always present):
  :prec {:Pi-o {:food double :pher double :h double}
         :tau double}}                         ; action temperature
 
+## Never delete what the hermeticity guard lists (2026-11-05)
+
+`FUTON2 TEST HERMETICITY FAILURE: production data changed` (exit 86) compares
+file metadata under `data/` before and after the test JVM. It cannot tell a
+test write from a concurrent production writer. On 2026-11-05 two agents
+deleted live WM click logs (`data/wm-click-loop/click-*.log`) that it listed,
+believing them to be their test artifacts, and the click loop crashed
+(LOG-DELETE-1, `~/notes/wm-next/tests/LOG-DELETE-1-findings.md`). Treat that
+result as concurrency-invalid: delete or move nothing under `data/`, and rerun
+when production writers are idle.
+
 ## A warrant is evidence; a suite run is a cost (adopted 2026-09-17)
 
 Registry warrants replaced habitual re-running. Check before you run, and when
