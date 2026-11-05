@@ -34,17 +34,20 @@
   (.startsWith (normalized-path path) (normalized-path root)))
 
 (defn- paths-exist [_rule action world]
-  (every? #(true? (world-value world :path-exists? %)) (:paths action)))
+  (and (seq (:paths action))
+       (every? #(true? (world-value world :path-exists? %)) (:paths action))))
 
 (defn- paths-under-production-data-root [_rule action world]
   (let [roots (world-value world :production-data-roots)]
     (and (seq roots)
+         (seq (:paths action))
          (every? (fn [path] (some #(under-root? path %) roots)) (:paths action)))))
 
 (defn- force-or-default-branch [_rule action world]
   (or (true? (:force? action))
-      (= (:ref action)
-         (world-value world :default-branch (:repo action) (:remote action)))))
+      (let [default (world-value world :default-branch (:repo action) (:remote action))]
+        (and (string? default) (not (str/blank? default))
+             (= (:ref action) default)))))
 
 (defn- service-is-shared [rule action _world]
   (contains? (:shared-services rule) (:service action)))
@@ -86,7 +89,7 @@
        :operation (:operation declined-action)}
 
       :else
-      (if-let [field (first (remove #(contains? declined-action %)
+      (if-let [field (first (remove #(some? (get declined-action %))
                                     (:requires rule-declaration)))]
         {:status :refused :reason :missing-field :rule rule :field field}
         (loop [[check & remaining] (:checks rule-declaration)]

@@ -77,3 +77,21 @@
                                   :operation :purchase))]
     (is (= :matched (:status a)))
     (is (= (:declined-action-digest a) (:declined-action-digest b)))))
+
+(deftest harm-rule-matched-refuses-vacuous-claims
+  ;; review (claude-6): empty or nil fields must not pass a check vacuously
+  (is (= :check-failed (:reason (result :H1 {:operation :delete :paths []}))))
+  (is (= :check-failed (:reason (result :H6 {:operation :edit :paths []}))))
+  (is (= :missing-field (:reason (result :H2 {:operation :git-push :repo "/code/x"
+                                               :remote "origin" :ref nil
+                                               :force? false}))))
+  (is (= :check-failed
+         (:reason (harm/match @rules
+                              {:rule :H2
+                               :declined-action {:operation :git-push :repo "/code/x"
+                                                 :remote "origin" :ref "refs/heads/main"
+                                                 :force? false}}
+                              (dissoc world :default-branch)))))
+  (is (= :matched (:status (result :H2 {:operation :git-push :repo "/code/x"
+                                         :remote "origin" :ref "refs/heads/main"
+                                         :force? false})))))
