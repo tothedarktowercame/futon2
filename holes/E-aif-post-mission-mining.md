@@ -85,3 +85,12 @@ per-lane review: one run, two lanes, two different verdicts.
   (v0.23 checkable forms) is the informal spec; the badge :repair fields are the lemma inventory;
   the peradam 3-witness frame is the natural certificate shape.
 
+## Completion criteria
+
+- Follow-on #1: realized-G diverges from expected-G in a live flight log (gamma's first non-zero perf sample, R14 variance closure) — check: a live trace under futon2/data/wm-trace/ or successor record carrying a realized/expected G pair with gamma != 1.0 **Not met.**
+- Follow-on #2: the forward model reads the durable join with token-match as fallback — check: futon2/src/futon2/aif/c_vector.clj fetch-durable-join* and advanced-outcome-ids **Met.**
+- Follow-on #3: mission-keyed discharges pushed down to c-entry grain and overstated open-count corrected — check: a successor note or commit recording the corrected open count vs the 455 baseline **Not met.**
+- Follow-on #4: fold-turn ritual exercised during burn-in (honest fold turns for delta-F-positive lane missions) — check: escrow/fold-turn records in the flight corpus naming (cascade,wiring) pairs **Not met.**
+- Follow-on #5: paper harvest checkpoint wired into p4ng/sequel-notebook.org with flight_log_extract.bb and proof-mine-gold-eval.json — check: p4ng/sequel-notebook.org references the flight-log extract and mining quality numbers **Not met.**
+- Follow-on #6.5 (R18 badge live readout) completed or moved to a named successor — check: a dated record in this item or a successor item **Not met.**
+- Follow-ons #6 (shelf) and #7 (AIF reach goal) each completed or moved to a named successor item — check: successor items exist and cite this ledger (E-gflownets-fold carries the GFN lane; M-evaluate-policies carries #6.6) **Not met.**

@@ -79,3 +79,10 @@ recorded as a real verdict, not deferred again.
    the verdict recorded in E-fold-embed-pipeline and the Upgrades card.
 3. If successful: a follow-on named for wiring the sampler into the cascade lane as a
    diversity source (behind the same reduction-safe switches as everything else).
+
+## Completion criteria
+
+- Rungs 0-2 each produce a committed verdict JSON — check: futon6/data/fold-embed-gfn/ (or the successor dir) holds rung verdict files postdating 2026-07-03 **Not started.**
+- Success criteria (i) match-or-beat greedy on realized fold coverage AND (ii) at least 3 distinct cascades per mission above the coverage floor, measured on held-out missions — check: a dated results note citing the held-out split **Not started.**
+- Or the kill criterion is invoked: a fifth single-best-holds verdict recorded in E-fold-embed-pipeline and the Upgrades card — check: futon2/holes/E-fold-embed-pipeline.md carries the GFN verdict **Not met.**
+- The relationship to the successor slush-demo line is recorded (absorbed, or run in parallel), so the lane has one owner — check: a dated note in this item naming the successor disposition **Not met.** (M-a4a-structure-node.md:20 already names 'earned later' — partial)

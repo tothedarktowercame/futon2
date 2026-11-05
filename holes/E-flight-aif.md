@@ -184,3 +184,11 @@ own triple there too.
   counts, or both?
 - Q4. Did any flight's cascade get scored as a policy, as M-first-flights
   Phase B item 8 asks?
+
+## Completion criteria
+
+- Worked example W1 exists with its findings named — check: futon2/holes/E-flight-aif.md §'W1 — worked example' findings W1-a..W1-f **Met.**
+- The corpus pass runs: the W1 reading applied mechanically across the mission-triples corpus, with where-it-breaks recorded — check: a dated results note (this file or a successor) reporting per-field break rates over the 81 triples **Not started.**
+- Q2 answered: which AIF term the cascade level maps to (E or hierarchical prior on B), with the evidence that settled it — check: a dated answer in this file or successor **Not started.**
+- Q3 answered: where G's numbers come from (the §3c catalog, the Dirichlet counts, or both) — check: a dated answer in this file or successor **Not started.**
+- Q4 answered: whether any flight's cascade was scored as a policy (M-first-flights Phase B item 8) — check: a dated answer citing the flight or recording none **Not started.**

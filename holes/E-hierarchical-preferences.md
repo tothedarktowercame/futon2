@@ -126,3 +126,11 @@ cites it only for the idea.
 
 Local copies of the papers: `~/notes/papers/` (`pezzulo2015`, `smith2022`,
 `sajid`; not committed).
+
+## Completion criteria
+
+- A source is checked for a learning/inference rule supplying C from above (deep temporal models; Parr et al. ch.7), and the finding recorded either way — including 'levels link only through D' — check: a dated answer to open question 1 in this file, citing what was read **Not started.**
+- The higher level's state is specified in terms of the outer loop's beliefs and whether it exists in State yet — check: a dated answer to open question 2 **Not started.**
+- Form (a) empirical-prior vs (b) context-indexed counts is chosen, with the reason — check: a dated decision answering open question 3 **Not started.**
+- If built: learnedClassPreference receives a higher-level-computed C and click_c_at / click_zero_C_is_kit carry over as the single-context special case — check: mathlib4/DarkTower/WarMachine/R20Step.lean or successor file carries the hierarchical C, with the special-case theorem **Not started.**
+- Or the extension is retired with a dated note if question 1 closes the door — check: a dated retirement note in this file **Not started.**

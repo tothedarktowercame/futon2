@@ -113,3 +113,10 @@ this v0 is a static projection, not the browseable map.
 - A clean kill is a success: if IDENTIFY/scoping finds the assets can't be aligned
   cheaply (e.g. devmap `:depends-on` is too sparse to form a real graph), that finding
   is the deliverable.
+
+## Completion criteria
+
+- The v0 computed constellation exists and retro-dicts at least one hand-made decommission call — check: futon2/holes/feature_constellation.py + feature-constellation.{json,png} and the retro-diction paragraph in this file **Met.**
+- The magnitude computation is refined beyond enacted-only warrants (consumers/liveness/recency terms from the scoping pass) — check: feature_constellation.py magnitude function names the additional terms, or a dated note records the decision **Not met.**
+- Devmap (declared) alignment decided: features aligned to devmap !-entries or the misalignment recorded as the finding — check: a dated subsection in this file or the design note recording the alignment verdict **Not met.**
+- A browseable/live surface exists (operator can collapse at k and point at a feature to trim/coalesce), OR a dated kill-finding that the assets cannot be aligned cheaply — check: a URL/command rendering the constellation interactively, or the kill finding recorded per the scope boundary **Not met.**
