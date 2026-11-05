@@ -5889,6 +5889,7 @@
   [verification]
   {:job-id (str "reviewer-falsifier/" (or (get-in verification [:receipt :receipt/id])
                                            "unidentified"))
+   :reviewer-falsifier/synthetic? true
    :state "done"
    :result-summary
    (str "FULL_LOOP_REVIEW: REQUEST_CHANGES "
@@ -10985,31 +10986,41 @@
             (let [failure (ex-data e)
                 review-job (:review-job failure)
                 verdict (some-> review-job review-verdict)
-                review-finding (when (and (not (:reviewed-claim-refused? failure))
-                                   (nil? (:repair-obligation failure))
-                                   (:commit failure)
-                                   (#{:request-changes :reject} verdict))
-                          ((or (:repair-record-fn opts)
-                               repair/record-review-failure!)
-                           ;; Authority-qualified for the same reason as the
-                           ;; deferred-completion-rejection site above: bare ordinals
-                           ;; collide across cohorts in the shared store.
-                           {:attempt-id external-attempt-id
-                            :occurrence
-                            (occurrence-for (:repair/occurrence failure)
-                                            (:job-id review-job)
-                                            (case verdict
-                                              :request-changes
-                                              :review-request-changes
-                                              :reject :review-rejected))
-                            :observation (observation-for :review-failure)
-                            :target (:target failure)
-                            :commit (:commit failure)
-                            :selected-entry (:selected-entry failure)
-                            :reviewer @reviewer-of-record
-                            :review-job (:job-id review-job)
-                            :review-verdict verdict
-                            :review-text (job-text review-job)}))
+                review-recording
+                (when (and (not (:reviewed-claim-refused? failure))
+                           (nil? (:repair-obligation failure))
+                           (:commit failure)
+                           (#{:request-changes :reject} verdict)
+                           (not (:reviewer-falsifier/synthetic? review-job)))
+                  (try
+                    {:finding
+                     ((or (:repair-record-fn opts)
+                          repair/record-review-failure!)
+                      ;; Authority-qualified for the same reason as the
+                      ;; deferred-completion-rejection site above: bare ordinals
+                      ;; collide across cohorts in the shared store.
+                      {:attempt-id external-attempt-id
+                       :occurrence
+                       (occurrence-for (:repair/occurrence failure)
+                                       (:job-id review-job)
+                                       (case verdict
+                                         :request-changes
+                                         :review-request-changes
+                                         :reject :review-rejected))
+                       :observation (observation-for :review-failure)
+                       :target (:target failure)
+                       :commit (:commit failure)
+                       :selected-entry (:selected-entry failure)
+                       :reviewer @reviewer-of-record
+                       :review-job (:job-id review-job)
+                       :review-verdict verdict
+                       :review-text (job-text review-job)})}
+                    (catch Throwable recording-error
+                      {:failure
+                       {:message (.getMessage recording-error)
+                        :class (.getName (class recording-error))
+                        :data (ex-data recording-error)}})))
+                review-finding (:finding review-recording)
                 finding (or review-finding (:repair-obligation failure))]
               (close! (outcome-from e)
                       (cond->
@@ -11043,6 +11054,9 @@
                         :cause (close-cause e)
                         :build-retries (when (seq (:build-retries failure))
                                          (:build-retries failure))}
+                        (:failure review-recording)
+                        (assoc :review-finding-recording-failure
+                               (:failure review-recording))
                         (seq (:reviews failure))
                         (assoc :reviews (:reviews failure)
                                :revision (:revision failure))))))))))))

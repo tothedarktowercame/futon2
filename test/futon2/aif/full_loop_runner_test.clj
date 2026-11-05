@@ -3766,6 +3766,88 @@
     (is (= :artifact-binding-mismatch
            (:failure-kind (first @findings))))))
 
+(deftest review-obligation-recording-cannot-mask-typed-revision-failure
+  (let [recording-calls (atom [])
+        result
+        (with-redefs-fn
+          {#'runner/refuse-on-runner-source-drift!
+           (constantly {:runner/source-check :fixture-current})}
+          #(runner/run-opportunity!
+            (merge
+             (isolated-runner-opts)
+             {:repair-open-fn (constantly [])
+           :trace-fn (constantly "/tmp/review-recording-failure-trace.edn")
+           :construct-fn
+           (fn [_]
+             (throw
+              (ex-info
+               "Revision artifact does not match the reviewed commit"
+               {:outcome :build-failed
+                :failure-kind :artifact-binding-mismatch
+                :failure-stage :revision-build
+                :commit "c"
+                :review-job
+                {:job-id "reviewer-falsifier/receipt-1"
+                 :reviewer-falsifier/synthetic? true
+                 :state "done"
+                 :result-summary
+                 "FULL_LOOP_REVIEW: REQUEST_CHANGES synthetic finding"}})))
+           :repair-record-fn
+           (fn [finding]
+             (swap! recording-calls conj finding)
+             (throw
+              (ex-info "Stop-the-line finding lacks required provenance"
+                       {:failure-kind :repair-finding-provenance-missing})))
+              :repair-system-record-fn
+              (fn [finding]
+                (assoc finding :repair/id "repair-original-failure"))})))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :artifact-binding-mismatch
+           (get-in result [:data :failure-kind])))
+    (is (= :revision-build (get-in result [:data :failure-stage])))
+    (is (empty? @recording-calls)
+        "synthetic falsifier jobs do not create independent-review obligations")))
+
+(deftest review-obligation-recording-failure-is-retained-not-substituted
+  (let [result
+        (with-redefs-fn
+          {#'runner/refuse-on-runner-source-drift!
+           (constantly {:runner/source-check :fixture-current})}
+          #(runner/run-opportunity!
+            (merge
+             (isolated-runner-opts)
+             {:repair-open-fn (constantly [])
+           :trace-fn (constantly "/tmp/review-recording-failure-detail-trace.edn")
+           :construct-fn
+           (fn [_]
+             (throw
+              (ex-info
+               "Revision artifact does not match the reviewed commit"
+               {:outcome :build-failed
+                :failure-kind :artifact-binding-mismatch
+                :failure-stage :revision-build
+                :commit "c"
+                :review-job
+                {:job-id "independent-review-1"
+                 :state "done"
+                 :result-summary
+                 "FULL_LOOP_REVIEW: REQUEST_CHANGES independent finding"}})))
+           :repair-record-fn
+           (fn [_]
+             (throw
+              (ex-info "Stop-the-line finding lacks required provenance"
+                       {:failure-kind :repair-finding-provenance-missing})))
+              :repair-system-record-fn
+              (fn [finding]
+                (assoc finding :repair/id "repair-original-failure"))})))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :artifact-binding-mismatch
+           (get-in result [:data :failure-kind])))
+    (is (= :revision-build (get-in result [:data :failure-stage])))
+    (is (= :repair-finding-provenance-missing
+           (get-in result [:data :review-finding-recording-failure
+                           :data :failure-kind])))))
+
 (deftest machine-repair-binds-to-failed-machine-repository
   (let [original-action {:type :advance-mission
                          :target "M-learning-loop"
