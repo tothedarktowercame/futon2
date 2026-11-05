@@ -6337,6 +6337,19 @@
                :cohort-id :test-cohort-exhaustion
                :sha256 (digest/sha256 (slurp path))}}))
 
+(defn- stamped-retention-cohort [prefix]
+  (let [base (.toFile (Files/createTempDirectory prefix
+                                                  (make-array FileAttribute 0)))
+        root (.getPath (io/file base "wm-full-loop"))
+        path (str root "/cohort.edn")]
+    (.mkdirs (io/file root))
+    (tiny-target-prereg path)
+    (cohort/activate! path root)
+    {:base base :root root :path path
+     :binding {:preregistration path :data-root root
+               :cohort-id :test-cohort-exhaustion
+               :sha256 (digest/sha256 (slurp path))}}))
+
 (defn- retention-success-opts [{:keys [root binding] :as cohort}]
   (merge
    (isolated-runner-opts (select-keys cohort [:mission-source-text]))
@@ -6359,6 +6372,29 @@
                            :resolved? true :dial-moved? true
                            :implementation-id "retained"
                            :discharge-id "retained-discharge"})}))
+
+(deftest cohort-machinery-stamps-every-attempt-file-once
+  (let [{:keys [base root] :as c} (stamped-retention-cohort
+                                   "runner-machinery-stamps")
+        click-id "wm-click-machinery-stamps"
+        result (#'runner/run-opportunity-core!
+                (assoc (retention-success-opts c) :click-id click-id))
+        attempt-dir (io/file root "test-cohort-exhaustion" (:attempt-id result))
+        files (->> (rest (file-seq attempt-dir))
+                   (filter #(.isFile ^java.io.File %))
+                   (map #(.getCanonicalPath ^java.io.File %)) set)
+        stamp-file (io/file base "wm-write-stamps" (str click-id ".jsonl"))
+        rows (with-open [reader (io/reader stamp-file)]
+               (mapv #(json/parse-string % true) (line-seq reader)))]
+    (is (= files (set (map :path rows))))
+    (is (= (count files) (count rows)))
+    (is (every? #(str/starts-with? (:writer %) "full-loop-runner/") rows))))
+
+(deftest cohort-machinery-without-click-id-writes-no-stamps
+  (let [{:keys [base] :as c} (stamped-retention-cohort
+                              "runner-machinery-no-stamps")]
+    (#'runner/run-opportunity-core! (retention-success-opts c))
+    (is (not (.exists (io/file base "wm-write-stamps"))))))
 
 (deftest selected-runner-action-is-minted-once-and-returned-from-writer
   (let [{:keys [root path] :as c} (retention-cohort "runner-retention-success")

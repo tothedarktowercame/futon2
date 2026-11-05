@@ -7644,6 +7644,33 @@
                             (catch Throwable e {:error e}))
         code-state (:value code-state-result)
         execution-cohort (:execution-cohort opts)
+        cohort-data-root (or (:data-root execution-cohort) cohort/default-data-root)
+        machinery-stamped-paths (atom #{})
+        machinery-stamp!
+        (fn [writer path]
+          (when (and cohort? path)
+            (let [canonical (.getCanonicalPath (io/file path))]
+              (when-not (contains? @machinery-stamped-paths canonical)
+                (let [result
+                      (write-stamp/record!
+                       {:root (io/file (.getParentFile (io/file cohort-data-root))
+                                       "wm-write-stamps")
+                        :click-id (:click-id opts)
+                        :run-id (:run-id opts)
+                        :writer (str "full-loop-runner/" writer)
+                        :path canonical})]
+                  (when (:stamped? result)
+                    (swap! machinery-stamped-paths conj canonical)))))))
+        stamp-checkpoint!
+        (fn [writer event]
+          (when event
+            (machinery-stamp!
+             writer
+             (io/file cohort-data-root (name (:cohort/id event))
+                      (:attempt/id event)
+                      (format "%03d-%s.edn" (:event/sequence event)
+                              (name (:checkpoint/type event))))))
+          event)
         _ (when (and (contains? opts :execution-cohort) (not (true? cohort?)))
             (throw (ex-info "Explicit execution cohort requires cohort recording"
                             {:reason :execution-cohort-recording-required})))
@@ -7678,10 +7705,19 @@
                       (if cohort-source
                         (cohort/start-attempt! cohort-source (:data-root execution-cohort) time-cell)
                         (cohort/start-attempt! time-cell)))
+        _ (stamp-checkpoint! "start-attempt!" start-event)
         _ (when start-event
             (swap! checkpoint-events assoc :time-step start-event))
         attempt-id (or (:attempt/id start-event)
                        (str "canary-" (UUID/randomUUID)))
+        stamp-attempt-tree!
+        (fn []
+          (when start-event
+            (let [attempt-dir (io/file cohort-data-root
+                                       (name (:cohort/id start-event)) attempt-id)]
+              (doseq [file (rest (file-seq attempt-dir))
+                      :when (.isFile ^java.io.File file)]
+                (machinery-stamp! "attempt-file!" file)))))
         attempt-evidence-dir
         (when cohort?
           (.getAbsolutePath
@@ -7754,13 +7790,15 @@
                         ;; an enabled durable append has succeeded.
                         (when cohort?
                           (let [append (fn [c]
-                                         (if cohort-source
-                                           (cohort/append-checkpoint!
-                                            cohort-source
-                                            (:data-root execution-cohort)
-                                            attempt-id checkpoint c)
-                                           (cohort/append-checkpoint!
-                                            attempt-id checkpoint c)))]
+                                         (stamp-checkpoint!
+                                          "checkpoint!"
+                                          (if cohort-source
+                                            (cohort/append-checkpoint!
+                                             cohort-source
+                                             (:data-root execution-cohort)
+                                             attempt-id checkpoint c)
+                                            (cohort/append-checkpoint!
+                                             attempt-id checkpoint c))))]
                             (append-checkpoint-or-refusal-sorry!
                              append
                              #(swap! checkpoint-events assoc checkpoint %)
@@ -7790,12 +7828,14 @@
               (swap! checkpoints assoc :selection cell)
               (when cohort?
                 (let [append (fn [c]
-                               (if cohort-source
-                                 (cohort/append-checkpoint!
-                                  cohort-source (:data-root execution-cohort)
-                                  attempt-id :selection c)
-                                 (cohort/append-checkpoint!
-                                  attempt-id :selection c)))]
+                               (stamp-checkpoint!
+                                "checkpoint!"
+                                (if cohort-source
+                                  (cohort/append-checkpoint!
+                                   cohort-source (:data-root execution-cohort)
+                                   attempt-id :selection c)
+                                  (cohort/append-checkpoint!
+                                   attempt-id :selection c))))]
                   (append-checkpoint-or-refusal-sorry!
                    append
                    #(swap! checkpoint-events assoc :selection %)
@@ -8149,6 +8189,11 @@
                            :repo (:repo effective-artifact-binding)
                            :construction-source construction-source
                            :ledger-root (or (:learning-trial-ledger-root opts) learning-ledger/default-root)}))
+                       _ (when token-comparison
+                           (doseq [entry [(:entry token-comparison)
+                                          (:surprise-entry token-comparison)]]
+                             (machinery-stamp! "retain-token-outcome!"
+                                               (:source-path entry))))
                        want-outcome-accounting
                        (when selected-action
                          (selected-want-outcome/receipt
@@ -8180,6 +8225,8 @@
                           :events @checkpoint-events
                           :target (:target selected-action)
                           :token-comparison (:receipt token-comparison)}))
+                       _ (machinery-stamp! "route-attestation!"
+                                           (get-in route-account [:reference :path]))
                        kernel-example-result
                        (when (and cohort? @action-occurrence)
                          (retain-kernel-example!
@@ -8188,6 +8235,10 @@
                           {:prediction (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
                            :occurrence @action-occurrence :artifact-sha (:commit data) :outcome outcome}
                           d-task-result @d-task-context #(read-job! opts %)))
+                       _ (when kernel-example-result
+                           (machinery-stamp! "retain-kernel-example!"
+                                             (get-in kernel-example-result
+                                                     [:entry :source-path])))
                        ;; PROOF-wm-works ⟨1⟩4 (final handoff): evaluate the
                        ;; accepted-increment predicate for THIS occurrence
                        ;; before the close is constructed, reading the
@@ -8423,6 +8474,10 @@
                            :focus-receipt (get-in selection-judgment
                                                   [:controller-decision :selection-certificate
                                                    :focus-receipt])}))
+                       _ (when run-ending-result
+                           (machinery-stamp! "retain-run-ending!"
+                                             (get-in run-ending-result
+                                                     [:entry :source-path])))
                        manifest (when (and cohort? @action-occurrence)
                                   ;; Closing used to sit outside the restart
                                   ;; debugger.  A manifest fault therefore
@@ -8504,6 +8559,8 @@
                                                   (:data-root execution-cohort)
                                                   attempt-id closed)
                            (cohort/close-attempt! attempt-id closed)))
+                       _ (stamp-checkpoint! "close-attempt!" closed-event)
+                       _ (when closed-event (stamp-attempt-tree!))
                        ;; PROOF-wm-works ⟨1⟩4 (final handoff): the B update
                        ;; is applied AFTER the close is written and ONLY
                        ;; when the predicate result recorded on that close is
@@ -8574,6 +8631,7 @@
                                content (assoc b-update-snapshot :post-close-update post-close)]
                            (io/make-parents f)
                            (spit f (pr-str content))
+                           (machinery-stamp! "retain-b-update!" f)
                            {:path (.getPath f)}))
                        discharge-result
                        (repair-discharge/finalize-run!
@@ -8785,6 +8843,13 @@
                               (or (:data-root execution-cohort)
                                   cohort/default-data-root)
                               (:cohort/id start-event) attempt-id sorry-data))
+                           _ (when failure-evidence
+                               (machinery-stamp!
+                                "retain-run-ending!"
+                                (io/file cohort-data-root
+                                         (name (:cohort/id start-event))
+                                         attempt-id "retained"
+                                         "run-ending-classification.edn")))
                            admitted-ids (mapv :evidence/id
                                               (get-in failure-evidence
                                                       [:manifest :entries]))
@@ -8844,7 +8909,11 @@
                                                close-error)
                                   (ex-data close-error)
                                   {:error-class (.getName (class close-error))
-                                   :error (ex-message close-error)})}))]
+                                   :error (ex-message close-error)})}))
+                       _ (stamp-checkpoint! "close-attempt!"
+                                            (:closed-event close-result))
+                       _ (when (:closed-event close-result)
+                           (stamp-attempt-tree!))]
                        {:attempt-id attempt-id
                         :opportunity-id opportunity-id
                         :outcome :build-failed
