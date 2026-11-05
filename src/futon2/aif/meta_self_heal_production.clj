@@ -1323,6 +1323,19 @@
           (refusal :meta-self-heal/transaction-move-failed
                    {:path source :target target :detail (ex-message t)}))))))
 
+(defn- active-injury-visibility [active selected]
+  (let [effective-count (or (:effective-active-count active)
+                            (count (:injuries active)))
+        raw-count (or (:raw-active-count active) effective-count)]
+    {:raw-active-count raw-count
+     :effective-active-count effective-count
+     :masked (vec (or (:masked active) []))
+     :selected selected
+     :reason (cond
+               (zero? raw-count) :no-raw-active-injury
+               (zero? effective-count) :all-active-occurrences-evidence-corrected
+               :else :effective-active-selected)}))
+
 (defn carried-bindings-observation
   "Read a valid persisted repair transaction once and describe whether its
   diagnosis and acceptance bindings belong to an active injury. A refused
@@ -1337,13 +1350,19 @@
        :durable-ledger-status (:status (:durable-ledger context))
        :durable-ledger-reason (:reason (:durable-ledger context))
        :durable-ledger-defects (:defects (:durable-ledger context))}
-      (if (or (not= :computed (:status active))
-              (empty? (:injuries active)))
-        {:status :absent :reason :no-active-injury}
-      (let [selection (or (:injury-selection context)
-                          (injury-selection (:meta-repair-transaction-path opts)
-                                            (:durable-ledger context) active))]
-        (cond
+      (let [selection (when (and (= :computed (:status active))
+                                 (seq (:injuries active)))
+                        (or (:injury-selection context)
+                            (injury-selection (:meta-repair-transaction-path opts)
+                                              (:durable-ledger context) active)))
+            selected (or (:injury-id selection)
+                         (first (sort (keys (:injuries active)))))
+            visibility (active-injury-visibility active selected)
+            result
+            (if (or (not= :computed (:status active))
+                    (empty? (:injuries active)))
+              {:status :absent}
+              (cond
           (and (:transaction-path selection)
                (not= (:meta-repair-transaction-path opts)
                      (or (:restore-to selection) (:transaction-path selection))))
@@ -1380,7 +1399,10 @@
                           :author-evidence (:author-evidence claim)
                           :observation-pin (:entry-pin claim)}))
                 {:status :absent :reason :transaction-injury-not-active}))
-            {:status :absent :reason :no-transaction})))))))
+            {:status :absent :reason :no-transaction})))]
+        (cond-> (merge result visibility)
+          (and (:reason result) (not= (:reason result) (:reason visibility)))
+          (assoc :binding-reason (:reason result)))))))
 
 (defn carried-bindings
   "Return persisted diagnosis and acceptance bindings for an active injury."
@@ -1963,7 +1985,8 @@
     {:status :unavailable :reason :meta-self-heal/diagnosis-ledger-unavailable}
 
     (empty? (:injuries active-injuries))
-    {:status :not-required :reason :meta-self-heal/no-active-injury}
+    (assoc (active-injury-visibility active-injuries nil)
+           :status :not-required)
 
     :else
     (let [injury-id (or (:injury-id injury-selection)

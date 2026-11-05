@@ -771,18 +771,45 @@
   `meta-injury-store/load-durable-ledger`; callers without that evidence must
   use `effective-active-injuries`."
   [ledger]
-  (let [corrections (->> (:corrections (:state (medic-state ledger)))
-                         (map medic/occurrence) set)]
+  (let [correction-entries
+        (->> (:entries ledger)
+             (filter #(and (observation? %)
+                           (= :medic-repaired (:observation-kind %))))
+             (map (fn [entry]
+                    [(medic/occurrence
+                      (get-in entry [:medic-operation :request :candidate]))
+                     entry]))
+             (into {}))
+        latest-active
+        (->> (transitions ledger)
+             (group-by :injury-id)
+             (keep (fn [[injury-id history]]
+                     (let [entry (last history)]
+                       (when (contains? active-states (:state entry))
+                         [injury-id entry]))))
+             (into {}))
+        masked
+        (->> latest-active
+             (keep (fn [[injury-id entry]]
+                     (when-let [correction
+                                (get correction-entries
+                                     [injury-id (str (:ordinal entry))])]
+                       {:injury-id injury-id
+                        :ordinal (:ordinal entry)
+                        :correction-ordinal (:ordinal correction)
+                        :correction-pin (:entry-pin correction)})))
+             (sort-by (juxt :injury-id :ordinal))
+             vec)
+        masked-occurrences (set (map (juxt :injury-id (comp str :ordinal)) masked))
+        effective (into {} (remove (fn [[injury-id entry]]
+                                     (contains? masked-occurrences
+                                                [injury-id (str (:ordinal entry))])))
+                        latest-active)]
     {:status :computed
-     :injuries (->> (transitions ledger)
-                    (group-by :injury-id)
-                    (keep (fn [[injury-id history]]
-                            (let [entry (last history)
-                                  occurrence [injury-id (str (:ordinal entry))]]
-                              (when (and (contains? active-states (:state entry))
-                                         (not (contains? corrections occurrence)))
-                                [injury-id entry]))))
-                    (into {}))}))
+     :raw-active-count (count latest-active)
+     :effective-active-count (count effective)
+     :masked masked
+     :injuries effective}))
 
 (defn medic-current-occurrence
   "The latest medic occurrence of INJURY-ID as `medic-state` reads it:

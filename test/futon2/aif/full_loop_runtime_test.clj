@@ -485,8 +485,11 @@
                                       {:status :unavailable
                                        :reason :fixture-unavailable})})]
     (is (= 1 @calls))
-    (is (= {:status :absent :reason :no-transaction}
-           (:carried-bindings result)))))
+    (is (= {:status :absent
+            :reason :effective-active-selected
+            :binding-reason :no-transaction}
+           (select-keys (:carried-bindings result)
+                        [:status :reason :binding-reason])))))
 
 (deftest production-registers-the-bounded-beta-campaign
   (runtime/production-defaults {})

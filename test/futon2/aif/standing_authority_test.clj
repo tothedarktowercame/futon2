@@ -144,7 +144,7 @@
 
 (deftest ledger-refused-is-not-silent-absence
   "Design P3/D4: a refused durable ledger load surfaces :ledger-refused with
-  its typed status/reason/defects, never :no-active-injury."
+  its typed status/reason/defects, never a raw-empty observation."
   (testing "refused durable load surfaces :ledger-refused"
     (let [obs (carried-bindings-observation
                {}
@@ -155,14 +155,14 @@
       (is (= :ledger-refused (:reason obs)))
       (is (= :store/tampered-ledger (:durable-ledger-reason obs)))
       (is (= [:entry/transition-invalid] (:durable-ledger-defects obs)))))
-  (testing "a computed empty active set stays :no-active-injury"
-    (is (= :no-active-injury
+  (testing "a computed empty active set reports that the raw set is empty"
+    (is (= :no-raw-active-injury
            (:reason (carried-bindings-observation
                      {}
                      {:durable-ledger {:status :loaded :ledger {:entries []}}
                       :active-injuries {:status :computed :injuries {}}})))))
   (testing "no ledger at all is absence, not refusal"
-    (is (= :no-active-injury
+    (is (= :no-raw-active-injury
            (:reason (carried-bindings-observation {} {:durable-ledger nil}))))))
 
 (defn- hermetic-root [policy-map evidence-files]
