@@ -65,8 +65,13 @@
                              (map second
                                   (re-seq #":(?:kind|reason)\s+(:[A-Za-z0-9_./?!+*<>-]+)"
                                           body)))
-                           terminal-maps)]
-    (set (map #(keyword (subs % 1)) (concat failure-kinds seam-kinds)))))
+                           terminal-maps)
+        ;; R20 empty-field abstention: {:status :abstained :case k}
+        abstention-cases (map second
+                              (re-seq #":status\s+:abstained\s+:case\s+(:[A-Za-z0-9_./?!+*<>-]+)"
+                                      text))]
+    (set (map #(keyword (subs % 1))
+              (concat failure-kinds seam-kinds abstention-cases)))))
 
 (defn- literal-terminal-kinds [files]
   (reduce set/union #{} (map #(literal-terminal-kinds-in-text (slurp %)) files)))
@@ -128,3 +133,15 @@
             {:opportunity-id "stop-table-1"}
             :reviewer-wait (constantly value) nil
             runner/reviewer-wait-terminal-condition)))))
+
+(deftest empty-field-abstention-is-the-aif-valid-stop
+  (is (= #{:empty-field}
+         (set (keep (fn [[k v]] (when (= :aif-valid-stop (:class v)) k))
+                    (classification-table)))))
+  (debugger/attach!)
+  (let [value {:status :abstained :case :empty-field}]
+    (is (= value
+           (runner/run-phase!
+            {:run-id "terminal-kind-empty-field" :phase-log-fn (fn [_])}
+            {:opportunity-id "stop-table-1"}
+            :selection (constantly value) nil nil)))))

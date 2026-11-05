@@ -1,5 +1,6 @@
 {
  :abstained {:class :repairable-error :lean-basis "R20FocusedSelection.lean:74-82; keyword alone does not prove the admissible set empty" :raise-sites ["src/futon2/aif/full_loop_runtime.clj:1134"]}
+ :empty-field {:class :aif-valid-stop :lean-basis "R20FocusedSelection.lean:74-82 (abstained with empty admissible set)" :raise-sites ["src/futon2/aif/full_loop_runtime.clj:1653"]}
  :agent-readiness-failed {:class :repairable-error :lean-basis nil :raise-sites ["src/futon2/aif/full_loop_runner.clj:7206"]}
  :agent-unavailable {:class :repairable-error :lean-basis nil :raise-sites ["src/futon2/aif/full_loop_cohort.clj:47"]}
  :all-refused-targets-unknown-class {:class :repairable-error :lean-basis nil :raise-sites ["full_loop_runner.clj:8871-8877"]}

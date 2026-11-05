@@ -24,7 +24,11 @@
     (or (when (keyword? (:failure-kind result)) (:failure-kind result))
         (when (contains? #{:error :refused :abstained} (:status result))
           (or (when (keyword? (:kind result)) (:kind result))
-              (when (keyword? (:reason result)) (:reason result)))))))
+              (when (keyword? (:reason result)) (:reason result))
+              ;; R20FocusedSelection.lean:74-82: an abstention over an empty
+              ;; admissible field carries its reason as :case, not :kind.
+              (when (and (= :abstained (:status result)) (keyword? (:case result)))
+                (:case result)))))))
 
 (defn unclassified-condition
   "Turn an unknown terminal keyword into a debugger condition.  This function
