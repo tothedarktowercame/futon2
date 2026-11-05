@@ -75,15 +75,28 @@
             (throw (ex-info "Retained carrier changed" {:kind :cause-scope/input-mismatch})))
         entry (requiring-resolve (symbol (:cause-entry scope)))
         result (entry input)
-        healthy (healthy? (:healthy-predicate scope) result)
+        predicate (:healthy-predicate scope)
+        healthy (healthy? predicate result)
+        observed (get-in result (:path predicate) ::absent)
+        ;; :predicate-observed-result true means only that the predicate was
+        ;; evaluated on the boundary's return value; whether it HELD is
+        ;; :healthy?. On 2026-11-05 (click wm-click-4a702a29) the acceptance
+        ;; reviewer read the former as "the predicate held" and refused a
+        ;; correct red test twice, so the observed value is now stated too.
         receipt {:schema :wm/cause-scope-receipt-v1 :scope scope
                  :observed-entry (:cause-entry scope) :invoked true
                  :predicate-observed-result true
+                 :predicate-observed-value (if (= ::absent observed) :absent observed)
                  :result-digest (stable-digest result)
                  :healthy? healthy :failures (if healthy 0 1) :errors 0}]
     (when-let [path (System/getenv "FUTON_CAUSE_SCOPE_RECEIPT")]
       (spit path (pr-str receipt)))
-    (assert healthy (str "cause remains unhealthy: " (:cause-entry scope)))
+    (assert healthy (str "cause remains unhealthy: " (:cause-entry scope)
+                         " returned " (pr-str (:path predicate)) " = "
+                         (pr-str (if (= ::absent observed) :absent observed))
+                         ", healthy predicate " (pr-str predicate)
+                         " does not hold (an AssertionError, so clojure.test counts"
+                         " it as an error; :failures 1 in the receipt)"))
     receipt))
 
 (defn- ns-require-aliases
