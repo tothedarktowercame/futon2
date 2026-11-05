@@ -1,6 +1,7 @@
 (ns futon2.aif.handoff-contract
   "One representation of an external producer/consumer contract."
   (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.pprint :as pp]
             [clojure.string :as str]))
 
@@ -9,6 +10,22 @@
 (defn- parse-map [s]
   (try (let [v (json/parse-string s true)] (when (map? v) v))
        (catch Exception _ nil)))
+
+(defn- parse-edn-map [s]
+  (try
+    (with-open [r (java.io.PushbackReader. (java.io.StringReader. s))]
+      (let [v (edn/read {:eof ::eof} r)
+            trailing (edn/read {:eof ::eof} r)]
+        (when (and (map? v) (= ::eof trailing))
+          (with-meta v {::normalization
+                        {:kind :edn-map-to-handoff-map
+                         :recorded? true}}))))
+    (catch Exception _ nil)))
+
+(defn response-normalization
+  "Normalization evidence attached to an unambiguously decoded response."
+  [answer]
+  (::normalization (meta answer)))
 
 (defn- balanced-object-spans
   "The top-level balanced `{...}` spans of s, in order. Depth is counted
@@ -62,7 +79,8 @@
     (let [fences (re-seq #"(?s)```[^\n]*\n(.*?)```" raw)]
       (if (seq fences)
         (when (= 1 (count fences))
-          (parse-map (second (first fences))))
+          (let [candidate (second (first fences))]
+            (or (parse-map candidate) (parse-edn-map candidate))))
         (let [whole (try (json/parse-string raw true)
                          (catch Exception _ ::unparsed))
               spans (balanced-object-spans raw)]
@@ -70,7 +88,8 @@
           ;; here; a bare object is its own single span
           (when (and (or (map? whole) (= ::unparsed whole))
                      (= 1 (count spans)))
-            (parse-map (first spans))))))))
+            (let [candidate (first spans)]
+              (or (parse-map candidate) (parse-edn-map candidate)))))))))
 
 (defn contract [{:keys [id version response validator] :as value}]
   (when-not (and (keyword? id) (pos-int? version) (map? response)

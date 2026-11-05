@@ -740,6 +740,10 @@
                                               (vec review-claim-defects)))))
                 reviewed (when reviewer-response
                            (handoff/response-map reviewer-response))
+                review-format-normalization
+                (handoff/response-normalization reviewed)
+                author-format-normalization
+                (handoff/response-normalization author-answer)
                 ;; An explicit reviewer refusal is a review outcome, not a
                 ;; format defect: run adc46631 (2026-10-31) replied with
                 ;; {"accepted": false, "accepted-by": null, ...reason}, the
@@ -1050,6 +1054,10 @@
                         :verdict (:verdict objection-round)})
                 feedback-event (assoc :cascade-feedback-event feedback-event)
                 correction (assoc :author-format-correction correction)
+                author-format-normalization
+                (assoc :author-format-normalization author-format-normalization)
+                review-format-normalization
+                (assoc :review-format-normalization review-format-normalization)
                 (and correction (:answer-delivery result))
                 (assoc-in [:answer-delivery :format-correction] correction)
                 (and correction (get-in result [:result :answer-delivery]))

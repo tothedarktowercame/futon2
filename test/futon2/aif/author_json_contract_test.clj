@@ -31,6 +31,31 @@
   {:requisition-id (:requisition-id req) :cascade-digest digest :by "wm-author" :patch patch
    :decisions (mapv (fn [[id clause]] (assoc clause :hole id)) authored/clauses)})
 
+(deftest retained-review-edn-with-prose-normalizes-and-continues
+  (let [reviews (atom 0)
+        check delivery/check-delivery
+        handler (runtime/open-cascade-resume-handler
+                 {:author "wm-author" :reviewer "wm-reviewer"
+                  :open-cascade-author-answer-fn answer
+                  :open-cascade-reviewer-answer-fn
+                  (fn [{:keys [author-answer]}]
+                    (swap! reviews inc)
+                    {:state "done" :job-id "retained-review-edn"
+                     :result (str "Review complete.\n"
+                                  (pr-str (assoc author-answer
+                                                 :accepted true
+                                                 :accepted-by "wm-reviewer")))})})
+        result (with-redefs [delivery/check-delivery
+                             (fn [a] (check delivery/canonical-repository
+                                      #(-> (io/file delivery/canonical-repository "src" %)
+                                           .toURI .toURL) a))]
+                 (handler held))]
+    (is (= 1 @reviews))
+    (is (= :resumed (:status result)))
+    (is (= {:kind :edn-map-to-handoff-map :recorded? true}
+           (:review-format-normalization result)))
+    (is (= authored/clauses (get-in result [:result :delivered])))))
+
 (deftest retained-malformed-answer-corrects-once-and-reaches-real-function
   (let [contacts (atom []) reviews (atom [])
         check delivery/check-delivery
