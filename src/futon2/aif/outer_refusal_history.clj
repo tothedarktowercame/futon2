@@ -84,23 +84,31 @@
          :source :selected-target-reading}
 
         (or (keyword? selection-reason)
+            (keyword? (:reason refusal))
             (keyword? (:kind refusal))
             (keyword? (:failure-kind refusal))
+            (keyword? (:reason selection-target))
             (keyword? (:kind selection-target))
             (and (keyword? (:reason selection-carrier))
                  (not= :no-selection-decision-recorded
                        (:reason selection-carrier))))
-        {:target (target-id (or (:target refusal) (:target selection-target)
-                               (record-target record)))
-         ;; the target's own cause first (e.g. :target-source-path-absent);
-         ;; the decision's summary reason is kept beside it
-         :reason (or (:failure-kind refusal) (:kind refusal)
-                     (:kind selection-target) selection-reason
-                     (:reason selection-carrier))
-         :decision-reason selection-reason
-         :missing (missing-vector (or (:missing refusal)
-                                      (:missing selection-target)))
-         :source :selection}
+        (let [leaf-reason (or (:reason refusal) (:reason selection-target)
+                              (:failure-kind refusal) (:kind refusal)
+                              (:kind selection-target) selection-reason
+                              (:reason selection-carrier))
+              boundary-kind (or (:kind refusal) (:kind selection-target))]
+          (cond-> {:target (target-id (or (:target refusal) (:target selection-target)
+                                         (record-target record)))
+                   ;; The leaf cause drives feedback; the boundary kind remains
+                   ;; beside it rather than replacing it.
+                   :reason leaf-reason
+                   :missing (missing-vector (or (:missing refusal)
+                                                (:missing selection-target)))
+                   :source :selection}
+            (and (keyword? selection-reason) (not= selection-reason leaf-reason))
+            (assoc :decision-reason selection-reason)
+            (and (keyword? boundary-kind) (not= boundary-kind leaf-reason))
+            (assoc :boundary-kind boundary-kind)))
 
         :else {:reason :not-retained}))))
 

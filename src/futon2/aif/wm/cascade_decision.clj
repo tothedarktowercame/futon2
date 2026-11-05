@@ -1328,17 +1328,31 @@
                                  (get-in result [:certification :receipt]))
                          (assoc-in [:selection-certificate :q6] (:refusal result)))}
           :refused
-          {:decision (cond-> (abstain [(merge (select-keys (:refusal result)
-                                                           [:reason :refusals :carry :versions :kernels])
-                                              {:target nil :stage :certification
-                                               :kind :model-contract-refused
-                                               :certification-kind (:kind (:refusal result))})])
+          (let [refusal (:refusal result)
+                targets (distinct (keep :target-id
+                                        (filter #(= :computed (:status %)) families)))
+                leaf-reason (or (get-in refusal [:carry :reason])
+                                (get-in refusal [:refusal :kind]))
+                missing (case leaf-reason
+                          :free-energy-not-supplied :historical-prefix-f
+                          nil)]
+            {:decision (cond-> (abstain [(cond->
+                                          (merge (select-keys refusal
+                                                              [:reason :refusals :carry
+                                                               :versions :kernels])
+                                                 {:target (when (= 1 (count targets))
+                                                            (first targets))
+                                                  :stage :certification
+                                                  :kind :model-contract-refused
+                                                  :certification-kind (:kind refusal)})
+                                           leaf-reason (assoc :reason leaf-reason)
+                                           missing (assoc :missing missing))])
                        ;; the refused carry is the next tick's previous
                        ;; receipt: it stays refused until a declaration for
                        ;; this identity is consumed, never silently reset
-                       (get-in result [:refusal :carry])
+                       (:carry refusal)
                        (assoc-in [:selection-certificate :reading-precision-carry]
-                                 (get-in result [:refusal :carry])))}
+                                 (:carry refusal)))})
           :abstained
           {:decision (if (= :canonical-coapply (:g-law opts))
                        (-> (abstain (into (family-refusals (:target-policy-families result))

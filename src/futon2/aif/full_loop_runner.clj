@@ -943,17 +943,18 @@
     (if-let [refusals (seq (:refusals decision))]
       (merge (select-keys (:abstention decision) [:case :target])
       {:status :abstained
-       :targets (mapv (fn [{:keys [target kind missing]}]
-                        {:target target
-                         :kind kind
-                         :missing missing
-                         :declines (into []
-                                         (comp (filter #(and (= target (:target %))
-                                                             (:candidate %)))
-                                               (map #(select-keys %
-                                                                  [:candidate :reason
-                                                                   :missing-evidence])))
-                                         dropped-candidates)})
+       :targets (mapv (fn [{:keys [target kind reason missing]}]
+                        (cond-> {:target target
+                                 :kind kind
+                                 :missing missing
+                                 :declines (into []
+                                                 (comp (filter #(and (= target (:target %))
+                                                                     (:candidate %)))
+                                                       (map #(select-keys %
+                                                                          [:candidate :reason
+                                                                           :missing-evidence])))
+                                                 dropped-candidates)}
+                          reason (assoc :reason reason)))
                       refusals)})
       {:status :absent :reason :judge-recorded-no-refusal-list})
 

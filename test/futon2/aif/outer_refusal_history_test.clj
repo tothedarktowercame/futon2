@@ -5,6 +5,8 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.outer-refusal-index :as index]
             [futon2.aif.outer-refusal-history :as history]
+            [futon2.aif.wm.cascade-decision :as wm-cd]
+            [futon2.test-support.reading-route :as route]
             [futon2.test-support.runner-fixture :as fixture]))
 
 (def retained-refusal
@@ -25,7 +27,7 @@
      (io/file dir history/index-name)
      (history/index-entry record source (index/sha256-file source)))))
 
-(defn- close-and-index
+(defn- close-record-and-index
   "Exercise the owned terminal-record writer before the compact projection."
   [result opts]
   (let [dir (temp-dir)
@@ -37,7 +39,11 @@
                  "abstention-reason" "2026-11-05T00:00:00Z" result)
         path (:run-record written)
         record (edn/read-string (slurp path))]
-    (history/index-entry record path (index/sha256-file path))))
+    {:record record
+     :row (history/index-entry record path (index/sha256-file path))}))
+
+(defn- close-and-index [result opts]
+  (:row (close-record-and-index result opts)))
 
 (defn- abstained-result
   ([sorry data] (abstained-result sorry data nil))
@@ -114,6 +120,36 @@
                                 :error "legacy close"})
              {})]
     (is (= {:reason :not-retained} (:abstention row)))))
+
+(deftest certification-abstention-keeps-its-target-and-leaf-cause
+  (let [closed (atom nil)]
+    (route/with-empty-learning-ledger
+      #(let [fx (route/fixture [["p/a" "p/c"] "p/b"])
+             unread-ledger {:steps [] :read [] :unread []
+                            :dir-status {:absent :no-flights-dir}}
+             decision (:decision
+                       (wm-cd/cascade-decision
+                        (route/assembled fx 1)
+                        (route/opts fx {:conditioning-steps unread-ledger})))
+             result (abstained-result
+                     {:kind :no-selection :decision decision}
+                     {:failure-kind :abstained :failure-stage :selection
+                      :error "certification abstained"
+                      :error-data {:decision decision}}
+                     decision)]
+         (reset! closed (close-record-and-index result {}))))
+    (let [{:keys [record row]} @closed
+          carrier (get-in record [:decision :abstention])]
+      (is (= {:target route/target
+              :kind :model-contract-refused
+              :reason :free-energy-not-supplied}
+             (select-keys (first (:targets carrier)) [:target :kind :reason])))
+      (is (= {:target route/target
+              :reason :free-energy-not-supplied
+              :boundary-kind :model-contract-refused
+              :missing [:historical-prefix-f]
+              :source :selection}
+             (:abstention row))))))
 
 (deftest absent-index-is-distinct-from-empty-history
   (let [dir (temp-dir)
