@@ -306,7 +306,7 @@ The handoff model has three parts, and refusals get the same three:
 - [x] Lean contract (claude-6).
 - [x] REFUSAL-SITES-1, read-only survey (codex-15, `invoke-1793894251861-12942-5c54ed0b`). For each site: anchor, kinds, proposed case, and which RefusalLegality fields it has evidence for. Also the choke points and the paths that bypass them, cross-click exclusion today, and the operator-brief writer.
 - [x] REFUSAL-INDEX-1: `refusal-sites.edn` (37 sites) plus an audit test that fails when a production refusal site is not indexed (`38a06eee0`, `bdaea8413`, review fix `a2fe02801`). Limit: Python stop calls are counted mechanically; Clojure constructors against a listed set, so a new Clojure site emitting an existing kind is caught only dynamically, by the validator at close.
-- [ ] REFUSAL-VALIDATOR-1: one adapter at the choke point that computes `disposition`. A debugger error holds the run when attached. A click terminal records its exclusion (and its brief entry for a question). A loop stop needs its evidence.
+- [x] REFUSAL-VALIDATOR-1 (2026-11-05, steps 1b-1f): one adapter at the choke point that computes `disposition`. A debugger error holds the run when attached. A click terminal records its exclusion (and its brief entry for a question). A loop stop needs its evidence.
 
 ### REFUSAL-SITES-1 result (codex-15, reviewed 2026-11-05)
 
@@ -381,6 +381,13 @@ records and notifies, and validates nothing).
      `:controller-threw` label is used only when the controller itself threw.
      Not yet tested through `close!`: nothing is written while a refusal is
      held. That is REFUSAL-VALIDATOR-1f, and step 2 is ticked when it lands.
+   - **Step 2 done.** REFUSAL-VALIDATOR-1f landed (codex-15 `f999a4909`). It
+     moves the pre-catch part of `close!` into a public `validated-close!`, and
+     `futon2.aif.close-refusal-wiring-test` checks four things: no observation or
+     close happens while the click is held, a work outcome passes through
+     unchanged, a detached close keeps its disposition, and a throw from the
+     await stops all persistence. To check the test itself, a mutant that
+     calls `observe-end!` before validating fails two of these tests.
    2a. **REFUSAL-VALIDATOR-OUTER.** The outer selector's own empty-field
    abstention never reaches runner `close!`. It returns `{:absent
    :no-task-selected}` directly (`full_loop_runtime.clj:1702-1707`), and the
