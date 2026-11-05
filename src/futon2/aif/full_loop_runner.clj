@@ -11015,7 +11015,7 @@
                        :review-job (:job-id review-job)
                        :review-verdict verdict
                        :review-text (job-text review-job)})}
-                    (catch Throwable recording-error
+                    (catch Exception recording-error
                       {:failure
                        {:message (.getMessage recording-error)
                         :class (.getName (class recording-error))
