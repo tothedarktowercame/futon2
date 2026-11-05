@@ -376,6 +376,11 @@ records and notifies, and validates nothing).
      live repair can release the hold. A `:use-value` keeps a record of what it
      replaced. The only part left is wiring it into `close!`, which is
      REFUSAL-VALIDATOR-1e.
+   - The wiring landed as `1533c6b94`, with the fix `99d0190a1`. `close!` now
+     validates before `observe-end!` and before anything is written. The
+     `:controller-threw` label is used only when the controller itself threw.
+     Not yet tested through `close!`: nothing is written while a refusal is
+     held. That is REFUSAL-VALIDATOR-1f, and step 2 is ticked when it lands.
    2a. **REFUSAL-VALIDATOR-OUTER.** The outer selector's own empty-field
    abstention never reaches runner `close!`. It returns `{:absent
    :no-task-selected}` directly (`full_loop_runtime.clj:1702-1707`), and the
