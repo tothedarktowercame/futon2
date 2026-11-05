@@ -2642,6 +2642,24 @@
                   :terminal-message (:terminal-message job)
                   :handoff job})))))
 
+(defn author-wait-terminal-condition
+  "The first author wait's debugger condition. An invocation failure that the
+  runner retries itself (`author-infrastructure-failure?` with a positive
+  `:author-infrastructure-retries`) is left to that retry; the retry wait stops
+  if the retry fails too. A debugger stop here would pre-empt the automatic
+  retry and hold the run for an operator."
+  [opts job]
+  (when-not (and (pos? (:author-infrastructure-retries opts 0))
+                 (author-infrastructure-failure? job))
+    (handoff-wait-terminal-condition :author-wait job)))
+
+(defn reviewer-wait-terminal-condition
+  "The first reviewer wait's debugger condition. The runner always retries an
+  invocation failure here once, so only other failures stop."
+  [job]
+  (when-not (author-infrastructure-failure? job)
+    (handoff-wait-terminal-condition :reviewer-wait job)))
+
 (defn interpretation-ask-classifier
   "PROOF-2b (click 17): the target classifier the ask selection uses — the
   SAME area-focus/classify-target producer the cascade decision scores with,
@@ -9778,8 +9796,7 @@
                                   #((or (:poll-fn opts) poll-job!)
                                     opts author-job-id)
                                   nil
-                                  #(handoff-wait-terminal-condition
-                                    :author-wait %))
+                                  #(author-wait-terminal-condition opts %))
                       (catch Throwable e
                         (throw
                          (ex-info (.getMessage e)
@@ -9987,8 +10004,7 @@
                                       #((or (:poll-fn opts) poll-job!) opts
                                         (:job-id review-response))
                                       nil
-                                      #(handoff-wait-terminal-condition
-                                        :reviewer-wait %))
+                                      reviewer-wait-terminal-condition)
                           (catch Throwable e
                             (throw
                              (ex-info (.getMessage e)

@@ -145,3 +145,25 @@
 (deftest detached-reviewer-retry-wait-is-unchanged
   (exercise-detached-handoff-wait
    :reviewer-retry-wait {:job-id "job-1" :state "timed-out"}))
+
+(def ^:private invocation-failure
+  {:job-id "job-1" :state "failed" :terminal-code "invoke-error"})
+
+(deftest automatically-retried-invocation-failures-do-not-stop
+  (debugger/attach!)
+  (is (true? (runner/author-infrastructure-failure? invocation-failure)))
+  (is (nil? (runner/author-wait-terminal-condition
+             {:author-infrastructure-retries 1} invocation-failure))
+      "the author wait leaves a retried invocation failure to the runner")
+  (is (nil? (runner/reviewer-wait-terminal-condition invocation-failure))
+      "the reviewer wait always retries an invocation failure once")
+  (is (= :untyped-failure
+         (:failure-kind
+          (ex-data (runner/author-wait-terminal-condition
+                    {:author-infrastructure-retries 0} invocation-failure))))
+      "with no retry budget the same failure stops")
+  (is (= :artifact-binding-mismatch
+         (:failure-kind
+          (ex-data (runner/reviewer-wait-terminal-condition
+                    {:job-id "job-1" :state "done"
+                     :failure-kind :artifact-binding-mismatch}))))))
