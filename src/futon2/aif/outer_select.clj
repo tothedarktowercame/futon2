@@ -166,14 +166,35 @@
   [class]
   (contains? #{:focus :associated :useful-elsewhere} class))
 
-(defn known-term-field
-  "Compatibility entrypoint: unknown metrics stay in the field. An order that
-  needs an unavailable term refuses at apply-selection-step, never by silently
-  restricting the candidate domain."
-  [{:keys [field]}]
-  {:field (vec field) :excluded [] :requests []})
-
 (defn- value-of [x k] (if (fn? x) (x k) (get x k)))
+
+(defn known-term-field
+  "Keep only candidates with a Lean-recognised target relation in the scoring
+  field. Unknown relations remain in the upstream enumerated census, with the
+  receipt's absence reason and authority pins retained in a typed exclusion."
+  [{:keys [field focus relation facts]}]
+  (reduce
+   (fn [partition candidate]
+     (let [target (:target candidate)
+           class (relation focus target)
+           receipt (get-in (value-of facts target) [:relation :receipt])]
+       (if (known-relation? class)
+         (update partition :field conj candidate)
+         (update partition :excluded conj
+                 (cond-> {:target target
+                          :reason :relation-unrecognised
+                          :relation-class class
+                          :relation-reason (or (get-in receipt [:relation :reason])
+                                               :relation-receipt-unavailable)
+                          :relation-receipt-digest (when receipt
+                                                     (identity/sha256 (pr-str receipt)))}
+                   (get-in receipt [:derived-via :corpus-sha256])
+                   (assoc :corpus-sha256 (get-in receipt [:derived-via :corpus-sha256]))
+                   (get-in receipt [:derived-via :focus-manifest-sha256])
+                   (assoc :focus-manifest-sha256
+                          (get-in receipt [:derived-via :focus-manifest-sha256])))))))
+   {:field [] :excluded [] :requests []}
+   field))
 
 (defn- cascade-record [observation cascade model score]
   (let [candidate (:pick model) target (:target candidate)
@@ -281,7 +302,6 @@
         construction (menu/construct library-root makeup observation)
         menu (:cascades construction)
         partition (known-term-field observation)
-        observation (assoc observation :field (:field partition))
         field-facts (:field-facts observation)
         forbidden (or (:forbidden observation) #{})
         forbidden-evidence (vec (:forbidden-evidence observation))]
@@ -299,9 +319,10 @@
       (when-not (= (set (keys (:admitted field-facts)))
                    (set (map :target (:field observation))))
         (refuse! :task-field-facts-mismatch {})))
+    (let [observation (assoc observation :field (:field partition))]
     (when (empty? (:field partition))
       (refuse! :outer-score/no-admitted-tasks
-               {:field-facts field-facts :outer-score/excluded (:excluded field-facts)}))
+               {:field-facts field-facts :outer-score/excluded (:excluded partition)}))
     (when-not (seq menu) (refuse! :empty-cascade-menu {}))
     (let [score-input (merge (select-keys observation [:focus :relation :facts :field])
                              {:state-counts (:state-counts state) :ending-counts (:c state)
@@ -416,4 +437,4 @@
                          (= (:cascade-picks result) (mapv :pick (:cascades result)))
                          (= (:cascade-pick-relations result) legacy-relations)
                          (= (:prediction result) (:prediction (nth (:cascades result) index)))))
-            result))))))))
+            result)))))))))
