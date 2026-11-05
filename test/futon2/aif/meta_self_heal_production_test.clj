@@ -452,6 +452,19 @@
     (spit path (String. bytes "UTF-8"))
     {:path path :sha256 (load-identity/sha256 bytes)}))
 
+(defn- recorded-injury-source-of-kind! [dir kind]
+  (let [record {:failure {:kind kind :stage :construction}}
+        path (str dir "/record.edn")
+        bytes (.getBytes (str (pr-str record) "\n") "UTF-8")]
+    (spit path (String. bytes "UTF-8"))
+    {:path path :sha256 (load-identity/sha256 bytes)}))
+
+(defn- cause-entry-fixture [source-pin var file]
+  {:var var
+   :file file
+   :input {:record-pin source-pin :path []}
+   :healthy-predicate {:op :result-path-equals :path [:status] :value :ok}})
+
 (defn- click-7-fixture [name]
   ;; Byte-for-byte evidence captured after wm-click-25cd3682's author receipt
   ;; was sealed failed; this is the stale attempt the route must retire.
@@ -860,6 +873,60 @@
 
 (defn- persisted-diagnoses [dir]
   (seq (.listFiles (java.io.File. (str dir "/diagnoses")))))
+
+(defn- diagnose-scoped-kind [dir kind cause-entry]
+  (let [pin (recorded-injury-source-of-kind! dir kind)
+        {:keys [ledger active]} (durable-with-active-source pin)
+        diagnosis (assoc (diagnosis-fixture :configuration)
+                         :cause-entry (cause-entry pin))]
+    (production/produce-diagnosis!
+     {:meta-diagnosis-root (str dir "/diagnoses")
+      :meta-repository-root repository-root
+      :meta-cause-scope-required? true
+      :meta-diagnosis-fn (constantly {:status :succeeded :diagnosis diagnosis})}
+     {:ledger ledger} active)))
+
+(deftest diagnosis-cause-entry-must-be-on-the-recorded-failure-path
+  (let [terminal (fn [pin]
+                   (cause-entry-fixture
+                    pin "futon2.aif.wm.terminal-receipt/terminal-receipt"
+                    "src/futon2/aif/wm/terminal_receipt.clj"))
+        frozen (fn [pin]
+                 (cause-entry-fixture
+                  pin "futon2.aif.token-outcome/freeze-prediction"
+                  "src/futon2/aif/token_outcome.clj"))
+        artifact (fn [pin]
+                   (cause-entry-fixture
+                    pin "futon2.aif.task-execution-evidence/fresh-artifact-binding"
+                    "src/futon2/aif/task_execution_evidence.clj"))
+        occurrence-dir (root)
+        occurrence (diagnose-scoped-kind occurrence-dir
+                                         :occurrence-square-answer-invalid terminal)
+        reviewer-dir (root)
+        reviewer (diagnose-scoped-kind reviewer-dir :reviewer-falsifier-failed frozen)
+        control-dir (root)
+        control (diagnose-scoped-kind control-dir :artifact-ref-unresolved artifact)
+        control-receipt (when-let [path (get-in control [:diagnosis-evidence-pin :path])]
+                          (edn/read-string (slurp path)))
+        unknown-dir (root)
+        unknown (diagnose-scoped-kind unknown-dir :fixture/unclassified artifact)]
+    (is (= :cause-scope/cause-entry-not-on-failure-path (:reason occurrence)))
+    (is (= "src/futon2/aif/wm/terminal_receipt.clj" (:candidate-file occurrence)))
+    (is (= ["src/futon2/aif/occurrence_square_authoring.clj:118"]
+           (:registered-raise-sites occurrence)))
+    (is (nil? (persisted-diagnoses occurrence-dir)))
+    (is (= :cause-scope/cause-entry-not-on-failure-path (:reason reviewer)))
+    (is (= ["full_loop_runner.clj:10328-10335"]
+           (:registered-raise-sites reviewer)))
+    (is (nil? (persisted-diagnoses reviewer-dir)))
+    (is (= :available (:status control)))
+    (is (= {:file "src/futon2/aif/task_execution_evidence.clj"
+            :raise-site "task_execution_evidence.clj:201"}
+           (get-in control-receipt [:diagnosis :path-witness])))
+    (is (= :cause-scope/failure-kind-unclassified (:reason unknown)))
+    (is (= "src/futon2/aif/task_execution_evidence.clj" (:candidate-file unknown)))
+    (is (= [] (:registered-raise-sites unknown)))
+    (is (nil? (persisted-diagnoses unknown-dir)))))
 
 (deftest diagnosis-naming-resolvable-production-functions-is-available
   (let [dir (root)
