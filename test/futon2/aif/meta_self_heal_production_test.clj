@@ -431,8 +431,8 @@
 
 (defn- scoped-diagnosis-fixture [class source-pin]
   (assoc (diagnosis-fixture class) :cause-entry
-         {:var "futon2.aif.wm.terminal-receipt/terminal-receipt"
-          :file "src/futon2/aif/wm/terminal_receipt.clj"
+         {:var "futon2.aif.meta-self-heal-harness/campaign-cause"
+          :file "src/futon2/aif/meta_self_heal_harness.clj"
           :failure-kind :fold-output-invalid :failure-stage :construction
           :input {:record-pin source-pin :path []}
           :healthy-predicate {:op :result-path-equals :path [:kind]

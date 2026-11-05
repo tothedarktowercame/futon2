@@ -13,7 +13,8 @@
             [futon2.aif.meta-repair-coordinator :as coordinator]
             [futon2.aif.medic-ticket-closure :as medic-ticket-closure]
             [futon2.aif.finding-ticket :as finding-ticket]
-            [futon2.aif.standing-authority :as standing])
+            [futon2.aif.standing-authority :as standing]
+            [futon2.aif.terminal-kind-classification :as terminal-kind-classification])
   (:import [java.nio.file Files StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))
 
@@ -259,6 +260,49 @@
       :cause-scope/predicate-not-result-derived
       :else nil)))
 
+(defn- normalized-repository-file [file]
+  (some-> file (str/replace "\\" "/") (str/replace #"^\./" "")))
+
+(defn- repository-relative-file [root file]
+  (let [root (normalized-repository-file
+              (.getCanonicalPath (io/file root)))
+        file (normalized-repository-file file)
+        prefix (str root "/")]
+    (if (str/starts-with? file prefix) (subs file (count prefix)) file)))
+
+(defn- raise-site-file [raise-site]
+  (some-> raise-site
+          (str/replace #":\d+(?:-\d+)?$" "")
+          normalized-repository-file))
+
+(defn- raise-site-matches-file? [root candidate raise-site]
+  (let [candidate (repository-relative-file root candidate)
+        registered (raise-site-file raise-site)]
+    (if (str/includes? registered "/")
+      (= candidate registered)
+      (= (.getName (io/file candidate)) registered))))
+
+(defn- cause-entry-assessment [root diagnosis source-record-pin failure-kind]
+  (if-let [defect (cause-entry-defect root diagnosis source-record-pin)]
+    {:defect defect}
+    (let [candidate (get-in diagnosis [:cause-entry :file])
+          classification (get (terminal-kind-classification/table) failure-kind)
+          raise-sites (vec (or (:raise-sites classification) []))
+          matched (some #(when (raise-site-matches-file? root candidate %) %) raise-sites)]
+      (cond
+        (nil? classification)
+        {:defect :cause-scope/failure-kind-unclassified
+         :candidate-file candidate :registered-raise-sites raise-sites}
+
+        (nil? matched)
+        {:defect :cause-scope/cause-entry-not-on-failure-path
+         :candidate-file candidate :registered-raise-sites raise-sites}
+
+        :else
+        ;; File-level approximation of SelfHealRoute.lean's var-level
+        ;; PhaseReplayReceipt.pathWitness (lines 1633-1684).
+        {:path-witness {:file candidate :raise-site matched}}))))
+
 (def diagnosis-request-budget-bytes
   "128 KiB for the serialized request, leaving substantial room below the
   adapter's 128k-token carried-context floor for history, tools and output."
@@ -354,7 +398,18 @@
                              :else (try (diagnose request)
                                 (catch Throwable _
                                   {:status :failed
-                                   :reason :meta-self-heal/diagnosis-port-threw})))]
+                                   :reason :meta-self-heal/diagnosis-port-threw})))
+                  repository-root (or (:meta-repository-root opts)
+                                      default-repository-root)
+                  ;; This is the failure kind of the pinned injury being
+                  ;; diagnosed, not a kind asserted by the candidate entry.
+                  failure-kind (get-in request [:injury-record :failure :kind])
+                  cause-assessment
+                  (when (and (:meta-cause-scope-required? opts)
+                             (map? (:diagnosis response)))
+                    (cause-entry-assessment repository-root
+                                            (:diagnosis response)
+                                            source-pin failure-kind))]
               (cond
                 (nil? response)
                 (refusal :meta-self-heal/diagnosis-port-returned-nil
@@ -398,21 +453,23 @@
                                  ::diagnosis (:diagnosis response)
                                  :repair-claimed? false}))
 
-                (and (:meta-cause-scope-required? opts)
-                     (cause-entry-defect
-                 (or (:meta-repository-root opts) default-repository-root)
-                 (:diagnosis response) source-pin))
-                (refusal (cause-entry-defect
-                          (or (:meta-repository-root opts) default-repository-root)
-                          (:diagnosis response) source-pin)
-                         {:injury-id injury-id :request request
-                          :repair-claimed? false})
+                (:defect cause-assessment)
+                (refusal (:defect cause-assessment)
+                         (merge (select-keys cause-assessment
+                                             [:candidate-file
+                                              :registered-raise-sites])
+                                {:injury-id injury-id :request request
+                                 :repair-claimed? false}))
 
                 :else
-                (let [receipt {:schema :wm/meta-diagnosis-receipt-v1
+                (let [diagnosis (cond-> (:diagnosis response)
+                                  (:path-witness cause-assessment)
+                                  (assoc :path-witness
+                                         (:path-witness cause-assessment)))
+                      receipt {:schema :wm/meta-diagnosis-receipt-v1
                                :status :available :injury-id injury-id
                                :source-record-pin source-pin :request request
-                               :diagnosis (:diagnosis response)
+                               :diagnosis diagnosis
                                :repair-claimed? false}
                       written (persist-diagnosis!
                                (diagnosis-path (or (:meta-diagnosis-root opts)
