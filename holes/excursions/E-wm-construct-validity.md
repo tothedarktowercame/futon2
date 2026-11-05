@@ -590,6 +590,18 @@ records and notifies, and validates nothing).
      reading; C2 waits on his answer.
 6. **C3-HARM-1.** Named harm rules. A guardrail refusal qualifies only by
    matching one.
+   *Joe, 2026-11-05:* (1) no click-side C2; instead "make sure current
+   abstentions keep their reason", so feedback reaches the mission owners and
+   him (ABSTAIN-REASON-1, codex-18). (2) Default harm list approved: H1
+   production data destroyed or overwritten, H2 force-push or push to a
+   shared default branch, H3 shared JVM restart, H4 posting as Joe or
+   publishing outside, H5 spending money, H6 editing existing Lean
+   (C3-HARM-0 discovery, codex-15). Also wanted: a soft "should do" check
+   that work reduces stress, tension and tendencies to violence (top of
+   `futon3/holes/war-room.md`), via a `library/militant-pacifism` pattern set
+   that does not yet exist. (3) Do not delete; the machine may record data,
+   but every write must be registered in the deliverable so Joe can inspect
+   it (WRITE-REGISTER-0 discovery, codex-20).
 
 Until 4-6 land, the validator classes every C-looking refusal as a debugger
 error, as the survey predicts. That is the intended interim state: those
