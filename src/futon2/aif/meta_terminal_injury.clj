@@ -103,7 +103,9 @@
       (:outcome record)
       (get-in record [:q6 :terminal :outcome :outcome])))
 
-(defn- failure-kind [record]
+(defn failure-kind
+  "The record's failure kind, by the same fallbacks `classify` uses."
+  [record]
   (or (get-in record [:failure :kind])
       (get-in record [:failure :detail :failure-kind])
       (get-in record [:terminal-receipt :failure-kind])

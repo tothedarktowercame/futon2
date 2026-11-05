@@ -14,6 +14,7 @@
             [futon2.aif.medic-ticket-closure :as medic-ticket-closure]
             [futon2.aif.finding-ticket :as finding-ticket]
             [futon2.aif.standing-authority :as standing]
+            [futon2.aif.meta-terminal-injury :as terminal-injury]
             [futon2.aif.terminal-kind-classification :as terminal-kind-classification])
   (:import [java.nio.file Files StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))
@@ -403,7 +404,10 @@
                                       default-repository-root)
                   ;; This is the failure kind of the pinned injury being
                   ;; diagnosed, not a kind asserted by the candidate entry.
-                  failure-kind (get-in request [:injury-record :failure :kind])
+                  ;; Read from the full pinned record with the classifier's
+                  ;; own fallbacks: the request's :failure may be an
+                  ;; over-budget preview without :kind.
+                  failure-kind (terminal-injury/failure-kind (:record source))
                   cause-assessment
                   (when (and (:meta-cause-scope-required? opts)
                              (map? (:diagnosis response)))
