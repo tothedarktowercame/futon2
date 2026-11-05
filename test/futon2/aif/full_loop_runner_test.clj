@@ -6104,11 +6104,18 @@
        nil [])
       (catch clojure.lang.ExceptionInfo _ nil))
     (is (seq @prompts) "a revision must have been dispatched")
-    (let [prompt (first @prompts)]
-      (is (str/includes? prompt authored)
-          "the reviewer must be pointed at the commit the author made")
-      (is (not (str/includes? prompt base))
-          "and NOT at the pre-dispatch head, which is an unrelated commit"))))
+    (let [prompt (first @prompts)
+          lines (str/split-lines prompt)
+          prior-line (some #(when (str/starts-with? % "YOUR PRIOR COMMIT SHAS:") %)
+                           lines)
+          base-line (some #(when (str/starts-with? % "TARGET REPOSITORY BASE HEAD:") %)
+                          lines)]
+      (is (str/includes? prior-line authored)
+          "the prior-commit field names the commit the author made")
+      (is (not (str/includes? prior-line base))
+          "the unrelated pre-dispatch head is not a prior authored commit")
+      (is (str/includes? base-line base)
+          "the pre-dispatch head remains in its repository-safety field"))))
 
 (deftest revision-prompt-falls-back-when-no-valid-authored-commit
   "artifact-binding/:commit is nil unless the observation was valid. With no
