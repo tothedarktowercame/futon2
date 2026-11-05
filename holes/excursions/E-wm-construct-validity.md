@@ -657,6 +657,14 @@ records and notifies, and validates nothing).
    - Militant-pacifism (Joe's "should do" side): six DRAFT patterns in
      `~/notes/wm-next/militant-pacifism-drafts/` (precept, optative, method
      tiers), kept out of `futon3/library` until Joe approves them.
+   - C3-HARM-3 merged (`0786d6a50`, codex-15; test `9b2d6016e`): the close
+     validator accepts `:harm-declined` as C3 only if the retained rule id
+     is approved and the action re-digests to the retained digest (no world
+     re-run at close); it waits as `:pending-exclusion` and becomes
+     `:click-terminal` when the index line carries a `:c3-exclusion` row
+     (digest = mission sha). Non-mission targets stay
+     `:exclusion-not-recorded`. C3-HARM-4 (selection reads the rows)
+     dispatched to codex-15.
 
 Until 4-6 land, the validator classes every C-looking refusal as a debugger
 error, as the survey predicts. That is the intended interim state: those
