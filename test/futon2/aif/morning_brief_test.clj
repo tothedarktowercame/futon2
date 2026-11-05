@@ -1,5 +1,7 @@
 (ns futon2.aif.morning-brief-test
   (:require [clojure.test :refer [deftest is]]
+            [futon2.aif.action-identity :as identity]
+            [futon2.aif.c2-question :as c2-question]
             [futon2.aif.morning-brief :as brief]))
 
 (defn- temp-root []
@@ -21,6 +23,10 @@
 (deftest question-needs-brief-c2-enqueue-is-pinned-and-idempotent
   (let [root (temp-root)
         first-receipt (brief/queue-c2-question! root c2-carrier)
+        ;; Backdate every file, so a rewrite in the same millisecond still
+        ;; shows up as a changed mtime.
+        _ (doseq [f (file-seq (java.io.File. root)) :when (.isFile f)]
+            (.setLastModified f 1000000))
         before (file-mtimes root)
         second-receipt (brief/queue-c2-question! root c2-carrier)
         after (file-mtimes root)]
@@ -29,7 +35,29 @@
     (is (= first-receipt second-receipt))
     (is (= 3 (count before)))
     (is (= before after))
+    (is (every? #{1000000} (vals after)))
     (is (brief/c2-receipt-valid? first-receipt))))
+
+(deftest question-needs-brief-accepts-a-real-c2-carrier
+  ;; The carrier built by c2-question (C2-BRIEF-1a) round-trips through the
+  ;; item file, so replay finds it equal and writes nothing.
+  (let [text "# Mission\nUse the stable channel.\n"
+        carrier (:carrier
+                 (c2-question/question-carrier
+                  "M-example" text
+                  {:repo "futon2" :path "holes/missions/M-example.md"
+                   :sha256 (identity/sha256 text)}
+                  {:question "LTS tag or last green build?"
+                   :span {:lines [2 2] :quote "Use the stable channel."}
+                   :alternatives ["LTS tag" "last green build"]}
+                  {:request-id "r1" :response-id "s1"
+                   :answered-by {:seat "reader"}}))
+        root (temp-root)
+        receipt (brief/queue-c2-question! root carrier)]
+    (is (some? carrier))
+    (is (= receipt (brief/queue-c2-question! root carrier)))
+    (is (brief/c2-receipt-valid? receipt))
+    (is (= (str "c2-" (:question-digest carrier)) (:attempt-id receipt)))))
 
 (deftest question-needs-brief-c2-conflicts-and-invalid-pins-are-rejected
   (let [root (temp-root)
