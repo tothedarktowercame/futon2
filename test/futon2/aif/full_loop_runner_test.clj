@@ -946,6 +946,8 @@
 (def successful-execution
   {:executed true :tool-events 3 :command-events 3})
 
+(declare retention-cohort)
+
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
            reviewer-events reviewer-result cure-card cure-summary cure-commit build-cure-retries
@@ -962,6 +964,7 @@
          cure-observed-commit ::from-artifact-ref}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        cohort (retention-cohort "feature-card-attempt")
         mission-file (io/file root "M-selected.md")
         fold-file (io/file root "M-selected.executed.edn")
         proof-file (io/file root "logic/feature-witness.edn")
@@ -988,7 +991,9 @@
         cure-id "feature-cure"
         opts (merge
               (isolated-runner-opts)
-              {:repair-open-fn (constantly [])
+              {:cohort? true
+               :execution-cohort (:binding cohort)
+               :repair-open-fn (constantly [])
                :judge-fn (fn [_]
                            {:judgement (assoc mission-judgement
                                               :operator-actions
@@ -1124,8 +1129,6 @@
      :dispatches @dispatches
      :dispatch-requests @dispatch-requests
      :fold-file fold-file :proof-file proof-file}))
-
-(declare retention-cohort)
 
 (defn- run-token-feature-card-attempt
   "Run the feature-card harness against the token fixture's actual Git object,
@@ -8193,8 +8196,17 @@
 (deftest feature-card-missing-measurements-reaches-reviewer-falsifier
   (let [c (retention-cohort "run-ending-wrong-token")
         d (token-loop-exercised-decision)
+        production-artifact-tokens d-task/artifact-tokens
+        reads (atom 0)
         {:keys [result]}
-        (with-redefs [d-task/artifact-tokens (fn [& _] [])]
+        (with-redefs [d-task/artifact-tokens
+                      (fn [& args]
+                        ;; Baseline capture and its close-time verification
+                        ;; read the real pre-author revision.  Only the
+                        ;; post-build measurement is absent in this fixture.
+                        (if (<= (swap! reads inc) 2)
+                          (apply production-artifact-tokens args)
+                          []))]
           (run-token-feature-card-attempt c d))]
     (is (= :build-failed (:outcome result)))
     (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
