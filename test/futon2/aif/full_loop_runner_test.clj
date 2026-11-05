@@ -4979,6 +4979,7 @@
         result
         (runner/run-opportunity!
          {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
+          :revision-rounds 0
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [stop-line])
           :repair-record-fn
