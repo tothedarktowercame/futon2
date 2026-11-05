@@ -307,7 +307,10 @@
       (fn []
         (let [file (io/file path)
               obligation-root (obligation-root-for-path file)]
-          (when-not lock-existed?
+          ;; The canonical data store locks /run/futon2/... instead
+          ;; (store-lock/with-store-lock-for), so the derived lock path never
+          ;; exists there: stamp it only if this call actually created it.
+          (when (and (not lock-existed?) (.isFile lock-file))
             (stamp-created! obligation-root "write-new!" lock-file))
           (io/make-parents file)
           (Files/write (.toPath file)

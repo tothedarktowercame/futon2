@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.write-stamp :as stamp])
   (:import [java.nio.file Files]
@@ -95,6 +96,24 @@
         (is (= (:repair/id finding)
                (:repair/id (first (repair/obligation-history root "attempt-bound"))))))
       (finally (delete-tree! base)))))
+
+(deftest repair-publication-under-a-relocated-store-lock-stamps-only-real-files
+  ;; The canonical data store takes its lock at /run/futon2/..., not beside
+  ;; the store, so the lock path write-new! derives never exists there.
+  (let [base (temp-dir)
+        root (io/file base "wm-repair-obligations")
+        elsewhere (temp-dir)
+        click-id "wm-click-relocated-lock"]
+    (try
+      (.mkdirs root)
+      (binding [store-lock/*lock-path* (str (io/file elsewhere "store.lock"))
+                stamp/*click-context* {:click-id click-id :run-id "lock-run"}]
+        (repair-finding root "relocated"))
+      (let [rows (json-lines (io/file base "wm-write-stamps" (str click-id ".jsonl")))]
+        (is (seq rows))
+        (is (every? #(.isFile (io/file (:path %))) rows)
+            "no stamp names a lock file that was never created"))
+      (finally (delete-tree! base) (delete-tree! elsewhere)))))
 
 (deftest repair-publication-without-conveyed-click-context-is-unstamped
   (doseq [mode [:unbound :raw-thread]]
