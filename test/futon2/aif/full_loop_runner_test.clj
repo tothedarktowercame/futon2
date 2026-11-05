@@ -8082,7 +8082,13 @@
            (pr-str (get-in result [:checkpoints :selection :judgment :controller-decision :selection-law]))))
     (is (map? (cohort/closed-execution (:binding c) (:attempt-id result))))))
 
-(deftest learning-receipt-missing-one-loop-carrier-retains-no-token-files
+(deftest learning-receipt-missing-one-loop-carrier-is-retained-with-the-gap-recorded
+  ;; RED-SUITES-3-O (claude-6, 2026-11-05): until 59a6d5ea8 an unexercised
+  ;; required loop node vetoed selection, so nothing was retained. Since then
+  ;; it is measured, not a veto (logic-model/correlation.md row 6: absence is
+  ;; a typed receipt). The trial still observes the effect of the action that
+  ;; ran, so its token outcome is retained; what must hold is that the run
+  ;; record says R13 was not exercised.
   (let [{:keys [root] :as cohort} (retention-cohort "learning-trial-unexercised")
         decision (update-in
                   (token-loop-exercised-decision)
@@ -8099,7 +8105,12 @@
     (is (not= :required-loop-node-unexercised (get-in result [:data :failure-kind])))
     (is (not= :invalid-close-outcome (get-in result [:data :failure-kind])))
     (doseq [name ["token-outcome.edn" "surprises.edn"]]
-      (is (not (.exists (io/file retained name)))))))
+      (is (.exists (io/file retained name)) name))
+    (is (= :refused
+           (get-in result [:checkpoints :selection :judgment :controller-decision
+                           :selection-certificate :loop-node-exercise
+                           :by-node :R13 :status]))
+        "the run record carries the unexercised loop node")))
 
 (deftest terminal-projection-prefers-original-typed-failure-over-close-wrapper
   (let [projected (#'runner/run-record-failure
