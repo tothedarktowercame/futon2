@@ -114,6 +114,7 @@
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
             [futon2.aif.tripwire :as tripwire]
+            [futon2.aif.terminal-kind-classification :as terminal-kinds]
             [futon2.report.cascade-lane :as cascade])
   (:import [java.nio.file Files StandardCopyOption]
            [java.security MessageDigest]
@@ -420,9 +421,10 @@
            attempt
            (try
              (let [result (thunk)
-                   condition (when (and result->debugger-condition
-                                        (debugger/attached?))
-                               (result->debugger-condition result))
+                   condition (when (debugger/attached?)
+                               (or (terminal-kinds/unclassified-condition phase result)
+                                   (when result->debugger-condition
+                                     (result->debugger-condition result))))
                    _ (when condition (throw condition))
                    _ (when (and (debugger/attached?)
                                 (debugger/breakpoint-armed? [:after phase]))
