@@ -133,6 +133,7 @@ a recorded defect.
 
 - [ ] A Lean theorem: in the War Machine's policy model, a stop policy is selected only when it minimises G over the admissible set; and with a non-empty admissible field carrying an unmet preference, some work policy has strictly lower G than the stop. It has no `sorry` and builds in `mathlib4`.
 - [ ] Every row of `terminal-kind-classification.edn` carries a basis in that theorem or its corollaries. `:aif-valid-stop` rows cite the theorem; all other rows cite the reason they are not optimal stops. A test fails on a row whose class disagrees with its basis.
+- [ ] Every terminal kind is one of L1, L2, C1, C2, C3 or a debugger error (see "Legal terminal states"). Each C kind has an acceptance test that the next selection differs, and C2 has one showing the question reaches the operator brief.
 - [ ] No `:recorded-defect` kind ends a click. The defect is retained beside the run and selection continues. There is one acceptance test per family in list (b) of the STOP-VALIDITY-1 findings.
 - [ ] A measurement over a supervised run of N clicks (N agreed with Joe): every terminal outcome is work, an `:empty-field` abstention carrying its scored-candidate evidence, or a hold resolved by repair. Zero other stops.
 - [ ] Effective-active injuries are 0 at the end of that run.
@@ -176,24 +177,99 @@ a recorded defect.
 - **Joe:** the informal design. In particular, what counts as an "unmet
   preference" and the N for the measurement run.
 
-## Carried-forward tensions (for the talk-through)
+## Legal terminal states (Joe, 2026-11-05, answering the first four tensions)
 
-1. **"Lean is correct and never changes" against a new theorem.** I read
-   Joe's rule as forbidding edits that bend existing Lean to fit the Clojure,
-   not new statements. Criterion 1 adds a file and changes none. To confirm.
-2. **"Almost always".** In which cases is a stop optimal, besides an empty
-   admissible field? Two candidates:
-   - Operator termination: a STOP file, or budget exhaustion. Here the stop
-     comes from outside the model, so it is not the machine's choice.
-   - A want genuinely already satisfied: `:already-satisfied` produced by
-     the selection step itself. It is currently a recorded defect. Is it
-     instead a sign that the admissible set was mis-scored?
-3. **Does the WM's G actually score "do nothing"?** If inaction is not an
-   explicit policy in the generative model, the theorem has nothing to bind
-   to. Then the first delta is adding the null policy to the admissible set,
-   with its predicted consequences.
-4. **Refusals by other agents.** An author or reviewer seat refusing is the
-   environment acting, not the machine choosing. The Lean already treats an
-   invalid author response as a non-injury. The question is whether the
-   *click* should then end (a stop) or continue, by re-asking, re-selecting
-   or recording.
+Joe's answers, verbatim where quoted:
+
+> do nothing is a 100% valid response in two cases. #1, when we have exhausted
+> the available work, obviously there is nothing to do. #2, an operator
+> override, if I say stop, the machine should stop.
+
+> You're right about :already-satisfied, that is a third case, but it then
+> needs to be treated as an error code so that the same redundant selection
+> isn't made again!
+
+> if the WM comes up with a *legitimate* question for me, it should not go on
+> and just build some garbage, though it may in some cases want to say "is
+> this what you mean" with a demo? My point is not to greenlight continual
+> operator nags, just to say, stop working on that problem and go on to
+> something else, leaving the question for me in the operator brief.
+
+> with reference to the film War Games, if you were planning to start a
+> thermonuclear war, please don't.
+
+> yes, we could add Lean if it's useful for validating stoppages as "legal,
+> not dark room".
+
+> a *legitimate* refusal is not an error, but, for example, "this problem is
+> already solved" or "I don't understand what is being asked of me". Those
+> lead to legal terminal states for the click (mark it as finished and move
+> on, or ask the operator a question in the morning) ... and new work should
+> be selected.
+
+This gives two levels. Only the first stops the machine.
+
+**Loop stops** (the machine does nothing further):
+
+| | Case | Evidence it must carry |
+|---|---|---|
+| L1 | Work exhausted: the scored admissible field is empty | the scored candidates and exclusions (`:empty-field`, `R20FocusedSelection.lean:74-82`) |
+| L2 | Operator override: Joe says stop | the STOP control or operator cancel (`:operator-cancelled`, `:debugger/aborted`) |
+
+**Click-legal terminals** (this click ends, nothing is wrong, and the *next
+click selects new work*):
+
+| | Case | What it must leave behind |
+|---|---|---|
+| C1 | Already satisfied ("this problem is already solved") | an error code on the target that excludes the same selection until new evidence arrives |
+| C2 | Legitimate question ("I don't understand what is being asked of me"), optionally with an "is this what you mean" demo | the question in the operator brief; the problem set aside until answered |
+| C3 | Harmful action declined (War Games) | the declined action and the reason; the target excluded |
+
+**Everything else is a debugger error**: held, then repaired live, by
+self-heal, or by the medic.
+
+**What makes a click-legal terminal not a Dark Room.** Each of C1-C3 changes
+what the next selection can choose. If it does not, the machine would make the
+same selection again and stop again: a Dark Room spread over several clicks
+instead of one. So the testable property is about the *following* selection,
+not about the stop itself:
+
+- after C1 or C3, the target is out of the admissible set until new evidence;
+- after C2, the problem is out until the question is answered, and the
+  question appears in the operator brief;
+- in each case, if the admissible field is still non-empty, the next click
+  selects other work.
+
+**Consequence for the classification table.**
+- `:already-satisfied` and `:already-satisfied-wants-unmeasured` move from
+  `:recorded-defect` to C1, with the exclusion as their required effect.
+- An author or reviewer refusal is C2 only when it is *legitimate*. A
+  malformed answer is not a question. The open design point is what makes a
+  question legitimate (below).
+- The 27 `:recorded-defect` rows are each re-read against L1-L2/C1-C3. What
+  fits none of them is a debugger error.
+
+**Lean, now in scope** (Joe: "useful for validating stoppages as legal, not
+dark room"):
+1. A loop stop is legal iff L1 or L2.
+2. A click-legal terminal is legal iff it is C1, C2 or C3 and its effect
+   removes the selected target (or problem) from the next admissible set.
+3. Progress: from a state with a non-empty admissible field, a run of legal
+   terminals cannot repeat the same selection without new evidence. So
+   legal terminals do not form a Dark Room cycle.
+
+## Carried-forward tensions (still open)
+
+1. **Legitimacy of a question (C2).** "Legitimate" has to be checkable, or
+   "I have a question" becomes the new excuse to stop. Two candidate tests:
+   - the question cites the specific ambiguity in the mission text;
+   - the machine names two readings that would lead to different work.
+   Also: is there a cap on open questions per target, so it does not nag?
+2. **C3 scope.** Which actions count as harmful? Starting from the existing
+   guardrails (`:guardrail-refusal`) is the obvious seed, but a guardrail
+   refusal by an author seat is not the same as the machine declining.
+3. **What "new evidence" lifts a C1 exclusion?** Examples: the mission file
+   changed, a want's measurement changed, or a dependent mission closed.
+4. **Does the WM's G score "do nothing"?** This tension still stands. L1 needs
+   the empty field to be a real empty field, not one emptied by over-eager
+   exclusion.
