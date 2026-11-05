@@ -1,6 +1,7 @@
 (ns futon2.aif.runner-source-restart-test
   (:require [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.wm.debugger :as debugger]))
 
 ;; Actual pre-attempt drift shape from one-click-frontier-2026-10-22/accepted.json.
@@ -10,10 +11,9 @@
    :runner/canonical-sha256 "acf4080b443c8574aaba28601b83509acd56fbd264dacbd09b0485e36d6be063"})
 (def current
   (assoc drift :runner/source-check :current
-         :namespaces (zipmap '[futon2.aif.full-loop-runtime
-                               futon2.report.war-machine
-                               futon2.aif.wm.family-selection
-                               futon2.aif.meta-pipeline-selector]
+         ;; the declared composition itself, not a copy: be509dc8a added
+         ;; family-canonical-g and a hand-kept list of four went stale
+         :namespaces (zipmap load-identity/source-composition
                              (repeat {:status :current}))))
 
 (use-fixtures :each
