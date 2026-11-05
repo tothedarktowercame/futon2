@@ -46,3 +46,9 @@ reuse the rational log remainder alone or call a fixture maximum a bound.
 
 The shared conversion removal remains unimplemented because work stopped at
 this reference boundary. Existing source and data records are unchanged.
+
+## Completion criteria
+
+- The narrow-enclosure control keeps rational endpoints through subtraction, ordering and margin comparison, with the negative control failing under the injected double-before-subtract width — check: `clojure -M:test` on futon2.aif.wm01-numerical-operations-test reports zero failures, and the ticket's with-redefs negative-control command exits 0 **Met.**
+- The runtime reference is specified as the exact utility-derived C law (declared tempering, zeroed outcomes) in a written statement, distinguishing it from the materialized C row discrepancy — check: the specification text exists in a committed note or docstring naming both paths **Not started.**
+- Bounds are derived for the live scorer's actual operations (horizon-g-sparse*, softplus/exp/log1p), or the materialized-row discrepancy is explicitly included as a separate term — check: a committed derivation plus, ideally, a live-tick receipt **Not started.**
