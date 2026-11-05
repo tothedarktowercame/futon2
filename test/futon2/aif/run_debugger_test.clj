@@ -45,17 +45,37 @@
   (runner/selection-terminal-condition :selection judgement))
 
 (deftest refused-outer-learning-becomes-a-debugger-condition
-  (let [condition
-        (runner/selection-terminal-condition
-         :selection
-         (assoc selected-judgement :outer-task-selection
-                {:outer-learning {:schema :wm/outer-learning-certificate-v1
-                                  :status :refused
-                                  :reason :outer-learning-state-unavailable}}))]
-    (is (instance? clojure.lang.ExceptionInfo condition))
-    (is (= :wm/outer-learning-not-consumed (:kind (ex-data condition))))
-    (is (= :outer-learning-state-unavailable
-           (get-in (ex-data condition) [:outer-learning :reason])))))
+  ;; outer_learning_manifest.clj:48-51 is the current refusal boundary;
+  ;; full_loop_runner.clj:436-465 turns its typed fault into a debugger stop.
+  (debugger/attach!)
+  (let [root (.toFile
+              (java.nio.file.Files/createTempDirectory
+               "outer-learning-debugger-"
+               (make-array java.nio.file.attribute.FileAttribute 0)))
+        manifest-path (str (java.io.File. root "manifest.edn"))
+        missing-record-path (str (java.io.File. root "missing-run-record.edn"))
+        record! (requiring-resolve 'futon2.aif.outer-learning-manifest/record!)
+        running
+        (future
+          (runner/run-phase!
+           {:run-id "outer-learning-refusal"}
+           {:opportunity-id "op" :attempt-id "attempt"}
+           :outer-learning-publication
+           #(record! manifest-path missing-record-path)))
+        stop (loop [remaining 4000]
+               (let [candidate
+                     (first (filter #(= "outer-learning-refusal" (:run-id %))
+                                    (debugger/stopped)))]
+                 (cond
+                   (= :outer-learning-record-unavailable
+                      (get-in candidate [:condition :kind])) candidate
+                   (pos? remaining) (do (Thread/sleep 5) (recur (dec remaining)))
+                   :else (throw (ex-info "Debugger condition did not appear"
+                                         {:last-stop candidate})))))]
+    (is (= :outer-learning-publication (:phase stop)))
+    (is (= missing-record-path (get-in stop [:ex-data :path])))
+    (debugger/continue! "outer-learning-refusal" [:use-value :publication-skipped])
+    (is (= :publication-skipped (deref running 2000 ::timeout)))))
 
 (defn- wait-for-stop
   ([run-id] (wait-for-stop run-id nil))
@@ -612,26 +632,26 @@
     (is (empty? (debugger/stopped)))))
 
 (deftest armed-outer-selection-breakpoint-stops-and-continues-the-same-value
+  ;; full_loop_runner.clj:446-452 supplies the restored generic after-phase
+  ;; breakpoint; selecting :selection exercises the current outer-choice seam.
   (debugger/attach!)
-  (debugger/arm-breakpoint! :outer-selection-complete)
-  (let [judgement (assoc selected-judgement
-                         :outer-task-selection
-                         {:schema :wm/outer-task-selection-v1
-                          :chosen {:id "M-self-documenting-stack"}})
+  (debugger/arm-breakpoint! [:after :selection])
+  (let [judgement selected-judgement
         running (future
                   (runner/run-phase!
                    (phase-opts "outer-selection-stop" (atom []))
                    {:opportunity-id "op" :attempt-id "attempt"}
                    :selection (constantly judgement)
-                   nil terminal-selection-condition))
-        stop (wait-for-condition "outer-selection-stop"
-                                 :wm/outer-selection-complete)]
-    (is (= "M-self-documenting-stack" (get-in stop [:ex-data :selected])))
-    (is (= judgement (get-in stop [:ex-data :judgement])))
-    (debugger/clear-breakpoint! :outer-selection-complete)
-    (debugger/continue! "outer-selection-stop"
-                        [:use-value (get-in stop [:ex-data :judgement])])
-    (is (= judgement (deref running 2000 ::timeout)))))
+                   nil terminal-selection-condition))]
+    (try
+      (let [stop (wait-for-condition "outer-selection-stop"
+                                     :wm/phase-breakpoint)]
+        (is (= :selection (:phase stop)))
+        (is (identical? judgement (debugger/stop-value "outer-selection-stop")))
+        (debugger/continue! "outer-selection-stop" :continue)
+        (is (identical? judgement (deref running 2000 ::timeout))))
+      (finally
+        (debugger/clear-breakpoint! [:after :selection])))))
 
 (deftest terminal-abstention-retry-reruns-only-the-same-selection-phase
   (debugger/attach!)
