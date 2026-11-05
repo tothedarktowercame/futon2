@@ -300,8 +300,8 @@ The handoff model has three parts, and refusals get the same three:
 
 **Steps:**
 - [x] Lean contract (claude-6).
-- [ ] REFUSAL-SITES-1, read-only survey (codex-15, `invoke-1793894251861-12942-5c54ed0b`). For each site: anchor, kinds, proposed case, and which RefusalLegality fields it has evidence for. Also the choke points and the paths that bypass them, cross-click exclusion today, and the operator-brief writer.
-- [ ] REFUSAL-INDEX-1: `refusal-sites.edn` plus an audit test that fails when a production refusal site is not indexed.
+- [x] REFUSAL-SITES-1, read-only survey (codex-15, `invoke-1793894251861-12942-5c54ed0b`). For each site: anchor, kinds, proposed case, and which RefusalLegality fields it has evidence for. Also the choke points and the paths that bypass them, cross-click exclusion today, and the operator-brief writer.
+- [x] REFUSAL-INDEX-1: `refusal-sites.edn` (37 sites) plus an audit test that fails when a production refusal site is not indexed (`38a06eee0`, `bdaea8413`, review fix `a2fe02801`). Limit: Python stop calls are counted mechanically; Clojure constructors against a listed set, so a new Clojure site emitting an existing kind is caught only dynamically, by the validator at close.
 - [ ] REFUSAL-VALIDATOR-1: one adapter at the choke point that computes `disposition`. A debugger error holds the run when attached. A click terminal records its exclusion (and its brief entry for a question). A loop stop needs its evidence.
 
 ### REFUSAL-SITES-1 result (codex-15, reviewed 2026-11-05)
