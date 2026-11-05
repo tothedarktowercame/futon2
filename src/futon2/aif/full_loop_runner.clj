@@ -2610,6 +2610,38 @@
               (re-find #"selected model is at capacity|model.*capacity|provider.*overload|temporarily unavailable"
                        failure-text))))))
 
+(defn handoff-wait-terminal-condition
+  "Project a failed Agency handoff value into its existing terminal failure.
+
+  This projector is called only while the debugger is attached.  Successful
+  deliveries and completed refusals both have state `done`; they remain
+  ordinary returned values.  Detached runs do not evaluate the projector and
+  retain the downstream classification path unchanged."
+  [phase job]
+  (let [failure-stage (case phase
+                        (:author-wait :author-retry-wait) :author-wait
+                        (:reviewer-wait :reviewer-retry-wait) :reviewer-wait
+                        phase)
+        failed? (or (not (map? job))
+                    (nil? (:state job))
+                    (contains? #{"failed" "cancelled" "timed-out"}
+                               (:state job))
+                    (:failure-kind job))]
+    (when failed?
+      (let [kind (cond
+                   (= "cancelled" (:state job)) :operator-cancelled
+                   (keyword? (:failure-kind job)) (:failure-kind job)
+                   :else :untyped-failure)]
+        (ex-info "Agency handoff did not produce a completed delivery"
+                 {:outcome (if (= kind :operator-cancelled)
+                             :cancelled :build-failed)
+                  :failure-kind kind
+                  :failure-stage failure-stage
+                  :job-id (:job-id job)
+                  :terminal-code (:terminal-code job)
+                  :terminal-message (:terminal-message job)
+                  :handoff job})))))
+
 (defn interpretation-ask-classifier
   "PROOF-2b (click 17): the target classifier the ask selection uses — the
   SAME area-focus/classify-target producer the cascade decision scores with,
@@ -9744,7 +9776,10 @@
                     (try
                       (run-phase! opts @phase-context :author-wait
                                   #((or (:poll-fn opts) poll-job!)
-                                    opts author-job-id))
+                                    opts author-job-id)
+                                  nil
+                                  #(handoff-wait-terminal-condition
+                                    :author-wait %))
                       (catch Throwable e
                         (throw
                          (ex-info (.getMessage e)
@@ -9789,7 +9824,10 @@
                   (when retry-author?
                     (run-phase! opts @phase-context :author-retry-wait
                                 #((or (:poll-fn opts) poll-job!)
-                                  opts (:job-id retry-response))))
+                                  opts (:job-id retry-response))
+                                nil
+                                #(handoff-wait-terminal-condition
+                                  :author-retry-wait %)))
                   author-retries
                   (cond-> []
                     retry-author?
@@ -9947,7 +9985,10 @@
                         (try
                           (run-phase! opts @phase-context :reviewer-wait
                                       #((or (:poll-fn opts) poll-job!) opts
-                                        (:job-id review-response)))
+                                        (:job-id review-response))
+                                      nil
+                                      #(handoff-wait-terminal-condition
+                                        :reviewer-wait %))
                           (catch Throwable e
                             (throw
                              (ex-info (.getMessage e)
@@ -9973,7 +10014,10 @@
                       (if retry-review?
                         (run-phase! opts @phase-context :reviewer-retry-wait
                                     #((or (:poll-fn opts) poll-job!) opts
-                                      (:job-id retry-review-response)))
+                                      (:job-id retry-review-response))
+                                    nil
+                                    #(handoff-wait-terminal-condition
+                                      :reviewer-retry-wait %))
                         initial-review-job)
                       _ (throw-if-cancelled! initial-effective-review-job
                                              :reviewer-wait)
