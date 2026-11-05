@@ -495,6 +495,21 @@ records and notifies, and validates nothing).
    - Found in passing: the runtime passes `:effective-run-index-rows` to the
      selector, but nothing reads it. A test pins that measured inner work
      does not remove open tasks. C1 rows are a separate input.
+   *C1-EXCLUSION-2a (2026-11-05):* `572ff5d39` (codex-15). The field builder
+   now returns `:mission-source-sha256-by-target`, taken from the same
+   registry read that listed the targets. The selector removes C1-excluded
+   targets from the scored field. With no C1 rows, the partition is unchanged.
+   - Gap found in review: when the scored field is empty, `select` throws
+     `:outer-score/no-admitted-tasks`. So the runtime's
+     `work-exhausted-refusal` is never reached, and with the debugger
+     attached the click is held. L1 has been unreachable in production since
+     step 2a. The 2a test for this built its evidence by hand.
+   - OUTER-L1-REACH (codex-15) makes it reachable. An empty field gives L1
+     only when every exclusion that emptied it is a legal-terminal one (C1
+     today). A field emptied by an ingest defect stays a refusal. This is
+     stricter than `loopStopLegal`, so it cannot stop the loop on a case
+     the Lean calls illegal.
+   - C1-EXCLUSION-2b (write side) went to codex-18.
 5. **C2-BRIEF-1.** The question carrier: the cited ambiguity and two
    readings, sent to `morning_brief/queue-item!`, plus the exclusion until
    answered.
