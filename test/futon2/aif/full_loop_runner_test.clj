@@ -2943,10 +2943,12 @@
                         :result-summary
                         "FULL_LOOP_REVIEW: REQUEST_CHANGES fail closed"}))
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
-          :queue-fn #(swap! queued conj %)})]
+          :queue-fn #(swap! queued conj %)})
+        terminal-item (some #(when (and (map? %) (contains? % :outcome)) %)
+                            @queued)]
     (is (= :build-failed (:outcome result)))
     (is (= "abc123" (get-in result [:data :commit])))
-    (is (= "abc123" (:commit (first @queued))))
+    (is (= "abc123" (:commit terminal-item)))
     (is (= :request-changes (:review-verdict (first @findings))))))
 
 (defn- run-revision-attempt
@@ -4266,12 +4268,14 @@
           (fn [finding]
             (swap! findings conj finding)
             (assoc finding :repair/id "repair-readiness"))
-          :queue-fn #(swap! queued conj %)})]
+          :queue-fn #(swap! queued conj %)})
+        terminal-item (some #(when (and (map? %) (contains? % :outcome)) %)
+                            @queued)]
     (is (= :agent-unavailable (:outcome result)))
     (is (= :agent-readiness-failed (get-in result [:data :failure-kind])))
     (is (= :unreachable (get-in result [:data :failure-detail])))
     (is (= :environmental-hold (:repair-class (first @findings))))
-    (is (= :none (get-in (first @queued) [:achievement :tier])))
+    (is (= :none (get-in terminal-item [:achievement :tier])))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))
 
@@ -5902,7 +5906,10 @@
                        (assoc m :repair/id "repair-ineligible-trigger"))
                      :queue-fn (fn [m] (swap! queue-calls conj m)
                                  {:morning-brief/addendum-id "brief-ineligible"})})
-            finding (first @repair-calls)]
+            finding (first @repair-calls)
+            terminal-item
+            (some #(when (and (map? %) (contains? % :outcome)) %)
+                  @queue-calls)]
         (is (= :incomplete (:outcome result)))
         (is (= 1 (count @repair-calls))
             "the refusal must still open exactly one stop-line obligation")
@@ -5914,7 +5921,7 @@
         (is (= [:cleared-precondition :grounded-production-shaped-successor]
                (:requires (:discharge-contract finding)))
             "so the discharge is: preregister the trigger, or use an eligible one")
-        (is (= :trigger-ineligible (get-in (first @queue-calls) [:failure :kind]))
+        (is (= :trigger-ineligible (get-in terminal-item [:failure :kind]))
             "and the morning brief carries the same typed kind")))))
 
 (deftest eligible-trigger-does-not-open-a-trigger-ineligible-obligation
