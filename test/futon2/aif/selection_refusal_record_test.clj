@@ -35,6 +35,23 @@
     (is (= 33 (count (:refusals detail))))
     (is (= {:omitted :entry-limit} (last (:refusals detail))))))
 
+(deftest mission-refresh-failure-retains-bounded-diagnostic
+  (let [stale (mapv (fn [n] {:id (str "M-" n) :large (apply str (repeat 1000 "x"))})
+                    (range 8))
+        refresh (#'runner/refresh-record
+                 (fn []
+                   (throw (ex-info "stale"
+                                   {:kind :mission-substrate-freshness-unestablished
+                                    :scanned 8 :errors [{:large "not retained"}]
+                                    :stale stale}))))
+        detail (#'runner/failure-detail {:error (:error refresh)})]
+    (is (= 8 (get-in detail [:error :stale-count])))
+    (is (= 1 (get-in detail [:error :error-count])))
+    (is (= ["M-0" "M-1" "M-2" "M-3" "M-4"]
+           (get-in detail [:error :stale-ids])))
+    (is (not (contains? (get detail :error) :stale)))
+    (is (not (contains? detail :omitted)))))
+
 (deftest production-shaped-refusal-survives-the-terminal-record
   ;; The shapes production actually produces, not the hand-built ones above:
   ;; meta-live-outer-selector/canonical-receipt puts a refused selection's

@@ -611,6 +611,43 @@
   ([] (load-missions-from-substrate))
   ([code-root] (load-missions-from-files code-root)))
 
+(defn- refresh-mission-substrate-pass
+  [code-root scan-fn index-fn upsert-fn]
+  (let [entries (:missions (scan-fn code-root))
+        before (index-fn)
+        reclassified-ids (->> entries
+                              (keep (fn [entry]
+                                      (let [props (some-> (get before (:id entry))
+                                                          :entity/props parse-entity-props)]
+                                        (when (and props
+                                                   (not= mission-classifier-sha256
+                                                         (:mission/classifier-sha256 props)))
+                                          (:id entry)))))
+                              set)
+        results (mapv (fn [entry]
+                        (upsert-fn {:code-root code-root :path (:path entry)
+                                    :existing (get before (:id entry))}))
+                      entries)
+        errors (filterv #(= :error (:status %)) results)
+        after (index-fn)
+        stale (->> entries
+                   (keep (fn [entry]
+                           (let [actual-props (some-> (get after (:id entry))
+                                                      :entity/props parse-entity-props)
+                                 actual-sha (:provenance/sha256 actual-props)
+                                 expected-sha (sha256-file (:path entry))
+                                 actual-classifier (:mission/classifier-sha256 actual-props)]
+                             (when-not (and (= expected-sha actual-sha)
+                                            (= mission-classifier-sha256 actual-classifier))
+                               {:id (:id entry)
+                                :expected {:sha256 expected-sha
+                                           :classifier-sha256 mission-classifier-sha256}
+                                :actual {:sha256 actual-sha
+                                         :classifier-sha256 actual-classifier}}))))
+                   vec)]
+    {:entries entries :reclassified-ids reclassified-ids :results results
+     :errors errors :stale stale}))
+
 (defn refresh-mission-substrate!
   "Refresh the mission records from the canonical primary checkouts and prove
    that the substrate now carries every scanned file revision.  This is the
@@ -622,39 +659,18 @@
           scan-fn load-missions-from-files
           index-fn mission-entity-index
           upsert-fn upsert-mission-record!}}]
-   (let [entries (:missions (scan-fn code-root))
-         before (index-fn)
-         reclassified-ids (->> entries
-                               (keep (fn [entry]
-                                       (let [props (some-> (get before (:id entry))
-                                                           :entity/props parse-entity-props)]
-                                         (when (and props
-                                                    (not= mission-classifier-sha256
-                                                          (:mission/classifier-sha256 props)))
-                                           (:id entry)))))
-                               set)
-         results (mapv (fn [entry]
-                         (upsert-fn {:code-root code-root
-                                     :path (:path entry)
-                                     :existing (get before (:id entry))}))
-                       entries)
-         errors (filterv #(= :error (:status %)) results)
-         after (index-fn)
-         stale (->> entries
-                    (keep (fn [entry]
-                            (let [actual-props (some-> (get after (:id entry))
-                                                       :entity/props parse-entity-props)
-                                  actual-sha (:provenance/sha256 actual-props)
-                                  expected-sha (sha256-file (:path entry))
-                                  actual-classifier (:mission/classifier-sha256 actual-props)]
-                              (when-not (and (= expected-sha actual-sha)
-                                             (= mission-classifier-sha256 actual-classifier))
-                                {:id (:id entry)
-                                 :expected {:sha256 expected-sha
-                                            :classifier-sha256 mission-classifier-sha256}
-                                 :actual {:sha256 actual-sha
-                                          :classifier-sha256 actual-classifier}}))))
-                    vec)]
+   (let [first-pass (refresh-mission-substrate-pass code-root scan-fn index-fn upsert-fn)
+         retry? (and (seq (:stale first-pass)) (empty? (:errors first-pass)))
+         final-pass (if retry?
+                      (refresh-mission-substrate-pass code-root scan-fn index-fn upsert-fn)
+                      first-pass)
+         {:keys [entries errors stale]} final-pass
+         results (if retry? (into (:results first-pass) (:results final-pass))
+                     (:results final-pass))
+         reclassified-ids (if retry?
+                            (into (:reclassified-ids first-pass)
+                                  (:reclassified-ids final-pass))
+                            (:reclassified-ids final-pass))]
      (when (or (empty? entries) (seq errors) (seq stale))
        (throw (ex-info "Mission substrate freshness could not be established"
                        {:kind :mission-substrate-freshness-unestablished
@@ -662,6 +678,7 @@
      {:schema :wm/mission-substrate-freshness-v1
       :status :established
       :scanned (count entries)
+      :retried-stale (if retry? (count (:stale first-pass)) 0)
       :created (count (filter #(= :created (:status %)) results))
       :updated (count (filter #(= :updated (:status %)) results))
       :reclassified (count (filter #(and (contains? reclassified-ids (:id %))

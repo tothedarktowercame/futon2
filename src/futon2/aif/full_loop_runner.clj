@@ -1024,6 +1024,12 @@
             (reduce-kv
              (fn [{:keys [kept omitted]} k v]
                (cond
+                 (and (= :error k) (map? v)
+                      (= :mission-substrate-freshness-unestablished (:kind v)))
+                 {:kept (assoc kept k
+                               (select-keys v [:class :message :ex-kind :kind :scanned
+                                               :stale-count :error-count :stale-ids]))
+                  :omitted omitted}
                  (contains? #{:refusals :outer-task-selection :fold-findings} k)
                  {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
                  (and (= :failure-detail k)
@@ -6988,11 +6994,18 @@
        :freshness (or (:freshness result)
                       {:absent :not-reported-by-maybe-refresh})})
     (catch Throwable t
-      {:outcome :refresh-failed
-       :failure-kind (or (explicit-failure-kind t)
-                         (some thrower-kind (cause-chain t))
-                         (failure-kind-from t))
-       :error (flight/throwable-summary t)})))
+      (let [data (ex-data t)
+            kind (or (explicit-failure-kind t)
+                     (some thrower-kind (cause-chain t))
+                     (failure-kind-from t))
+            error (cond-> (flight/throwable-summary t)
+                    (= :mission-substrate-freshness-unestablished kind)
+                    (assoc :kind kind
+                           :scanned (:scanned data)
+                           :stale-count (count (:stale data))
+                           :error-count (count (:errors data))
+                           :stale-ids (mapv :id (take 5 (:stale data)))))]
+        {:outcome :refresh-failed :failure-kind kind :error error}))))
 
 (defn phase-refresh
   "The refresh record on a :preference-refresh phase event or a run record

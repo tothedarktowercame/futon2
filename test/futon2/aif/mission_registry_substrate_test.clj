@@ -224,6 +224,60 @@
       (finally
         (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
 
+(defn- retry-fixture []
+  (let [file (java.io.File/createTempFile "mission-refresh-race" ".md")
+        _ (spit file "# Race\n\nStatus: ACTIVE\n")
+        entry {:id "M-race" :path (.getCanonicalPath file)}
+        props {:provenance/sha256 (#'mr/sha256-file (.getCanonicalPath file))
+               :mission/classifier-sha256 mr/mission-classifier-sha256}]
+    {:file file :entry entry
+     :clean {"M-race" {:entity/props props}}}))
+
+(deftest refresh-retries-one-stale-race-and-establishes
+  (let [{:keys [file entry clean]} (retry-fixture)
+        scans (atom 0) indexes (atom 0) upserts (atom 0)
+        report (mr/refresh-mission-substrate!
+                {:code-root "/fixture"
+                 :scan-fn (fn [_] (swap! scans inc) {:missions [entry]})
+                 :index-fn (fn [] (case (swap! indexes inc) 4 clean {}))
+                 :upsert-fn (fn [_] (swap! upserts inc)
+                              {:id "M-race" :status :updated})})]
+    (is (= :established (:status report)))
+    (is (= 1 (:retried-stale report)))
+    (is (= 2 @scans))
+    (is (= 2 @upserts))
+    (.delete file)))
+
+(deftest refresh-stale-twice-throws-after-exactly-two-passes
+  (let [{:keys [file entry]} (retry-fixture)
+        scans (atom 0)]
+    (try
+      (mr/refresh-mission-substrate!
+       {:code-root "/fixture"
+        :scan-fn (fn [_] (swap! scans inc) {:missions [entry]})
+        :index-fn (constantly {})
+        :upsert-fn (constantly {:id "M-race" :status :updated})})
+      (is false "persistent stale readback must throw")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :mission-substrate-freshness-unestablished (:kind (ex-data e))))
+        (is (= 2 @scans))))
+    (.delete file)))
+
+(deftest refresh-upsert-error-does-not-retry
+  (let [{:keys [file entry]} (retry-fixture)
+        scans (atom 0)]
+    (try
+      (mr/refresh-mission-substrate!
+       {:code-root "/fixture"
+        :scan-fn (fn [_] (swap! scans inc) {:missions [entry]})
+        :index-fn (constantly {})
+        :upsert-fn (constantly {:id "M-race" :status :error})})
+      (is false "upsert error must throw")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :mission-substrate-freshness-unestablished (:kind (ex-data e))))
+        (is (= 1 @scans))))
+    (.delete file)))
+
 (deftest refresh-rederives-when-classifier-digest-changes
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "mission-classifier-refresh"
