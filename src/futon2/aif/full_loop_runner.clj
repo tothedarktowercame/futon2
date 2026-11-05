@@ -3813,6 +3813,34 @@
   (assoc author-job :artifact-declaration
          (artifact-declaration author-job plan)))
 
+(defn- primary-artifact-repository [locators plan]
+  (when-let [locator (some-> locators seq first val)]
+    (let [named (:repo locator)
+          allowed (mapv :repo (:allowed plan))
+          by-name (group-by #(-> % io/file .getName) allowed)]
+      (or (some #{named} allowed)
+          (when (= 1 (count (get by-name (str named))))
+            (first (get by-name (str named))))))))
+
+(defn- preflight-artifact-declaration
+  "Attach a corroborated binding set, or turn its typed author-response defect
+  into retained declaration evidence so the existing bounded correction round
+  can repair the answer before the ordinary artifact gate consumes it."
+  [opts plan author-window-start-ms author-job]
+  (if-not (= :present (get-in author-job [:artifact-declaration :status]))
+    author-job
+    (try
+      (assoc author-job :artifact-binding-set
+             (task-execution/fresh-artifact-binding-set
+              opts plan author-window-start-ms author-job
+              (:artifact-declaration author-job)))
+      (catch clojure.lang.ExceptionInfo e
+        (if-let [defect (:author-response-defect (ex-data e))]
+          (-> author-job
+              (assoc-in [:artifact-declaration :status] :corroboration-defect)
+              (assoc-in [:artifact-declaration :defect] defect))
+          (throw e))))))
+
 (defn- author-verdict
   "Parse the author contract's terminal marker (line-anchored, first match —
   same conventions as review-verdict). The author prompt names REFUSE as a
@@ -4319,15 +4347,15 @@
    exact locator it is measured against (for C4, the mission checkbox line
    in its ticked form) and the tick contract: tick only wants the commit
    truly satisfies, in the same commit, in the target repository."
-  [locators target-repository]
+  [locators repository-plan]
   (when (and (map? locators) (seq locators))
     (str "SELECTED WANTS (what this run is measured on):\n"
+         "Repository-plan digest: " (pr-str (:digest repository-plan)) "\n"
          "Each want below is measured against its exact locator in the commit you "
-         "deliver. A C4 want is TRUE only when the named file in the TARGET "
+         "deliver. A C4 want is TRUE only when the named file in its LOCATOR "
          "REPOSITORY contains the exact declaration line in its TICKED form at "
          "that commit. When your commit truly completes a want, tick exactly that "
-         "checkbox line, in the SAME commit as the work, in the target repository "
-         "(" (pr-str target-repository) "). Tick ONLY wants your commit truly "
+         "checkbox line, in the SAME commit in that repository as the work. Tick ONLY wants your commit truly "
          "satisfies: a tick with no demonstrated work stays :checkbox-only (the "
          "two-instrument rule needs the tick plus this run's demo receipt), and "
          "an unsupported tick fails review. Grounded work with its box left "
@@ -4335,7 +4363,7 @@
          (clojure.string/join
           "\n"
           (for [[want locator] (sort-by pr-str locators)]
-            (str "  " (pr-str want) " — "
+            (str "  [repo " (pr-str (:repo locator)) "] " (pr-str want) " — "
                  (case (:class locator)
                    :C4 (str "C4 checkbox in " (:path locator) ": \""
                             (:decl locator) "\"")
@@ -4563,7 +4591,8 @@
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
                              measured-acquisition? surprise-root
-                             surprise-lookup-fn selected-want-locators]}
+                             surprise-lookup-fn selected-want-locators
+                             repository-plan]}
                       target mission cascade-entry stop-lines]
   (let [surprise-result (when surprise-root
                           (try
@@ -4600,17 +4629,20 @@
        "SELECTED TARGET: " (pr-str target) "\n"
        "TARGET REPOSITORY: " (pr-str target-repository) "\n"
        "TARGET REPOSITORY BASE HEAD: " (pr-str target-repository-head) "\n"
+       "REPOSITORY PLAN (allowed repository and runner-observed base head):\n"
+       (str/join "\n" (for [{:keys [repo base-head]} (:allowed repository-plan)]
+                           (str "  " (pr-str repo) " @ " (pr-str base-head)))) "\n"
        (let [block (acceptance-criterion-block {:action cascade-entry})]
          (if (map? block)
            (str "ACCEPTANCE CRITERIA: not stated (" (name (:reason block)) ")\n")
            block))
-       (selected-want-locator-block selected-want-locators target-repository)
-       "REPOSITORY ARTIFACT CONTRACT: Make and commit the complete parcel only in "
-       "TARGET REPOSITORY. The artifact gate observes only that repository. Paths and "
-       "actions nested in the mission record are context, not permission to commit in "
-       "another repository; a commit elsewhere is an artifact-binding mismatch. If the "
-       "target repository is unresolved or the parcel cannot be completed there, make no "
-       "commit and REFUSE with a typed reason. Generated artifacts must be a fixed point: "
+       (selected-want-locator-block selected-want-locators repository-plan)
+       "REPOSITORY ARTIFACT CONTRACT: You may commit in any repository listed in the "
+       "REPOSITORY PLAN, and no repository outside it. End with exactly one line "
+       "FULL_LOOP_ARTIFACTS: [{:repo \"<canonical path>\" :commit \"<sha>\"} ...] "
+       "sorted by :repo and naming every repository in which you committed, followed by "
+       "the existing FULL_LOOP_AUTHOR: DONE <sha> line. An outside repository is a typed "
+       "scope failure. Generated artifacts must be a fixed point: "
        "run each generator twice before committing and require the second run to leave no "
        "diff. Time-dependent output is a build failure, not something for build-cure to "
        "discover after the first commit.\n"
@@ -4833,7 +4865,7 @@
                    (assoc correction :status :refused :reason reason)})))
 
 (defn- author-response-correction-prompt
-  [author target repo base-head binding original-job]
+  [author target repo base-head repository-plan binding original-job]
   (str author ": FULL-LOOP AUTHOR RESPONSE CORRECTION. Your completed reply "
        "claimed the TARGET REPOSITORY BASE HEAD as a new DONE artifact. That "
        "is not an artifact binding. This is one correction of that same "
@@ -4842,6 +4874,7 @@
        "SELECTED TARGET: " (pr-str target) "\n"
        "TARGET REPOSITORY: " (pr-str repo) "\n"
        "TARGET REPOSITORY BASE HEAD: " (pr-str base-head) "\n"
+       "REPOSITORY PLAN: " (pr-str repository-plan) "\n"
        "IMMUTABLE CORRECTION BINDING: " (pr-str binding) "\n"
        "ORIGINAL AUTHOR JOB (RETAINED): "
        (pr-str (retained-author-job original-job)) "\n\n"
@@ -4852,7 +4885,8 @@
        "must carry real work: the mission's own text is never the artifact, "
        "and a claim whose only evidence is the mission markdown is refused "
        ":claim-mission-text-not-an-artifact. Otherwise "
-       "make a real fresh artifact in the target repository and end "
+       "make real fresh artifacts only in repositories in the plan, end with "
+       "FULL_LOOP_ARTIFACTS: [sorted {:repo :commit} ...], then "
        "FULL_LOOP_AUTHOR: DONE <fresh-commit-sha>. The unchanged author, "
        "feature-card, and artifact-binding gates evaluate this response."))
 
@@ -4864,7 +4898,7 @@
   presenting its own dispatched base as DONE.  All other artifact failures
   continue to reach their existing refusal unchanged.  The returned job is
   subsequently processed by the unchanged author refusal/card/artifact gates."
-  [opts phase-context author dispatched-turns target repo pre-author-head
+  [opts phase-context author dispatched-turns target repo pre-author-head repository-plan
    construction author-response author-prompt-text author-job]
   (let [raw-allowance (get opts :author-response-corrections
                            default-author-response-corrections)
@@ -4877,19 +4911,24 @@
         base-head (:head pre-author-head)
         original-request-id (:job-id author-response)
         original-verdict (author-verdict author-job)
+        declaration-defect?
+        (not (contains? #{:present :absent}
+                        (get-in author-job [:artifact-declaration :status])))
         trigger? (and (= "done" (:state author-job))
                       (not= "cancelled" (:state author-job))
                       (string? original-request-id)
                       (= original-request-id (:job-id author-job))
                       (= author (:agent-id author-job))
                       (= :done (:verdict original-verdict))
-                      (= base-head (:detail original-verdict)))]
+                      (or declaration-defect?
+                          (= base-head (:detail original-verdict))))]
     (if-not trigger?
       {:author-job author-job :author-response-corrections []}
       (let [binding {:target target
                      :author author
                      :repository repo
                      :base-head base-head
+                     :repository-plan-digest (:digest repository-plan)
                      :construction-contract (prompt-construction construction)
                      :construction-contract-sha256
                      (sha256 (prompt-construction construction))
@@ -4904,7 +4943,7 @@
           (author-response-correction-failure!
            "Author response correction allowance is exhausted"
            :author-response-correction-exhausted base-record))
-        (let [prompt (author-response-correction-prompt author target repo base-head
+        (let [prompt (author-response-correction-prompt author target repo base-head repository-plan
                                                         binding author-job)
               dispatch-result (atom nil)
               dispatch-once
@@ -4963,7 +5002,8 @@
                "Author response correction repeated the original base as DONE"
                :corrected-response-repeats-base-done correction-before-gate)))
           {:author-job
-           (assoc corrected-job :author-response-corrections
+           (assoc (retain-artifact-declaration corrected-job repository-plan)
+                  :author-response-corrections
                   [(assoc correction-before-gate :status :corrected)])
            :author-response-corrections
            [(assoc correction-before-gate :status :corrected)]})))))
@@ -9682,7 +9722,7 @@
                                   (observe-repo-head opts author-repo)
                                   (:pre-author-head deferred-author-context))
                 prompt-for-head
-                (fn [head-observation]
+                (fn [head-observation plan]
                   (author-prompt (assoc prompt-opts
                                         :reviewer reviewer
                                         :surprise-root
@@ -9692,6 +9732,7 @@
                                         :target-repository author-repo
                                         :target-repository-head
                                         (:head head-observation)
+                                        :repository-plan plan
                                         ;; UNTICKED-WORK-UNSEEN: the author
                                         ;; must see the exact locators the
                                         ;; selected wants are measured
@@ -9835,7 +9876,7 @@
                     (outer-refusal-history/require-new-inputs! comparison))
                  #(select-keys % [:status]))
                 author-prompt-text
-                (prompt-for-head pre-author-head)
+                (prompt-for-head pre-author-head repository-plan)
                 author-response
                 (run-phase! opts @phase-context :author-dispatch
                             #(if deferred-author-job
@@ -9902,7 +9943,7 @@
                   (when retry-author? (observe-repo-head opts author-repo))
                   retry-author-prompt-text
                   (when retry-author?
-                    (prompt-for-head retry-pre-author-head))
+                    (prompt-for-head retry-pre-author-head repository-plan))
                   retry-response
                   (when retry-author?
                     (run-phase! opts @phase-context :author-retry-dispatch
@@ -9928,10 +9969,15 @@
                     retry-author? (assoc :author-retries author-retries))
                   effective-pre-author-head
                   (if retry-author? retry-pre-author-head pre-author-head)
+                  author-job
+                  (->> (retain-artifact-declaration author-job repository-plan)
+                       (preflight-artifact-declaration
+                        opts repository-plan
+                        (:observed-at-ms effective-pre-author-head)))
                   author-correction-state
                   (author-response-correction-loop
                    opts @phase-context author dispatched-turns target author-repo
-                   effective-pre-author-head construction
+                   effective-pre-author-head repository-plan construction
                    (if retry-author? retry-response author-response)
                    (if retry-author? retry-author-prompt-text author-prompt-text)
                    author-job)
@@ -9977,6 +10023,18 @@
                     (throw (ex-info "Existing-artifact claim independently reviewed" reviewed)))))
               (throw-if-author-refused! author-job target :author-wait)
               (let [bound-author? (or fresh-author? (some? deferred-author-context))
+                    declaration (:artifact-declaration author-job)
+                    _ (when (and (not (contains? #{:present :absent} (:status declaration)))
+                                 bound-author?)
+                        (throw (ex-info "Author artifact declaration is defective"
+                                        {:outcome :build-failed
+                                         :failure-kind :author-response-defect
+                                         :failure-stage :author-wait
+                                         :author-response-defect
+                                         {:kind (keyword "artifact-declaration"
+                                                         (name (:status declaration)))
+                                          :declaration declaration}
+                                         :author-job author-job})))
                     retained-artifact-binding
                     (let [binding (:artifact-binding author-job)]
                       (when (and deferred-review-job
@@ -9985,12 +10043,35 @@
                                     (:commit binding))
                                  (true? (:corroborates? binding)))
                         binding))
+                    artifact-binding-set
+                    (or (:artifact-binding-set author-job)
+                        (when (and bound-author? (= :present (:status declaration)))
+                          (task-execution/fresh-artifact-binding-set
+                           opts repository-plan (:observed-at-ms effective-pre-author-head)
+                           author-job declaration)))
+                    primary-repo
+                    (when artifact-binding-set
+                      (primary-artifact-repository
+                       (get-in @d-task-dispatch
+                               [:dispatch :occurrence :action/value
+                                :observation-locators])
+                       repository-plan))
                     artifact-binding
-                    (if bound-author?
-                      (fresh-artifact-binding opts author-repo
-                                              effective-pre-author-head
-                                              author-job)
-                      retained-artifact-binding)
+                    (if artifact-binding-set
+                      (or (some #(when (= primary-repo (:repo %)) %)
+                                (:bindings artifact-binding-set))
+                          (throw (ex-info "First selected locator has no declared binding"
+                                          {:outcome :build-failed
+                                           :failure-kind :author-response-defect
+                                           :failure-stage :artifact-binding
+                                           :author-response-defect
+                                           {:kind :artifact-declaration/primary-binding-absent
+                                            :primary-repository primary-repo}})))
+                      (if bound-author?
+                        (fresh-artifact-binding opts author-repo
+                                                effective-pre-author-head
+                                                author-job)
+                        retained-artifact-binding))
                     observed-commit (:commit artifact-binding)
                     text-commit (:artifact-ref author-job)
                     _ (when-let [failure (unvalidated-artifact-failure
@@ -10007,12 +10088,17 @@
                                     (assoc :artifact-ref (:artifact-ref failure))))))
                     commit (if artifact-binding observed-commit text-commit)
                     author-job (cond-> author-job
+                                 artifact-binding-set
+                                 (assoc :artifact-binding-set artifact-binding-set)
                                  bound-author?
                                  (assoc :repo-observed-artifact-ref commit
                                         :artifact-binding artifact-binding))
                     build (run-phase! opts @phase-context :build-resolution
                                       #(when commit
-                                         (resolve-target-build opts author-repo commit))
+                                         (resolve-target-build opts
+                                                               (or (:repo artifact-binding)
+                                                                   author-repo)
+                                                               commit))
                                       nil
                                       #(build-resolution-terminal-condition
                                         artifact-binding %))

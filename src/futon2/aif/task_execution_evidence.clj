@@ -88,14 +88,16 @@
   The claimed commit must resolve to the validated repository HEAD.
   Divergent or missing claims fail closed. Injected observations cannot
   override an explicit disagreement."
-  [opts repo before author-job]
+  ([opts repo before author-job]
+   (fresh-artifact-binding opts repo before author-job nil))
+  ([opts repo before author-job declared-ref]
   (let [binding
         (if-let [f (:author-artifact-observer-fn opts)]
           (f repo before author-job)
           (let [after (observe-repo-head opts repo)
                 before-head (:head before)
                 observed-head (:head after)
-                reported-text-ref (author-claimed-ref author-job)
+                reported-text-ref (or declared-ref (author-claimed-ref author-job))
                 job-ref (:artifact-ref author-job)
                 start-ms (:observed-at-ms before)
                 end-ms (:observed-at-ms after)
@@ -212,7 +214,61 @@
                  :failure-stage :artifact-binding
                  :author-job author-job
                  :artifact-binding (assoc binding :commit nil)}))))
-    binding))
+    binding)))
+
+(defn fresh-artifact-binding-set
+  "Corroborate a present multi-repository declaration against PLAN. Every
+  allowed repository is observed so the declared repository set must equal the
+  set that actually changed; each member then passes fresh-artifact-binding in
+  its own repository from its own dispatch base."
+  [opts plan author-window-start-ms author-job declaration]
+  (let [allowed (:allowed plan)
+        afters (mapv (fn [{:keys [repo]}] (observe-repo-head opts repo)) allowed)
+        changed (->> (map vector allowed afters)
+                     (keep (fn [[before after]]
+                             (when (not= (:base-head before) (:head after))
+                               (:repo before))))
+                     set)
+        declared (set (map :repo (:members declaration)))]
+    (when-not (= declared changed)
+      (throw (ex-info "Declared repositories do not equal changed repositories"
+                      {:outcome :build-failed
+                       :failure-kind :author-response-defect
+                       :author-response-defect
+                       {:kind :artifact-declaration/repository-set-mismatch
+                        :declared-repositories (vec (sort declared))
+                        :changed-repositories (vec (sort changed))}})))
+    (let [bases (into {} (map (juxt :repo :base-head) allowed))
+          bindings
+          (mapv (fn [{:keys [repo commit]}]
+                  (try
+                    (fresh-artifact-binding
+                     opts repo {:head (get bases repo)
+                                :observed-at-ms author-window-start-ms}
+                     author-job commit)
+                    (catch clojure.lang.ExceptionInfo e
+                      (throw (ex-info
+                              "Declared commit could not be bound in its repository"
+                              {:outcome :build-failed
+                               :failure-kind :author-response-defect
+                               :author-response-defect
+                               {:kind :artifact-declaration/member-not-corroborated
+                                :repo repo :commit commit
+                                :cause (select-keys (ex-data e)
+                                                    [:failure-kind :artifact-binding])}}
+                              e)))))
+                (:members declaration))]
+      (when-let [failed (first (remove #(and (:corroborates? %) (:commit %)) bindings))]
+        (throw (ex-info "Declared commit did not corroborate in its repository"
+                        {:outcome :build-failed
+                         :failure-kind :author-response-defect
+                         :author-response-defect
+                         {:kind :artifact-declaration/member-not-corroborated
+                          :repo (:repo failed)
+                          :binding failed}})))
+      {:schema :wm/artifact-binding-set-v1
+       :bindings bindings
+       :plan-digest (:digest plan)})))
 
 (def ^:private code-file-pattern
   #"(?i)\.(?:clj|cljc|cljs|bb|el|lean|py|js|jsx|ts|tsx|java|go|rs|c|cc|cpp|h|hpp|sh)$")
