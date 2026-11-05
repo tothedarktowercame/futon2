@@ -23,6 +23,17 @@
 (def live-job-sha
   "d502f118b58e00523e3f6901457a34b77e6fcfc3b56018c58dd7413443ee49be")
 
+(def occurrence-195-record
+  "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-11-05-c226e5de-f597-45a0-b420-3219db50de94.edn")
+(def occurrence-195-record-sha
+  "52dc5f8ae5033b401038339bd45f439828f6d3ca039831a28db200c5a40e9cc8")
+(def occurrence-195-job
+  "/home/joe/notes/wm-next/tests/occ195-author-job.json")
+(def occurrence-195-job-sha
+  "0f5d1cc8cdd737858231238cf46a253cb7197eeec25f0412a83f09d43419e375")
+(def occurrence-195-job-id "invoke-1793853933302-12828-7ec2dcd1")
+(def occurrence-195-fix "affc4c8c925af36a6a995c5399e9799246a84c2e")
+
 (defn- root []
   (.toFile (java.nio.file.Files/createTempDirectory
             "ordinary-author-refusal-"
@@ -125,6 +136,41 @@
                   tampered (:authority good))]
     (is (= :medic/authority-rejected (:reason apparatus)))
     (is (= :medic/authority-rejected (:reason mismatch)))))
+
+(defn- occurrence-195-candidate [job-path job-sha]
+  {:kind :ordinary-author-refusal
+   :injury-id "injury/57c88b37ed879eb3eccbdce1af3710aecd276a4e"
+   :entry-id "195" :predecessor-entry-id "159"
+   :patch-id occurrence-195-fix
+   :reviewer "claude-6" :evaluator refusal/verifier-id
+   :evidence-pin job-sha
+   :original-record-id occurrence-195-record :original-pin occurrence-195-record-sha
+   :author-response-id job-path :author-response-pin job-sha
+   :classifier-revision occurrence-195-fix
+   :replay :ordinary-author-refusal-non-injury})
+
+(defn- occurrence-receipt [candidate job-path job-sha]
+  {:schema refusal/receipt-schema :verifier refusal/verifier-id
+   :candidate candidate
+   :record-pin {:path occurrence-195-record :sha256 occurrence-195-record-sha}
+   :author-response-pin {:path job-path :sha256 job-sha}
+   :fix-commit occurrence-195-fix
+   :replay-result :occurrence-square-author-response-invalid})
+
+(deftest retained-occurrence-195-is-a-checked-author-refusal
+  (let [candidate (occurrence-195-candidate occurrence-195-job occurrence-195-job-sha)
+        receipt (occurrence-receipt candidate occurrence-195-job occurrence-195-job-sha)]
+    (is (true? (refusal/checked? receipt candidate)))))
+
+(deftest occurrence-square-apparatus-and-valid-responses-are-inert
+  (let [record (edn/read-string (slurp occurrence-195-record))
+        pin {:path occurrence-195-record :sha256 occurrence-195-record-sha}
+        apparatus {:job-id occurrence-195-job-id :state "working" :result "{}"}
+        valid {:job-id occurrence-195-job-id :state "done" :result "{}"}]
+    (is (= :injury (:classification
+                    (refusal/replay-classification record pin apparatus))))
+    (is (= :injury (:classification
+                    (refusal/replay-classification record pin valid))))))
 
 (deftest retained-ordinal-124-replays-and-loads-through-every-production-path
   ;; This fixture preserves the property under correction: ordinal 124's

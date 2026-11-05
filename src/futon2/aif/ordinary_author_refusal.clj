@@ -6,11 +6,13 @@
             [clojure.java.io :as io]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.load-identity :as identity]
-            [futon2.aif.meta-terminal-injury :as terminal]))
+            [futon2.aif.meta-terminal-injury :as terminal]
+            [futon2.aif.occurrence-square-authoring :as square-authoring]))
 
 (def receipt-schema :wm/ordinary-author-refusal-receipt-v1)
 (def verifier-id "futon2.aif.ordinary-author-refusal/retained-authority")
-(def explicit-author-refusals #{:author-response-unparseable})
+(def explicit-author-refusals
+  #{:author-response-unparseable :occurrence-square-author-response-invalid})
 
 (defn pin? [p]
   (and (map? p) (= #{:path :sha256} (set (keys p)))
@@ -33,14 +35,27 @@
   occurrence is translated, and only when its retained verbatim answer is
   still undecodable by the current public handoff reader."
   [record record-pin job]
-  (when (and (= :open-cascade-author-answer-invalid (get-in record [:failure :kind]))
-             (= :cascade-resume (get-in record [:failure :stage]))
-             (= "done" (:state job))
-             (string? (:result job))
-             (nil? (handoff/response-map job)))
+  (cond
+    (and (= :open-cascade-author-answer-invalid (get-in record [:failure :kind]))
+         (= :cascade-resume (get-in record [:failure :stage]))
+         (= "done" (:state job))
+         (string? (:result job))
+         (nil? (handoff/response-map job)))
     (terminal/classify
      (assoc-in record [:failure :kind] :author-response-unparseable)
-     record-pin)))
+     record-pin)
+
+    (and (= :occurrence-square-answer-invalid (get-in record [:failure :kind]))
+         (= :occurrence-square-authoring (get-in record [:failure :stage])))
+    (let [exchange (handoff/exchange
+                    {:contact (constantly job)
+                     :request {:kind :occurrence-square-authoring}
+                     :decode #'square-authoring/decode})]
+      (terminal/classify
+       (assoc-in record
+                 [:failure :detail :occurrence-square-authoring :answer]
+                 (select-keys exchange [:reason :job-id]))
+       record-pin))))
 
 (defn checked? [receipt candidate]
   (let [record-resolved (resolve-pin (:record-pin receipt))
