@@ -38,6 +38,8 @@
    ;; DarkTower.WarMachine.OrdinaryRefusalProseRef repairedKindVerdict
    ;; (guardrailRefusal ↦ nonInjury; buildFailed stays an injury).
    :guardrail-refusal :ordinary-author-refusal})
+(def occurrence-square-author-response-reasons
+  #{:response-invalid :response-decode-threw :response-validation-threw})
 (def successful-outcomes #{:success :closed :grounded-change :cohort-complete})
 (def close-outcome-image
   "Transcribes `DarkTower/WarMachine/CloseOutcomeImage.lean` `image`,
@@ -285,6 +287,19 @@
                                 (abstention-reason record))
                               (or (when (producer-qualified-already-satisfied? record)
                                     :producer-qualified-already-satisfied)
+                                  ;; OrdinaryAuthorRefusalCorrection.lean:5-11
+                                  ;; makes only an invalid/unparseable author
+                                  ;; response explicitNonInjury.  The same outer
+                                  ;; kind also covers apparatus handoff failures,
+                                  ;; which remain injuries (lines 36-40).
+                                  (when (and (= :occurrence-square-answer-invalid kind)
+                                             (contains?
+                                              occurrence-square-author-response-reasons
+                                              (get-in record
+                                                      [:failure :detail
+                                                       :occurrence-square-authoring
+                                                       :answer :reason])))
+                                    :occurrence-square-author-response-invalid)
                                   (get explicit-non-injury-kinds kind)
                                   (when (and (nil? kind)
                                              (not= :already-satisfied terminal-outcome)

@@ -1035,6 +1035,23 @@
     (assoc :unmeasured-claim-correction
            (:unmeasured-claim-correction job))))
 
+(defn- rejected-answer-evidence? [v]
+  (and (= :wm/rejected-answer-evidence-v1 (:schema v))
+       (string? (:answer-prefix v))
+       (<= (:prefix-length-bytes v 0) (* 64 1024))))
+
+(defn- occurrence-square-authoring-failure-detail [v]
+  (let [answer (:answer v)
+        message (:message answer)]
+    (cond-> (select-keys v [:schema :status :kind])
+      (map? answer)
+      (assoc :answer
+             (cond-> (select-keys answer [:reason :job-id])
+               (string? message)
+               (assoc :message (subs message 0 (min 300 (count message))))))
+      (rejected-answer-evidence? (:answer-evidence v))
+      (assoc :answer-evidence (:answer-evidence v)))))
+
 (defn- failure-detail [error-data]
   (let [scalar? (fn [v]
                   (or (keyword? v) (number? v) (boolean? v) (nil? v)
@@ -1070,11 +1087,11 @@
                  ;; only its stable job identity and bounded correction chain.
                  (and (= :author-job k) (corrected-author-job-detail? v))
                  {:kept (assoc kept k (bounded-corrected-author-job v)) :omitted omitted}
-                 (and (= :answer-evidence k)
-                      (= :wm/rejected-answer-evidence-v1 (:schema v))
-                      (string? (:answer-prefix v))
-                      (<= (:prefix-length-bytes v 0) (* 64 1024)))
+                 (and (= :answer-evidence k) (rejected-answer-evidence? v))
                  {:kept (assoc kept k v) :omitted omitted}
+                 (and (= :occurrence-square-authoring k) (map? v))
+                 {:kept (assoc kept k (occurrence-square-authoring-failure-detail v))
+                  :omitted omitted}
                  ;; The pin is nested, and it is the receiver's only route to
                  ;; the retained input, so the scalar-only rule below would
                  ;; keep :status and lose the evidence.
