@@ -1724,8 +1724,7 @@ def run(args) -> int:
                     "for the field to change before the next click")
                 time.sleep(WAIT_SECONDS)
                 continue
-        lawful_stop = args.continuous and open_rows is None and c["outcome"] in DEBUG
-        if c["outcome"] in DECIDED or c["outcome"] in WAIT or lawful_stop:
+        if c["outcome"] in DECIDED or c["outcome"] in WAIT:
             quiet += 1
             if quiet >= args.stall:
                 return stop(args, "debugger-error",
@@ -1738,13 +1737,23 @@ def run(args) -> int:
         page = None
         if c["outcome"] in DEBUG:
             page, summary = debugger_page(c, last_abstention)
-            if last_abstention and moved(last_abstention["signature"], summary["signature"]):
+            previous_page = last_abstention
+            page_moved = (previous_page and
+                          moved(previous_page["signature"], summary["signature"]))
+            record({"event": "debugger", "click-id": c["click-id"], "page": str(page),
+                    "counts": summary["signature"]["counts"],
+                    "moved": page_moved if previous_page else None})
+            log(f"click {c['n']}: debugger page {page}")
+            if args.continuous and previous_page and not page_moved:
+                return stop(args, "debugger-error",
+                            f"continuous debugger page did not move: {previous_page['page']} "
+                            f"then {summary['page']}", 1,
+                            {"previous-page": previous_page["page"],
+                             "current-page": summary["page"]})
+            if page_moved:
                 log(f"click {c['n']}: the abstention moved since {last_abstention['page']}; repair count reset")
                 fault_repairs = []
             last_abstention = summary
-            record({"event": "debugger", "click-id": c["click-id"], "page": str(page),
-                    "counts": summary["signature"]["counts"]})
-            log(f"click {c['n']}: debugger page {page}")
         if args.observe_only or args.continuous:
             record({"event": "external-repair-skipped",
                     "click-id": c["click-id"],

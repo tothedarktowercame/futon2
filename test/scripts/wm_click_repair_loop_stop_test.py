@@ -31,6 +31,7 @@ class SelfHealStopTest(unittest.TestCase):
         self.loop.LEDGER = self.loop.STATE / "ledger.jsonl"
         self.loop.LOGFILE = self.loop.STATE / "loop.log"
         self.loop.STOP_FILE = self.loop.STATE / "STOP"
+        self.loop.DEBUGGER = self.loop.STATE / "debugger"
         self.loop.META_INJURY_ROOT = root / "injuries"
         self.args = SimpleNamespace(
             clicks=2, ticks=99, stall=3, max_repairs=3,

@@ -26,7 +26,7 @@
         calls (re-seq #"(?m)^\s*return stop\(args," text)
         literals (re-seq #"(?m)^\s*return stop\(args,\s*\"(operator-override|work-exhausted|debugger-error)\""
                          text)]
-    (is (= 19 (count calls)))
+    (is (= 20 (count calls)))
     (is (= (count calls) (count literals)))))
 
 (deftest changed-anchor-refuses-the-index

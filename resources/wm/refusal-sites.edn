@@ -178,6 +178,9 @@
    :anchor "outer selector exhausted work in" :kinds [:supervisor-reason] :case :L1
    :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
    :evidence {:scoredField :present :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
+  {:id :loop-unchanged-debugger-page :source "scripts/wm_click_repair_loop.py"
+   :anchor "continuous debugger page did not move:" :kinds [:supervisor-reason] :case :debugger-error
+   :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
   {:id :loop-repeated-empty-policy-field :source "scripts/wm_click_repair_loop.py"
    :anchor "on an unchanged field no compared policy's G is below" :kinds [:supervisor-reason] :case :debugger-error
    :evidence {:scoredField :derivable :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :derivable}}
