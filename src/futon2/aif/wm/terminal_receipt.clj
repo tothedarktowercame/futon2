@@ -106,6 +106,34 @@
            :status :missing
            :reason :selected-candidate-g-not-recorded})))))
 
+(defn- grounded-selection-despite-falsifier?
+  "True when RECORD's only failure is a reviewer-falsifier refusal at
+  :reviewer-wait over work that was selected, committed and corroborated:
+  the artifact binding corroborates the record's own :grounded-commit, and
+  the review job ran to :done. injury 76d912d3 (click tick-run-record
+  2026-11-05-7bc9acb9): the falsifier's :selected-want-accounting /
+  :evidence-authority checks refused on a refused selected-want-outcome
+  receipt while the increment itself was real — commit c83f3c07, corroborated
+  binding, review job done — and terminal-receipt routed the whole
+  selected-and-committed increment to a :failure, discarding it at this
+  routing seam. A refusal there is a review-evidence defect about the
+  accounting, not an abstention or a refusal to select: the record says an
+  action was enacted. Nothing is re-derived; every field is the record's
+  own."
+  [record]
+  (and (= :reviewer-falsifier-failed (:kind (:failure record)))
+       (= :reviewer-wait (:stage (:failure record)))
+       (= :refused (get-in record [:failure :detail :reviewer-falsifier
+                                   :status]))
+       (= (:sha (:grounded-commit record))
+          (get-in record [:failure :detail :artifact-binding :commit]))
+       ;; both nil when nothing was committed, and corroborates? below then
+       ;; never holds (a binding needs a commit to corroborate); the final
+       ;; string? check states that requirement outright.
+       (true? (get-in record [:failure :detail :artifact-binding
+                              :corroborates?]))
+       (string? (:sha (:grounded-commit record)))))
+
 (defn action-receipt
   "The :action-receipt for a selected-and-enacted RECORD: click id, target
   and its kind, the action kind and G terms the decision already records
@@ -115,9 +143,14 @@
   may live in a repo other than futon2, e.g. click 13's futon7 891001d),
   else a bare {:sha ..} from the d-task-enactment revision pair. No commit
   anywhere is the typed absence {:absent :no-grounded-commit}, never nil or
-  an invented value. The participants' reviewer-of-record beside it."
+  an invented value. The participants' reviewer-of-record beside it.
+  When the record's only failure is a reviewer-falsifier refusal at
+  :reviewer-wait over corroborated committed work (see
+  grounded-selection-despite-falsifier?), that refusal rides along as
+  :reviewer-falsifier {:status .. :reason ..} so the refusal stays visible
+  without making the receipt a second kind."
   [record]
-  {:kind :action-receipt
+  (cond-> {:kind :action-receipt
    :click-id (or (:click/id record) {:absent :no-click-id})
    :target (selected-target record)
    :target-kind (target-kind (selected-target record))
@@ -131,7 +164,12 @@
                                        :revision-pair :after])]
                  {:sha sha})
                {:absent :no-grounded-commit})
-   :reviewer (get-in record [:participants :roles :reviewer-of-record :identity])})
+   :reviewer (get-in record [:participants :roles :reviewer-of-record :identity])}
+    (grounded-selection-despite-falsifier? record)
+    (assoc :reviewer-falsifier
+           {:status (get-in record [:failure :detail :reviewer-falsifier :status])
+            :reason (get-in record [:failure :detail
+                                    :reviewer-falsifier-verification :reason])})))
 
 (defn failure-receipt
   "The :failure receipt for a RECORD that abstained, refused to select, or
@@ -198,13 +236,21 @@
   no abstention gets an :action-receipt. Every other record gets a :failure:
   an abstention, a failure after selection (the receipt names the target),
   or a record showing neither a selection nor a failure
-  (:no-terminal-state, itself a defect to repair). The RECEIPT is exactly
+  (:no-terminal-state, itself a defect to repair). The one exception:
+  a selected record whose only failure is a reviewer-falsifier refusal
+  at :reviewer-wait over corroborated committed work still gets an
+  :action-receipt carrying that refusal (grounded-selection-despite-
+  falsifier?; injury 76d912d3) — the action was enacted and grounded, so
+  the falsifier's accounting refusal is evidence on the action receipt,
+  not a terminal failure. The RECEIPT is exactly
   one kind; the record's state never makes this throw (review, claude-1
   2026-09-30: 35 of 63 past records were both or neither, and a throw here
   would have left their run records unwritten)."
   [record]
   (validate-receipt
-   (if (and (selected-target record) (not (failed? record)))
+   (if (and (selected-target record)
+            (or (not (failed? record))
+                (grounded-selection-despite-falsifier? record)))
      (action-receipt record)
      (failure-receipt record))))
 
