@@ -3364,8 +3364,22 @@
                            phases)))))))
 
 (deftest negative-review-without-findings-does-not-spend-revision-round
-  (let [{:keys [result phases dispatches]}
-        (run-revision-attempt ["FULL_LOOP_REVIEW: REQUEST_CHANGES"])]
+  ;; RED-SUITES-2-C (claude-6, 2026-11-05): this fixture's artifact also
+  ;; fails the machine reviewer falsifier, and since 42598530e a genuine
+  ;; falsifier failure (:reviewer-falsifier-applicable-check-failed) earns
+  ;; one revision round of its own. That round is correct, but it is not
+  ;; what this test is about, so the falsifier passes here and only the
+  ;; human reviewer's bare REQUEST_CHANGES is left to (not) authorize a turn.
+  (let [falsifier-calls (atom 0)
+        {:keys [result phases dispatches]}
+        (with-redefs-fn
+          {#'runner/refuse-on-runner-source-drift! (constantly nil)
+           #'reviewer-falsifier/verify
+           (fn [_candidate _inputs]
+             (swap! falsifier-calls inc)
+             {:status :verified :receipt/id "falsifier-passes"})}
+          #(run-revision-attempt ["FULL_LOOP_REVIEW: REQUEST_CHANGES"]))]
+    (is (pos? @falsifier-calls) "the machine falsifier ran and passed")
     (is (= :build-failed (:outcome result)))
     (is (= ["zai-5" "codex-7"] (mapv :agent dispatches)))
     (is (empty? (filter #(#{:revision-dispatch :revision-wait :revision-build
@@ -3848,6 +3862,9 @@
             :guardrail-refusal ["zai-5" "zai-5"]
             ":required-negative-controls-failed"]
            ["FULL_LOOP_AUTHOR: REFUSE" nil :build-failed ["zai-5"] nil]
+           ;; :guardrail-refusal, not :build-failed: L5-25 (21c40aff1,
+           ;; OrdinaryRefusalProseRef.lean) -- an Agency-extracted commit ref
+           ;; is prose, so a typed REFUSE that mentions one is still a refusal.
            ["FULL_LOOP_AUTHOR: REFUSE :blocked" "98d0dcb" :guardrail-refusal
             ["zai-5" "zai-5"] ":blocked"]]]
     (let [dispatches (atom []) findings (atom []) observed (atom false)
