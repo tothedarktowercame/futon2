@@ -43,3 +43,43 @@
     (let [refused (into #{} (keep :target)
                         (get-in opts [:outer/selection :reading-reselection :refusals]))]
       (into [] (remove refused) admitted))))
+
+(def no-work-outcomes
+  "Explicit non-work image from `meta-terminal-injury/close-outcome-image`.
+  Work outcomes (`:grounded-change`, `:success`, `:closed`, and
+  `:cohort-complete`) are intentionally absent."
+  #{:already-satisfied :grounded-no-change :artifact-only :abstained
+    :no-selection :agent-unavailable :guardrail-refusal :dispatch-failed
+    :build-failed :substrate-unavailable :incomplete :cancelled
+    :historical-verification-awaiting-validation
+    :historical-verification-refused})
+
+(defn evidence-for-close
+  "Build RefusalLegality evidence solely from retained close carriers.
+  Returns nil for work outcomes. OPERATOR-SIGNAL is an independently retained
+  proof, never inferred from a terminal keyword."
+  [outcome data scored-field operator-signal]
+  (when (contains? no-work-outcomes outcome)
+    (cond
+      (and (= :abstained outcome) (= :empty-field (:failure-kind data)))
+      (if (nil? scored-field)
+        {:refusal :other :case :L1
+         :evidence {:reason :scored-field-carrier-absent}}
+        {:refusal :stop :case :L1
+         :evidence {:kind :work-exhausted :scoredField scored-field
+                    :operatorSignal false}})
+
+      (and (= :debugger/aborted (:failure-kind data))
+           (= :abort (:debugger/restart data))
+           (true? operator-signal))
+      {:refusal :stop :case :L2
+       :evidence {:kind :operator-override :scoredField []
+                  :operatorSignal true}}
+
+      (and (= :operator-cancelled (:failure-kind data))
+           (true? operator-signal))
+      {:refusal :stop :case :L2
+       :evidence {:kind :operator-override :scoredField []
+                  :operatorSignal true}}
+
+      :else {:refusal :other})))
