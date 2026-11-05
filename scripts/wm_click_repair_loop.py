@@ -1505,6 +1505,12 @@ _WORK_EXHAUSTED_EDN = (
     " (= :abstained (get-in r [:selection-outcome :status])))"
     " (vector? a) (empty? a)))))")
 
+_CLAIMS_WORK_EXHAUSTED_EDN = (
+    "(let [r (clojure.edn/read-string {:default tagged-literal}"
+    " (slurp (first *command-line-args*)))]"
+    " (println (= :loop-stop"
+    " (get-in r [:outer/selection :refusal/disposition :disposition]))))")
+
 
 def _work_exhausted_checked(evidence: dict) -> bool:
     """L1 (RefusalLegality.loopStopLegal .workExhausted): the outer selector
@@ -1514,6 +1520,19 @@ def _work_exhausted_checked(evidence: dict) -> bool:
         return False
     try:
         r = subprocess.run(["bb", "-e", _WORK_EXHAUSTED_EDN, str(path)],
+                           capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return r.returncode == 0 and r.stdout.strip() == "true"
+
+
+def _record_claims_work_exhausted(record_path: str | None) -> bool:
+    """Read only the outer validator's retained claim. Stop legality is
+    independently recomputed by `_work_exhausted_checked`."""
+    if not record_path or not Path(record_path).is_file():
+        return False
+    try:
+        r = subprocess.run(["bb", "-e", _CLAIMS_WORK_EXHAUSTED_EDN, record_path],
                            capture_output=True, text=True, timeout=120)
     except (OSError, subprocess.TimeoutExpired):
         return False
@@ -1678,6 +1697,11 @@ def run(args) -> int:
                 else:
                     log(f"click {c['n']}: only acknowledged rows failed ({'; '.join(c['alert'])}); no bell")
             previous_alert = open_rows
+        if (c["outcome"] in DEBUG and c.get("run-record") and
+                _record_claims_work_exhausted(c["run-record"])):
+            return stop(args, "work-exhausted",
+                        f"outer selector exhausted work in {c['run-record']}", 0,
+                        {"run-record": c["run-record"]})
         if c["carried"]:
             quiet, fault_repairs = 0, []
             stopping_digest = None

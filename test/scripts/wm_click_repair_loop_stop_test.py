@@ -38,12 +38,13 @@ class SelfHealStopTest(unittest.TestCase):
             owner="owner", issuing_caller="caller", author="author",
             reviewer="reviewer", repair_reviewer="repair-reviewer")
 
-    def click(self, disposition, carried=False, click_id="click-1"):
+    def click(self, disposition, carried=False, click_id="click-1",
+              outcome="unknown", run_record=None):
         return {
             "n": 1, "rc": 1, "click-id": click_id, "spent": True,
-            "outcome": "unknown", "run-id": None, "carried": carried,
+            "outcome": outcome, "run-id": None, "carried": carried,
             "last-result": {"runtime-disposition": disposition},
-            "log": "unused", "run-record": None, "verdict": None,
+            "log": "unused", "run-record": run_record, "verdict": None,
             "alert": None, "why": None, "since-epoch": 0,
             "in-flight-repairs": [],
         }
@@ -150,6 +151,44 @@ class SelfHealStopTest(unittest.TestCase):
         with mock.patch.object(self.loop, "sh", side_effect=fake_sh):
             self.loop.notify(self.args, "debugger-error", False, "broken")
         self.assertIn("STOPPED [debugger-error/outside-repair]", sent["body"])
+
+    def outer_abstention_record(self, admitted, disposition):
+        record = self.loop.STATE / f"selection-{len(list(self.loop.STATE.iterdir()))}.edn"
+        record.write_text(
+            "{:selection-outcome {:status :abstained} "
+            ":outer/selection {:outer-field/admitted " + admitted + " "
+            ":refusal/disposition {:disposition :" + disposition + "}}}")
+        return str(record)
+
+    def test_retained_empty_work_exhaustion_stops_legally(self):
+        record = self.outer_abstention_record("[]", "loop-stop")
+        rc, calls, rows = self.run_with([
+            self.click({}, outcome="abstained", run_record=record)])
+        row = [r for r in rows if r.get("event") == "stop"][-1]
+        self.assertEqual(0, rc)
+        self.assertEqual(1, calls)
+        self.assertEqual("work-exhausted", row["case"])
+        self.assertTrue(row["legal"])
+
+    def test_false_work_exhaustion_claim_is_a_debugger_error(self):
+        record = self.outer_abstention_record('["still-live"]', "loop-stop")
+        rc, _, rows = self.run_with([
+            self.click({}, outcome="abstained", run_record=record)])
+        row = [r for r in rows if r.get("event") == "stop"][-1]
+        self.assertEqual(0, rc)
+        self.assertEqual("debugger-error", row["case"])
+        self.assertEqual("work-exhausted", row["claimed-case"])
+        self.assertFalse(row["legal"])
+
+    def test_debugger_disposition_falls_through_existing_path(self):
+        self.args.clicks = 1
+        record = self.outer_abstention_record('["still-live"]', "debugger-error")
+        rc, _, rows = self.run_with([
+            self.click({}, outcome="abstained", run_record=record)])
+        stops = [r for r in rows if r.get("event") == "stop"]
+        self.assertEqual(0, rc)
+        self.assertEqual("operator-override", stops[-1]["case"])
+        self.assertFalse(any(r.get("claimed-case") == "work-exhausted" for r in stops))
 
     def assert_typed_stop(self, disposition):
         rc, calls, rows = self.run_with([self.click(disposition)])
