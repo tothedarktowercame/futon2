@@ -119,6 +119,30 @@
     (is (= #{"M-open" "M-active" "M-partial" "M-unknown"}
            (set (map :id openes))))))
 
+(deftest checked-acceptance-contract-is-a-retained-open-census-exclusion
+  (write-primary-mission!
+   "futon0/holes/missions/M-checked.md"
+   (str "# Checked\n\n**Status:** OPEN\n\n"
+        "## Acceptance checklist\n\n- [x] first\n- [X] second\n"))
+  (write-primary-mission!
+   "futon0/holes/missions/M-unchecked.md"
+   (str "# Unchecked\n\n**Status:** OPEN\n\n"
+        "## Acceptance checklist\n\n- [x] first\n- [ ] second\n"))
+  (let [loaded (mr/load-missions *tmpdir*)
+        census (mr/open-mission-census loaded)
+        admitted (mr/open-missions loaded)
+        enumerated (ap/propose mr/mission-enumerator-proposer
+                               {:missions admitted})]
+    (is (= ["M-unchecked"] (mapv :id admitted)))
+    (is (= [{:id "M-checked"
+             :reason :open-mission-without-wants}]
+           (mapv #(select-keys % [:id :reason]) (:exclusions census))))
+    (is (= :empty
+           (get-in (first (:exclusions census)) [:mission/work-contract :status])))
+    (is (= (set (map :id (:open census)))
+           (set (map :target enumerated)))
+        "openTasks and the enumerated selection population share one census")))
+
 (deftest status-line-variants-are-classified-test
   (write-primary-mission! "futon0/holes/missions/M-plain.md"
                   (str "Status: DONE\n"

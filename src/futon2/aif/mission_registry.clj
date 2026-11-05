@@ -21,6 +21,7 @@
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.mission-hole-wants :as mission-wants]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.task-requisition :as task-requisition])
   (:import (java.io File)))
@@ -126,7 +127,7 @@
   "Explicit version of the mission status/gate classification rules. Change
    this value whenever those rules change; its digest is retained with every
    derived mission record so unchanged source files are reclassified."
-  "mission-classifier-v2-explicit-gate-lines")
+  "mission-classifier-v3-source-contract-census")
 
 (def mission-classifier-sha256
   (sha256-text mission-classifier-version))
@@ -245,6 +246,66 @@
   [mission-id status-class lines]
   (count (open-holes mission-id status-class lines)))
 
+(defn- code-root-for-mission-path
+  "The scan root above REPO for an admitted …/REPO/holes/[missions/]M-*.md."
+  [path]
+  (loop [f (.getParentFile (io/file path))]
+    (cond
+      (nil? f) nil
+      (= "holes" (.getName f)) (some-> f .getParentFile .getParent)
+      :else (recur (.getParentFile f)))))
+
+(defn- acceptance-checkboxes
+  "Checkbox lines under a recognised acceptance heading. This is evidence that
+  an empty existing want read is terminal, rather than a document still waiting
+  for a machine reading to discover its closure form."
+  [lines]
+  (loop [remaining (map-indexed (fn [i l] [(inc i) l]) lines)
+         active-level nil
+         out []]
+    (if-let [[line-no line] (first remaining)]
+      (let [level (heading-level line)
+            active-level (cond
+                           (re-find acceptance-heading-pattern line) level
+                           (and active-level level (<= level active-level)) nil
+                           :else active-level)]
+        (recur (rest remaining) active-level
+               (cond-> out
+                 (and active-level (re-find #"^[-*]\s+\[[ xX]\]\s+\S" line))
+                 (conj {:line line-no :checked? (boolean (re-find #"^[-*]\s+\[[xX]\]" line))
+                        :text (str/trim line)}))))
+      out)))
+
+(defn- source-contract-census
+  "Classify one already-read mission without another filesystem read.
+
+  The existing source reader decides whether work wants exist. An empty read is
+  conclusive only when the document supplies an explicit acceptance checkbox
+  surface and every item on it is checked; otherwise it remains :unknown so a
+  later reading can discover a closure form rather than being hidden."
+  [path text entry lines]
+  (let [code-root (code-root-for-mission-path path)
+        source (when code-root
+                 (mission-wants/mission-source code-root (assoc entry :text text)))
+        boxes (acceptance-checkboxes lines)
+        checked (filterv :checked? boxes)
+        unchecked (filterv (complement :checked?) boxes)]
+    (cond
+      (seq (:want source))
+      {:status :admitted :want-count (count (:want source))
+       :waiting-count (count (:unlocated source))}
+
+      (and (seq boxes) (empty? unchecked))
+      {:status :empty :want-count 0 :waiting-count 0
+       :reason :open-mission-without-wants
+       :evidence {:acceptance-checkboxes (count boxes)
+                  :checked-checkboxes (count checked)}}
+
+      :else
+      {:status :unknown :want-count 0
+       :waiting-count (count (:unlocated source))
+       :reason :source-contract-not-conclusive})))
+
 (defn- mission-doc->entry
   [path]
   (let [text (slurp path)
@@ -266,19 +327,24 @@
         operator-gated? (boolean (seq gate-lines))
         status-class (if operator-gated?
                        :operator-gated
-                       (classify-status status-line))]
-    {:id mission-id
-     :path path
-     :title (mission-title-from-lines mission-id lines)
-     :status-line status-line
-     :status-class status-class
-     :operator-gated? operator-gated?
-     :operator-gate-lines gate-lines
-     :requisition (task-requisition/read-state text)
-     :requisition-record? (task-requisition/requisition-record? {:text text})
-     :source {:path path :sha256 (sha256-text text)}
-     :open-holes (open-holes mission-id status-class lines)
-     :open-hole-count (open-hole-count mission-id status-class lines)}))
+                       (classify-status status-line))
+        entry {:id mission-id
+               :path path
+               :title (mission-title-from-lines mission-id lines)
+               :status-line status-line
+               :status-class status-class
+               :operator-gated? operator-gated?
+               :operator-gate-lines gate-lines
+               :requisition (task-requisition/read-state text)
+               :requisition-record? (task-requisition/requisition-record? {:text text})
+               :source {:path path :sha256 (sha256-text text)}
+               :open-holes (open-holes mission-id status-class lines)
+               :open-hole-count (open-hole-count mission-id status-class lines)}
+        contract (source-contract-census path text entry lines)]
+    (cond-> (assoc entry :mission/work-contract contract)
+      (and (= :empty (:status contract))
+           (not (contains? #{:complete :inactive :draft :operator-gated} status-class)))
+      (assoc :mission/unselectable-reason :open-mission-without-wants))))
 
 (defn mission-standing-observation
   "Read one mission task's pinned source and report contradictory current
@@ -397,6 +463,8 @@
          ;; discarded on each scan; a count cannot project into an outcome
          ;; domain and an item can. Omitted when empty (XTDB drops nil).
          :mission/open-holes (when (seq (:open-holes entry)) (vec (:open-holes entry)))
+         :mission/work-contract (:mission/work-contract entry)
+         :mission/unselectable-reason (:mission/unselectable-reason entry)
          :mission/classifier-sha256 mission-classifier-sha256
          :provenance/repo (repo-of code-root (:path entry))
          :provenance/path (:path entry)
@@ -408,7 +476,8 @@
    file is removed rather than inherited from an older classification."
   [:scope/role :mission/relation :mission/title :mission/status-line :mission/status-class
    :mission/operator-gated? :mission/operator-gate-lines :mission/requisition
-   :mission/open-hole-count :mission/open-holes :mission/classifier-sha256
+   :mission/open-hole-count :mission/open-holes :mission/work-contract
+   :mission/unselectable-reason :mission/classifier-sha256
    :provenance/repo :provenance/path :provenance/sha256])
 
 (defn- record-parse-props [props]
@@ -563,9 +632,12 @@
      :operator-gate-lines (vec (or (:mission/operator-gate-lines props) []))
      :requisition (or (:mission/requisition props) {:absent :not-ingested})
      :source {:path path :sha256 sha256}
-     :mission/unselectable-reason (when-not (and (string? path) (seq path)
-                                                  (string? sha256) (seq sha256))
-                                    :pathless-foreign-entity)
+     :mission/work-contract (:mission/work-contract props)
+     :mission/unselectable-reason
+     (or (:mission/unselectable-reason props)
+         (when-not (and (string? path) (seq path)
+                        (string? sha256) (seq sha256))
+           :pathless-foreign-entity))
      :open-hole-count (long (or (:mission/open-hole-count props) 0))
      :open-holes (vec (or (:mission/open-holes props) []))
      ;; A stored count with no stored items means this entity predates hole
@@ -727,9 +799,8 @@
          (reset! missions-cache {:at (System/currentTimeMillis) :code-root code-root :doc doc})
          doc)))))
 
-(defn live-mission?
-  "True when a loaded mission entry is eligible for WM `:open-mission`
-   enumeration/ranking."
+(defn- addressable-live-mission?
+  "True before applying a typed source-contract exclusion."
   [mission]
   (and (string? (:path mission))
        (seq (:path mission))
@@ -739,12 +810,37 @@
        (not (contains? #{:complete :inactive :draft :operator-gated}
                        (:status-class mission)))))
 
+(defn live-mission?
+  "True when a loaded mission entry is admitted to the canonical open census."
+  [mission]
+  (and (addressable-live-mission? mission)
+       (nil? (:mission/unselectable-reason mission))))
+
+(defn open-mission-census
+  "The single admitted open population and its retained typed exclusions.
+
+   Both Q1/openTasks and selection consume `open-missions`, which projects
+   `:open` from this census. Exclusions remain inspectable instead of silently
+   disappearing from the registry."
+  [loaded]
+  (let [missions (:missions loaded)]
+    {:open (vec (filter live-mission? missions))
+     :exclusions
+     (->> missions
+          (filter addressable-live-mission?)
+          (keep (fn [mission]
+                  (when-let [reason (:mission/unselectable-reason mission)]
+                    (cond-> (select-keys mission [:id :path :status-class
+                                                  :mission/work-contract])
+                      true (assoc :reason reason)))))
+          vec)}))
+
 (defn open-missions
   "Filter loaded missions to those that are live. Zero-arg variant
    scans the default code root; one-arg variant accepts a pre-loaded doc."
   ([] (open-missions (load-missions)))
   ([loaded]
-   (vec (filter live-mission? (:missions loaded)))))
+   (:open (open-mission-census loaded))))
 
 (defn mission-target-id
   "Normalize a mission action target to the file-backed registry id when possible.
