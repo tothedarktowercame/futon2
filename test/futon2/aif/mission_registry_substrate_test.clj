@@ -380,3 +380,25 @@
           (is (= mr/mission-classifier-sha256 (:mission/classifier-sha256 props)))))
       (finally
         (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
+
+(deftest all-checked-open-mission-is-excluded-after-the-substrate-round-trip
+  ;; WANTSEMPTY-2 review: the selector reads missions from substrate, not
+  ;; files, so the exclusion must survive ingest -> store -> substrate read.
+  (let [root (str (java.nio.file.Files/createTempDirectory
+                   "mission-empty-contract" (make-array java.nio.file.attribute.FileAttribute 0)))
+        dir (doto (io/file root "somerepo" "holes" "missions") .mkdirs)
+        write! (fn [id body] (let [f (io/file dir (str id ".md"))]
+                               (spit f (str "# " id "\n\n**Status:** OPEN\n\n## Acceptance checklist\n\n" body))
+                               (.getAbsolutePath f)))
+        store (atom {})]
+    (doseq [path [(write! "M-checked" "- [x] first\n- [x] second\n")
+                  (write! "M-unchecked" "- [x] first\n- [ ] second\n")]]
+      (with-redefs [substrate/entities-by-type (fn [& _] [])
+                    substrate/put-doc! (fn [doc & _] (swap! store assoc (:entity/external-id doc) doc) doc)]
+        (mr/upsert-mission-record! {:code-root root :path path})))
+    (with-substrate-entities
+      (vec (vals @store))
+      #(let [loaded (mr/load-missions-from-substrate)]
+         (is (= ["M-unchecked"] (mapv :id (mr/open-missions loaded))))
+         (is (= [["M-checked" :open-mission-without-wants]]
+                (mapv (juxt :id :reason) (:exclusions (mr/open-mission-census loaded)))))))))
