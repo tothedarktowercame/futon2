@@ -28,10 +28,11 @@
   {:outcome :grounded-change :grounded? true :artifact-only? false
    :occurrence occurrence :route-attestation route
    :route-attestation-ref {:status :present :path "/fixture" :sha256 (identity/digest route)}})
-(defn result [close & {:keys [route focus declaration expected-digests]
+(defn result [close & {:keys [route focus outer-selection declaration expected-digests]
                        :or {route (:route-attestation close)}}]
   (kernel/classify (cond-> {:close close :occurrence occurrence
                             :route-attestation route :focus-receipt focus}
+                     outer-selection (assoc :outer-selection outer-selection)
                      declaration (assoc :declaration declaration)
                      expected-digests (assoc :expected-digests expected-digests))))
 
@@ -44,8 +45,22 @@
                                           :route nil :focus (focus facet))))))
   (let [failure (assoc base-close :outcome :build-failed :grounded? false
                        :route-attestation nil :failure-kind :compiler-refusal)]
-    (is (= :known-typed-failure (:class (result failure :route nil))))
+    (is (= :stop-the-line (:class (result failure :route nil))))
+    (is (= :compiler-refusal (:failure-kind (result failure :route nil))))
     (is (= :unknown (:class (result (dissoc failure :failure-kind) :route nil))))))
+
+(deftest typed-failure-keeps-attempted-target-facet-separate-from-ending
+  (let [failure (assoc base-close :outcome :guardrail-refusal :grounded? false
+                       :route-attestation nil :failure-kind :guardrail-refusal)
+        receipt (result failure :route nil
+                        :outer-selection
+                        {:selection {:selected {:target target}}
+                         :selected-relation :focus})]
+    (is (= :stop-the-line (:class receipt)))
+    (is (= :guardrail-refusal (:failure-kind receipt)))
+    (is (= {:target target :class :focus :ending-class :focused}
+           (:facet receipt)))
+    (is (nil? (:attestation receipt)))))
 
 (deftest refusals-are-not-unknown
   (let [digest (identity/digest (kernel/projection base-close (kernel/declaration)))]
@@ -139,10 +154,10 @@
                      :when (not (contains? (get-in close [:payload :judgment])
                                            :run-ending-classification))]
                  [(subs (.getPath file) (count prefix)) (kernel/classify {:close close})])
-        known (into {} (for [[path r] legacy :when (= :known-typed-failure (:class r))]
+        known (into {} (for [[path r] legacy :when (= :stop-the-line (:class r))]
                          [path (:failure-kind r)]))]
     (is (<= 124 (count legacy)))
-    (is (every? #{:unknown :known-typed-failure} (map (comp :class second) legacy)))
+    (is (every? #{:unknown :stop-the-line} (map (comp :class second) legacy)))
     (is (= discovery-known-failures known))))
 
 (deftest recorded-occurrence-cohort-form-is-the-same-identity
@@ -167,7 +182,7 @@
         occ (edn/read-string (slurp (str dir "occurrence.edn")))
         r (kernel/classify {:close close :occurrence occ})]
     (is (= :recorded (:status r)) (pr-str (select-keys r [:kind :detail])))
-    (is (= :known-typed-failure (:class r)))
+    (is (= :stop-the-line (:class r)))
     (is (= :explanation-invalid (:failure-kind r)))))
 
 (def attempt-002-root
@@ -198,5 +213,5 @@
            grounded-commit))
     (is (= :related (:class classified)) (pr-str classified))
     (is (= grounded-commit (get-in classified [:close-projection :grounded-commit])))
-    (is (= :known-typed-failure (:class unqualified)))
+    (is (= :stop-the-line (:class unqualified)))
     (is (= :already-satisfied (:failure-kind unqualified)))))

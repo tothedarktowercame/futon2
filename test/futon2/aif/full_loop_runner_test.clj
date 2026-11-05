@@ -6958,7 +6958,7 @@
     (is (= retained-names admitted-retained))
     (is (run-ending/verify-close close receipt))
     (is (= (:class (run-ending/classify {:close close})) (:class receipt)))
-    (is (= :known-typed-failure (:class receipt)))
+    (is (= :stop-the-line (:class receipt)))
     (is (= :explanation-invalid (:failure-kind receipt)))))
 
 (deftest failure-close-evidence-reclassifies-final-judgment
@@ -6979,7 +6979,7 @@
       (spit prior-receipt "{:schema :test/prior-receipt}")
       (let [{:keys [run-ending manifest]}
             (#'runner/failure-close-evidence! events root :cohort "attempt" judgment)]
-        (is (= :known-typed-failure (:class run-ending)))
+        (is (= :stop-the-line (:class run-ending)))
         (is (= :explanation-invalid (:failure-kind run-ending)))
         (is (= #{"cohort/attempt/001-time-step.edn"
                  "cohort/attempt/retained/token-outcome.edn"
@@ -7996,7 +7996,7 @@
                       {} root :cohort "attempt" "target"
                       {:run-ending-entry (:entry retained)})
             entry (first (:entries manifest))]
-        (is (= :known-typed-failure (get-in retained [:receipt :class])))
+        (is (= :stop-the-line (get-in retained [:receipt :class])))
         (is (= "cohort/attempt/retained/run-ending-classification.edn"
                (:evidence/id entry)))
         (is (= (:receipt retained) (edn/read-string (slurp (:source-path entry)))))

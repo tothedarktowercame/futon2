@@ -118,7 +118,7 @@
                 qualified-already-satisfied? :unknown
                 (and increment facet) (get-in d [:facet-map facet])
                 increment :unknown
-                typed-failure? :known-typed-failure
+                typed-failure? :stop-the-line
                 :else :unknown)
         missing (when (= :unknown class)
                   (vec (concat
@@ -132,7 +132,7 @@
     {:schema :wm/run-ending-classification-receipt-v1
      :kernel/id (:kernel/id d) :mode :record-only :status :recorded
      :class class :missing missing
-     :failure-kind (when (= class :known-typed-failure) (:failure-kind judgment))
+     :failure-kind (when (= class :stop-the-line) (:failure-kind judgment))
      :identity ids
      :close-projection (projection judgment d)
      :close-projection-sha256 (projection-digest judgment d)

@@ -107,7 +107,7 @@
                  :failure-kind :reviewer-falsifier-failed}
           classed (run-ending/classify {:close close})]
       (is (= :recorded (:status classed)))
-      (is (= :known-typed-failure (:class classed)))
+      (is (= :stop-the-line (:class classed)))
       (is (= :reviewer-falsifier-failed (:failure-kind classed)))))
   (testing "loop-node retention refusals are evidence, not a veto"
     (let [loop-receipt (loop-node-exercise/receipt {})]

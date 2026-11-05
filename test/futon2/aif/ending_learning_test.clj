@@ -40,7 +40,7 @@
   (assoc (outer-state/init-state makeup) :pending pending))
 
 (deftest unclassified-ending-defers-resolution-without-consumption
-  (let [ending (failure-fixture/known-typed-failure-ending)
+  (let [ending (failure-fixture/nonterminal-ending)
         before (state-with-pending)
         resolved (with-redefs-fn
                    {#'runtime/pending-run-ending (constantly ending)
@@ -52,6 +52,21 @@
     (is (= :terminal-ending-class-absent (:reason resolved)))
     (is (= before (:state resolved)))
     (is (nil? (get-in resolved [:state :outer/consumptions run-id])))))
+
+(deftest typed-failure-ending-is-consumed-once
+  (let [ending (failure-fixture/typed-failure-ending)
+        before (state-with-pending)
+        resolved (with-redefs-fn
+                   {#'runtime/pending-run-ending (constantly ending)
+                    #'runtime/previous-giraffe-observation
+                    (fn [_ _ _] observation)}
+                   #(#'runtime/resolve-pending-learning
+                     {} makeup before nil observation))]
+    (is (= :applied (:status resolved)))
+    (is (= :stop-the-line (:ending-class resolved)))
+    (is (nil? (get-in resolved [:state :pending])))
+    (is (= :stop-the-line
+           (get-in resolved [:state :outer/consumptions run-id :ending :ending-class])))))
 
 (deftest durable-consumption-requires-a-terminal-ending-class
   (let [before (state-with-pending)

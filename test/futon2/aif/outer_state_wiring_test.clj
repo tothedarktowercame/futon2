@@ -198,7 +198,7 @@
                      #(#'runtime/resolve-pending-learning
                        {:run-record-dir (.getPath records)} makeup state current-dir
                        current-observation))]
-      (is (= :known-typed-failure (:class unqualified)))
+      (is (= :stop-the-line (:class unqualified)))
       (is (= :deferred (:status deferred)))
       (is (= :terminal-ending-class-absent (:reason deferred)))
       (is (= state (:state deferred))))))

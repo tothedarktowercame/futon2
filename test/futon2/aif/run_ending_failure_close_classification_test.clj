@@ -108,7 +108,7 @@
          (is (= :wm/run-ending-classification-receipt-v1 (:schema receipt)))
          (is (= :recorded (:status receipt)))
          ;; Typed failure details preserved; nothing turned into a success.
-         (is (= :known-typed-failure (:class receipt)))
+         (is (= :stop-the-line (:class receipt)))
          (is (= :cohort-checkpoint-oversized (:failure-kind receipt)))
          (is (nil? (:missing receipt)))
          (is (nil? (get-in receipt [:identity :occurrence])))
@@ -123,10 +123,9 @@
          (is (nil? (get-in result [:data :retention-inputs])))
          (is (nil? (get-in result [:data :evidence-manifest]))))))))
 
-(defn known-typed-failure-ending
-  "Read a content-verified completed fixture whose producer classification is
-  known-typed-failure rather than a terminal outer EndingClass."
-  []
+(defn retained-ending
+  "Read a content-verified completed fixture with RECEIPT republished."
+  [receipt]
   ;; Reuses the outer-consumption fixture's real record/stream/index shape;
   ;; only the classification receipt is replaced and its pin re-published.
   (let [source (.getParentFile (io/file (io/resource "fixtures/outer-consumption/README.md")))
@@ -146,12 +145,11 @@
                                          "2026-10-29-f74df9cc-c27b-420b-91ec-7a32db708c41"
                                          ".edn"))
           index (io/file root "reading-policy-class-history-index.ednl")
-          receipt {:schema :wm/run-ending-classification-receipt-v1
-                   :kernel/id :wm/run-ending-classification-kernel-v1
-                   :mode :record-only :status :recorded
-                   :class :known-typed-failure
-                   :failure-kind :dispatch-failed :missing []
-                   :identity {:occurrence nil}}]
+          receipt (merge {:schema :wm/run-ending-classification-receipt-v1
+                          :kernel/id :wm/run-ending-classification-kernel-v1
+                          :mode :record-only :status :recorded
+                          :missing [] :identity {:occurrence nil}}
+                         receipt)]
       (spit record-file
             (pr-str (assoc (edn/read-string (slurp record-file))
                            :run-ending-classification receipt)))
@@ -163,17 +161,32 @@
       (pending/observe
        root "2026-10-29-f74df9cc-c27b-420b-91ec-7a32db708c41"))))
 
+(defn nonterminal-ending []
+  (retained-ending {:class :unknown :failure-kind :dispatch-failed}))
+
+(defn typed-failure-ending []
+  (retained-ending {:class :stop-the-line :failure-kind :dispatch-failed
+                    :facet {:target "M-selected" :class :focus
+                            :ending-class :focused}}))
+
 (deftest retained-unclassified-receipt-defers-learning
   (isolated
    (fn []
-     ;; known-typed-failure is not a terminal R20Step EndingClass. Lean Q7's
-     ;; honest projection leaves it pending and does not apply learning.
-     (let [ending (known-typed-failure-ending)]
+     ;; A genuinely non-terminal producer class remains deferred under ENDING-2.
+     (let [ending (nonterminal-ending)]
        (is (= :deferred (:status ending)))
        (is (= :terminal-ending-class-absent (:reason ending)))
        (is (not (contains? ending :ending-class)))
        (is (= :terminal-ending-class-unavailable
               (get-in ending [:classification-absence :reason])))
-       (is (= :known-typed-failure
+       (is (= :unknown
               (get-in ending [:classification-absence :recorded-class])))
        (is (= true (get-in ending [:classification-absence :completed])))))))
+
+(deftest retained-typed-failure-is-a-ready-stop-the-line-ending
+  (isolated
+   (fn []
+     (let [ending (typed-failure-ending)]
+       (is (= :ready (:status ending)))
+       (is (= :stop-the-line (:ending-class ending)))
+       (is (not (contains? ending :classification-absence)))))))
