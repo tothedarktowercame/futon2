@@ -503,6 +503,70 @@ class ContinuousModeTest(unittest.TestCase):
         click = next(row for row in result["rows"] if row["event"] == "click")
         self.assertEqual(why, click["why"])
 
+    def test_cost_receipt_written_once_at_click_close_with_typed_absence(self):
+        loop = load_loop()
+        run_record = '''
+{:registered-run/timing
+ {:phase-timings-ms {:selection 17 :author-wait 23}
+  :debugger-stopped-ms 5
+  :debugger-stopped-by-phase-ms {:selection 5}
+  :debugger-dwell-status :complete}
+ :registered-run/model-usage
+ {:status :complete :source :wm-run-local-agency-ledger :unit :tokens
+  :input-tokens 100 :output-tokens 20 :total-tokens 120
+  :jobs [{:job-id "job-1" :role {:agent "wm-author"}
+          :phase :author-wait :status :complete :unit :tokens
+          :input-tokens 100 :output-tokens 20 :total-tokens 120}]}}
+'''
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            record_path = root / "tick-run-record-run-1.edn"
+            record_path.write_text(run_record)
+            ledger = root / "ledger.jsonl"
+            ordinary = {
+                "n": 1, "click-id": "wm-click-1", "run-id": "run-1",
+                "run-record": str(record_path),
+            }
+            not_launched = {
+                "n": 2, "click-id": None, "run-id": None, "run-record": None,
+            }
+            with mock.patch.object(loop, "LEDGER", ledger), \
+                 mock.patch.object(loop, "F2", ROOT):
+                loop.record_cost_receipt(ordinary, 321)
+                loop.record({"event": "click", "click-id": "wm-click-1"})
+                loop.record_cost_receipt(ordinary, 999)
+                loop.record_cost_receipt(not_launched, 45)
+                loop.record({"event": "click", "click-id": None})
+
+            rows = [json.loads(line) for line in ledger.read_text().splitlines()]
+            receipts = [row for row in rows if row["event"] == "cost-receipt"]
+            self.assertEqual(2, len(receipts))
+            self.assertEqual(["cost-receipt", "click", "cost-receipt", "click"],
+                             [row["event"] for row in rows])
+            receipt = receipts[0]
+            self.assertEqual(321, receipt["wall"]["total-ms"])
+            phases = {phase["phase"]: phase for phase in receipt["wall"]["phases"]}
+            self.assertEqual(17, phases["selection"]["wall-ms"])
+            self.assertEqual(23, phases["author-wait"]["wall-ms"])
+            self.assertEqual(5, receipt["wall"]["debugger"]["debugger-stopped-ms"])
+            self.assertEqual(120, receipt["model-usage"]["totals"]["total-tokens"])
+            job = next(call for call in receipt["model-usage"]["calls"]
+                       if call.get("job-id") == "job-1")
+            self.assertEqual(120, job["total-tokens"])
+            missing = [call for call in receipt["model-usage"]["calls"]
+                       if call.get("status") == "typed-missing"]
+            self.assertTrue(missing)
+            self.assertTrue(all("total-tokens" not in call for call in missing))
+            self.assertTrue(all(call["reason"] == "job-id-not-retained" for call in missing))
+            self.assertEqual("not-applicable",
+                             next(call for call in receipt["model-usage"]["calls"]
+                                  if call["role"] == "selection")["status"])
+            absent = receipts[1]
+            self.assertEqual("typed-missing", absent["run-id"]["status"])
+            self.assertEqual(45, absent["wall"]["total-ms"])
+            self.assertEqual("typed-missing", absent["wall"]["phases"][0]["status"])
+            self.assertNotIn("wall-ms", absent["wall"]["phases"][0])
+
     def test_repeated_signature_pauses_the_loop_once_the_fix_is_due(self):
         r = self.run_continuous([{"alert": ["work Q7 violated"]},
                                  {"alert": ["work Q7 violated"]},

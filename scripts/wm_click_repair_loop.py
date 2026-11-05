@@ -123,6 +123,147 @@ def record(row: dict) -> None:
         fh.write(json.dumps({"at": now(), **row}, ensure_ascii=False) + "\n")
 
 
+RUN_COST_PROJECTION = r'''
+(require '[clojure.edn :as edn] '[cheshire.core :as json])
+(let [path (System/getenv "WM_COST_RECORD_PATH")
+      record (edn/read-string (slurp path))]
+  (println (json/generate-string
+            (select-keys record
+                         [:registered-run/timing :registered-run/model-usage]))))
+'''
+
+CLICK_ENVELOPE_PHASES = [
+    "reset", "source-giraffe", "heap-tripwire", "admission", "child-wait",
+    "ownership", "requirements-report-card",
+]
+
+MODEL_CALL_GAPS = [
+    "readiness-author", "meta-diagnosis", "meta-acceptance-proposal",
+    "meta-acceptance-review", "meta-repair-author", "meta-repair-reviewer",
+]
+
+
+def run_cost_projection(run_record: str | None) -> dict:
+    """Read only the two cost-bearing run fields through Clojure's EDN reader.
+
+    Live run records are large, single-line EDN. Python deliberately never
+    reads or regex-parses that text; the subprocess returns one bounded JSON
+    projection. An absent/unreadable record is typed by the receipt builder.
+    """
+    if not run_record or not Path(run_record).is_file():
+        return {}
+    env = os.environ.copy()
+    env["WM_COST_RECORD_PATH"] = str(Path(run_record).resolve())
+    result = subprocess.run(
+        ["clojure", "-M", "-e", RUN_COST_PROJECTION], cwd=F2, env=env,
+        capture_output=True, text=True, timeout=120)
+    if result.returncode != 0:
+        return {"projection-error": "run-record-cost-projection-failed"}
+    try:
+        value = json.loads(result.stdout)
+        return value if isinstance(value, dict) else {
+            "projection-error": "run-record-cost-projection-invalid"}
+    except (TypeError, json.JSONDecodeError):
+        return {"projection-error": "run-record-cost-projection-invalid"}
+
+
+def _typed_missing(reason: str) -> dict:
+    return {"status": "typed-missing", "reason": reason}
+
+
+def cost_receipt(click: dict, total_ms: int) -> dict:
+    projection = run_cost_projection(click.get("run-record"))
+    timing = projection.get("registered-run/timing")
+    usage = projection.get("registered-run/model-usage")
+    timing = timing if isinstance(timing, dict) else {}
+    usage = usage if isinstance(usage, dict) else {}
+
+    phases = []
+    phase_timings = timing.get("phase-timings-ms")
+    if isinstance(phase_timings, dict):
+        phases.extend({"phase": phase, "status": "complete", "wall-ms": duration,
+                       "source": "run-record"}
+                      for phase, duration in phase_timings.items()
+                      if isinstance(duration, int) and duration >= 0)
+    elif click.get("run-record"):
+        phases.append({"phase": "ordinary-run", **_typed_missing(
+            "run-record-phase-timings-unavailable")})
+    else:
+        phases.append({"phase": "meta-self-heal", **_typed_missing(
+            "phase-duration-not-retrievable")})
+    phases.extend({"phase": phase, **_typed_missing("not-yet-instrumented")}
+                  for phase in CLICK_ENVELOPE_PHASES)
+
+    debugger = {key: timing[key] for key in
+                ("debugger-stopped-ms", "debugger-stopped-by-phase-ms",
+                 "debugger-dwell-status", "debugger-dwell-errors")
+                if key in timing}
+    if not debugger:
+        debugger = _typed_missing("run-record-debugger-dwell-unavailable")
+
+    calls = []
+    for job in usage.get("jobs", []) if isinstance(usage.get("jobs"), list) else []:
+        if isinstance(job, dict):
+            calls.append(job)
+    calls.append({"role": "selection", "status": "not-applicable",
+                  "reason": "in-process-non-model-selection"})
+    calls.extend({"role": role, **_typed_missing("job-id-not-retained")}
+                 for role in MODEL_CALL_GAPS)
+
+    numeric_totals = {key: usage[key] for key in
+                      ("input-tokens", "output-tokens", "total-tokens",
+                       "cached-input-tokens", "uncached-input-tokens")
+                      if isinstance(usage.get(key), int) and usage[key] >= 0}
+    totals = {"status": "partial", **numeric_totals,
+              "missing-call-count": len(MODEL_CALL_GAPS)}
+    usage_status = usage.get("status")
+    model_usage = {
+        "status": "partial",
+        "source-status": usage_status if isinstance(usage_status, str) else "typed-missing",
+        "unit": "tokens", "calls": calls, "totals": totals,
+    }
+    if not usage:
+        model_usage["source-reason"] = (projection.get("projection-error") or
+                                        "run-record-model-usage-unavailable")
+    elif usage.get("reason"):
+        model_usage["source-reason"] = usage["reason"]
+
+    run_id = click.get("run-id")
+    return {
+        "schema": "wm/click-cost-receipt-v1", "event": "cost-receipt",
+        "click-id": click.get("click-id"), "click-number": click.get("n"),
+        "run-id": ({"status": "present", "value": run_id} if run_id else
+                   _typed_missing("run-id-unavailable")),
+        "wall": {"status": "complete", "unit": "ms", "total-ms": total_ms,
+                 "phases": phases, "debugger": debugger},
+        "model-usage": model_usage,
+    }
+
+
+def cost_receipt_recorded(click: dict) -> bool:
+    """Idempotence by click id, or by loop ordinal before admission minted one."""
+    if not LEDGER.is_file():
+        return False
+    for line in LEDGER.read_text(errors="replace").splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if row.get("event") != "cost-receipt":
+            continue
+        if click.get("click-id") is not None:
+            if row.get("click-id") == click["click-id"]:
+                return True
+        elif row.get("click-id") is None and row.get("click-number") == click.get("n"):
+            return True
+    return False
+
+
+def record_cost_receipt(click: dict, total_ms: int) -> None:
+    if not cost_receipt_recorded(click):
+        record(cost_receipt(click, total_ms))
+
+
 def _plain(value):
     """Normalize JSON strings and EDN-like keyword strings for comparison."""
     return value[1:] if isinstance(value, str) and value.startswith(":") else value
@@ -1286,13 +1427,16 @@ def run(args) -> int:
                     "attached": attached, "stop-count": len(stops_after_attach)})
             return stop(args, reason, 1)
         log(f"click {spent + 1}: debugger attached={attached}")
+        fire_started_ns = time.monotonic_ns()
         c = fire(spent + 1, args, since)
+        fire_wall_ms = max(0, (time.monotonic_ns() - fire_started_ns) // 1_000_000)
         since = c.pop("since-epoch")
         spent += 1 if c["spent"] else 0
         if c["carried"]:
             ticks += 1
         log(f"click {c['n']}: {c['click-id']} outcome={c['outcome']} run={c['run-id']} "
             f"carried={c['carried']} rc={c['rc']}  [spent {spent}/{args.clicks}, carrying {ticks}/{args.ticks}]")
+        record_cost_receipt(c, fire_wall_ms)
         record({"event": "click", **{k: v for k, v in c.items() if k != "last-result"},
                 "last-result": c["last-result"], "spent-total": spent, "carrying-total": ticks})
         failure = machine_self_heal_failure(c)
