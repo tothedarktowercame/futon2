@@ -303,3 +303,70 @@ The handoff model has three parts, and refusals get the same three:
 - [ ] REFUSAL-SITES-1, read-only survey (codex-15, `invoke-1793894251861-12942-5c54ed0b`). For each site: anchor, kinds, proposed case, and which RefusalLegality fields it has evidence for. Also the choke points and the paths that bypass them, cross-click exclusion today, and the operator-brief writer.
 - [ ] REFUSAL-INDEX-1: `refusal-sites.edn` plus an audit test that fails when a production refusal site is not indexed.
 - [ ] REFUSAL-VALIDATOR-1: one adapter at the choke point that computes `disposition`. A debugger error holds the run when attached. A click terminal records its exclusion (and its brief entry for a question). A loop stop needs its evidence.
+
+### REFUSAL-SITES-1 result (codex-15, reviewed 2026-11-05)
+
+Findings: `~/notes/wm-next/tests/REFUSAL-SITES-1-findings.md`. I spot-checked
+two anchors (the guardrail refusal map, `require-novel!`) and one bypass (the
+Python `stop()` at `scripts/wm_click_repair_loop.py:1490-1494`, which logs,
+records and notifies, and validates nothing).
+
+- **Three terminal domains, no shared validator:**
+  - the Clojure attempt close (`close-core!`, `full_loop_runner.clj`
+    ~7752, with fallback ~8548);
+  - the Python repair-loop `stop()`, which has 18 call sites;
+  - the legacy shell loop `scripts/wm_click_loop.sh`, which has a STOP-file
+    check only.
+- **What is legal today:**
+  - L1: only `:empty-field`.
+  - L2, when the operator signal is retained: the STOP file, the operator
+    abort at a breakpoint, and the bounded `--clicks` run.
+  - `:operator-cancelled` is L2 only if Agency proves that an operator
+    cancelled. Today every cancelled job gets that kind.
+  - No C1, C2 or C3 site carries the full evidence:
+    - `:already-satisfied` has neither a measurement nor an exclusion;
+    - `:guardrail-refusal` accepts any non-blank prose;
+    - no refusal writes its question to the Morning Brief.
+- **Exclusion today:** there is no persistent C1 or C3 exclusion. Q6
+  reselection is click-local by design. The nearest carrier is
+  `effective_run_history.clj` (blocking on measured finished work), which
+  explicitly does not count legacy `:already-satisfied`.
+- **The brief:** `morning_brief.clj` `queue-item!` exists, but no refusal
+  reaches it.
+- **The supervisor's 16 other stop reasons** (repair budget, self-heal failed,
+  reload failing, stall wall, ...) are debugger errors escalated to outside
+  repair. They are not legal stops, and the validator should label them so.
+
+### Build order (proposed)
+
+1. **REFUSAL-INDEX-1.** Write `resources/wm/refusal-sites.edn` from the
+   survey rows: id, source, anchor, kinds, case, and evidence fields. The
+   audit test does three things: each anchor occurs once; every `stop(`
+   call in the Python supervisor and every refusal constructor in the
+   runner is indexed; and every C or L row cites
+   `RefusalLegality.disposition`.
+2. **REFUSAL-VALIDATOR-1 (Clojure).** Write `futon2.aif.refusal-legality`,
+   corresponding to `RefusalLegality.lean`. It runs at `close-core!` before a
+   refusal outcome is accepted. When the disposition is a debugger error, the
+   attached debugger holds. Evidence fields come from the click's carriers;
+   none are inferred from the keyword.
+3. **REFUSAL-VALIDATOR-2 (supervisor).** `stop()` takes a typed case.
+   - L2 needs the STOP file or the CLI budget.
+   - L1 needs the run record's scored field.
+   - Every other reason is labelled `:debugger-error/outside-repair` in the
+     record and the notification.
+   - The legacy shell loop is retired, or its stops go through the same
+     check.
+4. **C1-EXCLUSION-1.** A persistent exclusion row keyed by target and
+   evidence digest, consumed by preselection. It becomes
+   `RefusalLegality.nextField`, and is lifted when the digest changes.
+   `:already-satisfied` needs a measured satisfaction to qualify.
+5. **C2-BRIEF-1.** The question carrier: the cited ambiguity and two
+   readings, sent to `morning_brief/queue-item!`, plus the exclusion until
+   answered.
+6. **C3-HARM-1.** Named harm rules. A guardrail refusal qualifies only by
+   matching one.
+
+Until 4-6 land, the validator classes every C-looking refusal as a debugger
+error, as the survey predicts. That is the intended interim state: those
+refusals hold for repair instead of quietly ending clicks.
