@@ -509,6 +509,15 @@ records and notifies, and validates nothing).
      today). A field emptied by an ingest defect stays a refusal. This is
      stricter than `loopStopLegal`, so it cannot stop the loop on a case
      the Lean calls illegal.
+   - OUTER-L1-REACH merged as `345ebdfb9` (codex-15), with the test fix
+     `52c4a38de`. When every target is removed by a `:c1-already-satisfied`
+     exclusion, the runtime catches the selector's
+     `:outer-score/no-admitted-tasks` refusal and returns the no-target result
+     with `:loop-stop`. It does not hold, even with the debugger attached. A
+     field emptied by a mix of C1 and defect exclusions still throws.
+     The fix makes the test read the supervisor's own two predicates from the
+     script instead of a copied string, and adds the attached-debugger case.
+     On main's source both new tests fail; on the change they pass.
    - C1-EXCLUSION-2b (write side) went to codex-18.
 5. **C2-BRIEF-1.** The question carrier: the cited ambiguity and two
    readings, sent to `morning_brief/queue-item!`, plus the exclusion until
