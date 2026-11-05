@@ -118,8 +118,10 @@ WRITE_ROOTS = list(dict.fromkeys(
     path.resolve() for path in
     [*CANONICAL_FUTON_ROOTS,
      F2 / "data", F2 / "evidence", F3C / "data",
-     Path.home() / "worktrees" / "futon2" / "self-heal", Path("/tmp")]
-    if path.is_dir()))
+     Path.home() / "worktrees" / "futon2" / "self-heal", Path("/tmp")]))
+# No is_dir() filter here: the loop is long-running and a root created after
+# start (self-heal appears with the first META injury) must still be walked.
+# snapshot_write_roots skips a root that does not exist yet.
 WRITE_PRUNED_DIRS = {".git", "target", ".cpcache", ".cache", "node_modules", ".lake"}
 WRITE_HASH_LIMIT = 64 * 1024 * 1024
 # The click's code: what a repair may change and what a reload must pick up.
@@ -148,7 +150,9 @@ def snapshot_write_roots() -> tuple[dict[str, tuple[int, int]], float]:
     started = time.monotonic()
     snapshot = {}
     walked_roots = []
-    for root in WRITE_ROOTS:
+    # Shortest path first, so a parent root is walked before any root nested
+    # in it, whatever order WRITE_ROOTS lists them in.
+    for root in sorted(WRITE_ROOTS, key=lambda p: (len(Path(p).parts), str(p))):
         try:
             resolved_root = root.resolve()
             root_is_dir = resolved_root.is_dir()

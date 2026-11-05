@@ -83,6 +83,41 @@ class RepairLoopCastTest(unittest.TestCase):
             self.assertIn(str(normal.resolve()), snapshot)
             self.assertGreaterEqual(seconds, 0)
 
+    def test_snapshot_write_roots_real_bad_cases(self):
+        # claude-6 review: real filesystem cases, no mocked walk.
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "repo"
+            nested = root / "data"
+            nested.mkdir(parents=True)
+            (nested / "row.edn").write_text("x")
+            (root / "loop").symlink_to(root, target_is_directory=True)
+            locked = root / "locked"
+            locked.mkdir()
+            (locked / "hidden.txt").write_text("h")
+            (root / ".git").mkdir()
+            (root / ".git" / "HEAD").write_text("ref")
+            later = Path(td) / "created-later"
+            os.chmod(locked, 0)
+            try:
+                # nested root listed before its parent, a root that does not
+                # exist yet, a symlink loop and an unreadable directory
+                with mock.patch.object(loop, "WRITE_ROOTS",
+                                       [nested, root, later]), \
+                     mock.patch.object(loop.os, "walk",
+                                       wraps=loop.os.walk) as walked:
+                    snapshot, _ = loop.snapshot_write_roots()
+                    later.mkdir()
+                    (later / "new.txt").write_text("n")
+                    again, _ = loop.snapshot_write_roots()
+            finally:
+                os.chmod(locked, 0o700)
+            names = sorted(Path(p).relative_to(td).as_posix() for p in snapshot)
+            self.assertEqual(["repo/data/row.edn"], names)
+            self.assertIn(str(later / "new.txt"), again)
+            # root once, nested skipped; then root and later
+            self.assertEqual(3, walked.call_count)
+
     def test_click_write_manifest_registers_window_changes_and_ledger_pin(self):
         loop = load_loop()
         real_data = ROOT / "data"
