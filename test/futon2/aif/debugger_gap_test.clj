@@ -216,6 +216,11 @@
              {:job-id "job-1" :state "failed" :terminal-code "invoke-error"})))
   (is (empty? (debugger/stopped))))
 
+(deftest attached-re-review-wait-stops-on-unretried-failure
+  (exercise-named-condition-attached
+   :re-review-wait runner/re-review-wait-terminal-condition
+   {:job-id "job-1" :state "timed-out"} :untyped-failure))
+
 (deftest attached-claim-reviewer-wait-stops-and-retries
   (exercise-named-condition-attached
    :reviewer-wait #(runner/claim-reviewer-wait-terminal-condition "job-1" %)
