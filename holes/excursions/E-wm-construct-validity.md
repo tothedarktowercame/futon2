@@ -392,6 +392,17 @@ records and notifies, and validates nothing).
      record and the notification.
    - The legacy shell loop is retired, or its stops go through the same
      check.
+   *Progress (2026-11-05):* this landed as `2b5326a24` (codex-18), with the
+   fix `533c46305`.
+   - Each of the 18 `stop()` calls passes one literal case and its evidence.
+   - A legal-stop claim whose evidence fails is recorded as `debugger-error`,
+     with `claimed-case` kept.
+   - Every repair, reload, launch or crash stop, the stall stop, and the "no
+     G below abstention" stop are recorded as `debugger-error/outside-repair`.
+   - The fix reads the run record as EDN. The earlier text scan let an
+     admitted field of `nil`, or a nested one, pass as an empty field.
+   - No call site claims `work-exhausted` yet; that waits on step 2a.
+   - The legacy shell loop is still open.
 4. **C1-EXCLUSION-1.** A persistent exclusion row keyed by target and
    evidence digest, consumed by preselection. It becomes
    `RefusalLegality.nextField`, and is lifted when the digest changes.
