@@ -47,11 +47,14 @@
           receipt (brief/queue-c2-question! root c2-carrier)
           item (java.io.File. (:path receipt))
           item-bytes (java.nio.file.Files/readAllBytes (.toPath item))
-          companion (missing-path root (:attempt-id receipt))]
+          companion (missing-path root (:attempt-id receipt))
+          original (slurp companion)]
       (is (.delete companion))
       (is (not (.exists companion)))
       (is (= receipt (brief/queue-c2-question! root c2-carrier)))
       (is (.isFile companion))
+      ;; Recreated from the retained item, so byte-identical to the original.
+      (is (= original (slurp companion)))
       (is (= (seq item-bytes)
              (seq (java.nio.file.Files/readAllBytes (.toPath item)))))
       (is (= (:sha256 receipt)
