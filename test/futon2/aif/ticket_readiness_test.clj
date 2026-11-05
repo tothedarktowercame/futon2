@@ -53,6 +53,70 @@
     (is (= 3 @snapshot-calls)
         "one snapshot for the population scan, plus fresh before/after-contact snapshots")))
 
+(defn- priority-refresh-opts [manifest contacts priority-source]
+  {:tickets [{:id "T-a" :source source-pin} {:id "T-z" :source source-pin}]
+   :manifest-path manifest
+   :priority-source priority-source
+   :input-fn (constantly {:source source-pin :dependency-evidence []
+                          :ownership-evidence :unowned :implementation-evidence :absent
+                          :operator-evidence :allowed :root-route :standalone})
+   :prepare-fn identity
+   :answer-fn (fn [proposal] (swap! contacts conj (:id proposal)) {})
+   :validate-fn (fn [_ _ _]
+                  {:increment :preparation
+                   :assessment {:classification :unknown}})
+   :now-fn (constantly "2026-11-05T00:00:00Z")})
+
+(deftest priority-refresh-contacts-first-in-cutoff-known-row-only
+  (let [dir (temp-dir) manifest (.getPath (io/file dir "manifest.edn"))
+        contacts (atom [])
+        pin {:path "/giraffe/priority.edn" :sha256 "priority-sha"}
+        priority {:status :present :pin pin
+                  :rows [{:target "T-z" :priority-band :associated
+                          :cutoff-status :within-cutoff}
+                         {:target "T-a" :priority-band :elsewhere
+                          :cutoff-status :beyond-cutoff}]}
+        result (readiness/refresh-one!
+                (priority-refresh-opts manifest contacts priority))
+        retained (readiness/read-manifest manifest)]
+    (is (= :assessed (:status result)))
+    (is (= "T-z" (:ticket-id result)))
+    (is (= ["T-z"] @contacts))
+    (is (= pin (:priority-source result)))
+    (is (= "T-z" (get-in result [:priority-row :target])))
+    (is (= {"T-z" "2026-11-05T00:00:00Z"} (:attempts retained)))))
+
+(deftest priority-refresh-with-all-rows-current-contacts-nobody
+  (let [dir (temp-dir) manifest (.getPath (io/file dir "manifest.edn"))
+        contacts (atom [])
+        priority {:status :present :pin {:path "priority.edn" :sha256 "sha"}
+                  :rows [{:target "T-z" :priority-band :focus
+                          :cutoff-status :within-cutoff}]}
+        opts (priority-refresh-opts manifest contacts priority)
+        current-var (ns-resolve 'futon2.aif.ticket-readiness 'current-entry?)
+        result (with-redefs-fn
+                 {#'readiness/read-manifest
+                  (constantly {:schema readiness/manifest-schema
+                               :entries [{:ticket-id "T-z"
+                                          :assessment {:classification :suitable}}]
+                               :attempts {}})
+                  current-var (constantly true)}
+                 #(readiness/refresh-one! opts))]
+    (is (= :no-priority-unassessed-ticket (:status result)))
+    (is (empty? @contacts))))
+
+(deftest unavailable-priority-contacts-nobody-and-writes-no-attempt
+  (let [dir (temp-dir) manifest (.getPath (io/file dir "manifest.edn"))
+        contacts (atom [])
+        result (readiness/refresh-one!
+                (priority-refresh-opts
+                 manifest contacts
+                 {:status :absent :reason :priority-projection-absent}))]
+    (is (= :priority-projection-unavailable (:status result)))
+    (is (= :priority-projection-absent (:reason result)))
+    (is (empty? @contacts))
+    (is (not (.exists (io/file manifest))))))
+
 (defn- reviewed-output [dir binding producer reviewer result-text]
   (let [contract-path (write! dir "contract.edn" (merge binding
                                                           {:schema readiness/contract-schema

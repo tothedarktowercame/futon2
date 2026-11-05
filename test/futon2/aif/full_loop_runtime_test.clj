@@ -210,7 +210,7 @@
       :predecessor-pin (:predecessor-pin request)
      :status status :payload payload})))
 
-(deftest production-default-readiness-unavailable-is-fair-and-preview-free
+(deftest production-default-readiness-without-priority-contacts-nobody
   (let [dir (f32-root)
         manifest (str dir "/readiness.edn")
         contacts (atom 0)
@@ -227,9 +227,10 @@
                                (fn [_]
                                  (swap! contacts inc)
                                  {:state :not-contacted}))]
-                 (runtime/ticket-readiness-refresh-config opts))
-        results (mapv (fn [_] (ticket-readiness/refresh-one! config)) (range 3))
-        before (slurp manifest)
+                 (with-redefs-fn
+                   {#'runtime/find-giraffe-run (constantly nil)}
+                   #(runtime/ticket-readiness-refresh-config opts)))
+        result (ticket-readiness/refresh-one! config)
         preview (with-redefs [flight-runner/agency-answer-fn
                               (fn [_]
                                 (fn [_]
@@ -239,12 +240,36 @@
                   ;; composition boundary: it must not execute refresh-one!.
                   (runtime/production-defaults opts))]
     (is (= 0 @contacts) "unavailable designated producer performs no transport")
-    (is (= 3 (count (distinct (map :ticket-id results))))
-        "durable last-attempt ordering advances across three canonical tickets")
-    (is (every? #(= :unknown (get-in % [:assessment :classification])) results))
-    (is (= before (slurp manifest)) "read-only composition does not assess or write")
+    (is (= :priority-projection-unavailable (:status result)))
+    (is (= :giraffe-run-unavailable (:reason result)))
+    (is (not (.exists (io/file manifest))) "unavailable priority writes no attempt")
     (is (fn? (:ticket-readiness-refresh preview)))
-    (is (every? #(re-matches #"T-.+" (:ticket-id %)) results))))
+    (is (nil? (:ticket-id result)))))
+
+(deftest readiness-config-pins-verified-priority-from-selection-resolver
+  (let [dir (io/file (f32-root) "giraffe-run")
+        _ (.mkdirs dir)
+        priority-path (io/file dir "priority.edn")
+        rows [{:target "T-z" :priority-band :associated
+               :cutoff-status :within-cutoff}]
+        _ (spit priority-path (str (pr-str rows) "\n"))
+        pin (ticket-readiness/file-pin priority-path)
+        _ (spit (io/file dir "manifest.edn")
+                (pr-str {:priority-projection
+                         {:status :present :file "priority.edn"
+                          :sha256 (:sha256 pin)}}))
+        config (with-redefs [runner/agent-roster (constantly {})
+                             flight-runner/agency-answer-fn
+                             (fn [_] (constantly {:state :not-contacted}))]
+                 (with-redefs-fn
+                   {#'runtime/find-giraffe-run (constantly dir)}
+                   #(runtime/ticket-readiness-refresh-config
+                     {:author "fixture"
+                      :ticket-readiness-manifest-path
+                      (str (f32-root) "/readiness.edn")})))]
+    (is (= :present (get-in config [:priority-source :status])))
+    (is (= pin (get-in config [:priority-source :pin])))
+    (is (= rows (get-in config [:priority-source :rows])))))
 
 (defn- readiness-proposal-with-sources [n]
   {:schema :wm/cascade-proposal-request-v1

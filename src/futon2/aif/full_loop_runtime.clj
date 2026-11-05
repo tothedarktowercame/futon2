@@ -309,6 +309,24 @@
        :prompt-chars prompt-chars :prompt-budget-chars budget
        :proposal-pin (:proposal-pin summary)})))
 
+(declare find-giraffe-run)
+
+(defn- readiness-priority-source [opts]
+  (if-let [dir (find-giraffe-run opts)]
+    (try
+      (let [manifest (edn/read-string (slurp (io/file dir "manifest.edn")))
+            entry (:priority-projection manifest)
+            path (io/file dir (:file entry))
+            pin (when (.isFile path) (ticket-readiness/file-pin path))]
+        (cond
+          (not= :present (:status entry))
+          {:status :absent :reason (or (:reason entry) :priority-projection-absent)}
+          (not= (:sha256 entry) (:sha256 pin))
+          {:status :absent :reason :priority-projection-sha-mismatch}
+          :else {:status :present :pin pin :rows (edn/read-string (slurp path))}))
+      (catch Exception _ {:status :absent :reason :priority-projection-unreadable}))
+    {:status :absent :reason :giraffe-run-unavailable}))
+
 (defn ticket-readiness-refresh-config
   "Production preparation-only composition from existing canonical readers.
   The Agency response is retained beside the manifest before validation."
@@ -339,6 +357,7 @@
         contact-resolver #(runner/read-job! opts %)
         contact (designated-agent-answer-fn opts (:author opts) :prompt "brief")]
     {:tickets tickets :manifest-path manifest-path :snapshot-fn snapshot-fn :input-fn input-fn
+     :priority-source (readiness-priority-source opts)
      :contact-resolver contact-resolver
      :prepare-fn (fn [ticket]
                    (interpretation-request/prepare-proposal!

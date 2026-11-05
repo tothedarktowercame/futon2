@@ -372,11 +372,24 @@
   ANSWER-FN are the existing proposal/contact seams supplied by the caller.
   Preview callers must not invoke this function."
   [{:keys [tickets manifest-path prepare-fn answer-fn validate-fn input-fn snapshot-fn now-fn
-           contact-resolver]
+           contact-resolver priority-source] :as opts
     :or {now-fn #(str (Instant/now))}}]
   (let [manifest (read-manifest manifest-path)
         current (into {} (map (juxt :ticket-id identity) (:entries manifest)))
-        scan-snapshot (when snapshot-fn (snapshot-fn))
+        priority-mode? (contains? opts :priority-source)
+        priority-available? (= :present (:status priority-source))
+        by-id (into {} (map (juxt :id identity) tickets))
+        population (if priority-mode?
+                     (->> (:rows priority-source)
+                          (filter #(and (= :within-cutoff (:cutoff-status %))
+                                        (not= :unknown (:priority-band %))))
+                          (keep (fn [row]
+                                  (when-let [ticket (get by-id (:target row))]
+                                    (assoc ticket ::priority-row row)))))
+                     (ordered-population tickets (:attempts manifest)))
+        scan-snapshot (when (and snapshot-fn
+                                 (or (not priority-mode?) priority-available?))
+                        (snapshot-fn))
         candidates (remove (fn [{:keys [id] :as ticket}]
                              (let [entry (get current id)
                                    inputs (if snapshot-fn
@@ -385,9 +398,19 @@
                                    classification (get-in entry [:assessment :classification])]
                                (and (#{:suitable :completed} classification)
                                     (current-entry? entry inputs contact-resolver))))
-                           (ordered-population tickets (:attempts manifest)))]
-    (if-let [ticket (first candidates)]
-      (let [before-inputs (input-fn ticket)
+                           population)]
+    (cond
+      (and priority-mode? (not priority-available?))
+      {:status :priority-projection-unavailable
+       :reason (:reason priority-source)
+       :priority-source (dissoc priority-source :rows)}
+
+      (first candidates)
+      (let [ticket (first candidates)
+            priority-row (::priority-row ticket)
+            ticket (dissoc ticket ::priority-row)
+            priority-pin (:pin priority-source)
+            before-inputs (input-fn ticket)
             proposal (prepare-fn ticket)
             response (answer-fn proposal)
             inputs (input-fn ticket)
@@ -414,6 +437,14 @@
                                  :attempts (assoc (:attempts manifest) (:id ticket) at))]
         (atomic-spit! manifest-path next-manifest)
         {:status :assessed :ticket-id (:id ticket) :assessment (:assessment record)
-         :record-pin (file-pin record-path) :manifest-pin (file-pin manifest-path)})
+         :record-pin (file-pin record-path) :manifest-pin (file-pin manifest-path)
+         :priority-source priority-pin :priority-row priority-row})
+
+      priority-mode?
+      {:status :no-priority-unassessed-ticket
+       :priority-source (:pin priority-source)
+       :manifest-pin (when (.isFile (io/file manifest-path)) (file-pin manifest-path))}
+
+      :else
       {:status :no-unassessed-ticket :manifest-pin (when (.isFile (io/file manifest-path))
                                                      (file-pin manifest-path))})))
