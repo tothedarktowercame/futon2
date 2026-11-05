@@ -1,5 +1,7 @@
 (ns futon2.aif.refusal-legality-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.set]
+            [clojure.test :refer [deftest is]]
+            [futon2.aif.meta-terminal-injury]
             [futon2.aif.refusal-legality :as sut]))
 
 (deftest nonempty-field-not-exhausted
@@ -72,3 +74,15 @@
 
 (deftest work-outcome-has-no-refusal-evidence
   (is (nil? (sut/evidence-for-close :grounded-change {} nil false))))
+
+(deftest outcome-outside-the-image-is-validated
+  ;; `outcome-from` passes unknown thrown outcomes through; they must not
+  ;; be mistaken for work.
+  (is (= {:refusal :other} (sut/evidence-for-close :something-new {} nil false)))
+  (is (= :debugger-error
+         (sut/disposition (sut/evidence-for-close :something-new {} nil false)))))
+
+(deftest outcome-sets-partition-the-close-image
+  (is (= (set (keys futon2.aif.meta-terminal-injury/close-outcome-image))
+         (into sut/work-outcomes sut/no-work-outcomes)))
+  (is (empty? (clojure.set/intersection sut/work-outcomes sut/no-work-outcomes))))

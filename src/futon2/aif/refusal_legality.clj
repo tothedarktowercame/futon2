@@ -44,10 +44,17 @@
                         (get-in opts [:outer/selection :reading-reselection :refusals]))]
       (into [] (remove refused) admitted))))
 
+(def work-outcomes
+  "Close outcomes that did work: the `:changed` image of
+  `meta-terminal-injury/close-outcome-image`.  Everything else that reaches
+  `close!` is validated, including outcomes outside the image: `outcome-from`
+  passes any thrown `:outcome` through unchanged, so an open no-work set would
+  let a new outcome skip validation as if it were work."
+  #{:grounded-change :grounded-progress})
+
 (def no-work-outcomes
-  "Explicit non-work image from `meta-terminal-injury/close-outcome-image`.
-  Work outcomes (`:grounded-change`, `:success`, `:closed`, and
-  `:cohort-complete`) are intentionally absent."
+  "The no-work part of `meta-terminal-injury/close-outcome-image`, named for
+  readers and tests.  Validation does not consult it; see `work-outcomes`."
   #{:already-satisfied :grounded-no-change :artifact-only :abstained
     :no-selection :agent-unavailable :guardrail-refusal :dispatch-failed
     :build-failed :substrate-unavailable :incomplete :cancelled
@@ -56,10 +63,10 @@
 
 (defn evidence-for-close
   "Build RefusalLegality evidence solely from retained close carriers.
-  Returns nil for work outcomes. OPERATOR-SIGNAL is an independently retained
+  Returns nil only for `work-outcomes`. OPERATOR-SIGNAL is an independently retained
   proof, never inferred from a terminal keyword."
   [outcome data scored-field operator-signal]
-  (when (contains? no-work-outcomes outcome)
+  (when-not (contains? work-outcomes outcome)
     (cond
       (and (= :abstained outcome) (= :empty-field (:failure-kind data)))
       (if (nil? scored-field)
