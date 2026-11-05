@@ -421,8 +421,21 @@ records and notifies, and validates nothing).
      G below abstention" stop are recorded as `debugger-error/outside-repair`.
    - The fix reads the run record as EDN. The earlier text scan let an
      admitted field of `nil`, or a nested one, pass as an empty field.
-   - No call site claims `work-exhausted` yet; that waits on step 2a.
    - The legacy shell loop is still open.
+   *REFUSAL-VALIDATOR-2b (2026-11-05):* `27125400d` (codex-18), with the fix
+   `07bf5334b`.
+   - The supervisor claims `work-exhausted` only when the selection record's
+     `[:outer/selection :refusal/disposition :disposition]` is `:loop-stop`.
+     `stop()` still re-checks the empty admitted field itself. This is the
+     19th `stop()` site, indexed as `:loop-outer-work-exhausted`.
+   - Fix: a claim that failed validation returned the claiming site's exit
+     code 0. A downgraded claim now always exits 1.
+   - Decided: `lawful_stop` goes. It counted a continuous-mode abstention
+     with outcome in DEBUG as a quiet click. After 2b, every such abstention
+     that reaches it has a `:debugger-error` disposition, so it was counting
+     a debugger error as normal progress. REFUSAL-VALIDATOR-2c sends these
+     clicks to the debugger page and stops on a second unmoved one, so they
+     cannot pile up.
 4. **C1-EXCLUSION-1.** A persistent exclusion row keyed by target and
    evidence digest, consumed by preselection. It becomes
    `RefusalLegality.nextField`, and is lifted when the digest changes.
