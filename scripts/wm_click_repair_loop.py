@@ -1565,7 +1565,9 @@ def stop(args, case: str, reason: str, code: int, evidence: dict) -> int:
         row["claimed-case"] = case
     record(row)
     notify(args, effective_case, legal, reason)
-    return code
+    # A claimed legal stop that failed validation is a debugger error; it
+    # never exits as success, whatever code the claiming site passed.
+    return 1 if effective_case != case else code
 
 
 # ---------------------------------------------------------------- main

@@ -175,7 +175,7 @@ class SelfHealStopTest(unittest.TestCase):
         rc, _, rows = self.run_with([
             self.click({}, outcome="abstained", run_record=record)])
         row = [r for r in rows if r.get("event") == "stop"][-1]
-        self.assertEqual(0, rc)
+        self.assertEqual(1, rc)
         self.assertEqual("debugger-error", row["case"])
         self.assertEqual("work-exhausted", row["claimed-case"])
         self.assertFalse(row["legal"])
