@@ -29,3 +29,9 @@ Review the task evidence through ordinary ticket review; mark this ticket DONE o
 Finding: [repair-occ-6e2fe0dedfece39e704acd52a2d00e158b6fd40aa971aa20937d4cc02a242f39](/home/joe/code/futon2/data/wm-repair-obligations/findings/repair-occ-6e2fe0dedfece39e704acd52a2d00e158b6fd40aa971aa20937d4cc02a242f39.edn)
 
 Finding SHA-256: `aa5657d59a86d0120f23683d5f2279399bf5d5ca7fea00e845626bf800d2637d`
+
+## Injury provenance
+
+```edn
+{:injury-id "injury/76d912d35d995adc3794ae757bda36b905ecf949", :cause-record-pin {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-11-05-7bc9acb9-e46c-41ba-9a09-1516fec6c0ac.edn", :sha256 "0792e160b1d9f203fd39a6babd7f5edfe753b7d63681c3d533328e52423f344d"}, :origin-run/id "2026-11-05-7bc9acb9-e46c-41ba-9a09-1516fec6c0ac", :finding-sha256 "aa5657d59a86d0120f23683d5f2279399bf5d5ca7fea00e845626bf800d2637d"}
+```
