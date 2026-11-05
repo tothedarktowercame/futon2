@@ -4499,6 +4499,53 @@
                     :terminal-message :events :execution :artifact-ref
                     :repo-observed-artifact-ref]))
 
+(defn- guardrail-continuation-prompt
+  [author target repository reason original-job]
+  (str author ": FULL-LOOP GUARDRAIL CONTINUATION. Your first response refused "
+       "the selected work for this reason:\n\n" reason
+       "\n\nThis is the one bounded correction turn for the same selected target and "
+       "target repository. Partial grounded progress is accepted: it is valid "
+       "to leave an intended token false when you state the limitation and "
+       "commit the most useful substantive parcel you CAN complete. Do that "
+       "work in the target repository and end FULL_LOOP_AUTHOR: DONE "
+       "<fresh-commit-sha>. Do not make a cosmetic commit. If no useful parcel "
+       "can be committed, repeat FULL_LOOP_AUTHOR: REFUSE <reason>; that second "
+       "refusal ends the run with the existing guardrail-refusal record.\n\n"
+       "SELECTED TARGET: " (pr-str target) "\n"
+       "TARGET REPOSITORY: " (pr-str repository) "\n"
+       "ORIGINAL AUTHOR JOB (RETAINED): "
+       (pr-str (retained-author-job original-job))))
+
+(defn guardrail-continuation-round
+  "A reasoned no-commit author refusal gets one turn back to the same author.
+  The corrected job is then consumed by the ordinary refusal, artifact, review
+  and falsifier gates. A second refusal is deliberately left unchanged."
+  [opts phase-context author dispatched-turns target repository author-job]
+  (let [classification (author-refusal-classification author-job repository nil true)]
+    (if-not (= :guardrail-refusal (:outcome classification))
+      {:author-job author-job :guardrail-continuation nil}
+      (let [reason (:refusal-reason classification)
+            prompt (guardrail-continuation-prompt
+                    author target repository reason author-job)
+            response (run-phase!
+                      opts phase-context :guardrail-continuation-dispatch
+                      #(let [response ((or (:dispatch-fn opts) dispatch!)
+                                        opts author "wm-full-loop" target prompt)]
+                         (swap! dispatched-turns inc)
+                         response))
+            corrected-job
+            (run-phase! opts phase-context :guardrail-continuation-wait
+                        #((or (:poll-fn opts) poll-job!) opts (:job-id response)))
+            evidence {:schema :wm/guardrail-continuation-v1
+                      :status :returned
+                      :reason reason
+                      :original {:job (retained-author-job author-job)}
+                      :request {:job-id (:job-id response)
+                                :prompt-sha256 (sha256 prompt)}
+                      :corrected {:job (retained-author-job corrected-job)}}]
+        {:author-job (assoc corrected-job :guardrail-continuation evidence)
+         :guardrail-continuation evidence}))))
+
 (defn- author-response-correction-failure!
   [message reason correction]
   (throw (ex-info message
@@ -9565,6 +9612,11 @@
                    (if retry-author? retry-author-prompt-text author-prompt-text)
                    author-job)
                   author-job (:author-job author-correction-state)
+                  guardrail-continuation-state
+                  (guardrail-continuation-round
+                   opts @phase-context author dispatched-turns target author-repo
+                   author-job)
+                  author-job (:author-job guardrail-continuation-state)
                   ;; UNMEASURED-CLAIM-NO-WAY-OUT: an already-satisfied claim
                   ;; refused as mission-text-unmeasured gets one correction
                   ;; round here, before the claim review, so a DONE reply
