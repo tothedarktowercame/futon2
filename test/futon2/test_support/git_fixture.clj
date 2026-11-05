@@ -1,5 +1,6 @@
 (ns futon2.test-support.git-fixture
-  (:require [clojure.java.shell :as shell]
+  (:require [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]))
 
 (def routing-environment-keys
@@ -20,3 +21,21 @@
       (throw (ex-info "Git fixture command failed"
                       (assoc result :repo (str repo) :args args))))
     (str/trim (:out result))))
+
+(defn delete-tree!
+  "Remove ROOT recursively. Intended for roots created by with-temp-repo."
+  [root]
+  (doseq [f (reverse (file-seq (io/file root)))]
+    (io/delete-file f true)))
+
+(defn with-temp-repo
+  "Call F with a fresh directory under the OS temporary root and always
+  remove it, including when F throws. PREFIX identifies the fixture producer."
+  [prefix f]
+  (let [dir (.toFile
+             (java.nio.file.Files/createTempDirectory
+              prefix (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (try
+      (f dir)
+      (finally
+        (delete-tree! dir)))))

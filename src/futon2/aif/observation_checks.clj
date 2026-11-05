@@ -31,8 +31,17 @@
 
 (defn- refuse [kind data] {:status :missing :kind kind :data data})
 
+(defn repo-path
+  "Resolve a locator repository. Repository names remain relative to
+  `repo-root`; an explicit absolute path is used as written. The latter is
+  the fixture seam: tests can use an OS temporary directory without creating
+  a fake repository in the canonical code root."
+  [repo]
+  (let [f (io/file repo)]
+    (if (.isAbsolute f) (.getCanonicalPath f) (str repo-root "/" repo))))
+
 (defn- git [repo & args]
-  (apply sh/sh "git" "-C" (str repo-root "/" repo) args))
+  (apply sh/sh "git" "-C" (repo-path repo) args))
 
 (def locator-fields
   "The locator fields each field-list class requires, every one a non-blank

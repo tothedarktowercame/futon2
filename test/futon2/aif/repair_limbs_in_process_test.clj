@@ -22,25 +22,17 @@
 ;; shaped exactly like the real records they stand in for. The locators the
 ;; cascade source declares are C4-over-git — they read git at a sha — so a
 ;; fixture that must make a C4 head observable has to be committed. The
-;; fixtures below therefore build a THROWAWAY git worktree of futon2's
-;; ticket+resources state, commit the fixture shapes there, and point the
-;; locators' :repo at it. Nothing in /home/joe/code/futon2 is touched.
+;; fixtures below therefore build a THROWAWAY git repository under the OS
+;; temporary root, commit the fixture shapes there, and point the locators'
+;; :repo at its absolute path. Nothing in /home/joe/code is touched.
 ;; ---------------------------------------------------------------------------
 
 (defn- fixture-repo
   "A throwaway git repo holding shaped copies of the ticket file and the
    three evidence resources, committed so C4 locators resolve at its HEAD.
    Stands in for: the post-repair state (all limbs landed, Status DONE)."
-  []
-  ;; NOTE: the C3/C4 checkers run `git -C /home/joe/code/<repo>`, so the
-  ;; fixture repo must live UNDER /home/joe/code as a relative path — a
-  ;; throwaway sibling of futon2, never inside futon2's data/ trees, and
-  ;; removed on exit.
-  (let [dir (io/file "/home/joe/code"
-                     (str ".repair-limbs-fixture-" (System/nanoTime)))
-        _ (.mkdirs dir)
-        _ (.deleteOnExit dir)
-        git (fn [& args]
+  [dir]
+  (let [git (fn [& args]
               (apply git-fixture/git-result dir args))
         ticket-dir (io/file dir "holes/tickets")
         eig-dir (io/file dir "resources/wm/eig")
@@ -72,7 +64,7 @@
         _ (git "-c" "user.name=fixture" "-c" "user.email=fixture@test"
                "commit" "-q" "-m" "fixture: post-repair state")
         head (-> (git "rev-parse" "HEAD") :out str/trim)]
-    {:dir dir :repo (.getName dir) :head head}))
+    {:dir dir :repo (.getCanonicalPath dir) :head head}))
 
 (defn- locator-in [repo head loc]
   (assoc loc :repo (:repo repo) :sha head))
@@ -124,15 +116,18 @@
   ;; observations record present, the observations limb's produced token
   ;; becomes observable through its OWN C4 locator — unweakened, resolved
   ;; against the fixture repo's HEAD.
-  (let [repo (fixture-repo)
-        loc (locator-in repo (:head repo)
+  (git-fixture/with-temp-repo
+   "repair-limbs-fixture-"
+   (fn [dir]
+    (let [repo (fixture-repo dir)
+          loc (locator-in repo (:head repo)
                         {:class :C4 :path "resources/wm/eig/held-out-observations.edn"
                           :decl "HELD-OUT-OBSERVATIONS-COLLECTED"})
         check (fn [l] (case (:class l)
                         :C4 (checks/check-decl-in-file l)
                         :C3 (checks/check-path-exists l)))
-        r (check loc)]
-    (is (true? (:observed r)) (pr-str r))))
+          r (check loc)]
+      (is (true? (:observed r)) (pr-str r))))))
 
 (deftest fixture-full-chain-accepted
   ;; FIXTURE stands in for: all four limbs landed — the declaration (real,
@@ -142,8 +137,11 @@
   ;; observed true, and (c) the ticket's own acceptance observed true, the
   ;; predicate MUST return {:accepted? true} with all three conjuncts
   ;; satisfied — every locator, guard and conjunct exactly as declared.
-  (let [repo (fixture-repo)
-        head (:head repo)
+  (git-fixture/with-temp-repo
+   "repair-limbs-fixture-"
+   (fn [dir]
+    (let [repo (fixture-repo dir)
+          head (:head repo)
         r (ai/accepted-increment
            {:binding {:repo (:repo repo) :commit head
                       :pre-dispatch-head "4b825dc642cb6eb9a060e54bf8d69288fbed4b0"
@@ -163,8 +161,8 @@
             :after-revision head})]
     (is (true? (:accepted? r)) (pr-str (dissoc r :evidence)))
     (is (true? (get-in r [:evidence :acceptance-result :observed])))
-    (is (every? (fn [[_ v]] (true? (:observed v)))
-                (get-in r [:evidence :produced-token-results])))))
+      (is (every? (fn [[_ v]] (true? (:observed v)))
+                  (get-in r [:evidence :produced-token-results])))))))
 
 (deftest fixture-accepted-close-writes-the-b-update
   ;; With the PREDICATE'S OWN accepted verdict (from the full-chain fixture,
@@ -174,8 +172,11 @@
   ;; wrote: the append goes through learning-trial-ledger/record! with the
   ;; identity the call site itself derives (the binding commit), so the
   ;; exactly-once is pinned against the real row shape.
-  (let [repo (fixture-repo)
-        head (:head repo)
+  (git-fixture/with-temp-repo
+   "repair-limbs-fixture-"
+   (fn [dir]
+    (let [repo (fixture-repo dir)
+          head (:head repo)
         verdict (ai/accepted-increment
                  {:binding {:repo (:repo repo) :commit head
                             :pre-dispatch-head "4b825dc642cb6eb9a060e54bf8d69288fbed4b0"
@@ -242,5 +243,5 @@
     (is (= 3/4 (:theta r1)) "cold Laplace success")
     (is (= :already-recorded (:status r2)) "exactly once: the second call sees the runner-written row")
     (is (= (:theta r1) (:theta r2)))
-    (is (= 1 (count (ledger/read-trials (.getPath tmp))))
-        "exactly one row, written by the runner's record! seam")))
+      (is (= 1 (count (ledger/read-trials (.getPath tmp))))
+          "exactly one row, written by the runner's record! seam")))))
