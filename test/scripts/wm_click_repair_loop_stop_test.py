@@ -60,6 +60,22 @@ class SelfHealStopTest(unittest.TestCase):
         rows = [json.loads(line) for line in self.loop.LEDGER.read_text().splitlines()]
         return rc, fire.call_count, rows
 
+    def run_with_debugger_pages(self, clicks, signatures):
+        pages = [(self.loop.STATE / f"debugger-{i}.md",
+                  {"page": str(self.loop.STATE / f"debugger-{i}.md"),
+                   "signature": signature})
+                 for i, signature in enumerate(signatures)]
+        with (mock.patch.object(self.loop, "jvm_start_epoch", return_value=0),
+              mock.patch.object(self.loop, "reload_when_idle", return_value=(True, "", 0)),
+              mock.patch.object(self.loop, "debugger_stops", return_value=[]),
+              mock.patch.object(self.loop, "debugger_attached", return_value=True),
+              mock.patch.object(self.loop, "fire", side_effect=clicks) as fire,
+              mock.patch.object(self.loop, "debugger_page", side_effect=pages) as debugger_page,
+              mock.patch.object(self.loop, "notify")):
+            rc = self.loop.run(self.args)
+        rows = [json.loads(line) for line in self.loop.LEDGER.read_text().splitlines()]
+        return rc, fire.call_count, debugger_page.call_count, rows
+
     def stop_row(self, case, evidence, reason="fixture stop"):
         with mock.patch.object(self.loop, "notify"):
             self.loop.stop(self.args, case, reason, 1, evidence)
@@ -189,6 +205,49 @@ class SelfHealStopTest(unittest.TestCase):
         self.assertEqual(0, rc)
         self.assertEqual("operator-override", stops[-1]["case"])
         self.assertFalse(any(r.get("claimed-case") == "work-exhausted" for r in stops))
+
+    def test_first_continuous_debugger_error_gets_a_page_not_quiet(self):
+        record = self.outer_abstention_record('["still-live"]', "debugger-error")
+        first = self.click({}, outcome="abstained", run_record=record)
+        second = self.click({}, carried=True, click_id="click-2", outcome="ok")
+        rc, calls, pages, rows = self.run_with_debugger_pages(
+            [first, second], [{"counts": {}, "named": [["M-a", "refused"]]}])
+        self.assertEqual(0, rc)
+        self.assertEqual(2, calls)
+        self.assertEqual(1, pages)
+        self.assertEqual(1, sum(r.get("event") == "debugger" for r in rows))
+        self.assertFalse(any("wall repeats" in r.get("reason", "") for r in rows))
+
+    def test_unchanged_continuous_debugger_page_stops(self):
+        record = self.outer_abstention_record('["still-live"]', "debugger-error")
+        signature = {"counts": {"refused": 1}, "named": [["M-a", "refused"]]}
+        rc, calls, pages, rows = self.run_with_debugger_pages(
+            [self.click({}, outcome="abstained", run_record=record),
+             self.click({}, click_id="click-2", outcome="abstained", run_record=record)],
+            [signature, signature])
+        stop = [r for r in rows if r.get("event") == "stop"][-1]
+        self.assertEqual(1, rc)
+        self.assertEqual(2, calls)
+        self.assertEqual(2, pages)
+        self.assertEqual("debugger-error", stop["case"])
+        self.assertIn("debugger-0.md", stop["reason"])
+        self.assertIn("debugger-1.md", stop["reason"])
+
+    def test_moved_continuous_debugger_page_continues(self):
+        self.args.clicks = 3
+        record = self.outer_abstention_record('["still-live"]', "debugger-error")
+        first = {"counts": {"refused": 1}, "named": [["M-a", "refused"]]}
+        second = {"counts": {"refused": 1}, "named": [["M-b", "refused"]]}
+        rc, calls, pages, rows = self.run_with_debugger_pages(
+            [self.click({}, outcome="abstained", run_record=record),
+             self.click({}, click_id="click-2", outcome="abstained", run_record=record),
+             self.click({}, carried=True, click_id="click-3", outcome="ok")],
+            [first, second])
+        self.assertEqual(0, rc)
+        self.assertEqual(3, calls)
+        self.assertEqual(2, pages)
+        self.assertFalse(any(r.get("case") == "debugger-error" and
+                             "debugger page" in r.get("reason", "") for r in rows))
 
     def assert_typed_stop(self, disposition):
         rc, calls, rows = self.run_with([self.click(disposition)])
