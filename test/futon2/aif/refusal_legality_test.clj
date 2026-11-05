@@ -81,7 +81,7 @@
                 true (fn [_] (if (= 1 (swap! calls inc))
                                {:action :retry}
                                {:action :continue}))
-                :already-satisfied {:failure-kind :already-satisfied} nil false)]
+                :already-satisfied {:failure-kind :already-satisfied} (constantly nil) false)]
     (is (= 2 @calls))
     (is (= :debugger-error (get-in result [:data :refusal/disposition :disposition])))
     (is (= :continue (get-in result [:data :refusal/restart])))))
@@ -90,19 +90,24 @@
   (let [used (sut/resolve-close-refusal
               true (constantly {:action :use-value
                                 :value {:outcome :grounded-change :data {:kept true}}})
-              :guardrail-refusal {} nil false)
+              :guardrail-refusal {} (constantly nil) false)
         aborted (sut/resolve-close-refusal
                  true (constantly {:action :abort})
-                 :guardrail-refusal {} nil false)]
-    (is (= {:outcome :grounded-change :data {:kept true}} used))
+                 :guardrail-refusal {} (constantly nil) false)]
+    (is (= :grounded-change (:outcome used)))
+    (is (true? (get-in used [:data :kept])))
+    ;; bad case: the substituted work outcome must still show it came from
+    ;; the debugger and what it replaced
+    (is (= :use-value (get-in used [:data :refusal/restart])))
+    (is (= :guardrail-refusal (get-in used [:data :refusal/replaced :outcome])))
     (is (= :debugger/aborted (get-in aborted [:data :failure-kind])))))
 
 (deftest detached-close-retains-disposition-and-work-is-unchanged
   (is (= :debugger-error
-         (get-in (sut/resolve-close-refusal false nil :already-satisfied {} nil false)
+         (get-in (sut/resolve-close-refusal false nil :already-satisfied {} (constantly nil) false)
                  [:data :refusal/disposition :disposition])))
   (is (= {:outcome :grounded-change :data {:byte :same}}
-         (sut/resolve-close-refusal false nil :grounded-change {:byte :same} nil false))))
+         (sut/resolve-close-refusal false nil :grounded-change {:byte :same} (constantly nil) false))))
 
 (deftest outcome-outside-the-image-is-validated
   ;; `outcome-from` passes unknown thrown outcomes through; they must not
@@ -115,3 +120,14 @@
   (is (= (set (keys futon2.aif.meta-terminal-injury/close-outcome-image))
          (into sut/work-outcomes sut/no-work-outcomes)))
   (is (empty? (clojure.set/intersection sut/work-outcomes sut/no-work-outcomes))))
+
+(deftest close-refusal-retry-rereads-the-carrier
+  ;; bad case: an empty-field abstention held because the field carrier was
+  ;; absent; the operator repairs the carrier live and retries.  The retry
+  ;; must see the repaired field, not the one read before the hold.
+  (let [field (atom nil)
+        result (sut/resolve-close-refusal
+                true (fn [_] (reset! field []) {:action :retry})
+                :abstained {:failure-kind :empty-field} #(deref field) false)]
+    (is (= :loop-stop (get-in result [:data :refusal/disposition :disposition])))
+    (is (nil? (get-in result [:data :refusal/restart])))))

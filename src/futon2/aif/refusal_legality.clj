@@ -93,11 +93,13 @@
 
 (defn resolve-close-refusal
   "Validate a close before persistence. AWAIT-FN receives the illegal-refusal
-  condition data and returns a debugger restart map. The returned outcome/data
-  pair is ready for close persistence."
-  [attached? await-fn outcome data scored-field operator-signal]
-  (loop [outcome outcome, data data]
-    (if-let [refusal (evidence-for-close outcome data scored-field operator-signal)]
+  condition data and returns a debugger restart map. READ-SCORED-FIELD is a
+  0-arity fn, called on every pass, so `:retry` after a live repair sees the
+  repaired carrier rather than the one read before the hold. The returned
+  outcome/data pair is ready for close persistence."
+  [attached? await-fn outcome data read-scored-field operator-signal]
+  (loop [outcome outcome, data data, prior nil]
+    (if-let [refusal (evidence-for-close outcome data (read-scored-field) operator-signal)]
       (let [d (disposition refusal)
             retained {:disposition d :case (:case refusal)
                       :evidence (:evidence refusal)}]
@@ -108,8 +110,17 @@
                                          :disposition retained
                                          :evidence (:evidence refusal)})]
             (case action
-              :retry (recur outcome data)
-              :use-value (recur (:outcome value) (:data value))
+              :retry (recur outcome data prior)
+              ;; A debugger-supplied value must not close looking like an
+              ;; ordinary outcome: retain what it replaced.
+              :use-value (recur (:outcome value)
+                                (assoc (:data value)
+                                       :refusal/restart :use-value
+                                       :refusal/replaced
+                                       (or prior {:outcome outcome
+                                                  :disposition retained}))
+                                (or prior {:outcome outcome
+                                           :disposition retained}))
               :continue {:outcome outcome
                          :data (assoc data :refusal/disposition retained
                                            :refusal/restart :continue)}
