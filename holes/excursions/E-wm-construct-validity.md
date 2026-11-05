@@ -273,3 +273,33 @@ dark room"):
 4. **Does the WM's G score "do nothing"?** This tension still stands. L1 needs
    the empty field to be a real empty field, not one emptied by over-eager
    exclusion.
+
+## Validation plan (Joe, 2026-11-05: "validate the refusals ... the same way we validate handoffs")
+
+The handoff model has three parts, and refusals get the same three:
+
+| Handoffs | Refusals |
+|---|---|
+| a Lean admission contract per site (e.g. `FileChangeHygieneDelivery.admitted_iff_checked`) | `mathlib4/DarkTower/WarMachine/RefusalLegality.lean` (`d8dd72ade8`) |
+| an index of every production site, `resources/wm/handoff-sites.edn`, audited by `handoff_site_index_test` | `resources/wm/refusal-sites.edn` with the same audit (REFUSAL-INDEX-1) |
+| each site routes through `handoff/exchange` and its decoder | each refusal routes through one validator implementing `disposition` (REFUSAL-VALIDATOR-1) |
+
+**`RefusalLegality.lean` (builds, no `sorry`):**
+- `loopStopLegal`: work exhausted iff the scored field is empty
+  (`nonempty_field_not_exhausted`), or the operator signal.
+- `clickLegal`: the case check plus a recorded exclusion.
+  `unexcluded_not_legal` covers a terminal that leaves its target selectable.
+  `question_needs_brief` and `question_needs_cited_ambiguity` cover the
+  question case.
+- `disposition`: loop stop, click terminal or debugger error, with iff
+  theorems. `unlisted_is_debuggerError` covers everything else.
+- `legal_terminals_bounded`: on unchanged evidence, k legal terminals leave at
+  most `field.length - k` candidates. So legal terminals cannot cycle; they end
+  in work or in a legal work-exhausted stop. `new_evidence_restores` lifts an
+  exclusion when the evidence digest changes.
+
+**Steps:**
+- [x] Lean contract (claude-6).
+- [ ] REFUSAL-SITES-1, read-only survey (codex-15, `invoke-1793894251861-12942-5c54ed0b`). For each site: anchor, kinds, proposed case, and which RefusalLegality fields it has evidence for. Also the choke points and the paths that bypass them, cross-click exclusion today, and the operator-brief writer.
+- [ ] REFUSAL-INDEX-1: `refusal-sites.edn` plus an audit test that fails when a production refusal site is not indexed.
+- [ ] REFUSAL-VALIDATOR-1: one adapter at the choke point that computes `disposition`. A debugger error holds the run when attached. A click terminal records its exclusion (and its brief entry for a question). A loop stop needs its evidence.
