@@ -1594,9 +1594,11 @@
                        (map first)
                        (remove #(str/starts-with? % ":repair/")))
         data-kind (some-> (get-in finding [:failure-data :kind]) name)
+        nested-failure-kind (some-> (get-in finding [:failure-data :refresh :failure-kind]) name)
         failure-kind (some-> (:failure-kind finding) name)]
     (vec (distinct (concat kw-tokens
                            (when data-kind [data-kind])
+                           (when nested-failure-kind [nested-failure-kind])
                            (when failure-kind [failure-kind]))))))
 
 (defn- git-out [repo & args]

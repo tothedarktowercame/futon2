@@ -307,6 +307,15 @@
            :failure-error "required checkpoints missing"
            :failure-data {:missing [:selection]}}))))
 
+(deftest repaired-elsewhere-anchor-includes-retained-refresh-failure-kind
+  (is (= ["mission-substrate-freshness-unestablished"
+          "decision-input-freshness-unestablished"]
+         (#'repair/finding-diagnosis-anchors
+          {:failure-kind :decision-input-freshness-unestablished
+           :failure-stage :preference-refresh
+           :failure-data {:refresh
+                          {:failure-kind :mission-substrate-freshness-unestablished}}}))))
+
 (deftest dismiss-superseded-attempt-retained-proof-controls
   (doseq [[label finding-extra record expected]
           [[:later {} {:implementation-attempt "other-attempt"
