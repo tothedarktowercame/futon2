@@ -60,6 +60,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import fcntl
+import hashlib
 import json
 import os
 import re
@@ -102,6 +103,7 @@ WAIT_SECONDS = 900
 # live"). The loop writes a debugger page and sends it to the repair seat.
 DEBUG = {"abstained", "no-selection"}
 DEBUGGER = STATE / "debugger"
+WRITE_ROOTS = [F2 / "data", F2 / "evidence", F3C / "data"]
 # The click's code: what a repair may change and what a reload must pick up.
 CLICK_PATHS = [(F2, "src"), (F2, "scripts/futon2"), (F3C, "src/futon3c/wm")]
 SOURCE_IDENTITY_INVENTORY = F2 / "src" / "futon2" / "aif" / "load_identity.clj"
@@ -121,6 +123,91 @@ def log(msg: str) -> None:
 def record(row: dict) -> None:
     with LEDGER.open("a") as fh:
         fh.write(json.dumps({"at": now(), **row}, ensure_ascii=False) + "\n")
+
+
+def snapshot_write_roots() -> dict[str, tuple[int, int]]:
+    """Metadata-only census of regular, non-symlink files in declared roots."""
+    snapshot = {}
+    for root in WRITE_ROOTS:
+        if not root.exists():
+            continue
+        for path in root.rglob("*"):
+            if path.is_symlink() or not path.is_file():
+                continue
+            metadata = path.stat()
+            snapshot[str(path.resolve())] = (metadata.st_size, metadata.st_mtime_ns)
+    return snapshot
+
+
+def hash_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def write_click_manifest(click: dict, started: str, ended: str,
+                         before: dict[str, tuple[int, int]],
+                         after: dict[str, tuple[int, int]]) -> dict:
+    entries = []
+    for raw_path in sorted(set(before) | set(after)):
+        old, new = before.get(raw_path), after.get(raw_path)
+        if old == new:
+            continue
+        if new is None:
+            entries.append({"path": raw_path, "change": "removed",
+                            "attribution": "click-window"})
+            continue
+        path = Path(raw_path)
+        digest = hash_file(path)
+        current = path.stat()
+        if (current.st_size, current.st_mtime_ns) != new:
+            raise OSError(f"file changed while manifest was hashing it: {raw_path}")
+        entries.append({"path": raw_path, "sha256": digest, "size": new[0],
+                        "change": "new" if old is None else "modified",
+                        "attribution": "click-window"})
+    manifest = {
+        "schema": "wm-click-write-manifest-v1",
+        "click": {"id": click.get("click-id"), "number": click.get("n"),
+                  "run-id": click.get("run-id")},
+        "started": started, "ended": ended,
+        "roots": [str(root.resolve()) for root in WRITE_ROOTS],
+        "entries": entries,
+        "attribution_note": ("click-window means the path changed while this click ran; "
+                             "it does not prove that the click was the writer. Never delete "
+                             "or move a listed path on this evidence."),
+    }
+    safe_id = re.sub(r"[^A-Za-z0-9._-]", "_",
+                     str(click.get("click-id") or f"click-unknown-{click.get('n', 'unknown')}"))
+    target = STATE / "write-manifests" / f"{safe_id}.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    encoded = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode()
+    with target.open("xb") as output:
+        output.write(encoded)
+    return {"path": str(target.resolve()), "sha256": hashlib.sha256(encoded).hexdigest(),
+            "count": len(entries)}
+
+
+def fire_with_write_manifest(n: int, args, since_epoch: int) -> dict:
+    """Run one click unchanged, registering every declared-root window change."""
+    started = now()
+    try:
+        before = snapshot_write_roots()
+        snapshot_error = None
+    except Exception as error:
+        before, snapshot_error = {}, error
+    click = fire(n, args, since_epoch)
+    ended = now()
+    try:
+        if snapshot_error is not None:
+            raise snapshot_error
+        after = snapshot_write_roots()
+        click["write_manifest"] = write_click_manifest(click, started, ended, before, after)
+    except Exception as error:
+        click["write_manifest"] = {
+            "status": "failed", "error": f"{type(error).__name__}: {error}"}
+    return click
 
 
 RUN_COST_PROJECTION = r'''
@@ -1648,7 +1735,7 @@ def run(args) -> int:
             return stop(args, "debugger-error", reason, 1, {})
         log(f"click {spent + 1}: debugger attached={attached}")
         fire_started_ns = time.monotonic_ns()
-        c = fire(spent + 1, args, since)
+        c = fire_with_write_manifest(spent + 1, args, since)
         fire_wall_ms = max(0, (time.monotonic_ns() - fire_started_ns) // 1_000_000)
         c["reset-wall-ms"] = c.get("reset-wall-ms", 0) + reload_ms
         initial_reload_pending = False

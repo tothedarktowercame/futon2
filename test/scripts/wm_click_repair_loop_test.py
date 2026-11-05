@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 import contextlib
 import io
@@ -22,6 +23,80 @@ def load_loop():
 
 
 class RepairLoopCastTest(unittest.TestCase):
+    def test_click_write_manifest_registers_window_changes_and_ledger_pin(self):
+        loop = load_loop()
+        real_data = ROOT / "data"
+        real_mark = max((p.stat().st_mtime_ns for p in real_data.rglob("*")
+                         if p.is_file()), default=0)
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            state = base / "state"
+            roots = [base / "f2-data", base / "f2-evidence", base / "f3-data"]
+            for root in roots:
+                root.mkdir()
+            untouched = roots[0] / "untouched.edn"
+            modified = roots[0] / "modified.edn"
+            removed = roots[1] / "removed.edn"
+            untouched.write_text("same")
+            modified.write_text("before")
+            removed.write_text("gone")
+
+            def fake_fire(n, args, since):
+                (roots[0] / "new.edn").write_text("new bytes")
+                modified.write_text("after")
+                removed.unlink()
+                return {"n": n, "click-id": "wm-click-write-1", "run-id": "run-1",
+                        "outcome": "ok", "since-epoch": since}
+
+            ledger = state / "ledger.jsonl"
+            with mock.patch.object(loop, "STATE", state), \
+                 mock.patch.object(loop, "LEDGER", ledger), \
+                 mock.patch.object(loop, "WRITE_ROOTS", roots), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire):
+                click = loop.fire_with_write_manifest(1, object(), 123)
+                loop.record({"event": "click", **click})
+
+            pin = click["write_manifest"]
+            manifest_path = Path(pin["path"])
+            manifest_bytes = manifest_path.read_bytes()
+            self.assertEqual(hashlib.sha256(manifest_bytes).hexdigest(), pin["sha256"])
+            manifest = json.loads(manifest_bytes)
+            entries = {entry["path"]: entry for entry in manifest["entries"]}
+            self.assertEqual("new", entries[str(roots[0] / "new.edn")]["change"])
+            self.assertEqual(hashlib.sha256(b"new bytes").hexdigest(),
+                             entries[str(roots[0] / "new.edn")]["sha256"])
+            self.assertEqual("modified", entries[str(modified)]["change"])
+            self.assertEqual("removed", entries[str(removed)]["change"])
+            self.assertNotIn(str(untouched), entries)
+            self.assertTrue(all(entry.get("attribution") == "click-window"
+                                for entry in entries.values()))
+            self.assertEqual(3, pin["count"])
+            row = json.loads(ledger.read_text().splitlines()[-1])
+            self.assertEqual(pin, row["write_manifest"])
+        self.assertEqual(real_mark, max((p.stat().st_mtime_ns for p in real_data.rglob("*")
+                                        if p.is_file()), default=0))
+
+    def test_click_write_manifest_hash_failure_is_typed_and_preserves_result(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            root = base / "data"
+            root.mkdir()
+
+            def fake_fire(n, args, since):
+                (root / "new.edn").write_text("bytes")
+                return {"n": n, "click-id": "wm-click-write-failed",
+                        "outcome": "incomplete", "since-epoch": since}
+
+            with mock.patch.object(loop, "STATE", base / "state"), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire), \
+                 mock.patch.object(loop, "hash_file", side_effect=OSError("hash refused")):
+                click = loop.fire_with_write_manifest(1, object(), 123)
+            self.assertEqual("incomplete", click["outcome"])
+            self.assertEqual("failed", click["write_manifest"]["status"])
+            self.assertIn("hash refused", click["write_manifest"]["error"])
+
     def test_repair_kondo_judgment_does_not_use_stale_project_cache(self):
         loop = load_loop()
         with mock.patch.object(loop, "git", return_value="scripts/example.clj\n"), \
@@ -428,6 +503,9 @@ class ContinuousModeTest(unittest.TestCase):
                         "alert": [f"selection Q11 {'violated' if n == 1 else 'unverifiable'}"],
                         "since-epoch": since, "in-flight-repairs": []}
             with mock.patch.object(loop, "STATE", Path(td)), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [Path(td) / "f2-data",
+                                                          Path(td) / "f2-evidence",
+                                                          Path(td) / "f3-data"]), \
                  mock.patch.object(loop, "LEDGER", Path(td) / "ledger.jsonl"), \
                  mock.patch.object(loop, "LOGFILE", Path(td) / "loop.log"), \
                  mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
@@ -475,6 +553,9 @@ class ContinuousModeTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td, \
              mock.patch.object(loop, "STATE", Path(td)), \
+             mock.patch.object(loop, "WRITE_ROOTS", [Path(td) / "f2-data",
+                                                      Path(td) / "f2-evidence",
+                                                      Path(td) / "f3-data"]), \
              mock.patch.object(loop, "LEDGER", Path(td) / "ledger.jsonl"), \
              mock.patch.object(loop, "LOGFILE", Path(td) / "loop.log"), \
              mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
