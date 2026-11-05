@@ -339,6 +339,7 @@
         base (fixture/isolated-runner-opts)
         opts (assoc base
                     :run-id run-id
+                    :outer/selection {:outer-field/admitted []}
                     :roster-fn (fn [agency-base]
                                  (swap! calls update :roster inc)
                                  ((:roster-fn base) agency-base))
@@ -355,13 +356,19 @@
         (is (= :selection (:phase stop)))
         (is (string? (:attempt-id stop)))
         (alter-var-root #'repairable-judge
-                        (constantly (fn [_] {:judgement repaired-judgement})))
+                        (constantly
+                         (fn [_]
+                           (throw
+                            (ex-info "the retained scored field is empty"
+                                     {:outcome :abstained
+                                      :failure-kind :empty-field
+                                      :failure-stage :selection})))))
+        ;; The retry itself is the behavior under test.  Let its repaired,
+        ;; Lean-legal terminal pass through the ordinary detached close rather
+        ;; than introducing a second operator stop for the deliberate terminal.
+        (debugger/detach!)
         (debugger/continue! run-id :retry)
-        (let [abstention-stop
-              (wait-for-condition run-id :wm/selection-terminal-abstention)
-              _ (is (= :abstained (get-in abstention-stop [:ex-data :outcome])))
-              _ (debugger/continue! run-id :abort)
-              ;; This includes terminal-receipt persistence, not merely the
+        (let [;; This includes terminal-receipt persistence, not merely the
               ;; debugger resume.  Six warrant JVMs can legitimately make the
               ;; old five-second wall-clock guess expire on a healthy run.
               result (deref running 15000 ::timeout)
@@ -373,10 +380,17 @@
           (is (= :failure (get-in record [:terminal-receipt :kind])))
           (is (string? (:terminal-receipt-digest record))
               "the completed run record has exactly one attached terminal receipt")
-          (is (= {:roster 1 :code-state 1 :judge 2} @calls)
-              "retry repeats selection only, never the earlier real phases")))
+          (is (= {:roster 2 :code-state 1 :judge 2} @calls)
+              (str "retry repeats selection only; the terminal path performs "
+                   "its ordinary final roster observation"))))
       (finally
-        (alter-var-root #'repairable-judge (constantly original))))))
+        (alter-var-root #'repairable-judge (constantly original))
+        (debugger/detach!)
+        (when-not (realized? running)
+          (when (some #(= run-id (:run-id %)) (debugger/stopped))
+            (debugger/continue! run-id :abort))
+          (deref running 2000 nil))
+        (future-cancel running)))))
 
 (deftest abort-preserves-the-detached-failure
   (let [original @#'repairable-callee
@@ -527,17 +541,20 @@
         "abort preserves the ordinary outer refusal handling")))
 
 (deftest typed-refusal-retains-ordinary-behaviour-when-detached
-  (let [refusal (ex-info "War Machine abstained: cascade decision refused"
-                         {:outcome :abstained
-                          :judge-refusal {:kind :class-unknown-no-scalar-g}})
-        caught (try
-                 (runner/run-phase!
-                  (phase-opts "detached-refusal" (atom []))
-                  {:opportunity-id "op" :attempt-id "attempt"}
-                  :selection #(throw refusal))
-                 (catch clojure.lang.ExceptionInfo e e))]
-    (is (identical? refusal caught))
-    (is (empty? (debugger/stopped)))))
+  (try
+    (let [refusal (ex-info "War Machine abstained: cascade decision refused"
+                           {:outcome :abstained
+                            :judge-refusal {:kind :class-unknown-no-scalar-g}})
+          caught (try
+                   (runner/run-phase!
+                    (phase-opts "detached-refusal" (atom []))
+                    {:opportunity-id "op" :attempt-id "attempt"}
+                    :selection #(throw refusal))
+                   (catch clojure.lang.ExceptionInfo e e))]
+      (is (identical? refusal caught))
+      (is (empty? (debugger/stopped))))
+    (finally
+      (debugger/detach!))))
 
 (deftest busy-author-stops-and-retry-rereads-only-readiness
   (debugger/attach!)
