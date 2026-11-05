@@ -1950,14 +1950,25 @@
            (get-in item [:failure :kind])))))
 
 (deftest opt-in-review-evidence-correction-rechecks-the-same-gate
-  (let [{:keys [result dispatches dispatch-requests]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim
-          :review-evidence-corrections 1
-          :reviewer-execution {:executed false :tool-events 0 :command-events 0}
-          :reviewer-correction-execution successful-execution})
+  ;; This fixture's `feature123` is deliberately not a Git artifact and cannot
+  ;; supply mission-standing or revision-authority evidence.  The claim here is
+  ;; only that the bounded correction rechecks the same review gate; keep the
+  ;; unrelated machine-falsifier continuation out of that dispatch count.
+  (let [falsifier-calls (atom 0)
+        {:keys [result dispatches dispatch-requests]}
+        (with-redefs [reviewer-falsifier/verify
+                      (fn [_candidate _inputs]
+                        (swap! falsifier-calls inc)
+                        {:status :verified :receipt/id "correction-scope-passes"})]
+          (run-feature-card-attempt
+           {:author-card feature-card-claim
+            :review-evidence-corrections 1
+            :reviewer-execution {:executed false :tool-events 0 :command-events 0}
+            :reviewer-correction-execution successful-execution}))
         validation (get-in result [:checkpoints :build :judgment :validation])
         correction (first (:review-evidence-corrections validation))]
+    (is (pos? @falsifier-calls) "the later falsifier seam is still exercised")
+    (is (= :verified (get-in validation [:reviewer-falsifier-verification :status])))
     (is (not= :review-execution-evidence-missing
               (get-in result [:data :failure-kind]))
         "the corrected job passes this gate and the same round continues")
@@ -2042,15 +2053,29 @@
                       {:executed false :tool-events 0 :command-events 0}}
                      {:review-evidence-corrections 1
                       :reviewer-execution successful-execution}]]
-      (let [{:keys [dispatches]}
-            (run-feature-card-attempt (merge {:author-card feature-card-claim}
-                                             options))]
+      (let [falsifier-calls (atom 0)
+            {:keys [result dispatches]}
+            (with-redefs [reviewer-falsifier/verify
+                          (fn [_candidate _inputs]
+                            (swap! falsifier-calls inc)
+                            {:status :verified
+                             :receipt/id "correction-boundary-passes"})]
+              (run-feature-card-attempt
+               (merge {:author-card feature-card-claim} options)))
+            validation (get-in result [:checkpoints :build :judgment :validation])]
+        (is (pos? @falsifier-calls) "the later falsifier seam is still exercised")
+        (is (= :verified
+               (get-in validation [:reviewer-falsifier-verification :status])))
         (is (= ["zai-5" "codex-7"] dispatches)))))
   (testing "post-review mechanical falsifier failure cannot dispatch correction"
     (let [{:keys [result dispatches]}
           (run-feature-card-attempt
            {:author-card feature-card-claim
             :review-evidence-corrections 1
+            ;; This subcase isolates the correction boundary: the deliberately
+            ;; wrong prediction must reach the real falsifier and close there,
+            ;; not enter the independently tested falsifier-revision feature.
+            :runner-options {:revision-rounds 0}
             :judgement-transform-fn
             (fn [j]
               (assoc-in j [:token-outcome-prediction :tokens]
