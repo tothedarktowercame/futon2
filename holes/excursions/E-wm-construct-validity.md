@@ -584,6 +584,10 @@ records and notifies, and validates nothing).
      reading (a seat call) and close as C2 is Joe's design question; 1c-1
      (codex-18) first counts how many of the 60 abstentions were unclear
      missions.
+   - 1c-1 (codex-18; 3 rows spot-checked against run records): Q 0, D 14,
+     U 46. 10 of the D rows are selected-target-reading protocol failures. No
+     record shows an unclear mission. Recommendation to Joe: no click-side
+     reading; C2 waits on his answer.
 6. **C3-HARM-1.** Named harm rules. A guardrail refusal qualifies only by
    matching one.
 
