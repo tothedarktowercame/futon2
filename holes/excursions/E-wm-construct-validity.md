@@ -560,6 +560,11 @@ records and notifies, and validates nothing).
    - 1a (pure carrier, codex-18) and 1b (pinned brief enqueue, codex-15)
      are dispatched. Then 1c (close classification), 1d (row and read side),
      and 1e (registry).
+   - 1a merged (`4bc4c9564`, codex-18; review tests `f59528129`):
+     `c2-question/question-carrier` calls `question-reasons`, refuses
+     `:stale-citation` when the bytes differ from the pin, and digests
+     question + span + readings + source sha canonically.
+     `ambiguity-cited?` re-checks a stored carrier.
 6. **C3-HARM-1.** Named harm rules. A guardrail refusal qualifies only by
    matching one.
 
