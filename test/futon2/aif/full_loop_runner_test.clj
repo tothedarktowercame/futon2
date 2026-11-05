@@ -8204,10 +8204,17 @@
                         ;; Baseline capture and its close-time verification
                         ;; read the real pre-author revision.  Only the
                         ;; post-build measurement is absent in this fixture.
+                        ;; Keyed on call order because in the token fixture
+                        ;; the pre-author revision and the authored commit are
+                        ;; the same sha (keying on revision empties the
+                        ;; baseline too: claude-6, 2026-11-05). If the runner
+                        ;; adds a read before the falsifier this goes stale,
+                        ;; and the read-count assertion below says so.
                         (if (<= (swap! reads inc) 2)
                           (apply production-artifact-tokens args)
                           []))]
           (run-token-feature-card-attempt c d))]
+    (is (< 2 @reads) "the post-build measurement was read and came back empty")
     (is (= :build-failed (:outcome result)))
     (is (= :reviewer-falsifier-failed (get-in result [:data :failure-kind])))
     (is (= :reviewer-wait (get-in result [:data :failure-stage])))
