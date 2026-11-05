@@ -436,6 +436,12 @@ records and notifies, and validates nothing).
      a debugger error as normal progress. REFUSAL-VALIDATOR-2c sends these
      clicks to the debugger page and stops on a second unmoved one, so they
      cannot pile up.
+   *REFUSAL-VALIDATOR-2c (2026-11-05):* `c9b24e089`, `0f625af00` (codex-18),
+   with the test fix `c3853591e`. `lawful_stop` is gone. In continuous mode a
+   debugger-error abstention gets a debugger page. If the next debugger page
+   shows the same problem, the loop stops as `debugger-error`, exit 1. The
+   stop count is now 20. The test fixtures had leaked two pages into
+   `data/wm-click-loop/debugger/`; they are moved out and the fixtures fixed.
 4. **C1-EXCLUSION-1.** A persistent exclusion row keyed by target and
    evidence digest, consumed by preselection. It becomes
    `RefusalLegality.nextField`, and is lifted when the digest changes.
