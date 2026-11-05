@@ -1124,7 +1124,9 @@
                          (get-in j [:decision :controller-score])}))}
                    run)
                  (run))]
-    {:result result :item (first @queued)
+    ;; A run can queue an occurrence-square reference before its terminal
+    ;; Morning Brief item; callers of this harness need the latter.
+    {:result result :item (last @queued)
      :queued-operator-actions @queued-operator-actions
      :dispatches @dispatches
      :dispatch-requests @dispatch-requests
@@ -7500,7 +7502,7 @@
                           :cascade-id :test/mission-reader-comparator
                           :precedence (conj (:precedence action)
                                             :test/mission-reader-followup))
-        decision (-> (policy/select-action-cascades
+        decision (-> (runner-fixture/select-with-prefix-history
                       [(runner-fixture/loop-exercised-ranked-entry action -2.0 1)
                        (runner-fixture/loop-exercised-ranked-entry comparator -1.0 2)]
                       {:beta 2.0})
