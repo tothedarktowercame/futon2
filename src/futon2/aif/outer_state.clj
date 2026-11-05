@@ -15,6 +15,8 @@
 (def makeup-schema :wm/outer-makeup-v1)
 (def state-schema :wm/outer-state-v1)
 (def terminal-ending-classes #{:focused :related :unrelated :stop-the-line})
+(def pending-discharge-refusal-kinds
+  #{:pending-steps-unrecoverable :terminal-ending-class-absent})
 ;; The serving JVM runs from futon3c; live stores belong to canonical futon2.
 (def default-makeup-path "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn")
 (def default-state-path (data-paths/path "wm-learning" "outer-state.edn"))
@@ -405,7 +407,9 @@
          (= digest (:new-state-sha256 receipt))
          (= (:makeup/sha256 makeup) (:makeup-sha256 receipt) (:makeup/sha256 state))
          (string? (:run-id receipt))
-         (= :pending-steps-unrecoverable (get-in receipt [:refusal :kind]))
+         (contains? pending-discharge-refusal-kinds (get-in receipt [:refusal :kind]))
+         (or (= :pending-steps-unrecoverable (get-in receipt [:refusal :kind]))
+             (map? (get-in receipt [:refusal :classification-absence])))
          (true? (:learning-parameters-equal receipt))
          (.isFile backup)
          (let [bytes (Files/readAllBytes (.toPath backup))]
@@ -436,22 +440,33 @@
          (when (.exists temp) (Files/deleteIfExists (.toPath temp))))))))
 
 (defn discharge-unrecoverable-pending!
-  "Remove a pending learning step that `next-state` can never consume: a legacy
-  selection whose cascade has neither a retained digest nor typed steps, so
-  `chosen-cascade` refuses `:pending-steps-unrecoverable` on every click. The
-  observation is lost once and said so: the exact old bytes are backed up and a
-  separate receipt names the run, the cascade, the refusal and both state SHAs.
-  Learned counts are untouched. Refuses when there is no pending step, when the
-  step is recoverable, or when a different backup already holds the name."
-  [path makeup reason]
-  (let [target (io/file path)
+  "Remove a pending learning step that can never be consumed: either its legacy
+  cascade has no recoverable steps, or its verified completed-run observation
+  has no terminal ending class. The observation is lost once and said so: the
+  exact old bytes are backed up and a separate receipt names the run, cascade,
+  refusal and both state SHAs. Learned counts are untouched."
+  ([path makeup reason]
+   (discharge-unrecoverable-pending! path makeup reason nil))
+  ([path makeup reason observation]
+   (let [target (io/file path)
         bytes (Files/readAllBytes (.toPath target))
         state (read-state makeup path)
         pending (:pending state)
         _ (when-not pending (refuse! :no-pending-step {:path (str path)}))
-        refusal (try (chosen-cascade makeup (:selection pending)) nil
-                     (catch clojure.lang.ExceptionInfo e (ex-data e)))
-        _ (when-not (= :pending-steps-unrecoverable (:kind refusal))
+        cascade-refusal (try (chosen-cascade makeup (:selection pending)) nil
+                             (catch clojure.lang.ExceptionInfo e (ex-data e)))
+        terminal-ending-absent?
+        (and (= :deferred (:status observation))
+             (= :terminal-ending-class-absent (:reason observation))
+             (= (:run-id pending) (:run-id observation))
+             (map? (:classification-absence observation)))
+        refusal (cond
+                  (= :pending-steps-unrecoverable (:kind cascade-refusal)) cascade-refusal
+                  terminal-ending-absent?
+                  {:kind :terminal-ending-class-absent
+                   :classification-absence (:classification-absence observation)}
+                  :else nil)
+        _ (when-not refusal
             (refuse! :pending-step-recoverable {:run-id (:run-id pending)}))
         old-sha (sha256 bytes)
         discharged (dissoc state :pending :source)
@@ -483,8 +498,8 @@
                     (.delete receipt-file)
                     (refuse! :pending-discharge-source-changed {:path (str path)})))]
         (write-state! path discharged)))
-    {:status :discharged :receipt receipt :backup (.getCanonicalPath backup)
-     :receipt-path (.getCanonicalPath receipt-file)}))
+     {:status :discharged :receipt receipt :backup (.getCanonicalPath backup)
+      :receipt-path (.getCanonicalPath receipt-file)})))
 
 (defn write-makeup-migration!
   "Apply an already computed migration, retaining exact old bytes and its

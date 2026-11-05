@@ -44,6 +44,51 @@
     (is (= bytes (slurp path)) "nothing written")
     (is (empty? (filter #(re-find #"pending-discharge" (.getName %)) (.listFiles (.getParentFile (io/file path))))))))
 
+(def terminal-ending-absent
+  {:status :deferred
+   :reason :terminal-ending-class-absent
+   :run-id "2026-11-01-legacy"
+   :classification-absence
+   {:reason :terminal-ending-class-unavailable
+    :recorded-class :known-typed-failure
+    :completed true
+    :failure {:kind :pre-author-baseline-unavailable :stage :construction}}})
+
+(deftest terminal-ending-class-absence-discharges-a-recoverable-pending
+  (let [{:keys [old path bytes planted]} (with-pending [:ready-gate :by-rank])
+        invocation (try
+                     {:result (state/discharge-unrecoverable-pending!
+                               path old :terminal-ending-class-absent
+                               terminal-ending-absent)}
+                     (catch Throwable e {:error e}))]
+    ;; On pre-PENDING-1 main this is an ArityException, retained as a failed
+    ;; assertion rather than a test error for clean red/green evidence.
+    (is (nil? (:error invocation)) (some-> (:error invocation) str))
+    (when-let [result (:result invocation)]
+      (let [after (state/read-state old path)
+            receipt (edn/read-string (slurp (:receipt-path result)))]
+        (is (= :discharged (:status result)))
+        (is (nil? (:pending after)))
+        (is (= (dissoc planted :pending) (dissoc after :source))
+            "all learned values are unchanged")
+        (is (= bytes (slurp (:backup result))) "exact old bytes retained")
+        (is (= :terminal-ending-class-absent (get-in receipt [:refusal :kind])))
+        (is (= (:classification-absence terminal-ending-absent)
+               (get-in receipt [:refusal :classification-absence])))
+        (is (= :durable (:source after)) "read-state accepts the receipt")))))
+
+(deftest terminal-ending-class-is-still-recoverable
+  (let [{:keys [old path bytes]} (with-pending [:ready-gate :by-rank])
+        failure (try
+                  (state/discharge-unrecoverable-pending!
+                   path old :must-not-discharge
+                   {:status :ready :run-id "2026-11-01-legacy"
+                    :ending-class :related})
+                  nil
+                  (catch Throwable e e))]
+    (is (= :pending-step-recoverable (:kind (ex-data failure))))
+    (is (= bytes (slurp path)) "nothing written")))
+
 (deftest a-state-written-after-inspection-is-not-overwritten
   (let [{:keys [old path bytes planted]} (with-pending nil)
         newer (update planted :click-count inc)]
@@ -68,6 +113,10 @@
     (spit receipt-path (pr-str (assoc receipt :learning-parameters-equal false)))
     (is (= :invalid-discharge-receipt
            (:kind (ex-data (try (state/read-state old path) (catch clojure.lang.ExceptionInfo e e))))))
+    (spit receipt-path (pr-str (assoc-in receipt [:refusal :kind] :unsupported-discharge)))
+    (is (= :invalid-discharge-receipt
+           (:kind (ex-data (try (state/read-state old path) (catch clojure.lang.ExceptionInfo e e)))))
+        "only the two declared refusal kinds are admitted")
     (spit receipt-path (pr-str receipt))
     (spit backup (str backup-bytes "\n"))
     (is (= :invalid-discharge-receipt
