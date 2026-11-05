@@ -572,6 +572,10 @@ records and notifies, and validates nothing).
      `c2-receipt-valid?` re-reads the pinned bytes. Small gap: replay does not
      check that the summary and lifecycle files exist. The brief lists items
      from `items/`, so the question still shows.
+   - Premise gap found at 1c: mission reading runs only in the flight path
+     (`flight_runner/read-fn`), never in a WM click, so no click can produce a
+     C2 question yet. Discovery C2-BRIEF-1c-0 (codex-18) finds where an
+     unworkable mission ends in a click and the smallest seam.
 6. **C3-HARM-1.** Named harm rules. A guardrail refusal qualifies only by
    matching one.
 
