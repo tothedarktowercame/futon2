@@ -107,6 +107,7 @@
             [futon2.aif.serving-envelope :as serving-envelope]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.stop-line :as stop-line]
+            [futon2.aif.harm-rules :as harm-rules]
             [futon2.aif.refusal-legality :as refusal-legality]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.repair-discharge :as repair-discharge]
@@ -1916,6 +1917,38 @@
        (filter #(or (.exists (io/file % ".git"))
                     (.isFile (io/file % ".git"))))
        (mapv #(.getAbsolutePath %))))
+
+(defn production-harm-world
+  "Real-world ports used only to verify a typed REFUSE-HARM claim."
+  []
+  {:path-exists? #(let [file (io/file (str %))]
+                    (or (.isFile file) (.exists file)))
+   :production-data-roots
+   (constantly [(data-paths/path)
+                (data-paths/code-path "futon3c" "data")
+                (data-paths/repo-path "evidence")])
+   :default-branch
+   (fn [repo remote]
+     (let [result (git repo "symbolic-ref"
+                       (str "refs/remotes/" remote "/HEAD"))
+           prefix (str "refs/remotes/" remote "/")
+           ref (str/trim (:out result))]
+       (when (and (zero? (:exit result)) (str/starts-with? ref prefix))
+         (str "refs/heads/" (subs ref (count prefix))))))
+   :joe-identities
+   (fn []
+     (into #{"joe" "@joe"}
+           (keep (fn [repo]
+                   (let [result (git repo "config" "--get" "user.name")]
+                     (when (zero? (:exit result))
+                       (not-empty (str/trim (:out result)))))))
+           (primary-repos)))
+   :local-destination?
+   (fn [destination]
+     (let [path (.normalize (.toAbsolutePath (.toPath (io/file (str destination)))))
+           home (.normalize (.toAbsolutePath (.toPath (io/file (System/getProperty "user.home")))))
+           tmp (.normalize (.toAbsolutePath (.toPath (io/file "/tmp"))))]
+       (or (.startsWith path home) (.startsWith path tmp))))})
 
 (defn- stack-code-state []
   (let [states (mapv repo-state (primary-repos))
@@ -3900,11 +3933,19 @@
   refusal as a machine failure (attempt-020, 2026-07-16)."
   [job]
   (let [text (job-text job)
-        [_ marker detail] (re-find #"(?m)^FULL_LOOP_AUTHOR:\s*(DONE|REFUSE)\b[ \t]*(.*)$"
+        [_ marker detail] (re-find #"(?m)^FULL_LOOP_AUTHOR:\s*(REFUSE-HARM|DONE|REFUSE)\b[ \t]*(.*)$"
                                    text)]
     (case marker
       "DONE" {:verdict :done :detail (str/trim (str detail))}
       "REFUSE" {:verdict :refuse :reason (str/trim (str detail))}
+      "REFUSE-HARM"
+      (try
+        (let [claim (edn/read-string (str/trim (str detail)))]
+          (if (map? claim)
+            {:verdict :refuse-harm :claim claim}
+            {:verdict :refuse-harm :claim-error :unreadable}))
+        (catch Exception _
+          {:verdict :refuse-harm :claim-error :unreadable}))
       {:verdict :unverifiable})))
 
 
@@ -4110,14 +4151,29 @@
       -> :invalid-author-refusal (as before).
   EXISTS-FN is the injectable commit check ([repo sha] -> boolean) so tests
   stub the git call; REPO names where to look when the job does not."
-  ([job] (author-refusal-classification job nil nil false))
-  ([job repo] (author-refusal-classification job repo nil false))
-  ([job repo exists-fn] (author-refusal-classification job repo exists-fn false))
+  ([job] (author-refusal-classification job nil nil false (production-harm-world)))
+  ([job repo] (author-refusal-classification job repo nil false (production-harm-world)))
+  ([job repo exists-fn]
+   (author-refusal-classification job repo exists-fn false (production-harm-world)))
   ([job repo exists-fn repository-required?]
-   (let [{:keys [verdict reason]} (author-verdict job)
+   (author-refusal-classification job repo exists-fn repository-required?
+                                  (production-harm-world)))
+  ([job repo exists-fn repository-required? harm-world]
+   (let [{:keys [verdict reason claim claim-error]} (author-verdict job)
          artifact-ref (:artifact-ref job)
          exists-fn (or exists-fn commit-exists-in?)]
-     (when (= :refuse verdict)
+     (if (= :refuse-harm verdict)
+       (if claim-error
+         {:outcome :invalid-author-refusal
+          :harm-refusal {:status :refused :reason claim-error}}
+         (let [matched (harm-rules/match (harm-rules/load-rules) claim harm-world)]
+           (if (= :matched (:status matched))
+             {:outcome :harm-declined
+              :harm-match {:rule (:rule matched)
+                           :declined-action (:declined-action claim)
+                           :declined-action-digest (:declined-action-digest matched)}}
+             {:outcome :invalid-author-refusal :harm-refusal matched})))
+       (when (= :refuse verdict)
        (let [card (raw-feature-card job)
              already? (or (and card (already-satisfied-card? card))
                           (already-satisfied-report? reason))
@@ -4191,7 +4247,7 @@
                 (nil? proof-sha))
            {:outcome :guardrail-refusal :refusal-reason reason}
 
-           :else {:outcome :invalid-author-refusal}))))))
+           :else {:outcome :invalid-author-refusal})))))))
 
 (defn throw-if-author-refused!
   "Shared HEAD movement cannot establish an artifact for a refusing author,
@@ -4218,6 +4274,13 @@
                         (some? correction-repository))]
     (when classification
     (case (:outcome classification)
+      :harm-declined
+      (throw (ex-info "Author declined an action matching an approved harm rule"
+                      {:outcome :harm-declined
+                       :failure-kind :harm-declined
+                       :failure-stage stage
+                       :harm-match (:harm-match classification)
+                       :target target :author-job author-job}))
       :guardrail-refusal
       (throw (ex-info "Author refused with a typed reason"
                       {:outcome :guardrail-refusal
@@ -4640,6 +4703,14 @@
                 :grounded-change
                 :grounded-progress))))))))
 
+(defn- harm-refusal-prompt []
+  (str "If the exact action you would otherwise perform is harmful, finish with "
+       "FULL_LOOP_AUTHOR: REFUSE-HARM {:rule :Hn :declined-action {...}}. "
+       "The runner checks the typed action against the current world. Approved rules:\n"
+       (str/join "\n" (map (fn [{:keys [id doc]}] (str "  " id ": " doc))
+                            (:rules (harm-rules/load-rules))))
+       "\n"))
+
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
                              measured-acquisition? surprise-root
@@ -4775,7 +4846,8 @@
        "   :claim-mission-text-not-an-artifact, whatever its checkboxes say, and\n"
        "   gets one correction round to build a real artifact instead.\n"
        "If no safe substantive parcel is possible, make no commit and finish with "
-       "FULL_LOOP_AUTHOR: REFUSE <typed reason>.")))
+       "FULL_LOOP_AUTHOR: REFUSE <typed reason>.\n"
+       (harm-refusal-prompt))))
 
 (defn- build-cure-prompt
   "Construct the cure re-emission prompt sent to the SAME author agent when a

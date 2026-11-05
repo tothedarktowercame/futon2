@@ -53,6 +53,7 @@
    :no-selection :invalid
    :agent-unavailable :invalid
    :guardrail-refusal :refused
+   :harm-declined :refused
    :dispatch-failed :invalid
    :build-failed :invalid
    :substrate-unavailable :invalid

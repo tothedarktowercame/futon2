@@ -56,7 +56,7 @@
   "The no-work part of `meta-terminal-injury/close-outcome-image`, named for
   readers and tests.  Validation does not consult it; see `work-outcomes`."
   #{:already-satisfied :grounded-no-change :artifact-only :abstained
-    :no-selection :agent-unavailable :guardrail-refusal :dispatch-failed
+    :no-selection :agent-unavailable :guardrail-refusal :harm-declined :dispatch-failed
     :build-failed :substrate-unavailable :incomplete :cancelled
     :historical-verification-awaiting-validation
     :historical-verification-refused})
