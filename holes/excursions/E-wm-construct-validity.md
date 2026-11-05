@@ -644,6 +644,19 @@ records and notifies, and validates nothing).
      ledger row. Review fix: one file still being appended during hashing
      made the whole manifest fail; now that entry is `unstable: true`. Cost
      measured: 350,357 files under the three roots, about 1.9 s per snapshot.
+   - C3-HARM-2 merged (`f95421366`, codex-15; fix `dc0fa794e`): an author
+     may end with `FULL_LOOP_AUTHOR: REFUSE-HARM {:rule :Hn :declined-action
+     {...}}`; it parses ahead of plain REFUSE, is checked by
+     `harm-rules/match` against a production world, and throws
+     `:harm-declined` with the rule, action and digest. Review fix: URL
+     destinations were resolved as files and counted local, so H4 could not
+     match an external publish; `refs/heads/main` and `main` did not
+     compare equal; the prompt now lists each rule's operations and
+     required fields, generated from the rule file. C3-HARM-3 (validator +
+     `:c3-exclusion` index row) dispatched to codex-15.
+   - Militant-pacifism (Joe's "should do" side): six DRAFT patterns in
+     `~/notes/wm-next/militant-pacifism-drafts/` (precept, optative, method
+     tiers), kept out of `futon3/library` until Joe approves them.
 
 Until 4-6 land, the validator classes every C-looking refusal as a debugger
 error, as the survey predicts. That is the intended interim state: those
