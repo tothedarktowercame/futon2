@@ -1489,47 +1489,30 @@ def notify(args, case: str, legal: bool, reason: str) -> None:
     log(f"notified {args.owner}: {r.stdout.strip()[-200:]}")
 
 
-def _edn_form_after(text: str, key: str, opener: str, closer: str) -> str | None:
-    """Return the retained EDN form immediately following KEY, without parsing
-    values from a reason string or accepting an unterminated form."""
-    start = text.find(key)
-    if start < 0:
-        return None
-    start = text.find(opener, start + len(key))
-    if start < 0:
-        return None
-    depth, in_string, i = 0, False, start
-    while i < len(text):
-        ch = text[i]
-        if in_string:
-            if ch == "\\":
-                i += 2
-                continue
-            if ch == '"':
-                in_string = False
-        elif ch == '"':
-            in_string = True
-        elif ch == opener:
-            depth += 1
-        elif ch == closer:
-            depth -= 1
-            if depth == 0:
-                return text[start:i + 1]
-        i += 1
-    return None
+# Reads the retained run record as EDN (babashka), never by text search: a
+# scan for the next "[" after the key read `:outer-field/admitted nil` as the
+# following `[]`, and took a nested previous-selection's empty field for a
+# missing top-level one; both made "work exhausted" legal with no field.
+_WORK_EXHAUSTED_EDN = (
+    "(let [r (clojure.edn/read-string {:default tagged-literal}"
+    " (slurp (first *command-line-args*)))"
+    " a (get-in r [:outer/selection :outer-field/admitted] ::missing)]"
+    " (println (boolean (and (map? r) (= :no-task-selected (:absent r))"
+    " (vector? a) (empty? a)))))")
 
 
 def _work_exhausted_checked(evidence: dict) -> bool:
+    """L1 (RefusalLegality.loopStopLegal .workExhausted): the outer selector
+    returned no task AND its retained admitted field is present and empty."""
     path = evidence.get("run-record") if isinstance(evidence, dict) else None
-    try:
-        text = Path(path).read_text() if path else ""
-    except (OSError, UnicodeError, TypeError):
+    if not path or not Path(path).is_file():
         return False
-    selection = _edn_form_after(text, ":outer/selection", "{", "}")
-    admitted = (_edn_form_after(selection, ":outer-field/admitted", "[", "]")
-                if selection else None)
-    return (bool(re.search(r":absent\s+:no-task-selected(?:[\s,}])", text)) and
-            admitted is not None and admitted[1:-1].strip() == "")
+    try:
+        r = subprocess.run(["bb", "-e", _WORK_EXHAUSTED_EDN, str(path)],
+                           capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return r.returncode == 0 and r.stdout.strip() == "true"
 
 
 def _validated_stop(args, claimed_case: str, evidence: dict) -> tuple[str, bool]:

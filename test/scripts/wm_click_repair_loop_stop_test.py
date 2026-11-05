@@ -84,6 +84,18 @@ class SelfHealStopTest(unittest.TestCase):
         record = self.loop.STATE / "run.edn"
         for body in (
                 "{:absent :no-task-selected :outer/selection {}}",
+                # nil is "carrier absent", not empty: a text scan read the
+                # next [] after the key as the admitted field
+                "{:absent :no-task-selected :outer/selection "
+                "{:outer-field/admitted nil :outer-field/excluded []}}",
+                # only the top-level retained field counts, not a nested
+                # previous selection's
+                "{:absent :no-task-selected :outer/selection "
+                "{:reading-reselection {:previous-selection "
+                "{:outer-field/admitted []}}}}",
+                # an empty field without the no-task-selected outcome
+                "{:outer/selection {:outer-field/admitted []} "
+                ":note \":absent :no-task-selected\"}",
                 '{:absent :no-task-selected :outer/selection '
                 '{:outer-field/admitted ["still-live"]}}'):
             record.write_text(body)
