@@ -247,7 +247,7 @@ def write_click_manifest(click: dict, started: str, ended: str,
         attribution = ({"attribution": "stamped",
                         "writer": stamp["writer"] if stamp else "write-stamp",
                         "run-id": stamp.get("run-id") if stamp else click.get("run-id")}
-                       if stamped else {"attribution": "click-window"})
+                       if stamped else {"attribution": "click-window/unattributed"})
         if new is None:
             entries.append({"path": raw_path, "change": "removed", **attribution})
             continue
@@ -267,6 +267,9 @@ def write_click_manifest(click: dict, started: str, ended: str,
         except FileNotFoundError:
             entry["change"] = "removed-after-click"
         entries.append(entry)
+    stamped_count = sum(entry["attribution"] == "stamped" for entry in entries)
+    unattributed_count = sum(
+        entry["attribution"] == "click-window/unattributed" for entry in entries)
     manifest = {
         "schema": "wm-click-write-manifest-v1",
         "click": {"id": click.get("click-id"), "number": click.get("n"),
@@ -275,11 +278,13 @@ def write_click_manifest(click: dict, started: str, ended: str,
         "roots": [str(root.resolve()) for root in WRITE_ROOTS],
         "snapshot_seconds": snapshot_seconds,
         "entries": entries,
-        "stamped_count": sum(entry["attribution"] == "stamped" for entry in entries),
+        "stamped_count": stamped_count,
+        "unattributed_count": unattributed_count,
         "stamp_lines_unreadable": stamp_lines_unreadable,
-        "attribution_note": ("click-window means the path changed while this click ran; "
-                             "it does not prove that the click was the writer. Never delete "
-                             "or move a listed path on this evidence. stamped means a writer "
+        "attribution_note": ("click-window/unattributed means the path changed while this "
+                             "click ran and no writer claimed it; it does not prove that the "
+                             "click was the writer. Never delete or move a listed path on "
+                             "this evidence. stamped means a writer "
                              "claimed the path in the click's stamp file; any process that can "
                              "write that file can make the claim, so it names a writer, it "
                              "does not prove one."),
@@ -291,8 +296,14 @@ def write_click_manifest(click: dict, started: str, ended: str,
     encoded = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode()
     with target.open("xb") as output:
         output.write(encoded)
-    return {"path": str(target.resolve()), "sha256": hashlib.sha256(encoded).hexdigest(),
-            "count": len(entries)}
+    summary = {"path": str(target.resolve()),
+               "sha256": hashlib.sha256(encoded).hexdigest(),
+               "count": len(entries), "stamped": stamped_count,
+               "unattributed": unattributed_count}
+    if unattributed_count > 0:
+        log(f"click {click.get('click-id')} has {unattributed_count} unattributed "
+            f"write(s) in {summary['path']}")
+    return summary
 
 
 def fire_with_write_manifest(n: int, args, since_epoch: int) -> dict:

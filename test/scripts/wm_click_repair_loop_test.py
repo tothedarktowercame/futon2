@@ -59,10 +59,14 @@ class RepairLoopCastTest(unittest.TestCase):
             self.assertEqual("stamped", entries["named.edn"]["attribution"])
             self.assertEqual("fixture/writer", entries["named.edn"]["writer"])
             self.assertEqual("run-stamped", entries["named.edn"]["run-id"])
-            self.assertEqual("click-window", entries["unnamed.edn"]["attribution"])
+            self.assertEqual("click-window/unattributed",
+                             entries["unnamed.edn"]["attribution"])
             self.assertEqual("stamped", entries["wm-click-stamped.jsonl"]["attribution"])
             self.assertEqual("write-stamp", entries["wm-click-stamped.jsonl"]["writer"])
             self.assertEqual(2, manifest["stamped_count"])
+            self.assertEqual(1, manifest["unattributed_count"])
+            self.assertEqual(2, click["write_manifest"]["stamped"])
+            self.assertEqual(1, click["write_manifest"]["unattributed"])
             self.assertEqual(1, manifest["stamp_lines_unreadable"])
 
     def test_click_write_manifest_prunes_and_skips_large_hash(self):
@@ -194,7 +198,8 @@ class RepairLoopCastTest(unittest.TestCase):
             manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
             self.assertEqual([str(changed.resolve())],
                              [e["path"] for e in manifest["entries"]])
-            self.assertEqual("click-window", manifest["entries"][0]["attribution"])
+            self.assertEqual("click-window/unattributed",
+                             manifest["entries"][0]["attribution"])
             self.assertEqual(0, manifest["stamped_count"])
             self.assertEqual(1, manifest["stamp_lines_unreadable"])
 
@@ -244,9 +249,12 @@ class RepairLoopCastTest(unittest.TestCase):
             self.assertEqual("modified", entries[str(modified)]["change"])
             self.assertEqual("removed", entries[str(removed)]["change"])
             self.assertNotIn(str(untouched), entries)
-            self.assertTrue(all(entry.get("attribution") == "click-window"
+            self.assertTrue(all(entry.get("attribution") ==
+                                "click-window/unattributed"
                                 for entry in entries.values()))
             self.assertEqual(3, pin["count"])
+            self.assertEqual(0, pin["stamped"])
+            self.assertEqual(3, pin["unattributed"])
             row = json.loads(ledger.read_text().splitlines()[-1])
             self.assertEqual(pin, row["write_manifest"])
         self.assertEqual(real_mark, max((p.stat().st_mtime_ns for p in real_data.rglob("*")
@@ -320,6 +328,59 @@ class RepairLoopCastTest(unittest.TestCase):
             self.assertEqual("incomplete", click["outcome"])
             self.assertEqual("failed", click["write_manifest"]["status"])
             self.assertIn("hash refused", click["write_manifest"]["error"])
+            self.assertNotIn("stamped", click["write_manifest"])
+            self.assertNotIn("unattributed", click["write_manifest"])
+
+    def test_click_write_manifest_logs_only_unattributed_writes(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            root = base / "data"
+            root.mkdir()
+            first = root / "first.edn"
+            second = root / "second.edn"
+            claimed = root / "claimed.edn"
+            before_listing = set(root.iterdir())
+            click = {"click-id": "wm-click-log", "n": 1, "run-id": "run-log"}
+            with mock.patch.object(loop, "STATE", base / "state"), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "read_write_stamps",
+                                   return_value=({str(claimed.resolve()):
+                                                  {"writer": "fixture", "run-id": "run-log"}},
+                                                 0, None)), \
+                 mock.patch.object(loop, "log") as logged:
+                first.write_text("one")
+                second.write_text("two")
+                claimed.write_text("claimed")
+                after, _ = loop.snapshot_write_roots()
+                summary = loop.write_click_manifest(
+                    click, "start", "end", {}, after,
+                    {"before": 0.0, "after": 0.0})
+            manifest = json.loads(Path(summary["path"]).read_text())
+            self.assertEqual(2, manifest["unattributed_count"])
+            self.assertEqual(1, manifest["stamped_count"])
+            self.assertEqual(2, summary["unattributed"])
+            self.assertEqual(1, summary["stamped"])
+            logged.assert_called_once()
+            message = logged.call_args.args[0]
+            self.assertIn("wm-click-log", message)
+            self.assertIn("2", message)
+            self.assertIn(summary["path"], message)
+            self.assertEqual(before_listing | {first, second, claimed}, set(root.iterdir()))
+
+            stamped_after = {str(first.resolve()): (3, first.stat().st_mtime_ns)}
+            with mock.patch.object(loop, "STATE", base / "other-state"), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "read_write_stamps",
+                                   return_value=({str(first.resolve()):
+                                                  {"writer": "fixture", "run-id": "run-log"}},
+                                                 0, None)), \
+                 mock.patch.object(loop, "log") as no_log:
+                zero = loop.write_click_manifest(
+                    {"click-id": "wm-click-zero", "n": 2}, "start", "end", {},
+                    stamped_after, {"before": 0.0, "after": 0.0})
+            self.assertEqual(0, zero["unattributed"])
+            no_log.assert_not_called()
 
     def test_repair_kondo_judgment_does_not_use_stale_project_cache(self):
         loop = load_loop()
