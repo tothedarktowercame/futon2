@@ -602,6 +602,14 @@ records and notifies, and validates nothing).
    that does not yet exist. (3) Do not delete; the machine may record data,
    but every write must be registered in the deliverable so Joe can inspect
    it (WRITE-REGISTER-0 discovery, codex-20).
+   - C3-HARM-0 (codex-15; citations spot-checked): a refusal today is one
+     free-text reason; no typed declined operation exists anywhere, so none
+     of H1-H6 is checkable and none of the 7 indexed guardrail refusals is
+     harm. Decisions (`~/notes/wm-next/tests/C3-HARM-decisions.md`): rules
+     in `resources/wm/harm-rules.edn` (`ef3c69b76`); the author gets a typed
+     `REFUSE-HARM` line naming rule + declined action, checked against the
+     world, never trusted; plain `REFUSE` stays a debugger error. Build: 1
+     pure matcher (dispatched), 2 author grammar, 3 validator + exclusion.
 
 Until 4-6 land, the validator classes every C-looking refusal as a debugger
 error, as the survey predicts. That is the intended interim state: those
