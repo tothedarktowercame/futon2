@@ -1,5 +1,6 @@
 import importlib.util
 import hashlib
+import os
 import json
 import contextlib
 import io
@@ -75,6 +76,52 @@ class RepairLoopCastTest(unittest.TestCase):
             self.assertEqual(pin, row["write_manifest"])
         self.assertEqual(real_mark, max((p.stat().st_mtime_ns for p in real_data.rglob("*")
                                         if p.is_file()), default=0))
+
+    def test_click_write_manifest_sees_same_size_rewrite_and_live_appends(self):
+        # review (claude-6): a same-size rewrite is caught by mtime; a file
+        # still being appended after the click is listed as unstable, not a
+        # reason to lose the whole manifest
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            root = base / "data"
+            root.mkdir()
+            same = root / "same-size.edn"
+            same.write_text("aaaa")
+            os.utime(same, ns=(1_000_000_000, 1_000_000_000))
+            live = root / "live.log"
+            live.write_text("x")
+            os.utime(live, ns=(1_000_000_000, 1_000_000_000))
+            real_hash = loop.hash_file
+
+            def fake_fire(n, args, since):
+                same.write_text("bbbb")
+                live.write_text("xy")
+                return {"n": n, "click-id": "wm-click-same-size", "outcome": "ok",
+                        "since-epoch": since}
+
+            def appending_hash(path):
+                digest = real_hash(path)
+                if path == live:
+                    with live.open("a") as fh:
+                        fh.write("z")
+                return digest
+
+            with mock.patch.object(loop, "STATE", base / "state"), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire), \
+                 mock.patch.object(loop, "hash_file", side_effect=appending_hash):
+                click = loop.fire_with_write_manifest(1, object(), 123)
+            manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
+            entries = {Path(e["path"]).name: e for e in manifest["entries"]}
+            self.assertEqual("modified", entries["same-size.edn"]["change"])
+            self.assertEqual(hashlib.sha256(b"bbbb").hexdigest(),
+                             entries["same-size.edn"]["sha256"])
+            self.assertNotIn("unstable", entries["same-size.edn"])
+            self.assertTrue(entries["live.log"]["unstable"])
+            self.assertEqual(2, click["write_manifest"]["count"])
+            manifest_dir = base / "state" / "write-manifests"
+            self.assertNotIn(str(manifest_dir), " ".join(entries))
 
     def test_click_write_manifest_hash_failure_is_typed_and_preserves_result(self):
         loop = load_loop()

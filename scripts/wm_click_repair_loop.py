@@ -160,13 +160,18 @@ def write_click_manifest(click: dict, started: str, ended: str,
                             "attribution": "click-window"})
             continue
         path = Path(raw_path)
-        digest = hash_file(path)
-        current = path.stat()
-        if (current.st_size, current.st_mtime_ns) != new:
-            raise OSError(f"file changed while manifest was hashing it: {raw_path}")
-        entries.append({"path": raw_path, "sha256": digest, "size": new[0],
-                        "change": "new" if old is None else "modified",
-                        "attribution": "click-window"})
+        entry = {"path": raw_path, "size": new[0],
+                 "change": "new" if old is None else "modified",
+                 "attribution": "click-window"}
+        try:
+            entry["sha256"] = hash_file(path)
+            current = path.stat()
+            if (current.st_size, current.st_mtime_ns) != new:
+                # a live writer is still appending: keep the entry, say so
+                entry["unstable"] = True
+        except FileNotFoundError:
+            entry["change"] = "removed-after-click"
+        entries.append(entry)
     manifest = {
         "schema": "wm-click-write-manifest-v1",
         "click": {"id": click.get("click-id"), "number": click.get("n"),
