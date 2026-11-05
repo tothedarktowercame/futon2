@@ -6814,10 +6814,10 @@
   ;; critical namespaces are now registered at their live canonical disk
   ;; digests; futon2.aif.policy stays deliberately unregistered (asserted
   ;; below). No production gate is altered.
-  (let [critical ['futon2.aif.full-loop-runtime
-                  'futon2.report.war-machine
-                  'futon2.aif.wm.family-selection
-                  'futon2.aif.meta-pipeline-selector]
+  ;; 2026-11-05: read the critical set from load-identity/source-composition
+  ;; rather than a copy; be509dc8a added family-canonical-g there and this
+  ;; fixture's hand-kept list of four went stale.
+  (let [critical load-identity/source-composition
         disk-digest (fn [n]
                       (load-identity/sha256
                        (load-identity/read-bytes
