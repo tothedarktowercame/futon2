@@ -364,6 +364,13 @@ records and notifies, and validates nothing).
      throwable. The hold therefore moves to the start of `close!`, before
      anything is persisted, and calls `debugger/await-restart!` at
      `:close-refusal`. This is REFUSAL-VALIDATOR-1c, which is in progress.
+   - `evidence-for-close` landed as `382972e9f`, with the fix `649f1a4d3`.
+     Validation is keyed on the work outcomes (`:grounded-change`,
+     `:grounded-progress`), and every other outcome is validated. The reason:
+     `outcome-from` passes unknown outcomes through unchanged, so a closed
+     no-work set would have let them skip validation. No runner path sets
+     `:empty-field`, so a runner abstention always becomes a debugger error.
+     L1 is decided at step 2a. The close wiring is REFUSAL-VALIDATOR-1d.
    2a. **REFUSAL-VALIDATOR-OUTER.** The outer selector's own empty-field
    abstention never reaches runner `close!`. It returns `{:absent
    :no-task-selected}` directly (`full_loop_runtime.clj:1702-1707`), and the
