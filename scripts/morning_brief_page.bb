@@ -1,4 +1,8 @@
 #!/usr/bin/env bb
+(require '[babashka.classpath :as cp] '[clojure.java.io :as jio])
+(let [repo-root (some-> (jio/file *file*) .getCanonicalFile .getParentFile .getParentFile)]
+  (cp/add-classpath (str (jio/file repo-root "src"))))
+
 ;; Morning Brief page (claude-11 dispatch, approved by Joe 2026-10-25).
 ;;
 ;; Read-only over futon2/data/wm-morning-brief (items/, reviews/, addenda/).
@@ -25,7 +29,9 @@
 (ns morning-brief-page
   (:require [babashka.fs :as fs]
             [clojure.edn :as edn]
-            [clojure.string :as str]))
+            [clojure.pprint :as pprint]
+            [clojure.string :as str]
+            [futon2.aif.abstention-digest :as abstention-digest]))
 
 (def objective-order
   [:operator-gate :feature-verdict :selection-quality
@@ -85,12 +91,6 @@
       (str/replace "<" "&lt;")
       (str/replace ">" "&gt;")
       (str/replace "\"" "&quot;")))
-
-(defn- queued-day [item]
-  (try
-    (let [i (java.time.Instant/parse (:queued-at item))]
-      (str (. i (atZone java.time.ZoneOffset/UTC))))
-    (catch Exception _ "unknown-date")))
 
 (defn- queued-sort-key [item]
   (try (java.time.Instant/parse (:queued-at item))
@@ -197,6 +197,14 @@
                                     (catch Exception _ false))
                               items))
         reviewed-count (count (distinct (map :attempt-id reviews)))
+        abstention-index (fs/normalize
+                          (fs/path root ".." "wm-runs"
+                                   "outer-refusal-index.ednl"))
+        abstention-text
+        (if (fs/regular-file? abstention-index)
+          (abstention-digest/render-text
+           (abstention-digest/read-by-target (str abstention-index)))
+          "Abstention index not present.\n")
         grouped (->> pending
                      (sort-by queued-sort-key)
                      (reverse)
@@ -220,6 +228,9 @@
      "<p class=\"note\">Read-only view. Reviews are recorded from the REPL via "
      "POST /api/alpha/morning-brief/review; name an item by its attempt-id above. "
      "Generated " now " UTC.</p>"
+     "<h2>Abstention feedback by target</h2>"
+     "<p class=\"note\">Read-only digest of retained outer-loop abstention reasons.</p>"
+     "<pre>" (esc abstention-text) "</pre>"
      (apply str (for [day (reverse (sort (keys grouped)))]
                   (str "<h2>" (esc day) " (" (count (get grouped day)) " pending)</h2>"
                        (apply str (map #(render-item % (get addenda (:attempt-id %) 0))
@@ -238,7 +249,7 @@
 
 ;; --- self-check over a fixture brief directory -------------------------------
 
-(defn- spit-edn [path v] (spit (str path) (with-out-str (clojure.pprint/pprint v))))
+(defn- spit-edn [path v] (spit (str path) (with-out-str (pprint/pprint v))))
 
 (defn self-check []
   (let [dir (fs/create-temp-dir {:prefix "mb-page-check"})
