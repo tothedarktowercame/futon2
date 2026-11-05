@@ -665,6 +665,13 @@ records and notifies, and validates nothing).
      (digest = mission sha). Non-mission targets stay
      `:exclusion-not-recorded`. C3-HARM-4 (selection reads the rows)
      dispatched to codex-15.
+   - C3-HARM-4 merged (`ad7afad05`, codex-15): selection reads current
+     `:c3-exclusion` rows through the same digest comparison as C1, one
+     exclusion per target in index order, reason `:c3-harm-declined`
+     accepted by the selector and as a legal emptying reason. A mission
+     source change restores the target. The C3 path is complete end to end:
+     typed author line -> world match -> close validator -> index row ->
+     field exclusion. No historical refusal qualifies (all 7 are prose).
 
 Until 4-6 land, the validator classes every C-looking refusal as a debugger
 error, as the survey predicts. That is the intended interim state: those
