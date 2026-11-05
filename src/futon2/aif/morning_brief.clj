@@ -187,6 +187,56 @@
                         (item-identity item)))
      path)))
 
+(defn- file-sha256 [path]
+  (sha256 (Files/readAllBytes (.toPath (io/file path)))))
+
+(defn- c2-receipt [path question-digest]
+  {:attempt-id (str "c2-" question-digest)
+   :path (.getPath (io/file path))
+   :sha256 (file-sha256 path)
+   :question-digest question-digest})
+
+(defn queue-c2-question!
+  "Queue the question evidence required by RefusalLegality.question_needs_brief.
+
+  The question digest fixes the attempt id. A byte-identical semantic replay
+  returns the original item pin without touching any of the three append-only
+  files. Reusing a digest for a different carrier is a typed conflict."
+  [root {:keys [target question-digest] :as carrier}]
+  (when-not (and (some? target) (nonblank-string? question-digest))
+    (throw (ex-info "C2 Morning Brief question requires target and question digest"
+                    {:kind :invalid-c2-question :carrier carrier})))
+  (let [attempt-id (str "c2-" question-digest)
+        path (io/file root "items" (str attempt-id ".edn"))
+        item {:attempt-id attempt-id
+              :outcome :c2-question-pending
+              :selected-target target
+              :question-digest question-digest
+              :c2/carrier carrier}]
+    (if (.isFile path)
+      (let [existing (edn/read-string (slurp path))]
+        (when-not (= carrier (:c2/carrier existing))
+          (throw (ex-info "C2 Morning Brief question conflicts with existing item"
+                          {:kind :c2-brief-conflict
+                           :attempt-id attempt-id
+                           :path (.getPath path)})))
+        (c2-receipt path question-digest))
+      (c2-receipt (queue-item! root item) question-digest))))
+
+(defn c2-receipt-valid?
+  "Check that RECEIPT still pins an existing C2 item with the same question."
+  [{:keys [path sha256 question-digest]}]
+  (try
+    (let [file (io/file path)
+          item (when (.isFile file) (edn/read-string (slurp file)))]
+      (boolean
+       (and item
+            (nonblank-string? sha256)
+            (= sha256 (file-sha256 file))
+            (= question-digest (:question-digest item))
+            (= question-digest (get-in item [:c2/carrier :question-digest])))))
+    (catch Exception _ false)))
+
 (declare reviews items)
 
 (defn- open-operator-gate-item

@@ -7,6 +7,44 @@
                       "wm-morning-brief-test"
                       (make-array java.nio.file.attribute.FileAttribute 0)))))
 
+(def c2-carrier
+  {:target "M-clarify"
+   :question-digest "question-pin-123"
+   :question {:quote "What does done mean?"
+              :readings ["All checks pass" "Operator accepts the result"]}})
+
+(defn- file-mtimes [root]
+  (into {}
+        (map (fn [f] [(.getPath f) (.lastModified f)]))
+        (filter #(.isFile %) (file-seq (java.io.File. root)))))
+
+(deftest question-needs-brief-c2-enqueue-is-pinned-and-idempotent
+  (let [root (temp-root)
+        first-receipt (brief/queue-c2-question! root c2-carrier)
+        before (file-mtimes root)
+        second-receipt (brief/queue-c2-question! root c2-carrier)
+        after (file-mtimes root)]
+    (is (= "c2-question-pin-123" (:attempt-id first-receipt)))
+    (is (= "question-pin-123" (:question-digest first-receipt)))
+    (is (= first-receipt second-receipt))
+    (is (= 3 (count before)))
+    (is (= before after))
+    (is (brief/c2-receipt-valid? first-receipt))))
+
+(deftest question-needs-brief-c2-conflicts-and-invalid-pins-are-rejected
+  (let [root (temp-root)
+        receipt (brief/queue-c2-question! root c2-carrier)]
+    (is (= :c2-brief-conflict
+           (try
+             (brief/queue-c2-question!
+              root (assoc-in c2-carrier [:question :quote] "Different bytes"))
+             nil
+             (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))
+    (spit (:path receipt) "{:tampered true}\n")
+    (is (false? (brief/c2-receipt-valid? receipt)))
+    (.delete (java.io.File. (:path receipt)))
+    (is (false? (brief/c2-receipt-valid? receipt)))))
+
 (deftest queue-review-and-consumption-are-append-only
   (let [root (temp-root)
         _ (brief/queue-item! root {:attempt-id "attempt-001"
