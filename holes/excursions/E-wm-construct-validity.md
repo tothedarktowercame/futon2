@@ -518,7 +518,26 @@ records and notifies, and validates nothing).
      The fix makes the test read the supervisor's own two predicates from the
      script instead of a copied string, and adds the attached-debugger case.
      On main's source both new tests fail; on the change they pass.
-   - C1-EXCLUSION-2b (write side) went to codex-18.
+   - C1-EXCLUSION-2b merged as `ede3a310b` (codex-18).
+     - When a measured C1 close has a mission sha, the validator marks it
+       `:pending-exclusion` and does not hold.
+     - The run record keeps that disposition. Records with no disposition
+       now carry `:not-applicable`.
+     - The single index line written after the record carries the
+       `:c1-exclusion` row and `:click-terminal`. If the row is refused, the
+       line carries `:debugger-error` with reason `:exclusion-not-recorded`.
+   - Correction to my packet: a failed append does NOT go through the close
+     fallback. `persist-run-record!` runs after `close!` and outside its try,
+     so the exception leaves the runner after the run record is written,
+     with no index line. That is fail-closed: no row, so no legal claim.
+     But the record on disk still says `:pending-exclusion`. A pending
+     record is never legal by itself; legality is decided by the index line.
+   - Conservative gap: a `:grounded-no-change` close keeps its mission
+     observation in the build checkpoint, not in the close data. It is
+     therefore never measured at close, and stays a debugger error.
+   - The C1 path now runs end to end: a measured close writes a row, the
+     next selection drops the target, and a field emptied that way reaches
+     the L1 stop.
 5. **C2-BRIEF-1.** The question carrier: the cited ambiguity and two
    readings, sent to `morning_brief/queue-item!`, plus the exclusion until
    answered.
