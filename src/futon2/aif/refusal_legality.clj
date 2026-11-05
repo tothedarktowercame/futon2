@@ -33,3 +33,13 @@
     :stop (if (loop-stop-legal? evidence) :loop-stop :debugger-error)
     :terminal (if (click-legal? evidence) :click-terminal :debugger-error)
     :debugger-error))
+
+(defn retained-scored-field
+  "Project the retained outer scored field after this click's reading refusals.
+  Mirrors `ReadingRefusalReselection.reducedField`: refused targets are removed
+  from the unchanged admitted field. Missing carrier data remains nil."
+  [opts]
+  (when-let [admitted (get-in opts [:outer/selection :outer-field/admitted])]
+    (let [refused (into #{} (keep :target)
+                        (get-in opts [:outer/selection :reading-reselection :refusals]))]
+      (into [] (remove refused) admitted))))
