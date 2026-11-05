@@ -35,7 +35,7 @@
                 (slurp "test/fixtures/want-interp-library/M-futon-seams-interpretations@futon2-78439f58.edn")))
 (def blend-square
   (edn/read-string
-   (slurp "test/fixtures/three-halves-square/publication-cadence.edn")))
+   (slurp "test/fixtures/three-halves-square/meet-the-reader-where-they-are.edn")))
 (def document :exit/h54d16050a9dc)
 (def instatiate :exit/h4ef5c183bc55)
 
