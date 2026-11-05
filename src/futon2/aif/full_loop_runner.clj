@@ -11095,28 +11095,42 @@
                                 :q6/predecessor q6-predecessor
                                 :registered-run/chronology-start chronology-start)
         _ (ensure-dispatch-seat! (config raw-opts))
-        ;; BEFORE the attempt: a stale runner must not consume it, and the
-        ;; identity it records must be the identity that judged the run.
-        source-check (check-runner-source-phase! (assoc raw-opts :run-id run-id))
-        ;; A2-ENVELOPE-RECEIPT-ABSENT: the serving envelope is captured at
-        ;; run start, BEFORE author dispatch (run-opportunity-core! below),
-        ;; and retained on the record by persist-run-record!. Capture never
-        ;; throws; unobservable components are declared unknown.
-        serving-envelope ((or (:serving-envelope-fn raw-opts)
-                              (fn [o] (serving-envelope/capture o (config o))))
-                          (assoc raw-opts :run-id run-id))
-        raw-opts (assoc raw-opts :serving-envelope serving-envelope)
-        publication (discharge-receipt/catch-up!
-                     (or (:repair-root raw-opts) repair/default-root)
-                     (or (:discharge-receipt-repo raw-opts) "/home/joe/code/futon2"))
+        source-check (atom nil)
+        publication (atom nil)
+        effective-opts (atom raw-opts)
         result
         (try
-      (binding [cascade-sources/*read-occurrences* (:declaration-reads/state raw-opts)
-                input-receipts/*habit-reads* (:habit-reads/state raw-opts)
-                previous-run/*predecessor* q6-predecessor]
-        (run-opportunity-core! (assoc raw-opts :run-id run-id
-                                     :loaded-code-identity source-check)))
+      ;; BEFORE the attempt: a stale runner must not consume it, and the
+      ;; identity it records must be the identity that judged the run.  The
+      ;; phase emission itself belongs inside this initialization boundary:
+      ;; a broken phase sink is an initialization failure, while the two
+      ;; source-integrity refusals are rethrown unchanged below.
+      (let [checked-source (check-runner-source-phase! (assoc raw-opts :run-id run-id))
+            ;; A2-ENVELOPE-RECEIPT-ABSENT: the serving envelope is captured at
+            ;; run start, BEFORE author dispatch (run-opportunity-core! below),
+            ;; and retained on the record by persist-run-record!. Capture never
+            ;; throws; unobservable components are declared unknown.
+            serving-envelope ((or (:serving-envelope-fn raw-opts)
+                                  (fn [o] (serving-envelope/capture o (config o))))
+                              (assoc raw-opts :run-id run-id))
+            initialized-opts (assoc raw-opts :serving-envelope serving-envelope)
+            caught-up (discharge-receipt/catch-up!
+                       (or (:repair-root initialized-opts) repair/default-root)
+                       (or (:discharge-receipt-repo initialized-opts)
+                           "/home/joe/code/futon2"))]
+        (reset! source-check checked-source)
+        (reset! publication caught-up)
+        (reset! effective-opts initialized-opts)
+        (binding [cascade-sources/*read-occurrences* (:declaration-reads/state initialized-opts)
+                  input-receipts/*habit-reads* (:habit-reads/state initialized-opts)
+                  previous-run/*predecessor* q6-predecessor]
+          (run-opportunity-core! (assoc initialized-opts :run-id run-id
+                                        :loaded-code-identity checked-source))))
     (catch Throwable e
+      (when (contains? #{:stale-runner-source
+                         :stale-outer-selection-composition}
+                       (:failure-kind (ex-data e)))
+        (throw e))
       (when (or (= :delivery-qa-gate-failed
                    (:failure-kind (ex-data e)))
                 (:evidence-manifest/refusal (ex-data e))
@@ -11225,13 +11239,13 @@
       (finally
         (post-wm-status! (config raw-opts)
                          {:source "wm-full-loop" :status "idle"})))
-        final-result (cond-> (assoc result :runner/source source-check
-                                      :repair/publication publication)
+        final-result (cond-> (assoc result :runner/source @source-check
+                                      :repair/publication @publication)
                        (not (:trace-publication result))
                        (assoc :trace-publication
                               {:status :absent
                                :reason :selection-judgement-not-observed}))
-        persisted (persist-run-record! raw-opts run-id started-at final-result)
+        persisted (persist-run-record! @effective-opts run-id started-at final-result)
         terminal-publication
         (when (= :present (:run-record-status persisted))
           (let [context {:opportunity-id (:click-id raw-opts)
