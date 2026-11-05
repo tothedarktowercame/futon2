@@ -547,6 +547,17 @@
                        throwable))
                      (throw throwable))))))))))))
 
+(defn validated-close!
+  "Resolve refusal legality before any close observation or persistence."
+  [outcome data observe-end! close-core! attached? await-fn read-scored-field
+   retain-resolution!]
+  (let [{resolved-outcome :outcome resolved-data :data :as resolution}
+        (refusal-legality/resolve-close-refusal
+         attached? await-fn outcome data read-scored-field false)]
+    (retain-resolution! resolution)
+    (observe-end!)
+    (close-core! resolved-outcome resolved-data)))
+
 (defn capture-selection-world!
   "Capture the post-selection census inside a restartable debugger phase.
   A stale serving Var or signature mismatch must stop for live repair instead
@@ -8549,10 +8560,9 @@
         close! (fn [outcome data]
                  (let [refusal-resolution (volatile! nil)]
                  (try
-                   (let [{resolved-outcome :outcome resolved-data :data}
-                         (vreset! refusal-resolution
-                         (refusal-legality/resolve-close-refusal
-                          (debugger/attached?)
+                   (validated-close!
+                    outcome data observe-end! close-core!
+                    (debugger/attached?)
                           (fn [condition]
                             (debugger/await-restart!
                              (assoc @phase-context
@@ -8568,12 +8578,9 @@
                                     {:outcome outcome :data data}
                                     :debugger-has-stop-value? true)
                              (ex-info "Illegal refusal at close" condition)))
-                          outcome data
                           #(refusal-legality/retained-scored-field
                             (selected-target-reading/current-options opts))
-                          false))]
-                     (observe-end!)
-                     (close-core! resolved-outcome resolved-data))
+                    #(vreset! refusal-resolution %))
                    (catch Throwable e
                      ;; Cohort-53 attempt-001 is retained as the historical
                      ;; counterexample: a close-time evidence refusal escaped
