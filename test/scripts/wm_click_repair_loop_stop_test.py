@@ -26,12 +26,23 @@ class SelfHealStopTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         root = Path(self.temp.name)
+        canonical_state = self.loop.STATE
         self.loop.STATE = root / "state"
         self.loop.STATE.mkdir()
         self.loop.LEDGER = self.loop.STATE / "ledger.jsonl"
         self.loop.LOGFILE = self.loop.STATE / "loop.log"
         self.loop.STOP_FILE = self.loop.STATE / "STOP"
         self.loop.DEBUGGER = self.loop.STATE / "debugger"
+        # Every module path under the canonical state directory moves with
+        # STATE, so a newly reachable writer (ALERTS, DEBUGGER, ...) cannot
+        # reach production data (2026-11-05: DEBUGGER was missed and a fixture
+        # page landed in data/wm-click-loop/debugger/).
+        for name, value in list(vars(self.loop).items()):
+            if isinstance(value, Path) and value.is_relative_to(canonical_state):
+                setattr(self.loop, name,
+                        self.loop.STATE / value.relative_to(canonical_state))
+        assert not any(isinstance(v, Path) and v.is_relative_to(canonical_state)
+                       for v in vars(self.loop).values())
         self.loop.META_INJURY_ROOT = root / "injuries"
         self.args = SimpleNamespace(
             clicks=2, ticks=99, stall=3, max_repairs=3,
@@ -249,6 +260,33 @@ class SelfHealStopTest(unittest.TestCase):
         self.assertEqual(2, pages)
         self.assertFalse(any(r.get("case") == "debugger-error" and
                              "debugger page" in r.get("reason", "") for r in rows))
+
+    def test_moved_then_unmoved_debugger_page_stops(self):
+        self.args.clicks = 3
+        record = self.outer_abstention_record('["still-live"]', "debugger-error")
+        first = {"counts": {"refused": 1}, "named": [["M-a", "refused"]]}
+        second = {"counts": {"refused": 1}, "named": [["M-b", "refused"]]}
+        rc, calls, pages, rows = self.run_with_debugger_pages(
+            [self.click({}, outcome="abstained", run_record=record),
+             self.click({}, click_id="click-2", outcome="abstained", run_record=record),
+             self.click({}, click_id="click-3", outcome="abstained", run_record=record)],
+            [first, second, second])
+        stop = [r for r in rows if r.get("event") == "stop"][-1]
+        self.assertEqual(1, rc)
+        self.assertEqual(3, calls)
+        self.assertEqual("debugger-error", stop["case"])
+        self.assertIn("debugger-1.md", stop["reason"])
+        self.assertIn("debugger-2.md", stop["reason"])
+
+    def test_legal_work_exhaustion_stops_before_the_debugger_page(self):
+        record = self.outer_abstention_record("[]", "loop-stop")
+        rc, calls, pages, rows = self.run_with_debugger_pages(
+            [self.click({}, outcome="abstained", run_record=record)], [])
+        stop = [r for r in rows if r.get("event") == "stop"][-1]
+        self.assertEqual(0, rc)
+        self.assertEqual(0, pages)
+        self.assertEqual("work-exhausted", stop["case"])
+        self.assertTrue(stop["legal"])
 
     def assert_typed_stop(self, disposition):
         rc, calls, rows = self.run_with([self.click(disposition)])

@@ -433,6 +433,7 @@ class ContinuousModeTest(unittest.TestCase):
                  mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
                  mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
                  mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
+                 mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
                  mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
                  mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
                  mock.patch.object(loop, "fire", side_effect=fire), \
@@ -479,6 +480,7 @@ class ContinuousModeTest(unittest.TestCase):
              mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
              mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
              mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "acknowledged.json"), \
+             mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
              mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
              mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)) as reload, \
              mock.patch.object(loop, "fire", side_effect=fire), \

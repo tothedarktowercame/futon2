@@ -25,11 +25,22 @@ class DebuggerAttachTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         root = Path(self.temp.name)
+        canonical_state = self.loop.STATE
         self.loop.STATE = root / "state"
         self.loop.STATE.mkdir()
         self.loop.LEDGER = self.loop.STATE / "ledger.jsonl"
         self.loop.LOGFILE = self.loop.STATE / "loop.log"
         self.loop.STOP_FILE = self.loop.STATE / "STOP"
+        # Every module path under the canonical state directory moves with
+        # STATE, so a newly reachable writer (ALERTS, DEBUGGER, ...) cannot
+        # reach production data (2026-11-05: DEBUGGER was missed and a fixture
+        # page landed in data/wm-click-loop/debugger/).
+        for name, value in list(vars(self.loop).items()):
+            if isinstance(value, Path) and value.is_relative_to(canonical_state):
+                setattr(self.loop, name,
+                        self.loop.STATE / value.relative_to(canonical_state))
+        assert not any(isinstance(v, Path) and v.is_relative_to(canonical_state)
+                       for v in vars(self.loop).values())
         self.args = SimpleNamespace(
             clicks=1, ticks=99, stall=3, max_repairs=3,
             repair_seat="repair", continuous=False, observe_only=False,
