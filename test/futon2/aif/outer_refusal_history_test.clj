@@ -88,7 +88,8 @@
                :error-data {:decision decision}}
               decision)
              {})]
-    (is (= {:target "M-selection" :reason :no-acting-cascade-candidate
+    (is (= {:target "M-selection" :reason :target-source-path-absent
+            :decision-reason :no-acting-cascade-candidate
             :missing [:mission-source] :source :selection}
            (:abstention row))))
   (let [reading {:status :refused
@@ -156,3 +157,23 @@
       (is (= (history/record-inputs cloned)
              (get-in (ex-data refusal)
                      [:outer-repeat-comparison :inputs]))))))
+
+(deftest gate-missing-tokens-survive-the-close-without-a-checkpoint-copy
+  ;; review (claude-6): the carrier reaches the record only through the close
+  ;; data here, as in production records, where the selection checkpoint holds
+  ;; no decision.  failure-detail used to drop the nested :missing vector.
+  (let [gate (runner/gate-refusal
+              (ex-info "gate" {:error :inadmissible-decision
+                                :reason :missing-observation-locators
+                                :detail {:target "M-gate"
+                                         :missing-tokens [:locator-file :verdict]}})
+              nil)
+        row (close-and-index
+             (abstained-result
+              {:kind :no-selection}
+              {:failure-kind :abstained :failure-stage :selection
+               :error "typed refusal" :error-data {:judge-refusal gate}})
+             {})]
+    (is (= {:target "M-gate" :reason :missing-observation-locators
+            :missing [:locator-file :verdict] :source :gate}
+           (:abstention row)))))

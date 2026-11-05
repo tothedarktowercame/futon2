@@ -1083,7 +1083,7 @@
                                (select-keys v [:class :message :ex-kind :kind :scanned
                                                :stale-count :error-count :stale-ids]))
                   :omitted omitted}
-                 (contains? #{:refusals :outer-task-selection :fold-findings} k)
+                 (contains? #{:refusals :outer-task-selection :fold-findings :judge-refusal} k)
                  {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
                  (and (= :failure-detail k)
                       (map? v)

@@ -92,8 +92,12 @@
                        (:reason selection-carrier))))
         {:target (target-id (or (:target refusal) (:target selection-target)
                                (record-target record)))
-         :reason (or selection-reason (:kind refusal) (:failure-kind refusal)
-                     (:kind selection-target) (:reason selection-carrier))
+         ;; the target's own cause first (e.g. :target-source-path-absent);
+         ;; the decision's summary reason is kept beside it
+         :reason (or (:failure-kind refusal) (:kind refusal)
+                     (:kind selection-target) selection-reason
+                     (:reason selection-carrier))
+         :decision-reason selection-reason
          :missing (missing-vector (or (:missing refusal)
                                       (:missing selection-target)))
          :source :selection}
