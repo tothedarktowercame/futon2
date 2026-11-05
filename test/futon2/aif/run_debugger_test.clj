@@ -381,8 +381,12 @@
           (is (string? (:terminal-receipt-digest record))
               "the completed run record has exactly one attached terminal receipt")
           (is (= {:roster 2 :code-state 1 :judge 2} @calls)
-              (str "retry repeats selection only; the terminal path performs "
-                   "its ordinary final roster observation"))))
+              ;; claude-6 review: the two roster reads are the serving
+              ;; envelope at run start (full_loop_runner.clj ~11023) and
+              ;; agent readiness (~2042), both before the stop; the retry
+              ;; adds none. Not a terminal-path roster read.
+              (str "retry repeats selection only; roster is read once for the "
+                   "serving envelope and once for readiness"))))
       (finally
         (alter-var-root #'repairable-judge (constantly original))
         (debugger/detach!)
