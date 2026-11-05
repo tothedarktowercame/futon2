@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.morning-brief :as brief]
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.write-stamp :as stamp])
@@ -133,6 +134,42 @@
             (when-let [e @failure] (throw e))))
         (is (not (.exists (io/file base "wm-write-stamps"))) (name mode))
         (finally (delete-tree! base))))))
+
+(deftest morning-brief-stamps-only-created-queue-files
+  (let [base (temp-dir)
+        root (io/file base "wm-morning-brief")
+        foreign (io/file root "foreign-seat-output.edn")
+        click-id "wm-click-morning-brief"]
+    (try
+      (io/make-parents foreign)
+      (spit foreign "{:foreign true}")
+      (binding [stamp/*click-context* {:click-id click-id :run-id "brief-run"}]
+        (brief/queue-item! root {:attempt-id "brief-attempt" :outcome :incomplete}))
+      (let [stamp-file (io/file base "wm-write-stamps" (str click-id ".jsonl"))
+            before (json-lines stamp-file)
+            stamped (set (map :path before))
+            files (->> (file-seq root)
+                       (filter #(.isFile ^java.io.File %))
+                       (map #(.getCanonicalPath ^java.io.File %)) set)]
+        (is (= (disj files (.getCanonicalPath foreign)) stamped))
+        (is (= (count stamped) (count before)))
+        (is (= #{"morning-brief/queue-item!"} (set (map :writer before))))
+        (is (thrown? java.nio.file.FileAlreadyExistsException
+                     (binding [stamp/*click-context*
+                               {:click-id click-id :run-id "brief-run"}]
+                       (brief/queue-item! root
+                                          {:attempt-id "brief-attempt"
+                                           :outcome :incomplete}))))
+        (is (= before (json-lines stamp-file)) "failed replay adds no stamp"))
+      (finally (delete-tree! base)))))
+
+(deftest morning-brief-without-click-context-is-unstamped
+  (let [base (temp-dir)
+        root (io/file base "wm-morning-brief")]
+    (try
+      (brief/queue-item! root {:attempt-id "unbound-brief" :outcome :incomplete})
+      (is (not (.exists (io/file base "wm-write-stamps"))))
+      (finally (delete-tree! base)))))
 
 (deftest persist-run-record-stamps-record-and-indexes
   (let [root (temp-dir)

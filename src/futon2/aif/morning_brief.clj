@@ -9,7 +9,8 @@
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.string :as str]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.write-stamp :as write-stamp])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]
@@ -106,7 +107,7 @@
 (defn- nonblank-string? [value]
   (and (string? value) (not (str/blank? value))))
 
-(defn- write-new! [path value]
+(defn- write-new! [root writer path value]
   (let [file (io/file path)]
     (io/make-parents file)
     (Files/write (.toPath file)
@@ -114,6 +115,11 @@
                  (into-array StandardOpenOption
                              [StandardOpenOption/CREATE_NEW
                               StandardOpenOption/WRITE]))
+    (write-stamp/record-in-context!
+     {:root (io/file (.getParentFile (.getCanonicalFile (io/file root)))
+                     "wm-write-stamps")
+      :writer (str "morning-brief/" writer)
+      :path file})
     (.getPath file)))
 
 (defn- edn-files [dir]
@@ -165,26 +171,26 @@
                                   (select-keys (:feature-card item)
                                                [:built :matches-intent?])))))
 
-(defn- write-summary! [root source item]
-  (write-new! (io/file root "summaries" (str (:attempt-id item) ".edn"))
+(defn- write-summary! [root writer source item]
+  (write-new! root writer
+              (io/file root "summaries" (str (:attempt-id item) ".edn"))
               (item-summary source item)))
 
 (defn- repair-missing-queue-companions!
-  [root source item]
+  [root writer source item]
   (let [attempt-id (:attempt-id item)
         summary-path (io/file root "summaries" (str attempt-id ".edn"))
         lifecycle-path (io/file root "lifecycle" attempt-id "queued.edn")]
     (when-not (.isFile summary-path)
-      (write-summary! root source item))
+      (write-summary! root writer source item))
     (when-not (.isFile lifecycle-path)
-      (write-new! lifecycle-path
+      (write-new! root writer lifecycle-path
                   (merge {:schema lifecycle-schema :transition :queued
                           :at (:queued-at item) :source :queue-item!}
                          (item-identity item))))))
 
-(defn queue-item!
-  ([item] (queue-item! default-root item))
-  ([root {:keys [attempt-id] :as item}]
+(defn- queue-item-with-writer!
+  [root writer {:keys [attempt-id] :as item}]
    (when-not (and (string? attempt-id) (not (str/blank? attempt-id)))
      (throw (ex-info "Morning Brief item requires attempt-id" {:item item})))
    (let [occurred-at (str (Instant/now))
@@ -192,13 +198,18 @@
                           :evidence/occurred-at
                           {:status :present :value occurred-at}
                           :morning-brief/schema-version 3)
-         path (write-new! (io/file root "items" (str attempt-id ".edn")) item)]
-     (write-summary! root path item)
-     (write-new! (io/file root "lifecycle" attempt-id "queued.edn")
+         path (write-new! root writer
+                          (io/file root "items" (str attempt-id ".edn")) item)]
+     (write-summary! root writer path item)
+     (write-new! root writer (io/file root "lifecycle" attempt-id "queued.edn")
                  (merge {:schema lifecycle-schema :transition :queued
                          :at occurred-at :source :queue-item!}
                         (item-identity item)))
-     path)))
+     path))
+
+(defn queue-item!
+  ([item] (queue-item! default-root item))
+  ([root item] (queue-item-with-writer! root "queue-item!" item)))
 
 (defn- file-sha256 [path]
   (sha256 (Files/readAllBytes (.toPath (io/file path)))))
@@ -234,9 +245,10 @@
                           {:kind :c2-brief-conflict
                            :attempt-id attempt-id
                            :path (.getPath path)})))
-        (repair-missing-queue-companions! root path existing)
+        (repair-missing-queue-companions! root "queue-c2-question!" path existing)
         (c2-receipt path question-digest))
-      (c2-receipt (queue-item! root item) question-digest))))
+      (c2-receipt (queue-item-with-writer! root "queue-c2-question!" item)
+                  question-digest))))
 
 (defn c2-receipt-valid?
   "Check that RECEIPT still pins an existing C2 item with the same question."
@@ -284,7 +296,7 @@
                  :outcome :operator-action-required
                  :selected-target mission
                  :operator-action (assoc operator-action :type :mission-gate)}
-           ref (queue-item! root item)]
+           ref (queue-item-with-writer! root "queue-operator-gate!" item)]
        {:status :queued :attempt-id attempt-id :ref ref}))))
 
 (defn item-objectives [item]
@@ -366,7 +378,8 @@
                             :at (str (Instant/now)) :source :field-desk-item-read
                             :consumer consumer}
                            (item-identity item))]
-         (write-new! (io/file root "lifecycle" attempt-id "opened.edn") record)
+         (write-new! root "open-item!"
+                     (io/file root "lifecycle" attempt-id "opened.edn") record)
          {:item item :event record})))))
 
 (defn- response-class [answer]
@@ -438,10 +451,12 @@
                    :qa-target (get-in item [:qa-targets objective])
                    :belief-event (belief-event-for review-id item objective answer
                                                    reviewed-at)}]
-       (write-new! (io/file root "reviews" (str review-id ".edn")) record)
+       (write-new! root "review!"
+                   (io/file root "reviews" (str review-id ".edn")) record)
        (when-not (some #(= :responded (:transition %))
                        (:events (lifecycle-state root attempt-id)))
-         (write-new! (io/file root "lifecycle" attempt-id "responded.edn")
+         (write-new! root "review!"
+                     (io/file root "lifecycle" attempt-id "responded.edn")
                      (merge {:schema lifecycle-schema :transition :responded
                              :at reviewed-at :source :morning-brief-review
                              :review-id review-id :reviewer reviewer
@@ -472,7 +487,8 @@
                  :author author
                  :created-at (str (Instant/now))
                  :morning-brief/schema-version 1}]
-     (write-new! (io/file root "addenda" (str addendum-id ".edn")) record)
+     (write-new! root "addendum!"
+                 (io/file root "addenda" (str addendum-id ".edn")) record)
      record)))
 
 (defn reviews
@@ -497,7 +513,7 @@
                (let [item (edn/read-string (slurp file))]
                  (if (contains? known (:attempt-id item))
                    result
-                   (do (write-summary! root file item)
+                   (do (write-summary! root "ensure-summaries!" file item)
                        (update result :written inc)))))
              {:written 0}
              (edn-files (io/file root "items"))))))
