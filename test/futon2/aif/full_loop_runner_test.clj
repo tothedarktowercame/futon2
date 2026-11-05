@@ -3811,15 +3811,20 @@
                                 "Joe — this is your call and easily reversed.")}]}))]
     (is (= :guardrail-refusal (:outcome result)))
     (is (= :guardrail-refusal (get-in result [:data :failure-kind])))
-    (is (= ["zai-5"] @dispatches)
-        "no reviewer is dispatched for a refusal")
+    (is (= ["zai-5" "zai-5"] @dispatches)
+        "one bounded correction is dispatched to the author, never a reviewer or third turn")
     (is (= :environmental-hold (:repair-class (first @findings)))
         "a typed refusal must not open a machine-failure repair")
     (is (= :guardrail-refusal (:failure-kind (first @findings))))
     (is (= (str "operator-engaged-concurrent-identity"
                 " — author is under live operator direction")
            (get-in result [:data :error-data :refusal-reason]))
-        "the typed reason is preserved for the morning brief")))
+        "the typed reason is preserved for the morning brief")
+    (is (= (str "operator-engaged-concurrent-identity"
+                " — author is under live operator direction")
+           (get-in result [:data :error-data :author-job
+                           :guardrail-continuation :reason]))
+        "the correction record retains the original typed diagnostic")))
 
 (deftest bare-refusal-without-typed-reason-stays-build-failed
   ;; Fail-closed: the contract demands REFUSE <typed reason>; a bare marker
@@ -3838,11 +3843,13 @@
 (deftest author-refusal-does-not-attribute-concurrent-head-movement
   ;; repair-attempt-001: another actor's documentation commit moved HEAD
   ;; while the author reported REFUSE. It must never become a review parcel.
-  (doseq [[marker artifact expected]
+  (doseq [[marker artifact expected expected-dispatches original-diagnostic]
           [["FULL_LOOP_AUTHOR: REFUSE :required-negative-controls-failed" nil
-            :guardrail-refusal]
-           ["FULL_LOOP_AUTHOR: REFUSE" nil :build-failed]
-           ["FULL_LOOP_AUTHOR: REFUSE :blocked" "98d0dcb" :build-failed]]]
+            :guardrail-refusal ["zai-5" "zai-5"]
+            ":required-negative-controls-failed"]
+           ["FULL_LOOP_AUTHOR: REFUSE" nil :build-failed ["zai-5"] nil]
+           ["FULL_LOOP_AUTHOR: REFUSE :blocked" "98d0dcb" :guardrail-refusal
+            ["zai-5" "zai-5"] ":blocked"]]]
     (let [dispatches (atom []) findings (atom []) observed (atom false)
           built (atom false)
           opts (assoc (no-commit-author-opts
@@ -3863,7 +3870,13 @@
       (is (= expected (:outcome result)))
       (is (false? @observed) "refusal is resolved before artifact observation")
       (is (false? @built) "no build is resolved for unrelated HEAD movement")
-      (is (= ["zai-5"] @dispatches) "no reviewer dispatch")
+      (is (= expected-dispatches @dispatches)
+          "typed refusals get exactly one author correction; no reviewer or third turn")
+      (when original-diagnostic
+        (is (= original-diagnostic
+               (get-in result [:data :error-data :author-job
+                               :guardrail-continuation :reason]))
+            "the bounded correction retains the original typed diagnostic"))
       (when (= expected :build-failed)
         (is (= :invalid-author-refusal (get-in result [:data :failure-kind])))))))
 
