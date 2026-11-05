@@ -38,7 +38,6 @@
 (deftest refusal-then-commit-falls-through-to-review
   (let [{:keys [dispatches prompts result]} (correction (committed "correction-1"))
         author-job (:author-job result)
-        reviewed? (atom false)
         binding (runner/fresh-artifact-binding
                  {:repo-head-observation-fn
                   (fn [repo] {:repo repo :head "a2396d69" :observed-at-ms 2000})
@@ -55,10 +54,8 @@
     (is (nil? (runner/throw-if-author-refused!
                author-job "M-patterns-done-right" :author-wait)))
     (is (= "a2396d69" (:commit binding)))
-    ;; The corrected response passed the production refusal and fresh-artifact
-    ;; seams; the caller therefore reaches its unchanged reviewer dispatch.
-    (reset! reviewed? true)
-    (is @reviewed?)
+    ;; The corrected response passes the production refusal and fresh-artifact
+    ;; seams above, which is what the caller requires before reviewer dispatch.
     (is (= :returned (get-in author-job [:guardrail-continuation :status])))))
 
 (deftest two-refusals-preserve-the-existing-terminal-record
