@@ -107,8 +107,10 @@
         current (ledger/append-medic-discharge ledger occurrence dir authority)
         open-result (ledger/append-medic-discharge ledger [injury-id 1] dir authority)]
     (is (= :historical (:failed-check historical)))
+    (is (nil? (:ledger historical)) "historical refusal appends nothing")
     (is (= :appended (:status current)) "fixture HEAD is accepted before the negative case")
     (is (= :not-enacted (:failed-check open-result)))
+    (is (nil? (:ledger open-result)) "state refusal appends nothing")
     (testing "a real unrelated commit is rejected"
       (spit (str dir "/other") "other\n")
       (shell/sh "git" "-C" dir "add" "other")
@@ -137,7 +139,8 @@
               changed (ledger/seal-ledger changed)
               refused (ledger/append-medic-discharge changed occurrence dir authority)]
           (is (not= other unrelated))
-          (is (= :current (:failed-check refused))))))))
+          (is (= :current (:failed-check refused)))
+          (is (nil? (:ledger refused)) "current refusal appends nothing"))))))
 
 (deftest later-reopening-is-active-again
   (let [{:keys [dir head]} (git-fixture)
