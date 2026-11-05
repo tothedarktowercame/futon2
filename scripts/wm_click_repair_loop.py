@@ -1493,11 +1493,16 @@ def notify(args, case: str, legal: bool, reason: str) -> None:
 # scan for the next "[" after the key read `:outer-field/admitted nil` as the
 # following `[]`, and took a nested previous-selection's empty field for a
 # missing top-level one; both made "work exhausted" legal with no field.
+# The outer no-task decision reaches the supervisor as the selection record
+# (`click_record` fallback), which carries `:selection-outcome {:status
+# :abstained}` beside `:outer/selection`, not the runtime's `:absent` map.
 _WORK_EXHAUSTED_EDN = (
     "(let [r (clojure.edn/read-string {:default tagged-literal}"
     " (slurp (first *command-line-args*)))"
     " a (get-in r [:outer/selection :outer-field/admitted] ::missing)]"
-    " (println (boolean (and (map? r) (= :no-task-selected (:absent r))"
+    " (println (boolean (and (map? r)"
+    " (or (= :no-task-selected (:absent r))"
+    " (= :abstained (get-in r [:selection-outcome :status])))"
     " (vector? a) (empty? a)))))")
 
 

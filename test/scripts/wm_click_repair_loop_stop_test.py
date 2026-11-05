@@ -113,6 +113,26 @@ class SelfHealStopTest(unittest.TestCase):
         self.assertEqual("work-exhausted", row["case"])
         self.assertTrue(row["legal"])
 
+    def test_work_exhausted_reads_the_selection_record_shape(self):
+        # selection_record/write-decision! shape: what the supervisor sees
+        record = self.loop.STATE / "selection-record.edn"
+        record.write_text(
+            "{:schema :x :selection-outcome {:status :abstained :case :empty-field} "
+            ":outer/selection {:outer-field/admitted []}}")
+        row = self.stop_row("work-exhausted", {"run-record": str(record)})
+        self.assertEqual("work-exhausted", row["case"])
+        self.assertTrue(row["legal"])
+        record.write_text(
+            "{:schema :x :selection-outcome {:status :abstained :case :empty-field} "
+            ":outer/selection {:outer-field/admitted [\"M-live\"]}}")
+        row = self.stop_row("work-exhausted", {"run-record": str(record)})
+        self.assertEqual("debugger-error", row["case"])
+        record.write_text(
+            "{:schema :x :selection-outcome {:status :chosen :pick \"M-a\"} "
+            ":outer/selection {:outer-field/admitted []}}")
+        row = self.stop_row("work-exhausted", {"run-record": str(record)})
+        self.assertEqual("debugger-error", row["case"])
+
     def test_g_not_below_abstention_is_debugger_error(self):
         row = self.stop_row(
             "debugger-error", {"input-digest": "abc"},
