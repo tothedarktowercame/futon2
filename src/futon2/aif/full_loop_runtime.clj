@@ -1249,7 +1249,10 @@
 (declare run-ordinary-opportunity-impl!)
 
 (defn- work-exhausted-refusal [selection]
-  (let [present? (contains? selection :outer-field/admitted)
+  ;; Present means a retained vector: the runtime copies
+  ;; (:outer-score/admitted selection), so a missing scorer list arrives as
+  ;; the key with nil, which is "carrier absent", not an empty field.
+  (let [present? (vector? (:outer-field/admitted selection))
         evidence {:kind :work-exhausted
                   :scoredField (:outer-field/admitted selection)}]
     {:disposition (if (and present? (refusal-legality/loop-stop-legal? evidence))

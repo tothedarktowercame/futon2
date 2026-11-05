@@ -201,14 +201,19 @@
   (let [empty-field (#'runtime/work-exhausted-refusal {:outer-field/admitted []})
         live-field (#'runtime/work-exhausted-refusal
                     {:outer-field/admitted ["M-still-selectable"]})
-        missing-field (#'runtime/work-exhausted-refusal {})]
+        missing-field (#'runtime/work-exhausted-refusal {})
+        ;; bad case: the runtime copies (:outer-score/admitted selection), so
+        ;; a scorer that produced no admitted list retains the key with nil.
+        ;; nil is "carrier absent", never an empty field.
+        nil-field (#'runtime/work-exhausted-refusal {:outer-field/admitted nil})]
     (is (= :loop-stop (:disposition empty-field)))
     (is (= [] (get-in empty-field [:evidence :scoredField])))
     (is (= :debugger-error (:disposition live-field)))
     (is (= ["M-still-selectable"]
            (get-in live-field [:evidence :scoredField])))
     (is (= :debugger-error (:disposition missing-field)))
-    (is (nil? (get-in missing-field [:evidence :scoredField])))))
+    (is (nil? (get-in missing-field [:evidence :scoredField])))
+    (is (= :debugger-error (:disposition nil-field)))))
 
 (defn- record-files [dir]
   (filter #(and (.isFile %)
