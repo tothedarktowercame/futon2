@@ -43,3 +43,13 @@
     (is (re-find #"M-a" text))
     (is (re-find #"not-retained=2" text))
     (is (re-find #"2026-11-05-r2" text))))
+
+(deftest legacy-abstention-rows-without-a-carrier-are-counted-not-dropped
+  ;; Every abstention in the real index on 2026-11-05 predates the carrier.
+  (let [rows [{:run-id "2026-10-19-a" :target "A-self-heal"
+               :failure {:kind :abstained :stage :selection}}
+              {:run-id "2026-09-28-b" :failure {:kind :no-selection}}
+              {:run-id "2026-10-20-c" :target "M-x"
+               :failure {:kind :guardrail-refusal}}]]
+    (is (= {"A-self-heal" {:not-indexed 1} :no-target {:not-indexed 1}}
+           (into {} (map (juxt :target :reasons)) (digest/by-target rows))))))

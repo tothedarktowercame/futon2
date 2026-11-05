@@ -18,13 +18,19 @@
 (defn by-target
   "Group indexed abstentions by target, newest occurrence retained.
 
-  Rows without an :abstention carrier are non-abstention terminals and are
-  ignored.  A missing target is explicit :no-target; :not-retained remains a
-  counted reason rather than disappearing."
+  Rows that are neither abstentions nor carry an :abstention are ignored.
+  A missing target is explicit :no-target; :not-retained remains a counted
+  reason rather than disappearing.  An abstained/no-selection row indexed
+  before ABSTAIN-REASON-1 has no carrier; it counts as :not-indexed (its
+  record may hold a reason, but reading 60 records, ~230 MB, per page render
+  is not done here), so legacy abstentions are visible, not dropped."
   [index-rows]
   (->> index-rows
        (keep (fn [row]
-               (when-let [abstention (:abstention row)]
+               (when-let [abstention (or (:abstention row)
+                                         (when (contains? #{:abstained :no-selection}
+                                                          (get-in row [:failure :kind]))
+                                           {:reason :not-indexed}))]
                  {:target (or (:target abstention) (:target row) :no-target)
                   :reason (or (:reason abstention) :not-retained)
                   :missing (missing-values (:missing abstention))
