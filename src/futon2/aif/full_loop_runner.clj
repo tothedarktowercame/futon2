@@ -2660,6 +2660,70 @@
   (when-not (author-infrastructure-failure? job)
     (handoff-wait-terminal-condition :reviewer-wait job)))
 
+(defn- handoff-wait-condition-with-kind [phase failure-kind job]
+  (when-let [condition (handoff-wait-terminal-condition phase job)]
+    (ex-info (ex-message condition)
+             (assoc (ex-data condition) :failure-kind failure-kind)
+             condition)))
+
+(defn author-response-correction-wait-terminal-condition [job]
+  (handoff-wait-condition-with-kind
+   :author-response-correction-wait :author-response-correction-refused job))
+
+(defn unmeasured-claim-correction-wait-terminal-condition [job]
+  (handoff-wait-condition-with-kind
+   :unmeasured-claim-correction-wait :unmeasured-claim-correction-refused job))
+
+(defn review-evidence-correction-wait-terminal-condition [job]
+  (if (= "cancelled" (:state job))
+    (handoff-wait-terminal-condition :review-evidence-correction-wait job)
+    (handoff-wait-condition-with-kind
+     :review-evidence-correction-wait :review-evidence-correction-refused job)))
+
+(defn revision-wait-terminal-condition [job]
+  (handoff-wait-terminal-condition :revision-wait job))
+
+(defn re-review-wait-terminal-condition
+  "Leave invocation failures to the existing automatic re-review retry."
+  [job]
+  (when-not (author-infrastructure-failure? job)
+    (handoff-wait-terminal-condition :re-review-wait job)))
+
+(defn re-review-retry-wait-terminal-condition [job]
+  (handoff-wait-terminal-condition :re-review-wait job))
+
+(defn claim-reviewer-wait-terminal-condition [expected-job-id job]
+  (if (and (= "done" (:state job))
+           (= expected-job-id (:job-id job)))
+    nil
+    (ex-info "Claim reviewer did not complete the dispatched job"
+             {:outcome :build-failed
+              :failure-kind :review-job-binding-mismatch
+              :failure-stage :reviewer-wait
+              :review-job job})))
+
+(defn build-cure-wait-terminal-condition [job]
+  (handoff-wait-terminal-condition :build-cure-wait job))
+
+(defn build-resolution-terminal-condition [artifact-binding build]
+  (cond
+    (and artifact-binding (:repo build)
+         (not= (:repo build) (:repo artifact-binding)))
+    (ex-info "Observed author artifact resolved outside the target repository"
+             {:outcome :build-failed
+              :failure-kind :artifact-binding-mismatch
+              :failure-stage :build-resolution
+              :artifact-binding artifact-binding
+              :resolved-repository (:repo build)})
+
+    (or (nil? build) (nil? (:repo build)) (not (vector? (:files build))))
+    (ex-info "Author completed without a verifiable commit"
+             {:outcome :build-failed
+              :failure-kind :untyped-failure
+              :failure-stage :build-resolution})
+
+    :else nil))
+
 (defn interpretation-ask-classifier
   "PROOF-2b (click 17): the target classifier the ask selection uses — the
   SAME area-focus/classify-target producer the cascade decision scores with,
@@ -4865,7 +4929,8 @@
               correction-id (:job-id response)
               corrected-job
               (run-phase! opts phase-context :author-response-correction-wait
-                          #((or (:poll-fn opts) poll-job!) opts correction-id))
+                          #((or (:poll-fn opts) poll-job!) opts correction-id)
+                          nil author-response-correction-wait-terminal-condition)
               correction-before-gate
               (assoc base-record
                      :request {:job-id correction-id
@@ -5031,7 +5096,8 @@
               correction-id (:job-id response)
               corrected-job
               (run-phase! opts phase-context :unmeasured-claim-correction-wait
-                          #((or (:poll-fn opts) poll-job!) opts correction-id))
+                          #((or (:poll-fn opts) poll-job!) opts correction-id)
+                          nil unmeasured-claim-correction-wait-terminal-condition)
               correction-before-gate
               (assoc base-record
                      :request {:job-id correction-id
@@ -5211,7 +5277,8 @@
               expected-job-id (:job-id response)
               corrected-job
               (run-phase! opts phase-context :review-evidence-correction-wait
-                          #((or (:poll-fn opts) poll-job!) opts expected-job-id))
+                          #((or (:poll-fn opts) poll-job!) opts expected-job-id)
+                          nil review-evidence-correction-wait-terminal-condition)
               after (observe-repo-head opts repo)
               correction-before-check
               (assoc base-record
@@ -5494,7 +5561,8 @@
             revision-author-job
             (run-phase!
              opts phase-context :revision-wait
-             #((or (:poll-fn opts) poll-job!) opts (:job-id revision-response)))
+             #((or (:poll-fn opts) poll-job!) opts (:job-id revision-response))
+             nil revision-wait-terminal-condition)
             _ (throw-if-cancelled! revision-author-job :revision-wait)
             _ (when-not (= "done" (:state revision-author-job))
                 (throw
@@ -5566,7 +5634,8 @@
             initial-re-review-job
             (run-phase!
              opts phase-context :re-review-wait
-             #((or (:poll-fn opts) poll-job!) opts (:job-id re-review-response)))
+             #((or (:poll-fn opts) poll-job!) opts (:job-id re-review-response))
+             nil re-review-wait-terminal-condition)
             retry-re-review? (author-infrastructure-failure? initial-re-review-job)
             retry-re-review-response
             (when retry-re-review?
@@ -5578,7 +5647,8 @@
             (if retry-re-review?
               (run-phase! opts phase-context :re-review-retry-wait
                           #((or (:poll-fn opts) poll-job!) opts
-                            (:job-id retry-re-review-response)))
+                            (:job-id retry-re-review-response))
+                          nil re-review-retry-wait-terminal-condition)
               initial-re-review-job)
             _ (throw-if-cancelled! re-review-job :re-review-wait)
             re-review-gate
@@ -5838,7 +5908,8 @@
                       (charge!)
                       r))
         job (run-phase! opts phase-context :reviewer-wait
-              #((or (:poll-fn opts) poll-job!) opts (:job-id response)))
+              #((or (:poll-fn opts) poll-job!) opts (:job-id response))
+              nil #(claim-reviewer-wait-terminal-condition (:job-id response) %))
         _ (when-not (and (= "done" (:state job)) (= (:job-id response) (:job-id job)))
             (throw (ex-info "Claim reviewer did not complete the dispatched job"
                             {:outcome :build-failed :failure-kind :review-job-binding-mismatch
@@ -5999,7 +6070,8 @@
                 cure-job-id (:job-id cure-response)
                 cure-job
                 (run-phase! opts phase-context :build-cure-wait
-                            #((or (:poll-fn opts) poll-job!) opts cure-job-id))
+                            #((or (:poll-fn opts) poll-job!) opts cure-job-id)
+                            nil build-cure-wait-terminal-condition)
                 _ (throw-if-cancelled! cure-job :build-cure-wait)
                 _ (throw-if-author-refused! cure-job target :build-cure-wait)
                 ;; Re-resolve the build: the commit may have changed.
@@ -9940,7 +10012,10 @@
                                         :artifact-binding artifact-binding))
                     build (run-phase! opts @phase-context :build-resolution
                                       #(when commit
-                                         (resolve-target-build opts author-repo commit)))
+                                         (resolve-target-build opts author-repo commit))
+                                      nil
+                                      #(build-resolution-terminal-condition
+                                        artifact-binding %))
                     repo (:repo build)
                     files (:files build)]
                 (when (and artifact-binding repo
