@@ -54,3 +54,16 @@
   (is (= :not-c3 (:reason (sut/exclusion-row (assoc (record "M-x") :outcome :other)))))
   (is (= :harm-match-absent (:reason (sut/exclusion-row (dissoc (record "M-x") :harm-match)))))
   (is (= :digest-carrier-absent (:reason (sut/exclusion-row (record "T-x"))))))
+
+(deftest row-reads-the-match-where-a-real-record-retains-it
+  ;; A run record keeps thrown ex-data under [:failure :detail] (via
+  ;; failure-detail); the fixture above puts :harm-match at top level.
+  (let [{:keys [harm-match] :as top} (record "M-x")
+        real (-> top
+                 (dissoc :harm-match :outcome)
+                 (assoc-in [:failure :detail :harm-match] harm-match)
+                 (assoc-in [:failure :detail :outcome] :harm-declined))
+        result (sut/exclusion-row real)]
+    (is (= :row (:status result)))
+    (is (= (identity/digest action)
+           (get-in result [:row :declined-action-digest])))))
