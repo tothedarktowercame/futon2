@@ -6388,7 +6388,35 @@
                (mapv #(json/parse-string % true) (line-seq reader)))]
     (is (= files (set (map :path rows))))
     (is (= (count files) (count rows)))
-    (is (every? #(str/starts-with? (:writer %) "full-loop-runner/") rows))))
+    (is (every? #(str/starts-with? (:writer %) "full-loop-runner/") rows))
+    (is (not-any? #(= "full-loop-runner/attempt-file!" (:writer %)) rows)
+        "every stamp comes from a write site, not a directory sweep")))
+
+(deftest cohort-machinery-does-not-stamp-a-foreign-file
+  ;; claude-6 review: a file a seat drops into the attempt directory is not
+  ;; machinery output and must stay unstamped (click-window in the manifest)
+  (let [{:keys [base root] :as c} (stamped-retention-cohort
+                                   "runner-machinery-foreign")
+        click-id "wm-click-machinery-foreign"
+        foreign (atom nil)
+        opts (retention-success-opts c)
+        result (#'runner/run-opportunity-core!
+                (assoc opts :click-id click-id
+                       :dispatch-fn
+                       (fn [& args]
+                         (let [dir (first (filter #(.isDirectory ^java.io.File %)
+                                                  (.listFiles (io/file root "test-cohort-exhaustion"))))
+                               f (io/file dir "evidence" "download.bin")]
+                           (io/make-parents f)
+                           (spit f "not machinery")
+                           (reset! foreign (.getCanonicalPath f)))
+                         (apply (:dispatch-fn opts) args))))
+        rows (with-open [reader (io/reader (io/file base "wm-write-stamps"
+                                                    (str click-id ".jsonl")))]
+               (mapv #(json/parse-string % true) (line-seq reader)))]
+    (is (string? (:attempt-id result)))
+    (is (string? @foreign) "the fixture dispatch ran and dropped the file")
+    (is (not-any? #(= @foreign (:path %)) rows))))
 
 (deftest cohort-machinery-without-click-id-writes-no-stamps
   (let [{:keys [base] :as c} (stamped-retention-cohort

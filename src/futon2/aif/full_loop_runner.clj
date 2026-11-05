@@ -7710,14 +7710,23 @@
             (swap! checkpoint-events assoc :time-step start-event))
         attempt-id (or (:attempt/id start-event)
                        (str "canary-" (UUID/randomUUID)))
+        ;; claude-6 review: stamp only paths a writer reports. An earlier
+        ;; version swept the whole attempt directory, which would also stamp
+        ;; a file a seat dropped there as machinery output.
         stamp-attempt-tree!
-        (fn []
+        (fn [job-text-rows]
           (when start-event
-            (let [attempt-dir (io/file cohort-data-root
-                                       (name (:cohort/id start-event)) attempt-id)]
-              (doseq [file (rest (file-seq attempt-dir))
-                      :when (.isFile ^java.io.File file)]
-                (machinery-stamp! "attempt-file!" file)))))
+            (doseq [row job-text-rows
+                    part [:prompt :reply]
+                    :let [path (get-in row [part :path])]
+                    :when (= :present (get-in row [part :status]))]
+              (machinery-stamp! "retain-job-texts!" path))
+            ;; full_loop_cohort/append-pre-author-baseline! writes this fixed
+            ;; name (and returns no path)
+            (let [baseline (io/file cohort-data-root (name (:cohort/id start-event))
+                                    attempt-id "pre-author-mission-baseline.edn")]
+              (when (.isFile baseline)
+                (machinery-stamp! "append-pre-author-baseline!" baseline)))))
         attempt-evidence-dir
         (when cohort?
           (.getAbsolutePath
@@ -8560,7 +8569,7 @@
                                                   attempt-id closed)
                            (cohort/close-attempt! attempt-id closed)))
                        _ (stamp-checkpoint! "close-attempt!" closed-event)
-                       _ (when closed-event (stamp-attempt-tree!))
+                       _ (when closed-event (stamp-attempt-tree! @job-text-records))
                        ;; PROOF-wm-works ⟨1⟩4 (final handoff): the B update
                        ;; is applied AFTER the close is written and ONLY
                        ;; when the predicate result recorded on that close is
@@ -8913,7 +8922,7 @@
                        _ (stamp-checkpoint! "close-attempt!"
                                             (:closed-event close-result))
                        _ (when (:closed-event close-result)
-                           (stamp-attempt-tree!))]
+                           (stamp-attempt-tree! @job-text-records))]
                        {:attempt-id attempt-id
                         :opportunity-id opportunity-id
                         :outcome :build-failed
