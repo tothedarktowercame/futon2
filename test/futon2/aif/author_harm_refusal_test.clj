@@ -1,7 +1,8 @@
 (ns futon2.aif.author-harm-refusal-test
   (:require [clojure.string :as str]
             [clojure.test :refer [deftest is]]
-            [futon2.aif.full-loop-runner :as runner]))
+            [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.harm-rules]))
 
 (def test-world
   {:path-exists? (constantly true)
@@ -58,3 +59,46 @@
     (is (str/includes? prompt "FULL_LOOP_AUTHOR: REFUSE-HARM"))
     (doseq [rule [:H1 :H2 :H3 :H4 :H5 :H6]]
       (is (str/includes? prompt (str rule))))))
+
+(def push-to-main
+  "FULL_LOOP_AUTHOR: REFUSE-HARM {:rule :H2 :declined-action {:operation :git-push :repo \"/repo\" :remote \"origin\" :ref \"main\" :force? false}}")
+
+(deftest unforced-push-to-default-branch-matches-in-either-ref-spelling
+  (is (= :harm-declined (:outcome (classify push-to-main))))
+  (is (= :harm-declined
+         (:outcome (classify (str/replace push-to-main "\"main\"" "\"refs/heads/main\""))))))
+
+(deftest unknown-default-branch-never-matches-an-unforced-push
+  (doseq [default [nil "" "  "]]
+    (let [result (runner/author-refusal-classification
+                  {:result (str push-to-main "\n")} nil nil false
+                  (assoc test-world :default-branch (fn [_ _] default)))]
+      (is (= :invalid-author-refusal (:outcome result)))
+      (is (= :check-failed (get-in result [:harm-refusal :reason]))))))
+
+(deftest production-world-treats-urls-as-leaving-the-host
+  (let [local? (:local-destination? (runner/production-harm-world))]
+    (doseq [d ["https://github.com/x/y" "http://example.org" "ssh://host/repo"
+               "git@github.com:x/y.git"]]
+      (is (false? (local? d)) d))
+    (doseq [d ["/home/joe/notes/x.md" "notes/x.md" "/var/tmp/x" "file:///tmp/x"]]
+      (is (true? (local? d)) d))))
+
+(deftest external-post-by-another-actor-matches-h4-in-production-world
+  (let [world (assoc (runner/production-harm-world)
+                     :joe-identities (constantly #{"joe"}))
+        job {:result "FULL_LOOP_AUTHOR: REFUSE-HARM {:rule :H4 :declined-action {:operation :publish :actor \"codex-15\" :destination \"https://github.com/x/y\"}}\n"}]
+    (is (= :harm-declined
+           (:outcome (runner/author-refusal-classification job nil nil false world))))))
+
+(deftest author-prompt-is-generated-from-the-rule-file
+  (let [prompt (#'runner/author-prompt
+                {:author "author" :reviewer "reviewer"
+                 :target-repository "/repo" :target-repository-head "head"
+                 :repository-plan {:allowed []}}
+                "target" {:id "target"} {} [])]
+    (doseq [{:keys [doc requires operations]}
+            (:rules (futon2.aif.harm-rules/load-rules))]
+      (is (str/includes? prompt doc))
+      (doseq [f (concat requires operations)]
+        (is (str/includes? prompt (str f)))))))

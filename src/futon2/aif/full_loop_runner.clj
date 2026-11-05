@@ -1944,11 +1944,15 @@
                        (not-empty (str/trim (:out result)))))))
            (primary-repos)))
    :local-destination?
+   ;; A URL (other than file:) or an scp-style host:path leaves this host;
+   ;; any filesystem path, absolute or relative, stays on it.  Resolving a
+   ;; URL as a file would put "https:/..." under the working directory and
+   ;; call it local.
    (fn [destination]
-     (let [path (.normalize (.toAbsolutePath (.toPath (io/file (str destination)))))
-           home (.normalize (.toAbsolutePath (.toPath (io/file (System/getProperty "user.home")))))
-           tmp (.normalize (.toAbsolutePath (.toPath (io/file "/tmp"))))]
-       (or (.startsWith path home) (.startsWith path tmp))))})
+     (let [d (str/trim (str destination))]
+       (not (or (and (re-find #"^[A-Za-z][A-Za-z0-9+.-]*://" d)
+                     (not (re-find #"(?i)^file://" d)))
+                (re-find #"^[^/\s@]+@[^/\s:]+:" d)))))})
 
 (defn- stack-code-state []
   (let [states (mapv repo-state (primary-repos))
@@ -4707,7 +4711,10 @@
   (str "If the exact action you would otherwise perform is harmful, finish with "
        "FULL_LOOP_AUTHOR: REFUSE-HARM {:rule :Hn :declined-action {...}}. "
        "The runner checks the typed action against the current world. Approved rules:\n"
-       (str/join "\n" (map (fn [{:keys [id doc]}] (str "  " id ": " doc))
+       (str/join "\n" (map (fn [{:keys [id doc operations requires]}]
+                              (str "  " id ": " doc
+                                   " :operation one of " (pr-str (vec (sort operations)))
+                                   "; required fields " (pr-str (vec requires))))
                             (:rules (harm-rules/load-rules))))
        "\n"))
 

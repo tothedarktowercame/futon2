@@ -43,11 +43,19 @@
          (seq (:paths action))
          (every? (fn [path] (some #(under-root? path %) roots)) (:paths action)))))
 
+(defn- branch-name
+  "\"refs/heads/main\" and \"main\" name the same branch."
+  [ref]
+  (when (string? ref)
+    (let [r (str/trim ref)]
+      (if (str/starts-with? r "refs/heads/") (subs r (count "refs/heads/")) r))))
+
 (defn- force-or-default-branch [_rule action world]
   (or (true? (:force? action))
-      (let [default (world-value world :default-branch (:repo action) (:remote action))]
+      (let [default (branch-name
+                     (world-value world :default-branch (:repo action) (:remote action)))]
         (and (string? default) (not (str/blank? default))
-             (= (:ref action) default)))))
+             (= (branch-name (:ref action)) default)))))
 
 (defn- service-is-shared [rule action _world]
   (contains? (:shared-services rule) (:service action)))
