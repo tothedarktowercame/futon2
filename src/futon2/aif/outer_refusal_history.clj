@@ -92,7 +92,10 @@
             (and (keyword? (:reason selection-carrier))
                  (not= :no-selection-decision-recorded
                        (:reason selection-carrier))))
-        (let [leaf-reason (or (:reason refusal) (:reason selection-target)
+        (let [;; only a keyword :reason is a typed cause; a prose :reason
+              ;; must not displace the typed :failure-kind / :kind below
+              typed #(when (keyword? %) %)
+              leaf-reason (or (typed (:reason refusal)) (typed (:reason selection-target))
                               (:failure-kind refusal) (:kind refusal)
                               (:kind selection-target) selection-reason
                               (:reason selection-carrier))

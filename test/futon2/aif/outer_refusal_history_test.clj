@@ -151,6 +151,16 @@
               :source :selection}
              (:abstention row))))))
 
+(deftest prose-reason-does-not-displace-typed-kind
+  ;; claude-6 review: a string :reason on a refusal is prose, not a cause
+  (let [row (history/index-entry
+             {:failure {:kind :abstained
+                        :detail {:refusals [{:target "M-x"
+                                             :kind :target-source-path-absent
+                                             :reason "the source file is gone"}]}}}
+             "/fixture/record.edn" "0")]
+    (is (= :target-source-path-absent (get-in row [:abstention :reason])))))
+
 (deftest absent-index-is-distinct-from-empty-history
   (let [dir (temp-dir)
         inputs {:schema :wm/outer-repeat-inputs-v1 :target "M-no-index"}
