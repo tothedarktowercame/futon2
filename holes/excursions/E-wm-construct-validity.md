@@ -576,6 +576,14 @@ records and notifies, and validates nothing).
      (`flight_runner/read-fn`), never in a WM click, so no click can produce a
      C2 question yet. Discovery C2-BRIEF-1c-0 (codex-18) finds where an
      unworkable mission ends in a click and the smallest seam.
+   - 1c-0 (codex-18, citations spot-checked): an unclear mission in a click
+     ends as `:abstained`/`:no-selection`. Flights already end questions-only
+     targets as `:not-a-target-yet` before any click. But flights are dormant
+     (last record 2026-09-26; 0 stored questions), so a flight-side C2 would
+     change no live click. Not built. Whether a click should run a mission
+     reading (a seat call) and close as C2 is Joe's design question; 1c-1
+     (codex-18) first counts how many of the 60 abstentions were unclear
+     missions.
 6. **C3-HARM-1.** Named harm rules. A guardrail refusal qualifies only by
    matching one.
 
