@@ -4479,6 +4479,17 @@
     (is (= :code-commit
            (:artifact-shape (#'runner/discharge-contract repair-class))))))
 
+(deftest clock-store-busy-mints-an-environmental-hold-contract
+  (let [repair-class (#'runner/repair-class-for :clock/store-busy)
+        finding {:failure-kind :clock/store-busy
+                 :repair-class repair-class
+                 :discharge-contract (#'runner/discharge-contract repair-class)}]
+    (is (= :environmental-hold (:repair-class finding)))
+    (is (= [:cleared-precondition :grounded-production-shaped-successor]
+           (get-in finding [:discharge-contract :requires])))
+    (is (= :code-commit
+           (get-in finding [:discharge-contract :artifact-shape])))))
+
 (deftest recoverable-late-author-completion-skips-second-author-turn
   (let [dispatches (atom [])
         resolutions (atom [])

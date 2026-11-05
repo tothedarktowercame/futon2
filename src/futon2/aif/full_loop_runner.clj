@@ -6806,7 +6806,11 @@
        :transport-timeout :transport-unavailable :trigger-ineligible
        ;; R31-b: an explicit retained-value breakpoint abort is the same
        ;; environmental hold class as the existing Agency cancellation.
-       :operator-cancelled :debugger/aborted}
+       :operator-cancelled :debugger/aborted
+       ;; A typed pre-dispatch refusal from a saturated clock store, with the
+       ;; dispatch explicitly not created, is a precondition hold rather than
+       ;; a fault in the machine's code.
+       :clock/store-busy}
      failure-kind)
     :environmental-hold
 
