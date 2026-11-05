@@ -34,7 +34,7 @@
 (defn- stub-observe-opts []
   {:gc-fn (fn [] nil)
    :roster-fn (fn [_agency-base] fixture-seats)
-   :queue-fn (fn [_agency-base] {:ok true :count 3 :jobs fixture-jobs})})
+   :invoke-jobs-fn (fn [_agency-base] {:ok true :count 3 :jobs fixture-jobs})})
 
 (def fixture-config
   {:agency-base "http://127.0.0.1:7070"
@@ -86,7 +86,7 @@
 (deftest capture-lists-failed-observations-as-unknown
   (let [envelope (sut/capture
                   (assoc (stub-observe-opts)
-                         :queue-fn (fn [_] (throw (ex-info "agency down" {})))
+                         :invoke-jobs-fn (fn [_] (throw (ex-info "agency down" {})))
                          :roster-fn (fn [_] (throw (ex-info "agency down" {}))))
                   fixture-config)]
     (is (= :unknown (get-in envelope [:agency :queue :status])))
@@ -96,6 +96,20 @@
     ;; a failed observation must not refuse the run's own instrumentation
     (is (= :measured (get-in envelope [:heap :status])))
     (is (= :measured (get-in envelope [:admission-opts :status])))))
+
+;; RED-SUITES-3-K (claude-6, 2026-11-05): capture receives the runner's whole
+;; option map, whose :queue-fn is the Morning Brief queuer. The envelope must
+;; never call it, and must not report its return value as a measured queue.
+(deftest capture-does-not-call-the-morning-brief-queuer
+  (let [brief-calls (atom [])
+        envelope (sut/capture
+                  (-> (stub-observe-opts)
+                      (dissoc :invoke-jobs-fn)
+                      (assoc :queue-fn (fn [item] (swap! brief-calls conj item) [])
+                             :invoke-jobs-fn (fn [_] (throw (ex-info "agency down" {})))))
+                  fixture-config)]
+    (is (empty? @brief-calls))
+    (is (= :unknown (get-in envelope [:agency :queue :status])))))
 
 ;; --- receiver-side: read the envelope back from the tick record -------------
 

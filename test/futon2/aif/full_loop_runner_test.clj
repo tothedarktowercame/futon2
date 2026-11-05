@@ -2949,6 +2949,8 @@
     (is (= :build-failed (:outcome result)))
     (is (= "abc123" (get-in result [:data :commit])))
     (is (= "abc123" (:commit terminal-item)))
+    (is (every? map? @queued)
+        "only Morning Brief items are queued (the serving envelope once fed the Agency URL into :queue-fn)")
     (is (= :request-changes (:review-verdict (first @findings))))))
 
 (defn- run-revision-attempt

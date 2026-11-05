@@ -97,10 +97,15 @@
 (defn queue-snapshot
   "Agency invoke-queue state at run start: total and per-state counts from
   GET /api/alpha/invoke/jobs?limit=4000. Best-effort: any failure is
-  reported as :status :unknown, never thrown into the run."
-  [{:keys [agency-base queue-fn]}]
+  reported as :status :unknown, never thrown into the run.
+
+  The injection key is :invoke-jobs-fn, not :queue-fn: capture receives the
+  runner's whole option map, where :queue-fn is the Morning Brief queuer.
+  Sharing the key called that queuer with the Agency URL and recorded its
+  return value as a measured, empty Agency queue."
+  [{:keys [agency-base invoke-jobs-fn]}]
   (try
-    (let [jobs (:jobs ((or queue-fn
+    (let [jobs (:jobs ((or invoke-jobs-fn
                            (fn [base]
                              (get-json (str base "/api/alpha/invoke/jobs?limit=4000")
                                        10000)))
