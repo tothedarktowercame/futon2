@@ -77,7 +77,8 @@
              {:target "M-autoclock-in"})
         carrier (get-in record [:decision :abstention])]
     (is (= :abstained (:status carrier)))
-    (is (= [{:target "M-autoclock-in" :kind :incommensurable-family :missing :common-horizon
+    (is (= [{:source :judge
+             :target "M-autoclock-in" :kind :incommensurable-family :missing :common-horizon
              :data {:kind :incommensurable-family :horizon-steps [4 6]} :declines []}]
            (:targets carrier)))
     (is (not= :untyped-failure (get-in result [:data :failure-kind])))
