@@ -406,6 +406,18 @@
 
 (declare selection-terminal-condition)
 (declare claim-mode-observation)
+(declare author-infrastructure-failure?)
+
+(defn self-retried-terminal-result?
+  "True only for initial handoff failures whose surrounding runner path already
+  performs its own bounded retry.  Retry-wait failures must reach the debugger."
+  [opts phase result]
+  (and (author-infrastructure-failure? result)
+       (case phase
+         :author-wait (pos? (:author-infrastructure-retries opts 0))
+         :reviewer-wait true
+         :re-review-wait true
+         false)))
 
 (defn run-phase!
   "Run thunk with start/end telemetry; errors are logged and rethrown."
@@ -424,7 +436,10 @@
                    condition (when (debugger/attached?)
                                (or (terminal-kinds/unclassified-condition phase result)
                                    (when result->debugger-condition
-                                     (result->debugger-condition result))))
+                                     (result->debugger-condition result))
+                                   (when-not (self-retried-terminal-result?
+                                              opts phase result)
+                                     (terminal-kinds/repairable-condition phase result))))
                    _ (when condition (throw condition))
                    _ (when (and (debugger/attached?)
                                 (debugger/breakpoint-armed? [:after phase]))

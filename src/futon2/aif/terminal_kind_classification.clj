@@ -42,3 +42,16 @@
                 :seam phase
                 :failure-stage phase
                 :terminal-result result}))))
+
+(defn repairable-condition
+  "Turn a classified repairable terminal result into a debugger condition.
+  The caller is responsible for excluding results its own phase retries."
+  [phase result]
+  (when-let [kind (terminal-kind result)]
+    (when (= :repairable-error (:class (get (table) kind)))
+      (ex-info "Repairable terminal result requires live repair"
+               {:kind :repairable-terminal-kind
+                :original-kind kind
+                :seam phase
+                :failure-stage phase
+                :terminal-result result}))))
