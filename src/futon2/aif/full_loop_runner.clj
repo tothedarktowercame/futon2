@@ -3626,6 +3626,71 @@
 (defn- job-text [job] (task-execution/job-text job))
 (defn- review-verdict [job] (task-execution/review-verdict job))
 
+(defn- read-one-edn [s]
+  (try
+    (binding [*read-eval* false]
+      (with-open [reader (java.io.PushbackReader.
+                          (java.io.StringReader. s))]
+        (let [value (edn/read {:eof ::eof} reader)
+              trailing (edn/read {:eof ::eof} reader)]
+          (when (and (not= ::eof value) (= ::eof trailing)) value))))
+    (catch Throwable _ nil)))
+
+(defn- artifact-member? [member]
+  (and (map? member)
+       (= #{:repo :commit} (set (keys member)))
+       (string? (:repo member))
+       (not (str/blank? (:repo member)))
+       (string? (:commit member))
+       (boolean (re-matches #"(?i)[0-9a-f]{7,40}" (:commit member)))))
+
+(defn artifact-declaration
+  "Parse the optional FULL_LOOP_ARTIFACTS line from AUTHOR-JOB and bind it to
+  PLAN. Defects are evidence, not gates in this packet: every result is a typed
+  declaration receipt for retention beside the otherwise unchanged job."
+  [author-job plan]
+  (let [plan-digest (:digest plan)
+        ;; job-text joins several retained views of the same Agency reply.
+        ;; Collapse an identical declaration repeated by those carriers while
+        ;; retaining two different declarations as an unparseable defect.
+        matches (->> (re-seq #"(?m)^FULL_LOOP_ARTIFACTS:[ \t]*(.*)\r?$"
+                             (job-text author-job))
+                     (map second) distinct vec)
+        base {:schema :wm/artifact-declaration-v1
+              :plan-digest plan-digest}]
+    (if (empty? matches)
+      (assoc base :status :absent)
+      (let [members (when (= 1 (count matches)) (read-one-edn (first matches)))
+            repos (when (vector? members) (mapv :repo members))
+            allowed (set (map :repo (:allowed plan)))
+            duplicates (when repos
+                         (->> (frequencies repos)
+                              (keep (fn [[repo n]] (when (> n 1) repo)))
+                              sort vec))
+            undeclared (when repos
+                         (->> repos (remove allowed) distinct sort vec))]
+        (cond
+          (or (not= 1 (count matches))
+              (not (vector? members))
+              (not-every? artifact-member? members)
+              (not= repos (vec (sort repos))))
+          (assoc base :status :unparseable)
+
+          (seq duplicates)
+          (assoc base :status :duplicate-repo :members members
+                 :duplicate-repos duplicates)
+
+          (seq undeclared)
+          (assoc base :status :undeclared-repo :members members
+                 :undeclared-repos undeclared)
+
+          :else
+          (assoc base :status :present :members members))))))
+
+(defn retain-artifact-declaration [author-job plan]
+  (assoc author-job :artifact-declaration
+         (artifact-declaration author-job plan)))
+
 (defn- author-verdict
   "Parse the author contract's terminal marker (line-anchored, first match —
   same conventions as review-verdict). The author prompt names REFUSE as a
@@ -9731,7 +9796,8 @@
                    (get-in @d-task-dispatch [:dispatch])
                    dispatched-turns author-job author-repo)
                   author-job (or (:author-job unmeasured-claim-correction-state)
-                                 author-job)]
+                                 author-job)
+                  author-job (retain-artifact-declaration author-job repository-plan)]
               (throw-if-cancelled! author-job :author-wait)
               (when-not (= "done" (:state author-job))
                 (throw (ex-info "Author job did not complete"
