@@ -44,20 +44,78 @@
   (and (map? (:failure record))
        (keyword? (get-in record [:failure :kind]))))
 
+(defn- missing-vector [missing]
+  (cond
+    (nil? missing) []
+    (vector? missing) missing
+    (sequential? missing) (vec missing)
+    :else [missing]))
+
+(defn- target-id [target]
+  (when (or (string? target) (keyword? target)) target))
+
+(defn abstention-entry
+  "Project the retained reason for an abstained/no-selection terminal record.
+
+  The four sources remain distinguishable.  A legacy close with no carrier is
+  named :not-retained rather than silently omitting the reason."
+  [record]
+  (when (contains? #{:abstained :no-selection}
+                   (get-in record [:failure :kind]))
+    (let [detail (get-in record [:failure :detail])
+          typed (get detail :judge-refusal)
+          reading (:selected-target-reading record)
+          selection-carrier (get-in record [:decision :abstention])
+          [selection-target] (:targets selection-carrier)
+          refusal (first (:refusals detail))
+          selection-reason (get-in detail [:decision :reason])]
+      (cond
+        (and (map? typed) (keyword? (:kind typed)))
+        {:target (target-id (:target typed))
+         :reason (:kind typed)
+         :missing (missing-vector (or (:missing typed)
+                                      (:missing selection-target)))
+         :source (if (= :gate (:source typed)) :gate :judge)}
+
+        (and (= :refused (:status reading)) (keyword? (:kind reading)))
+        {:target (target-id (:target reading))
+         :reason (:kind reading)
+         :missing (missing-vector (:missing reading))
+         :source :selected-target-reading}
+
+        (or (keyword? selection-reason)
+            (keyword? (:kind refusal))
+            (keyword? (:failure-kind refusal))
+            (keyword? (:kind selection-target))
+            (and (keyword? (:reason selection-carrier))
+                 (not= :no-selection-decision-recorded
+                       (:reason selection-carrier))))
+        {:target (target-id (or (:target refusal) (:target selection-target)
+                               (record-target record)))
+         :reason (or selection-reason (:kind refusal) (:failure-kind refusal)
+                     (:kind selection-target) (:reason selection-carrier))
+         :missing (missing-vector (or (:missing refusal)
+                                      (:missing selection-target)))
+         :source :selection}
+
+        :else {:reason :not-retained}))))
+
 (defn index-entry
   "Project one already-read terminal RECORD into its compact index row."
   [record record-path record-sha256]
-  {:schema :wm/outer-refusal-index-entry-v1
-   :status :indexed
-   :run-id (:run/id record)
-   :record-path record-path
-   :record-sha256 record-sha256
-   :target (record-target record)
-   :failure (select-keys (:failure record) [:kind :stage])
-   :finished-work? (terminal-injury/finished-work? record)
-   :satisfaction (terminal-injury/satisfaction-evidence record)
-   :inputs (record-inputs record)
-   :effective-run-identity (:effective-run-identity record)})
+  (let [abstention (abstention-entry record)]
+    (cond-> {:schema :wm/outer-refusal-index-entry-v1
+             :status :indexed
+             :run-id (:run/id record)
+             :record-path record-path
+             :record-sha256 record-sha256
+             :target (record-target record)
+             :failure (select-keys (:failure record) [:kind :stage])
+             :finished-work? (terminal-injury/finished-work? record)
+             :satisfaction (terminal-injury/satisfaction-evidence record)
+             :inputs (record-inputs record)
+             :effective-run-identity (:effective-run-identity record)}
+      abstention (assoc :abstention abstention))))
 
 (defn reading-index-entries
   "Project each intermediate reading refusal once, even if the run succeeds.

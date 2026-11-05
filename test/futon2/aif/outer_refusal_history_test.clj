@@ -2,8 +2,10 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.outer-refusal-index :as index]
-            [futon2.aif.outer-refusal-history :as history]))
+            [futon2.aif.outer-refusal-history :as history]
+            [futon2.test-support.runner-fixture :as fixture]))
 
 (def retained-refusal
   ;; Real refused M-recommendation-bindings terminal record.
@@ -22,6 +24,95 @@
     (index/append-entry!
      (io/file dir history/index-name)
      (history/index-entry record source (index/sha256-file source)))))
+
+(defn- close-and-index
+  "Exercise the owned terminal-record writer before the compact projection."
+  [result opts]
+  (let [dir (temp-dir)
+        written (runner/persist-run-record!
+                 (merge (fixture/isolated-runner-opts)
+                        {:run-record-dir (.getPath dir)
+                         :click-id "click-abstention-reason"}
+                        opts)
+                 "abstention-reason" "2026-11-05T00:00:00Z" result)
+        path (:run-record written)
+        record (edn/read-string (slurp path))]
+    (history/index-entry record path (index/sha256-file path))))
+
+(defn- abstained-result
+  ([sorry data] (abstained-result sorry data nil))
+  ([sorry data decision]
+   {:attempt-id "attempt-abstention-reason"
+    :outcome :incomplete
+    :wm/route [{:node :SELECTION :via :abstained :at "2026-11-05T00:00:00Z"}]
+    :data data
+    :checkpoints {:selection (cond-> {:sorry sorry}
+                               decision (assoc :judgment
+                                               {:controller-decision decision}))}}))
+
+(deftest every-abstention-source-reaches-the-compact-index
+  (let [judge (runner/judge-refusal
+               (ex-info "cascade decision refused"
+                        {:kind :class-unknown-no-scalar-g
+                         :missing :target-relation
+                         :target "M-judge"})
+               nil)
+        gate (runner/gate-refusal
+              (ex-info "gate" {:error :inadmissible-decision
+                                :reason :missing-observation-locators
+                                :detail {:target "M-gate"
+                                         :missing-tokens [:locator-file]}})
+              nil)
+        close (fn [carrier]
+                (close-and-index
+                 (abstained-result
+                  {:kind :no-selection :judge-refusal carrier}
+                  {:failure-kind :abstained :failure-stage :selection
+                   :error "typed refusal" :error-data {:judge-refusal carrier}})
+                 {}))]
+    (is (= {:target "M-judge" :reason :class-unknown-no-scalar-g
+            :missing [:target-relation] :source :judge}
+           (:abstention (close judge))))
+    (is (= {:target "M-gate" :reason :missing-observation-locators
+            :missing [:locator-file] :source :gate}
+           (:abstention (close gate)))))
+  (let [decision {:status :abstained :reason :no-acting-cascade-candidate
+                  :refusals [{:target "M-selection"
+                              :kind :target-source-path-absent
+                              :missing [:mission-source]}]}
+        row (close-and-index
+             (abstained-result
+              {:kind :no-selection :decision decision}
+              {:failure-kind :abstained :failure-stage :selection
+               :error "no addressable action"
+               :error-data {:decision decision}}
+              decision)
+             {})]
+    (is (= {:target "M-selection" :reason :no-acting-cascade-candidate
+            :missing [:mission-source] :source :selection}
+           (:abstention row))))
+  (let [reading {:status :refused
+                 :kind :selected-target-reading-answer-invalid
+                 :target "M-reading"
+                 :detail {:answer {:status :refused :reason :response-invalid}}}
+        row (close-and-index
+             (abstained-result
+              {:kind :no-selection}
+              {:failure-kind :abstained :failure-stage :selection-world
+               :error "reading refused"})
+             {:selected-target-reading/state
+              (atom {:status :completed :record reading})})]
+    (is (= {:target "M-reading"
+            :reason :selected-target-reading-answer-invalid
+            :missing [] :source :selected-target-reading}
+           (:abstention row))))
+  (let [row (close-and-index
+             (abstained-result {:kind :no-selection}
+                               {:failure-kind :no-selection
+                                :failure-stage :selection
+                                :error "legacy close"})
+             {})]
+    (is (= {:reason :not-retained} (:abstention row)))))
 
 (deftest absent-index-is-distinct-from-empty-history
   (let [dir (temp-dir)

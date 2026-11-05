@@ -882,7 +882,8 @@
     (when (and (instance? clojure.lang.ExceptionInfo e)
                (= "cascade decision refused" (ex-message e))
                (keyword? (:kind d)))
-      {:kind (:kind d)
+      {:source :judge
+       :kind (:kind d)
        :target (or (:target d) flight-target {:absent :refusal-names-no-target})
        :missing (or (:missing d)
                     (case (:kind d)
@@ -907,7 +908,8 @@
     (when (and (instance? clojure.lang.ExceptionInfo e)
                (= :inadmissible-decision (:error d)))
       (let [detail (:detail d)]
-        {:kind (if (keyword? (:reason d)) (:reason d) {:absent :no-reason-given})
+        {:source :gate
+         :kind (if (keyword? (:reason d)) (:reason d) {:absent :no-reason-given})
          :target (or (when (map? detail) (:target detail))
                      flight-target
                      {:absent :refusal-names-no-target})
@@ -929,7 +931,8 @@
     ;; with that kind, its ex-data kept under :data
     (and (nil? decision) judge-refusal)
     {:status :abstained
-     :targets [(assoc (select-keys judge-refusal [:target :kind :missing :data]) :declines [])]}
+     :targets [(assoc (select-keys judge-refusal [:source :target :kind :missing :data])
+                      :declines [])]}
 
     (nil? decision)
     {:status :absent :reason :no-selection-decision-recorded}
