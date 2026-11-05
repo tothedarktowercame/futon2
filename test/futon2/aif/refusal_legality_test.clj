@@ -28,15 +28,15 @@
   (is (nil? (sut/retained-scored-field {}))))
 
 (deftest retained-scored-field-keeps-unrefused-candidates
-  (is (= [:b]
+  (is (= ["M-b"]
          (sut/retained-scored-field
           {:outer/selection
-           {:outer-field/admitted [:a :b]
-            :reading-reselection {:refusals [{:target :a}]}}}))))
+           {:outer-field/admitted ["E-a" "M-b"]
+            :reading-reselection {:refusals [{:target "E-a"}]}}}))))
 
 (deftest retained-scored-field-can-be-exhausted-by-in-click-refusals
   (is (= []
          (sut/retained-scored-field
           {:outer/selection
-           {:outer-field/admitted [:a]
-            :reading-reselection {:refusals [{:target :a}]}}}))))
+           {:outer-field/admitted ["E-a"]
+            :reading-reselection {:refusals [{:target "E-a"}]}}}))))
