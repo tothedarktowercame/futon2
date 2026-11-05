@@ -61,3 +61,9 @@ not match, and what a faithful representation would need. No code change.
 ## Provenance
 
 claude-4, 2026-10-19, at Joe's request ("investigate further via a ticket").
+
+## Completion criteria
+
+- The investigation note exists — check: a note under futon2 holes/labs/ (ticket's stated deliverable) answering questions 1-5 (what :isomorphism/:consistency witnesses assert and their counts; whether containment is represented; whether the squares carry per-modality precision; the interchange law; contradicted vs absent). **Not started.**
+- The note ends with the verdict and the faithful-representation sketch — check: the note's closing lines give matches / partly matches / does not match and what a faithful representation would need. **Not started.**
+- Findings reviewed with Joe before any code change — check: a review note or Joe ruling recorded against the note (the ticket's own constraint: no code change until findings are reviewed). **Not started.**

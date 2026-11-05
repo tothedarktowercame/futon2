@@ -117,3 +117,13 @@ Requested by Joe after the five-click campaign exhausted its authorization
 without autonomous repair.  Architectural diagnosis supplied by `claude-5`
 in Agency job `invoke-1792382724781-17058-f65d240b`, after review of the five
 commits and `meta_injury_observation.clj`.
+
+## Completion criteria
+
+- Append-only injury ledger with total transition validator — check: futon2 src/futon2/aif/meta_injury_ledger.clj + test deftest arbitrary-nondischarge-appends-never-reduce-active-set (meta_injury_ledger_test.clj:101). **Met.**
+- Campaign replay opens/reopens injuries without stage allowlists — check: deftest campaign-record-appends-cannot-erase-injury (meta_injury_ledger_test.clj:119) over the three pinned 10-19 records. **Met.**
+- Dedicated repair transaction with sealed work order, discharging/reopening/abandoning correctly — check: meta_repair_coordinator_test.clj deftests at lines 102, 141, 177, 478. **Met.**
+- Repair identity held across claim/dispatch/review/enactment/retry — check: deftest complete-valid-transaction-discharges-only-on-attributable-retry (meta_injury_ledger_test.clj:73) and retry-* deftests in the same file. **Met.**
+- The five ordinary-route bypasses are removed or quarantined and their tests inverted to require refusal — check: git log for the inversion of 97eab2ee8, fa43dd757, 5a5b421bc, 42bfb4bb5, 95145f093. **Not started.**
+- Click acceptance returns a click id before asynchronous execution — check: the acceptance route's response carries a click id on a real click; no stale last-result reuse. **Not started.**
+- Real recorded click replayed with trace-shape comparison against the isolated harness — check: a recorded replay test citing a real click input file. **Not started.**

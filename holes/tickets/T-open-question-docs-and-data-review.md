@@ -38,3 +38,9 @@ Things to settle:
 
 Raised by claude-4 while annotating R9 for the plop2026 docbook
 (`p4ng/plop-2026-code-annotations.json`), 2026-10-18.
+
+## Completion criteria
+
+- The question is answered: what counts as review of a document or data file is decided — check: a decision recorded in this ticket (or a note it cites) covering 'Things to settle' items 1-2 (review meaning; whether behaviour-changing data needs the code standard). **Not started.**
+- The rule is stated where the code enforces it — check: item 3; R9's text and/or the review-execution-gate docstring in task_execution_evidence.clj state the docs/data rule explicitly. **Not started.**
+- The two validators share one rule — check: item 4; review-execution-gate and independent-review-evidence derive from one definition, or a recorded reason they differ. **Not started.**

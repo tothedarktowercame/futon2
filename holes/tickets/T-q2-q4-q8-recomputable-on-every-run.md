@@ -77,3 +77,10 @@ hold its own copy.
 Found by claude-4 while checking which patterns have runtime certificates
 (plop2026 docbook pass, `p4ng/plop-2026-code-annotations.json`
 `certificate_coverage`), 2026-10-18. Joe asked for it as a fix-now ticket.
+
+## Completion criteria
+
+- Q4 decided on every run that reaches selection — check: futon2 sha 2079cc548 (q4_preference.clj carrier binding); re-run scripts/wm_report_card.clj over the existing 2026-10-18 click-5 record (data/wm-runs/2026-10-18-f016ed51-...): Q4 reads pass or fail, never not-recomputable. **Not met.** (fix landed; the re-run acceptance not evidenced)
+- A tie is a decided failure, not a missing fact — check: src/futon2/aif/selection_record.clj:141 carries :selection-predecessor-time-tie as a typed reason; a planted tied record reads Q8 fail with the tied members. **Not met.** (typed tie exists; the planted-record check not evidenced)
+- Q2, Q4, Q8 decided even when the run fails after selection — check: 2079cc548 records the carriers at selection time (full_loop_runner.clj); a planted post-selection failure record still decides all three. **Not met.** (recording landed; the planted check not evidenced)
+- The Clojure predicates and the Lean checker agree — check: NOTE: the named Lean spec (IncrementalTaskFrontier, OuterTaskObjective) was removed in mathlib4 3a09d2a80f; this criterion needs restating against whatever Lean spec now covers selection, or recording as moot with the machinery removal. **Not started.**
