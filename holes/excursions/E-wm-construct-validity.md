@@ -392,6 +392,19 @@ records and notifies, and validates nothing).
    abstention never reaches runner `close!`. It returns `{:absent
    :no-task-selected}` directly (`full_loop_runtime.clj:1702-1707`), and the
    scored field is in hand there. That is a separate validation site.
+   *Done (2026-11-05):* codex-18 `e5a371470` and `73f040109`, with my fixes
+   `db90f23e5` and `460f0287a`.
+   - A no-target outer decision keeps a `:refusal/disposition`. It is
+     `:loop-stop` only when the retained admitted field is a vector and that
+     vector is empty; otherwise it is `:debugger-error`.
+   - The selector does abstain with a non-empty field, under
+     `:all-policies-predict-stopping`. That is the Dark Room case, and it is
+     now a debugger error.
+   - The decision reaches the supervisor as the selection record, not as a
+     run record. The Python check now reads that shape.
+   - No hold is placed at that point, because `await-restart!` is not
+     reachable there. REFUSAL-VALIDATOR-2b makes the supervisor claim L1 from
+     the selection record.
 3. **REFUSAL-VALIDATOR-2 (supervisor).** `stop()` takes a typed case.
    - L2 needs the STOP file or the CLI budget.
    - L1 needs the run record's scored field.
