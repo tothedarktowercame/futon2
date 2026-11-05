@@ -1,7 +1,7 @@
 (ns scripts.medic-discharge
   "Dry-run/apply evidence-bearing discharges for the three legacy enacted
   occurrences covered by checked medic corrections."
-  (:require [futon2.aif.meta-injury-ledger :as ledger]
+  (:require [futon2.aif.medic-discharge :as discharge]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.standing-authority :as standing]))
 
@@ -30,7 +30,7 @@
     (when-not (= :loaded (:status loaded))
       (throw (ex-info "ledger load refused" loaded)))
     (let [results (reduce (fn [{:keys [ledger rows]} occurrence]
-                            (let [result (ledger/append-medic-discharge
+                            (let [result (discharge/append-medic-discharge
                                           ledger occurrence repository verifier)]
                               {:ledger (if (= :appended (:status result))
                                          (:ledger result) ledger)

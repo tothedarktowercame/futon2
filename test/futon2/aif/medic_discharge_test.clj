@@ -3,7 +3,8 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.meta-injury-ledger :as ledger]))
+            [futon2.aif.meta-injury-ledger :as ledger]
+            [futon2.aif.medic-discharge :as discharge]))
 
 (def injury-id "injury/discharge")
 (def cause-pin {:path "fixture/cause.edn" :sha256 (apply str (repeat 64 "a"))})
@@ -54,12 +55,31 @@
     (shell/sh "git" "-C" dir "commit" "-qm" "fixture")
     {:dir dir :head (str/trim (:out (shell/sh "git" "-C" dir "rev-parse" "HEAD")))}))
 
-(defn- corrected-ledger [repository commit]
+(defn- receipt-chain!
+  "Write the retained OutOfBandFix receipt chain the production corrections
+  carry: authority receipt -> evaluation receipt -> pre/post/negative replays."
+  [dir verdicts]
+  (let [{:keys [pre post negative evaluation]
+         :or {pre :original-contract-failed post :original-contract-repaired
+              negative :negative-control-refused
+              evaluation :original-acceptance-repaired}} verdicts
+        replay (fn [phase verdict]
+                 (write-edn! dir (str (name phase) "-replay.edn")
+                             {:schema :wm/meta-medic-genuine-repair-replay-v1
+                              :phase phase :verdict verdict}))
+        evaluation-pin (write-edn! dir "evaluation-receipt.edn"
+                                   {:pre-replay-pin (replay :pre pre)
+                                    :post-replay-pin (replay :post post)
+                                    :negative-control-pin (replay :negative negative)
+                                    :verdict evaluation})]
+    (write-edn! dir "authority.edn" {:evaluation-pin evaluation-pin})))
+
+(defn- corrected-ledger
+  ([repository commit] (corrected-ledger repository commit {}))
+  ([repository commit verdicts]
   (let [history (enacted-ledger)
         current (last (:entries history))
-        result-pin (write-edn! repository "counterfactual.edn" {:status :retained})
-        receipt-pin (write-edn! repository "authority.edn"
-                                {:counterfactual-result {:run-pin result-pin}})
+        receipt-pin (receipt-chain! repository verdicts)
         payload {:kind :genuine-repair :injury-id injury-id
                  :entry-id (str (:ordinal current))
                  :predecessor-entry-id (str (dec (:ordinal current)))
@@ -76,13 +96,13 @@
                    :authority-receipt-pin receipt-pin}
         corrected (ledger/append-medic-repaired history receipt-pin operation authority)]
     {:ledger (:ledger corrected) :receipt-pin receipt-pin
-     :correction (:entry corrected) :occurrence [injury-id (:ordinal current)]}))
+     :correction (:entry corrected) :occurrence [injury-id (:ordinal current)]})))
 
 (deftest checked-correction-discharges-enacted-occurrence
   (let [{:keys [dir head]} (git-fixture)
         {:keys [ledger correction occurrence]} (corrected-ledger dir head)
         before (ledger/effective-active-injuries-from-validated-ledger ledger)
-        result (ledger/append-medic-discharge ledger occurrence dir authority)
+        result (discharge/append-medic-discharge ledger occurrence dir authority)
         after (ledger/effective-active-injuries-from-validated-ledger (:ledger result))
         entry (:entry result)]
     (is (= :appended (:status result)) (pr-str result))
@@ -103,9 +123,9 @@
                                                   (apply str (repeat 64 "f"))) %)
                                      entries)))
         stale-ledger (ledger/seal-ledger stale-ledger)
-        historical (ledger/append-medic-discharge stale-ledger occurrence dir authority)
-        current (ledger/append-medic-discharge ledger occurrence dir authority)
-        open-result (ledger/append-medic-discharge ledger [injury-id 1] dir authority)]
+        historical (discharge/append-medic-discharge stale-ledger occurrence dir authority)
+        current (discharge/append-medic-discharge ledger occurrence dir authority)
+        open-result (discharge/append-medic-discharge ledger [injury-id 1] dir authority)]
     (is (= :historical (:failed-check historical)))
     (is (nil? (:ledger historical)) "historical refusal appends nothing")
     (is (= :appended (:status current)) "fixture HEAD is accepted before the negative case")
@@ -137,7 +157,7 @@
                                              ledger/seal-entry) %)
                                       entries)))
               changed (ledger/seal-ledger changed)
-              refused (ledger/append-medic-discharge changed occurrence dir authority)]
+              refused (discharge/append-medic-discharge changed occurrence dir authority)]
           (is (not= other unrelated))
           (is (= :current (:failed-check refused)))
           (is (nil? (:ledger refused)) "current refusal appends nothing"))))))
@@ -145,7 +165,7 @@
 (deftest later-reopening-is-active-again
   (let [{:keys [dir head]} (git-fixture)
         {:keys [ledger occurrence]} (corrected-ledger dir head)
-        discharged (:ledger (ledger/append-medic-discharge ledger occurrence dir authority))
+        discharged (:ledger (discharge/append-medic-discharge ledger occurrence dir authority))
         reopened (ledger/seal-entry
                   {:schema ledger/transition-schema
                    :ordinal (inc (count (:entries discharged)))
@@ -155,3 +175,30 @@
     (is (= 1 (:raw-active-count projected)))
     (is (= 1 (:effective-active-count projected)))
     (is (= [] (:masked projected)))))
+
+(deftest counterfactual-and-current-verdicts-are-checked
+  (testing "a counterfactual that did not fail refuses"
+    (let [{:keys [dir head]} (git-fixture)
+          {:keys [ledger occurrence]}
+          (corrected-ledger dir head {:pre :original-contract-repaired})
+          result (discharge/append-medic-discharge ledger occurrence dir authority)]
+      (is (= :counterfactual (:failed-check result)))
+      (is (nil? (:ledger result)))))
+  (testing "a negative control that was not refused refuses"
+    (let [{:keys [dir head]} (git-fixture)
+          {:keys [ledger occurrence]}
+          (corrected-ledger dir head {:negative :negative-control-passed})
+          result (discharge/append-medic-discharge ledger occurrence dir authority)]
+      (is (= :counterfactual (:failed-check result)))))
+  (testing "a post-repair replay that still fails refuses as current"
+    (let [{:keys [dir head]} (git-fixture)
+          {:keys [ledger occurrence]}
+          (corrected-ledger dir head {:post :original-contract-failed})
+          result (discharge/append-medic-discharge ledger occurrence dir authority)]
+      (is (= :current (:failed-check result)))))
+  (testing "an evaluation that did not find the acceptance repaired refuses as historical"
+    (let [{:keys [dir head]} (git-fixture)
+          {:keys [ledger occurrence]}
+          (corrected-ledger dir head {:evaluation :original-acceptance-not-repaired})
+          result (discharge/append-medic-discharge ledger occurrence dir authority)]
+      (is (= :historical (:failed-check result))))))

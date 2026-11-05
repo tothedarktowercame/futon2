@@ -3,12 +3,8 @@
 
   This module deliberately has no filesystem, serving, runner, or mutable
   production-data dependency."
-  (:require [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
-            [clojure.edn :as edn]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.medic-disposition :as medic]))
 
 (def ledger-schema :wm/meta-injury-ledger-v1)
@@ -67,8 +63,8 @@
 (def empty-ledger
   (seal-ledger {:schema ledger-schema :attempt-limit 3 :retry-limit 3 :entries []}))
 
-(defn- transition? [entry] (= transition-schema (:schema entry)))
-(defn- observation? [entry] (= observation-schema (:schema entry)))
+(defn transition? [entry] (= transition-schema (:schema entry)))
+(defn observation? [entry] (= observation-schema (:schema entry)))
 (defn- transitions [ledger] (filter transition? (:entries ledger)))
 (defn- injury-history [ledger injury-id]
   (filter #(= injury-id (:injury-id %)) (transitions ledger)))
@@ -438,95 +434,6 @@
         {:status :appended
          :ledger (seal-ledger (update ledger :entries conj (:entry checked)))
          :entry (:entry checked)})))))
-
-(defn- read-checked-pin [pin]
-  (when (pin? pin)
-    (try
-      (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file (:path pin))))]
-        (when (= (:sha256 pin) (load-identity/sha256 bytes))
-          {:bytes bytes :value (edn/read-string (String. bytes "UTF-8"))}))
-      (catch Throwable _ nil))))
-
-(defn- counterfactual-result-pin [receipt]
-  (or (:post-replay-pin receipt)
-      (get-in receipt [:counterfactual :run-pin])
-      (get-in receipt [:counterfactual-result :run-pin])
-      (get-in receipt [:acceptance-result :run-pin])))
-
-(defn- retained-counterfactual? [receipt]
-  (or (some? (:counterfactual-result receipt))
-      (some? (:acceptance-result receipt))
-      (when-let [pin (counterfactual-result-pin receipt)]
-        (boolean (read-checked-pin pin)))
-      (when-let [evaluation (some-> receipt :evaluation-pin read-checked-pin :value)]
-        (when-let [pin (counterfactual-result-pin evaluation)]
-          (boolean (read-checked-pin pin))))))
-
-(defn- ancestor-of-head? [repository commit]
-  (and (sha? commit)
-       (let [{:keys [exit]} (shell/sh "git" "-C" repository
-                                     "merge-base" "--is-ancestor" commit "HEAD")]
-         (zero? exit))))
-
-(defn append-medic-discharge
-  "Append an evidence-bearing `:enacted -> :discharged` transition for one
-  exact occurrence already covered by a `:medic-repaired` observation.
-
-  The correction receipt is re-read by hash, its repair commit must be an
-  ancestor of REPOSITORY's HEAD, and a retained counterfactual/acceptance
-  result must still be readable. A refusal never changes LEDGER."
-  ([ledger occurrence repository authority-verifier]
-   (let [[injury-id occurrence-ordinal] occurrence
-         history (filter #(and (transition? %) (= injury-id (:injury-id %)))
-                         (:entries ledger))
-         current (last history)
-         correction (some (fn [entry]
-                            (when (and (observation? entry)
-                                       (= :medic-repaired (:observation-kind entry))
-                                       (= [injury-id (str occurrence-ordinal)]
-                                          (medic/occurrence
-                                           (get-in entry [:medic-operation :request
-                                                          :candidate]))))
-                              entry))
-                          (:entries ledger))
-         candidate (get-in correction [:medic-operation :request :candidate])
-         receipt-pin (or (get-in correction [:medic-operation :authority-receipt-pin])
-                         (:record-pin correction))
-         receipt (some-> receipt-pin read-checked-pin :value)
-         commit (or (:patch-id candidate) (:fixed-by correction))]
-     (cond
-       (or (nil? current)
-           (not= (str occurrence-ordinal) (str (:ordinal current)))
-           (not= :enacted (:state current)))
-       (refusal :medic-discharge/not-enacted
-                {:failed-check :not-enacted :occurrence occurrence})
-
-       (nil? correction)
-       (refusal :medic-discharge/correction-missing
-                {:failed-check :correction :occurrence occurrence})
-
-       (nil? receipt)
-       (refusal :medic-discharge/evidence-refused
-                {:failed-check :historical :evidence-pin receipt-pin})
-
-       (not (ancestor-of-head? repository commit))
-       (refusal :medic-discharge/evidence-refused
-                {:failed-check :current :repair-commit commit})
-
-       (not (retained-counterfactual? receipt))
-       (refusal :medic-discharge/evidence-refused
-                {:failed-check :counterfactual :evidence-pin receipt-pin})
-
-       :else
-       (append-transition
-        ledger {:injury-id injury-id :state :discharged
-                :attempt (:attempt current) :repair-id (:repair-id current)
-                :outcome :success :reason :medic-correction
-                :medic-correction-pin (:entry-pin correction)
-                :medic-receipt-pin receipt-pin
-                :medic-evidence-pin (:evidence-pin candidate)
-                :repair-commit commit}
-        authority-verifier)))))
 
 (defn- transition->medic-entry
   [prior-by-injury transition-by-injury opening-by-injury corrections entry]
