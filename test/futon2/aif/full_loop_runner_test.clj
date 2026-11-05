@@ -3127,6 +3127,7 @@
 
 (deftest genuine-falsifier-refusal-is-amended-once-and-then-closes
   (let [calls (atom 0)
+        seen-commits (atom [])
         refusal {:status :refused
                  :reason :reviewer-falsifier-applicable-check-failed
                  :failed-checks [:selected-want-accounting]
@@ -3135,7 +3136,8 @@
         (with-redefs-fn
           {#'runner/refuse-on-runner-source-drift! (constantly nil)
            #'reviewer-falsifier/verify
-           (fn [_candidate _inputs]
+           (fn [_candidate inputs]
+             (swap! seen-commits conj (:commit inputs))
              (if (= 1 (swap! calls inc))
                refusal
                {:status :verified :receipt/id "falsifier-amended"}))}
@@ -3148,6 +3150,8 @@
     (is (= :grounded-change (:outcome result))
         "a passed amended artifact continues through grounding and close")
     (is (= 2 @calls) "the falsifier is rerun exactly once after amendment")
+    (is (= ["abc123" "def456"] @seen-commits)
+        "the rerun falsifies the amended commit, not the refused one")
     (is (= ["abc123" "def456"] (:commits build)))
     (is (= :verified
            (get-in build [:validation :reviewer-falsifier-verification :status])))
