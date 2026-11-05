@@ -133,9 +133,12 @@ RUN_COST_PROJECTION = r'''
 '''
 
 CLICK_ENVELOPE_PHASES = [
-    "reset", "source-giraffe", "heap-tripwire", "admission", "child-wait",
-    "ownership", "requirements-report-card",
+    "reset", "agency-budget-preflight", "source-giraffe", "heap-gc",
+    "tripwire-preflight", "cast-single-flight-wait", "post-admission",
+    "server-execution", "child-wait", "ownership-verification",
+    "requirements-report-card",
 ]
+PHASE_BOUNDARY_PREFIX = "WM_COST_PHASE "
 
 MODEL_CALL_GAPS = [
     "readiness-author", "meta-diagnosis", "meta-acceptance-proposal",
@@ -171,6 +174,28 @@ def _typed_missing(reason: str) -> dict:
     return {"status": "typed-missing", "reason": reason}
 
 
+def launcher_phase_timings(click: dict) -> dict[str, int]:
+    """Read the launcher's fixed-prefix JSON boundaries from this click's log."""
+    phases = {}
+    log_path = click.get("log")
+    if log_path and Path(log_path).is_file():
+        for line in Path(log_path).read_text(errors="replace").splitlines():
+            if not line.startswith(PHASE_BOUNDARY_PREFIX):
+                continue
+            try:
+                boundary = json.loads(line[len(PHASE_BOUNDARY_PREFIX):])
+            except json.JSONDecodeError:
+                continue
+            phase, duration = boundary.get("phase"), boundary.get("wall-ms")
+            if (phase in CLICK_ENVELOPE_PHASES and isinstance(duration, int)
+                    and duration >= 0 and phase not in phases):
+                phases[phase] = duration
+    reset_ms = click.get("reset-wall-ms")
+    if isinstance(reset_ms, int) and reset_ms >= 0:
+        phases["reset"] = reset_ms
+    return phases
+
+
 def cost_receipt(click: dict, total_ms: int) -> dict:
     projection = run_cost_projection(click.get("run-record"))
     timing = projection.get("registered-run/timing")
@@ -182,7 +207,7 @@ def cost_receipt(click: dict, total_ms: int) -> dict:
     phase_timings = timing.get("phase-timings-ms")
     if isinstance(phase_timings, dict):
         phases.extend({"phase": phase, "status": "complete", "wall-ms": duration,
-                       "source": "run-record"}
+                       "source": "run-record", "parent": "server-execution"}
                       for phase, duration in phase_timings.items()
                       if isinstance(duration, int) and duration >= 0)
     elif click.get("run-record"):
@@ -191,7 +216,11 @@ def cost_receipt(click: dict, total_ms: int) -> dict:
     else:
         phases.append({"phase": "meta-self-heal", **_typed_missing(
             "phase-duration-not-retrievable")})
-    phases.extend({"phase": phase, **_typed_missing("not-yet-instrumented")}
+    launcher = launcher_phase_timings(click)
+    phases.extend(({"phase": phase, "status": "complete", "wall-ms": launcher[phase],
+                    "source": "launcher-monotonic"}
+                   if phase in launcher else
+                   {"phase": phase, **_typed_missing("not-reached")})
                   for phase in CLICK_ENVELOPE_PHASES)
 
     debugger = {key: timing[key] for key in
@@ -953,7 +982,9 @@ def _retried_no_defect(stop: dict) -> bool:
 
 
 def fire(n: int, args, since_epoch: int) -> dict:
+    reset_started_ns = time.monotonic_ns()
     reset_cast_sessions(args)
+    reset_wall_ms = max(0, (time.monotonic_ns() - reset_started_ns) // 1_000_000)
     out = STATE / f"click-{n:03d}-{int(time.time())}.log"
     before = budget_lines()
     cmd = [F2 / "scripts" / "wm_click.sh", "--run", "--issuing-caller", args.issuing_caller,
@@ -1007,7 +1038,8 @@ def fire(n: int, args, since_epoch: int) -> dict:
     return {"n": n, "rc": rc, "click-id": click_id, "spent": spent, "outcome": lr.get("outcome", "unknown"),
             "run-id": run_id, "carried": carried(run_id), "last-result": lr, "log": str(out),
             "run-record": record_path, "verdict": verdict, "alert": click_alert(verdict), "why": why,
-            "since-epoch": since_epoch, "in-flight-repairs": in_flight_repairs}
+            "since-epoch": since_epoch, "in-flight-repairs": in_flight_repairs,
+            "reset-wall-ms": reset_wall_ms}
 
 
 # ---------------------------------------------------------------- debugger
@@ -1372,7 +1404,9 @@ def run(args) -> int:
         f"max-repairs={args.max_repairs} repair-seat={args.repair_seat} ===")
     record({"event": "start", "args": vars(args)})
     since = jvm_start_epoch()
+    initial_reload_started_ns = time.monotonic_ns()
     ok, text, since = reload_when_idle(since)
+    initial_reload_ms = max(0, (time.monotonic_ns() - initial_reload_started_ns) // 1_000_000)
     fault_repairs: list[str] = []
     while not ok:  # a namespace that will not load is a repair before any click
         if len(fault_repairs) >= args.max_repairs:
@@ -1387,13 +1421,17 @@ def run(args) -> int:
     last_abstention: dict | None = None
     previous_alert: list[str] | None = None
     stopping_digest: str | None = None  # the field on which nothing beat stopping
+    initial_reload_pending = True
     while spent < args.clicks and ticks < args.ticks:
+        reload_ms = initial_reload_ms if initial_reload_pending else 0
         if STOP_FILE.exists():
             return stop(args, f"stop file present after {spent} clicks, {ticks} carrying")
         if args.continuous and spent:
             # A fix landed between clicks is loaded before the next one; that is
             # how an alert's signature stops repeating without a pause.
+            reload_started_ns = time.monotonic_ns()
             ok, text, since = reload_when_idle(since)
+            reload_ms = max(0, (time.monotonic_ns() - reload_started_ns) // 1_000_000)
             if not ok:
                 return stop(args, f"paused: a namespace committed since the last click will not load: {text[:300]}", 1)
         stops = debugger_stops()
@@ -1430,6 +1468,8 @@ def run(args) -> int:
         fire_started_ns = time.monotonic_ns()
         c = fire(spent + 1, args, since)
         fire_wall_ms = max(0, (time.monotonic_ns() - fire_started_ns) // 1_000_000)
+        c["reset-wall-ms"] = c.get("reset-wall-ms", 0) + reload_ms
+        initial_reload_pending = False
         since = c.pop("since-epoch")
         spent += 1 if c["spent"] else 0
         if c["carried"]:

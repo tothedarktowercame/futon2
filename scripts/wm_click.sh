@@ -79,11 +79,43 @@ finding() { printf '  %-22s FINDING: %s\n' "$1" "$2"; }
 # not a success.
 cannot() { printf '  %-22s CANNOT LAUNCH: %s\n' "$1" "$2"; }
 
+# Structured click-cost telemetry. Python's monotonic_ns is process-independent
+# on this host (CLOCK_MONOTONIC), immune to wall-clock adjustments, and already
+# required by this launcher. Each completed envelope phase emits exactly one
+# machine-readable line into the per-click log captured by the repair loop.
+phase_now_ns() { python3 -c 'import time; print(time.monotonic_ns())'; }
+emit_phase_ns() {
+  python3 - "$1" "$2" <<'PY'
+import json, sys
+print("WM_COST_PHASE " + json.dumps({"phase": sys.argv[1],
+                                      "wall-ms": int(sys.argv[2]) // 1_000_000,
+                                      "source": "launcher-monotonic"},
+                                     separators=(",", ":")))
+PY
+}
+emit_phase_since() {
+  local phase="$1" started="$2" ended
+  ended=$(phase_now_ns)
+  emit_phase_ns "$phase" "$((ended - started))"
+}
+
+LAUNCH_STARTED_NS=$(phase_now_ns)
+SOURCE_GIRAFFE_NS=0
+HEAP_TRIPWIRE_NS=0
+preflight_started_ns="$LAUNCH_STARTED_NS"
+
 echo "wm_click preflight"
 
 # 1. Agency reachable. The one condition that stops everything.
 code=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "$BASE/api/alpha/agents")
-[ "$code" = "200" ] && say "agency" "up" || { cannot "agency" "HTTP $code -- Agency unreachable, nothing else can be checked"; echo; exit 1; }
+if [ "$code" = "200" ]; then
+  say "agency" "up"
+else
+  emit_phase_since "agency-budget-preflight" "$preflight_started_ns"
+  cannot "agency" "HTTP $code -- Agency unreachable, nothing else can be checked"
+  echo
+  exit 1
+fi
 
 # The durable ration is knowable before a worker or readiness wake exists.
 # Treat absence/exhaustion as a terminal launch account, not as a live run.
@@ -93,14 +125,17 @@ d=json.load(sys.stdin).get("ordinary-click-budget") or {}
 print(d.get("available", "unknown"))
 ' 2>/dev/null)
 if [ "$budget" = "unknown" ]; then
+  emit_phase_since "agency-budget-preflight" "$preflight_started_ns"
   cannot "click budget" "serving process did not expose a durable availability receipt"
   echo; echo "cannot launch (exit 3)"; exit 3
 elif [ "$budget" -le 0 ] 2>/dev/null; then
+  emit_phase_since "agency-budget-preflight" "$preflight_started_ns"
   cannot "click budget" "ordinary-click allocation exhausted before cast wake"
   echo; echo "cannot launch (exit 3)"; exit 3
 else
   say "click budget" "$budget available"
 fi
+emit_phase_since "agency-budget-preflight" "$preflight_started_ns"
 
 # Staleness-gated Giraffe mint (deficits row Q1-GIRAFFE-FIELD-STALENESS,
 # proposal 6 of the 2026-10-31 finding): the field a click consumes must not
@@ -238,40 +273,53 @@ except Exception:
 # Source preparation is not an informational tripwire. No campaign/abort loop.
 # Check before preflight JVM reads and again immediately before each POST.
 prepare_sources() {
+  local started ended rc=0
+  started=$(phase_now_ns)
   if ! python3 "$SCRIPT_DIR/wm_click_prepare.py"; then
     cannot "source composition" "idle canonical preparation did not verify; no click posted"
-    return 3
+    rc=3
+  elif ! giraffe_field_freshness; then
+    rc=3
   fi
-  giraffe_field_freshness || return 3
+  ended=$(phase_now_ns)
+  SOURCE_GIRAFFE_NS=$((SOURCE_GIRAFFE_NS + ended - started))
+  return "$rc"
 }
 
 probe_heap() {
-  local listing pids pid gc_output heap_output metrics old_used_mb max_mb threshold_mb
+  local started listing pids pid gc_output heap_output metrics old_used_mb max_mb threshold_mb rc=0
+  started=$(phase_now_ns)
   # Measured after a full GC on 2026-10-26: 4645 MiB old/non-young use in a
   # 12288 MiB heap. 8192 MiB preserves about 4 GiB for one click; this is an
   # empirical operating threshold, not a semantic limit on the War Machine.
   threshold_mb="${WM_CLICK_HEAP_REFUSE_MB:-8192}"
   if ! [[ "$threshold_mb" =~ ^[0-9]+$ ]]; then
     cannot "heap after GC" "WM_CLICK_HEAP_REFUSE_MB must be a non-negative integer (got $threshold_mb)"
-    return 3
-  fi
-  if ! listing=$(jcmd -l 2>&1); then
+    rc=3
+  elif ! listing=$(jcmd -l 2>&1); then
     cannot "heap after GC" "jcmd could not list JVMs: $listing"
-    return 3
+    rc=3
+  fi
+  if [ "$rc" -ne 0 ]; then
+    HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
+    return "$rc"
   fi
   pids=$(printf '%s\n' "$listing" |
     awk '$2 == "clojure.main" && $0 ~ / -m futon3c[.]dev([[:space:]]|$)/ {print $1}')
   if [ "$(printf '%s\n' "$pids" | awk 'NF {n++} END {print n+0}')" -ne 1 ]; then
     cannot "heap after GC" "expected one futon3c.dev JVM, found: ${pids:-none}"
+    HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
     return 3
   fi
   pid="$pids"
   if ! gc_output=$(jcmd "$pid" GC.run 2>&1); then
     cannot "heap after GC" "jcmd $pid GC.run failed: $gc_output"
+    HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
     return 3
   fi
   if ! heap_output=$(jcmd "$pid" GC.heap_info 2>&1); then
     cannot "heap after GC" "jcmd $pid GC.heap_info failed: $heap_output"
+    HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
     return 3
   fi
   if ! metrics=$(printf '%s\n' "$heap_output" | python3 -c '
@@ -290,20 +338,29 @@ max_kib = (int(heap.group(4), 16) - int(heap.group(3), 16)) // 1024
 print((old_used_kib + 1023) // 1024, max_kib // 1024)
 '); then
     cannot "heap after GC" "could not parse G1 old-generation use from jcmd output"
+    HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
     return 3
   fi
   read -r old_used_mb max_mb <<<"$metrics"
   say "heap after GC" "$old_used_mb MiB of $max_mb MiB old gen"
   if [ "$old_used_mb" -gt "$threshold_mb" ]; then
     cannot "heap after GC" "$old_used_mb MiB exceeds WM_CLICK_HEAP_REFUSE_MB=$threshold_mb; no click posted"
+    HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
     return 3
   fi
+  HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
 }
 
 if [ "$RUN" = "1" ]; then
-  prepare_sources || exit 3
+  if ! prepare_sources; then
+    emit_phase_ns "source-giraffe" "$SOURCE_GIRAFFE_NS"
+    exit 3
+  fi
 fi
-probe_heap || exit 3
+if ! probe_heap; then
+  emit_phase_ns "heap-gc" "$HEAP_TRIPWIRE_NS"
+  exit 3
+fi
 
 # 2. Casting: three distinct seats, all on the roster AND idle.
 # Misconfiguration (non-distinct seats) cannot be waited out: terminal now.
@@ -438,6 +495,7 @@ for seat in sys.argv[1].split(","):
 # JVM, whose env is not this shell's, so a var like WM_CLICK_SKIP_WIRES on the
 # proof-eval command line never reaches the code (measured, ab5ca8fa). Inline
 # any such literal into the generated form.
+tripwire_started_ns=$(phase_now_ns)
 if [ "$RUN" = "1" ]; then
 wires_file=$(mktemp "${TMPDIR:-/tmp}/wm-click-wires.XXXXXX.clj")
 cat > "$wires_file" <<'CLJ'
@@ -499,6 +557,9 @@ case "$wires" in
     # that with (catch Throwable _ false)).
     finding "tripwires" "CHECK DID NOT RUN -- wire status unknown: $wires";;
 esac
+tripwire_ended_ns=$(phase_now_ns)
+TRIPWIRE_NS=$((tripwire_ended_ns - tripwire_started_ns))
+emit_phase_ns "tripwire-preflight" "$TRIPWIRE_NS"
 # Repair-covered witnesses do not halt the click (observe! defers them so the
 # repair can be selected). Report them so the operator knows the click will
 # start inside a named repair obligation -- visible, never silent.
@@ -562,12 +623,14 @@ fi
 # account and exit 3 (cannot launch -- reported, not a refusal, not a success).
 waited_since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 t0=$(date +%s)
+cast_wait_started_ns=$(phase_now_ns)
 echo "waiting for cast seats and single-flight boundary (since $waited_since; max 30 min)"
 clickid=""
 while [ -z "$clickid" ]; do
   while :; do
     if cast_report; then break; fi
     if [ $(( $(date +%s) - t0 )) -gt 1800 ]; then
+      emit_phase_since "cast-single-flight-wait" "$cast_wait_started_ns"
       echo
       cannot "casting wait" "30 minutes elapsed since $waited_since; seat/click state above is the terminal account"
       echo "cannot launch (exit 3)"
@@ -575,10 +638,19 @@ while [ -z "$clickid" ]; do
     fi
     sleep 20
   done
+  emit_phase_since "cast-single-flight-wait" "$cast_wait_started_ns"
 
   # ---------------------------------------------------------------- fire
-  prepare_sources || exit 3
-  probe_heap || exit 3
+  if ! prepare_sources; then
+    emit_phase_ns "source-giraffe" "$SOURCE_GIRAFFE_NS"
+    exit 3
+  fi
+  emit_phase_ns "source-giraffe" "$SOURCE_GIRAFFE_NS"
+  if ! probe_heap; then
+    emit_phase_ns "heap-gc" "$HEAP_TRIPWIRE_NS"
+    exit 3
+  fi
+  emit_phase_ns "heap-gc" "$HEAP_TRIPWIRE_NS"
   # The kernel's UUID source, not uuidgen: zone 1.1 (2026-10-09) shipped
   # without uuid-runtime, and the old `|| date +%s` fallback minted an id the
   # endpoint refuses as :wm-click-run-id-malformed.
@@ -595,6 +667,7 @@ if sys.argv[7].strip(): payload["interpretation-seats"] = sys.argv[7].split(",")
 print(json.dumps(payload))
 PYJSON
 )
+  admission_started_ns=$(phase_now_ns)
   post_left=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   resp=$(curl -s -m "$POST_TIMEOUT_S" -X POST "$BASE/api/alpha/wm/click" -H 'Content-Type: application/json' \
     -d "$payload")
@@ -624,6 +697,7 @@ PY
       fi
       [ -n "$clickid" ] && break
       if [ $(( $(date +%s) - recovery_started )) -ge "$POST_RECOVERY_MAX_S" ]; then
+        emit_phase_since "post-admission" "$admission_started_ns"
         echo "ALERT FOR JOE"
         echo "requirements NOT CHECKED: admission answer absent and click was not recovered"
         exit 1
@@ -637,16 +711,23 @@ PY
   # (runner_service.clj click!). That id is not ours: stop this launch.
   rejected=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("rejected") or "")' 2>/dev/null)
   if [ -n "$rejected" ]; then
+    emit_phase_since "post-admission" "$admission_started_ns"
     cannot "launch" "$rejected; no automatic launch after another active click"
     exit 3
   fi
   if [ -z "$clickid" ]; then
     clickid=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id",""))' 2>/dev/null)
   fi
-  [ -n "$clickid" ] || { echo "no click-id returned; not accepted"; exit 1; }
+  if [ -z "$clickid" ]; then
+    emit_phase_since "post-admission" "$admission_started_ns"
+    echo "no click-id returned; not accepted"
+    exit 1
+  fi
 done
+emit_phase_since "post-admission" "$admission_started_ns"
 echo "tracking our click: $clickid"
 
+server_started_ns=$(phase_now_ns)
 t0=$(date +%s)
 while :; do
   sleep 20
@@ -659,14 +740,22 @@ while :; do
   phase=$(echo "$s" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("phase"))' 2>/dev/null)
   echo "[$(( $(date +%s) - t0 ))s] running=$running phase=$phase"
   [ "$running" = "False" ] && break
-  [ $(( $(date +%s) - t0 )) -gt 5400 ] && { echo "still running after 90 min; report this, do not re-fire"; exit 1; }
+  if [ $(( $(date +%s) - t0 )) -gt 5400 ]; then
+    emit_phase_since "server-execution" "$server_started_ns"
+    echo "still running after 90 min; report this, do not re-fire"
+    exit 1
+  fi
 done
+emit_phase_since "server-execution" "$server_started_ns"
 
+child_wait_started_ns=$(phase_now_ns)
 if ! python3 "$F2/scripts/wm_click_wait_child.py" --base "$BASE" --click-id "$clickid"; then
+  emit_phase_since "child-wait" "$child_wait_started_ns"
   echo "ALERT FOR JOE"
   echo "requirements NOT CHECKED: self-heal child did not complete"
   exit 1
 fi
+emit_phase_since "child-wait" "$child_wait_started_ns"
 
 echo; echo "terminal state:"
 curl -s -m 20 "$BASE/api/alpha/wm/click" | python3 -m json.tool | sed -n '1,24p'
@@ -690,6 +779,7 @@ PY
 # only retained server evidence establishes ownership. Prefer the run record;
 # a click binding can establish the same pair while the run record is still
 # unavailable. Never run the requirements checker for a mismatched pair.
+ownership_started_ns=$(phase_now_ns)
 run_record="$F2/data/wm-runs/tick-run-record-$RUNID.edn"
 # An outer refusal has an immutable selection decision but no inner tick.
 # The ownership check below verifies the click and run ids; the exporter reads
@@ -787,6 +877,7 @@ print(f"ownership evidence absent: run={expected_run} click={expected_click}; "
 raise SystemExit(1)
 PY
 ); then
+  emit_phase_since "ownership-verification" "$ownership_started_ns"
   echo "ALERT FOR JOE"
   echo "$ownership"
   echo "requirements NOT CHECKED: recovered click ownership not established"
@@ -797,12 +888,14 @@ fi
 # record to read and it is explicitly not applicable here.
 case "$ownership" in
   medic-only-discharge)
+    emit_phase_since "ownership-verification" "$ownership_started_ns"
     echo "medic-only discharge: no ordinary run was attempted (ordinary selection not called)"
     echo "requirements not applicable: ordinary Q1--Q10 check needs an ordinary run record; none exists by design on this route"
     echo "medic evidence: click-run-binding $binding_file (runtime-disposition discharged/open-out-of-band-medic)"
     exit 0
     ;;
 esac
+emit_phase_since "ownership-verification" "$ownership_started_ns"
 echo "click ownership confirmed by $ownership"
 case "$ownership" in
   "self-heal-child "*) run_record="${ownership#self-heal-child }" ;;
@@ -811,8 +904,10 @@ esac
 # A written run is not a successful click until the independently evaluated
 # Q1--Q10 verdict exists.  This is deliberately unconditional: no environment
 # variable can disable the post-run check.
+requirements_started_ns=$(phase_now_ns)
 verdict_file="$run_record.requirements.edn"
 if [ ! -f "$run_record" ]; then
+  emit_phase_since "requirements-report-card" "$requirements_started_ns"
   echo "ALERT FOR JOE"
   echo "requirements NOT CHECKED: run record missing after completed click: $run_record"
   exit 1
@@ -820,6 +915,7 @@ fi
 python3 "$F2/scripts/wm_run_alert.py" --run-record "$run_record"
 requirements_status=$?
 if [ ! -f "$verdict_file" ]; then
+  emit_phase_since "requirements-report-card" "$requirements_started_ns"
   echo "ALERT FOR JOE"
   echo "requirements NOT CHECKED: verdict file absent after post-run check: $verdict_file"
   exit 1
@@ -828,6 +924,8 @@ fi
 # durable click state (the service refuses a file naming another run record).
 # An unrecorded child verdict is not a passed click.
 if ! python3 "$F2/scripts/wm_click_record_child_verdict.py" --base "$BASE" --click-id "$clickid" --verdict-file "$verdict_file"; then
+  emit_phase_since "requirements-report-card" "$requirements_started_ns"
   exit 1
 fi
+emit_phase_since "requirements-report-card" "$requirements_started_ns"
 exit "$requirements_status"

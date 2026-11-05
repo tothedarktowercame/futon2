@@ -522,10 +522,20 @@ class ContinuousModeTest(unittest.TestCase):
             root = Path(td)
             record_path = root / "tick-run-record-run-1.edn"
             record_path.write_text(run_record)
+            click_log = root / "click.log"
+            click_log.write_text(
+                'ordinary output\n'
+                'WM_COST_PHASE {"phase":"agency-budget-preflight","wall-ms":11,'
+                '"source":"launcher-monotonic"}\n'
+                'WM_COST_PHASE {"phase":"source-giraffe","wall-ms":29,'
+                '"source":"launcher-monotonic"}\n'
+                'WM_COST_PHASE {"phase":"server-execution","wall-ms":80,'
+                '"source":"launcher-monotonic"}\n')
             ledger = root / "ledger.jsonl"
             ordinary = {
                 "n": 1, "click-id": "wm-click-1", "run-id": "run-1",
-                "run-record": str(record_path),
+                "run-record": str(record_path), "log": str(click_log),
+                "reset-wall-ms": 7,
             }
             not_launched = {
                 "n": 2, "click-id": None, "run-id": None, "run-record": None,
@@ -548,6 +558,16 @@ class ContinuousModeTest(unittest.TestCase):
             phases = {phase["phase"]: phase for phase in receipt["wall"]["phases"]}
             self.assertEqual(17, phases["selection"]["wall-ms"])
             self.assertEqual(23, phases["author-wait"]["wall-ms"])
+            self.assertEqual("server-execution", phases["selection"]["parent"])
+            self.assertEqual("server-execution", phases["author-wait"]["parent"])
+            self.assertEqual(7, phases["reset"]["wall-ms"])
+            self.assertEqual(11, phases["agency-budget-preflight"]["wall-ms"])
+            self.assertEqual(29, phases["source-giraffe"]["wall-ms"])
+            self.assertEqual(80, phases["server-execution"]["wall-ms"])
+            self.assertEqual("launcher-monotonic", phases["server-execution"]["source"])
+            self.assertEqual("typed-missing", phases["child-wait"]["status"])
+            self.assertEqual("not-reached", phases["child-wait"]["reason"])
+            self.assertNotIn("wall-ms", phases["child-wait"])
             self.assertEqual(5, receipt["wall"]["debugger"]["debugger-stopped-ms"])
             self.assertEqual(120, receipt["model-usage"]["totals"]["total-tokens"])
             job = next(call for call in receipt["model-usage"]["calls"]

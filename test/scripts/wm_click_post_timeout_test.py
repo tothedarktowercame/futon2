@@ -122,6 +122,11 @@ class ClickServer:
 
 
 class PostTimeoutTest(unittest.TestCase):
+    def phase_boundaries(self, output):
+        prefix = "WM_COST_PHASE "
+        return [json.loads(line[len(prefix):]) for line in output.splitlines()
+                if line.startswith(prefix)]
+
     def run_case(self, mode):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
@@ -177,6 +182,15 @@ os.execv({sys.executable!r}, [{sys.executable!r}] + sys.argv[1:])
         self.assertIn("click ownership confirmed by run-record", result.stdout)
         self.assertNotIn("no click-id returned; not accepted", result.stdout)
         self.assertEqual(["alert"], events)
+        phases = [row["phase"] for row in self.phase_boundaries(result.stdout)]
+        expected = {
+            "agency-budget-preflight", "source-giraffe", "heap-gc",
+            "tripwire-preflight", "cast-single-flight-wait", "post-admission",
+            "server-execution", "child-wait", "ownership-verification",
+            "requirements-report-card",
+        }
+        self.assertEqual(expected, set(phases))
+        self.assertTrue(all(phases.count(phase) == 1 for phase in expected), phases)
 
     def test_refused_selection_record_reaches_alert_without_tick(self):
         result, events = self.run_case("selection-only")
