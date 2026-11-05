@@ -371,14 +371,17 @@
   "Contact and durably assess at most one canonical ticket.  PREPARE-FN and
   ANSWER-FN are the existing proposal/contact seams supplied by the caller.
   Preview callers must not invoke this function."
-  [{:keys [tickets manifest-path prepare-fn answer-fn validate-fn input-fn now-fn
+  [{:keys [tickets manifest-path prepare-fn answer-fn validate-fn input-fn snapshot-fn now-fn
            contact-resolver]
     :or {now-fn #(str (Instant/now))}}]
   (let [manifest (read-manifest manifest-path)
         current (into {} (map (juxt :ticket-id identity) (:entries manifest)))
+        scan-snapshot (when snapshot-fn (snapshot-fn))
         candidates (remove (fn [{:keys [id] :as ticket}]
                              (let [entry (get current id)
-                                   inputs (input-fn ticket)
+                                   inputs (if snapshot-fn
+                                            (input-fn ticket scan-snapshot)
+                                            (input-fn ticket))
                                    classification (get-in entry [:assessment :classification])]
                                (and (#{:suitable :completed} classification)
                                     (current-entry? entry inputs contact-resolver))))

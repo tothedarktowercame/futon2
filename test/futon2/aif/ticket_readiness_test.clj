@@ -18,6 +18,41 @@
 (def source-pin {:path "tickets/T-zai-chat-transient-timeout.md"
                  :sha256 "09e1270000000000000000000000000000000000000000000000000000000000"})
 
+(deftest population-currency-scan-reuses-one-pipeline-snapshot
+  (let [dir (temp-dir)
+        manifest (.getPath (io/file dir "manifest.edn"))
+        tickets (mapv (fn [n] {:id (str "T-" n) :source source-pin}) (range 5))
+        last-id (:id (last tickets))
+        snapshot-calls (atom 0)
+        snapshot-fn #(hash-map :version (swap! snapshot-calls inc))
+        input-fn (fn inputs
+                   ([ticket] (inputs ticket (snapshot-fn)))
+                   ([ticket snapshot] {:ticket (:id ticket) :snapshot snapshot}))
+        opts {:tickets tickets :manifest-path manifest
+              :snapshot-fn snapshot-fn :input-fn input-fn
+              :prepare-fn identity :answer-fn (constantly {})
+              :validate-fn (fn [_ _ _]
+                             {:increment :preparation
+                              :assessment {:classification :unknown}})
+              :now-fn (constantly "2026-11-05T00:00:00Z")}
+        current-var (ns-resolve 'futon2.aif.ticket-readiness 'current-entry?)
+        result (with-redefs-fn
+                 {#'readiness/read-manifest
+                  (constantly {:schema readiness/manifest-schema
+                               :entries (mapv (fn [ticket]
+                                                {:ticket-id (:id ticket)
+                                                 :assessment {:classification :suitable}})
+                                              tickets)
+                               :attempts {}})
+                  current-var (fn [entry _ _] (not= last-id (:ticket-id entry)))}
+                 #(readiness/refresh-one! opts))]
+    (is (= last-id (:ticket-id result)))
+    (is (= :inputs-changed-during-contact
+           (get-in result [:assessment :reason]))
+        "the two fresh contact-boundary snapshots still detect a change")
+    (is (= 3 @snapshot-calls)
+        "one snapshot for the population scan, plus fresh before/after-contact snapshots")))
+
 (defn- reviewed-output [dir binding producer reviewer result-text]
   (let [contract-path (write! dir "contract.edn" (merge binding
                                                           {:schema readiness/contract-schema

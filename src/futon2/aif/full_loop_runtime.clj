@@ -330,13 +330,15 @@
                           default-ticket-readiness-manifest)
         tickets (->> (:tickets (mission-registry/load-tickets))
                      (filter mission-registry/live-ticket?) vec)
-        input-fn (fn [ticket]
-                   (let [snapshot (readiness-inputs/fetch-pipeline-snapshot)]
-                     (readiness-inputs/ticket-readiness-input
-                      ticket snapshot (meta-pipeline/pipeline-membership snapshot))))
+        snapshot-fn readiness-inputs/fetch-pipeline-snapshot
+        input-fn (fn inputs
+                   ([ticket] (inputs ticket (snapshot-fn)))
+                   ([ticket snapshot]
+                    (readiness-inputs/ticket-readiness-input
+                     ticket snapshot (meta-pipeline/pipeline-membership snapshot))))
         contact-resolver #(runner/read-job! opts %)
         contact (designated-agent-answer-fn opts (:author opts) :prompt "brief")]
-    {:tickets tickets :manifest-path manifest-path :input-fn input-fn
+    {:tickets tickets :manifest-path manifest-path :snapshot-fn snapshot-fn :input-fn input-fn
      :contact-resolver contact-resolver
      :prepare-fn (fn [ticket]
                    (interpretation-request/prepare-proposal!
