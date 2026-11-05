@@ -9,6 +9,7 @@
   (:require [futon2.data-paths :as data-paths]
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.loaded-displacement :as loaded-displacement]
+            [futon2.aif.cause-scope :as cause-scope]
             [futon2.aif.flight :as flight]
             [babashka.http-client :as http]
             [cheshire.core :as json]
@@ -1747,6 +1748,80 @@
     (remove nil?
             [(:mission-path action) (:pattern-path action)
              (:mission-path repaired-action) (:pattern-path repaired-action)])))
+
+(declare observe-repo-head)
+
+(defn- repository-plan-digest [plan]
+  (cause-scope/stable-digest (dissoc plan :digest)))
+
+(defn repository-plan-valid?
+  "True when PLAN's retained digest binds every required/allowed member and
+  observed base head. Deferred author completion uses this before trusting the
+  carrier; changing or dropping any member therefore cannot preserve identity."
+  [plan]
+  (and (= :wm/repository-plan-v1 (:schema plan))
+       (vector? (:required plan))
+       (vector? (:allowed plan))
+       (string? (:digest plan))
+       (= (:digest plan) (repository-plan-digest plan))))
+
+(defn repository-plan
+  "Observe and seal the repository plan at author dispatch.
+
+  Required repositories come from selected executable want locators and the
+  action paths already used by target-repository. Allowed repositories are the
+  canonical workspace repositories retained by code-state. An unresolved
+  locator/path remains typed evidence in :required rather than aborting the
+  dispatch. This packet only retains the plan; the singular artifact gate is
+  deliberately unchanged."
+  [opts code-state entry locators]
+  (let [known (->> (:repo-heads code-state) keys (filter string?) sort vec)
+        by-name (group-by #(-> % io/file .getName) known)
+        resolve-locator-repo
+        (fn [repo]
+          (cond
+            (some #{repo} known) repo
+            (= 1 (count (get by-name (str repo)))) (first (get by-name (str repo)))
+            :else nil))
+        repo-for-path (or (:repo-for-path-fn opts) git-repo-for-path)
+        locator-reasons
+        (for [[want locator] (sort-by (comp pr-str key) locators)
+              :let [cls (or (:class locator) (:check locator))]
+              :when (contains? #{:C3 :C4} cls)]
+          (let [repo (resolve-locator-repo (:repo locator))
+                reason {:kind :want-locator :want want
+                        :locator (select-keys locator [:class :check :repo :path])}]
+            (if repo {:repo repo :reason reason}
+                {:unresolved {:kind :repository :value (:repo locator)}
+                 :reason reason})))
+        path-reasons
+        (for [path (action-paths (:action entry))]
+          (let [repo (repo-for-path path)
+                reason {:kind :action-path :path path}]
+            (if repo {:repo repo :reason reason}
+                {:unresolved {:kind :path :value path} :reason reason})))
+        requirements (concat locator-reasons path-reasons)
+        resolved (->> requirements
+                      (filter :repo)
+                      (group-by :repo)
+                      (map (fn [[repo rows]]
+                             {:repo repo :reasons (mapv :reason rows)}))
+                      (sort-by :repo)
+                      vec)
+        unresolved (->> requirements
+                        (filter :unresolved)
+                        (mapv (fn [{:keys [unresolved reason]}]
+                                {:unresolved unresolved :reasons [reason]})))
+        allowed (mapv (fn [repo]
+                        (let [observation (observe-repo-head opts repo)]
+                          {:repo repo
+                           :base-head (:head observation)
+                           :observed-at-ms (:observed-at-ms observation)}))
+                      known)
+        plan {:schema :wm/repository-plan-v1
+              :required (into resolved unresolved)
+              :allowed allowed}]
+    (assoc plan :digest (repository-plan-digest plan))))
 
 (defn- machine-repair-repository [entry]
   (let [action (:action entry)
@@ -6960,6 +7035,9 @@
           (nil? (:pre-author-head context))
           (not (string? (:prompt-sha256 context))))
       :deferred-author-context-incomplete
+      (and (contains? context :repository-plan)
+           (not (repository-plan-valid? (:repository-plan context))))
+      :deferred-author-repository-plan-mismatch
       (and (contains? context :mission-observation-baseline)
            (or (not= :wm/mission-observation-baseline-v1
                      (get-in context [:mission-observation-baseline :schema]))
@@ -9410,6 +9488,14 @@
                                      :failure-kind (:kind @d-task-dispatch)
                                      :failure-stage :author-dispatch
                                      :d-task-dispatch @d-task-dispatch})))
+                repository-plan
+                (if deferred-author-job
+                  (:repository-plan deferred-author-context)
+                  (repository-plan
+                   opts code-state entry
+                   (get-in @d-task-dispatch
+                           [:dispatch :occurrence :action/value
+                            :observation-locators])))
                 retained-mission-event
                 (when (and mission-applicable? deferred-author-job)
                   (let [origin (:mission-observation-origin deferred-author-context)]
@@ -9477,7 +9563,8 @@
                        (sort-by pr-str)
                        vec))
                  :mission-source-sha256 (get-in mission [:source :sha256])
-                 :base-head (:head pre-author-head)}
+                 :base-head (:head pre-author-head)
+                 :repository-plan repository-plan}
                 _effective-run-comparison
                 (run-phase!
                  opts @phase-context :effective-run-comparison
@@ -9503,6 +9590,7 @@
                  :construction-sha256 (sha256 construction)
                  :repository author-repo
                  :pre-author-head (:head pre-author-head)
+                 :repository-plan repository-plan
                  :d-task-dispatch-sha256 (sha256 @d-task-dispatch)
                  :mission-baseline-sha256 (sha256 mission-baseline)}
                 _outer-repeat-comparison
@@ -9561,6 +9649,7 @@
                                             :target target
                                             :repository author-repo
                                             :pre-author-head pre-author-head
+                                            :repository-plan repository-plan
                                             :job-id author-job-id
                                             :prompt-sha256 (sha256 author-prompt-text)}
                                             mission-applicable?
