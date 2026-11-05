@@ -58,6 +58,15 @@
                        (some? (current-digest-fn (:target %)))
                        (= (:evidence-digest %)
                           (current-digest-fn (:target %)))))
-         (mapv (fn [row]
-                 {:target (:target row) :reason :c1-already-satisfied
-                  :pin (:evidence-digest row)})))))
+         ;; One entry per target: outer_select refuses forbidden evidence
+         ;; whose target set and entry count differ, so a duplicated row
+         ;; (a retried close, a re-appended index) would refuse the whole
+         ;; selection.  Matching rows for a target share the current digest,
+         ;; so which one is kept does not change the pin.
+         (reduce (fn [acc row]
+                   (if (some #(= (:target row) (:target %)) acc)
+                     acc
+                     (conj acc {:target (:target row)
+                                :reason :c1-already-satisfied
+                                :pin (:evidence-digest row)})))
+                 []))))

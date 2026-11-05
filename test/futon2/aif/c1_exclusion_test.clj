@@ -1,6 +1,7 @@
 (ns futon2.aif.c1-exclusion-test
   (:require [clojure.test :refer [deftest is]]
-            [futon2.aif.c1-exclusion :as sut]))
+            [futon2.aif.c1-exclusion :as sut]
+            [futon2.aif.outer-select :as outer-select]))
 
 (def identity-row
   {:mission-source-sha256 "mission" :policy-id "policy"
@@ -43,8 +44,17 @@
       (is (<= (count (remove forbidden field)) (- n k))))))
 
 (deftest forbidden-shape-matches-outer-select-contract
+  ;; the real predicate `outer-select/select` applies, not a copy of it
   (let [row {:status :row :row {:target "M-a" :evidence-digest "pin"}}
-        output (sut/forbidden-evidence [row] (constantly "pin") ["M-a"])]
-    (is (every? #(and (contains? #{"M-a"} (:target %))
-                      (keyword? (:reason %))
-                      (string? (:pin %)) (seq (:pin %))) output))))
+        field [{:target "M-a"} {:target "M-b"}]
+        output (sut/forbidden-evidence [row row] (constantly "pin") ["M-a" "M-b"])]
+    (is (outer-select/valid-forbidden-evidence?
+         (set (map :target output)) output field))))
+
+(deftest duplicate-rows-yield-one-forbidden-entry
+  ;; bad case: a re-appended row must not break outer_select's
+  ;; forbidden-set/evidence-count equality and refuse the selection
+  (let [row {:status :row :row {:target "M-a" :evidence-digest "d"}}
+        out (sut/forbidden-evidence [row row] (constantly "d") ["M-a" "M-b"])]
+    (is (= 1 (count out)))
+    (is (= (count (set (map :target out))) (count out)))))

@@ -291,6 +291,19 @@
   [ratings]
   (vec (take 10 (sort-by (juxt :G :target) (filter #(number? (:G %)) ratings)))))
 
+
+(defn valid-forbidden-evidence?
+  "The exact check `select` applies to `:forbidden`/`:forbidden-evidence`:
+  one entry per forbidden target, each in the field, with a keyword reason
+  and a non-blank string pin."
+  [forbidden forbidden-evidence field]
+  (and (set? forbidden)
+       (= forbidden (set (map :target forbidden-evidence)))
+       (= (count forbidden) (count forbidden-evidence))
+       (every? #(and (contains? (set (map :target field)) (:target %))
+                     (keyword? (:reason %)) (string? (:pin %)) (seq (:pin %)))
+               forbidden-evidence)))
+
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection."
@@ -305,12 +318,7 @@
         field-facts (:field-facts observation)
         forbidden (or (:forbidden observation) #{})
         forbidden-evidence (vec (:forbidden-evidence observation))]
-    (when-not (and (set? forbidden)
-                   (= forbidden (set (map :target forbidden-evidence)))
-                   (= (count forbidden) (count forbidden-evidence))
-                   (every? #(and (contains? (set (map :target (:field observation))) (:target %))
-                                 (keyword? (:reason %)) (string? (:pin %)) (seq (:pin %)))
-                           forbidden-evidence))
+    (when-not (valid-forbidden-evidence? forbidden forbidden-evidence (:field observation))
       (refuse! :invalid-forbidden-evidence {:forbidden forbidden-evidence}))
     (when field-facts
       (observation/validate-field! (:enumerated field-facts)
