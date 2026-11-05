@@ -289,11 +289,18 @@
          (range n))})
 
 (deftest ^:slow real-retained-readiness-proposal-is-bounded-and-informative
+  (let [evidence-root (.toFile (java.nio.file.Files/createTempDirectory
+                                "futon2-readiness-proposal-"
+                                (make-array java.nio.file.attribute.FileAttribute 0)))]
+   (try
   (let [ticket-id "T-evidence-pinned-to-mutable-prose-26082026"
         ticket (first (filter #(= ticket-id (:id %))
                               (:tickets (mission-registry/load-tickets))))
+        ;; EVIDENCE-WRITER-1: the root only names where <root>/evidence
+        ;; snapshots are written.  user.dir pinned the whole pattern library
+        ;; into canonical futon2/evidence/ (868 files, 2026-11-05 05:26Z).
         proposal (interpretation-request/prepare-proposal!
-                  ticket-id :ticket (System/getProperty "user.dir"))
+                  ticket-id :ticket (str evidence-root))
         citations (get-in proposal [:retrieval :citations])
         result (#'runtime/ticket-readiness-prompt
                 {:ticket-readiness-prompt-budget-chars
@@ -321,7 +328,10 @@
             escaped-prefix (subs (pr-str prefix) 1 (dec (count (pr-str prefix))))]
         (is (str/includes? (:prompt result) escaped-prefix))))
     (is (str/includes? (:prompt result) (pr-str (:source ticket)))
-        "the prompt contains the exact source-pin the validator requires")))
+        "the prompt contains the exact source-pin the validator requires"))
+   (finally
+     (doseq [f (reverse (file-seq evidence-root))]
+       (io/delete-file f true))))))
 
 (deftest over-budget-readiness-refuses-before-provider-contact
   (let [dir (f32-root)
