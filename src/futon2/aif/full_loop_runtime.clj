@@ -1781,6 +1781,12 @@
      :ordinary-selection-called? false
      :acceptance-observation acceptance-observation}))
 
+(defn- run-meta-self-heal-route!
+  "Run the potentially long META repair route with ordinary phase telemetry."
+  [opts]
+  (runner/run-phase! opts {} :meta-self-heal
+                     #(meta-self-heal/route! opts)))
+
 (defn- run-opportunity-with-authority!
   "Arbitrate durable META injuries before constructing any ordinary policy
   field. An active injury consumes the opportunity without fallback."
@@ -1874,7 +1880,7 @@
                    :diagnosis-observation diagnosis-observation
                    :acceptance-observation acceptance-observation
                    :carried-bindings carried-bindings)
-      :else (let [routed (meta-self-heal/route! effective-opts)]
+      :else (let [routed (run-meta-self-heal-route! effective-opts)]
               (assoc (or routed (run-ordinary-opportunity! effective-opts))
                      :diagnosis-observation diagnosis-observation
                      :acceptance-observation acceptance-observation
