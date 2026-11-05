@@ -1182,7 +1182,19 @@
    rejected execution alternative."
   [selection]
   (let [chosen-class (:chosen-class selection)
-        chosen-cascade (:cascade-id selection)]
+        chosen-cascade (:cascade-id selection)
+        chosen-row (first (filter #(= chosen-class (:class %))
+                                  (get-in selection [:why :classes])))
+        placed-gate? (boolean
+                      (some #(= :placed-gate (if (map? %) (:step %) %))
+                            (:steps chosen-row)))
+        without-unread-placement
+        (fn [row]
+          (if placed-gate?
+            row
+            (-> row
+                (dissoc :placement)
+                (update :facts #(when (some? %) (dissoc % :placement))))))]
     (-> selection
         (update :why
                 (fn [why]
@@ -1190,7 +1202,9 @@
                     (update why :classes
                             (fn [classes]
                               (when (some? classes)
-                                (vec (filter #(= chosen-class (:class %)) classes)))))
+                                (->> classes
+                                     (filter #(= chosen-class (:class %)))
+                                     (mapv without-unread-placement)))))
                     why)))
         (update :argument
                 (fn [argument]
@@ -1198,9 +1212,12 @@
                     (update argument :arguments
                             (fn [arguments]
                               (when (some? arguments)
-                                (vec (filter #(or (= chosen-cascade (:id %))
-                                                  (= :stopping (:id %)))
-                                             arguments)))))
+                                (->> arguments
+                                     (filter #(or (= chosen-cascade (:id %))
+                                                  (= :stopping (:id %))))
+                                     (mapv #(if (= :stopping (:id %))
+                                              %
+                                              (without-unread-placement %)))))))
                     argument))))))
 
 (defn selection-absence-paths

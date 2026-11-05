@@ -957,7 +957,9 @@
         record {:outer/selection
                 {:cascade-id :serves-a-way
                  :chosen-class "chosen-class-hash"
-                 :why {:classes [{:class "chosen-class-hash" :placement absent}]}
+                 :why {:classes [{:class "chosen-class-hash"
+                                  :steps [{:step :placed-gate}]
+                                  :placement absent}]}
                  :argument {:arguments [{:id :serves-a-way
                                          :facts {:placement absent}}
                                         {:id :stopping :facts {}}]}}}
@@ -965,6 +967,27 @@
     (is (contains? paths [:outer/selection :why :classes 0 :placement]))
     (is (contains? paths [:outer/selection :argument :arguments 0 :facts :placement]))
     (is (= 2 (count paths)) "both retained narratives still expose the chosen placement absence")))
+
+(deftest selection-path-drops-placement-the-chosen-class-did-not-read
+  (let [absent {:status :absent :reason :no-placement}
+        record {:outer/selection
+                {:cascade-id :giraffe-order
+                 :chosen-class "chosen-class-hash"
+                 :why {:classes [{:class "chosen-class-hash"
+                                  :steps [{:step :ready-gate}
+                                          {:step :by-cone}
+                                          {:step :by-unblocks}]
+                                  :placement absent}]}
+                 :argument {:arguments [{:id :giraffe-order
+                                         :facts {:placement absent}}
+                                        {:id :stopping :facts {}}]}}}]
+    (is (= [] (facts/selection-absence-paths record))
+        "placement is off-path when the chosen cascade has no placed-gate")))
+
+(deftest selection-path-real-199fe7fd-does-not-count-unread-placement
+  (let [record (edn/read-string
+                (slurp "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-11-05-199fe7fd-0a51-47aa-83a8-f95b1f92a668.edn"))]
+    (is (= [] (facts/selection-absence-paths record)))))
 
 (deftest predecessor-refusal-detail-is-not-on-the-current-selection-path
   (let [record (edn/read-string (slurp click-1-selection-record))
