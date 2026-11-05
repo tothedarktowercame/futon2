@@ -38,6 +38,40 @@
     (is (every? #{1000000} (vals after)))
     (is (brief/c2-receipt-valid? first-receipt))))
 
+(deftest question-needs-brief-c2-replay-repairs-missing-companion-files
+  (doseq [missing-path [(fn [root attempt-id]
+                          (java.io.File. root (str "summaries/" attempt-id ".edn")))
+                        (fn [root attempt-id]
+                          (java.io.File. root (str "lifecycle/" attempt-id "/queued.edn")))]]
+    (let [root (temp-root)
+          receipt (brief/queue-c2-question! root c2-carrier)
+          item (java.io.File. (:path receipt))
+          item-bytes (java.nio.file.Files/readAllBytes (.toPath item))
+          companion (missing-path root (:attempt-id receipt))]
+      (is (.delete companion))
+      (is (not (.exists companion)))
+      (is (= receipt (brief/queue-c2-question! root c2-carrier)))
+      (is (.isFile companion))
+      (is (= (seq item-bytes)
+             (seq (java.nio.file.Files/readAllBytes (.toPath item)))))
+      (is (= (:sha256 receipt)
+             (:sha256 (brief/queue-c2-question! root c2-carrier)))))))
+
+(deftest question-needs-brief-c2-replay-leaves-present-companions-alone
+  (let [root (temp-root)
+        receipt (brief/queue-c2-question! root c2-carrier)
+        attempt-id (:attempt-id receipt)
+        companions [(java.io.File. root (str "summaries/" attempt-id ".edn"))
+                    (java.io.File. root (str "lifecycle/" attempt-id "/queued.edn"))]]
+    (doseq [companion companions]
+      (spit companion "{:different :retained}\n")
+      (.setLastModified companion 1000000))
+    (is (= receipt (brief/queue-c2-question! root c2-carrier)))
+    (is (= ["{:different :retained}\n" "{:different :retained}\n"]
+           (mapv slurp companions)))
+    (is (= [1000000 1000000]
+           (mapv #(.lastModified %) companions)))))
+
 (deftest question-needs-brief-accepts-a-real-c2-carrier
   ;; The carrier built by c2-question (C2-BRIEF-1a) round-trips through the
   ;; item file, so replay finds it equal and writes nothing.

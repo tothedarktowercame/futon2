@@ -169,6 +169,19 @@
   (write-new! (io/file root "summaries" (str (:attempt-id item) ".edn"))
               (item-summary source item)))
 
+(defn- repair-missing-queue-companions!
+  [root source item]
+  (let [attempt-id (:attempt-id item)
+        summary-path (io/file root "summaries" (str attempt-id ".edn"))
+        lifecycle-path (io/file root "lifecycle" attempt-id "queued.edn")]
+    (when-not (.isFile summary-path)
+      (write-summary! root source item))
+    (when-not (.isFile lifecycle-path)
+      (write-new! lifecycle-path
+                  (merge {:schema lifecycle-schema :transition :queued
+                          :at (:queued-at item) :source :queue-item!}
+                         (item-identity item))))))
+
 (defn queue-item!
   ([item] (queue-item! default-root item))
   ([root {:keys [attempt-id] :as item}]
@@ -200,8 +213,9 @@
   "Queue the question evidence required by RefusalLegality.question_needs_brief.
 
   The question digest fixes the attempt id. A byte-identical semantic replay
-  returns the original item pin without touching any of the three append-only
-  files. Reusing a digest for a different carrier is a typed conflict."
+  returns the original item pin, repairing a missing summary or queued
+  lifecycle companion without replacing a present file. Reusing a digest for
+  a different carrier is a typed conflict."
   [root {:keys [target question-digest] :as carrier}]
   (when-not (and (some? target) (nonblank-string? question-digest))
     (throw (ex-info "C2 Morning Brief question requires target and question digest"
@@ -220,6 +234,7 @@
                           {:kind :c2-brief-conflict
                            :attempt-id attempt-id
                            :path (.getPath path)})))
+        (repair-missing-queue-companions! root path existing)
         (c2-receipt path question-digest))
       (c2-receipt (queue-item! root item) question-digest))))
 
