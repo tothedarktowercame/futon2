@@ -2545,14 +2545,24 @@
     (is (zero? @calls))))
 
 (deftest iteration-24-claim-authorizes-recorded-acceptance-supersession
-  (let [root "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-24"
-        transaction (edn/read-string (slurp (str root "/transaction-after.edn")))
-        admission (edn/read-string (slurp (str root "/acceptance-admission-pin.edn")))
-        ledger (edn/read-string (slurp (str root "/ledger-after.edn")))
-        new-pin {:path (str root "/acceptance-admission-pin.edn")
+  (let [fixture-root "/home/joe/notes/wm-next/criteria-completeness/repair-iteration-24"
+        transaction (edn/read-string (slurp (str fixture-root "/transaction-after.edn")))
+        admission (edn/read-string (slurp (str fixture-root "/acceptance-admission-pin.edn")))
+        ledger (edn/read-string (slurp (str fixture-root "/ledger-after.edn")))
+        acceptance-root (root)
+        old-admission {:schema :wm/meta-acceptance-admission-v1
+                       :acceptance-test (get-in transaction
+                                                [:work-order :acceptance-test])}
+        old-bytes (.getBytes (str (pr-str old-admission) "\n") "UTF-8")
+        old-sha (load-identity/sha256 old-bytes)
+        old-path (str acceptance-root "/acceptance-" old-sha ".edn")
+        _ (java.nio.file.Files/write (.toPath (java.io.File. old-path)) old-bytes
+                                     (make-array java.nio.file.OpenOption 0))
+        new-pin {:path (str fixture-root "/acceptance-admission-pin.edn")
                  :sha256 (load-identity/sha256
                           (java.nio.file.Files/readAllBytes
-                           (.toPath (java.io.File. root "acceptance-admission-pin.edn"))))}
+                           (.toPath (java.io.File. fixture-root
+                                                       "acceptance-admission-pin.edn"))))}
         observation {:status :accepted
                      :injury-id (:injury-id admission)
                      :source-record-pin (:source-record-pin admission)
@@ -2560,6 +2570,7 @@
                      :acceptance-test (:acceptance-test admission)
                      :acceptance-admission-pin new-pin}
         opts {:meta-acceptance-observation observation
+              :meta-acceptance-root acceptance-root
               :meta-diagnosis-context {:durable-ledger {:ledger ledger}}}
         rebound (#'production/acceptance-transaction-binding opts transaction)
         author-calls (atom 0)
