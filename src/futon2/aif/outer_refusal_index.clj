@@ -6,6 +6,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.c1-exclusion :as c1-exclusion]
+            [futon2.aif.c3-exclusion :as c3-exclusion]
             [futon2.aif.outer-refusal-history :as history]
             [futon2.aif.ticket-publication-io :as publication])
   (:import [java.math BigInteger]
@@ -64,15 +65,20 @@
   (let [terminal (history/index-entry record path sha)]
     (if (= :pending-exclusion
            (get-in record [:refusal/disposition :disposition]))
-      (let [exclusion (c1-exclusion/exclusion-row record)]
+      (let [terminal-case (get-in record [:refusal/disposition :case])
+            exclusion (case terminal-case
+                        :C1 (c1-exclusion/exclusion-row record)
+                        :C3 (c3-exclusion/exclusion-row record)
+                        {:status :refused :reason :unknown-exclusion-case})
+            exclusion-key (case terminal-case
+                            :C1 :c1-exclusion :C3 :c3-exclusion nil)]
         (if (= :row (:status exclusion))
-          (assoc terminal
-                 :c1-exclusion exclusion
+          (assoc terminal exclusion-key exclusion
                  :refusal/disposition
-                 {:disposition :click-terminal :case :C1
+                 {:disposition :click-terminal :case terminal-case
                   :evidence {:exclusionRecorded true}})
           (assoc terminal :refusal/disposition
-                 {:disposition :debugger-error :case :C1
+                 {:disposition :debugger-error :case terminal-case
                   :reason :exclusion-not-recorded
                   :evidence exclusion})))
       terminal)))
@@ -89,10 +95,11 @@
       (catch Exception e
         (if (= :pending-exclusion
                (get-in record [:refusal/disposition :disposition]))
-          (throw (ex-info "C1 exclusion was not recorded"
+          (throw (ex-info "Terminal exclusion was not recorded"
                           {:failure-kind :exclusion-not-recorded
                            :refusal/disposition
-                           {:disposition :debugger-error :case :C1
+                           {:disposition :debugger-error
+                            :case (get-in record [:refusal/disposition :case])
                             :reason :exclusion-not-recorded}}
                           e))
           (throw e))))

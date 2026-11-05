@@ -35,6 +35,21 @@
     (is (= 33 (count (:refusals detail))))
     (is (= {:omitted :entry-limit} (last (:refusals detail))))))
 
+(deftest harm-declined-retains-the-complete-small-match
+  (let [match {:rule :H2
+               :declined-action {:operation :git-push :repo "/repo"
+                                  :remote "origin" :ref "refs/heads/main"
+                                  :force? true}
+               :declined-action-digest (apply str (repeat 64 "a"))}
+        failure (#'runner/run-record-failure
+                 {:data {:failure-kind :harm-declined
+                         :failure-stage :author-wait
+                         :error "Author declined an approved harmful action"
+                         :error-data {:outcome :harm-declined
+                                      :harm-match match}}})]
+    (is (= :harm-declined (:kind failure)))
+    (is (= match (get-in failure [:detail :harm-match])))))
+
 (deftest mission-refresh-failure-retains-bounded-diagnostic
   (let [stale (mapv (fn [n] {:id (str "M-" n) :large (apply str (repeat 1000 "x"))})
                     (range 8))

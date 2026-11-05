@@ -2,6 +2,7 @@
   (:require [clojure.set]
             [clojure.test :refer [deftest is]]
             [futon2.aif.meta-terminal-injury]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.refusal-legality :as sut]))
 
 (deftest nonempty-field-not-exhausted
@@ -96,6 +97,42 @@
            (get-in (sut/resolve-close-refusal false nil :already-satisfied data
                                               (constantly nil) false)
                    [:data :refusal/disposition :disposition])))))
+
+(def valid-harm-action
+  {:operation :git-push :repo "/repo" :remote "origin"
+   :ref "refs/heads/main" :force? true})
+
+(deftest matched-c3-with-digest-carrier-is-pending-exclusion
+  (let [result (sut/resolve-close-refusal
+                true (fn [_] (throw (AssertionError. "must not hold")))
+                :harm-declined
+                {:mission-source-sha256 "mission"
+                 :harm-match {:rule :H2 :declined-action valid-harm-action
+                              :declined-action-digest (identity/digest valid-harm-action)}}
+                (constantly nil) false)]
+    (is (= :pending-exclusion
+           (get-in result [:data :refusal/disposition :disposition])))
+    (is (= :C3 (get-in result [:data :refusal/disposition :case])))))
+
+(deftest invalid-c3-match-remains-debugger-error
+  (doseq [harm-match [nil
+                      {:rule :H9 :declined-action valid-harm-action
+                       :declined-action-digest (identity/digest valid-harm-action)}
+                      {:rule :H2 :declined-action (assoc valid-harm-action :force? false)
+                       :declined-action-digest (identity/digest valid-harm-action)}]]
+    (is (= :debugger-error
+           (get-in (sut/resolve-close-refusal
+                    false nil :harm-declined
+                    {:mission-source-sha256 "mission" :harm-match harm-match}
+                    (constantly nil) false)
+                   [:data :refusal/disposition :disposition])))))
+
+(deftest plain-guardrail-refusal-remains-debugger-error
+  (is (= :debugger-error
+         (get-in (sut/resolve-close-refusal false nil :guardrail-refusal
+                                            {:refusal-reason ":blocked"}
+                                            (constantly nil) false)
+                 [:data :refusal/disposition :disposition]))))
 
 (deftest close-refusal-controller-restarts
   (let [calls (atom 0)

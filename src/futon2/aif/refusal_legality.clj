@@ -5,7 +5,18 @@
   mirror the Lean definitions `loopStopLegal`, `caseChecked`, `clickLegal`,
   and `disposition`, respectively. Evidence field names intentionally match
   `LoopStopEvidence` and `ClickEvidence` exactly. This namespace performs no
-  I/O and does not infer evidence from a terminal keyword.")
+  I/O and does not infer evidence from a terminal keyword."
+  (:require [futon2.aif.action-identity :as identity]
+            [futon2.aif.harm-rules :as harm-rules]))
+
+(def ^:private harm-rule-ids
+  (into #{} (map :id) (:rules (harm-rules/load-rules))))
+
+(defn- retained-harm-match? [{:keys [rule declined-action declined-action-digest]}]
+  (and (contains? harm-rule-ids rule)
+       (map? declined-action)
+       (string? declined-action-digest)
+       (= declined-action-digest (identity/digest declined-action))))
 
 (defn loop-stop-legal?
   [{:keys [kind scoredField operatorSignal]}]
@@ -77,6 +88,14 @@
                   (string? (:mission-source-sha256 data))
                   :exclusionRecorded false}}
 
+      (= :harm-declined outcome)
+      {:refusal :terminal :case :C3
+       :evidence {:kind :harm-declined
+                  :harmRuleMatched (retained-harm-match? (:harm-match data))
+                  :missionSourceShaPresent
+                  (string? (:mission-source-sha256 data))
+                  :exclusionRecorded false}}
+
       (and (= :abstained outcome) (= :empty-field (:failure-kind data)))
       (if (nil? scored-field)
         {:refusal :other :case :L1
@@ -113,7 +132,7 @@
             ;; disposition. It means caseChecked holds while
             ;; exclusionRecorded is unknown until the finished record's
             ;; compact index line is published.
-            d (if (and (= :C1 (:case refusal))
+            d (if (and (contains? #{:C1 :C3} (:case refusal))
                        (case-checked? (:evidence refusal))
                        (true? (get-in refusal [:evidence :missionSourceShaPresent])))
                 :pending-exclusion
