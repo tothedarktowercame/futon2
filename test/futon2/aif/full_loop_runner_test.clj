@@ -2281,16 +2281,27 @@
            (get-in item [:selection-review :selected-action])))
     (is (= "Was this the best available selection?"
            (get-in item [:selection-review :question])))
-    (is (= [:opportunity :agent-readiness :agent-readiness :code-state :code-state
+    (is (= [:runner-source :runner-source
+            :opportunity :agent-readiness :agent-readiness :code-state :code-state
+            :ration-admission :ration-admission
             :substrate-preflight :substrate-preflight
             :preference-refresh :preference-refresh
             :stop-line-memory :stop-line-memory :selection :selection
+            :selected-target-reading :selected-target-reading
+            :occurrence-square-authoring :occurrence-square-authoring
+            :selected-reading :selected-reading
             :selection-world :selection-world
-            :construction :construction :author-dispatch :author-dispatch
+            :construction :construction
+            :effective-run-comparison :effective-run-comparison
+            :outer-repeat-comparison :outer-repeat-comparison
+            :author-dispatch :author-dispatch
             :author-wait :author-wait :build-resolution :build-resolution
             :reviewer-dispatch :reviewer-dispatch :reviewer-wait :reviewer-wait
             :grounding :grounding :delivery-qa :delivery-qa
-            :close-evidence-manifest :close-evidence-manifest :opportunity]
+            :close-evidence-manifest :close-evidence-manifest :opportunity
+            :meta-injury-deposit :meta-injury-deposit
+            :meta-terminal-injury-ingest :meta-terminal-injury-ingest
+            :outer-learning-publication :outer-learning-publication]
            (mapv :phase @phases)))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))
@@ -4545,7 +4556,7 @@
         flat-judgement
         (assoc judgement
                :decision
-               (policy/select-action-cascades
+               (runner-fixture/select-with-prefix-history
                 ;; 2 units of G apart: a strict minimum exists, which identical
                 ;; G now refuses before this stop, and the posterior still
                 ;; cannot discriminate (masses within discrimination-epsilon)
@@ -8293,9 +8304,18 @@
                        :repair-lifecycle-fn (partial repair/lifecycle-census root)})}))
           census (get-in result [:checkpoints :selection :judgment
                                  :repair-lifecycle-census])]
-      ;; The ordinary judge remains free to abstain; reporting cannot turn an
-      ;; empty operational stop-line input into a repair route.
-      (is (= :no-selection (:outcome result)))
+      ;; Reporting cannot turn an empty operational stop-line input into a
+      ;; repair route. Until a04b157d25 the judge abstained here (:no-selection);
+      ;; the caller now supplies the decision, so the claim is that the supplied
+      ;; ordinary action is what ran.
+      (is (= :grounded-progress (:outcome result)))
+      (is (not (contains? #{:repair-machine-failure :revalidate-historical-repair}
+                          (get-in result [:checkpoints :selection :judgment
+                                          :selected-action :type]))))
+      (is (= (select-keys (:action (token-loop-exercised-decision)) [:id :target])
+             (select-keys (get-in result [:checkpoints :selection :judgment
+                                          :selected-action])
+                          [:id :target])))
       (is (= {:count 0 :ids []}
              (get-in result [:checkpoints :selection :judgment :open-stop-lines])))
       (is (= :wm/repair-obligation-lifecycle-census-v1 (:schema census)))
