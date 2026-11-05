@@ -786,10 +786,29 @@ def handle_held_stop(args, stop: dict, in_flight_repairs: list,
         else:
             abort_held_run(stop["run-id"])
             log(f"reload failed while held: {reload_text[:300]}")
+    elif verdict == "no-defect" and not _retried_no_defect(stop):
+        # The repair seat found the machine behaving to contract: the stop is
+        # environmental (e.g. a typed :clock/store-busy refusal), and the
+        # designed recovery is the debugger's :retry.  One retry per held
+        # (run, phase); a second hold there is aborted below.
+        HELD_NO_DEFECT_RETRIES.add((stop["run-id"], stop["phase"]))
+        resumed = retry_held_run(stop["run-id"])
+        record({"event": "debugger-resumed", "run-id": stop["run-id"],
+                "phase": stop["phase"], "choice": "retry-no-defect",
+                "result": resumed["out"][-500:]})
+        log("held repair ended no-defect; retried the held phase once")
     else:
         abort_held_run(stop["run-id"])
         log(f"held repair ended {verdict}; aborting the held phase")
     return since_epoch
+
+
+# (run-id, phase) pairs already retried after a no-defect verdict.
+HELD_NO_DEFECT_RETRIES: set = set()
+
+
+def _retried_no_defect(stop: dict) -> bool:
+    return (stop["run-id"], stop["phase"]) in HELD_NO_DEFECT_RETRIES
 
 
 def fire(n: int, args, since_epoch: int) -> dict:

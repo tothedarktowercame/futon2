@@ -133,6 +133,34 @@ class RepairLoopCastTest(unittest.TestCase):
         events = [call.args[0]["event"] for call in record.call_args_list]
         self.assertEqual(["external-repair-skipped", "debugger-resumed"], events)
 
+    def test_no_defect_held_stop_retries_once_then_aborts(self):
+        # Click c31a0166: a typed :clock/store-busy hold, repair verdict
+        # no-defect, and the loop aborted instead of the designed :retry.
+        loop = load_loop()
+        args = loop.parse_args([
+            "run", "--clicks", "3", "--owner", "codex-68",
+            "--issuing-caller", "codex-68", "--author", "wm-author",
+            "--reviewer", "wm-reviewer",
+            "--repair-reviewer", "wm-repair-reviewer",
+        ])
+        stop = {"run-id": "run-busy", "phase": "cascade-resume",
+                "condition-kind": "clock/store-busy"}
+        with tempfile.TemporaryDirectory() as td, \
+             mock.patch.object(loop, "repair",
+                               return_value=("no-defect", "detail")), \
+             mock.patch.object(loop, "retry_held_run",
+                               return_value={"out": "{:delivered true}"}) as retry, \
+             mock.patch.object(loop, "abort_held_run",
+                               return_value={"out": "{:delivered true}"}) as abort, \
+             mock.patch.object(loop, "record"), \
+             mock.patch.object(loop, "log"):
+            loop.handle_held_stop(args, stop, [], Path(td) / "held.md", 1)
+            retry.assert_called_once_with("run-busy")
+            abort.assert_not_called()
+            loop.handle_held_stop(args, stop, [], Path(td) / "held.md", 1)
+            retry.assert_called_once_with("run-busy")
+            abort.assert_called_once_with("run-busy")
+
     def test_each_click_resets_the_explicit_role_cast(self):
         loop = load_loop()
         args = loop.parse_args([
