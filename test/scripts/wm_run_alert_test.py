@@ -190,7 +190,8 @@ class AlertTest(unittest.TestCase):
     self.assertRegex(verdict,r'":verdicts" \{[^}]*":Q7" ":holds"')
     self.assertRegex(verdict,r'":selection-verdicts" \{[^}]*":Q7" ":violated"')
     self.assertRegex(stdout,r"(?m)^Q7 violated: 0 typed path absences; receipt observed, pickRelation absent, "
-                            r"pickReach defaulted, learningApplied true$")
+                            r"pickReach defaulted, pendingRun run0 absent, "
+                            r"consumedRuns 1 total / 0 observed, learningApplied true$")
 
   def test_selection_export_failure_is_not_checked(self):
     status,stdout,_,verdict=self.export_run(fail_selection=True)

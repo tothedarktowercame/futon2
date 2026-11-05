@@ -51,6 +51,21 @@ def strict_minimum_line(f):
 def provenance_name(x):
     return "observed" if isinstance(x, dict) else str(x).lower()
 
+def pending_run_name(x):
+    """Render the pending run's id and typed provenance for Q7."""
+    if isinstance(x, list) and len(x) == 2:
+        return f"{x[0]} {provenance_name(x[1])}"
+    return "absent" if x is None else provenance_name(x)
+
+def consumed_runs_name(xs):
+    """Render Q7's consumed-run cardinality and observed subset."""
+    if not isinstance(xs, list):
+        return "absent"
+    observed=sum(1 for row in xs
+                 if isinstance(row, list) and len(row) == 2
+                 and isinstance(row[1], dict))
+    return f"{len(xs)} total / {observed} observed"
+
 def path_line(f):
     """On a selection run, which part of the typed path Lean read."""
     count=f"{val(f['pathAbsenceCount'])} typed path absences"
@@ -59,6 +74,8 @@ def path_line(f):
     if nr(path): return f"{count}; selectionPath: {path['not-recomputable']}"
     if not isinstance(path, dict): return f"{count}; selectionPath absent"
     parts=[f"{k} {provenance_name(path.get(k))}" for k in ("receipt","pickRelation","pickReach")]
+    parts.extend((f"pendingRun {pending_run_name(path.get('pendingRun'))}",
+                  f"consumedRuns {consumed_runs_name(path.get('consumedRuns'))}"))
     return f"{count}; {', '.join(parts)}, learningApplied {provenance_name(path.get('learningApplied'))}"
 
 def numbers(q, f):
