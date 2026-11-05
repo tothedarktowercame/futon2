@@ -24,6 +24,47 @@ def load_loop():
 
 
 class RepairLoopCastTest(unittest.TestCase):
+    def test_click_write_manifest_applies_writer_stamps_and_skips_malformed(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            root = base / "repo"
+            stamps = root / "wm-write-stamps"
+            root.mkdir()
+            named = root / "named.edn"
+            unnamed = root / "unnamed.edn"
+
+            def fake_fire(n, args, since):
+                named.write_text("named")
+                unnamed.write_text("unnamed")
+                stamps.mkdir()
+                stamp_file = stamps / "wm-click-stamped.jsonl"
+                stamp_file.write_text(
+                    json.dumps({"path": str(named.resolve()),
+                                "writer": "fixture/writer", "run-id": "run-stamped",
+                                "click-id": "wm-click-stamped", "at": "now"})
+                    + "\n{malformed\n")
+                return {"n": n, "click-id": "wm-click-stamped",
+                        "run-id": "run-stamped", "outcome": "ok",
+                        "since-epoch": since}
+
+            with mock.patch.object(loop, "STATE", base / "state"), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "WRITE_STAMP_ROOT", stamps), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire):
+                click = loop.fire_with_write_manifest(1, object(), 123)
+
+            manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
+            entries = {Path(entry["path"]).name: entry for entry in manifest["entries"]}
+            self.assertEqual("stamped", entries["named.edn"]["attribution"])
+            self.assertEqual("fixture/writer", entries["named.edn"]["writer"])
+            self.assertEqual("run-stamped", entries["named.edn"]["run-id"])
+            self.assertEqual("click-window", entries["unnamed.edn"]["attribution"])
+            self.assertEqual("stamped", entries["wm-click-stamped.jsonl"]["attribution"])
+            self.assertEqual("write-stamp", entries["wm-click-stamped.jsonl"]["writer"])
+            self.assertEqual(2, manifest["stamped_count"])
+            self.assertEqual(1, manifest["stamp_lines_unreadable"])
+
     def test_click_write_manifest_prunes_and_skips_large_hash(self):
         loop = load_loop()
         with tempfile.TemporaryDirectory() as td:
@@ -147,6 +188,7 @@ class RepairLoopCastTest(unittest.TestCase):
             with mock.patch.object(loop, "STATE", state), \
                  mock.patch.object(loop, "LEDGER", ledger), \
                  mock.patch.object(loop, "WRITE_ROOTS", roots), \
+                 mock.patch.object(loop, "WRITE_STAMP_ROOT", base / "stamps"), \
                  mock.patch.object(loop, "fire", side_effect=fake_fire):
                 click = loop.fire_with_write_manifest(1, object(), 123)
                 loop.record({"event": "click", **click})
@@ -203,6 +245,7 @@ class RepairLoopCastTest(unittest.TestCase):
 
             with mock.patch.object(loop, "STATE", base / "state"), \
                  mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "WRITE_STAMP_ROOT", base / "stamps"), \
                  mock.patch.object(loop, "fire", side_effect=fake_fire), \
                  mock.patch.object(loop, "hash_file", side_effect=appending_hash):
                 click = loop.fire_with_write_manifest(1, object(), 123)
@@ -231,6 +274,7 @@ class RepairLoopCastTest(unittest.TestCase):
 
             with mock.patch.object(loop, "STATE", base / "state"), \
                  mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "WRITE_STAMP_ROOT", base / "stamps"), \
                  mock.patch.object(loop, "fire", side_effect=fake_fire), \
                  mock.patch.object(loop, "hash_file", side_effect=OSError("hash refused")):
                 click = loop.fire_with_write_manifest(1, object(), 123)

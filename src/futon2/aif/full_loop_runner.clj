@@ -96,6 +96,7 @@
             [futon2.aif.occurrence-square-authoring :as square-authoring]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.run-record-io :as run-record-io]
+            [futon2.aif.write-stamp :as write-stamp]
             [futon2.aif.meta-injury-store :as meta-injury-store]
             [futon2.aif.meta-self-heal-production :as meta-self-heal]
             [futon2.aif.outer-learning-manifest :as outer-learning-manifest]
@@ -1773,6 +1774,16 @@
         (class-history-index/append-run-record! dir written record)
         ;; this run's close in the Q6 run stream, beside the record it names
         (previous-run/close! dir q6-terminal written nil)
+        (let [stamp-root (io/file (.getParentFile dir) "wm-write-stamps")
+              stamp {:root stamp-root
+                     :click-id (:click-id raw-opts)
+                     :run-id run-id
+                     :writer "full-loop-runner/persist-run-record!"}]
+          (doseq [path [written
+                        (io/file dir outer-refusal-history/index-name)
+                        (io/file dir class-history-index/index-name)
+                        (io/file dir previous-run/stream-name)]]
+            (write-stamp/record! (assoc stamp :path path))))
         {:run-record-status :present
          :run-record written})
       ;; terminal-fallback-route is total for wrapper results. Retain the guard

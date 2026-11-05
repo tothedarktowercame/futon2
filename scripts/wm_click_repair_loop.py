@@ -124,6 +124,7 @@ WRITE_ROOTS = list(dict.fromkeys(
 # snapshot_write_roots skips a root that does not exist yet.
 WRITE_PRUNED_DIRS = {".git", "target", ".cpcache", ".cache", "node_modules", ".lake"}
 WRITE_HASH_LIMIT = 64 * 1024 * 1024
+WRITE_STAMP_ROOT = F2 / "data" / "wm-write-stamps"
 # The click's code: what a repair may change and what a reload must pick up.
 CLICK_PATHS = [(F2, "src"), (F2, "scripts/futon2"), (F3C, "src/futon3c/wm")]
 SOURCE_IDENTITY_INVENTORY = F2 / "src" / "futon2" / "aif" / "load_identity.clj"
@@ -201,23 +202,59 @@ def hash_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def read_write_stamps(click_id: str | None) -> tuple[dict[str, dict], int, Path | None]:
+    """Read valid attribution stamps for one click, skipping malformed lines."""
+    if not isinstance(click_id, str) or not click_id.strip():
+        return {}, 0, None
+    stamp_file = WRITE_STAMP_ROOT / f"{click_id}.jsonl"
+    if not stamp_file.is_file():
+        return {}, 0, stamp_file
+    stamps = {}
+    unreadable = 0
+    try:
+        lines = stamp_file.read_text().splitlines()
+    except (OSError, UnicodeError):
+        return {}, 1, stamp_file
+    for line in lines:
+        try:
+            row = json.loads(line)
+            if (not isinstance(row, dict)
+                    or not isinstance(row.get("path"), str)
+                    or not os.path.isabs(row["path"])
+                    or not isinstance(row.get("writer"), str)
+                    or not row["writer"].strip()
+                    or row.get("click-id") != click_id):
+                raise ValueError("invalid write stamp")
+            stamps[row["path"]] = row
+        except (json.JSONDecodeError, TypeError, ValueError):
+            unreadable += 1
+    return stamps, unreadable, stamp_file
+
+
 def write_click_manifest(click: dict, started: str, ended: str,
                          before: dict[str, tuple[int, int]],
                          after: dict[str, tuple[int, int]],
                          snapshot_seconds: dict[str, float]) -> dict:
+    stamps, stamp_lines_unreadable, stamp_file = read_write_stamps(click.get("click-id"))
+    stamp_path = str(stamp_file.resolve()) if stamp_file and stamp_file.exists() else None
     entries = []
     for raw_path in sorted(set(before) | set(after)):
         old, new = before.get(raw_path), after.get(raw_path)
         if old == new:
             continue
+        stamp = stamps.get(raw_path)
+        stamped = stamp is not None or raw_path == stamp_path
+        attribution = ({"attribution": "stamped",
+                        "writer": stamp["writer"] if stamp else "write-stamp",
+                        "run-id": stamp.get("run-id") if stamp else click.get("run-id")}
+                       if stamped else {"attribution": "click-window"})
         if new is None:
-            entries.append({"path": raw_path, "change": "removed",
-                            "attribution": "click-window"})
+            entries.append({"path": raw_path, "change": "removed", **attribution})
             continue
         path = Path(raw_path)
         entry = {"path": raw_path, "size": new[0],
                  "change": "new" if old is None else "modified",
-                 "attribution": "click-window"}
+                 **attribution}
         try:
             if new[0] > WRITE_HASH_LIMIT:
                 entry["hash"] = "skipped-large"
@@ -238,6 +275,8 @@ def write_click_manifest(click: dict, started: str, ended: str,
         "roots": [str(root.resolve()) for root in WRITE_ROOTS],
         "snapshot_seconds": snapshot_seconds,
         "entries": entries,
+        "stamped_count": sum(entry["attribution"] == "stamped" for entry in entries),
+        "stamp_lines_unreadable": stamp_lines_unreadable,
         "attribution_note": ("click-window means the path changed while this click ran; "
                              "it does not prove that the click was the writer. Never delete "
                              "or move a listed path on this evidence."),
