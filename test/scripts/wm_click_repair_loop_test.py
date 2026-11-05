@@ -24,6 +24,65 @@ def load_loop():
 
 
 class RepairLoopCastTest(unittest.TestCase):
+    def test_click_write_manifest_prunes_and_skips_large_hash(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            root = base / "repo"
+            root.mkdir()
+            (root / ".git").mkdir()
+            (root / "target").mkdir()
+            outside = base / "outside"
+            outside.mkdir()
+            linked = root / "linked"
+            linked.symlink_to(outside, target_is_directory=True)
+            normal = root / "normal.txt"
+            normal.write_text("before")
+
+            def fake_fire(n, args, since):
+                (root / ".git" / "state").write_text("git")
+                (root / "target" / "build").write_text("build")
+                (outside / "escaped").write_text("outside")
+                normal.write_text("after")
+                with (root / "large.bin").open("wb") as output:
+                    output.truncate(loop.WRITE_HASH_LIMIT + 1)
+                return {"n": n, "click-id": "wm-click-wide-roots",
+                        "outcome": "ok", "since-epoch": since}
+
+            with mock.patch.object(loop, "STATE", base / "state"), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire), \
+                 mock.patch.object(loop, "hash_file", wraps=loop.hash_file) as hashed:
+                click = loop.fire_with_write_manifest(1, object(), 123)
+
+            manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
+            entries = {Path(entry["path"]).name: entry
+                       for entry in manifest["entries"]}
+            self.assertEqual({"normal.txt", "large.bin"}, set(entries))
+            self.assertEqual("skipped-large", entries["large.bin"]["hash"])
+            self.assertNotIn("sha256", entries["large.bin"])
+            self.assertNotIn(root / "large.bin",
+                             [call.args[0] for call in hashed.call_args_list])
+            self.assertGreaterEqual(manifest["snapshot_seconds"]["before"], 0)
+            self.assertGreaterEqual(manifest["snapshot_seconds"]["after"], 0)
+
+    def test_snapshot_write_roots_skips_unreadable_directory(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            normal = root / "normal.txt"
+            normal.write_text("visible")
+
+            def unreadable_walk(top, topdown, onerror, followlinks):
+                onerror(PermissionError("unreadable"))
+                yield str(root), [], [normal.name]
+
+            with mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop.os, "walk", side_effect=unreadable_walk):
+                snapshot, seconds = loop.snapshot_write_roots()
+            self.assertIn(str(normal.resolve()), snapshot)
+            self.assertGreaterEqual(seconds, 0)
+
     def test_click_write_manifest_registers_window_changes_and_ledger_pin(self):
         loop = load_loop()
         real_data = ROOT / "data"

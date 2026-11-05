@@ -64,6 +64,7 @@ import hashlib
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 import time
@@ -103,7 +104,24 @@ WAIT_SECONDS = 900
 # live"). The loop writes a debugger page and sends it to the repair seat.
 DEBUG = {"abstained", "no-selection"}
 DEBUGGER = STATE / "debugger"
-WRITE_ROOTS = [F2 / "data", F2 / "evidence", F3C / "data"]
+# Canonical-name git checkouts currently selected by this rule:
+# futon0, futon1, futon1a, futon1b, futon1bi, futon2, futon2a, futon3,
+# futon3a, futon3b, futon3c, futon4, futon5, futon5a, futon6, futon7,
+# and futon7a. Backups and descriptive clones do not match the name rule.
+CANONICAL_FUTON_RE = re.compile(r"futon\d+[a-z]*")
+CANONICAL_FUTON_ROOTS = [
+    path for path in sorted(CODE.glob("futon*"))
+    if path.is_dir() and (path / ".git").exists()
+    and CANONICAL_FUTON_RE.fullmatch(path.name)
+]
+WRITE_ROOTS = list(dict.fromkeys(
+    path.resolve() for path in
+    [*CANONICAL_FUTON_ROOTS,
+     F2 / "data", F2 / "evidence", F3C / "data",
+     Path.home() / "worktrees" / "futon2" / "self-heal", Path("/tmp")]
+    if path.is_dir()))
+WRITE_PRUNED_DIRS = {".git", "target", ".cpcache", ".cache", "node_modules", ".lake"}
+WRITE_HASH_LIMIT = 64 * 1024 * 1024
 # The click's code: what a repair may change and what a reload must pick up.
 CLICK_PATHS = [(F2, "src"), (F2, "scripts/futon2"), (F3C, "src/futon3c/wm")]
 SOURCE_IDENTITY_INVENTORY = F2 / "src" / "futon2" / "aif" / "load_identity.clj"
@@ -125,18 +143,50 @@ def record(row: dict) -> None:
         fh.write(json.dumps({"at": now(), **row}, ensure_ascii=False) + "\n")
 
 
-def snapshot_write_roots() -> dict[str, tuple[int, int]]:
+def snapshot_write_roots() -> tuple[dict[str, tuple[int, int]], float]:
     """Metadata-only census of regular, non-symlink files in declared roots."""
+    started = time.monotonic()
     snapshot = {}
+    walked_roots = []
     for root in WRITE_ROOTS:
-        if not root.exists():
+        try:
+            resolved_root = root.resolve()
+            root_is_dir = resolved_root.is_dir()
+        except (OSError, RuntimeError):
             continue
-        for path in root.rglob("*"):
-            if path.is_symlink() or not path.is_file():
-                continue
-            metadata = path.stat()
-            snapshot[str(path.resolve())] = (metadata.st_size, metadata.st_mtime_ns)
-    return snapshot
+        if not root_is_dir:
+            continue
+        # The legacy data/evidence roots remain declared, but a canonical
+        # checkout already walked their files. Avoid paying for them twice.
+        if any(resolved_root == parent or resolved_root.is_relative_to(parent)
+               for parent in walked_roots):
+            continue
+        walked_roots.append(resolved_root)
+        for directory, dirnames, filenames in os.walk(
+                resolved_root, topdown=True, onerror=lambda _error: None,
+                followlinks=False):
+            kept_dirs = []
+            for name in dirnames:
+                child = os.path.join(directory, name)
+                try:
+                    if name not in WRITE_PRUNED_DIRS and not os.path.islink(child):
+                        kept_dirs.append(name)
+                except (OSError, PermissionError):
+                    pass
+            dirnames[:] = kept_dirs
+            for name in filenames:
+                path = os.path.join(directory, name)
+                try:
+                    metadata = os.stat(path, follow_symlinks=False)
+                    if not stat.S_ISREG(metadata.st_mode):
+                        continue
+                    # directory descends from an already resolved root;
+                    # resolving every file repeats filesystem traversal and
+                    # made the wider census prohibitively expensive.
+                    snapshot[path] = (metadata.st_size, metadata.st_mtime_ns)
+                except (FileNotFoundError, PermissionError, OSError):
+                    continue
+    return snapshot, time.monotonic() - started
 
 
 def hash_file(path: Path) -> str:
@@ -149,7 +199,8 @@ def hash_file(path: Path) -> str:
 
 def write_click_manifest(click: dict, started: str, ended: str,
                          before: dict[str, tuple[int, int]],
-                         after: dict[str, tuple[int, int]]) -> dict:
+                         after: dict[str, tuple[int, int]],
+                         snapshot_seconds: dict[str, float]) -> dict:
     entries = []
     for raw_path in sorted(set(before) | set(after)):
         old, new = before.get(raw_path), after.get(raw_path)
@@ -164,7 +215,10 @@ def write_click_manifest(click: dict, started: str, ended: str,
                  "change": "new" if old is None else "modified",
                  "attribution": "click-window"}
         try:
-            entry["sha256"] = hash_file(path)
+            if new[0] > WRITE_HASH_LIMIT:
+                entry["hash"] = "skipped-large"
+            else:
+                entry["sha256"] = hash_file(path)
             current = path.stat()
             if (current.st_size, current.st_mtime_ns) != new:
                 # a live writer is still appending: keep the entry, say so
@@ -178,6 +232,7 @@ def write_click_manifest(click: dict, started: str, ended: str,
                   "run-id": click.get("run-id")},
         "started": started, "ended": ended,
         "roots": [str(root.resolve()) for root in WRITE_ROOTS],
+        "snapshot_seconds": snapshot_seconds,
         "entries": entries,
         "attribution_note": ("click-window means the path changed while this click ran; "
                              "it does not prove that the click was the writer. Never delete "
@@ -198,7 +253,7 @@ def fire_with_write_manifest(n: int, args, since_epoch: int) -> dict:
     """Run one click unchanged, registering every declared-root window change."""
     started = now()
     try:
-        before = snapshot_write_roots()
+        before, before_seconds = snapshot_write_roots()
         snapshot_error = None
     except Exception as error:
         before, snapshot_error = {}, error
@@ -207,8 +262,10 @@ def fire_with_write_manifest(n: int, args, since_epoch: int) -> dict:
     try:
         if snapshot_error is not None:
             raise snapshot_error
-        after = snapshot_write_roots()
-        click["write_manifest"] = write_click_manifest(click, started, ended, before, after)
+        after, after_seconds = snapshot_write_roots()
+        click["write_manifest"] = write_click_manifest(
+            click, started, ended, before, after,
+            {"before": before_seconds, "after": after_seconds})
     except Exception as error:
         click["write_manifest"] = {
             "status": "failed", "error": f"{type(error).__name__}: {error}"}
