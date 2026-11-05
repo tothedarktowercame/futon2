@@ -28,6 +28,7 @@
             [futon2.aif.outer-observation :as outer-observation]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.previous-run :as previous-run]
+            [futon2.aif.refusal-legality :as refusal-legality]
             [futon2.aif.selection-record :as selection-record]
             [futon2.aif.selection-world :as selection-world]
             [futon2.aif.outer-state :as outer-state]
@@ -1247,6 +1248,16 @@
 (declare run-ordinary-opportunity-with-task!)
 (declare run-ordinary-opportunity-impl!)
 
+(defn- work-exhausted-refusal [selection]
+  (let [present? (contains? selection :outer-field/admitted)
+        evidence {:kind :work-exhausted
+                  :scoredField (:outer-field/admitted selection)}]
+    {:disposition (if (and present? (refusal-legality/loop-stop-legal? evidence))
+                    :loop-stop
+                    :debugger-error)
+     :case :work-exhausted
+     :evidence evidence}))
+
 (defn- missions-giraffe-manifest? [manifest]
   (let [edge-path (get-in manifest [:sources :edges :path])]
     (and (string? edge-path)
@@ -1650,7 +1661,13 @@
               selection-outcome
               (if-let [pick (get-in selection [:selection :selected :target])]
                 {:status :chosen :class (:chosen-class selection) :pick pick}
-                (or (:outcome selection) {:status :abstained :case :empty-field}))]
+                (or (:outcome selection) {:status :abstained :case :empty-field}))
+              refusal-disposition
+              (when-not (get-in selection [:selection :selected :target])
+                (work-exhausted-refusal retained-selection))
+              retained-selection (cond-> retained-selection
+                                   refusal-disposition
+                                   (assoc :refusal/disposition refusal-disposition))]
           (if-let [target (get-in selection [:selection :selected :target])]
             (let [run-id (or (:run-id opts) (new-run-id))]
               (when-not (= :deferred (:status learning))
@@ -1700,7 +1717,9 @@
               (retain-selection! opts retained-selection selection-outcome)
               (when (= :applied (:status learning))
                 (outer-state/write-state! state-path state))
-              {:absent :no-task-selected :outer/selection retained-selection})))
+              (cond-> {:absent :no-task-selected :outer/selection retained-selection}
+                refusal-disposition
+                (assoc :refusal/disposition refusal-disposition)))))
         (catch clojure.lang.ExceptionInfo e
           (outer-selection-failure opts e))
         (catch Exception e

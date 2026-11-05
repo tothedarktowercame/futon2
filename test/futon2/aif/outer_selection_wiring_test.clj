@@ -188,6 +188,12 @@
     (is (= :no-task-selected (:absent result)))
     (is (= {:status :abstained :case :all-policies-predict-stopping}
            (get-in result [:outer/selection :outcome])))
+    (is (= :debugger-error (get-in result [:refusal/disposition :disposition])))
+    (is (= :debugger-error
+           (get-in result [:outer/selection :refusal/disposition :disposition])))
+    (is (= :debugger-error
+           (get-in (edn/read-string (slurp (get-in result [:selection-record :path])))
+                   [:outer/selection :refusal/disposition :disposition])))
     (is (= [:none] (get-in result [:outer/selection :stopping-equivalent 0 :members])))
     (is (false? @called?))))
 
@@ -196,13 +202,13 @@
         live-field (#'runtime/work-exhausted-refusal
                     {:outer-field/admitted ["M-still-selectable"]})
         missing-field (#'runtime/work-exhausted-refusal {})]
-    (is (= :loop-stop (:refusal/disposition empty-field)))
-    (is (= [] (get-in empty-field [:refusal/evidence :scoredField])))
-    (is (= :debugger-error (:refusal/disposition live-field)))
+    (is (= :loop-stop (:disposition empty-field)))
+    (is (= [] (get-in empty-field [:evidence :scoredField])))
+    (is (= :debugger-error (:disposition live-field)))
     (is (= ["M-still-selectable"]
-           (get-in live-field [:refusal/evidence :scoredField])))
-    (is (= :debugger-error (:refusal/disposition missing-field)))
-    (is (nil? (get-in missing-field [:refusal/evidence :scoredField])))))
+           (get-in live-field [:evidence :scoredField])))
+    (is (= :debugger-error (:disposition missing-field)))
+    (is (nil? (get-in missing-field [:evidence :scoredField])))))
 
 (defn- record-files [dir]
   (filter #(and (.isFile %)
