@@ -175,8 +175,7 @@
    :anchor "the same requirements failed on two consecutive clicks" :kinds [:supervisor-reason] :case :debugger-error
    :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
   {:id :loop-repeated-empty-policy-field :source "scripts/wm_click_repair_loop.py"
-   :anchor "on an unchanged field no compared policy's G is below" :kinds [:supervisor-reason] :case :L1
-   :lean-contract "DarkTower.WarMachine.RefusalLegality.loopStopLegal"
+   :anchor "on an unchanged field no compared policy's G is below" :kinds [:supervisor-reason] :case :debugger-error
    :evidence {:scoredField :derivable :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :derivable}}
   {:id :loop-stall-wall :source "scripts/wm_click_repair_loop.py"
    :anchor "clicks in a row carried no tick without failing" :kinds [:supervisor-reason] :case :debugger-error
@@ -185,7 +184,7 @@
    :anchor "repairs did not produce a carrying click or move" :kinds [:supervisor-reason] :case :debugger-error
    :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
   {:id :loop-repair-seat-refused :source "scripts/wm_click_repair_loop.py"
-   :anchor "return stop(args, f\"repair seat answered {verdict}:" :kinds [:supervisor-reason] :case :debugger-error
+   :anchor "return stop(args, \"debugger-error\", f\"repair seat answered {verdict}:" :kinds [:supervisor-reason] :case :debugger-error
    :evidence {:scoredField :absent :operatorSignal :absent :satisfactionMeasured :absent :ambiguityCited :absent :questionInBrief :absent :harmRuleMatched :absent :exclusionRecorded :absent}}
   {:id :loop-reload-budget-exhausted :source "scripts/wm_click_repair_loop.py"
    :anchor "reload failing after repairs:" :kinds [:supervisor-reason] :case :debugger-error

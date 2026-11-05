@@ -48,8 +48,11 @@
         id-set (set ids)
         python-source "scripts/wm_click_repair_loop.py"
         python-text (slurp (io/file repo python-source))
-        python-stop-count (count (filter #(and (re-find #"(?<![\w.])stop\(args" %) (not (re-find #"^\s*def " %)))
-                                         (str/split-lines python-text)))
+        python-stop-count (count (re-seq #"(?m)^\s*return stop\(args," python-text))
+        python-stop-calls (re-seq #"(?<![\w.])stop\(args,\s*\"([^\"]+)\"" python-text)
+        invalid-python-stop-cases
+        (vec (remove #{"operator-override" "work-exhausted" "debugger-error"}
+                     (map second python-stop-calls)))
         indexed-python-count (count (filter #(= python-source (:source %)) sites))
         problems
         (concat
@@ -60,6 +63,10 @@
          (when-not (= python-stop-count indexed-python-count)
            [{:reason :python-stop-coverage-mismatch
              :produced python-stop-count :indexed indexed-python-count}])
+         (when (or (not= python-stop-count (count python-stop-calls))
+                   (seq invalid-python-stop-cases))
+           [{:reason :python-stop-case-not-literal
+             :cases invalid-python-stop-cases}])
          (when-let [missing (seq (remove id-set required-clojure-site-ids))]
            [{:reason :clojure-refusal-constructor-coverage-mismatch
              :missing (vec (sort missing))}])

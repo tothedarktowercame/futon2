@@ -59,12 +59,72 @@ class SelfHealStopTest(unittest.TestCase):
         rows = [json.loads(line) for line in self.loop.LEDGER.read_text().splitlines()]
         return rc, fire.call_count, rows
 
+    def stop_row(self, case, evidence, reason="fixture stop"):
+        with mock.patch.object(self.loop, "notify"):
+            self.loop.stop(self.args, case, reason, 1, evidence)
+        return json.loads(self.loop.LEDGER.read_text().splitlines()[-1])
+
+    def test_stop_file_operator_override_is_legal(self):
+        self.loop.STOP_FILE.touch()
+        row = self.stop_row("operator-override",
+                            {"operator-signal": "stop-file-observed"})
+        self.assertEqual("operator-override", row["case"])
+        self.assertTrue(row["legal"])
+
+    def test_cli_budget_operator_override_is_legal(self):
+        row = self.stop_row(
+            "operator-override",
+            {"operator-signal": "cli-budget-spent", "spent": self.args.clicks,
+             "click-budget": self.args.clicks, "ticks": 0,
+             "tick-budget": self.args.ticks})
+        self.assertEqual("operator-override", row["case"])
+        self.assertTrue(row["legal"])
+
+    def test_work_exhausted_requires_present_empty_admitted_field(self):
+        record = self.loop.STATE / "run.edn"
+        for body in (
+                "{:absent :no-task-selected :outer/selection {}}",
+                '{:absent :no-task-selected :outer/selection '
+                '{:outer-field/admitted ["still-live"]}}'):
+            record.write_text(body)
+            row = self.stop_row("work-exhausted", {"run-record": str(record)})
+            self.assertEqual("debugger-error", row["case"])
+            self.assertEqual("work-exhausted", row["claimed-case"])
+            self.assertFalse(row["legal"])
+
+    def test_work_exhausted_with_retained_empty_field_is_legal(self):
+        record = self.loop.STATE / "run.edn"
+        record.write_text(
+            "{:absent :no-task-selected "
+            ":outer/selection {:outer-field/admitted []}}")
+        row = self.stop_row("work-exhausted", {"run-record": str(record)})
+        self.assertEqual("work-exhausted", row["case"])
+        self.assertTrue(row["legal"])
+
+    def test_g_not_below_abstention_is_debugger_error(self):
+        row = self.stop_row(
+            "debugger-error", {"input-digest": "abc"},
+            "no compared policy's G is below the abstention")
+        self.assertEqual("debugger-error", row["case"])
+        self.assertFalse(row["legal"])
+
+    def test_debugger_error_notification_is_outside_repair(self):
+        sent = {}
+
+        def fake_sh(*_args, **kwargs):
+            sent["body"] = kwargs["input"]
+            return SimpleNamespace(stdout="sent")
+
+        with mock.patch.object(self.loop, "sh", side_effect=fake_sh):
+            self.loop.notify(self.args, "debugger-error", False, "broken")
+        self.assertIn("STOPPED [debugger-error/outside-repair]", sent["body"])
+
     def assert_typed_stop(self, disposition):
         rc, calls, rows = self.run_with([self.click(disposition)])
         self.assertEqual(1, rc)
         self.assertEqual(1, calls)
         typed = [row for row in rows
-                 if row.get("event") == "stop" and
+                 if row.get("event") == "stop-evidence" and
                  row.get("kind") == "machine-self-heal-failed"]
         self.assertEqual(1, len(typed))
         self.assertEqual("click-1", typed[0]["click-id"])

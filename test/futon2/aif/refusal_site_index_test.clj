@@ -1,16 +1,13 @@
 (ns futon2.aif.refusal-site-index-test
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.refusal-site-index :as sut]))
 
 (def repo (.getCanonicalPath (io/file ".")))
 
 (defn- python-stop-call-count []
-  (->> (str/split-lines
-        (slurp (io/file repo "scripts/wm_click_repair_loop.py")))
-       (filter #(and (re-find #"(?<![\w.])stop\(args" %) (not (re-find #"^\s*def " %))))
-       count))
+  (count (re-seq #"(?m)^\s*return stop\(args,"
+                 (slurp (io/file repo "scripts/wm_click_repair_loop.py")))))
 
 (defn- indexed-python-stop-count [index]
   (count (filter #(= "scripts/wm_click_repair_loop.py" (:source %))
@@ -23,6 +20,14 @@
     (is (= (count (:sites index)) (count (set (map :id (:sites index))))))
     (is (= (python-stop-call-count) (indexed-python-stop-count index))
         "every Python return stop(args call has exactly one indexed row")))
+
+(deftest every-python-stop-names-a-literal-validator-case
+  (let [text (slurp (io/file repo "scripts/wm_click_repair_loop.py"))
+        calls (re-seq #"(?m)^\s*return stop\(args," text)
+        literals (re-seq #"(?m)^\s*return stop\(args,\s*\"(operator-override|work-exhausted|debugger-error)\""
+                         text)]
+    (is (= 18 (count calls)))
+    (is (= (count calls) (count literals)))))
 
 (deftest changed-anchor-refuses-the-index
   (let [index (update-in (sut/read-index) [:sites 0]

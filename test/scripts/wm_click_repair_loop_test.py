@@ -443,7 +443,8 @@ class ContinuousModeTest(unittest.TestCase):
                  mock.patch.object(loop, "log"):
                 code = loop.run(args)
             self.assertEqual(1, code)
-            self.assertIn("no compared policy's G is below the abstention's, twice", notify.call_args[0][1])
+            self.assertIn("no compared policy's G is below the abstention's, twice",
+                          notify.call_args[0][3])
             self.assertEqual(1, sum(1 for c in sleep.call_args_list if c.args == (loop.WAIT_SECONDS,)),
                              "one wait for the field to change, then the pause")
             self.assertEqual(0, repair.call_count)
@@ -492,7 +493,7 @@ class ContinuousModeTest(unittest.TestCase):
                 if (Path(td) / "alerts.jsonl").exists() else []
             rows = [__import__("json").loads(l) for l in (Path(td) / "ledger.jsonl").read_text().splitlines()]
             events = [row["event"] for row in rows]
-        return {"code": code, "stop": notify.call_args[0][1], "alerts": alerts,
+        return {"code": code, "stop": notify.call_args[0][3], "alerts": alerts,
                 "belled": notify_alert.call_count, "repairs": repair.call_count, "events": events,
                 "rows": rows, "reloads": reload.call_count}
 

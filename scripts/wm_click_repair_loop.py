@@ -1476,9 +1476,11 @@ def repair(args, reason: str, click: dict | None, prior: list[str],
 
 # ---------------------------------------------------------------- stop
 
-def notify(args, reason: str) -> None:
+def notify(args, case: str, legal: bool, reason: str) -> None:
     rows = LEDGER.read_text().splitlines()[-12:] if LEDGER.exists() else []
-    body = "\n".join([f"From wm_click_repair_loop.py, {now()}. STOPPED: {reason}", "",
+    disposition = f"{case}/{'legal-stop' if legal else 'outside-repair'}"
+    body = "\n".join([f"From wm_click_repair_loop.py, {now()}. "
+                      f"STOPPED [{disposition}]: {reason}", "",
                       "Last ledger rows (futon2/data/wm-click-loop/ledger.jsonl):", *rows, "",
                       "Restart only with the same explicit cast recorded in the start row; "
                       "no cast identity has a default."])
@@ -1487,10 +1489,75 @@ def notify(args, reason: str) -> None:
     log(f"notified {args.owner}: {r.stdout.strip()[-200:]}")
 
 
-def stop(args, reason: str, code: int = 0) -> int:
+def _edn_form_after(text: str, key: str, opener: str, closer: str) -> str | None:
+    """Return the retained EDN form immediately following KEY, without parsing
+    values from a reason string or accepting an unterminated form."""
+    start = text.find(key)
+    if start < 0:
+        return None
+    start = text.find(opener, start + len(key))
+    if start < 0:
+        return None
+    depth, in_string, i = 0, False, start
+    while i < len(text):
+        ch = text[i]
+        if in_string:
+            if ch == "\\":
+                i += 2
+                continue
+            if ch == '"':
+                in_string = False
+        elif ch == '"':
+            in_string = True
+        elif ch == opener:
+            depth += 1
+        elif ch == closer:
+            depth -= 1
+            if depth == 0:
+                return text[start:i + 1]
+        i += 1
+    return None
+
+
+def _work_exhausted_checked(evidence: dict) -> bool:
+    path = evidence.get("run-record") if isinstance(evidence, dict) else None
+    try:
+        text = Path(path).read_text() if path else ""
+    except (OSError, UnicodeError, TypeError):
+        return False
+    selection = _edn_form_after(text, ":outer/selection", "{", "}")
+    admitted = (_edn_form_after(selection, ":outer-field/admitted", "[", "]")
+                if selection else None)
+    return (bool(re.search(r":absent\s+:no-task-selected(?:[\s,}])", text)) and
+            admitted is not None and admitted[1:-1].strip() == "")
+
+
+def _validated_stop(args, claimed_case: str, evidence: dict) -> tuple[str, bool]:
+    if claimed_case == "operator-override":
+        signal = evidence.get("operator-signal") if isinstance(evidence, dict) else None
+        if signal == "stop-file-observed":
+            legal = STOP_FILE.exists()
+        elif signal == "cli-budget-spent":
+            legal = ((evidence.get("spent") == evidence.get("click-budget") == args.clicks) or
+                     (evidence.get("ticks") == evidence.get("tick-budget") == args.ticks))
+        else:
+            legal = False
+    elif claimed_case == "work-exhausted":
+        legal = _work_exhausted_checked(evidence)
+    else:
+        legal = claimed_case == "debugger-error"
+    return (claimed_case, True) if legal and claimed_case != "debugger-error" else ("debugger-error", False)
+
+
+def stop(args, case: str, reason: str, code: int, evidence: dict) -> int:
+    effective_case, legal = _validated_stop(args, case, evidence)
     log(f"STOP: {reason}")
-    record({"event": "stop", "reason": reason})
-    notify(args, reason)
+    row = {"event": "stop", "case": effective_case, "legal": legal,
+           "evidence": evidence, "reason": reason}
+    if effective_case != case:
+        row["claimed-case"] = case
+    record(row)
+    notify(args, effective_case, legal, reason)
     return code
 
 
@@ -1514,11 +1581,11 @@ def run(args) -> int:
     fault_repairs: list[str] = []
     while not ok:  # a namespace that will not load is a repair before any click
         if len(fault_repairs) >= args.max_repairs:
-            return stop(args, f"reload still failing after {len(fault_repairs)} repairs: {text[:300]}", 1)
+            return stop(args, "debugger-error", f"reload still failing after {len(fault_repairs)} repairs: {text[:300]}", 1, {})
         verdict, detail = repair(args, text, None, fault_repairs)
         fault_repairs.append(detail)
         if verdict in ("cannot-repair", "no-defect"):
-            return stop(args, f"reload failing and the repair seat answered {verdict}: {detail[:300]}", 1)
+            return stop(args, "debugger-error", f"reload failing and the repair seat answered {verdict}: {detail[:300]}", 1, {})
         ok, text, since = reload_when_idle(since)
 
     spent = ticks = quiet = 0
@@ -1529,7 +1596,9 @@ def run(args) -> int:
     while spent < args.clicks and ticks < args.ticks:
         reload_ms = initial_reload_ms if initial_reload_pending else 0
         if STOP_FILE.exists():
-            return stop(args, f"stop file present after {spent} clicks, {ticks} carrying")
+            return stop(args, "operator-override",
+                        f"stop file present after {spent} clicks, {ticks} carrying", 0,
+                        {"operator-signal": "stop-file-observed"})
         if args.continuous and spent:
             # A fix landed between clicks is loaded before the next one; that is
             # how an alert's signature stops repeating without a pause.
@@ -1537,15 +1606,15 @@ def run(args) -> int:
             ok, text, since = reload_when_idle(since)
             reload_ms = max(0, (time.monotonic_ns() - reload_started_ns) // 1_000_000)
             if not ok:
-                return stop(args, f"paused: a namespace committed since the last click will not load: {text[:300]}", 1)
+                return stop(args, "debugger-error", f"paused: a namespace committed since the last click will not load: {text[:300]}", 1, {})
         stops = debugger_stops()
         if len(stops) > 1:
             reason = (f"self-heal-debugger-frames-stacked: {len(stops)} debugger stops; "
                       "no click fired")
-            record({"event": "stop", "kind": "self-heal-debugger-frames-stacked",
+            record({"event": "stop-evidence", "kind": "self-heal-debugger-frames-stacked",
                     "stop-count": len(stops),
                     "run-ids": [held["run-id"] for held in stops]})
-            return stop(args, reason, 1)
+            return stop(args, "debugger-error", reason, 1, {})
         if len(stops) == 1:
             held = stops[0]
             record({"event": "debugger-held", **{key: held[key] for key in
@@ -1565,9 +1634,9 @@ def run(args) -> int:
         if not attached or stops_after_attach:
             reason = ("debugger-not-attached: verification failed "
                       f"(attached={attached}, stops={len(stops_after_attach)}); no click fired")
-            record({"event": "stop", "kind": "debugger-not-attached",
+            record({"event": "stop-evidence", "kind": "debugger-not-attached",
                     "attached": attached, "stop-count": len(stops_after_attach)})
-            return stop(args, reason, 1)
+            return stop(args, "debugger-error", reason, 1, {})
         log(f"click {spent + 1}: debugger attached={attached}")
         fire_started_ns = time.monotonic_ns()
         c = fire(spent + 1, args, since)
@@ -1588,20 +1657,20 @@ def run(args) -> int:
             fields = {key: failure.get(key) for key in
                       ("route", "status", "reason", "phase", "injury-id", "attempt")
                       if failure.get(key) is not None}
-            record({"event": "stop", "kind": "machine-self-heal-failed",
+            record({"event": "stop-evidence", "kind": "machine-self-heal-failed",
                     "click-id": c["click-id"], **fields})
             detail = ", ".join(f"{key} {value}" for key, value in fields.items())
             reason = (f"machine-self-heal-failed: click {c['click-id']}"
                       f"{', ' if detail else ''}{detail}; no next iteration started")
-            return stop(args, reason, 1)
+            return stop(args, "debugger-error", reason, 1, {})
         if (_runtime_disposition(c.get("last-result")) is None and
                 _binding_disposition(c.get("click-id")) is None):
             log(f"click {c['click-id']}: retained runtime disposition unreadable; "
                 "keeping current loop behaviour")
         if c["outcome"] == "preflight-refused":
-            return stop(args, c["last-result"]["reason"], 1)
+            return stop(args, "debugger-error", c["last-result"]["reason"], 1, {})
         if c["rc"] == 3 and not c["spent"]:
-            return stop(args, launch_failure_text(c.get("log")), 1)
+            return stop(args, "debugger-error", launch_failure_text(c.get("log")), 1, {})
         if args.continuous:
             acknowledged = acknowledged_rows()
             open_rows = unacknowledged(c["alert"], acknowledged)
@@ -1613,8 +1682,9 @@ def run(args) -> int:
                 repeated = open_rows is not None and previous_alert == open_rows
                 queue_alert(c, repeated)
                 if repeated:
-                    return stop(args, "paused: the same requirements failed on two consecutive clicks "
-                                      f"({'; '.join(open_rows)}); fix, then restart. Queue: {ALERTS}", 1)
+                    return stop(args, "debugger-error",
+                                "paused: the same requirements failed on two consecutive clicks "
+                                f"({'; '.join(open_rows)}); fix, then restart. Queue: {ALERTS}", 1, {})
                 if open_rows is not None:
                     notify_alert(args, c)
                 else:
@@ -1630,10 +1700,11 @@ def run(args) -> int:
                 record({"event": "nothing-beats-stopping", "click-id": c["click-id"], "input-digest": digest,
                         "repeated": digest == stopping_digest})
                 if digest == stopping_digest:
-                    return stop(args, "paused: on an unchanged field no compared policy's G is below the "
-                                      f"abstention's, twice (input digest {digest[:12]}); the field must change "
-                                      "or the model must; re-firing would be the repeated identical-input "
-                                      "refusal Q6 forbids", 1)
+                    return stop(args, "debugger-error",
+                                "paused: on an unchanged field no compared policy's G is below the "
+                                f"abstention's, twice (input digest {digest[:12]}); the field must change "
+                                "or the model must; re-firing would be the repeated identical-input "
+                                "refusal Q6 forbids", 1, {"input-digest": digest})
                 stopping_digest = digest
                 log(f"click {c['n']}: nothing beats stopping on input {digest[:12]}; waiting {WAIT_SECONDS}s "
                     "for the field to change before the next click")
@@ -1643,8 +1714,9 @@ def run(args) -> int:
         if c["outcome"] in DECIDED or c["outcome"] in WAIT or lawful_stop:
             quiet += 1
             if quiet >= args.stall:
-                return stop(args, f"{quiet} clicks in a row carried no tick without failing "
-                                  f"(last outcome {c['outcome']}); the wall repeats")
+                return stop(args, "debugger-error",
+                            f"{quiet} clicks in a row carried no tick without failing "
+                            f"(last outcome {c['outcome']}); the wall repeats", 0, {})
             if c["outcome"] in WAIT:
                 log(f"click {c['n']}: {c['outcome']}; waiting {WAIT_SECONDS}s before the next click")
                 time.sleep(WAIT_SECONDS)
@@ -1670,23 +1742,26 @@ def run(args) -> int:
         # The apparatus failed, or the machine had nothing to select. Repair,
         # reload, click again.
         if len(fault_repairs) >= args.max_repairs:
-            return stop(args, f"{len(fault_repairs)} repairs did not produce a carrying click or move "
-                              f"the obstruction; last outcome {c['outcome']}", 1)
+            return stop(args, "debugger-error",
+                        f"{len(fault_repairs)} repairs did not produce a carrying click or move "
+                        f"the obstruction; last outcome {c['outcome']}", 1, {})
         reason = f"click {c['click-id']} ended {c['outcome']} (wm_click.sh rc={c['rc']})"
         verdict, detail = repair(args, reason, c, fault_repairs, page)
         fault_repairs.append(f"{reason} -> {detail}")
         if verdict == "cannot-repair" or (page and verdict == "no-defect"):
-            return stop(args, f"repair seat answered {verdict}: {detail[:300]}", 1)
+            return stop(args, "debugger-error", f"repair seat answered {verdict}: {detail[:300]}", 1, {})
         ok, text, since = reload_when_idle(since)
         while not ok:
             if len(fault_repairs) >= args.max_repairs:
-                return stop(args, f"reload failing after repairs: {text[:300]}", 1)
+                return stop(args, "debugger-error", f"reload failing after repairs: {text[:300]}", 1, {})
             verdict, detail = repair(args, text, None, fault_repairs)
             fault_repairs.append(f"{text[:200]} -> {detail}")
             if verdict in ("cannot-repair", "no-defect"):
-                return stop(args, f"reload failing; repair seat answered {verdict}", 1)
+                return stop(args, "debugger-error", f"reload failing; repair seat answered {verdict}", 1, {})
             ok, text, since = reload_when_idle(since)
-    return stop(args, f"done: {spent} clicks spent, {ticks} carried a tick")
+    return stop(args, "operator-override", f"done: {spent} clicks spent, {ticks} carried a tick", 0,
+                {"operator-signal": "cli-budget-spent", "spent": spent,
+                 "click-budget": args.clicks, "ticks": ticks, "tick-budget": args.ticks})
 
 
 def status() -> int:
@@ -1736,7 +1811,7 @@ def main() -> int:
     except Exception as e:  # a crash is a stop like any other: the owner hears of it
         import traceback
         log(traceback.format_exc())
-        return stop(args, f"loop crashed: {type(e).__name__}: {e}", 2)
+        return stop(args, "debugger-error", f"loop crashed: {type(e).__name__}: {e}", 2, {})
 
 
 if __name__ == "__main__":
