@@ -62,3 +62,10 @@ own canonical id-scheme; compose on **links**, not by collapsing namespaces). **
   not rebuild the cascade body (that's DISSOLUTION (A)) or the AIF loop (that's the R16/R14 work).
 - Gates at resume: clj-kondo on any Clojure; the endpoint reload-safe (extra-routes, per prior C-cascade
   work); one edit → two views propagate, demonstrated.
+
+## Completion criteria
+
+- The explainer's NODES/IFACES are lifted to a single authored source at `futon2/holes/aif-rungs.edn` — check: the file exists and the html no longer embeds a NODES array **Not met.**
+- A unified endpoint serves declared states plus R-O cross-refs derived from cascade-real, with provenance (canonical id, evidence commit/endpoint, backlinks) — check: `curl /api/alpha/aif-rungs` (or the merged endpoint the resume design names) returns items with provenance fields **Not met.**
+- `aif-wiring-explainer.html` fetches its nodes from that endpoint (embedded copy deleted) — check: the html contains a fetch against the endpoint and zero embedded NODES **Not met.**
+- One edit, two views: editing one state in the registry moves the explainer AND the notebook Appendix A (live fetch-and-render cell) — check: a dated demonstration in this file naming the edited id and both propagated views **Not started.**

@@ -465,3 +465,11 @@ click demonstrates all of the following on a real target:
 
 Until then, further ordinary clicks should not be used to rediscover this
 known boundary.
+
+## Completion criteria
+
+- A live click saves the selected cascade as a durable, content-addressed :wm/executable-cascade-v1 record — check: `ls /home/joe/code/futon2/data/wm-executable-cascades/ | wc -l` grows and a record's :digest equals its filename **Met.**
+- The saved cascade is validated by the single shared validator and the validation is certified — check: `/home/joe/code/futon2/src/futon2/aif/wm/executable_cascade.clj:439` validate-cascade returns :certified for a live-saved record; re-load via load-record (line 406) reproduces it **Met.**
+- A live click follows the selected cascade as its enactment guide and records at least one witnessed enacted step in an execution journal — check: an entry under `/home/joe/code/futon2/data/wm-execution-journals/` for the same digest as the selected cascade **Met.**
+- A materialise/validate/compile defect is held for live repair at the same phase (selected target and cascade identity retained; no re-selection, no new click) rather than reported as no-selection or a G refusal — check: a click record under `data/wm-click-loop/` whose phase key is a construction/validation phase with the selected-cascade digest retained and no new selection receipt **Not met.**
+- The occurrence-square-authoring phase consumes only validated registry records before policy construction (no maps derived from role labels or the post-selection :action envelope) — check: `/home/joe/code/futon2/src/futon2/aif/wm/` occurrence-square authoring ns exists and its constructor takes registry records only **Not started.**

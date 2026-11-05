@@ -478,3 +478,10 @@ explicit. No build was undertaken under that earlier instruction.
   correction above; the ruled_outcome_c path (src/futon2/aif/, not checks/);
   and sec-c-vector.tex's bridge account omitting the §1b observation-domain
   gap — the paper statement is being added.
+
+## Completion criteria
+
+- The initial C module v1 with a callable WM adapter exists and its construction is recorded under Joe's authorization — check: `/home/joe/code/futon2/holes/labs/wm-contract/INSTANTIATE-C-module-v1-2026-09-09.md` **Met.**
+- Each pinned C_tau band (apex clusters A-D) has either an assigned weight with provenance or an explicit recorded deferral with provenance; the cluster-C missing carrier is an explicit zero — check: a dated file under `/home/joe/code/futon2/holes/labs/wm-contract/` recording the ruling **Not started.**
+- The §1b observation model between scorer and kernel exists and is NOT closed by substituting checkpoint trajectories for channel observations — check: a model or mapping ns/note connecting `src/futon2/aif/efe.clj:701-703` channel-valued means to `checks/disposition_kernel.clj:20-27`'s observation domain, with the substitution prohibition honoured **Not started.**
+- The F10 rider: a production caller enables and supplies the fold's inputs (no site left :folded? false for want of a caller) — check: `grep -rn ':folded? false' /home/joe/code/futon2/src/futon2/aif/ruled_outcome_c.clj` returns only deliberately-unfolded sites with recorded reasons **Not started.**

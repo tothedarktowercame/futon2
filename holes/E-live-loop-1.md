@@ -227,3 +227,9 @@ S1 table delivered and reviewed; S2 escrow shape designed (deposit made
 only if armed); S3 design note written. Then the excursion closes into
 whatever mission the operator wants to grow from it — the before-picture
 (Flight 1's honest nothings) is already on the record.
+
+## Completion criteria
+
+- S1 delivered: a before/after table (rel distribution, cascade sizes, F) over at least 10 real sorries, baseline banner re-run as control — check: `/home/joe/code/p4ng/flights/e-live-loop-1-s1-sorry-grain.org` exists with the table and the raw JSON alongside **Met.**
+- S2 design delivered: the escrowed fold-turn record shape, home, replay seam and arming rule written up, with no deposit made inside this excursion — check: `/home/joe/code/futon2/holes/E-live-loop-1-s2-escrow-design.md` **Met.**
+- S3 delivered or explicitly re-homed: either a design note specifying how realized lane-outcomes modulate energy/precision for the cascade lane (the 0/674 observation as an update), or a line in this item naming the successor (e.g. E-live-loop-2/-3) that owns it — check: a dated section or file under `/home/joe/code/futon2/holes/` naming γ over the cascade lane **Not met.**
