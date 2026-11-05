@@ -1266,7 +1266,7 @@
   "Reasons whose removal is a legal terminal under RefusalLegality.nextField.
   Requiring every emptying exclusion to be in this set is stricter than
   loopStopLegal: missing ingest or relation evidence remains a debugger error."
-  #{:c1-already-satisfied})
+  #{:c1-already-satisfied :c3-harm-declined})
 
 (defn- legal-terminal-empty-field? [observation failure-data]
   (let [excluded (into (vec (:outer-field/excluded observation))
@@ -1635,13 +1635,26 @@
                            observation
                            (assoc observation
                                   :effective-run-index-rows effective-index-rows))
-              c1-rows (keep :c1-exclusion effective-index-rows)
-              c1-exclusions
+              ;; Preserve durable index order. Within one index line C1 is
+              ;; considered before C3; field-exclusions then keeps the first
+              ;; current row for a target, preventing duplicate evidence.
+              legal-terminal-rows
+              (mapcat (fn [index-row]
+                        (keep identity
+                              [(some-> (:c1-exclusion index-row)
+                                       (assoc :exclusion-reason
+                                              :c1-already-satisfied))
+                               (some-> (:c3-exclusion index-row)
+                                       (assoc :exclusion-reason
+                                              :c3-harm-declined))]))
+                      effective-index-rows)
+              legal-terminal-exclusions
               (c1-exclusion/field-exclusions
-               c1-rows
+               legal-terminal-rows
                #(get-in observation [:mission-source-sha256-by-target %])
                (mapv :target (:field observation)))
-              observation (assoc observation :c1-exclusions c1-exclusions)
+              observation (assoc observation :c1-exclusions
+                                 legal-terminal-exclusions)
               observation (assoc observation :previous-selection
                                  (previous-run/selection-predecessor
                                   (or (:run-record-dir opts) runner/default-run-record-dir)

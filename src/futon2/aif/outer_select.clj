@@ -200,7 +200,9 @@
   (let [targets (set (map :target original-field))]
     (when-not (and (= (count exclusions) (count (set (map :target exclusions))))
                    (every? #(and (contains? targets (:target %))
-                                 (= :c1-already-satisfied (:reason %))
+                                 (contains? #{:c1-already-satisfied
+                                              :c3-harm-declined}
+                                            (:reason %))
                                  (string? (:pin %)) (seq (:pin %))) exclusions))
       (refuse! :invalid-c1-exclusions {:c1-exclusions exclusions}))
     (let [excluded-targets (set (map :target exclusions))]

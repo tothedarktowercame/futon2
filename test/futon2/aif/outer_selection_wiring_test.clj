@@ -273,6 +273,41 @@
     (is (= "true\n" (:out supervisor-check)))
     (is (= "true\n" (:out supervisor-claim)))))
 
+(deftest c3-legal-terminal-exclusion-makes-work-exhaustion-reachable
+  ;; RefusalLegality.legal_terminal_excludes / legal_terminals_bounded: a
+  ;; current C3 exclusion removes the last scored target and reaches L1.
+  (let [sha "fixture-sha"
+        digest (identity/digest {:mission-source-sha256 sha})
+        rows (mapv (fn [target]
+                     {:c3-exclusion
+                      {:status :row
+                       :row {:schema :wm/c3-exclusion-v1
+                             :target target
+                             :evidence-digest digest
+                             :rule :H1
+                             :declined-action-digest (str "action-" target)
+                             :run-id (str "harm-" target)}}})
+                   ["M-ready" "M-unknown"])
+        result (call-ordinary
+                {:decision-as-of "2026-10-28T12:00:00Z"}
+                {#'outer-observation/outer-observation
+                 (fn [_]
+                   (assoc fixtures/base-observation
+                          :mission-source-sha256-by-target
+                          {"M-ready" sha "M-unknown" sha}
+                          :giraffe/run-id "fixture-missions-run"))
+                 #'effective-run-history/index-rows (fn [_] rows)
+                 #'runtime/run-ordinary-opportunity-with-task!
+                 (fn [_] (throw (AssertionError. "empty field must not run a task")))})
+        retained (:outer/selection result)]
+    (is (= :no-task-selected (:absent result)))
+    (is (= [] (:outer-field/admitted retained)))
+    (is (= #{{:target "M-ready" :reason :c3-harm-declined}
+             {:target "M-unknown" :reason :c3-harm-declined}}
+           (set (map #(select-keys % [:target :reason])
+                     (:outer-field/excluded retained)))))
+    (is (= :loop-stop (get-in result [:refusal/disposition :disposition])))))
+
 (deftest legal-empty-field-does-not-hold-an-attached-debugger
   (let [awaited (atom 0)
         sha "fixture-sha"

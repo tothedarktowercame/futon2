@@ -105,6 +105,40 @@
     (is (= partition
            (outer-select/apply-c1-exclusions partition (:field partition) [])))))
 
+(deftest c3-new-evidence-restores-and-current-evidence-excludes
+  (let [old-pin (identity/digest {:mission-source-sha256 "old"})
+        rows [{:status :row :exclusion-reason :c3-harm-declined
+               :row {:target "M-a" :evidence-digest old-pin :run-id "r"}}]]
+    (is (empty? (sut/field-exclusions rows (constantly "new") ["M-a"])))
+    (is (= :c3-harm-declined
+           (:reason (first (sut/field-exclusions rows (constantly "old") ["M-a"])))))))
+
+(deftest c1-and-c3-current-rows-produce-one-first-index-exclusion
+  (let [pin (identity/digest {:mission-source-sha256 "sha"})
+        rows [{:status :row :exclusion-reason :c3-harm-declined
+               :row {:target "M-a" :evidence-digest pin :run-id "c3-first"}}
+              {:status :row :exclusion-reason :c1-already-satisfied
+               :row {:target "M-a" :evidence-digest pin :run-id "c1-second"}}]
+        exclusions (sut/field-exclusions rows (constantly "sha") ["M-a"])]
+    (is (= 1 (count exclusions)))
+    (is (= :c3-harm-declined (:reason (first exclusions))))
+    (is (= "c3-first" (:run-id (first exclusions))))
+    (is (map? (try
+                (outer-select/apply-c1-exclusions
+                 {:field [{:target "M-a"}] :excluded []}
+                 [{:target "M-a"}] exclusions)
+                (catch Exception _ nil))))))
+
+(deftest unknown-legal-terminal-exclusion-reason-is-refused
+  (is (= :invalid-c1-exclusions
+         (try
+           (outer-select/apply-c1-exclusions
+            {:field [{:target "M-a"}] :excluded []}
+            [{:target "M-a"}]
+            [{:target "M-a" :reason :guardrail-refusal :pin "pin"}])
+           nil
+           (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))))
+
 (deftest pending-c1-is-resolved-in-the-single-index-line
   (let [dir (temp-dir)
         source (io/file dir "tick-run-record-run.edn")

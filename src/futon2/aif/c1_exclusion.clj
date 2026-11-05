@@ -52,23 +52,24 @@
 (defn field-exclusions [rows current-mission-sha-fn field]
   (let [field (set field)]
     (->> rows
-         (keep :row)
+         (keep (fn [{:keys [row exclusion-reason]}]
+                 (when row
+                   (assoc row ::reason (or exclusion-reason
+                                           :c1-already-satisfied)))))
          (filter #(and (contains? field (:target %))
                        (some? (current-mission-sha-fn (:target %)))
                        (= (:evidence-digest %)
                           (identity/digest
                            {:mission-source-sha256
                             (current-mission-sha-fn (:target %))}))))
-         ;; One entry per target: outer_select refuses forbidden evidence
-         ;; whose target set and entry count differ, so a duplicated row
-         ;; (a retried close, a re-appended index) would refuse the whole
-         ;; selection.  Matching rows for a target share the current digest,
-         ;; so which one is kept does not change the pin.
+         ;; One entry per target: outer_select refuses evidence whose target
+         ;; set and entry count differ. Rows remain in durable index order;
+         ;; when C1 and C3 both exclude one target, the first indexed row wins.
          (reduce (fn [acc row]
                    (if (some #(= (:target row) (:target %)) acc)
                      acc
                      (conj acc {:target (:target row)
-                                :reason :c1-already-satisfied
+                                :reason (::reason row)
                                 :pin (:evidence-digest row)
                                 :run-id (:run-id row)})))
                  []))))
