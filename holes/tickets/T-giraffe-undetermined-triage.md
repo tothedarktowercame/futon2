@@ -1,6 +1,6 @@
 # T-giraffe-undetermined-triage — read Giraffe's undetermined items before the War Machine works on them
 
-**Requisition:** in-progress — dispatched 2026-11-06T07:08:15Z to Kimi seats (claude-6, for Joe)
+**Requisition:** completed — 2026-11-06T07:17:16Z, three Kimi seats (E-kimi-task-348, 349, 350), state done
 
 **Asked by:** Joe, 2026-11-06: "the big learning here is that we need to treat
 the under Giraffe 'undefined' things the same way, lest we risk running more
