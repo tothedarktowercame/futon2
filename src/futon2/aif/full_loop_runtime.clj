@@ -1149,6 +1149,12 @@
                               :cascade-feedback-path :cascade-feedback-metadata
                               :observation-labels-path :flight :trace-dir
                               :task
+                              ;; the reading-policy class model reads the
+                              ;; selected target's class from this retained
+                              ;; relation (Lean outcomeClass; held run
+                              ;; 2026-11-06-05f4bdcd abstained with
+                              ;; :target-class-required without it)
+                              :outer/selection
                               :selection-timing/state :nano-time-fn
                               ;; the decision forms every target's policy
                               ;; family against this pinned graph
