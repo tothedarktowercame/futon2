@@ -61,6 +61,9 @@ resources/wm/*
 # PROOF-wm-works 1.4: the v2 attempt-learning contract authorising production
 # consumption (Joe plan signature as authority) is a machine-read resource.
 !resources/wm/attempt-learning-contract-v2.edn
+# M-action-cost-modelling (2026-11-06, wm-author): operator-curated action
+# cost scales, machine-read by futon2.aif.wm.action-scale.
+!resources/wm/action-scales.edn
 
 # local file that shouldn't be tracked here
 LICENSE

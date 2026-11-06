@@ -1,0 +1,17 @@
+{:schema :wm/action-scales-v1
+ ;; Operator-curated action-cost scales (shape (a) of
+ ;; M-action-cost-modelling §INSTANTIATE scope-in: "source from
+ ;; operator-curated EDN").  Keyed by candidate-action :target string;
+ ;; values are one of :minute :hour :session :multi-session :mission
+ ;; :campaign.
+ ;;
+ ;; Curated entries carry evidence in their rationale; a target with no
+ ;; entry here falls back to action-scale/default-scale-for (typed by
+ ;; action :type, :scale-source :default) so EVERY candidate carries a
+ ;; scale while curated rows remain distinguishable from defaults.
+ :scales {"sorry/wm-ui-hud-mode-rationale-hardcode"
+          {:scale :minute
+           :rationale "Tooltip text swap sourced from strategic-vocabulary; M-action-cost-modelling names this the :minute-scale member of the tied-sorries test case."}
+          "sorry/r3d-per-entity-attribution"
+          {:scale :campaign
+           :rationale "Blocked on M-INC step (b) typed-event-vocabulary before per-entity streams exist; mission text types it :campaign with re-typing to :mission once the shared predecessor lands."}}}
