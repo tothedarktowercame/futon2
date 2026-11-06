@@ -549,6 +549,18 @@
                        throwable))
                      (throw throwable))))))))))))
 
+(defn discharge-proof
+  "Close-data marks proving the caught failure was already decided by an
+  operator abort at a phase stop. Nil when no discharge is retained. The
+  proof source is the debugger's own discharge ledger — never a terminal
+  keyword — so the close does not demand a second operator decision for a
+  condition that was already decided (held run 2026-11-06-73839343, repair
+  wm-click-loop-repair-b310a7df: a phase-level abort of an ordinary typed
+  failure reached close and raised a fresh illegal-refusal hold)."
+  [e]
+  (when (debugger/discharged? e)
+    {:debugger/discharged? true :debugger/restart :abort}))
+
 (defn validated-close!
   "Resolve refusal legality before any close observation or persistence."
   [outcome data observe-end! close-core! attached? await-fn read-scored-field
@@ -11057,9 +11069,14 @@
                         :class (.getName (class recording-error))
                         :data (ex-data recording-error)}})))
                 review-finding (:finding review-recording)
-                finding (or review-finding (:repair-obligation failure))]
+                finding (or review-finding (:repair-obligation failure))
+                ;; A failure the debugger already discharged by a recorded
+                ;; abort must not demand a second operator decision at close
+                ;; (held run 2026-11-06-73839343, repair
+                ;; wm-click-loop-repair-b310a7df); see discharge-proof.
+                proof (discharge-proof e)]
               (close! (outcome-from e)
-                      (cond->
+                      (cond-> (cond->
                        {:target (or (:target failure)
                                     (some-> @checkpoints :selection :judgment
                                             :selected-mission))
@@ -11095,7 +11112,8 @@
                                (:failure review-recording))
                         (seq (:reviews failure))
                         (assoc :reviews (:reviews failure)
-                               :revision (:revision failure))))))))))))
+                               :revision (:revision failure)))
+                       proof (merge proof)))))))))))
 
 (defn run-opportunity!
   "Run one opportunity and ensure initialization failures also become durable

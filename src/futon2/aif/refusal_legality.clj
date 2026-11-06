@@ -119,6 +119,22 @@
 
       :else {:refusal :other})))
 
+(defn- retained-discharged-abort?
+  "True when the close data carries the debugger's retained proof that an
+  operator already chose abort for this failure at a phase stop. The
+  :debugger/discharged? mark is minted only by the debugger's discharge path
+  (the breakpoint cancellation already retains it); it is a retained proof,
+  never inferred from a terminal keyword. Held run 2026-11-06-73839343
+  (repair wm-click-loop-repair-b310a7df): a phase-level abort of an ordinary
+  typed failure rethrew the failure without the mark, the close could not
+  see the decided abort, and raised a second operator decision for the same
+  discharged condition — the bounce that stoppable-failure?'s discharge
+  contract ('must close the run, not bounce back into a second stop')
+  forbids."
+  [data]
+  (or (true? (:debugger/discharged? data))
+      (true? (get-in data [:error-data :debugger/discharged?]))))
+
 (defn resolve-close-refusal
   "Validate a close before persistence. AWAIT-FN receives the illegal-refusal
   condition data and returns a debugger restart map. READ-SCORED-FIELD is a
@@ -139,7 +155,8 @@
                 (disposition refusal))
             retained {:disposition d :case (:case refusal)
                       :evidence (:evidence refusal)}]
-        (if (and attached? (= :debugger-error d))
+        (if (and attached? (= :debugger-error d)
+                 (not (retained-discharged-abort? data)))
           (let [{:keys [action value]} (await-fn
                                         {:kind :illegal-refusal
                                          :original-kind (or (:failure-kind data) outcome)
@@ -178,5 +195,12 @@
                                         :refusal/disposition retained
                                         :refusal/restart :abort)}
               (throw (ex-info "Unknown close-refusal restart" {:action action}))))
-          {:outcome outcome :data (assoc data :refusal/disposition retained)}))
+          ;; A discharged abort persists as the :continue restart would: the
+          ;; operator decision was already made and retained at the phase
+          ;; stop, so the close proceeds and records what it retained.
+          (if (retained-discharged-abort? data)
+            {:outcome outcome
+             :data (assoc data :refusal/disposition retained
+                               :refusal/restart :continue)}
+            {:outcome outcome :data (assoc data :refusal/disposition retained)})))
       {:outcome outcome :data data})))

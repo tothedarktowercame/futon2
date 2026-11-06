@@ -145,6 +145,41 @@
     (is (= :debugger-error (get-in result [:data :refusal/disposition :disposition])))
     (is (= :continue (get-in result [:data :refusal/restart])))))
 
+(deftest discharged-abort-close-does-not-raise-a-second-decision
+  ;; Held run 2026-11-06-73839343 (repair wm-click-loop-repair-b310a7df):
+  ;; the operator aborted the occurrence-square-authoring phase stop; the
+  ;; ordinary typed failure reached close, no classification matched, and the
+  ;; close demanded a SECOND operator decision for the same discharged
+  ;; condition. With the debugger's retained discharge proof on the close
+  ;; data, the close persists as the :continue restart would, and the hold
+  ;; fires only when no decision was made.
+  (let [await (fn [_] (throw (ex-info "second decision must not be demanded" {})))
+        result (sut/resolve-close-refusal
+                true await
+                :incomplete
+                {:failure-kind :occurrence-square-answer-invalid
+                 :failure-stage :occurrence-square-authoring
+                 :error-data {:outcome :incomplete
+                              :failure-kind :occurrence-square-answer-invalid
+                              :debugger/discharged? true
+                              :debugger/restart :abort}}
+                (constantly nil) false)]
+    (is (= :incomplete (:outcome result)))
+    (is (= :debugger-error
+           (get-in result [:data :refusal/disposition :disposition]))
+        "the retained classification still says what it was")
+    (is (= :continue (get-in result [:data :refusal/restart]))
+        "the close proceeds as a decided continue, not a fresh hold"))
+  ;; without the retained proof the hold still fires exactly once
+  (let [calls (atom 0)]
+    (sut/resolve-close-refusal
+     true (fn [_] (swap! calls inc) {:action :abort})
+     :incomplete
+     {:failure-kind :occurrence-square-answer-invalid
+      :error-data {:failure-kind :occurrence-square-answer-invalid}}
+     (constantly nil) false)
+    (is (= 1 @calls))))
+
 (deftest close-refusal-controller-use-value-and-abort
   (let [used (sut/resolve-close-refusal
               true (constantly {:action :use-value

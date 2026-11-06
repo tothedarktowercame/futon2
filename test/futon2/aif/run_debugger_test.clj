@@ -409,6 +409,35 @@
       (finally
         (alter-var-root #'repairable-callee (constantly original))))))
 
+(deftest aborted-ordinary-failure-is-discharged-for-the-close
+  ;; Held run 2026-11-06-73839343 (repair wm-click-loop-repair-b310a7df):
+  ;; the operator aborted the occurrence-square-authoring phase stop, but the
+  ;; close could not see that decision and raised a second illegal-refusal
+  ;; hold for the same failure. The close site consults the debugger's
+  ;; discharge ledger; an ordinary typed failure aborted at a phase stop
+  ;; must be discharged there (identity preserved, no wrapper).
+  (debugger/attach!)
+  (let [original @#'repairable-callee
+        running (future
+                  (try
+                    (runner/run-phase!
+                     (phase-opts "abort-discharge" (atom []))
+                     {:opportunity-id "op" :attempt-id "attempt"}
+                     :selection repairable-callee)
+                    (catch Throwable e e)))]
+    (try
+      (wait-for-stop "abort-discharge")
+      (debugger/continue! "abort-discharge" :abort :failed)
+      (let [aborted (deref running 2000 ::timeout)]
+        (is (instance? clojure.lang.ExceptionInfo aborted))
+        (is (= {:debugger/discharged? true :debugger/restart :abort}
+               (runner/discharge-proof aborted))
+            "the close site can prove the abort was already decided")
+        (is (= :test/selection-broke (:kind (ex-data aborted)))
+            "the failure keeps its own identity"))
+      (finally
+        (alter-var-root #'repairable-callee (constantly original))))))
+
 (deftest use-value-continues-the-phase
   (debugger/attach!)
   (let [events (atom [])
