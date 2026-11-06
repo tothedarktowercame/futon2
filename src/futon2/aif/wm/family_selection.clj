@@ -4,9 +4,11 @@
   placeholder policy. Habit E is attached by the selector from the enactment
   fold under each policy's structural reading-policy key (cascade-habit-store
   policy-view); a ranked entry carries no E of its own before that."
-  (:require [futon2.aif.inner-abstention :as stop]
+  (:require [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.inner-abstention :as stop]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.cascade-shape-g :as shape-g]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.selected-mission-contract :as mission-contract]
             [futon2.aif.occurrence-index :as occurrence-index]
             [futon2.aif.wm.family-canonical-g :as canonical-g]
@@ -26,6 +28,28 @@
   "The co-application transition kernel the ranked reading policies carry,
   and the kernel the decision's precision identity binds."
   :co-application-frontier-theta-v1)
+
+(defn target-classes-for-outer-selection
+  "Project the retained outer selection through the same relation vocabulary
+  used by run-ending-classification.  Absence and unmapped relations remain a
+  typed unknown; they are never converted to the direct scorer's focused
+  default."
+  [outer-selection]
+  (let [target (get-in outer-selection [:selection :selected :target])
+        relation (:selected-relation outer-selection)
+        scorer-class (get focus-receipt/scorer-class relation)]
+    (if target
+      {target {:class (if scorer-class relation :unknown)
+               :scorer-class scorer-class
+               :reason (when-not scorer-class
+                         :outer-selection-relation-unavailable)
+               :provenance {:status :retained
+                            :source "outer selection selected relation"
+                            :outer-selection-sha256
+                            (action-identity/digest outer-selection)
+                            :target target
+                            :relation relation}}}
+      {})))
 
 (defn- annotate-failure [target failure]
   (assoc failure :target-id (or (:target-id failure) target)))
@@ -379,7 +403,8 @@
                                        (remove #(= :computed (:status %)) families)))
         missing-targets (vec (map :target-id
                                   (remove #(= :computed (:status %)) families)))
-        rows (score-family-field families nil (:factorized-preference opts))
+        rows (score-family-field families (:target-classes opts)
+                                 (:factorized-preference opts))
         canonical (when (= :canonical-coapply (:g-law opts))
                     (canonical-g/rescore rows (:factorized-preference opts)))
         rows (if canonical
@@ -403,7 +428,7 @@
         ranked (if bound (:ranked bound) ranked)
         ranked (if attach-f (attach-f ranked) ranked)
         certified (when (and certify (seq ranked)) (certify ranked scored))
-        opts (cond-> (dissoc opts :attach-f :certify :exclude
+        opts (cond-> (dissoc opts :attach-f :certify :exclude :target-classes
                              :bind-cascade-identity :g-law :factorized-preference)
                (= :certified (:status certified)) (assoc :beta (:beta certified) :prepared-selection (:prepared-selection certified)
                       :beta-status (when (:prepared-selection certified) :r20-computed)))

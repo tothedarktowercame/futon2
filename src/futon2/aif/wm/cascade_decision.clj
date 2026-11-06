@@ -1277,6 +1277,9 @@
                     #(family-selection/select-over-families
                     families
                     {:g-law (:g-law opts)
+                     :target-classes
+                     (family-selection/target-classes-for-outer-selection
+                      (:outer/selection opts))
                      :certify (certify-reading-family field families nil (assoc opts :policy-history-pin pin))
                      ;; Q6 before the one selector: the previous run's
                      ;; refused choice, on the same selection inputs, is

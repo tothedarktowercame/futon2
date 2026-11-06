@@ -205,6 +205,55 @@
   {:status :failed :target-id target :policies [] :distinct-count 0
    :failures [{:kind kind}] :failure-count 1})
 
+(defn- unrelated-history [policy-key]
+  {:status :complete
+   :window 32
+   :sources [{:path "retained-unrelated-run"
+              :record {:run/id "retained-unrelated-run"
+                       :terminal {:schema :wm/q6-terminal-v1
+                                  :choice {:status :present
+                                           :policy-key policy-key}}
+                       :run-ending-classification {:class :unrelated}}}]})
+
+(deftest retained-outer-relation-controls-reading-policy-class-evidence
+  (let [target "M-formal-patterns"
+        family (computed-family target 1)
+        outer (fn [relation]
+                {:selection {:selected {:target target}}
+                 :selected-relation relation})
+        score-for
+        (fn [relation]
+          (with-redefs [class-f/history-context unrelated-history]
+            (first (sut/score-family-field
+                    [family]
+                    (sut/target-classes-for-outer-selection (outer relation))))))
+        unrelated-row (score-for :useful-elsewhere)
+        unrelated (-> unrelated-row :scored first second)
+        focused-row (score-for :focus)
+        focused (first (:failures focused-row))]
+    (is (= :unrelated
+           (get-in unrelated [:class-emission :model :target-class target])))
+    (is (= :computed (:status unrelated)))
+    (is (= :computed (get-in unrelated [:class-emission :f-status])))
+    (is (= :focused
+           (get-in (sut/target-classes-for-outer-selection (outer :focus))
+                   [target :scorer-class])))
+    (is (= :zero-posterior-mass (:kind focused)))
+    (is (= :observation-impossible-under-policy
+           (get-in focused [:inference :status])))))
+
+(deftest absent-outer-relation-refuses-instead-of-defaulting-focused
+  (let [target "M-formal-patterns"
+        target-classes
+        (sut/target-classes-for-outer-selection
+         {:selection {:selected {:target target}}})
+        row (first (sut/score-family-field [(computed-family target 1)]
+                                           target-classes))]
+    (is (empty? (:scored row)))
+    (is (= :target-class-unknown (get-in row [:failures 0 :kind])))
+    (is (= :outer-selection-relation-unavailable
+           (get-in row [:failures 0 :reason])))))
+
 (deftest joint-selector-scores-every-policy-once
   (let [result (sut/select-over-families [(computed-family "T-a" 2)
                                           (computed-family "T-b" 3)]
