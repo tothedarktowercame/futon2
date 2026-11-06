@@ -20,6 +20,7 @@
             [clojure.set :as cset]
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
+            [futon2.aif.c2-question :as c2-question]
             [futon2.aif.area-focus :as area-focus]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.cascade-structure :as cascade-structure]
@@ -3999,11 +4000,17 @@
   refusal as a machine failure (attempt-020, 2026-07-16)."
   [job]
   (let [text (job-text job)
-        [_ marker detail] (re-find #"(?m)^FULL_LOOP_AUTHOR:\s*(REFUSE-HARM|DONE|REFUSE)\b[ \t]*(.*)$"
+        [_ marker detail] (re-find #"(?m)^FULL_LOOP_AUTHOR:\s*(REFUSE-HARM|QUESTION|DONE|REFUSE)\b[ \t]*(.*)$"
                                    text)]
     (case marker
       "DONE" {:verdict :done :detail (str/trim (str detail))}
       "REFUSE" {:verdict :refuse :reason (str/trim (str detail))}
+      "QUESTION"
+      (if-let [question (read-one-edn (str/trim (str detail)))]
+        (if (map? question)
+          {:verdict :question :question question}
+          {:verdict :question :question-error :unreadable-question})
+        {:verdict :question :question-error :unreadable-question})
       "REFUSE-HARM"
       (try
         (let [claim (edn/read-string (str/trim (str detail)))]
@@ -4225,10 +4232,16 @@
    (author-refusal-classification job repo exists-fn repository-required?
                                   (production-harm-world)))
   ([job repo exists-fn repository-required? harm-world]
-   (let [{:keys [verdict reason claim claim-error]} (author-verdict job)
+   (let [{:keys [verdict reason claim claim-error question question-error]} (author-verdict job)
          artifact-ref (:artifact-ref job)
          exists-fn (or exists-fn commit-exists-in?)]
-     (if (= :refuse-harm verdict)
+     (cond
+       (= :question verdict)
+       {:outcome :author-question
+        :question question
+        :question-error question-error}
+
+       (= :refuse-harm verdict)
        (if claim-error
          {:outcome :invalid-author-refusal
           :harm-refusal {:status :refused :reason claim-error}}
@@ -4239,7 +4252,7 @@
                            :declined-action (:declined-action claim)
                            :declined-action-digest (:declined-action-digest matched)}}
              {:outcome :invalid-author-refusal :harm-refusal matched})))
-       (when (= :refuse verdict)
+       (= :refuse verdict)
        (let [card (raw-feature-card job)
              already? (or (and card (already-satisfied-card? card))
                           (already-satisfied-report? reason))
@@ -4313,7 +4326,32 @@
                 (nil? proof-sha))
            {:outcome :guardrail-refusal :refusal-reason reason}
 
-           :else {:outcome :invalid-author-refusal})))))))
+           :else {:outcome :invalid-author-refusal}))))))
+
+(defn- checked-author-question
+  [target mission {:keys [question question-error]}]
+  (cond
+    question-error
+    {:status :refused :reason question-error}
+
+    (not (map? (:source mission)))
+    {:status :refused :reason :source-pin-absent}
+
+    (not (and (string? (get-in mission [:source :path]))
+              (string? (get-in mission [:source :sha256]))))
+    {:status :refused :reason :source-pin-absent}
+
+    :else
+    (try
+      (let [source-pin (:source mission)
+            source-bytes (String. (Files/readAllBytes
+                                   (.toPath (io/file (:path source-pin))))
+                                  "UTF-8")]
+        (c2-question/question-carrier target source-bytes source-pin question nil))
+      (catch Throwable e
+        {:status :refused
+         :reason :source-unavailable
+         :error-class (.getName (class e))}))))
 
 (defn throw-if-author-refused!
   "Shared HEAD movement cannot establish an artifact for a refusing author,
@@ -4323,7 +4361,9 @@
   :already-satisfied with that commit as the grounded commit (click 14);
   a reasoned refusal with no artifact claim is the guardrail refusal; a
   contradictory or unsupported claim stays :invalid-author-refusal."
-  [author-job target stage]
+  ([author-job target stage]
+   (throw-if-author-refused! author-job target stage nil))
+  ([author-job target stage mission]
   (let [correction-repository
         (or (get-in author-job [:author-response-corrections 0 :binding :repository])
             (get-in author-job [:unmeasured-claim-correction :binding :repository]))
@@ -4340,6 +4380,15 @@
                         (some? correction-repository))]
     (when classification
     (case (:outcome classification)
+      :author-question
+      (let [checked (checked-author-question target mission classification)]
+        (throw (ex-info "Author reported a cited ambiguity in the mission text"
+                        {:outcome :author-question
+                         :failure-kind :author-question
+                         :failure-stage stage
+                         :target target
+                         :c2/question checked
+                         :author-job author-job})))
       :harm-declined
       (throw (ex-info "Author declined an action matching an approved harm rule"
                       {:outcome :harm-declined
@@ -4365,7 +4414,7 @@
                       {:outcome :build-failed
                        :failure-kind :invalid-author-refusal
                        :failure-stage stage
-                       :target target :author-job author-job}))))))
+                       :target target :author-job author-job})))))))
 
 (defn- review-execution-gate [files job]
   (task-execution/review-execution-gate files job))
@@ -4915,7 +4964,11 @@
        "   :claim-mission-text-not-an-artifact, whatever its checkboxes say, and\n"
        "   gets one correction round to build a real artifact instead.\n"
        "If no safe substantive parcel is possible, make no commit and finish with "
-       "FULL_LOOP_AUTHOR: REFUSE <typed reason>.\n"
+       "FULL_LOOP_AUTHOR: REFUSE <typed reason>. If the mission text itself admits "
+       "two readings and you cannot tell which applies, finish instead with exactly "
+       "FULL_LOOP_AUTHOR: QUESTION {:question \"...\" :span {:lines [first last] "
+       ":quote \"exact mission text\"} :alternatives [\"reading A\" \"reading B\"]}. "
+       "QUESTION is not a substitute for bounded work when the text permits it.\n"
        (harm-refusal-prompt))))
 
 (defn- build-cure-prompt
@@ -5012,7 +5065,12 @@
        "work in the target repository and end FULL_LOOP_AUTHOR: DONE "
        "<fresh-commit-sha>. Do not make a cosmetic commit. If no useful parcel "
        "can be committed, repeat FULL_LOOP_AUTHOR: REFUSE <reason>; that second "
-       "refusal ends the run with the existing guardrail-refusal record.\n\n"
+       "refusal ends the run with the existing guardrail-refusal record. If the "
+       "mission text itself admits two readings and you cannot tell which applies, "
+       "finish instead with FULL_LOOP_AUTHOR: QUESTION {:question \"...\" :span "
+       "{:lines [first last] :quote \"exact mission text\"} :alternatives "
+       "[\"reading A\" \"reading B\"]}. This is not a substitute for bounded work "
+       "when the text permits it.\n\n"
        "SELECTED TARGET: " (pr-str target) "\n"
        "TARGET REPOSITORY: " (pr-str repository) "\n"
        "ORIGINAL AUTHOR JOB (RETAINED): "
@@ -10336,7 +10394,7 @@
                                     :dispatch (get-in @d-task-dispatch [:dispatch])})]
                     ;; The existing close handler retains the reviewed artifact and job.
                     (throw (ex-info "Existing-artifact claim independently reviewed" reviewed)))))
-              (throw-if-author-refused! author-job target :author-wait)
+              (throw-if-author-refused! author-job target :author-wait mission)
               (let [bound-author? (or fresh-author? (some? deferred-author-context))
                     declaration (:artifact-declaration author-job)
                     _ (when (and (some? (:status declaration))

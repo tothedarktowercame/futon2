@@ -4,7 +4,8 @@
   The mission-reading validator remains the authority for what constitutes a
   cited ambiguity. This namespace pins the source bytes and gives the checked
   question a canonical digest; it performs no I/O."
-  (:require [futon2.aif.action-identity :as identity]
+  (:require [clojure.string :as str]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.mission-reading :as mission-reading]))
 
 (def schema :wm/c2-question-v1)
@@ -19,9 +20,12 @@
    :source-sha256 source-sha})
 
 (defn- question-refusal [question source-bytes]
-  (some-> (mission-reading/question-reasons [question] source-bytes)
-          first
-          :reason))
+  (or (some-> (mission-reading/question-reasons [question] source-bytes)
+              first
+              :reason)
+      (when (< (count (set (remove str/blank?
+                                  (:alternatives question)))) 2)
+        :question-without-alternatives)))
 
 (defn question-carrier
   "Return a checked C2 question carrier or a typed refusal.

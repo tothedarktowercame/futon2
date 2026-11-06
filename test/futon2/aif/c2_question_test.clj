@@ -45,6 +45,8 @@
             :question-span-does-not-resolve]
            [:one-alternative (assoc question :alternatives ["only one"])
             :question-without-alternatives]
+           [:duplicate-alternatives (assoc question :alternatives ["same" "same"])
+            :question-without-alternatives]
            [:blank-question (assoc question :question "  ")
             :question-not-stated]]]
     (testing (name label)
