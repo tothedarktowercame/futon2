@@ -3,7 +3,8 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.full-loop-runner :as runner]
-            [futon2.aif.selected-target-reading :as selected-target-reading])
+            [futon2.aif.selected-target-reading :as selected-target-reading]
+            [futon2.aif.wm.debugger :as debugger])
   (:import [java.nio.file Files]
            [java.security MessageDigest]))
 
@@ -191,6 +192,80 @@
     (is (= "Cannot read the excerpt" (:message record)))
     (is (= "clojure.lang.ExceptionInfo" (:error-class record)))
     (is (= {:kind :excerpt-unreadable :target "M-held"} (:error-data record)))))
+
+(deftest clock-store-busy-repair-throw-escapes-with-intact-data
+  (let [busy-data {:failure-kind :clock/store-busy
+                   :error/code :clock/store-busy
+                   :dispatch/not-created? true}
+        busy (ex-info "Agency clock store busy; dispatch not created" busy-data)
+        wrapped (ex-info "reading dispatch failed" {:stage :reading} busy)
+        thrown (with-redefs [selected-target-reading/preparation-needed? (constantly true)]
+                 (try
+                   (runner/selected-target-reading-step
+                    {:run-id "reading-clock-busy"}
+                    {:decision {}}
+                    (fn [_ _] (throw wrapped))
+                    (fn [_] (throw (AssertionError. "redecide must not run"))))
+                   nil
+                   (catch clojure.lang.ExceptionInfo e e)))]
+    (is (identical? wrapped thrown))
+    (is (= busy-data (ex-data (.getCause thrown))))))
+
+(deftest non-clock-repair-throw-remains-a-reading-refusal
+  (let [failure (ex-info "agent unavailable" {:failure-kind :agent-unavailable})
+        result (with-redefs [selected-target-reading/preparation-needed? (constantly true)]
+                 (runner/selected-target-reading-step
+                  {:run-id "reading-agent-unavailable"}
+                  {:decision {}}
+                  (fn [_ _] (throw failure))
+                  (fn [_] (throw (AssertionError. "redecide must not run")))))
+        record (:record result)]
+    (is (= :refused (:status record)))
+    (is (= :selected-target-reading-repair-threw (:kind record)))
+    (is (= {:failure-kind :agent-unavailable} (:error-data record)))))
+
+(deftest clock-store-busy-holds-at-reading-phase-and-retry-redispatches
+  (let [run-id "reading-clock-busy-retry"
+        calls (atom 0)
+        task (atom nil)
+        record {:schema :wm/selected-target-reading-request-v1
+                :status :published :published false}]
+    (debugger/attach!)
+    (try
+      (binding [runner/*wm-status-reporting?* false]
+        (with-redefs [selected-target-reading/preparation-needed? (constantly true)]
+          (reset! task
+                  (future
+                    (runner/run-phase!
+                     {:run-id run-id}
+                     {} :selected-target-reading
+                     #(runner/selected-target-reading-step
+                       {:run-id run-id} {:decision {}}
+                       (fn [_ _]
+                         (if (= 1 (swap! calls inc))
+                           (throw (ex-info "Agency clock store busy; dispatch not created"
+                                           {:failure-kind :clock/store-busy
+                                            :error/code :clock/store-busy
+                                            :dispatch/not-created? true}))
+                           record))
+                       (fn [_] (throw (AssertionError. "redecide must not run")))))))
+          (let [deadline (+ (System/nanoTime) 5000000000)
+                stop (loop []
+                       (or (first (filter #(= run-id (:run-id %)) (debugger/stopped)))
+                           (when (< (System/nanoTime) deadline)
+                             (Thread/sleep 10)
+                             (recur))))]
+            (is (= :selected-target-reading (:phase stop)))
+            (is (= :clock/store-busy (get-in stop [:ex-data :failure-kind])))
+            (is (= 1 @calls))
+            (when stop (debugger/continue! run-id :retry :fixed))
+            (is (= record (:record (deref @task 5000 ::timeout))))
+            (is (= 2 @calls)))))
+      (finally
+        (when (some #(= run-id (:run-id %)) (debugger/stopped))
+          (debugger/continue! run-id :abort :failed))
+        (when @task (future-cancel @task))
+        (debugger/detach!)))))
 
 (deftest reading-observer-distinguishes-not-started-from-missing-result
   (let [no-checkpoint {:checkpoints {}}]

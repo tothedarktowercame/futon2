@@ -1145,6 +1145,16 @@
                      (assoc :data (ex-data current)))))
       chain)))
 
+(defn- clock-store-busy-cause?
+  "True when THROWABLE or one of its causes is the typed clock-store busy
+  failure.  That failure creates no dispatch, so the phase debugger must own
+  retry rather than retaining it as a reading refusal."
+  [^Throwable throwable]
+  (boolean
+   (some (fn [{:keys [data]}]
+           (= :clock/store-busy (:failure-kind data)))
+         (exception-cause-chain throwable))))
+
 (defn- original-typed-failure [^Throwable throwable]
   (some (fn [{:keys [data]}]
           (when (and (map? data) (:failure-kind data))
@@ -3045,18 +3055,20 @@
               (reset! reading-state {:status :started}))
           record (try (repair-fn opts judgement)
                       (catch Throwable e
-                        ;; The throwable's class and ex-data ride the record:
-                        ;; repair 1b5608db (held run 6d57248a) reached
-                        ;; close-refusal with :original-kind
-                        ;; :selected-target-reading-repair-threw and nothing
-                        ;; anywhere saying what threw, so the operator
-                        ;; debugger page was causeless.
-                        {:schema :wm/selected-target-reading-request-v1
-                         :status :refused
-                         :kind :selected-target-reading-repair-threw
-                         :published false :message (ex-message e)
-                         :error-class (.getName (class e))
-                         :error-data (ex-data e)}))
+                        (if (clock-store-busy-cause? e)
+                          (throw e)
+                          ;; The throwable's class and ex-data ride the record:
+                          ;; repair 1b5608db (held run 6d57248a) reached
+                          ;; close-refusal with :original-kind
+                          ;; :selected-target-reading-repair-threw and nothing
+                          ;; anywhere saying what threw, so the operator
+                          ;; debugger page was causeless.
+                          {:schema :wm/selected-target-reading-request-v1
+                           :status :refused
+                           :kind :selected-target-reading-repair-threw
+                           :published false :message (ex-message e)
+                           :error-class (.getName (class e))
+                           :error-data (ex-data e)})))
           _ (when reading-state
               (reset! reading-state {:status :completed :record record}))]
       (if (:published record)
