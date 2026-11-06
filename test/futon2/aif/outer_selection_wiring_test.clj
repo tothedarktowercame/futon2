@@ -171,6 +171,7 @@
             :outer-cascade-id :find-out-before-building}
            (select-keys (get-in @received [:outer/selection :enactment])
                         [:mode :outer-cascade-id])))
+    (is (= :off (:wm/discovery-enactment @received)))
     (is (= "M-unknown"
            (get-in @received [:outer/selection :selection :selected :target])))))
 

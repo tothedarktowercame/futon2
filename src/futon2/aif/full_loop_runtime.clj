@@ -1587,7 +1587,8 @@
   chosen task has closed; while it remains open observed gain is `:none`.
   META injuries are arbitrated before this function."
   [opts]
-  (if (get-in opts [:task :id])
+  (let [opts (assoc opts :wm/discovery-enactment :off)]
+   (if (get-in opts [:task :id])
     (run-ordinary-opportunity-with-task!
      (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}]
        (assoc opts :selection-record
@@ -1786,7 +1787,7 @@
           (outer-selection-failure opts e))
         (catch Exception e
           (outer-selection-failure opts e)))
-      {:absent :no-verified-giraffe-run})))
+      {:absent :no-verified-giraffe-run}))))
 
 (defn- run-ordinary-opportunity! [opts]
   (let [opts (selection-context opts)
@@ -1843,6 +1844,9 @@
         ;; execution boundary before it decides whether selection is
         ;; terminal.
         runner-opts0 (assoc opts
+                           ;; FOBB-B is retained but deliberately not live
+                           ;; until review and close contracts exist.
+                           :wm/discovery-enactment :off
                            :ticket-readiness-refresh
                            (:ticket-readiness-refresh defaults)
                            :click-budget (or (:click-budget opts) (atom 0))

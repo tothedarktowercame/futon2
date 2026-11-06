@@ -1610,6 +1610,7 @@
                     :observation-labels (observation-label-wire/record-declaration-reads!
                                          (:observation-labels-path raw-opts) declaration-reads)
                     :click/id (:click-id raw-opts)
+                    :discovery-enactment (:wm/discovery-enactment raw-opts)
                     :startedAt started-at
                     :registered-run/timing timing
                     :registered-run/model-usage usage
@@ -4875,6 +4876,103 @@
                             (:rules (harm-rules/load-rules))))
        "\n"))
 
+(def ^:private find-out-result-schema :wm/find-out-result-v1)
+(def ^:private find-out-verdicts #{:current :blocked :likely-outdated})
+
+(defn discovery-prompt
+  "A read-only author contract for a find-out-before-building selection.
+  This contract is deliberately selected only by `author-enactment-prompt`
+  while the explicit runtime switch is :on."
+  [{:keys [author reviewer]} target mission cascade-entry]
+  (str author ": FULL-LOOP DISCOVERY OPPORTUNITY. You are the discovery author; "
+       reviewer " is the independent reviewer.\n\n"
+       "Find out what the selected undetermined work means before anyone builds it. "
+       "This is a read-only task: inspect the mission and cited repository evidence, "
+       "but make no edits to the target and do not commit target changes.\n\n"
+       "SELECTED TARGET: " (pr-str target) "\n"
+       "MISSION RECORD: " (pr-str mission) "\n"
+       "PATTERN CASCADE:\n" (cascade-plan/cascade-plan-text cascade-entry)
+       "\nFor each item, report what it is in two sentences; why Giraffe could not "
+       "decide (quote the unresolved edge from its reading); and exactly one verdict:\n"
+       "- :current — concrete next items exist and nothing blocks them.\n"
+       "- :blocked — state each blocker as a technical question: the decision, "
+       "the alternatives, what each changes, and cited file:line evidence.\n"
+       "- :likely-outdated — cite what superseded it, where it finished, or the "
+       "work it depended on that has moved on.\n"
+       "Evidence is a non-empty vector of file:line locator strings. A blocked "
+       "item's :questions is a non-empty vector of C2 question maps shaped as "
+       "{:question \"...\" :span {:lines [first last] :quote \"exact text\"} "
+       ":alternatives [\"reading A\" \"reading B\"]}.\n\n"
+       "Finish with exactly one line:\n"
+       "FULL_LOOP_DISCOVERY: {:schema :wm/find-out-result-v1 :target "
+       (pr-str target)
+       " :items [{:verdict :current|:blocked|:likely-outdated "
+       ":evidence [\"path:line\"] :questions [...]}]}\n"
+       "Do not emit FULL_LOOP_ARTIFACTS and do not emit FULL_LOOP_AUTHOR: DONE <sha>.\n"))
+
+(defn- file-line-locator? [x]
+  (and (string? x)
+       (boolean (re-matches #".+:\d+(?:-\d+)?" x))))
+
+(defn- discovery-question-shape? [{:keys [question span alternatives]}]
+  (and (string? question)
+       (not (str/blank? question))
+       (map? span)
+       (let [[a b] (:lines span)]
+         (and (integer? a) (integer? b) (<= 1 a b)))
+       (string? (:quote span))
+       (not (str/blank? (:quote span)))
+       (sequential? alternatives)
+       (every? string? alternatives)
+       (<= 2 (count (distinct (remove str/blank? alternatives))))))
+
+(defn parse-discovery-result
+  "Parse and validate the inert find-out result wire. Returns either a typed
+  accepted result or a typed refusal; it does not publish or close a run."
+  [text]
+  (let [[_ wire] (re-find #"(?m)^FULL_LOOP_DISCOVERY:\s*(.*)$" (str text))
+        result (when wire (read-one-edn (str/trim wire)))]
+    (cond
+      (nil? wire)
+      {:status :refused :kind :find-out-result/missing-marker}
+
+      (not (map? result))
+      {:status :refused :kind :find-out-result/unreadable}
+
+      (not= find-out-result-schema (:schema result))
+      {:status :refused :kind :find-out-result/schema-mismatch}
+
+      (not (vector? (:items result)))
+      {:status :refused :kind :find-out-result/items-missing}
+
+      :else
+      (or
+       (some (fn [[index item]]
+               (cond
+                 (not (map? item))
+                 {:status :refused :kind :find-out-result/item-malformed :item index}
+
+                 (not (contains? item :verdict))
+                 {:status :refused :kind :find-out-result/verdict-missing :item index}
+
+                 (not (contains? find-out-verdicts (:verdict item)))
+                 {:status :refused :kind :find-out-result/verdict-unknown
+                  :item index :verdict (:verdict item)}
+
+                 (or (not (vector? (:evidence item)))
+                     (empty? (:evidence item))
+                     (not-every? file-line-locator? (:evidence item)))
+                 {:status :refused :kind :find-out-result/evidence-missing :item index}
+
+                 (and (= :blocked (:verdict item))
+                      (or (not (vector? (:questions item)))
+                          (empty? (:questions item))
+                          (not-every? discovery-question-shape? (:questions item))))
+                 {:status :refused :kind :find-out-result/blocked-questions-missing
+                  :item index}))
+             (map-indexed vector (:items result)))
+       {:status :accepted :result result}))))
+
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
                              measured-acquisition? surprise-root
@@ -5016,6 +5114,20 @@
        ":quote \"exact mission text\"} :alternatives [\"reading A\" \"reading B\"]}. "
        "QUESTION is not a substitute for bounded work when the text permits it.\n"
        (harm-refusal-prompt))))
+
+(defn author-enactment-prompt
+  "Choose the author contract from the retained FOBB-A pin and an explicit
+  runtime switch. There is intentionally no default for the switch."
+  [runtime-opts prompt-opts target mission construction stop-lines]
+  (let [mode (get-in construction [:outer-enactment :mode])
+        enabled (:wm/discovery-enactment runtime-opts)]
+    (when-not (contains? #{:on :off} enabled)
+      (throw (ex-info "Discovery enactment option must be explicit"
+                      {:failure-kind :discovery-enactment-option-required
+                       :wm/discovery-enactment enabled})))
+    (if (and (= :discovery mode) (= :on enabled))
+      (discovery-prompt prompt-opts target mission construction)
+      (author-prompt prompt-opts target mission construction stop-lines))))
 
 (defn- build-cure-prompt
   "Construct the cure re-emission prompt sent to the SAME author agent when a
@@ -10147,7 +10259,9 @@
                                   (:pre-author-head deferred-author-context))
                 prompt-for-head
                 (fn [head-observation plan]
-                  (author-prompt (assoc prompt-opts
+                  (author-enactment-prompt
+                   opts
+                   (assoc prompt-opts
                                         :reviewer reviewer
                                         :surprise-root
                                         (or (:surprise-root opts)
@@ -10166,7 +10280,7 @@
                                         (get-in @d-task-dispatch
                                                 [:dispatch :occurrence :action/value
                                                  :observation-locators]))
-                                 target mission construction stop-lines))
+                   target mission construction stop-lines))
                 _ (mission-contract/require-before-author! (:selected-action construction))
                 mission-applicable?
                 (mission-measurement-applicable?
