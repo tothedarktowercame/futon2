@@ -188,18 +188,18 @@
     (into #{}
           (mapcat
            (fn [[root rows]]
-             (let [{:keys [exit out err]}
+             ;; An unreadable repository excludes nothing: being unable to
+             ;; see an edit must not stop selection (Joe 2026-11-06: the WM
+             ;; must not be brittle in ways other agents are not).
+             (let [{:keys [exit out]}
                    (shell/sh "git" "-C" (.getPath root) "status" "--porcelain=v1"
-                             "-z" "--untracked-files=no")]
-               (when-not (zero? exit)
-                 (refuse! :target-edit-status-unavailable
-                          {:repo (.getPath root) :message err}))
-               (let [dirty (porcelain-paths out)]
-                 (keep (fn [{:keys [target path]}]
-                         (let [relative (str (.relativize (.toPath root)
-                                                         (.toPath (io/file path))))]
-                           (when (contains? dirty relative) target)))
-                       rows))))
+                             "-z" "--untracked-files=no")
+                   dirty (if (zero? exit) (porcelain-paths out) #{})]
+               (keep (fn [{:keys [target path]}]
+                       (let [relative (str (.relativize (.toPath root)
+                                                       (.toPath (io/file path))))]
+                         (when (contains? dirty relative) target)))
+                     rows)))
           (group-by :root located)))))
 
 (defn- open-roster [authority entries]
