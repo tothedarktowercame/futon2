@@ -1224,9 +1224,11 @@ def debugger_stops() -> list[dict]:
     ids = re.findall(r':run-id\s+"([^"]+)"', r["out"])
     phases = re.findall(r':phase\s+:([\w.-]+)', r["out"])
     kinds = re.findall(r':condition\s+\{:kind\s+:([\w./-]+)', r["out"])
+    stamps = re.findall(r':stopped-at\s+"([^"]+)"', r["out"])
     return [{"run-id": rid,
              "phase": phases[i] if i < len(phases) else "unknown",
              "condition-kind": kinds[i] if i < len(kinds) else "unknown",
+             "stopped-at": stamps[i] if i < len(stamps) else "unknown",
              "raw": r["out"]}
             for i, rid in enumerate(ids)]
 
@@ -1267,6 +1269,19 @@ def handle_held_stop(args, stop: dict, in_flight_repairs: list,
     """
     reason = (f"held run {stop['run-id']} stopped at {stop['phase']} "
               f"({stop['condition-kind']})")
+    if (stop["run-id"], stop["phase"]) in HELD_RETRIED:
+        # The retry re-held at the same phase: the repair did not remove the
+        # cause.  Do not repair again inside this run; abort so the click
+        # ends and the next round's self-heal sees it.  (2026-11-05: run
+        # 6d57248a re-held at close-refusal after a "repaired" retry and sat
+        # unattended for 20 minutes, because the repeat matched a handled
+        # signature and was skipped.)
+        result = abort_held_run(stop["run-id"])
+        record({"event": "debugger-resumed", "run-id": stop["run-id"],
+                "phase": stop["phase"], "choice": "abort-repeat-hold",
+                "result": result["out"][-500:]})
+        log(f"{reason} again after a retry; aborting the held phase")
+        return since_epoch
     if args.observe_only:
         result = abort_held_run(stop["run-id"])
         record({"event": "external-repair-skipped", "run-id": stop["run-id"],
@@ -1284,6 +1299,7 @@ def handle_held_stop(args, stop: dict, in_flight_repairs: list,
         ok, reload_text, since_epoch = reload_when_idle(
             since_epoch, held_run_id=stop["run-id"])
         if ok:
+            HELD_RETRIED.add((stop["run-id"], stop["phase"]))
             resumed = retry_held_run(stop["run-id"])
             record({"event": "debugger-resumed", "run-id": stop["run-id"],
                     "phase": stop["phase"], "choice": "retry",
@@ -1298,6 +1314,7 @@ def handle_held_stop(args, stop: dict, in_flight_repairs: list,
         # designed recovery is the debugger's :retry.  One retry per held
         # (run, phase); a second hold there is aborted below.
         HELD_NO_DEFECT_RETRIES.add((stop["run-id"], stop["phase"]))
+        HELD_RETRIED.add((stop["run-id"], stop["phase"]))
         resumed = retry_held_run(stop["run-id"])
         record({"event": "debugger-resumed", "run-id": stop["run-id"],
                 "phase": stop["phase"], "choice": "retry-no-defect",
@@ -1311,6 +1328,10 @@ def handle_held_stop(args, stop: dict, in_flight_repairs: list,
 
 # (run-id, phase) pairs already retried after a no-defect verdict.
 HELD_NO_DEFECT_RETRIES: set = set()
+
+# (run-id, phase) pairs already retried after any repair verdict; a second
+# hold at one of them is aborted, not repaired again.
+HELD_RETRIED: set = set()
 
 
 def _retried_no_defect(stop: dict) -> bool:
@@ -1341,7 +1362,8 @@ def fire(n: int, args, since_epoch: int) -> dict:
                 raise subprocess.TimeoutExpired(cmd, 3 * 3600)
             stop = debugger_stop()
             if stop:
-                signature = (stop["run-id"], stop["phase"], stop["condition-kind"])
+                signature = (stop["run-id"], stop["phase"], stop["condition-kind"],
+                             stop.get("stopped-at"))
                 if signature not in handled_stops:
                     handled_stops.add(signature)
                     record({"event": "debugger-held", **{k: stop[k] for k in

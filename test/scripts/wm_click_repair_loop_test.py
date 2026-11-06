@@ -539,6 +539,37 @@ class RepairLoopCastTest(unittest.TestCase):
             retry.assert_called_once_with("run-busy")
             abort.assert_called_once_with("run-busy")
 
+    def test_repaired_held_stop_that_re_holds_is_aborted_not_repaired_again(self):
+        # Run 6d57248a: a "repaired" verdict, hot-load and retry, then the
+        # same phase held again and the loop skipped it as already handled.
+        loop = load_loop()
+        args = loop.parse_args([
+            "run", "--clicks", "3", "--owner", "codex-68",
+            "--issuing-caller", "codex-68", "--author", "wm-author",
+            "--reviewer", "wm-reviewer",
+            "--repair-reviewer", "wm-repair-reviewer",
+        ])
+        stop = {"run-id": "run-rehold", "phase": "close-refusal",
+                "condition-kind": "illegal-refusal"}
+        with tempfile.TemporaryDirectory() as td, \
+             mock.patch.object(loop, "repair",
+                               return_value=("repaired", "detail")) as rep, \
+             mock.patch.object(loop, "reload_when_idle",
+                               return_value=(True, "", 1)), \
+             mock.patch.object(loop, "retry_held_run",
+                               return_value={"out": "{:delivered true}"}) as retry, \
+             mock.patch.object(loop, "abort_held_run",
+                               return_value={"out": "{:delivered true}"}) as abort, \
+             mock.patch.object(loop, "record"), \
+             mock.patch.object(loop, "log"):
+            loop.handle_held_stop(args, stop, [], Path(td) / "held.md", 1)
+            retry.assert_called_once_with("run-rehold")
+            abort.assert_not_called()
+            loop.handle_held_stop(args, stop, [], Path(td) / "held.md", 1)
+            rep.assert_called_once()
+            retry.assert_called_once_with("run-rehold")
+            abort.assert_called_once_with("run-rehold")
+
     def test_each_click_resets_the_explicit_role_cast(self):
         loop = load_loop()
         args = loop.parse_args([
