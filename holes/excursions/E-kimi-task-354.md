@@ -1,6 +1,6 @@
 # E-kimi-task-354 — futonic vocabulary as native Chinese: eat-your-own-tail theorization
 
-**Requisition:** in-progress — dispatched 2026-11-06T20:44:42Z to kimi-1 as invoke-1793997882816-14337-3ee11bc2
+**Requisition:** completed — 2026-11-06T20:47:27Z, job invoke-1793997882816-14337-3ee11bc2, state done
 
 Clocked in by zai-9 for kimi-1 on 2026-11-06 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
