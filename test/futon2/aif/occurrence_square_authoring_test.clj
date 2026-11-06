@@ -194,6 +194,39 @@
     (is (= :selected (get-in result [:judgement :decision :status])))
     (is (= :published (get-in result [:record :status])))))
 
+(deftest clock-store-busy-repair-throw-escapes-square-authoring-with-intact-data
+  ;; held run 2026-11-06-c89e0ead (repair 5aefccdc): the square-authoring
+  ;; catch swallowed Agency's typed pre-dispatch busy refusal into a bare
+  ;; :occurrence-square-authoring-threw record, so the held phase could not
+  ;; present :clock/store-busy or offer the operator-driven :retry.
+  (let [busy-data {:outcome :clock-store-busy
+                   :failure-kind :clock/store-busy
+                   :error/code :clock/store-busy
+                   :dispatch/not-created? true}
+        busy (ex-info "Agency clock store busy; dispatch not created" busy-data)
+        thrown (try
+                 (runner/occurrence-square-authoring-step
+                  {} (judgement (reading! (temp-root)))
+                  (fn [_ _] (throw busy))
+                  (fn [_] (throw (AssertionError. "redecide must not run"))))
+                 nil
+                 (catch clojure.lang.ExceptionInfo e e))]
+    (is (identical? busy thrown))
+    (is (= busy-data (ex-data thrown)))))
+
+(deftest square-authoring-repair-throw-retains-cause-class-and-ex-data
+  (let [cause (ex-info "cannot resolve pattern text"
+                       {:kind :pattern-unreadable :pattern pattern})
+        result (runner/occurrence-square-authoring-step
+                {} (judgement (reading! (temp-root)))
+                (fn [_ _] (throw cause))
+                (fn [_] (throw (AssertionError. "redecide must not run"))))
+        record (:record result)]
+    (is (= :occurrence-square-authoring-threw (:kind record)))
+    (is (= "cannot resolve pattern text" (:message record)))
+    (is (= "clojure.lang.ExceptionInfo" (:error-class record)))
+    (is (= {:kind :pattern-unreadable :pattern pattern} (:error-data record)))))
+
 (deftest debugger-does-not-stop-between-reading-and-square-authoring
   (let [reading (reading! (temp-root))
         missing-squares (judgement reading)

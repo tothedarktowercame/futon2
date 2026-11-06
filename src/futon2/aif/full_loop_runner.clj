@@ -1062,6 +1062,10 @@
   (let [answer (:answer v)
         message (:message answer)]
     (cond-> (select-keys v [:schema :status :kind])
+      (string? (:message v))
+      (assoc :message (subs (:message v) 0 (min 300 (count (:message v)))))
+      (:error-class v)
+      (assoc :error-class (:error-class v))
       (map? answer)
       (assoc :answer
              (cond-> (select-keys answer [:reason :job-id])
@@ -3128,9 +3132,21 @@
     {:judgement judgement :record nil}
     (let [record (try (repair-fn opts judgement)
                       (catch Throwable e
-                        {:schema square-authoring/schema :status :error
-                         :kind :occurrence-square-authoring-threw
-                         :message (ex-message e)}))]
+                        (if (clock-store-busy-cause? e)
+                          ;; The busy refusal creates no dispatch, so the
+                          ;; phase debugger must own retry; retaining it as
+                          ;; a square-authoring error record loses the typed
+                          ;; ex-data (held run c89e0ead, repair 5aefccdc).
+                          (throw e)
+                          ;; The throwable's class and ex-data ride the
+                          ;; record, mirroring the selected-target-reading
+                          ;; seam (repair 1b5608db: a bare :message leaves
+                          ;; the operator debugger page causeless).
+                          {:schema square-authoring/schema :status :error
+                           :kind :occurrence-square-authoring-threw
+                           :message (ex-message e)
+                           :error-class (.getName (class e))
+                           :error-data (ex-data e)})))]
       (if (:published record)
         {:judgement (-> (redecide record)
                         (assoc :occurrence-square-authoring record)
