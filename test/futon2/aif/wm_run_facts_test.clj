@@ -968,6 +968,27 @@
     (is (contains? paths [:outer/selection :argument :arguments 0 :facts :placement]))
     (is (= 2 (count paths)) "both retained narratives still expose the chosen placement absence")))
 
+(deftest selection-source-header-absence-values-are-not-a-q7-envelope
+  (let [record {:outer/selection
+                {:cascade-id :serves-a-way
+                 :chosen-class "chosen-class-hash"
+                 :why {:classes [{:class "chosen-class-hash"
+                                  :source {:header {:date :absent
+                                                    :status :absent
+                                                    :timebox :absent}}}]}}}]
+    (is (= [] (facts/selection-absence-paths record))
+        "the selected document header is presentation metadata, not a typed absence")))
+
+(deftest selection-genuine-typed-absence-still-counts-for-q7
+  (let [record {:outer/selection
+                {:cascade-id :serves-a-way
+                 :chosen-class "chosen-class-hash"
+                 :why {:classes [{:class "chosen-class-hash"
+                                  :source {:receipt {:status :absent
+                                                     :reason :source-unavailable}}}]}}}]
+    (is (= [[:outer/selection :why :classes 0 :source :receipt]]
+           (facts/selection-absence-paths record)))))
+
 (deftest selection-path-drops-placement-the-chosen-class-did-not-read
   (let [absent {:status :absent :reason :no-placement}
         record {:outer/selection

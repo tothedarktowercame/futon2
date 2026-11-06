@@ -214,6 +214,28 @@
                         :history-index-absent :history-index-incomplete
                         "absent" "not-supplied" "missing" "refused" "failed"})
 
+(defn- typed-absence-envelope?
+  "True only for the typed absence carriers emitted on WM records, not for a
+  business map that happens to use an absence keyword as one field value."
+  [m]
+  ;; Recognised producer shapes are:
+  ;;   {:status <absence> :reason ...}, {:status :missing :kind ...},
+  ;;   {:status :history-index-* :index-path ...}, and the status-only
+  ;;   {:status :absent} carrier; outcome envelopes use the same discriminator
+  ;;   with :reason/:kind/:failure-kind (or alone). Typed refusals and the
+  ;;   ending-classification absence have their own explicit discriminators.
+  (let [status-absence? (contains? absence-statuses (:status m))
+        outcome-absence? (contains? absence-statuses (:outcome m))
+        typed-detail? #(or (= #{%} (set (keys m)))
+                           (contains? m :reason)
+                           (contains? m :kind)
+                           (contains? m :failure-kind)
+                           (contains? m :index-path))]
+    (or (and status-absence? (typed-detail? :status))
+        (and outcome-absence? (typed-detail? :outcome))
+        (= :typed-refusal (:kind m))
+        (= :classification-receipt-absent (:reason m)))))
+
 (defn- selected-candidate
   "Return the certificate row for the enacted target/cascade.  Candidate ids
   are action maps in older records and plain ids in newer ones, so require the
@@ -1258,10 +1280,7 @@
                           #(and (map? %)
                                 (let [m (into {} %)]
                                   (or (undefined-completion-discovery? m)
-                                      (contains? absence-statuses (:status m))
-                                      (contains? absence-statuses (:outcome m))
-                                      (= :typed-refusal (:kind m))
-                                      (= :classification-receipt-absent (:reason m))))))]
+                                      (typed-absence-envelope? m)))))]
             (cond-> (vec (concat root p))
               (undefined-completion-discovery? value) (conj :completion-class)))))
       roots)))))
