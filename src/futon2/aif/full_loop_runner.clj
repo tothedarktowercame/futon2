@@ -1129,6 +1129,8 @@
                   :omitted omitted}
                  (and (= :harm-match k) (map? v))
                  {:kept (assoc kept k (bounded-failure-value v 6)) :omitted omitted}
+                 (and (contains? #{:c2/question :c2/brief-receipt} k) (map? v))
+                 {:kept (assoc kept k (bounded-failure-value v 8)) :omitted omitted}
                  ;; The pin is nested, and it is the receiver's only route to
                  ;; the retained input, so the scalar-only rule below would
                  ;; keep :status and lose the evidence.

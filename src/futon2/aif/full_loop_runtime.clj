@@ -1655,6 +1655,9 @@
                               [(some-> (:c1-exclusion index-row)
                                        (assoc :exclusion-reason
                                               :c1-already-satisfied))
+                               (some-> (:c2-exclusion index-row)
+                                       (assoc :exclusion-reason
+                                              :c2-legitimate-question))
                                (some-> (:c3-exclusion index-row)
                                        (assoc :exclusion-reason
                                               :c3-harm-declined))]))

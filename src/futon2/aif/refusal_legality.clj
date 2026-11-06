@@ -181,7 +181,7 @@
             ;; disposition. It means caseChecked holds while
             ;; exclusionRecorded is unknown until the finished record's
             ;; compact index line is published.
-            d (if (and (contains? #{:C1 :C3} (:case refusal))
+            d (if (and (contains? #{:C1 :C2 :C3} (:case refusal))
                        (case-checked? (:evidence refusal))
                        (true? (get-in refusal [:evidence :missionSourceShaPresent])))
                 :pending-exclusion

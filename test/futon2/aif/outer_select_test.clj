@@ -11,6 +11,22 @@
 
 (clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
+(deftest c2-exclusion-is-accepted-and-unknown-reason-is-refused
+  (let [partition {:field [{:target "M-c2"} {:target "M-other"}]
+                   :excluded [] :requests []}
+        field (:field partition)
+        exclusion {:target "M-c2" :reason :c2-legitimate-question
+                   :pin "evidence-pin"}]
+    (is (= ["M-other"]
+           (mapv :target (:field (outer-select/apply-c1-exclusions
+                                  partition field [exclusion])))))
+    (is (= :invalid-c1-exclusions
+           (try
+             (outer-select/apply-c1-exclusions
+              partition field [(assoc exclusion :reason :unknown)])
+             nil
+             (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))))
+
 (deftest selection-why-names-the-served-ways-and-action
   (let [rendered (outer-select/render-selection-why
                   :class

@@ -6,6 +6,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.c1-exclusion :as c1-exclusion]
+            [futon2.aif.c2-exclusion :as c2-exclusion]
             [futon2.aif.c3-exclusion :as c3-exclusion]
             [futon2.aif.outer-refusal-history :as history]
             [futon2.aif.ticket-publication-io :as publication])
@@ -68,10 +69,12 @@
       (let [terminal-case (get-in record [:refusal/disposition :case])
             exclusion (case terminal-case
                         :C1 (c1-exclusion/exclusion-row record)
+                        :C2 (c2-exclusion/exclusion-row record)
                         :C3 (c3-exclusion/exclusion-row record)
                         {:status :refused :reason :unknown-exclusion-case})
             exclusion-key (case terminal-case
-                            :C1 :c1-exclusion :C3 :c3-exclusion nil)]
+                            :C1 :c1-exclusion :C2 :c2-exclusion
+                            :C3 :c3-exclusion nil)]
         (if (= :row (:status exclusion))
           (assoc terminal exclusion-key exclusion
                  :refusal/disposition

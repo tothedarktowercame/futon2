@@ -81,6 +81,7 @@
    'futon2.aif.c-fold-config "/home/joe/code/futon2/src/futon2/aif/c_fold_config.clj"
    'futon2.aif.c-vector "/home/joe/code/futon2/src/futon2/aif/c_vector.clj"
    'futon2.aif.c2-question "/home/joe/code/futon2/src/futon2/aif/c2_question.clj"
+   'futon2.aif.c2-exclusion "/home/joe/code/futon2/src/futon2/aif/c2_exclusion.clj"
    'futon2.aif.evidence-manifest "/home/joe/code/futon2/src/futon2/aif/evidence_manifest.clj"
    'futon2.aif.fold "/home/joe/code/futon2/src/futon2/aif/fold.clj"
    'futon2.aif.fold-classical "/home/joe/code/futon2/src/futon2/aif/fold_classical.clj"

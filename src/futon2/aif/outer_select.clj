@@ -201,6 +201,7 @@
     (when-not (and (= (count exclusions) (count (set (map :target exclusions))))
                    (every? #(and (contains? targets (:target %))
                                  (contains? #{:c1-already-satisfied
+                                              :c2-legitimate-question
                                               :c3-harm-declined}
                                             (:reason %))
                                  (string? (:pin %)) (seq (:pin %))) exclusions))

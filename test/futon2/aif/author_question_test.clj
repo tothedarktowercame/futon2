@@ -169,24 +169,19 @@
           (is (false? (refusal-legality/case-checked?
                        (:evidence (evidence valid))))))))))
 
-(deftest checked-c2-close-still-holds-instead-of-becoming-pending-exclusion
+(deftest checked-c2-close-becomes-pending-exclusion
   (with-mission
     (fn [_ mission brief-root]
       (let [thrown (thrown-data (job question) "M-example" :author-wait
                                 mission brief-root)
-            held (atom nil)
             result (refusal-legality/resolve-close-refusal
                     true
-                    (fn [condition]
-                      (reset! held condition)
-                      {:action :abort})
+                    (fn [_] (throw (AssertionError. "checked C2 must not hold")))
                     :author-question {:error-data thrown}
                     (constantly nil) false)]
-        (is (= :C2 (get-in @held [:disposition :case])))
-        (is (= :debugger-error
-               (get-in @held [:disposition :disposition])))
-        (is (not= :pending-exclusion
-                  (get-in result [:data :refusal/disposition :disposition])))))))
+        (is (= :C2 (get-in result [:data :refusal/disposition :case])))
+        (is (= :pending-exclusion
+               (get-in result [:data :refusal/disposition :disposition])))))))
 
 (deftest author-prompts-name-the-question-wire-and-its-limit
   (let [primary (#'runner/author-prompt
