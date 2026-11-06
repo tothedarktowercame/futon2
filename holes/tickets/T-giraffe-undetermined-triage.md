@@ -86,3 +86,130 @@ Blockers / questions for Joe:
 ## Group B
 
 ## Group C
+
+### E-mfuton-typeclass-scope-state-20261003
+
+**What it is.** A compiler-work requisition (futon3c/holes/excursions/E-mfuton-typeclass-scope-state-20261003.md):
+implement SourceTypeclassScope state construction and
+`_build_instance_result_owner_index` in the SBCL Lisp port of mfuton, with a
+real Python differential, continuing from the accepted declaration-index
+commit 97479d0. Dispatched to codex-13 on 2026-10-03.
+
+**Why Giraffe could not decide.** Its single edge is a depends-on on
+E-mfuton-typeclass-declaration-index-20261003, which is completed
+("integrated as 97479d0"), so the dependency resolved; the status was left
+undetermined because "in-progress" had no completion evidence either way.
+
+**Verdict: likely outdated.** The Lisp curriculum this requisition belongs to
+was paused the day after dispatch: mfuton-share f8eed5a1 (2026-10-04, codex-19)
+"Pause Lisp curriculum at source HAdd OfNat wiring boundary", plus 99ed4a64
+"Pause transpiler push". No `lisp/src/source-typeclass-scope.lisp` or
+`instance-result-owner-index.lisp` was ever committed (no such paths in
+mfuton-share history). The repo named in the requisition,
+/home/joe/code/mfuton-sbcl, no longer exists; the tree lives on as
+/home/joe/code/mfuton-share, whose post-2026-10-04 work went into Python-side
+psw/* merges and EmitPython, not the SBCL port. The packet also binds the
+worker to a stale environment ("/tmp/mfs-venv", MFUTON_HOME=/home/joe/code).
+
+Questions for Joe:
+1. Retire this requisition, or re-point it? The Lisp port is paused upstream
+   of this step (paused at the HAdd/OfNat boundary, before typeclass scope
+   state), so the requisition cannot proceed as written. Options: (a) retire
+   as superseded by the pause; (b) rewrite to name mfuton-share and the
+   current pause boundary, queued behind a resume decision. Evidence:
+   mfuton-share commit f8eed5a1 (2026-10-04); requisition header
+   "Continue in /home/joe/code/mfuton-sbcl" (path gone).
+
+### E-river-feedback-results
+
+**What it is.** A results note (mmca-clj/holes/E-river-feedback-results.md)
+measuring the original paper river's phenotype→genotype feedback by matched
+ablation: ~0.90 genotype divergence within 5 steps, saturating near 0.92.
+Its stated purpose was to be "the control the correction round (E4/E5/E6
+reruns) should adopt."
+
+**Why Giraffe could not decide.** Both unresolved edges point at a target
+with no document: "E4/E5/E6 reruns are future correction-round work with no
+task document; the existing E4-results.md / E5-results.md / E6-results.md …
+are results notes without M-/E-/T- ids, so no target resolves."
+
+**Verdict: likely outdated.** The purpose is fulfilled. The E4/E5/E6 reruns
+already adopted exactly this control: mmca-clj holes/E4-results.md is now
+"E4 — Directed predictive information (corrected: authentic river + matched
+ablation)" (16f9d77) and E5/E6/E7 were regenerated "with fixed ablation
+(frozen p0, true X→G cut)" (1f0352a, 2026-07-19), one day after this doc's
+v2 (3076c1b, 2026-07-18). E4/E5-results.md quote the matched-ablation design
+verbatim. Nothing in mmca-clj has touched these files since (latest
+repo-wide activity is the 2026-10-09 verdict batch). The note is a finished
+results document whose downstream consumer consumed it.
+
+Questions for Joe:
+1. Close as completed? The doc's only open item was "the correction round
+   should adopt this control", and it has (E4/E5/E6 all rerun against the
+   matched control, July 2026). Options: (a) mark completed; (b) keep open
+   only if a further rerun round is planned. Evidence: mmca-clj commits
+   1f0352a, e3b1e8e, 3275bd8, 16f9d77; holes/E4-results.md:1.
+
+### E-transitive-proxy-ghosts
+
+**What it is.** A defect note (futon3c/holes/excursions/E-transitive-proxy-ghosts.md):
+federated proxy pruning is strictly pairwise, so a relayed proxy of a
+departed agent is never pruned — presence is transitive under relay, absence
+is not. Two repair shapes sketched (origin-attested pruning; origin-attested
+TTL), neither implemented.
+
+**Why Giraffe could not decide.** Its one unresolved edge is a depends-on on
+"futon0/README-federate.md F-0" — "A README, not a task document (no
+M-/E-/T- id), so it does not resolve as a link target; it specifies the
+:origin/site and :origin/epoch metadata the proposed fixes rely on."
+
+**Verdict: blocked.** The defect is still in the code:
+`prune-departed-proxies!` (futon3c/src/futon3c/agency/federation.clj:935) is
+unchanged and still prunes only against the immediate peer's roster. The
+2026-08-14 commit e81fb5098 "Canonicalize federation proxy origins" added
+origin-identity canonicalization (the metadata shape-1 needs) but not
+origin-attested pruning or TTL. So the defect is live and real, but which
+fix to build is an undecided design choice the doc itself leaves open.
+
+Questions for Joe:
+1. Which repair shape? (a) Origin-attested pruning: propagate origin
+   identity, prune when the origin stops advertising — closer to the
+   federation design's F-0 commitments, and e81fb5098 already landed the
+   canonical origin identity it builds on. (b) Origin-attested TTL: proxies
+   expire unless refreshed by origin-attested presence — cheaper, fails safe
+   under partition. The doc says they are not exclusive. Evidence:
+   federation.clj:935 (pairwise prune, unchanged); e81fb5098 (origin
+   canonicalization landed).
+2. Is the relayed multi-site topology still in service? The defect was
+   measured on zone→chi→lucy→oxf (2026-08-14). If the fleet no longer runs
+   relayed proxies, this can be closed as no-longer-reachable rather than
+   fixed. Evidence: E-port-wiring-map.md is the topology of record.
+
+### E-wm-apparatus
+
+**What it is.** A framing excursion (futon2/holes/excursions/E-wm-apparatus.md)
+naming the apparatus-layer assurances (recording, delivery, liveness,
+identity) the War Machine needs beyond its verified mathematics, and seeding
+the assurance-frontier ticket queue :U70–:U74.
+
+**Why Giraffe could not decide.** All five unresolved edges are depends-on
+edges to the tickets the excursion seeds: ":U70 … no task document with that
+id exists in any canonical repo" (same reason for :U71, :U72, :U73, :U74).
+
+**Verdict: likely outdated.** The seeded queue is done. In
+futon2/holes/labs/wm-contract/dependency-frontier.md:171-210, :U70, :U71,
+:U72, :U73, :U74 are all marked `:done` (and the frontier has grown past
+them to :U81). The assurance-frontier table the excursion asked for exists
+in the same file (:witnessed / :ticketed states per pattern × signature),
+and the wm-contract lane stayed active through 2026-11-06 (e.g. c753538f7).
+The excursion was a seeding document; its work queue is drained.
+
+Questions for Joe:
+1. Close as completed? Every concrete deliverable the doc names (:U70 DAG,
+   :U71/:U72 receipt discipline, :U73 detector commissioning, :U74 standing
+   caller comparator) is :done in the frontier. Options: (a) mark completed,
+   keeping it as the historical framing for the frontier; (b) keep open only
+   if the "walked pattern × signature" sweep it defers ("to be walked … when
+   :U70 builds the DAG") still owes a pass — but that is now frontier
+   content, not this document's. Evidence: dependency-frontier.md:171-210,
+   :236-244.
