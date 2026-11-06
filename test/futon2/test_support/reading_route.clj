@@ -127,10 +127,21 @@
   [fx]
   (fold-source/conditioning-steps (str (:flights fx))))
 
+(defn retained-selection
+  "The retained outer selection for FX's target under RELATION, in the shape
+  full-loop-runtime retains at :outer/selection. Production always hands the
+  decision a retained selection; a test that wants the absent shape passes
+  {:outer/selection nil} explicitly."
+  ([fx] (retained-selection fx :focus))
+  ([fx relation]
+   {:selection {:selected {:target (:target-id (:row fx))}}
+    :selected-relation relation}))
+
 (defn opts
   "The production decision options for FX, merged with EXTRA."
   [fx extra]
   (merge {:task {:id target}
+          :outer/selection (retained-selection fx)
           :outer/makeup-path (.getCanonicalPath (io/file "data/wm-learning/outer-makeup.edn"))
           :pattern-graph-path (str (:graph fx))
           :pattern-library-root (str (:library fx))

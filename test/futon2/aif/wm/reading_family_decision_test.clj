@@ -7,6 +7,7 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [clojure.walk :as walk]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.efe :as efe]
             [futon2.aif.decision-gate :as decision-gate]
@@ -18,6 +19,7 @@
             [futon2.aif.pattern-graph-pin :as graph-pin]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-prefix-admission :as admission]
+            [futon2.aif.reading-policy-class-free-energy :as class-f]
             [futon2.aif.reading-interpretation-debt :as debt]
             [futon2.aif.selected-reading :as selected-reading]
             [futon2.aif.target-reading-registry :as reading-registry]
@@ -120,6 +122,12 @@
                      (assembled rows betas)
                      (merge {:pattern-graph-path (str graph)
                              :target-reading-root (str root)
+                             ;; Production (full-loop-runtime live-opts) always
+                             ;; retains the outer selection the class binding
+                             ;; reads; the absent shape is pinned in
+                             ;; family-selection-test.
+                             :outer/selection {:selection {:selected {:target task}}
+                                               :selected-relation :focus}
                              ;; a04b157d2: selection policy is task-scoped.
                              :task {:id task}
                              :conditioning-steps (fold-source/conditioning-steps (str flights))
@@ -196,6 +204,61 @@
     (is (= :frozen (:status frozen)))
     (is (= (set (:want input))
            (set (map :token (:wanted frozen)))))))
+
+(defn- consumed-target-classes
+  "Every class-emission model the DECISION retained anywhere (certificate,
+  candidates, refusals), as the set of their target->class maps. nil when the
+  decision abstained before scoring and retained no model."
+  [decision]
+  (let [models (atom [])]
+    (walk/postwalk
+     (fn [x] (when (and (map? x)
+                        (or (empty? x) (keyword? (first (keys x))))
+                        (= :class-emission (get x :kind)))
+               (swap! models conj (get x :target-class)))
+       x)
+     decision)
+    (seq @models)))
+
+(deftest retained-outer-relation-reaches-the-class-model-at-the-decision-seam
+  ;; wm-click-loop-repair-868746ac: held run 2026-11-06-05f4bdcd abstained
+  ;; terminally at selection because the class model predicted the focused
+  ;; default while the retained class history held an :unrelated tick under
+  ;; the same policy key (:zero-posterior-mass). At this production seam the
+  ;; retained outer relation -- not a focused default -- must reach the
+  ;; class model: :useful-elsewhere scores and selects against an unrelated
+  ;; retained tick, while :focus against the same tick is still the typed
+  ;; refusal, never a silent default.
+  (let [fx (fixture)
+        unrelated-history
+        (fn [policy-key]
+          {:status :complete :window 32
+           :sources [{:path "retained-unrelated-run"
+                      :record {:run/id "retained-unrelated-run"
+                               :terminal {:schema :wm/q6-terminal-v1
+                                          :choice {:status :present
+                                                   :policy-key policy-key}}
+                               :run-ending-classification {:class :unrelated}}}]})]
+    (testing "a retained :useful-elsewhere relation scores and selects"
+      (let [result (with-redefs [class-f/history-context unrelated-history]
+                     (decide fx [(get-in fx [:rows :current])] {"M-current" 1}
+                             "M-current"
+                             {:outer/selection
+                              {:selection {:selected {:target "M-current"}}
+                               :selected-relation :useful-elsewhere}}))
+            decision (:decision result)]
+        (is (= 1 (::selector-calls result)))
+        (is (= "M-current" (get-in decision [:action :target])))
+        (is (some #(= {"M-current" :unrelated} %)
+                 (consumed-target-classes decision)))))
+    (testing "a retained :focus relation against the same tick is the held failure, typed"
+      (let [result (with-redefs [class-f/history-context unrelated-history]
+                     (decide fx [(get-in fx [:rows :current])] {"M-current" 1}))
+            decision (:decision result)]
+        (is (zero? (::selector-calls result)))
+        (is (nil? (get-in decision [:action :target])))
+        (is (= :zero-posterior-mass
+               (:failure-kind (first (:refusals decision)))))))))
 
 (defn- with-action
   "DECISION with its chosen action replaced by (F action) everywhere the
