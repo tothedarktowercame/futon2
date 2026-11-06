@@ -126,11 +126,67 @@
     (is (not (contains? data :c2/brief-receipt)))
     (is (not (.exists (io/file brief-root))))))
 
-(deftest author-question-is-not-yet-a-legal-close
-  (let [evidence (refusal-legality/evidence-for-close
-                  :author-question {:failure-kind :author-question} nil false)]
-    (is (= {:refusal :other} evidence))
-    (is (= :debugger-error (refusal-legality/disposition evidence)))))
+(deftest author-question-builds-checked-c2-close-evidence-but-is-not-yet-legal
+  (with-mission
+    (fn [_ mission brief-root]
+      (let [thrown (thrown-data (job question) "M-example" :author-wait
+                                mission brief-root)
+            evidence (refusal-legality/evidence-for-close
+                      :author-question {:error-data thrown} nil false)]
+        (is (= :C2 (:case evidence)))
+        (is (refusal-legality/case-checked? (:evidence evidence)))
+        (is (false? (refusal-legality/click-legal? (:evidence evidence))))
+        (is (= :debugger-error (refusal-legality/disposition evidence)))))))
+
+(deftest author-question-close-rechecks-each-retained-authority
+  (with-mission
+    (fn [file mission brief-root]
+      (let [valid (thrown-data (job question) "M-example" :author-wait
+                               mission brief-root)
+            other-question (assoc question :question "Which interpretation wins?")
+            other (thrown-data (job other-question) "M-example" :author-wait
+                               mission brief-root)
+            refused (thrown-data
+                     (job (assoc-in question [:span :quote] "absent"))
+                     "M-example" :author-wait mission brief-root)
+            evidence #(refusal-legality/evidence-for-close
+                       :author-question {:error-data %} nil false)]
+        (testing "carrier without receipt"
+          (is (false? (refusal-legality/case-checked?
+                       (:evidence (evidence (dissoc valid :c2/brief-receipt)))))))
+        (testing "receipt paired with a refused carrier"
+          (is (false? (refusal-legality/case-checked?
+                       (:evidence (evidence
+                                   (assoc refused :c2/brief-receipt
+                                          (:c2/brief-receipt valid))))))))
+        (testing "receipt digest differs from carrier"
+          (is (false? (refusal-legality/case-checked?
+                       (:evidence (evidence
+                                   (assoc valid :c2/brief-receipt
+                                          (:c2/brief-receipt other))))))))
+        (testing "pinned source bytes changed before close"
+          (spit file (str mission-text "drift\n"))
+          (is (false? (refusal-legality/case-checked?
+                       (:evidence (evidence valid))))))))))
+
+(deftest checked-c2-close-still-holds-instead-of-becoming-pending-exclusion
+  (with-mission
+    (fn [_ mission brief-root]
+      (let [thrown (thrown-data (job question) "M-example" :author-wait
+                                mission brief-root)
+            held (atom nil)
+            result (refusal-legality/resolve-close-refusal
+                    true
+                    (fn [condition]
+                      (reset! held condition)
+                      {:action :abort})
+                    :author-question {:error-data thrown}
+                    (constantly nil) false)]
+        (is (= :C2 (get-in @held [:disposition :case])))
+        (is (= :debugger-error
+               (get-in @held [:disposition :disposition])))
+        (is (not= :pending-exclusion
+                  (get-in result [:data :refusal/disposition :disposition])))))))
 
 (deftest author-prompts-name-the-question-wire-and-its-limit
   (let [primary (#'runner/author-prompt

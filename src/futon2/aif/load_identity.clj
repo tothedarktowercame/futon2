@@ -96,6 +96,7 @@
    'futon2.aif.receipt-construction "/home/joe/code/futon2/src/futon2/aif/receipt_construction.clj"
    'futon2.aif.mission-registry "/home/joe/code/futon2/src/futon2/aif/mission_registry.clj"
    'futon2.aif.morning-brief "/home/joe/code/futon2/src/futon2/aif/morning_brief.clj"
+   'futon2.aif.refusal-legality "/home/joe/code/futon2/src/futon2/aif/refusal_legality.clj"
    'futon2.aif.pattern-registry "/home/joe/code/futon2/src/futon2/aif/pattern_registry.clj"
    'futon2.aif.run-participants "/home/joe/code/futon2/src/futon2/aif/run_participants.clj"
    'futon2.aif.repair-obligation "/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj"

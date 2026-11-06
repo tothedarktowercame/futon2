@@ -4,10 +4,14 @@
   `loop-stop-legal?`, `case-checked?`, `click-legal?`, and `disposition`
   mirror the Lean definitions `loopStopLegal`, `caseChecked`, `clickLegal`,
   and `disposition`, respectively. Evidence field names intentionally match
-  `LoopStopEvidence` and `ClickEvidence` exactly. This namespace performs no
-  I/O and does not infer evidence from a terminal keyword."
-  (:require [futon2.aif.action-identity :as identity]
-            [futon2.aif.harm-rules :as harm-rules]))
+  `LoopStopEvidence` and `ClickEvidence` exactly. C2 rechecks the retained
+  source pin against its current bytes and the durable Morning Brief receipt;
+  it does not infer evidence from a terminal keyword."
+  (:require [clojure.java.io :as io]
+            [futon2.aif.action-identity :as identity]
+            [futon2.aif.c2-question :as c2-question]
+            [futon2.aif.harm-rules :as harm-rules]
+            [futon2.aif.morning-brief :as morning-brief]))
 
 (def ^:private harm-rule-ids
   (into #{} (map :id) (:rules (harm-rules/load-rules))))
@@ -72,6 +76,32 @@
     :historical-verification-awaiting-validation
     :historical-verification-refused})
 
+(defn- c2-close-evidence [data]
+  ;; The runner catches author exceptions and retains their ex-data under
+  ;; :error-data before validated-close!; direct callers may supply that map.
+  (let [retained (if (map? (:error-data data)) (:error-data data) data)
+        checked (:c2/question retained)
+        carrier (when (= :carrier (:status checked)) (:carrier checked))
+        receipt (:c2/brief-receipt retained)
+        source (get-in carrier [:ambiguity :source])
+        ambiguity-cited?
+        (boolean
+         (when (and carrier (string? (:path source)) (string? (:sha256 source)))
+           (try
+             (c2-question/ambiguity-cited? carrier (slurp (io/file (:path source))))
+             (catch Throwable _ false))))
+        question-in-brief?
+        (boolean
+         (and carrier
+              (= (:question-digest carrier) (:question-digest receipt))
+              (morning-brief/c2-receipt-valid? receipt)))]
+    {:refusal :terminal :case :C2
+     :evidence {:kind :legitimate-question
+                :ambiguityCited ambiguity-cited?
+                :questionInBrief question-in-brief?
+                :missionSourceShaPresent (string? (:sha256 source))
+                :exclusionRecorded false}}))
+
 (defn evidence-for-close
   "Build RefusalLegality evidence solely from retained close carriers.
   Returns nil only for `work-outcomes`. OPERATOR-SIGNAL is an independently retained
@@ -79,6 +109,9 @@
   [outcome data scored-field operator-signal]
   (when-not (contains? work-outcomes outcome)
     (cond
+      (= :author-question outcome)
+      (c2-close-evidence data)
+
       (contains? #{:already-satisfied :grounded-no-change} outcome)
       {:refusal :terminal :case :C1
        :evidence {:kind :already-satisfied

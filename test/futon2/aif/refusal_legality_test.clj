@@ -128,6 +128,9 @@
                    [:data :refusal/disposition :disposition])))))
 
 (deftest plain-guardrail-refusal-remains-debugger-error
+  (is (= {:refusal :other}
+         (sut/evidence-for-close :guardrail-refusal
+                                 {:refusal-reason ":blocked"} nil false)))
   (is (= :debugger-error
          (get-in (sut/resolve-close-refusal false nil :guardrail-refusal
                                             {:refusal-reason ":blocked"}
