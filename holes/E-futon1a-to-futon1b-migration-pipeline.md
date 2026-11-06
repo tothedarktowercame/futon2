@@ -1,6 +1,6 @@
 # E-futon1a-to-futon1b-migration-pipeline — full-store export/import pipeline
 
-**Status: IN PROGRESS — S1–S3 RUN LIVE for evidence+graph+types (2026-07-10,
+**Status: CLOSED (Joe, 2026-11-06) — switch-over executed 2026-07-10 (part 7: full S5 verify PASS, futon1b-server deployed; live on :7073). Was: IN PROGRESS — S1–S3 RUN LIVE for evidence+graph+types (2026-07-10,
 see dated section at end): 147,893 docs migrated and parity-spot-checked;
 Zai memory seam demonstrated on the real corpus. QUIET WINDOW FULLY STAGED
 (2026-07-10 later section): evidence snapshot scope live on :7071, verify
