@@ -1,6 +1,6 @@
 # E-kimi-task-349 — T-giraffe-undetermined-triage group B
 
-**Requisition:** in-progress — dispatched 2026-11-06T07:08:45Z to kimi-2 as invoke-1793948925719-13717-a1cef2e7
+**Requisition:** completed — 2026-11-06T07:17:16Z, job invoke-1793948925719-13717-a1cef2e7, state done
 
 Clocked in by claude-6 for kimi-2 on 2026-11-06 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
