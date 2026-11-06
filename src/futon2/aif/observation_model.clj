@@ -329,7 +329,18 @@
                                 (and policy-key (some? window) (vector? sources)))
                     (refuse! :class-free-energy-history-not-supplied
                              {:required [:policy-key :window :sources]}))
-                prediction (class-predictive model belief (:horizon model) target)
+                ;; P(class|policy), not P(class|policy, candidate): the
+                ;; callee contract (reading_policy_class_free_energy/evaluate)
+                ;; prices retained policy history. The candidate-conditioned
+                ;; class-predictive is deterministic over at most the target's
+                ;; class and :stop-the-line, so any retained :related or
+                ;; :unrelated tick under the same policy-key read as zero
+                ;; evidence and refused the family permanently (held run
+                ;; 2026-11-06-ac25ea50; the refused policy can never run
+                ;; again to displace the tick). The declared terminal class
+                ;; preference is the policy-level prediction.
+                prediction (class-preference! model
+                             (class-preference-for model (:horizon model)))
                 result (if unavailable?
                          (assoc (select-keys history
                                             [:status :index-path :missing-records
