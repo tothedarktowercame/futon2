@@ -1611,6 +1611,7 @@
                                          (:observation-labels-path raw-opts) declaration-reads)
                     :click/id (:click-id raw-opts)
                     :discovery-enactment (:wm/discovery-enactment raw-opts)
+                    :discovery-receipt (get-in result [:data :discovery-receipt])
                     :startedAt started-at
                     :registered-run/timing timing
                     :registered-run/model-usage usage
@@ -4972,6 +4973,113 @@
                   :item index}))
              (map-indexed vector (:items result)))
        {:status :accepted :result result}))))
+
+(defn discovery-reviewer-prompt
+  "Review a discovery answer as evidence, not as an implementation change."
+  [{:keys [reviewer author]} target enactment-pin result]
+  (str reviewer ": FULL-LOOP DISCOVERY REVIEW. You are the independent reviewer; "
+       author " authored the discovery.\n\n"
+       "Check the :wm/find-out-result-v1 schema, selected target, and retained "
+       "selection enactment pin. Check every file:line locator against the repository: "
+       "it must resolve and support the claimed verdict. Every item needs one of "
+       ":current, :blocked, or :likely-outdated and non-empty resolving evidence. "
+       "A blocked item must carry C2-shaped questions with cited spans and at least "
+       "two distinct alternatives. Confirm that :current means concrete unblocked "
+       "next work, :blocked names a real unresolved decision, and :likely-outdated "
+       "is justified by supersession or completed/moved work. This is discovery "
+       "review, not code review; do not request or assess a commit.\n\n"
+       "SELECTED TARGET: " (pr-str target) "\n"
+       "SELECTION ENACTMENT PIN: " (pr-str enactment-pin) "\n"
+       "DISCOVERY RESULT: " (pr-str result) "\n\n"
+       "Finish with exactly one line: FULL_LOOP_DISCOVERY_REVIEW: ACCEPT, or "
+       "FULL_LOOP_DISCOVERY_REVIEW: REJECT {:reasons [\"specific reason\" ...]}.\n"))
+
+(defn parse-discovery-review [text]
+  (let [[_ marker detail]
+        (re-find #"(?m)^FULL_LOOP_DISCOVERY_REVIEW:\s*(ACCEPT|REJECT)\b[ \t]*(.*)$"
+                 (str text))]
+    (case marker
+      "ACCEPT" (if (str/blank? detail)
+                 {:status :reviewed :verdict :accept}
+                 {:status :refused :kind :find-out-review/trailing-data})
+      "REJECT" (let [body (read-one-edn (str/trim detail))
+                     reasons (:reasons body)]
+                 (if (and (map? body) (vector? reasons) (seq reasons)
+                          (every? #(and (string? %) (not (str/blank? %))) reasons))
+                   {:status :reviewed :verdict :reject :reasons reasons}
+                   {:status :refused :kind :find-out-review/reasons-missing}))
+      {:status :refused :kind :find-out-review/missing-verdict})))
+
+(defn discovery-receipt
+  "The only constructor for the retained discovery+review receipt. An answer
+  is accepted only after an explicit accepting review and an unchanged head."
+  [{:keys [target enactment-pin parsed review before-head after-head
+           author-job-id reviewer-job-id]}]
+  (let [result (:result parsed)
+        target-matches? (= target (:target result))
+        head-unchanged? (and (string? (:head before-head))
+                             (string? (:head after-head))
+                             (= (:head before-head) (:head after-head)))
+        accepted? (and (= :accepted (:status parsed)) target-matches?
+                       (= :accept (:verdict review)) head-unchanged?)
+        status (cond
+                 (not= :accepted (:status parsed)) :author-result-refused
+                 (not target-matches?) :target-mismatch
+                 (not= :reviewed (:status review)) :unreviewed
+                 (= :reject (:verdict review)) :review-rejected
+                 (not head-unchanged?) :target-repository-changed
+                 accepted? :accepted
+                 :else :refused)]
+    {:schema :wm/find-out-receipt-v1
+     :status status
+     :target target
+     :selection-enactment enactment-pin
+     :result (when (= :accepted (:status parsed)) result)
+     :author-result (when-not (= :accepted (:status parsed)) parsed)
+     :review review
+     :author-job-id author-job-id
+     :reviewer-job-id reviewer-job-id
+     :target-repository-head {:before before-head :after after-head
+                              :unchanged? head-unchanged?}
+     :later-build-candidates
+     (if accepted?
+       (vec (filter #(= :current (:verdict %)) (:items result)))
+       [])}))
+
+(defn run-discovery-review!
+  "Run the bounded discovery review seam. It never dispatches implementation."
+  [opts phase-context dispatched-turns prompt-opts reviewer target construction
+   repository before-head author-job]
+  (let [parsed (parse-discovery-result (job-text author-job))]
+    (if-not (= :accepted (:status parsed))
+      (discovery-receipt
+       {:target target :enactment-pin (:outer-enactment construction)
+        :parsed parsed :review {:status :not-dispatched
+                                :reason :author-result-refused}
+        :before-head before-head :after-head before-head
+        :author-job-id (:job-id author-job)})
+      (let [prompt (discovery-reviewer-prompt
+                    prompt-opts target (:outer-enactment construction)
+                    (:result parsed))
+            response (run-phase!
+                      opts phase-context :discovery-reviewer-dispatch
+                      #(charge-dispatched-turn! opts dispatched-turns reviewer
+                                                "wm-full-loop-discovery-review"
+                                                target prompt))
+            review-job (run-phase!
+                        opts phase-context :discovery-reviewer-wait
+                        #((or (:poll-fn opts) poll-job!) opts (:job-id response))
+                        nil reviewer-wait-terminal-condition)
+            _ (throw-if-cancelled! review-job :discovery-reviewer-wait)
+            review (if (= "done" (:state review-job))
+                     (parse-discovery-review (job-text review-job))
+                     {:status :refused :kind :find-out-review/job-not-done})
+            after-head (observe-repo-head opts repository)]
+        (discovery-receipt
+         {:target target :enactment-pin (:outer-enactment construction)
+          :parsed parsed :review review :before-head before-head
+          :after-head after-head :author-job-id (:job-id author-job)
+          :reviewer-job-id (:job-id review-job)})))))
 
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
@@ -10507,6 +10615,30 @@
                     retry-author? (assoc :author-retries author-retries))
                   effective-pre-author-head
                   (if retry-author? retry-pre-author-head pre-author-head)
+                  _discovery-close
+                  (when (and (= :discovery
+                                (get-in construction [:outer-enactment :mode]))
+                             (= :on (:wm/discovery-enactment opts)))
+                    (throw-if-cancelled! author-job :author-wait)
+                    (when-not (= "done" (:state author-job))
+                      (throw (ex-info "Discovery author job did not complete"
+                                      {:outcome :incomplete
+                                       :failure-kind :discovery-author-not-done
+                                       :failure-stage :author-wait
+                                       :author-job author-job})))
+                    (let [receipt
+                          (run-discovery-review!
+                           opts @phase-context dispatched-turns
+                           (assoc prompt-opts :author author :reviewer reviewer)
+                           reviewer target construction author-repo
+                           effective-pre-author-head author-job)]
+                      (throw (ex-info "Discovery close contract is not available"
+                                      {:outcome :incomplete
+                                       :failure-kind :discovery-close-unavailable
+                                       :failure-stage :discovery-close
+                                       :target target
+                                       :author-job author-job
+                                       :discovery-receipt receipt}))))
                   author-job
                   (->> (retain-artifact-declaration author-job repository-plan)
                        (preflight-artifact-declaration
@@ -11313,6 +11445,7 @@
                         :author-job (:author-job failure)
                         :review-job review-job
                         :reviewed-claim-refused? (:reviewed-claim-refused? failure)
+                        :discovery-receipt (:discovery-receipt failure)
                         :refusal-reason (:refusal-reason failure)
                         :repair-obligation finding
                         :repair/occurrence

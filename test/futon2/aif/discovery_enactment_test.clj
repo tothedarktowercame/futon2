@@ -15,7 +15,8 @@
 
 (def discovery-construction
   (assoc construction :outer-enactment
-         {:mode :discovery :outer-cascade-id :find-out-before-building}))
+         {:mode :discovery :outer-cascade-id :find-out-before-building
+          :selection-sha "selection-pin"}))
 
 (deftest discovery-prompt-is-gated-and-implementation-is-unchanged
   (let [target (:mission construction)
@@ -80,3 +81,105 @@
          (:status (runner/parse-discovery-result
                    (wire {:verdict :blocked :evidence ["x:1"]
                           :questions [good-question]}))))))
+
+(def accepted-result
+  {:schema :wm/find-out-result-v1 :target "M-example"
+   :items [{:item "A" :verdict :current :evidence ["holes/M-example.md:4"]}
+           {:item "B" :verdict :blocked :evidence ["holes/M-example.md:8-9"]
+            :questions [good-question]}]})
+
+(deftest discovery-review-is-required-and-rejections-retain-reasons
+  (let [base {:target "M-example"
+              :enactment-pin (:outer-enactment discovery-construction)
+              :parsed {:status :accepted :result accepted-result}
+              :before-head {:repo "/repo" :head "same"}
+              :after-head {:repo "/repo" :head "same"}}
+        unreviewed (runner/discovery-receipt
+                    (assoc base :review {:status :not-dispatched}))
+        rejected (runner/discovery-receipt
+                  (assoc base :review {:status :reviewed :verdict :reject
+                                       :reasons ["x:4 does not support current"]}))
+        accepted (runner/discovery-receipt
+                  (assoc base :review {:status :reviewed :verdict :accept}))]
+    (is (= :unreviewed (:status unreviewed)))
+    (is (empty? (:later-build-candidates unreviewed)))
+    (is (= :review-rejected (:status rejected)))
+    (is (= ["x:4 does not support current"]
+           (get-in rejected [:review :reasons])))
+    (is (= :accepted (:status accepted)))
+    (is (= ["A"] (mapv :item (:later-build-candidates accepted))))
+    (is (= (:outer-enactment discovery-construction)
+           (:selection-enactment accepted)))))
+
+(deftest discovery-review-prompt-and-verdict-are-typed
+  (let [prompt (runner/discovery-reviewer-prompt
+                {:author "author" :reviewer "reviewer"} "M-example"
+                (:outer-enactment discovery-construction) accepted-result)]
+    (is (str/includes? prompt "file:line locator"))
+    (is (str/includes? prompt "SELECTION ENACTMENT PIN"))
+    (is (str/includes? prompt "not code review"))
+    (is (= {:status :reviewed :verdict :accept}
+           (runner/parse-discovery-review
+            "FULL_LOOP_DISCOVERY_REVIEW: ACCEPT")))
+    (is (= {:status :reviewed :verdict :reject :reasons ["citation fails"]}
+           (runner/parse-discovery-review
+            "FULL_LOOP_DISCOVERY_REVIEW: REJECT {:reasons [\"citation fails\"]}")))
+    (is (= :find-out-review/reasons-missing
+           (:kind (runner/parse-discovery-review
+                   "FULL_LOOP_DISCOVERY_REVIEW: REJECT {:reasons []}"))))))
+
+(deftest discovery-round-reviews-without-implementation-and-preserves-head
+  (let [dispatches (atom [])
+        heads (atom 0)
+        opts {:dispatch-fn
+              (fn [_opts agent caller target prompt]
+                (swap! dispatches conj {:agent agent :caller caller
+                                        :target target :prompt prompt})
+                {:job-id "review-job"})
+              :poll-fn
+              (fn [_opts job-id]
+                (is (= "review-job" job-id))
+                {:job-id job-id :state "done"
+                 :result "FULL_LOOP_DISCOVERY_REVIEW: ACCEPT"})
+              :repo-head-observation-fn
+              (fn [repo]
+                (swap! heads inc)
+                {:repo repo :head "unchanged" :observed-at-ms @heads})}
+        before {:repo "/repo" :head "unchanged" :observed-at-ms 0}
+        author-job {:job-id "author-job" :state "done"
+                    :result (str "FULL_LOOP_DISCOVERY: " (pr-str accepted-result))}
+        receipt (runner/run-discovery-review!
+                 opts {} (atom 1) prompt-opts "reviewer" "M-example"
+                 discovery-construction "/repo" before author-job)]
+    (is (= :accepted (:status receipt)))
+    (is (true? (get-in receipt [:target-repository-head :unchanged?])))
+    (is (= 1 @heads))
+    (is (= 1 (count @dispatches)))
+    (is (= "wm-full-loop-discovery-review" (:caller (first @dispatches))))
+    (is (not (str/includes? (:prompt (first @dispatches))
+                            "FULL-LOOP IMPLEMENTATION OPPORTUNITY")))))
+
+(deftest reviewed-discovery-receipt-is-retained-in-the-run-record
+  (let [dir (.toFile
+             (java.nio.file.Files/createTempDirectory
+              "discovery-receipt" (make-array java.nio.file.attribute.FileAttribute 0)))
+        receipt (runner/discovery-receipt
+                 {:target "M-example"
+                  :enactment-pin (:outer-enactment discovery-construction)
+                  :parsed {:status :accepted :result accepted-result}
+                  :review {:status :reviewed :verdict :accept}
+                  :before-head {:repo "/repo" :head "same"}
+                  :after-head {:repo "/repo" :head "same"}})
+        written (runner/persist-run-record!
+                 {:run-record-dir (.getPath dir)
+                  :wm/discovery-enactment :on
+                  :scan-render-fn (fn [& _] nil)}
+                 "discovery-receipt-test" "2026-11-06T00:00:00Z"
+                 {:outcome :incomplete
+                  :data {:failure-kind :discovery-close-unavailable
+                         :discovery-receipt receipt}})
+        record (edn/read-string (slurp (:run-record written)))]
+    (is (= :on (:discovery-enactment record)))
+    (is (= receipt (:discovery-receipt record)))
+    (is (= (:outer-enactment discovery-construction)
+           (get-in record [:discovery-receipt :selection-enactment])))))
