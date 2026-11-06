@@ -1,6 +1,6 @@
 # E-kimi-task-347 — T-formal-patterns-unblock: make M-formal-patterns next items selectable, questions for Joe
 
-**Requisition:** in-progress — dispatched 2026-11-06T06:23:28Z to kimi-1 as invoke-1793946208261-13623-2f819ee8
+**Requisition:** completed — 2026-11-06T06:33:03Z, job invoke-1793946208261-13623-2f819ee8, state done
 
 Clocked in by claude-6 for kimi-1 on 2026-11-06 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
