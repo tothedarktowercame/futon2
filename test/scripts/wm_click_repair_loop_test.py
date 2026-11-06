@@ -441,6 +441,14 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertEqual(["futon2.aif.wm.family-selection"], event["source-identity-dependencies"])
         self.assertNotIn("futon2.aif.full-loop-runner", event["source-identity-dependencies"])
 
+    def test_dependency_closure_follows_canonical_requires(self):
+        loop = load_loop()
+        selection = loop.F2 / "src/futon2/aif/wm/family_selection.clj"
+        closure = loop.dependency_closure([selection])
+        namespaces = {loop.ns_of(path)[0] for path in closure}
+        self.assertIn("futon2.aif.wm.family-selection", namespaces)
+        self.assertIn("futon2.aif.wm.family-canonical-g", namespaces)
+
     def test_reload_when_idle_retries_deferred_result_before_success(self):
         loop = load_loop()
         with mock.patch.object(loop, "reload_changed", side_effect=[

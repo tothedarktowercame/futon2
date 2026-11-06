@@ -39,17 +39,18 @@ def idle():
         raise PreparationRefused("click-running-or-status-unavailable")
 
 
-def clean():
-    # require may load a not-yet-loaded dependency: inspect all tracked files
-    # in both canonical repositories, not only a stale parent file.
-    for repo in [reload.F2, reload.F3C]:
-        result = reload.sh("git", "-C", repo, "status", "--porcelain", "--untracked-files=no")
-        if result.returncode or result.stdout.strip():
-            raise PreparationRefused(f"canonical-tree-dirty-or-unavailable: {repo}")
-        sources = reload.sh("git", "-C", repo, "status", "--porcelain",
-                            "--untracked-files=all", "--", "src", "scripts/futon2")
-        if sources.returncode or sources.stdout.strip():
-            raise PreparationRefused(f"canonical-source-uncommitted-or-unavailable: {repo}")
+def clean(files):
+    """Return dirty closure files; refuse only when their state is unknowable."""
+    dirty = set()
+    for path in files:
+        repo = reload.F2 if reload.F2 in path.parents else reload.F3C
+        result = reload.sh("git", "-C", repo, "status", "--porcelain",
+                           "--untracked-files=all", "--", str(path.relative_to(repo)))
+        if result.returncode:
+            raise PreparationRefused(f"closure-source-status-unavailable: {path}")
+        if result.stdout.strip():
+            dirty.add(path)
+    return dirty
 
 
 def snapshot(names):
@@ -74,31 +75,50 @@ def prepare(dry_run=False):
     if dry_run:
         return {"status": "not-prepared", "reason": "dry-run"}
     idle()
-    clean()
     names, inventory = declaration()
+    namespace_closures = {name: set(reload.dependency_closure([inventory[name]]))
+                          for name in names}
+    closure = sorted(set().union(*namespace_closures.values()))
+    dirty = set(clean(closure))
     before = snapshot(names)
     if any(row.get("status") not in ("current", "stale", "unregistered") for row in before.values()):
         raise PreparationRefused("composition-identity-unavailable")
-    files = [inventory[n] for n in names if before[n]["status"] != "current"]
+    blocked = {name for name in names if namespace_closures[name] & dirty}
+    files = [inventory[n] for n in names
+             if before[n]["status"] != "current" and n not in blocked]
     order = reload.reload_order(files)
-    if {n for n, _ in order} != {n for n in names if before[n]["status"] != "current"}:
+    if {n for n, _ in order} != {n for n in names
+                                 if before[n]["status"] != "current"
+                                 and n not in blocked}:
         raise PreparationRefused("reload-plan-incomplete")
     print(json.dumps({"status": "planned", "before": before,
                       "loads": [{"namespace": n, "path": str(p)} for n, p in order]}), flush=True)
+    reloaded = []
     for ns, _ in order:
         idle()
-        clean()
+        dirty = set(clean(closure))
+        if namespace_closures[ns] & dirty:
+            continue
         result = reload.reload_namespace(ns)
         if result["rc"] or ":reloaded" not in result["out"]:
             raise PreparationRefused(f"reload-failed: {ns}: {result}")
+        reloaded.append(ns)
     idle()
-    clean()
+    dirty = set(clean(closure))
+    blocked = {name for name in names if namespace_closures[name] & dirty}
     if declaration()[0] != names:
         raise PreparationRefused("composition-changed-during-preparation")
     after = snapshot(names)
-    if any(row.get("status") != "current" for row in after.values()):
+    if any(row.get("status") not in ("current", "stale", "unregistered")
+           for row in after.values()):
+        raise PreparationRefused("composition-identity-unavailable")
+    if any(row.get("status") != "current" and name not in blocked
+           for name, row in after.items()):
         raise PreparationRefused("composition-still-stale-or-unavailable")
-    return {"status": "current", "namespaces": after, "reloaded": [n for n, _ in order]}
+    return {"status": "current" if all(row["status"] == "current" for row in after.values())
+            else "prepared",
+            "namespaces": after, "reloaded": reloaded,
+            "skipped-dirty": [str(path) for path in sorted(dirty)]}
 
 
 def main():

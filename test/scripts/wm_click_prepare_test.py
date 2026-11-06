@@ -69,12 +69,66 @@ class PrepareTest(unittest.TestCase):
                         p.prepare()
                 load.assert_called_once_with(names[-1])
 
-    def test_git_error_and_dirty_result_are_not_clean(self):
+    def test_git_error_refuses_but_dirty_closure_file_is_reported(self):
         p = load_prepare()
-        for rc, stdout in [(1, ""), (0, " M src/scorer.clj")]:
-            with mock.patch.object(p.reload, "sh", return_value=subprocess.CompletedProcess([], rc, stdout, "")):
-                with self.assertRaisesRegex(p.PreparationRefused, "canonical-tree-dirty-or-unavailable"):
-                    p.clean()
+        path = p.reload.F2 / "src/scorer.clj"
+        with mock.patch.object(p.reload, "sh", return_value=subprocess.CompletedProcess([], 1, "", "")):
+            with self.assertRaisesRegex(p.PreparationRefused, "closure-source-status-unavailable"):
+                p.clean([path])
+        with mock.patch.object(p.reload, "sh", return_value=subprocess.CompletedProcess([], 0, " M src/scorer.clj", "")):
+            self.assertEqual({path}, p.clean([path]))
+
+    def test_untracked_file_outside_closure_prepares(self):
+        self.assert_outside_dirty_file_is_ignored("?? src/futon2/aif/unrelated.clj")
+
+    def test_tracked_modification_outside_closure_prepares(self):
+        self.assert_outside_dirty_file_is_ignored(" M src/futon2/aif/unrelated.clj")
+
+    def assert_outside_dirty_file_is_ignored(self, outside_status):
+        p = load_prepare()
+        names, inventory = p.declaration()
+        closure = [inventory[n] for n in names]
+        current = {n: {"status": "current"} for n in names}
+
+        def status(*args, **kwargs):
+            queried = args[-1]
+            if queried == "src/futon2/aif/unrelated.clj":
+                return subprocess.CompletedProcess([], 0, outside_status, "")
+            return subprocess.CompletedProcess([], 0, "", "")
+
+        with mock.patch.object(p, "idle"), \
+             mock.patch.object(p.reload, "dependency_closure", side_effect=lambda files: files), \
+             mock.patch.object(p.reload, "sh", side_effect=status) as git_status, \
+             mock.patch.object(p, "snapshot", return_value=current), \
+             mock.patch.object(p.reload, "reload_namespace") as load:
+            result = p.prepare()
+        self.assertEqual("current", result["status"])
+        self.assertFalse(any(call.args[-1] == "src/futon2/aif/unrelated.clj"
+                             for call in git_status.call_args_list))
+        load.assert_not_called()
+
+    def test_modified_closure_file_prepares_without_reload_and_records_status(self):
+        p = load_prepare()
+        names, inventory = p.declaration()
+        changed = names[-1]
+        path = inventory[changed]
+        statuses = {n: {"status": "current"} for n in names}
+        statuses[changed] = {"status": "stale"}
+
+        def status(*args, **kwargs):
+            output = " M " + str(path.relative_to(p.reload.F2)) if args[-1] == str(path.relative_to(p.reload.F2)) else ""
+            return subprocess.CompletedProcess([], 0, output, "")
+
+        with mock.patch.object(p, "idle"), \
+             mock.patch.object(p.reload, "dependency_closure", side_effect=lambda files: files), \
+             mock.patch.object(p.reload, "sh", side_effect=status), \
+             mock.patch.object(p, "snapshot", return_value=statuses), \
+             mock.patch.object(p.reload, "reload_namespace") as load:
+            result = p.prepare()
+        self.assertEqual("prepared", result["status"])
+        self.assertEqual("stale", result["namespaces"][changed]["status"])
+        self.assertIn(str(path), result["skipped-dirty"])
+        load.assert_not_called()
 
     def test_still_stale_and_unavailable_refuse(self):
         for status in ["stale", "unavailable"]:

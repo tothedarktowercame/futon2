@@ -896,6 +896,43 @@ def dirty(path: Path) -> bool:
     return bool(git(repo, "status", "--porcelain", "--", str(path.relative_to(repo))).strip())
 
 
+def dependency_closure(files: list[Path]) -> list[Path]:
+    """Return FILES and their canonical futon2/futon3c requires.
+
+    Namespace parsing lives here with reload ordering so admission and reload
+    cannot acquire different ideas of the click's source closure.  Only source
+    roots that the serving JVM may load from these two canonical repositories
+    are indexed; tests, data, and other repositories are deliberately absent.
+    """
+    roots = [F2 / "src", F2 / "scripts", F3C / "src", F3C / "scripts"]
+    by_namespace = {}
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for suffix in ("*.clj", "*.cljc"):
+            for path in root.rglob(suffix):
+                namespace, _ = ns_of(path)
+                if namespace and namespace not in by_namespace:
+                    by_namespace[namespace] = path
+
+    found = set()
+
+    def visit(path: Path) -> None:
+        path = Path(path)
+        if path in found:
+            return
+        found.add(path)
+        _, requirements = ns_of(path)
+        for requirement in requirements:
+            dependency = by_namespace.get(requirement)
+            if dependency is not None:
+                visit(dependency)
+
+    for file in files:
+        visit(file)
+    return sorted(found)
+
+
 def reload_order(files: list[Path]) -> list[tuple[str, Path]]:
     info = {}
     for f in files:
