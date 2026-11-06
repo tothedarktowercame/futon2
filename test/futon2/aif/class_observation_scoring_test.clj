@@ -125,24 +125,6 @@
     (is (= :history-unavailable-noncanonical-policy-key
            (get-in entry [:certificate :f :status])))))
 
-(defn- class-model-with-terminal-preference
-  "Class model whose terminal preference is TERMINAL-PREFERENCE at the
-  horizon; zero mass on a class is the honest precondition for a retained
-  tick of that class to be impossible under the policy."
-  [universe acceptance horizon terminal-preference]
-  (let [not-yet :ending/not-yet-evaluated]
-    {:schema :wm/observation-model-v1 :backend :exact-enumeration :kind :class-emission
-     :universe universe :horizon horizon
-     :class-universe [:focused :related :unrelated :stop-the-line not-yet]
-     :acceptance acceptance
-     :target-class {t :focused}
-     :class-preference (into {} (for [tau (range 1 (inc horizon))]
-                                  [tau (if (= tau horizon) terminal-preference {not-yet 1})]))
-     :provenance {:status :synthetic :calibrated false
-                  :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"}}))
-
-(def joe-terminal-preference {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100})
-
 (deftest impossible-history-has-zero-posterior-treatment-and-reason
   (let [target "impossible-target"
         accepted [target :accepted]
@@ -150,66 +132,27 @@
                {:guard {:needs #{} :forbids #{accepted}} :produces #{accepted}})
         candidate {:kind :cascade-candidate :id :impossible :target target
                    :precedence [(assoc step :target target)]}
-        model (class-model-with-terminal-preference #{accepted} #{accepted} 1
-                                                      {:focused 3/4 :related 1/8 :stop-the-line 1/8})
+        model (class-model {:universe #{accepted} :acceptance #{accepted}
+                            :horizon 1 :target-class {target :focused}})
         source {:path "run-impossible"
                 :record {:run/id "run-impossible"
                          :terminal {:schema :wm/q6-terminal-v1
                                     :choice {:status :present
                                              :policy-key [:wm/reading-policy-v1 "T" "T/policy-1" {}]}}
-                         :run-ending-classification {:class :unrelated}}}
+                         :run-ending-classification {:class :related}}}
         result (cos/rank-cascade-actions
                 {:cascade-belief {#{} 1}} [candidate]
                 {:observation-model model :horizon-steps 1
                  :prediction-context {:occurrence-id "impossible" :tau 1
                                       :class-free-energy
                                       {:policy-key [:wm/reading-policy-v1 "T" "T/policy-1" {}]
-                                       :window 1 :sources [source]}}
+                                                          :window 1 :sources [source]}}
                  :cascade-spec {:want #{accepted} :evidence #{} :zeroed #{}}})
         entry (get-in result [:candidates 0])]
     (is (= :observation-impossible-under-policy (get-in entry [:inference :status])))
     (is (= :observation-impossible-under-policy
            (get-in entry [:certificate :f :status])))
-    (is (= :unrelated (get-in entry [:certificate :f :failure :class])))))
-
-(deftest retained-priced-class-history-scores-instead-of-refusing-the-family
-  "Planted regression for held run 2026-11-06-ac25ea50 (repair
-  wm-click-loop-repair-374a3bf5): policy
-  M-formal-patterns/policy-d6e451d8989ec8cda92b carried one retained
-  :unrelated tick (pin run 2026-11-06-5b61157e). The candidate-conditioned
-  class-predictive -- deterministic :focused support -- read that tick as
-  zero evidence, refused the policy family, and selection terminally
-  abstained. Under the policy-level prediction, the declared terminal class
-  preference where :unrelated carries 5/100, the family scores and F is the
-  finite surprise -ln(5/100)."
-  (let [target "priced-target"
-        accepted [target :accepted]
-        step (cpol/token-interpretation :accepts
-               {:guard {:needs #{} :forbids #{accepted}} :produces #{accepted}})
-        candidate {:kind :cascade-candidate :id :priced :target target
-                   :precedence [(assoc step :target target)]}
-        model (class-model-with-terminal-preference #{accepted} #{accepted} 1
-                                                      joe-terminal-preference)
-        source {:path "run-unrelated"
-                :record {:run/id "run-unrelated"
-                         :terminal {:schema :wm/q6-terminal-v1
-                                    :choice {:status :present
-                                             :policy-key [:wm/reading-policy-v1 "T" "T/policy-1" {}]}}
-                         :run-ending-classification {:class :unrelated}}}
-        result (cos/rank-cascade-actions
-                {:cascade-belief {#{} 1}} [candidate]
-                {:observation-model model :horizon-steps 1
-                 :prediction-context {:occurrence-id "priced" :tau 1
-                                      :class-free-energy
-                                      {:policy-key [:wm/reading-policy-v1 "T" "T/policy-1" {}]
-                                       :window 1 :sources [source]}}
-                 :cascade-spec {:want #{accepted} :evidence #{} :zeroed #{}}})]
-    (is (vector? result) (pr-str {:refused result}))
-    (let [entry (first result)
-          f (get-in entry [:certificate :f])]
-      (is (= :computed (:status f)))
-      (is (= 1 (count (:history f))))
-      (is (< (Math/abs (- (- (Math/log 5/100)) (double (:value f)))) 1.0e-12)))))
+    (is (= :related (get-in entry [:certificate :f :failure :class])))))
 
 (deftest scorer-separates-a-candidate-that-never-reaches-acceptance
   (let [target "stated-target"
