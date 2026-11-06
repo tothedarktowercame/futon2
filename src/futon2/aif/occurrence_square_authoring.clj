@@ -67,8 +67,7 @@
          (str "FORMAT CORRECTION (one round only): your preceding response did "
               "not parse as one JSON object. Parser error: "
               (:parser-error format-correction)
-              ". The observed defect is one missing closing brace before the "
-              "final ']}' — before replying, check that every '{' and '[' you "
+              ". Before replying, check that every '{' and '[' you "
               "open is closed, counting the entry object, its maps object and "
               "each of I1, I2, G and B. Return exactly one valid JSON object "
               "of the shape above. This is the only format correction.\n\n"))

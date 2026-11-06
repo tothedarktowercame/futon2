@@ -85,7 +85,8 @@
         plain (sut/prompt base)]
     (is (re-find #"FORMAT CORRECTION \(one round only\)" corrected))
     (is (re-find #"Unexpected close marker '\]'" corrected))
-    (is (re-find #"missing closing brace" corrected))
+    (is (not (re-find #"missing closing brace" corrected))
+        "the prompt names only the parser error it was given")
     (is (not (re-find #"FORMAT CORRECTION" plain))
         "the plain prompt gains no correction text")))
 
