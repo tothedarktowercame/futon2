@@ -53,9 +53,9 @@
        "evidence source explaining where that situation is observed. Do not "
        "invent offsets, hashes, theories, maps or policy identities; the machine "
        "constructs and validates those. Reply with exactly one JSON object: "
-       "{schema:'wm/occurrence-square-maps-v1',target:'...',analysis_digest:'...',"
-       "entries:[{occurrence_id:[pattern,fragmentIndex],maps:{I1:{element,source},"
-       "I2:{element,source},G:{element,source},B:{element,source}}}]}.\n\n"
+       "{schema:'wm/occurrence-square-maps-v2',target:'...',analysis_digest:'...',"
+       "entries:[{occurrence_id:[pattern,fragmentIndex],I1:{element,source},"
+       "I2:{element,source},G:{element,source},B:{element,source}}]}.\n\n"
        "Copy target and analysis_digest exactly from the request; they are binding "
        "receipts, not values to calculate.\n\n"
        (when format-correction
@@ -68,7 +68,7 @@
               "not parse as one JSON object. Parser error: "
               (:parser-error format-correction)
               ". Before replying, check that every '{' and '[' you "
-              "open is closed, counting the entry object, its maps object and "
+              "open is closed, counting the entry object and "
               "each of I1, I2, G and B. Return exactly one valid JSON object "
               "of the shape above. This is the only format correction.\n\n"))
        (json/generate-string {:target target :analysis_digest analysis-digest
@@ -152,7 +152,7 @@
                                      (handoff/response-parse-error
                                       (:raw-answer exchange)))}})}
 
-            (or (not= "wm/occurrence-square-maps-v1" (some-> (:schema answer) name))
+            (or (not= "wm/occurrence-square-maps-v2" (some-> (:schema answer) name))
                 (not= target (:target answer))
                 (not= analysis-digest (:analysis_digest answer))
                 (not= expected (set (keys by-id))))
@@ -165,7 +165,9 @@
                         (for [{:keys [occurrence-id pattern pattern-sha256]} occurrences
                               :let [text (resolver pattern)
                                     path (str "futon3/library/" pattern ".flexiarg")
-                                    maps (keywordize-roles (:maps (get by-id occurrence-id)))
+                                    maps (keywordize-roles
+                                          (select-keys (get by-id occurrence-id)
+                                                       [:I1 :I2 :G :B]))
                                     sq (square/build-from-situation-maps
                                         pattern text {:path path :sha256 pattern-sha256} maps)]]
                           [occurrence-id {:occurrence-id occurrence-id

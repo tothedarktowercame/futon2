@@ -47,14 +47,14 @@
                               :analysis-digest (:analysis-digest reading)}]}]}}}})
 
 (def answer
-  {:schema "wm/occurrence-square-maps-v1"
+  {:schema "wm/occurrence-square-maps-v2"
    :target "M-live"
    :entries
    [{:occurrence_id [pattern 0]
-     :maps {:I1 {:element "living rendering" :source "target reading fragment"}
-            :I2 {:element "frozen snapshot" :source "target reading fragment"}
-            :G {:element "publication address" :source "pattern BECAUSE"}
-     :B {:element "both discoverable" :source "pattern CHECK"}}}]})
+     :I1 {:element "living rendering" :source "target reading fragment"}
+     :I2 {:element "frozen snapshot" :source "target reading fragment"}
+     :G {:element "publication address" :source "pattern BECAUSE"}
+     :B {:element "both discoverable" :source "pattern CHECK"}}]})
 
 (deftest prompt-uses-one-snake-case-wire-schema
   (let [wire (sut/prompt {:target "M-live" :analysis-digest digest-a
@@ -64,7 +64,30 @@
                                          :fragment {:text "work"}}]})]
     (is (re-find #"occurrence_id" wire))
     (is (not (re-find #"occurrence-id" wire)))
+    (is (re-find #"wm/occurrence-square-maps-v2" wire))
+    (is (not (re-find #"maps:\{" wire)))
     (is (re-find #"Copy target and analysis_digest exactly" wire))))
+
+(deftest v1-maps-wrapper-is-refused
+  (let [reading-root (temp-root) square-root (temp-root)
+        reading (reading! reading-root)
+        v1-answer {:schema "wm/occurrence-square-maps-v1"
+                   :target "M-live"
+                   :analysis_digest (:analysis-digest reading)
+                   :entries
+                   [{:occurrence_id [pattern 0]
+                     :maps (select-keys (first (:entries answer)) [:I1 :I2 :G :B])}]}
+        result (sut/repair!
+                {:author "wm-author" :target-reading-root reading-root
+                 :occurrence-square-root square-root
+                 :answer-fn (constantly v1-answer)}
+                (judgement reading))]
+    (is (= :error (:status result)))
+    (is (= :occurrence-square-answer-unbound (:kind result)))
+    (is (= :absent
+           (:status (squares/current square-root "M-live"
+                                     (:analysis-digest reading)
+                                     (squares/library-resolver)))))))
 
 (deftest correction-round-prompt-names-the-parser-error
   ;; Held run 2026-11-06-73839343 (repair wm-click-loop-repair-fc798874): both
@@ -229,11 +252,11 @@
         reading (reading! reading-root)
         digest (:analysis-digest reading)
         ;; exactly the observed defect shape: valid object, one missing brace
-        malformed (str "{\"schema\":\"wm/occurrence-square-maps-v1\","
+        malformed (str "{\"schema\":\"wm/occurrence-square-maps-v2\","
                        "\"target\":\"M-live\","
                        "\"analysis_digest\":\"" digest "\","
                        "\"entries\":[{\"occurrence_id\":[\"" pattern "\",0],"
-                       "\"maps\":{\"I1\":{},\"I2\":{},\"G\":{},\"B\":{}}")
+                       "\"I1\":{},\"I2\":{},\"G\":{},\"B\":{}")
         correction-requests (atom [])
         record (sut/repair!
                 {:author "wm-author" :target-reading-root reading-root
@@ -256,7 +279,7 @@
   (let [reading-root (temp-root) square-root (temp-root)
         reading (reading! reading-root)
         digest (:analysis-digest reading)
-        malformed (str "{\"schema\":\"wm/occurrence-square-maps-v1\","
+        malformed (str "{\"schema\":\"wm/occurrence-square-maps-v2\","
                        "\"target\":\"M-live\","
                        "\"analysis_digest\":\"" digest "\",\"entries\":[{")
         record (sut/repair!
