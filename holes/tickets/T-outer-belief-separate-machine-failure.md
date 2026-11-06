@@ -1,6 +1,7 @@
 # Do not fold apparatus failures into the outer target belief as task outcomes
 
-**Status:** OPEN — FIX NOW (Joe, 2026-10-19)
+**Status:** DONE — evidence recorded (wm-author, 2026-11-06); opened by Joe,
+2026-10-19
 Parent: M-wm-strategic-mission-selection
 
 ## Observed failure
@@ -55,6 +56,42 @@ tie mechanism in `T-outer-target-novelty-term.md`.
   still updates alpha as before.
 - The before/after alpha for the three 10-18 targets, with the dataset
   digests.
+
+## Closure evidence (2026-11-06)
+
+The scoped tasks were implemented and reviewed in October 2026; this section
+records the discharge so the open condition leaves through a transition that
+names the repair (apparatus/open-conditions-live-in-a-ledger), not by decay.
+
+1. Terminal-cause classification before the fold:
+   `futon2.aif.meta-outcome-dataset/terminal-cause`
+   (commit b9ef8089864aba5335a5129f153dfcf2f02e5111, hardened by
+   a3d05c4591f1adcffad4517720f1782bae961849 "Fail closed on unknown terminal
+   causes"). Apparatus kinds/stages class as `:apparatus-failure`; ambiguous
+   terminal labels class as `:unclassified`; neither reaches alpha. Ambiguous
+   kinds are not folded, per the scoped task.
+2. Apparatus failures recorded as interoceptive evidence (R20) with the run
+   id: `meta-outcome-dataset/produce` emits
+   `:interoceptive-evidence` (`:wm/r20-terminal-evidence-v1`) for every
+   `:apparatus-failure`/`:unclassified` run; task outcomes still update the
+   outcome class as before. Fixture coverage:
+   `futon2.aif.meta-outcome-dataset-test/terminal-cause-boundary-pins-apparatus-and-ambiguous-evidence`
+   (a run ending `:incomplete` with `:resume-protocol-violation` is excluded
+   from rows and appears on the interoceptive record; a `:task-failure` run
+   classes `:task-outcome`).
+3. The 10-18 readiness clicks: all three 2026-10-18 runs
+   (`M-formal-war-machine`, `M-digital-nomad-patterns`,
+   `M-self-improvement-loop`) were previously folded and were removed from
+   the dataset by rule with before/after alpha `[1 1 1 2 1] -> [1 1 1 1 1]`
+   and dataset digests, recorded in
+   `holes/labs/wm-contract/outer-belief-terminal-cause-audit-2026-10-19.edn`
+   (dataset old-sha256 017856e97a85c298d1bbe0b78ccef4d6511d63e3157ffd207c36836978d948cb,
+   new-sha256 0a35405cd4f7669c753b78828c38920ab7a57853f147bcdf8b2b0cf8943d6389);
+   test warrant in
+   `holes/labs/wm-contract/outer-belief-terminal-cause-warrant.edn`.
+
+Re-run receipt (2026-11-06): `clojure -M:test -n futon2.aif.meta-outcome-dataset-test`
+-> 10 tests, 66 assertions, 0 failures, 0 errors.
 
 ## Provenance
 
