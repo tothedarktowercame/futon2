@@ -66,6 +66,29 @@
     (is (not (re-find #"occurrence-id" wire)))
     (is (re-find #"Copy target and analysis_digest exactly" wire))))
 
+(deftest correction-round-prompt-names-the-parser-error
+  ;; Held run 2026-11-06-73839343 (repair wm-click-loop-repair-fc798874): both
+  ;; author answers missed exactly one closing brace before the final ']}'.
+  ;; The correction round re-sent a byte-identical prompt — the parser error
+  ;; never reached wm-author, so the correction round was a blind retry. The
+  ;; prompt must surface it, as the selected-target-reading seam does.
+  (let [base {:target "M-live" :analysis-digest digest-a
+              :occurrences [{:occurrence-id [pattern 0]
+                             :pattern pattern
+                             :pattern-sha256 pattern-sha
+                             :fragment {:text "work"}}]}
+        corrected (sut/prompt (assoc base
+                                     :format-correction
+                                     {:round 1 :limit 1
+                                      :parser-error
+                                      "Unexpected close marker ']'"}))
+        plain (sut/prompt base)]
+    (is (re-find #"FORMAT CORRECTION \(one round only\)" corrected))
+    (is (re-find #"Unexpected close marker '\]'" corrected))
+    (is (re-find #"missing closing brace" corrected))
+    (is (not (re-find #"FORMAT CORRECTION" plain))
+        "the plain prompt gains no correction text")))
+
 (deftest publishes-machine-built-square-before-g
   (let [reading-root (temp-root) square-root (temp-root)
         reading (reading! reading-root)

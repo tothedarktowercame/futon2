@@ -37,7 +37,7 @@
                     :analysis-digest (:analysis-digest failure)}))]
     refusal))
 
-(defn prompt [{:keys [target analysis-digest occurrences]}]
+(defn prompt [{:keys [target analysis-digest occurrences format-correction]}]
   (let [wire-occurrences
         (mapv (fn [occurrence]
                 {:occurrence_id (:occurrence-id occurrence)
@@ -58,6 +58,20 @@
        "I2:{element,source},G:{element,source},B:{element,source}}}]}.\n\n"
        "Copy target and analysis_digest exactly from the request; they are binding "
        "receipts, not values to calculate.\n\n"
+       (when format-correction
+         ;; Held run 2026-11-06-73839343 (repair wm-click-loop-repair-fc798874):
+         ;; the correction round re-dispatched with a byte-identical prompt, so
+         ;; wm-author never saw the parser error and returned another answer
+         ;; missing one closing brace. The sibling selected-target-reading seam
+         ;; surfaces the parser error; this seam must too.
+         (str "FORMAT CORRECTION (one round only): your preceding response did "
+              "not parse as one JSON object. Parser error: "
+              (:parser-error format-correction)
+              ". The observed defect is one missing closing brace before the "
+              "final ']}' — before replying, check that every '{' and '[' you "
+              "open is closed, counting the entry object, its maps object and "
+              "each of I1, I2, G and B. Return exactly one valid JSON object "
+              "of the shape above. This is the only format correction.\n\n"))
        (json/generate-string {:target target :analysis_digest analysis-digest
                               :occurrences wire-occurrences} {:pretty true}))))
 
