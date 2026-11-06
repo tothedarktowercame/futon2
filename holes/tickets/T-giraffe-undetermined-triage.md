@@ -85,6 +85,52 @@ Blockers / questions for Joe:
 
 ## Group B
 
+### E-futon1a-to-futon1b-migration-pipeline — **likely outdated**
+
+What it is: futon2 excursion (`/home/joe/code/futon2/holes/E-futon1a-to-futon1b-migration-pipeline.md`) building the reproducible export/transform/ingest/verify pipeline that moves the live futon1a (XTDB 1.x) store into a futon1b XTDB 2 node without touching the serving JVM. It ran in full on 2026-07-10: 147,893+ docs migrated, an XTDB 2.0.0 durability bug (F11) found and fixed by upgrading to 2.1.0, full three-layer verify PASS, and the switch-over executed (futon1b-server deployed on :7073, dual-write enabled, cold-scan reindex triggered — parts 1–7 in the doc).
+
+Why Giraffe could not decide: the reading's `unresolved` list is **empty** (corpus `batch-old-11.jsonl`). The undetermined verdict comes from the document's own header, which still reads "IN PROGRESS … QUIET WINDOW FULLY STAGED … awaiting operator 'go'" — stale, since part 7 of the same document records the switch-over executed and verify PASS.
+
+Evidence of being finished/outdated: the header was never updated after the 2026-07-10 part-7 section ("SWITCH-OVER EXECUTED … Full S5 verify on migration-store-21: PASS … futon1b-server DEPLOYED"); last content commit `b993a4f3f` (2026-07-10); the deployed futon1b-server on :7073 is live **today** (`GET /health` returns `{:node-open? true …}` with a 2026-11-06 checkpoint), so the pipeline's output is the running service. The only remaining work named in the doc is background ops (the 5.09M watcher-event erase) and follow-ups explicitly assigned elsewhere ("stop the watcher writing watcher-event hyperedges … good Codex bell"; futon1a-succession decision is "explicitly not this excursion's scope").
+
+Questions for Joe: none blocking — one disposition question. The excursion appears done-in-fact; should it be marked CLOSED (header updated to the part-7 outcome), or is there a remaining acceptance item (e.g. the erase finishing, or the P2-addendum assertions for the data types the slice didn't cover) that should keep it open? **1 question.**
+
+### E-ground-G — **blocked**
+
+What it is: futon6 excursion (`/home/joe/code/futon6/holes/E-ground-G.md`) grounding the rollout value `G` in a signal external to the prior's own metric, then re-running the T1 rent measurement. It produced the peradam-free grounded learning loop (Build 1–3: phylogeny-grounded `construct_cascade`, `cascade_learn.py`, `curriculum_propose.py` — all reviewed PASS), but the final grounded-T1 measurement is data-blocked: realized closures cover 1/86 move endpoints, and the doc ends with a three-way decision explicitly "pending Joe".
+
+Why Giraffe could not decide: unresolved edge quoted verbatim — `"raw_target": "C-falsifiable-missions", "kind": "unblocks"` with quote "BLOCKED pending `E-ground-G` (`futon6/holes/E-ground-G.md`)" — reason: "C-prefixed campaign document, not a task document in the population index." So the one thing waiting on this excursion is a campaign doc Giraffe cannot count as a task.
+
+Blockers / questions for Joe:
+
+- **Q1 (the pending a/b/c decision, verbatim from the doc's final section):** grounding-by-lookup is intrinsically empty for prospective search, so the options recorded are (a) defer rollout-grounding and run a supervised observer go-live with the reviewed grounded loop as a sidecar; (b) build the small `move-cost ← posteriors` bridge now and re-measure as closures accumulate (the author's recommended real path); (c) log the degenerate 0-rent baseline for the record. What changes: whether futon2 `rollout/move-cost` gets the posteriors bridge now, and whether `C-falsifiable-missions`' rollout work stays paused or resumes. Evidence: `E-ground-G.md` §"GROUNDED-T1 LANDING" (final section, before the closure criteria).
+- **Q2 (data maturity):** the posteriors bridge is starved because closure data is thin (5 success-closures at Build-3 review). Is closure accumulation now expected from the ordinary WM/agency flow (so Q1-(b) ripens on its own), or should a closure-generating driver be scheduled deliberately? Evidence: `E-ground-G.md` Build-3 review, "starved of data exactly where the rest of the loop is"; closure criteria (provisional, 2026-10-09) still unchecked.
+
+**2 questions.**
+
+### E-memory-whitepaper-v3-programme — **blocked**
+
+What it is: futon3c excursion (`/home/joe/code/futon3c/holes/excursions/E-memory-whitepaper-v3-programme.md`), the plan for finishing the M-memory-retrieval WS6 V3 whitepaper: Phase 0 instruments (A1 backfill via `memory_outcome_sweeper.py`, receipt fields, reachability index), Phase 1 the Zone silence chapter and witnessed-chain write-up, Phase 2 a naturalistic paired head-to-head ladder in waves with a residue battery. Drafted 2026-08-10, last content change 2026-08-11 (`719c32e2e`, "Queue behind the retrieval rungs"); no wave or rung execution is recorded anywhere.
+
+Why Giraffe could not decide: the reading's `unresolved` list is **empty** (corpus `batch-old-33.jsonl`); all three dependencies (E-memory-v3-staging, E-ground-control-pass-to-zone, M-memory-retrieval) resolve. Undetermined because the doc is OPEN with everything queued behind other work ("Queue behind the retrieval rungs", line 419) and no completion or cancellation signal.
+
+Blockers / questions for Joe:
+
+- **Q1 (is the V3 wave ladder still the plan?):** the parent mission M-memory-retrieval is OPEN with WS6 unchecked (acceptance checklist dated 2026-09-30, three items open: `holes/missions/M-memory-retrieval.md`), and the 2026-09-26 commit `882bb0229` ("M-象-2000: what carries over from the memory whitepaper plan") moved whitepaper lessons into M-象-2000 at the pattern level. Options: (a) V3 proceeds as drafted — next concrete items are Phase 0a (bless + run the sweeper backfill over dev-laptop's 130 + Zone's job ledgers) and 0b (receipt fields in `dispatch_with_recall.clj`), which need no further decisions; (b) retire the wave ladder and write V3 as a paper-only chapter (silence chapter + n=1 witnessed chain are "already fully evidenced" per the doc); (c) fold the residue-battery goals into whatever campaign follows M-象-2000 and retire this programme. What changes: whether the WM should dispatch Phase-0 instrument work, and what WS6's remaining acceptance items mean.
+- **Q2 (the APM/Zone substrate the design assumed):** Phase 2's problem panel, frames containerization, and `abl-codex-1` replication probe all assume the Zone apm-lean campaign seats as they stood 2026-08-10 ("abl-codex-1 replication: probe OVERRAN 2026-08-10 … liveness unconfirmed; retry with a longer budget"). Does that substrate still exist to run paired waves on, or must the design be re-pointed before any dispatch? Evidence: `E-memory-whitepaper-v3-programme.md` Phase 2 and "Frames — run containerization on Zone" sections.
+
+**2 questions.**
+
+### E-mfuton-native-installation-20261003 — **likely outdated**
+
+What it is: futon3c requisition (`/home/joe/code/futon3c/holes/excursions/E-mfuton-native-installation-20261003.md`, 18 lines) dispatching work on the native-installation handoff between Lisp body compilation/emission and installed-generated-binding in `/home/joe/code/mfuton-sbcl` — build a real installer if feasible, else deliver an executable contract check naming the exact missing operation. "This job does not earn completion until real installation is executed."
+
+Why Giraffe could not decide: the reading's `unresolved` list is **empty** (corpus `batch-old-34.jsonl`); its one inferred depends-on (E-mfuton-lisp-exact-binding-codex13-20261003) is DONE (mfuton-share `a3fa5fb3`). Undetermined because the requisition header still says "in-progress" and the doc contains no completion record.
+
+Evidence of being outdated: (1) the fallback deliverable was actually delivered — codex-18's commit `3b446fb4` (2026-10-03, mfuton-share, Agency-Job `auto-bellback-invoke-1790999811446-30715-8f3cacac` = this requisition's own invoke id) records the executable installation-contract check, with the blocker recorded in `lisp/curriculum/capabilities.json`: "missing_operation: Lower Lisp-produced module artifact to native initializer" — i.e. the producer/runtime mismatch path the requisition names was taken, not real installation. (2) The Lisp curriculum was paused the next day (mfuton-share `f8eed5a1`, 2026-10-04, "Pause Lisp curriculum at source HAdd OfNat wiring boundary"), so real installation cannot proceed. (3) The named workspace `/home/joe/code/mfuton-sbcl` no longer exists on disk; mfuton work moved to `/home/joe/code/mfuton-share` (Python/EmitPython, active through 2026-10-26). Same findings as Group C's E-mfuton-typeclass-scope-state entry.
+
+Questions for Joe: one disposition question. The requisition's contract-check deliverable landed but its stated completion bar ("real installation executed") was never met and its workspace is gone: retire it as superseded-by-pause (recording `3b446fb4` as the delivered contract check), or rewrite it against mfuton-share queued behind a Lisp-curriculum resume decision? **1 question.**
+
 ## Group C
 
 ### E-mfuton-typeclass-scope-state-20261003
