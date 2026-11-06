@@ -36,6 +36,39 @@
    :allowed (mapv (fn [repo] {:repo repo :base-head (get bases repo)}) repos)
    :digest "plan-digest"})
 
+(deftest primary-binding-is-selected-without-a-selected-locator
+  ;; Held run 2026-11-06-24328734 (repair wm-click-loop-repair-c76bc5b9):
+  ;; the selected action's observation-locators were empty, so no repository
+  ;; was primary, and a present corroborated single-repository declaration was
+  ;; thrown back at the author as :primary-binding-absent with
+  ;; :primary-repository nil.
+  (let [binding {:repo "/repos/only" :commit "abc1234" :corroborates? true}]
+    (testing "no selected locator and one corroborated repository binds"
+      (is (= binding (evidence/select-primary-artifact-binding
+                      {:schema :wm/artifact-binding-set-v1 :bindings [binding]}
+                      nil))))
+    (testing "a selected primary repository still requires its declared binding"
+      (is (= binding (evidence/select-primary-artifact-binding
+                      {:schema :wm/artifact-binding-set-v1 :bindings [binding]}
+                      "/repos/only")))
+      (let [ex (try (evidence/select-primary-artifact-binding
+                     {:schema :wm/artifact-binding-set-v1 :bindings [binding]}
+                     "/repos/other")
+                    nil (catch clojure.lang.ExceptionInfo e e))]
+        (is (= :artifact-declaration/primary-binding-absent
+               (get-in (ex-data ex) [:author-response-defect :kind])))
+        (is (= "/repos/other"
+               (get-in (ex-data ex) [:author-response-defect :primary-repository])))))
+    (testing "no locator and several corroborated repositories is an apparatus condition, not an author defect"
+      (let [two {:repo "/repos/two" :commit "def5678" :corroborates? true}
+            ex (try (evidence/select-primary-artifact-binding
+                     {:schema :wm/artifact-binding-set-v1 :bindings [binding two]}
+                     nil)
+                    nil (catch clojure.lang.ExceptionInfo e e))]
+        (is (= :primary-locator-absent (:failure-kind (ex-data ex))))
+        (is (nil? (:author-response-defect (ex-data ex))))
+        (is (= ["/repos/only" "/repos/two"] (:changed-repositories (ex-data ex))))))))
+
 (deftest declared-repositories-are-corroborated-independently
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-multirepo-" (make-array java.nio.file.attribute.FileAttribute 0)))

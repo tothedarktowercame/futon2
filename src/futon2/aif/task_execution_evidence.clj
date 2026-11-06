@@ -303,6 +303,38 @@
        :bindings bindings
        :plan-digest (:digest plan)})))
 
+(defn select-primary-artifact-binding
+  "Choose the singular artifact binding for the artifact gate from a
+  corroborated BINDING-SET. With a PRIMARY-REPOSITORY named by the first
+  selected observation locator, its declared binding is required and a miss is
+  the existing typed author defect :primary-binding-absent. A selected action
+  with no observation locators names no primary repository at all (held run
+  2026-11-06-24328734, repair wm-click-loop-repair-c76bc5b9): a corroborated
+  declaration of exactly one repository is then the singular artifact and
+  binds; several corroborated repositories with no locator leave the choice
+  undefined, which is an apparatus condition (the dispatch selected no
+  locator), not an author response defect, so it is typed
+  :primary-locator-absent without the :author-response-defect key."
+  [binding-set primary-repository]
+  (let [bindings (:bindings binding-set)]
+    (or (when primary-repository
+          (some #(when (= primary-repository (:repo %)) %) bindings))
+        (when (and (nil? primary-repository) (= 1 (count bindings)))
+          (first bindings))
+        (throw
+         (ex-info "First selected locator has no declared binding"
+                  (if primary-repository
+                    {:outcome :build-failed
+                     :failure-kind :author-response-defect
+                     :failure-stage :artifact-binding
+                     :author-response-defect
+                     {:kind :artifact-declaration/primary-binding-absent
+                      :primary-repository primary-repository}}
+                    {:outcome :build-failed
+                     :failure-kind :primary-locator-absent
+                     :failure-stage :artifact-binding
+                      :changed-repositories (mapv :repo bindings)}))))))
+
 (def ^:private code-file-pattern
   #"(?i)\.(?:clj|cljc|cljs|bb|el|lean|py|js|jsx|ts|tsx|java|go|rs|c|cc|cpp|h|hpp|sh)$")
 

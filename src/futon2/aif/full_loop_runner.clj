@@ -10735,15 +10735,8 @@
                        repository-plan))
                     artifact-binding
                     (if artifact-binding-set
-                      (or (some #(when (= primary-repo (:repo %)) %)
-                                (:bindings artifact-binding-set))
-                          (throw (ex-info "First selected locator has no declared binding"
-                                          {:outcome :build-failed
-                                           :failure-kind :author-response-defect
-                                           :failure-stage :artifact-binding
-                                           :author-response-defect
-                                           {:kind :artifact-declaration/primary-binding-absent
-                                            :primary-repository primary-repo}})))
+                      (task-execution/select-primary-artifact-binding
+                       artifact-binding-set primary-repo)
                       (if bound-author?
                         (fresh-artifact-binding opts author-repo
                                                 effective-pre-author-head
