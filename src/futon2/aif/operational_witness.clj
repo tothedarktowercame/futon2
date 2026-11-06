@@ -140,6 +140,84 @@
       (if (:verified? report) [(dissoc report :mismatches)] []))
     []))
 
+;; --- registration conformance (M-experiment-build-match, layer 3) ---------
+;;
+;; The reviewer's re-run comparison keyed on :food-seed alone and so could
+;; compare arbitrary arms. This relation names its tuple — (scenario, arm,
+;; seed-triple) — and additionally checks the run artifact's DESIGN against
+;; the registration, so a run that drifted from what was registered cannot
+;; silently pass.
+
+(defn registered-cello
+  "Relation: `key` is a registered `[scenario arm seed]` cell — its (scenario,
+  arm) prefix is a declared cell of the registration. Intended to run
+  FORWARD; `key` is the witnessing tuple."
+  [cells key]
+  (l/fresh [scenario arm seed]
+    (l/== key [scenario arm seed])
+    (l/membero [scenario arm] cells)))
+
+(defn- registration-cells
+  [registration]
+  (let [design (:clean/experiment-design registration)]
+    (set (for [scenario (:scenarios design)
+               arm (map :id (:arms design))]
+           [scenario arm]))))
+
+(defn verify-registration-conformance
+  "Compare a run artifact against the registration it claims to run under.
+  Rejects any row whose (scenario, arm) tuple is not registered, any cell
+  whose run count differs from the registration's :runs-per-cell, and any
+  row carrying a :design that differs from the registered arm's :ablates or
+  the registered :environment."
+  [{:keys [registration run-artifact]}]
+  (let [design (:clean/experiment-design registration)
+        cells (registration-cells registration)
+        runs-per-cell (get-in design [:seeds :runs-per-cell])
+        ablates (into {} (map (juxt :id :ablates)) (:arms design))
+        rows (artifact-rows run-artifact)
+        row-counts (frequencies (map (fn [[key _]] (vec (butlast key))) rows))
+        rejections
+        (vec
+         (concat
+          (keep (fn [[[scenario arm _seed] run]]
+                  (when-not (contains? cells [scenario arm])
+                    {:key [scenario arm] :kind :unregistered-tuple :run run}))
+                rows)
+          (keep (fn [[cell n]]
+                  (when (and runs-per-cell (not= n runs-per-cell))
+                    {:key cell :kind :cell-run-count
+                     :registered runs-per-cell :found n}))
+                row-counts)
+          (keep (fn [[[scenario arm _seed] run]]
+                  (let [row-design (:design run)]
+                    (when (and (:design run)
+                               (or (not= (:ablates row-design) (get ablates arm))
+                                   (and (:environment row-design)
+                                        (not= (:environment row-design)
+                                              (:environment design)))))
+                      {:key [scenario arm] :kind :design-differs
+                       :registered (get ablates arm) :found (:ablates row-design)})))
+                rows)))
+        witnessed
+        (vec (for [[key _] rows
+                   :when (registered-cello (mapv vec cells) key)]
+               key))]
+    {:verified? (empty? rejections)
+     :registered-cell-count (count cells)
+     :row-count (count rows)
+     :witnessed-tuples witnessed
+     :rejections rejections}))
+
+(defn witness-registration-conformance
+  "Registered witness adapter. A conforming artifact yields its witness
+  report (the verified tuple count); any rejection yields no witness."
+  [{:keys [registration run-artifact] :as observation}]
+  (if (and registration run-artifact)
+    (let [report (verify-registration-conformance observation)]
+      (if (:verified? report) [(dissoc report :rejections)] []))
+    []))
+
 ;; --- the standing register (a register OF RELATIONS) ---
 
 (def register
@@ -150,7 +228,10 @@
              :run  witness-closure}
    :artifact-reproduction
    {:desc "a re-run exactly reproduces every full (scenario, arm, seed) cell"
-    :run witness-artifact-reproduction}})
+    :run witness-artifact-reproduction}
+   :registration-conformance
+   {:desc "a run artifact conforms to its registration: every (scenario, arm, seed) cell registered, run counts and arm design unchanged"
+    :run witness-registration-conformance}})
 
 (defn run-register
   "Re-run every registered witness against the current observation. Returns a

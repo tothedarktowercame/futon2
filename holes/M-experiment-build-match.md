@@ -327,8 +327,30 @@ Neither records which version it holds.
 
 ## Acceptance checklist (2026-09-30)
 
-- [ ] A Slice-5 confirmation registration exists in the experiment-shaped CLean EDN schema and names its arms, axes, scenarios, seeds, stop rule, and decision rule.
-- [ ] Rendering that registration produces Lean whose navigability obligations fail for a constant-score treatment axis and pass for the valid confirmation design.
-- [ ] A schema derived from the same registration makes the harness refuse an unregistered arm before the run starts.
-- [ ] A registered operational-witness relation compares `(scenario, arm, seed)` and rejects a run artifact whose tuple or design differs from the registration.
-- [ ] Registrations and amendments carry a schema version, and a version change is recorded without mutating an in-flight registration.
+- [x] A Slice-5 confirmation registration exists in the experiment-shaped CLean EDN schema and names its arms, axes, scenarios, seeds, stop rule, and decision rule.
+- [x] Rendering that registration produces Lean whose navigability obligations fail for a constant-score treatment axis and pass for the valid confirmation design.
+- [x] A schema derived from the same registration makes the harness refuse an unregistered arm before the run starts.
+- [x] A registered operational-witness relation compares `(scenario, arm, seed)` and rejects a run artifact whose tuple or design differs from the registration.
+- [x] Registrations and amendments carry a schema version, and a version change is recorded without mutating an in-flight registration.
+
+### Discharge evidence (2026-11-06, wm-author)
+
+- Registration and render gate (boxes 1-2): `futon6/holes/clean/slice5-confirmation.clean.edn`
+  now carries `:clean/schema-version 1` (futon6 commit
+  5369574e83dd9074280cc12f573da4cbd1056126). Rendering twice via
+  `scripts/clean_to_lean.py --kind experiment --only slice5-confirmation` reproduces
+  `mathlib4/DarkTower/CLeanSlice5Confirmation.lean` byte-for-byte (fixed point), and
+  `lake env lean` on the render exits 0 — the navigability theorems pass. A fixture with
+  a treatment arm ablating the constant-score `:canonical-ambiguity` axis is refused at
+  render (`non-navigable treatment refused`).
+- Harness gate (box 3): `futon2.aif.experiment-registration/run-config-schema` derives a
+  malli schema from the registration (arm/scenario enums); `validate-run-config` refuses
+  an unregistered arm at `:stage :before-run` (13 tests, 45 assertions, 0 failures).
+- Witness (box 4): `futon2.aif.operational-witness/register` gains
+  `:registration-conformance` — a core.logic relation over `(scenario, arm, seed)`
+  triples that rejects unregistered tuples, wrong per-cell run counts, and drifted arm
+  designs, with adversarial tests showing each rejection.
+- Schema version (box 5): registrations carry `:clean/schema-version`; the validator
+  refuses its absence and unknown versions, validates an in-flight registration as-of
+  the version it carries, and `amend` records a version change as an amendment event
+  with a derived successor, never mutating the original (tested).
