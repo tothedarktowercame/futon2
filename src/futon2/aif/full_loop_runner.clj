@@ -7072,6 +7072,10 @@
       ;; :unknown-outcome, and the last-resort fallback re-closed the attempt
       ;; as :build-failed and the meta-terminal classifier opened an injury.
       (= :refused raw) :guardrail-refusal
+      ;; The futon1b clock store refused before Agency created a dispatch.
+      ;; This is an unavailable substrate, not a new close vocabulary value;
+      ;; retain :clock/store-busy as the failure kind beside this outcome.
+      (= :clock-store-busy raw) :substrate-unavailable
       (#{:agent-job-stalled :construction-failed :grounding-failed
          :policy-nondiscrimination :selection-validation-failed :incomplete} raw) :incomplete
       :else raw)))
