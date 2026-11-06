@@ -6,6 +6,7 @@
   available."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.area-focus :as area-focus]
@@ -108,7 +109,8 @@
   Registry statuses, requisition records, and inner-policy satisfaction are
   not exclusions."
   #{:target-source-path-absent :target-source-conflict :target-item-line-absent
-    :unread-new :reading-source-changed :completion-definition-not-found})
+    :unread-new :reading-source-changed :completion-definition-not-found
+    :target-under-edit})
 
 (defn validate-exclusion! [{:keys [target reason pin] :as row}]
   (when-not (and (string? target) (task-exclusion-reasons reason)
@@ -152,6 +154,53 @@
                   (filter mission-registry/live-ticket? (get-in authority [:loaded-tickets :tickets])))))
 
 (defn- data-pin [x] (sha256 (.getBytes (pr-str x) "UTF-8")))
+
+(defn- git-root
+  "Resolve PATH to its containing checkout without starting a process.  A
+  worktree's `.git` file and a normal checkout's `.git` directory both count."
+  [path]
+  (when (and (string? path) (seq path))
+    (loop [dir (.getParentFile (.getCanonicalFile (io/file path)))]
+      (when dir
+        (if (.exists (io/file dir ".git"))
+          (.getCanonicalFile dir)
+          (recur (.getParentFile dir)))))))
+
+(defn- porcelain-paths [output]
+  (->> (str/split (or output "") #"\u0000")
+       (keep (fn [entry]
+               (when (<= 4 (count entry))
+                 ;; --untracked-files=no means every returned path is tracked.
+                 (subs entry 3))))
+       set))
+
+(defn- targets-under-edit
+  "Snapshot tracked modifications once per repository and return target ids.
+  Source paths are the registry pins used to join Giraffe members to targets;
+  untracked files are deliberately omitted so :unread-new keeps its seam."
+  [registry]
+  (let [located (keep (fn [[target entry]]
+                        (let [path (get-in entry [:source :path])]
+                          (when-let [root (git-root path)]
+                            {:target target :path (.getCanonicalPath (io/file path))
+                             :root root})))
+                      registry)]
+    (into #{}
+          (mapcat
+           (fn [[root rows]]
+             (let [{:keys [exit out err]}
+                   (shell/sh "git" "-C" (.getPath root) "status" "--porcelain=v1"
+                             "-z" "--untracked-files=no")]
+               (when-not (zero? exit)
+                 (refuse! :target-edit-status-unavailable
+                          {:repo (.getPath root) :message err}))
+               (let [dirty (porcelain-paths out)]
+                 (keep (fn [{:keys [target path]}]
+                         (let [relative (str (.relativize (.toPath root)
+                                                         (.toPath (io/file path))))]
+                           (when (contains? dirty relative) target)))
+                       rows))))
+          (group-by :root located)))))
 
 (defn- open-roster [authority entries]
   (let [ids (set (map :id entries))
@@ -198,6 +247,7 @@
                               (remove #(contains? by-id %) open-ids))
              declarations (construction-inputs/target-source-declarations enumerated authority)
              changed (set (map name (get-in manifest [:reading-drift :drift :reading-source-changed])))
+             under-edit (targets-under-edit registry)
              entries
              (mapv (fn [target declaration]
                      (let [row (get by-id target)
@@ -205,17 +255,20 @@
                            reason (cond (contains? changed target) :reading-source-changed
                                         (undefined-completion? row) :completion-definition-not-found
                                         (nil? row) :unread-new
+                                        (contains? under-edit target) :target-under-edit
                                         :else (:source-absent declaration))
                            pin (get-in row [:dependency-reading :record-pin :sha256])]
                        (if reason
                          {:excluded (validate-exclusion!
-                                     {:target target :reason reason
+                                     (cond-> {:target target :reason reason
                                       :reach (if row (task-reach row)
                                                {:status :absent :reason :pass-row-unavailable})
                                       :pin (case reason
                                              :reading-source-changed manifest-sha
                                              :unread-new pass-sha
                                              :completion-definition-not-found pass-sha
+                                             :target-under-edit (or (get-in registry-entry [:source :sha256])
+                                                                   (data-pin registry-entry))
                                              (data-pin registry-entry))
                                       :evidence (cond
                                                   (= reason :completion-definition-not-found)
@@ -225,8 +278,13 @@
                                                   (contains? #{:unread-new :reading-source-changed} reason)
                                                   {:pass-sha256 pass-sha :manifest-sha256 manifest-sha
                                                    :registry-entry registry-entry}
+                                                  (= reason :target-under-edit)
+                                                  {:path (get-in registry-entry [:source :path])
+                                                   :registry-entry registry-entry}
                                                   :else
-                                                  {:registry-entry registry-entry :declaration declaration})})}
+                                                  {:registry-entry registry-entry :declaration declaration})}
+                                       (= reason :target-under-edit)
+                                       (assoc :path (get-in registry-entry [:source :path]))))}
                          (do
                            (when-not (and (string? pin) (seq pin))
                              (refuse! :giraffe-row-pin-unavailable {:target target :pass-sha256 pass-sha}))

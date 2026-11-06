@@ -3,6 +3,7 @@
             [clojure.edn :as edn]
             [futon2.aif.policy-satisfaction :as satisfaction]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-observation :as observation]
             [futon2.aif.focus-receipt :as focus]
@@ -33,6 +34,64 @@
   (.toFile (java.nio.file.Files/createTempDirectory
             "outer-observation-test"
             (make-array java.nio.file.attribute.FileAttribute 0))))
+
+(defn temp-git-source! []
+  (let [root (temp-dir)
+        source (io/file root "M-ready.md")]
+    (spit source "# M-ready\n")
+    (doseq [args [["init" "-q"]
+                  ["config" "user.email" "outer-observation@example.test"]
+                  ["config" "user.name" "Outer Observation Test"]
+                  ["add" "M-ready.md"]
+                  ["commit" "-qm" "fixture"]]]
+      (let [{:keys [exit err]} (apply shell/sh "git" "-C" (.getPath root) args)]
+        (is (zero? exit) err)))
+    {:root root :source source}))
+
+(defn authority-with-source [source]
+  (assoc-in fixture-authority [:loaded-missions :missions 0]
+            {:id "M-ready" :path (.getPath source)
+             :source {:path (.getCanonicalPath source) :sha256 "fixture-sha"}
+             :status-class :open :status-line "OPEN"}))
+
+(declare fixture-run!)
+
+(deftest target-source-under-edit-is-a-typed-field-exclusion
+  (let [{:keys [source]} (temp-git-source!)
+        authority (authority-with-source source)
+        clean (observation/giraffe-field (fixture-run!) makeup authority)]
+    (is (contains? (set (map :target (:field clean))) "M-ready")
+        "a clean tracked target remains admitted")
+    (spit source "# M-ready\n\nworking copy edit\n")
+    (let [field (observation/giraffe-field (fixture-run!) makeup authority)
+          exclusion (first (filter #(= "M-ready" (:target %))
+                                   (:outer-field/excluded field)))]
+      (is (= :target-under-edit (:reason exclusion)))
+      (is (= (.getCanonicalPath source) (:path exclusion)))
+      (is (= (:path exclusion) (get-in exclusion [:evidence :path])))
+      (is (not (contains? (set (map :target (:field field))) "M-ready"))))
+    (let [{:keys [exit err]} (shell/sh "git" "-C" (.getPath (.getParentFile source))
+                                       "add" (.getName source))]
+      (is (zero? exit) err))
+    (is (= :target-under-edit
+           (->> (:outer-field/excluded
+                 (observation/giraffe-field (fixture-run!) makeup authority))
+                (filter #(= "M-ready" (:target %))) first :reason))
+        "a staged edit is excluded too")))
+
+(deftest untracked-new-source-keeps-the-unread-new-exclusion
+  (let [{:keys [root]} (temp-git-source!)
+        source (io/file root "M-new.md")
+        _ (spit source "# M-new\n")
+        authority (update-in fixture-authority [:loaded-missions :missions]
+                             conj {:id "M-new" :path (.getPath source)
+                                   :source {:path (.getCanonicalPath source)
+                                            :sha256 "new-fixture-sha"}
+                                   :status-class :open :status-line "OPEN"})
+        field (observation/giraffe-field (fixture-run!) makeup authority)
+        matches (filter #(= "M-new" (:target %)) (:outer-field/excluded field))]
+    (is (= 1 (count matches)) "one target gets one exclusion")
+    (is (= :unread-new (:reason (first matches))))))
 
 (defonce ^:private giraffe-loader
   (doto (clojure.lang.DynamicClassLoader.
