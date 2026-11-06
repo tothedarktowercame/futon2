@@ -4353,6 +4353,23 @@
          :reason :source-unavailable
          :error-class (.getName (class e))}))))
 
+(defn- publish-author-question!
+  [brief-root checked]
+  (if-not (= :carrier (:status checked))
+    {:status :not-published :reason :question-not-carrier}
+    (try
+      (let [carrier (:carrier checked)
+            receipt (brief/queue-c2-question! brief-root carrier)]
+        (if (and (= (:question-digest carrier) (:question-digest receipt))
+                 (brief/c2-receipt-valid? receipt))
+          receipt
+          {:status :failed :reason :brief-receipt-invalid}))
+      (catch Throwable e
+        {:status :failed
+         :reason :brief-publication-threw
+         :error-class (.getName (class e))
+         :error-message (.getMessage e)}))))
+
 (defn throw-if-author-refused!
   "Shared HEAD movement cannot establish an artifact for a refusing author,
   so a refusal never continues the build. The typed classification
@@ -4362,8 +4379,10 @@
   a reasoned refusal with no artifact claim is the guardrail refusal; a
   contradictory or unsupported claim stays :invalid-author-refusal."
   ([author-job target stage]
-   (throw-if-author-refused! author-job target stage nil))
+   (throw-if-author-refused! author-job target stage nil brief/default-root))
   ([author-job target stage mission]
+   (throw-if-author-refused! author-job target stage mission brief/default-root))
+  ([author-job target stage mission brief-root]
   (let [correction-repository
         (or (get-in author-job [:author-response-corrections 0 :binding :repository])
             (get-in author-job [:unmeasured-claim-correction :binding :repository]))
@@ -4381,13 +4400,15 @@
     (when classification
     (case (:outcome classification)
       :author-question
-      (let [checked (checked-author-question target mission classification)]
+      (let [checked (checked-author-question target mission classification)
+            brief-receipt (publish-author-question! brief-root checked)]
         (throw (ex-info "Author reported a cited ambiguity in the mission text"
                         {:outcome :author-question
                          :failure-kind :author-question
                          :failure-stage stage
                          :target target
                          :c2/question checked
+                         :c2/brief-receipt brief-receipt
                          :author-job author-job})))
       :harm-declined
       (throw (ex-info "Author declined an action matching an approved harm rule"
@@ -10394,7 +10415,9 @@
                                     :dispatch (get-in @d-task-dispatch [:dispatch])})]
                     ;; The existing close handler retains the reviewed artifact and job.
                     (throw (ex-info "Existing-artifact claim independently reviewed" reviewed)))))
-              (throw-if-author-refused! author-job target :author-wait mission)
+              (throw-if-author-refused!
+               author-job target :author-wait mission
+               (or (:morning-brief-root opts) brief/default-root))
               (let [bound-author? (or fresh-author? (some? deferred-author-context))
                     declaration (:artifact-declaration author-job)
                     _ (when (and (some? (:status declaration))
