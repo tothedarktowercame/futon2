@@ -58,6 +58,52 @@
    :facts {"M-ready" {:status :ready :unblocks 1 :cone 2}
            "M-unknown" {:status :undetermined :unblocks 0 :cone 1}}})
 
+(deftest chosen-outer-cascade-retains-typed-enactment-pin
+  (let [discovery-makeup
+        {:cascades [{:id :find-out-before-building :patterns ["test"]
+                     :steps [{:gate-status :undetermined}]}]
+         :enactment-modes {:find-out-before-building :discovery}}
+        discovery (outer-select/select discovery-makeup base-state base-observation)
+        implementation (outer-select/select
+                        (assoc base-makeup
+                               :enactment-modes {:first :implementation
+                                                 :second :implementation})
+                        base-state base-observation)]
+    (is (= {:mode :discovery
+            :outer-cascade-id :find-out-before-building
+            :selection-sha (outer-select/enactment-selection-sha discovery)}
+           (:enactment discovery)))
+    (is (= :implementation (get-in implementation [:enactment :mode])))
+    (is (= (:cascade-id implementation)
+           (get-in implementation [:enactment :outer-cascade-id])))
+    (is (= (:enactment discovery)
+           (outer-select/validate-enactment-pin! discovery)))
+    (is (= (:enactment discovery)
+           (outer-select/validate-enactment-pin!
+            (update discovery :selection dissoc :candidates))))
+    (doseq [id [:giraffe-order :serves-a-way]]
+      (let [selected (outer-select/select
+                      {:cascades [{:id id :patterns ["test"] :steps [:ready-gate]}]
+                       :enactment-modes {id :implementation}}
+                      base-state base-observation)]
+        (is (= :implementation (get-in selected [:enactment :mode])))
+        (is (= id (get-in selected [:enactment :outer-cascade-id])))))))
+
+(deftest outer-enactment-mode-never-defaults-or-merges-conflicts
+  (let [same-policies {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
+                                  {:id :b :patterns ["test"] :steps [:ready-gate]}]}
+        failure (fn [makeup]
+                  (try (outer-select/select makeup base-state base-observation)
+                       nil
+                       (catch clojure.lang.ExceptionInfo e (ex-data e))))
+        unmapped (failure (assoc same-policies :enactment-modes {:a :implementation}))
+        conflict (failure (assoc same-policies
+                                 :enactment-modes {:a :implementation :b :discovery}))]
+    (is (= :outer-selection/enactment-mode-unmapped (:kind unmapped)))
+    (is (= [:b] (:cascades unmapped)))
+    (is (= :outer-selection/enactment-mode-conflict (:kind conflict)))
+    (is (= #{:implementation :discovery} (:modes conflict)))))
+
 (deftest click-12-trace-is-over-the-admitted-scoring-field
   (let [record (edn/read-string
                 (slurp "/home/joe/code/futon2/data/wm-runs/selection-record-2026-11-01-wm-click-7d89656e-b180-4f9e-bfb0-780d225b41de.edn"))

@@ -114,6 +114,7 @@
   {:makeup/sha256 (apply str (repeat 64 "a"))
    :default-reach 1/2
    :cascades [{:id :ready :patterns ["test"] :steps [:ready-gate]}]
+   :enactment-modes {:ready :implementation}
    :c-kit {:focused 55/100 :related 35/100 :unrelated 5/100
            :stop-the-line 5/100 :not-yet-evaluated 0}
    :kappa 100
@@ -148,10 +149,30 @@
       (is (= :chosen (get-in record [:selection-outcome :status]))))
     (is (= {:id "M-selected"} (:task @received)))
     (is (= :ready (get-in @received [:outer/selection :cascade-id])))
+    (is (= :implementation (get-in @received [:outer/selection :enactment :mode])))
     (is (vector? (get-in @received [:outer/selection :cascade-scores])))
     (is (= "fixture-missions-run"
            (get-in @received [:outer/selection :giraffe/run-id])))
     (is (nil? (get-in @received [:outer/selection :selection :candidates])))))
+
+(deftest find-out-selection-retains-discovery-mode-at-runner-seam
+  (let [received (atom nil)
+        discovery (assoc makeup
+                         :cascades [{:id :find-out-before-building
+                                     :patterns ["test"]
+                                     :steps [{:status-gate :undetermined}]}]
+                         :enactment-modes {:find-out-before-building :discovery})]
+    (call-ordinary
+     {:decision-as-of "2026-10-28T12:00:00Z"}
+     {#'outer-state/load-makeup (fn [_] discovery)
+      #'runtime/run-ordinary-opportunity-with-task!
+      (fn [opts] (reset! received opts) {:ran true})})
+    (is (= {:mode :discovery
+            :outer-cascade-id :find-out-before-building}
+           (select-keys (get-in @received [:outer/selection :enactment])
+                        [:mode :outer-cascade-id])))
+    (is (= "M-unknown"
+           (get-in @received [:outer/selection :selection :selected :target])))))
 
 (deftest supplied-task-bypasses-selection
   (let [received (atom nil)

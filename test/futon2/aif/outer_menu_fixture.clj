@@ -8,7 +8,7 @@
   (with-redefs [menu/construct
                 (fn [root makeup _]
                   (let [library (q2/library-manifest root)]
-                    {:library library
+                    (cond-> {:library library
                      :cascades
                      (mapv (fn [c]
                              (let [units (mapv (fn [i p]
@@ -18,5 +18,7 @@
                                    c (assoc c :units units :edges nil :readme-cascade nil
                                               :lineage-status :absent)]
                                (assoc c :digest (menu/cascade-digest c))))
-                           (:cascades makeup))}))]
+                           (:cascades makeup))}
+                      (:enactment-modes makeup)
+                      (assoc :enactment-modes (:enactment-modes makeup)))))]
     (f)))

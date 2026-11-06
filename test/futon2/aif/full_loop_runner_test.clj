@@ -27,6 +27,7 @@
             [futon2.aif.accepted-increment :as accepted-increment]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.outer-select :as outer-select]
             [futon2.aif.selected-mission-contract :as mission-contract]
             [futon2.aif.full-loop-runtime :as runtime]
             [futon2.aif.ticket-readiness :as ticket-readiness]
@@ -8042,6 +8043,30 @@
       (is (some? (#'runner/selected-entry {:decision selected})))
       (is (= (get-in decision [:selection-certificate :precision-family])
              (get-in selected [:selection-certificate :precision-family]))))))
+
+(deftest outer-enactment-pin-survives-selected-entry-and-construction
+  (let [decision (token-loop-exercised-decision)
+        base {:cascade-id :find-out-before-building
+              :cascade-digest "outer-cascade-digest"
+              :chosen-class "outer-class"
+              :selection {:selected {:target "M-formal-patterns"}}}
+        outer (assoc base :enactment
+                     {:mode :discovery
+                      :outer-cascade-id :find-out-before-building
+                      :selection-sha (outer-select/enactment-selection-sha base)})
+        entry (#'runner/selected-entry {:decision decision} outer)
+        construction (runner/construct-selected-action entry)]
+    (is (= (:enactment outer) (:outer-enactment entry)))
+    (is (= (:enactment outer) (:outer-enactment construction)))
+    (doseq [[changed expected]
+            [[(dissoc entry :outer-enactment)
+              :outer-selection/enactment-pin-lost]
+             [(assoc-in entry [:outer-enactment :mode] :implementation)
+              :outer-selection/enactment-pin-altered]]]
+      (let [failure (try (runner/construct-selected-action changed)
+                         nil
+                         (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        (is (= expected (:failure-kind failure)))))))
 
 (deftest feature-card-close-retains-learning-receipt-without-changing-selection
   ;; Canonical runner-source guard stays enabled; owner runs after merge.

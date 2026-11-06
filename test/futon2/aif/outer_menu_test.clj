@@ -59,6 +59,8 @@
 (deftest mapping-must-bind-readme-and-safe-executable-steps
   (doseq [[alter reason]
           [[#(assoc % :readme-sha256 (apply str (repeat 64 "0"))) :outer-menu/mapping-invalid]
+           [#(update-in % [:cascades 1] dissoc :enactment-mode)
+            :outer-menu/enactment-mode-unmapped]
            [#(assoc-in % [:cascades 1 :steps] [{:status-gate :undetermined} :by-cone])
             :outer-menu/unavailable-metric-order]
            [#(assoc-in % [:cascades 1 :steps] [:by-unblocks :ready-gate])

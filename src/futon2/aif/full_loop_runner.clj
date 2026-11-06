@@ -82,6 +82,7 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.open-cascade-refinement :as open-cascade-refinement]
             [futon2.aif.outer-refusal-index :as outer-refusal-index]
+            [futon2.aif.outer-select :as outer-select]
             [futon2.aif.reading-policy-class-history-index :as class-history-index]
             [futon2.aif.outer-refusal-history :as outer-refusal-history]
             [futon2.aif.effective-run-history :as effective-run-history]
@@ -3201,18 +3202,27 @@
    flat-removal H4, 2026-09-17). A cascade decision yields the chosen
    candidate with its own scores (there is no ranked-actions join); an
    abstention yields nil — nothing was selected."
-  [judgement]
-  (let [decision (:decision judgement)]
+  ([judgement] (selected-entry judgement nil))
+  ([judgement outer-selection]
+  (let [decision (:decision judgement)
+        outer-pin (when outer-selection
+                    (outer-select/validate-enactment-pin! outer-selection))
+        retain-outer (fn [entry]
+                       (cond-> entry
+                         outer-selection
+                         (assoc :outer-enactment outer-pin
+                                :outer-enactment-sha (identity/digest outer-pin)
+                                :outer-enactment-required? true)))]
     (cond
       (and (map? decision) (= :abstained (:status decision))) nil
       (and (= :meta-algorithm-selection
               (get-in decision [:selection-law :applied]))
            (= :run-algorithm (get-in decision [:action :type]))
            (string? (get-in decision [:action :target])))
-      {:action (:action decision)
+      (retain-outer {:action (:action decision)
        :rank 1
        :G-efe (:controller-score decision)
-       :controller-score (:controller-score decision)}
+       :controller-score (:controller-score decision)})
       (= :cascade-selection-posterior (get-in decision [:selection-law :applied]))
       (let [action (:action decision)
             candidates (get-in decision [:selection-certificate :candidates])
@@ -3226,7 +3236,7 @@
                    ;; interpretation it owes is discharged for this identity
                    (let [debt (reading-interpretation-status decision)]
                      (or (nil? debt) (= :discharged (:status debt)))))
-          {:action action
+          (retain-outer {:action action
            ;; Preserve the exact construction pin used by this ranked policy.
            ;; Packet D3 needs it to bind the occurrence-resolved squares that
            ;; were already validated before G.
@@ -3247,8 +3257,8 @@
            ;; stop-lines and mission lookup, and the action itself must NOT
            ;; grow a key (its value is digested into the occurrence identity,
            ;; the trial configuration and the dedup key).
-           :enacted-steps (get-in decision [:selection-law :enacted-steps])}))
-      :else nil)))
+           :enacted-steps (get-in decision [:selection-law :enacted-steps])})))
+      :else nil))))
 
 (defn no-selection-reason
   "Why a decision that exists named no addressable action (D25). Nothing was
@@ -3544,7 +3554,19 @@
 
 (defmethod construct-selected-action :cascade-candidate
   [entry]
-  (let [;; ⟨1⟩6: the enacted steps the DECISION recorded (keyed by chain
+  (let [_ (when (and (:outer-enactment-required? entry)
+                     (not (map? (:outer-enactment entry))))
+            (throw (ex-info "Outer enactment pin was lost before construction"
+                            {:failure-kind :outer-selection/enactment-pin-lost
+                             :failure-stage :construction})))
+        _ (when (and (:outer-enactment-required? entry)
+                     (not= (:outer-enactment-sha entry)
+                           (identity/digest (:outer-enactment entry))))
+            (throw (ex-info "Outer enactment pin changed before construction"
+                            {:failure-kind :outer-selection/enactment-pin-altered
+                             :failure-stage :construction})))
+        outer-enactment (:outer-enactment entry)
+        ;; ⟨1⟩6: the enacted steps the DECISION recorded (keyed by chain
         ;; head), threaded onto the action once, here — the initial
         ;; dispatch, the revision dispatch and the (b) filter all read
         ;; this same field; none resolves it independently.
@@ -3560,19 +3582,20 @@
                  ;; explicitly present nil remains evidence in its own right.
                  (contains? entry :enacted-steps)
                  (assoc :enacted-steps (:enacted-steps entry)))]
-    {:mission (:target action)
-     :psi (str "enact cascade " (or (:cascade-id action) (:id action)))
-     :construction-kind :selected-cascade
-     :selected-action action
-     :precedence (vec (:precedence action))
-     :construction-receipt (:construction-receipt action)
-     :interpretation-receipts (:interpretation-receipts action)
-     :shown (mapv (fn [p] (if (map? p)
-                            (str (or (:id p) (:cascade-id p)))
-                            (str p)))
-                  (:precedence action))
-     :cascade-structure (cascade-structure/receipt action)
-     :policy-holes []}))
+    (cond-> {:mission (:target action)
+             :psi (str "enact cascade " (or (:cascade-id action) (:id action)))
+             :construction-kind :selected-cascade
+             :selected-action action
+             :precedence (vec (:precedence action))
+             :construction-receipt (:construction-receipt action)
+             :interpretation-receipts (:interpretation-receipts action)
+             :shown (mapv (fn [p] (if (map? p)
+                                    (str (or (:id p) (:cascade-id p)))
+                                    (str p)))
+                          (:precedence action))
+             :cascade-structure (cascade-structure/receipt action)
+             :policy-holes []}
+      outer-enactment (assoc :outer-enactment outer-enactment))))
 
 (defmethod construct-selected-action :learn-action-class
   [entry]
@@ -9476,7 +9499,10 @@
                                 (or (:outer/selection (selected-target-reading/current-options opts))
                                     (:outer-task-selection judgement0)))
             mode-flags ((runtime-default opts :mode-flags-fn))
-            ordinary-entry (selected-entry judgement0)
+            ordinary-entry (selected-entry
+                            judgement0
+                            (:outer/selection
+                             (selected-target-reading/current-options opts)))
             ;; Capture the exact production value before cascade execution can
             ;; throw.  A failed run must remain resumable without selection;
             ;; the terminal record historically retained only the exception.
@@ -9635,7 +9661,8 @@
                                       :discrimination discrimination)
                                      :trace-persistence (if repair-action?
                                                           :repair-action-not-traced
-                                                          :after-construction)}
+                                                          :after-construction)
+                                     :outer-enactment (:outer-enactment entry)}
                                     (cond-> (decision-ground (:decision judgement))
                                      (and historical-action? (:run4/requested-pin opts))
                                      (assoc :run4/requested-pin (:run4/requested-pin opts)
@@ -9907,6 +9934,7 @@
                                                      :operational-plan
                                                      :construction-kind
                                                      :selected-action
+                                                     :outer-enactment
                                                      :capability-contract
                                                      :actuation-contract
                                                      :repair-contract])

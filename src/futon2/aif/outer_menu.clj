@@ -68,7 +68,9 @@
         (refuse! :outer-menu/mapping-entry-invalid {:cascade (:id c)}))
       (case (:status c)
         :executable
-        (do (when-not (and (vector? (:patterns c)) (seq (:patterns c))
+        (do (when-not (contains? #{:discovery :implementation} (:enactment-mode c))
+              (refuse! :outer-menu/enactment-mode-unmapped {:cascade (:id c)}))
+            (when-not (and (vector? (:patterns c)) (seq (:patterns c))
                            (every? #(contains? (:patterns manifest) %) (:patterns c)))
               (refuse! :outer-menu/pattern-outside-manifest {:cascade (:id c)}))
             (validate-steps! c))
@@ -137,4 +139,6 @@
                 {:status :absent :reason :giraffe-input-pin-unavailable})
      :library library :kernel kernel :kernel-input kernel-input
      :slice slice :pool pool :retrieval retrieval
-     :cascades cascades :policy-count (count cascades)}))
+     :cascades cascades
+     :enactment-modes (into {} (map (juxt :id :enactment-mode)) cascades)
+     :policy-count (count cascades)}))

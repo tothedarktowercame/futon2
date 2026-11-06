@@ -151,6 +151,50 @@
                      (:selection-evidence data)
                      (assoc-in [:selection-evidence :outcome] {:status :refused :kind kind})))))
 
+(defn enactment-selection-sha
+  "Digest the immutable outer-choice fields bound by an enactment pin.  Later
+  runtime annotations are deliberately outside this carrier."
+  [selection]
+  (identity/digest {:cascade-id (:cascade-id selection)
+                    :cascade-digest (:cascade-digest selection)
+                    :chosen-class (:chosen-class selection)
+                    :selected (get-in selection [:selection :selected])}))
+
+(defn validate-enactment-pin!
+  "Return the retained pin when it still names and hashes this outer choice."
+  [selection]
+  (let [pin (:enactment selection)]
+    (when-not (and (map? pin)
+                   (contains? #{:discovery :implementation} (:mode pin))
+                   (= (:cascade-id selection) (:outer-cascade-id pin))
+                   (= (enactment-selection-sha selection) (:selection-sha pin)))
+      (refuse! :outer-selection/enactment-pin-invalid
+               {:enactment pin
+                :cascade-id (:cascade-id selection)
+                :expected-selection-sha (enactment-selection-sha selection)}))
+    pin))
+
+(defn- attach-enactment-pin
+  [result chosen-class construction]
+  (if-not (contains? construction :enactment-modes)
+    ;; Explicit legacy/unit seam. Production outer-menu/construct always emits
+    ;; the map and refuses every unmapped executable cascade.
+    result
+    (let [mode-map (:enactment-modes construction)
+          members (:members chosen-class)
+          missing (vec (remove #(contains? mode-map %) members))
+          modes (set (keep mode-map members))]
+      (when (seq missing)
+        (refuse! :outer-selection/enactment-mode-unmapped
+                 {:cascades missing :selection-evidence result}))
+      (when-not (= 1 (count modes))
+        (refuse! :outer-selection/enactment-mode-conflict
+                 {:cascades members :modes modes :selection-evidence result}))
+      (let [pin {:mode (first modes)
+                 :outer-cascade-id (:cascade-id result)
+                 :selection-sha (enactment-selection-sha result)}]
+        (assoc result :enactment pin)))))
+
 (defn- relation-class
   "The relation class the scorer would see for TARGET, or ::no-relation-fn
   when the observation carries no relation function at all (pure unit
@@ -458,7 +502,8 @@
                                                :selection-evidence evidence}))
           (let [result (assoc evidence :outcome {:status :chosen} :chosen-class (:id chosen-class) :cascade-index index :cascade-id (:id chosen) :cascade-digest (:digest chosen)
                              :selection (when picked {:candidates (:field observation) :selected picked})
-                             :prediction (:prediction chosen))]
+                             :prediction (:prediction chosen))
+                result (attach-enactment-pin result chosen-class construction)]
             (assert (and (= (:cascade-scores result) (mapv :G (:cascades result)))
                          (= (:cascade-picks result) (mapv :pick (:cascades result)))
                          (= (:cascade-pick-relations result) legacy-relations)
