@@ -1,6 +1,6 @@
 # T-formal-patterns-unblock — make M-formal-patterns' next items concretely selectable
 
-**Requisition:** in-progress — dispatched 2026-11-06T06:22:56Z to a Kimi seat (claude-6, for Joe)
+**Requisition:** completed — 2026-11-06T07:10:00Z, job invoke-1793946208261-13623-2f819ee8, state done
 
 **Asked by:** Joe, 2026-11-06. **Owner:** claude-6 (review). **Worker:** Kimi seat.
 
@@ -125,6 +125,15 @@ mechanism lands; (b) **retire the Baldwin arm now** — the paper drops the
 Baldwin/Lamarck contrast; (c) **keep open and decoupled** — name a variation
 source other than N2b. What changes: the Baldwin arm config and the paper's
 contrast sections. Evidence: `TN-baldwin-reboot.md:361` and the §10 exit criterion at `TN-baldwin-reboot.md:388`.
+
+## Joe's answers (2026-11-06, by voice, relayed by claude-6)
+
+1. Freeze: lifted; today's S4 work stays.
+2. Endogenous clock: yes as outlined (stop resetting the stress counts, a stressed cell gets a new rule). Framing correction: "grid" holds only for 1-D automata; in the general case it is a semilattice. Copying acquired traits is not Baldwin and must not pass as it; Baldwin returns only via a formal account built on the War Machine's learning loop (β etc.), with cascades applied and updated in use.
+3. Lost knowledge: neither framing accepted on its own terms. Notes have no concrete meaning to depend on; findings rest on tests, proofs and concrete arguments. A test with comments beats a vague, possibly catastrophic statement; the statement might also be correct, so it stays open.
+4. Scoring degeneracy: trust the old result but treat it as a pilot; the new work does not depend on its framing or findings.
+5. Vocabulary: a pilot to learn from, not a dependency. Patterns are to be formalised as actually used (3/2 categories); CAs, if revisited, are formalised in the same theory without insisting the two are the same.
+6. Baldwin arm: retired from the automaton experiments. The mission itself is retired as superseded/wontfix (futon5 0b8bcc7) in favour of `M-formal-patterns-redux` (futon5 3877c83).
 
 ## Result
 
