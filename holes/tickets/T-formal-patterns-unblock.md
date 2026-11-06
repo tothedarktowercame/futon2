@@ -1,6 +1,6 @@
 # T-formal-patterns-unblock — make M-formal-patterns' next items concretely selectable
 
-**Requisition:** completed — 2026-11-06T07:10:00Z, job invoke-1793946208261-13623-2f819ee8, state done
+**Requisition:** completed — 2026-11-06T07:07:54Z, job invoke-1793946208261-13623-2f819ee8, state done
 
 **Asked by:** Joe, 2026-11-06. **Owner:** claude-6 (review). **Worker:** Kimi seat.
 
