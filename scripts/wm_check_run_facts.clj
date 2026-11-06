@@ -191,7 +191,7 @@
    ;; the previous run's refusal and the input digests too.
    :q11 ["currentChoice" "comparedPolicies" "constructedCascades" "targetConstruction" "abstentionPrediction"
          "enumeratedTasks" "kind" "policyG" "abstentionG" "policyPrediction"
-         "previousOutcome" "previousInputDigest" "currentInputDigest" "refusalHistory"]})
+         "previousChoice" "previousOutcome" "previousInputDigest" "currentInputDigest" "refusalHistory"]})
 
 (defn required-keys
   "A work run has no selection path to export, so Q7 does not wait on one.  A
@@ -268,7 +268,7 @@
                               (if-let [path (facts "selectionPath")]
                                 (selection-path-term path)
                                 "none")))
-        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d, refusalHistory := %s"
+        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s, previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d, refusalHistory := %s"
                                (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
                                (decision (facts "currentChoice"))
                                (target-construction (facts "targetConstruction"))
@@ -276,6 +276,7 @@
                                (policy-g (facts "policyG")) (rational-term (facts "abstentionG"))
                                (policy-prediction (facts "policyPrediction"))
                                (digest-term (facts "abstentionPrediction"))
+                               (previous-decision (facts "previousChoice"))
                                (outcomes (facts "previousOutcome"))
                                (id (facts "previousInputDigest")) (id (facts "currentInputDigest"))
                                (refusal-history (facts "refusalHistory"))))

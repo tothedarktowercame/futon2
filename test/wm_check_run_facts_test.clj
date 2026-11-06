@@ -156,7 +156,7 @@
       (is (re-find #"policyPrediction := \[\(\d+, \d+\), \(\d+, 0\)\]" q6))))
   (testing "Q11 reads the previous refusal and digests, so its minimum is over the admissible set"
     (let [q11 (sut/evidence selection-facts :q11)]
-      (is (re-find #"previousDecision := \(\.pick \d+ \d+\)" q11))
+      (is (re-find #"previousDecision := some \(\.pick \d+ \d+\)" q11))
       (is (str/includes? q11 "previousOutcome := .refused"))
       (is (re-find #"previousInputDigest := (\d+), currentInputDigest := \1" q11))))
   (testing "without the previous run Q11 is not recomputable rather than inheriting click20's refusal"
