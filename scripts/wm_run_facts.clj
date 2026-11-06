@@ -985,13 +985,24 @@
                    (some nil? rows) (not-recomputable "a menu cascade has no finite score")
                    :else (vec (sort-by #(get % "policy") rows)))})))
 
+(defn- empty-field-abstention?
+  "The retained terminal case, not merely the absence of a pick, distinguishes
+  Lean's `abstainEmptyField` from abstentions which have no Decision value."
+  [previous]
+  (and (= :present (:status previous))
+       (= :abstained (:outcome previous))
+       (= :abstained (get-in previous [:selection-outcome :status]))
+       (= :empty-field (get-in previous [:selection-outcome :case]))))
+
 (defn- selection-history-facts [selection]
   (let [p (:previous selection)
         present (= :present (:status p))
         nr #(not-recomputable (str "previous selection: " (or (:reason p) %)))
         decision (cond
-                   (and present (= :abstained (:outcome p)))
-                   (if (:pick p) {"abstain-on-task" (:pick p)} "abstain-empty-field")
+                   (and present (= :abstained (:outcome p)) (:pick p))
+                   {"abstain-on-task" (:pick p)}
+                   (empty-field-abstention? p) "abstain-empty-field"
+                   (and present (= :abstained (:outcome p))) "none"
                    (and present (:chosen-class p) (:pick p))
                    {"target" (:pick p) "cascade" (:chosen-class p)}
                    (and present (= :refused (:outcome p)))
@@ -1184,8 +1195,11 @@
   [previous]
   (when (map? previous)
     (let [present? (= :present (:status previous))
-          choice (when (and present? (:chosen-class previous) (:pick previous))
-                   {:target (:pick previous) :cascade (:chosen-class previous)})
+          choice (cond
+                   (and present? (:chosen-class previous) (:pick previous))
+                   {:target (:pick previous) :cascade (:chosen-class previous)}
+                   (and present? (= :abstained (:outcome previous)))
+                   {:status :none :reason :previous-abstention-has-no-decision})
           outcome (when (and present?
                              (contains? #{:changed :refused :abstained}
                                         (:outcome previous)))

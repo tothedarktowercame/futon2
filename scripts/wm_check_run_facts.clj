@@ -36,9 +36,11 @@
         :else ".unknownDecision"))
 (defn previous-decision
   "The predecessor's optional decision.  A refused-before-choice carrier is a
-  known `none`; every actual decision is wrapped in `some`."
+  known `none`; so is a retained abstention which has no Lean Decision.
+  Every actual decision is wrapped in `some`."
   [x]
-  (if (and (map? x) (= true (x "refused")))
+  (if (or (= "none" x)
+          (and (map? x) (= true (x "refused"))))
     "none"
     (str "some " (decision x))))
 (defn target-construction

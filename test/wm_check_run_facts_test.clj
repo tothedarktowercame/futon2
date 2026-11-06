@@ -141,6 +141,10 @@
   (testing "an abstained previous outcome reaches Lean as its constructor"
     (is (= ".abstained" (sut/outcomes "abstained")))))
 
+(deftest previous-decision-distinguishes-option-none-from-an-unknown-decision
+  (is (= "none" (sut/previous-decision "none")))
+  (is (= "some .unknownDecision" (sut/previous-decision {"target" "t1"}))))
+
 (deftest q11-without-the-stopped-prediction-is-not-recomputable
   (is (str/starts-with? (sut/evidence (dissoc selection-facts "abstentionPrediction") :q11) ".nr")))
 

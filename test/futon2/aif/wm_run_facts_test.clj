@@ -1028,6 +1028,32 @@
             "[:outer/selection :previous :choice]"]
            paths))))
 
+(deftest previous-abstention-without-a-decision-is-not-a-path-absence
+  (let [previous {:status :present
+                  :outcome :abstained
+                  :chosen-class nil
+                  :pick nil
+                  :selection-outcome {:status :abstained
+                                      :case :insufficient-comparison}
+                  :choice-input-digest "581241b5"}
+        record (assoc-in live-record [:outer/selection :previous] previous)
+        projected (#'facts/selection-history-facts {:previous previous})]
+    (is (= "none" (projected "previousChoice")))
+    (is (not-any? #{[:outer/selection :previous :choice]}
+                  (facts/selection-absence-paths record)))))
+
+(deftest previous-decision-projection-distinguishes-three-retained-cases
+  (let [project (fn [previous]
+                  ((#'facts/selection-history-facts {:previous previous})
+                   "previousChoice"))
+        base {:status :present :choice-input-digest "digest"}]
+    (is (= {"target" "T" "cascade" "C"}
+           (project (merge base {:outcome :changed :chosen-class "C" :pick "T"}))))
+    (is (= "abstain-empty-field"
+           (project (merge base {:outcome :abstained
+                                 :selection-outcome {:status :abstained :case :empty-field}}))))
+    (is (contains? (project (merge base {:outcome :changed})) "not-recomputable"))))
+
 (deftest current-selection-outcome-detail-remains-on-its-own-path
   (let [planted (assoc-in live-record [:outer/selection :selection-outcome]
                           {:status :changed
