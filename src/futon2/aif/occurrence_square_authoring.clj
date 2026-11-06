@@ -107,8 +107,19 @@
                        :kind :occurrence-square-authoring :target target
                        :analysis-digest analysis-digest :occurrences occurrences
                        :author author}
-              exchange (handoff/exchange {:contact answer-fn :request request
-                                           :decode decode})
+              ;; One completed undecodable response gets one format correction,
+              ;; mirroring the selected-target-reading seam (repair
+              ;; wm-click-loop-repair-a3b1cff2, held run c89e0ead: one missing
+              ;; brace in an otherwise complete square-maps answer became a
+              ;; terminal refusal with no correction round).
+              formatted (handoff/contact-with-format-correction
+                         {:contact answer-fn :request request
+                          :decode #(decode
+                                    (if (and (map? %) (nil? (:state %))) %
+                                      (handoff/response-payload %)))})
+              exchange (handoff/exchange
+                        {:contact (constantly (:response formatted))
+                         :request request :decode decode})
               answer (:value exchange)
               entries (:entries answer)
               by-id (into {} (map (juxt (comp vec :occurrence_id) identity)) entries)
@@ -117,6 +128,7 @@
             (not= :validated (:status exchange))
             {:schema schema :status :error :kind :occurrence-square-answer-invalid
              :answer (select-keys exchange [:reason :job-id :message])
+             :format-correction (:format-correction formatted)
              :answer-evidence
              (answer-evidence/retain
               {:raw (:raw-answer exchange)

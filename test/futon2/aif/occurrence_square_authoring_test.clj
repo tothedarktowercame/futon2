@@ -194,6 +194,58 @@
     (is (= :selected (get-in result [:judgement :decision :status])))
     (is (= :published (get-in result [:record :status])))))
 
+(deftest malformed-square-maps-answer-gets-one-format-correction-round
+  ;; held run 2026-11-06-c89e0ead (repair a3b1cff2): the author returned a
+  ;; complete square-maps answer missing one closing brace; without a
+  ;; correction round it became a terminal :occurrence-square-answer-invalid
+  ;; refusal that cascaded into two debugger holds. The sibling
+  ;; selected-target-reading seam gives one undecodable response one format
+  ;; correction; this seam must too.
+  (let [reading-root (temp-root) square-root (temp-root)
+        reading (reading! reading-root)
+        digest (:analysis-digest reading)
+        ;; exactly the observed defect shape: valid object, one missing brace
+        malformed (str "{\"schema\":\"wm/occurrence-square-maps-v1\","
+                       "\"target\":\"M-live\","
+                       "\"analysis_digest\":\"" digest "\","
+                       "\"entries\":[{\"occurrence_id\":[\"" pattern "\",0],"
+                       "\"maps\":{\"I1\":{},\"I2\":{},\"G\":{},\"B\":{}}")
+        correction-requests (atom [])
+        record (sut/repair!
+                {:author "wm-author" :target-reading-root reading-root
+                 :occurrence-square-root square-root
+                 :answer-fn (fn [request]
+                              (if (:format-correction request)
+                                (do (swap! correction-requests conj request)
+                                    {:state "done" :result
+                                     (assoc answer :analysis_digest digest)})
+                                {:state "done" :result malformed}))}
+                (judgement reading))]
+    (is (= :published (:status record)) "the corrected round publishes")
+    (is (= 1 (count @correction-requests)) "exactly one correction round")
+    (is (= 1 (get-in (first @correction-requests)
+                     [:format-correction :round])))
+    (is (string? (get-in (first @correction-requests)
+                         [:format-correction :parser-error])))))
+
+(deftest answer-invalid-after-correction-still-retains-the-refusal
+  (let [reading-root (temp-root) square-root (temp-root)
+        reading (reading! reading-root)
+        digest (:analysis-digest reading)
+        malformed (str "{\"schema\":\"wm/occurrence-square-maps-v1\","
+                       "\"target\":\"M-live\","
+                       "\"analysis_digest\":\"" digest "\",\"entries\":[{")
+        record (sut/repair!
+                {:author "wm-author" :target-reading-root reading-root
+                 :occurrence-square-root square-root
+                 :answer-fn (constantly {:state "done" :result malformed})}
+                (judgement reading))]
+    (is (= :error (:status record)))
+    (is (= :occurrence-square-answer-invalid (:kind record)))
+    (is (= 1 (get-in record [:format-correction :round]))
+        "the exhausted correction round is retained as evidence")
+    (is (map? (get-in record [:answer-evidence :defect])))))
+
 (deftest clock-store-busy-repair-throw-escapes-square-authoring-with-intact-data
   ;; held run 2026-11-06-c89e0ead (repair 5aefccdc): the square-authoring
   ;; catch swallowed Agency's typed pre-dispatch busy refusal into a bare
