@@ -53,8 +53,118 @@ re-rated by Giraffe."
 
 ## Questions for Joe
 
-(to be filled by the worker)
+**Q1 — Freeze disposition, and the standing of 84409a9 (S4).**
+The freeze says "Do not dispatch a slice while this notice stands"
+(`futon5/holes/M-formal-patterns.md:111`), but 84409a9 executed slice S4
+(Peeragogy translation) under it. Decision: (a) **lift the freeze** — register
+remainders (N2b, N3, H2, H5) become ordinary backlog and S0–S3/S5 become
+dispatchable; (b) **keep the freeze and ratify S4 as a one-off exception** —
+slices stay undispatchable, S4's acceptance tick stands; (c) **keep the freeze
+and treat S4 as a violation** — untick the acceptance item and park the S4
+artifacts. What changes: the freeze section of
+`futon5/holes/M-formal-patterns.md`; whether slices S0–S3, S5 can be dispatched
+at all. Evidence: `futon5/holes/M-formal-patterns.md:106-111`;
+`git show 84409a9` (futon5).
+
+**Q2 — N2b: open it as a work item, or keep it look-ahead?**
+TN §10 marks N2b "LOOK-AHEAD ONLY … still not a work item until Joe opens it"
+(`TN-baldwin-reboot.md:357`); its stated prerequisites (N2, H1) are now both
+DONE, and §14's sequence next step is "invariants (a)(b)(c) agreed → smallest
+build" (`TN-baldwin-reboot.md:716`). Decision: (a) **open N2b** with the §14.2
+invariants as agreed — smallest build = stop resetting the 40-step accumulator
+window (`src/futon5/exotype/selection.clj:99-105`), give τ exactly one
+consequence, one acceptance test, plus the §14.3 prereg falsifier; (b) **keep
+look-ahead** — name what further prerequisite is missing. Also parked inside
+§14: whether exotype→genotype replacement (Joe's answer to invariant (b))
+breaks the Baldwin frame ("third channel") — resolve before build, or build
+first and classify after? What changes: `selection.clj`,
+`test/futon5/exotype/invariants_test.clj`, a prereg note; paper Part III
+framing (§36 argues for N2b). Evidence: `TN-baldwin-reboot.md:357,598-717`.
+
+**Q3 — N3 exit criterion.**
+§10's registered criterion is "every `holes/F-*.md` and top-level `TN-*.md` has
+an inbound reference or is marked terminal"; §19 measured that this catches one
+instance in four and §19.5 replaces it with the co-location backlog, ending
+"Gate is Joe's" (`TN-baldwin-reboot.md:1139`). Decision: (a) **accept §19.5**
+— N3 closes when the §21.6 co-location backlog is done; the inbound-reference
+audit is dropped; (b) **keep the original criterion** — the WM owes the
+reference audit instead of (or in addition to) co-location. What changes: what
+N3 backlog work the WM selects; whether a repo-wide reference audit is owed.
+Evidence: `TN-baldwin-reboot.md:358,1048-1140`.
+
+**Q4 — EFE objective degeneracy: new register item or N3 backlog?**
+§20.5 flags micro-pilot 7 ("the exotype objective cannot be repaired from
+inside") as "a candidate new register item … Gate is Joe's"
+(`TN-baldwin-reboot.md:1230`); §21.5 has since measured the degeneracy in the
+pure scoring function (`:chaos` argmin for 18/24 observations under the old
+model, 20/24 under the derived one). Decision: (a) **register as N5** — slices
+2/4b/5/6* and the paper's Finding 2 get re-examined under it; (b) **fold into
+the N3 backlog** — co-locate the split claims with pins/hole markers, no new
+register item; (c) **defer** until the §13 re-runs. What changes: the §10
+register table; `src/futon5/exotype/efe.clj` co-locations; possibly paper
+Finding 2. Evidence: `TN-baldwin-reboot.md:1205-1231,1300-1301`.
+
+**Q5 — H5 vocabulary and the shape of the §13 re-runs.**
+H5's vocabulary sub-item is "unblocked, not widened"; §30 ends "Not built.
+Discussion only, pending Joe's pick of vocabulary and whether the A/B replaces
+the plain re-run" (`TN-baldwin-reboot.md:1984`). Decision: (a) **baseline 4
+kinds**, re-runs are plain redos; (b) **widen to 8 kinds** (`:fix2`, `:fix4`,
+`:even4`, `:odd53`, §30.4) with every §13 RE-RUN run as the preregistered A/B
+(P1–P3, §30.5); (c) widen but re-run plain. What changes:
+`src/futon5/exotype/grid.clj` propagator vocabulary, re-run scripts and seed
+config, prereg documents; blocks the §20.4 ledger row "slice results measure
+spatial structure" (6 of 12 slices marked RE-RUN). Evidence:
+`TN-baldwin-reboot.md:1894-1988`, §13 (`TN-baldwin-reboot.md:509ff`).
+
+**Q6 — H2 disposition.**
+H2 ("Baldwin arm has no genotype variation source") is "open — candidate
+resolution is N2b", gate "folded into N2b" (`TN-baldwin-reboot.md:361`); its
+exit criterion is "a decided variation source, or the arm retired". Decision:
+(a) **H2 rides with Q2** — if N2b opens, H2 closes when N2b's variation
+mechanism lands; (b) **retire the Baldwin arm now** — the paper drops the
+Baldwin/Lamarck contrast; (c) **keep open and decoupled** — name a variation
+source other than N2b. What changes: the Baldwin arm config and the paper's
+contrast sections. Evidence: `TN-baldwin-reboot.md:361` and the §10 exit criterion at `TN-baldwin-reboot.md:388`.
 
 ## Result
 
-(to be filled by the worker: commits, Giraffe run id and the new row)
+(filled by kimi-1, 2026-11-06)
+
+**Commits.**
+- futon5 `e1771c1` — `holes/M-formal-patterns.md` only: (a) freeze section now
+  self-contained — defines slice / Nightmare (N) / Headache (H) and carries the
+  §10 register status table dated 2026-11-06 (freeze notice text kept, freeze
+  NOT lifted — that is Q1); (b) acceptance checklist restated with locators.
+- futon2 (this ticket) — questions Q1–Q6 above and this Result section.
+
+**84409a9 (S4) vs the freeze — fact.** The freeze notice scopes the mission to
+the eight register items and says "Do not dispatch a slice while this notice
+stands" (`holes/M-formal-patterns.md:106-111`). S4 is a mission slice, not a
+register item, so **84409a9 was outside the freeze scope** — a freeze violation
+in letter, though it ticked a genuine acceptance item (evidence: `git show
+84409a9`, "Ticks the S4 acceptance item"; the ticked box was verified present).
+Not reverted; its disposition is Q1.
+
+**Staged replacement Giraffe reading** (not promoted; live corpus untouched):
+`/home/joe/notes/wm-next/formal-patterns-unblock/reading-M-formal-patterns.jsonl`
+— one line, source sha256 b04e041f… (post-edit mission), every quote
+re-verified at its cited line, `relates-to M-formal-war-machine` refreshed
+(sha unchanged, quote still at line 26), new resolved `depends-on
+T-formal-patterns-unblock` edge (the checklist now names the ticket), and the
+`TN-baldwin-reboot.md` dependency kept unresolved (still a TN) but re-noted as
+informational now that the register status is inline.
+
+**Next selectable items** (unchecked, in the mission checklist):
+1. N3 backlog (in freeze scope): read `TN-metaca-baldwin-micro-pilots.md`
+   micro-pilot 7, split claims per §21.2, co-locate + pin/hole-mark at
+   `src/futon5/exotype/efe.clj`.
+2. N3 backlog (in freeze scope): co-locate the remaining open §20.4 ledger
+   claims per §21.6 (the RE-RUN row inside it is blocked on Q5).
+All other items are blocked on Joe: Q1 (freeze/S0–S3,S5), Q2 (N2b), Q3 (N3
+exit), Q4 (objective registration), Q5 (H5 vocabulary + re-runs), Q6 (H2).
+Items not blocked on Joe exist (1–2 above), so no `**Gate:**` line was added
+to the mission.
+
+**Giraffe re-run** was not executed here (a click may be live; nothing was
+written under `~/code/storage/giraffe`). The staged reading plus the resolved
+T-edge is what should move the mission off `undetermined` at the next mint.
