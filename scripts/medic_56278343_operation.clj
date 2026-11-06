@@ -1,7 +1,9 @@
 (ns medic-56278343-operation
-  "Dry-run only: prepare and verify the genuine-repair medic operation for
-  injury 56278343. This script never transacts the live ledger."
-  (:require [futon2.aif.action-identity :as action-identity]
+  "Dry-run by default; --apply performs the explicit locked ledger transaction
+  for injury 56278343 (genuine repair, CSB-CLOSE-1)."
+  (:require [clojure.edn :as edn]
+            [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.out-of-band-fix :as out-of-band]
@@ -14,9 +16,9 @@
 (def record-pin
   {:path "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-11-06-152a1490-23bd-4b2b-a7d3-0c4b86e1ec75.edn"
    :sha256 "4ee5e588d10d56973c8adc308c26e67681ce07c48d54bd86b6dd442e0c6aebcf"})
-(def fix-commit "84210f8e8de7100f4918fc20770f13ce3ddc62ad")
-(def repository "/home/joe/worktrees/futon2/csb-close-1")
-(def receipt-root "/tmp/futon2-medic-56278343-dry-run")
+(def fix-commit "ab5246a71")
+(def repository "/home/joe/code/futon2")
+(def receipt-root "/home/joe/notes/wm-next/tests/medic-56278343")
 
 (def healthy-condition
   {:op :path-equals :path [:replay]
@@ -30,9 +32,19 @@
 (defn build-operation! [live-ledger]
   (let [current (ledger/medic-current-occurrence live-ledger injury-id)
         cause (#'repaired/read-pin record-pin)
+        ;; Replay through the loaded runner: rebuild the recorded failure's
+        ;; ex-data and ask the patched outcome-from for its close outcome.
+        injured (edn/read-string (slurp (:path record-pin)))
+        failure-kind (get-in injured [:failure :kind])
+        replayed (#'runner/outcome-from
+                  (ex-info "Agency clock store busy; dispatch not created"
+                           {:outcome :clock-store-busy
+                            :failure-kind failure-kind
+                            :dispatch/not-created? true}))
         rerun-value {:schema :wm/clock-store-busy-close-replay-v1
                      :patch fix-commit
-                     :replay (:expected healthy-condition)}
+                     :replay {:close-outcome replayed
+                              :terminal-failure-kind failure-kind}}
         _ (when-not (#'repaired/condition-holds? rerun-value healthy-condition)
             (throw (ex-info "Post-repair replay did not establish healthy condition"
                             {:rerun rerun-value :condition healthy-condition})))
@@ -68,10 +80,11 @@
      :candidate candidate :operation operation}))
 
 (defn -main [& args]
-  (when (seq args)
-    (throw (ex-info "This operation is dry-run only and accepts no arguments"
-                    {:args args})))
-  (let [normal-authority (:verifier (standing/standing-resolution))
+  (let [apply? (= ["--apply"] (vec args))
+        _ (when (and (seq args) (not apply?))
+            (throw (ex-info "Usage: clojure -M scripts/medic_56278343_operation.clj [--apply]"
+                            {:args args})))
+        normal-authority (:verifier (standing/standing-resolution))
         loaded (store/load-ledger ledger-path normal-authority)
         _ (when-not (= :loaded (:status loaded))
             (throw (ex-info "Live ledger did not validate" loaded)))
@@ -91,14 +104,21 @@
         after (when (= :appended (:status dry-result))
                 (ledger/effective-active-injuries-from-validated-ledger
                  (:ledger dry-result)))]
-    (prn {:mode :dry-run
-          :writes-live-ledger false
+    (prn {:mode (if apply? :apply :dry-run)
           :candidate candidate
           :receipt-pin receipt-pin
           :medic-process-status (get-in dry-result [:admission :result :status])
           :append-status (:status dry-result)
           :before (counts before)
           :after (some-> after counts)})
+    (when apply?
+      (let [result (store/transact-medic-disposition!
+                    ledger-path record-pin operation verifier)]
+        (prn {:transaction-status (:status result)
+              :durability (:durability result)
+              :entry-pin (get-in result [:entry :entry-pin])})
+        (when-not (= :appended (:status result))
+          (System/exit 1))))
     (shutdown-agents)))
 
 (apply -main *command-line-args*)
