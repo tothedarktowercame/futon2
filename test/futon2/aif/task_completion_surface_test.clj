@@ -58,6 +58,23 @@ Just an idea.
     (is (= [[:outer/selection :pick-fact :completion :completion-class]]
            (facts/selection-absence-paths (selection-record c))))))
 
+(deftest acceptance-evidence-bullets-are-an-unlocated-completion-definition
+  (let [c (describe-text "# Do not fold apparatus failures
+
+## Acceptance evidence
+
+- A fixture run that ends `:incomplete` with a resume-protocol failure kind
+  does not change the target's alpha; it appears on the interoceptive record.
+- A fixture run that ends with a genuine task abstention or task failure
+  still updates alpha as before.
+- The before/after alpha for the three 10-18 targets, with the dataset
+  digests.
+")]
+    (is (= :completion-prose-needs-locators (:completion-class c)))
+    (is (= 3 (:criteria-count c)))
+    (is (= 3 (:unlocated-criteria-count c)))
+    (is (zero? (:located-criteria-count c)))))
+
 (deftest v1-and-selection-dependencies-stay-visible
   (is (= [[:outer/selection :pick-fact :completion :baseline]]
          (facts/selection-absence-paths (selection-record v1))))

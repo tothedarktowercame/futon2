@@ -127,6 +127,15 @@
   (is (empty? (:wants (read-with "## Acceptance tests elsewhere\n\n- not criteria"))) "heading must start with the name")
   (is (empty? (:wants (read-with "## Acceptance-free notes\n\n- x")))) )
 
+(deftest acceptance-evidence-is-a-criteria-section-but-other-suffixes-are-not
+  (let [text (str/join "\n" ["# T" "" "## Acceptance evidence" ""
+                              "- Apparatus failure leaves target alpha unchanged."
+                              "- Genuine task outcomes still update alpha."
+                              "- Retain before/after alpha and dataset digests."])]
+    (is (= 3 (count (:wants (read-with text))))))
+  (is (empty? (:wants (read-with
+                       "## Acceptance tests discussed\n\n- not criteria")))))
+
 ;; Live pins: verbatim copies of the three missions the flight-target
 ;; decision rests on, at the named shas (test/fixtures/mission-criteria/).
 ;; Located and met are read the way the tick reads them, with decl-present?

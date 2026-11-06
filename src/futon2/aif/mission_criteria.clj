@@ -38,7 +38,7 @@
 (def criteria-heading-re
   ;; the heading IS the name, optionally followed by a dash, colon or
   ;; parenthetical: "Acceptance (2026-09-12)" yes, "Acceptance tests" no
-  #"(?i)^(?:completion criteria|acceptance(?: criteria)?|success criteria|exit criteria|done when)\s*(?:$|[:(]|[—–-]\s)")
+  #"(?i)^(?:completion criteria|acceptance(?: criteria| evidence)?|success criteria|exit criteria|done when)\s*(?:$|[:(]|[—–-]\s)")
 
 (defn- sha1-12 [^String s]
   (let [d (.digest (MessageDigest/getInstance "SHA-1") (.getBytes s "UTF-8"))]

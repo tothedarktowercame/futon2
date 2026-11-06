@@ -10,6 +10,7 @@
             [futon2.aif.outer-state :as state]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.selection-world :as selection-world]
+            [futon2.aif.task-completion-surface :as completion]
             [wm-run-facts :as run-facts]))
 
 (clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
@@ -448,6 +449,31 @@
     (is (observation/validate-field! (:enumerated-open-tasks result)
                                     (mapv :target (:field result))
                                     (:outer-field/excluded result)))))
+
+(deftest acceptance-evidence-completion-is-not-excluded-as-undefined
+  (let [text "# Apparatus failures
+
+## Acceptance evidence
+
+- A fixture run that ends `:incomplete` with a resume-protocol failure kind
+  does not change the target's alpha; it appears on the interoceptive record.
+- A fixture run that ends with a genuine task abstention or task failure
+  still updates alpha as before.
+- The before/after alpha for the three 10-18 targets, with the dataset
+  digests.
+"
+        file (java.io.File/createTempFile "acceptance-evidence-" ".md")]
+    (try
+      (spit file text)
+      (let [surface (completion/describe
+                     {:id "T-outer-belief-separate-machine-failure"
+                      :source {:path (.getPath file)
+                               :sha256 (identity/sha256 text)}})
+            result (completion-fixture-field [surface])]
+        (is (= :completion-prose-needs-locators (:completion-class surface)))
+        (is (= ["M-completion-0"] (mapv :target (:field result))))
+        (is (empty? (:outer-field/excluded result))))
+      (finally (io/delete-file file)))))
 
 (deftest completion-derivation-mode-refuses-unbuilt
   (let [config (io/file (temp-dir) "outer-admission.edn")]
