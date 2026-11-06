@@ -335,7 +335,12 @@
       (is (= field (:field-facts selected)))
       (is (= 609 (count (:outer-score/admitted selected))))
       (is (= :giraffe-status-readiness-prior-v1 (get-in selected [:cascades 0 :reach :source])))
-      (is (= 3/4 (get-in selected [:selection :selected :reach]))))))
+      ;; One cascade is one comparison class: since SEL-Q2-2 the selection
+      ;; abstains (Q2 floor 2) and nothing is selected. The reach still
+      ;; flows to the cascade's own pick.
+      (is (= 3/4 (get-in selected [:cascades 0 :reach :value])))
+      (is (= :insufficient-comparison (get-in selected [:outcome :case])))
+      (is (nil? (:selection selected))))))
 
 (deftest task-reach-is-a-pinned-prior-not-run-history
   (doseq [[status expected] [[:ready 3/4] [:undetermined 1/2] [:not-ready 1/4]]]
