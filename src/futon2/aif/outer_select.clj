@@ -484,8 +484,12 @@
                                       :per-task-rating ratings
                                       :library-root library-root})
             evidence (assoc evidence :why why :argument argument)]
-        (if (empty? classes)
-          (assoc evidence :outcome {:status :abstained :case :all-policies-predict-stopping}
+        (if (< (count classes) 2)
+          (assoc evidence
+                 :outcome {:status :abstained
+                           :case (if (empty? classes)
+                                   :all-policies-predict-stopping
+                                   :insufficient-comparison)}
                  :selection nil :prediction (:prediction abstention))
           (do
         (when (< 1 (count tied))

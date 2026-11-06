@@ -61,8 +61,11 @@
 (deftest chosen-outer-cascade-retains-typed-enactment-pin
   (let [discovery-makeup
         {:cascades [{:id :find-out-before-building :patterns ["test"]
+                     :steps [:ready-gate]}
+                    {:id :discovery-companion :patterns ["test"]
                      :steps [{:gate-status :undetermined}]}]
-         :enactment-modes {:find-out-before-building :discovery}}
+         :enactment-modes {:find-out-before-building :discovery
+                           :discovery-companion :discovery}}
         discovery (outer-select/select discovery-makeup base-state base-observation)
         implementation (outer-select/select
                         (assoc base-makeup
@@ -83,15 +86,20 @@
             (update discovery :selection dissoc :candidates))))
     (doseq [id [:giraffe-order :serves-a-way]]
       (let [selected (outer-select/select
-                      {:cascades [{:id id :patterns ["test"] :steps [:ready-gate]}]
-                       :enactment-modes {id :implementation}}
+                      {:cascades [{:id id :patterns ["test"] :steps [:ready-gate]}
+                                  {:id :companion :patterns ["test"]
+                                   :steps [{:gate-status :undetermined}]}]
+                       :enactment-modes {id :implementation
+                                        :companion :implementation}}
                       base-state base-observation)]
         (is (= :implementation (get-in selected [:enactment :mode])))
         (is (= id (get-in selected [:enactment :outer-cascade-id])))))))
 
 (deftest outer-enactment-mode-never-defaults-or-merges-conflicts
   (let [same-policies {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
-                                  {:id :b :patterns ["test"] :steps [:ready-gate]}]}
+                                  {:id :b :patterns ["test"] :steps [:ready-gate]}
+                                  {:id :c :patterns ["test"]
+                                   :steps [{:gate-status :undetermined}]}]}
         failure (fn [makeup]
                   (try (outer-select/select makeup base-state base-observation)
                        nil
@@ -192,6 +200,28 @@
       (is (empty? (:classes refusal)))
       (is (= :no-pick (get-in refusal [:cascades 0 :pick]))))))
 
+(deftest singleton-non-stopping-posterior-abstains
+  (let [makeup {:cascades [{:id :ready-a :patterns ["test"] :steps [:ready-gate]}
+                           {:id :ready-b :patterns ["test"] :steps [:ready-gate]}
+                           {:id :stopping-a :patterns ["test"]
+                            :steps [{:gate-status :not-ready}]}
+                           {:id :stopping-b :patterns ["test"]
+                            :steps [{:gate-status :not-ready}]}]}
+        result (outer-select/select makeup base-state base-observation)]
+    (is (= {:status :abstained :case :insufficient-comparison}
+           (:outcome result)))
+    (is (nil? (:selection result)))
+    (is (= 1 (count (:classes result))))
+    (is (= #{:ready-a :ready-b}
+           (set (:members (first (:classes result))))))
+    (is (= 1 (count (:stopping-equivalent result))))
+    (is (= #{:stopping-a :stopping-b}
+           (set (:members (first (:stopping-equivalent result))))))
+    (is (= 4 (count (get-in result [:construction :cascades])))))
+  (let [result (outer-select/select base-makeup base-state base-observation)]
+    (is (= :chosen (get-in result [:outcome :status])))
+    (is (= 2 (count (:classes result))))))
+
 (deftest chosen-prediction-is-the-chosen-model-push
   (let [result (outer-select/select base-makeup base-state base-observation)
         chosen (nth (:cascades base-makeup) (:cascade-index result))
@@ -206,14 +236,15 @@
     (is (< (Math/abs (- 1.0 (reduce + (vals (:outcomes prediction)))))
            1.0e-12))))
 
-(deftest identical-predictions-are-one-policy
+(deftest identical-predictions-are-one-policy-and-not-a-comparison
   (let [observation (assoc base-observation :relation (fn [_ _] :focus))
         makeup {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
                            {:id :b :patterns ["test"] :steps [:ready-gate]}]}
         r (outer-select/select makeup base-state observation)]
     (is (= 1 (count (:classes r))))
     (is (= [:a :b] (:members (first (:classes r)))))
-    (is (= :a (:cascade-id r)))
+    (is (= {:status :abstained :case :insufficient-comparison} (:outcome r)))
+    (is (nil? (:cascade-id r)))
     (is (= 2 (count (:cascades r))))))
 
 (deftest distinct-predictions-at-equal-g-refuse
@@ -306,7 +337,8 @@
                 {:cascades [{:id :one-pass :steps [{:gate (fn [_] (swap! calls inc) true)}]}]}
                 base-state obs)]
     (is (= 2 @calls))
-    (is (= "M-ready" (get-in result [:selection :selected :target])))))
+    (is (= {:status :abstained :case :insufficient-comparison}
+           (:outcome result)))))
 
 (deftest forbidden-picks-stay-scored-but-cannot-win
   (let [before (outer-select/select base-makeup base-state base-observation)
@@ -339,7 +371,8 @@
     (is (= 1 (get-in r [:construction :policy-count])))
     (is (= [:second] (:members (first (:stopping-equivalent r)))))
     (is (nil? (some :relation-basis (:classes r))))
-    (is (= :first (:cascade-id r)))
+    (is (= {:status :abstained :case :insufficient-comparison} (:outcome r)))
+    (is (nil? (:cascade-id r)))
     (is (= ["M-ready"] (:outer-score/admitted r)))
     (is (= ["M-unknown"] (mapv :target (:outer-score/excluded r))))
     (is (= 2 (count (:cascades r))))

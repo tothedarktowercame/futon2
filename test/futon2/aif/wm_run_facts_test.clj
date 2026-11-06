@@ -1218,13 +1218,14 @@
                       (outer-select/select params state observation))
         reselection (assoc reselection :q6 (:q6 retained))
         export (facts/selection-facts-for-record
-                (assoc record :selection-outcome {:status :chosen}
+                (assoc record :selection-outcome (:outcome reselection)
                        :outer/selection reselection)
                 "click-12-read-only-reselection" snap {})
         projected (:facts export)]
     (reset! click-12-reselection-export export)
-    (is (= "M-interim-director-proxy-metric-inventory"
-           (get-in reselection [:selection :selected :target])))
+    (is (= {:status :abstained :case :insufficient-comparison}
+           (:outcome reselection)))
+    (is (nil? (get-in reselection [:selection :selected :target])))
     (is (= 3.3896147707408804 (get-in reselection [:classes 0 :G])))
     (is (= 13.278213771580794 (get-in reselection [:abstention :G])))
     (is (= 10 (get-in export [:diagnostics :abstentionTerms :terms :altitude])))

@@ -113,8 +113,10 @@
 (def makeup
   {:makeup/sha256 (apply str (repeat 64 "a"))
    :default-reach 1/2
-   :cascades [{:id :ready :patterns ["test"] :steps [:ready-gate]}]
-   :enactment-modes {:ready :implementation}
+   :cascades [{:id :ready :patterns ["test"] :steps [:ready-gate]}
+              {:id :undetermined :patterns ["test"]
+               :steps [{:status-gate :undetermined}]}]
+   :enactment-modes {:ready :implementation :undetermined :implementation}
    :c-kit {:focused 55/100 :related 35/100 :unrelated 5/100
            :stop-the-line 5/100 :not-yet-evaluated 0}
    :kappa 100
@@ -159,9 +161,12 @@
   (let [received (atom nil)
         discovery (assoc makeup
                          :cascades [{:id :find-out-before-building
+                                     :patterns ["test"] :steps [:ready-gate]}
+                                    {:id :discovery-companion
                                      :patterns ["test"]
                                      :steps [{:status-gate :undetermined}]}]
-                         :enactment-modes {:find-out-before-building :discovery})]
+                         :enactment-modes {:find-out-before-building :discovery
+                                           :discovery-companion :discovery})]
     (call-ordinary
      {:decision-as-of "2026-10-28T12:00:00Z"}
      {#'outer-state/load-makeup (fn [_] discovery)
@@ -172,7 +177,7 @@
            (select-keys (get-in @received [:outer/selection :enactment])
                         [:mode :outer-cascade-id])))
     (is (= :off (:wm/discovery-enactment @received)))
-    (is (= "M-unknown"
+    (is (= "M-selected"
            (get-in @received [:outer/selection :selection :selected :target])))))
 
 (deftest supplied-task-bypasses-selection
@@ -220,6 +225,33 @@
            (get-in (edn/read-string (slurp (get-in result [:selection-record :path])))
                    [:outer/selection :refusal/disposition :disposition])))
     (is (= [:none] (get-in result [:outer/selection :stopping-equivalent 0 :members])))
+    (is (false? @called?))))
+
+(deftest singleton-posterior-retains-abstention-without-author-dispatch
+  (let [called? (atom false)
+        singleton-makeup
+        (assoc makeup :cascades
+               [{:id :ready-a :patterns ["test"] :steps [:ready-gate]}
+                {:id :ready-b :patterns ["test"] :steps [:ready-gate]}
+                {:id :stopping-a :patterns ["test"]
+                 :steps [{:gate-status :not-ready}]}
+                {:id :stopping-b :patterns ["test"]
+                 :steps [{:gate-status :not-ready}]}])
+        result (call-ordinary
+                {:decision-as-of "2026-10-28T12:00:00Z"}
+                {#'outer-state/load-makeup (fn [_] singleton-makeup)
+                 #'runtime/run-ordinary-opportunity-with-task!
+                 (fn [_] (reset! called? true) {:outcome :grounded-progress})})
+        retained (:outer/selection result)
+        record (edn/read-string
+                (slurp (get-in result [:selection-record :path])))]
+    (is (= :no-task-selected (:absent result)))
+    (is (= {:status :abstained :case :insufficient-comparison}
+           (:outcome retained)))
+    (is (= {:status :abstained :case :insufficient-comparison}
+           (:selection-outcome record)))
+    (is (= 1 (count (:classes retained))))
+    (is (= 1 (count (:stopping-equivalent retained))))
     (is (false? @called?))))
 
 (deftest no-target-disposition-is-checked-against-the-retained-admitted-field
