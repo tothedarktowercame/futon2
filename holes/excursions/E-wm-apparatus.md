@@ -1,5 +1,7 @@
 # E-wm-apparatus — the war machine as apparatus: the assurances the mathematics does not give us
 
+**Status:** CLOSED (Joe, 2026-11-06) — its seeded tickets :U70–:U74 are done (dependency-frontier.md) and the assurances it named are part of current ways of working with the machine.
+
 Commissioned by Joe, 2026-09-08 ("create an E-wm-apparatus.md excursion that
 cross references them and explains the assurances we need to build into the
 WM, above and beyond the R-number and wm-organization / wm-workflow aspects
