@@ -1461,7 +1461,8 @@
       (if-not (= :ready (:status ending))
         (merge {:status :deferred :state state :reason (:reason ending)}
                (select-keys ending [:run-id :classification-absence
-                                    :classification-provenance]))
+                                    :classification-provenance
+                                    :abandonment-evidence]))
         (if-let [previous (binding [*placement-replay-opts* opts]
                             (previous-giraffe-observation current-dir makeup pending))]
           (if-let [reason (:deferred previous)]

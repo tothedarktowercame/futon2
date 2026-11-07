@@ -1,6 +1,6 @@
 (ns futon2.aif.outer-consumption-test
   (:require [clojure.test :refer [deftest is use-fixtures]]
-            [clojure.edn :as edn] [clojure.string :as str] [clojure.java.io :as io]
+            [clojure.edn :as edn] [clojure.java.io :as io]
             [futon2.aif.outer-state :as state]
             [futon2.aif.outer-pending-observation :as pending]
             [futon2.aif.full-loop-runtime :as runtime]
@@ -105,8 +105,13 @@
                           :target (get-in after [:pending :selection :selection :selected :target])}))))
 (deftest in-flight-and-tampered-records-defer
   (let [root (copy-fixture) stream (io/file root "run-stream.edn")
-        saved (slurp stream) file (io/file root (str "tick-run-record-" run-id ".edn"))]
-    (spit stream (str (first (str/split-lines saved)) "\n"))
+        saved (slurp stream) file (io/file root (str "tick-run-record-" run-id ".edn"))
+        ;; The fixture's 2026-10-29 start predates this JVM, so it is
+        ;; provably abandoned (:run-abandoned) under the restart rule; a run
+        ;; this JVM fired stays :run-in-flight. Rewrite only the timestamp.
+        fresh-started (pr-str {:event :started :run/id run-id
+                               :startedAt (str (java.time.Instant/now))})]
+    (spit stream (str fresh-started "\n"))
     (is (= :run-in-flight (:reason (pending/observe root run-id))))
     (spit stream saved)
     (spit file (pr-str (assoc (read-edn file) :failure {:kind :fabricated})))

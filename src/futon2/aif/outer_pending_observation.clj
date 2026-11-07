@@ -14,6 +14,49 @@
 (def terminal-classes #{:focused :related :unrelated :stop-the-line})
 (defn- defer [reason & [detail]] (merge {:status :deferred :reason reason} detail))
 
+(def ^:dynamic *jvm-start*
+  "The serving JVM's start instant, overridable in tests. A run whose :started
+  event predates this cannot be in flight: runs are fired by the serving JVM,
+  so its process is gone."
+  nil)
+
+(defn- jvm-start []
+  (or *jvm-start*
+      (java.time.Instant/ofEpochMilli
+       (.getStartTime (java.lang.management.ManagementFactory/getRuntimeMXBean)))))
+
+(defn- instant [s]
+  (when (string? s)
+    (try (java.time.Instant/parse s) (catch Exception _ nil))))
+
+(defn abandonment-evidence
+  "Evidence that a started-not-closed run cannot still be running, or nil.
+  Never elapsed time alone. Two kinds, both from the record itself:
+  :superseded-by-later-closed-run — another run started after RUN-ID's start
+  and has since closed in the same stream; :jvm-restart — the serving JVM
+  started after RUN-ID's start, so the process that fired the run is gone."
+  [events run-id]
+  (let [start-events (filter #(= :started (:event %)) events)
+        at (some #(when (= run-id (:run/id %)) (instant (:startedAt %)))
+                 start-events)
+        later-closed
+        (some (fn [closed]
+                (let [other (some #(when (= (:run/id closed) (:run/id %)) %)
+                                  start-events)
+                      other-at (some-> other :startedAt instant)]
+                  (when (and (= :closed (:event closed))
+                             (not= run-id (:run/id closed))
+                             at other-at
+                             (.isAfter ^java.time.Instant other-at at))
+                    {:kind :superseded-by-later-closed-run
+                     :later-run-id (:run/id closed)
+                     :later-startedAt (:startedAt other)})))
+              events)
+        jvm (let [s (jvm-start)]
+              (when (and at s (.isAfter ^java.time.Instant s at))
+                {:kind :jvm-restart :jvm-started-at (str s)}))]
+    (or later-closed jvm)))
+
 (defn observe
   "Read a completed, content-verified run. The existing publication index pins
   the whole record, while the sealed run-stream terminal proves completion.
@@ -22,13 +65,18 @@
   [dir run-id]
   (try
     (let [stream (previous/read-stream dir)
-          events (filter #(= run-id (:run/id %)) (:events stream))
+          all-events (:events stream)
+          events (filter #(= run-id (:run/id %)) all-events)
           closed (filter #(= :closed (:event %)) events)
           file (io/file dir (str "tick-run-record-" run-id ".edn"))]
       (cond
         (not= :present (:status stream)) (defer :run-stream-unreadable)
-        (empty? closed) (defer (if (some #(= :started (:event %)) events)
-                                :run-in-flight :run-completion-absent))
+        (empty? closed)
+        (if (some #(= :started (:event %)) events)
+          (if-let [evidence (abandonment-evidence all-events run-id)]
+            (defer :run-abandoned {:run-id run-id :abandonment-evidence evidence})
+            (defer :run-in-flight {:run-id run-id}))
+          (defer :run-completion-absent {:run-id run-id}))
         (not= 1 (count closed)) (defer :run-completion-ambiguous)
         (not (.isFile file)) (defer :run-record-absent)
         :else

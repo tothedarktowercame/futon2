@@ -16,7 +16,7 @@
 (def state-schema :wm/outer-state-v1)
 (def terminal-ending-classes #{:focused :related :unrelated :stop-the-line})
 (def pending-discharge-refusal-kinds
-  #{:pending-steps-unrecoverable :terminal-ending-class-absent})
+  #{:pending-steps-unrecoverable :terminal-ending-class-absent :run-abandoned})
 ;; The serving JVM runs from futon3c; live stores belong to canonical futon2.
 (def default-makeup-path "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn")
 (def default-state-path (data-paths/path "wm-learning" "outer-state.edn"))
@@ -408,8 +408,12 @@
          (= (:makeup/sha256 makeup) (:makeup-sha256 receipt) (:makeup/sha256 state))
          (string? (:run-id receipt))
          (contains? pending-discharge-refusal-kinds (get-in receipt [:refusal :kind]))
-         (or (= :pending-steps-unrecoverable (get-in receipt [:refusal :kind]))
-             (map? (get-in receipt [:refusal :classification-absence])))
+         (case (get-in receipt [:refusal :kind])
+           :pending-steps-unrecoverable true
+           :terminal-ending-class-absent
+           (map? (get-in receipt [:refusal :classification-absence]))
+           :run-abandoned
+           (map? (get-in receipt [:refusal :abandonment-evidence])))
          (true? (:learning-parameters-equal receipt))
          (.isFile backup)
          (let [bytes (Files/readAllBytes (.toPath backup))]
@@ -441,8 +445,10 @@
 
 (defn discharge-unrecoverable-pending!
   "Remove a pending learning step that can never be consumed: either its legacy
-  cascade has no recoverable steps, or its verified completed-run observation
-  has no terminal ending class. The observation is lost once and said so: the
+  cascade has no recoverable steps, its verified completed-run observation
+  has no terminal ending class, or its run was started and provably abandoned
+  (the JVM restarted after its start, or a later run has since closed in the
+  same stream). The observation is lost once and said so: the
   exact old bytes are backed up and a separate receipt names the run, cascade,
   refusal and both state SHAs. Learned counts are untouched."
   ([path makeup reason]
@@ -460,11 +466,19 @@
              (= :terminal-ending-class-absent (:reason observation))
              (= (:run-id pending) (:run-id observation))
              (map? (:classification-absence observation)))
+        run-abandoned?
+        (and (= :deferred (:status observation))
+             (= :run-abandoned (:reason observation))
+             (= (:run-id pending) (:run-id observation))
+             (map? (:abandonment-evidence observation)))
         refusal (cond
                   (= :pending-steps-unrecoverable (:kind cascade-refusal)) cascade-refusal
                   terminal-ending-absent?
                   {:kind :terminal-ending-class-absent
                    :classification-absence (:classification-absence observation)}
+                  run-abandoned?
+                  {:kind :run-abandoned
+                   :abandonment-evidence (:abandonment-evidence observation)}
                   :else nil)
         _ (when-not refusal
             (refuse! :pending-step-recoverable {:run-id (:run-id pending)}))
