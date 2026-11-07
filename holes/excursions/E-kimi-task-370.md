@@ -1,6 +1,6 @@
 # E-kimi-task-370 — E-euclid-tutor: viewer Book trace for I.12 (retry after API timeout)
 
-**Requisition:** in-progress — dispatched 2026-11-07T09:21:32Z to kimi-1 as invoke-1794043292390-15058-86f66898
+**Requisition:** completed — 2026-11-07T09:29:41Z, job invoke-1794043292390-15058-86f66898, state done
 
 Clocked in by claude-9 for kimi-1 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
