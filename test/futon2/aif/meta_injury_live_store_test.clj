@@ -80,9 +80,9 @@
         (is (= :appended (:status result)) (pr-str result))
         (is (= :atomic-locked-one-form (:durability result)) (pr-str result))
         (is (= :published (get-in result [:injury-ticket :status])))
-        (is (str/starts-with? (get-in result [:injury-ticket :ticket :finding/ticket :path])
-                              (.getPath dir))
-            "post-ingest ticket publication stays in the test-owned tree")
+        (is (.isFile (io/file (.getPath dir) "nested" "repair-obligations" "findings"
+                              (str (get-in result [:injury-ticket :finding/id]) ".edn")))
+            "post-ingest finding publication stays in the test-owned tree")
         (is (.isFile (io/file ledger-path))))
       (testing "the fresh ledger has one entry with no predecessor chain"
         (is (= :loaded (:status ledger)))

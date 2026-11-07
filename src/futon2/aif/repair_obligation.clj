@@ -552,7 +552,7 @@
   ([root finding] (record-review-failure! root finding (finding-ticket/destinations root)))
   ([root {:keys [attempt-id target commit selected-entry reviewer review-job
                  review-verdict review-text occurrence observation]
-          :as finding} publication]
+          :as finding} _publication]
    (when-not (and (string? attempt-id) target commit selected-entry reviewer
                   review-job (#{:request-changes :reject} review-verdict)
                   (not (str/blank? (str review-text))))
@@ -589,7 +589,10 @@
                   (assoc :origin-run/id (:origin-run/id finding))
                   occurrence (assoc :repair/occurrence occurrence))]
      (write-new-or-identical! root id record)
-     (with-contended-store-lock root #(finding-ticket/publish! root id publication))
+     ;; REPAIR-NOTICKET-1 (Joe, 2026-11-07): a repair finding is not a ticket.
+     ;; The finding plus resolutions is the authoritative lifecycle
+     ;; (repair-derived-state); ticket publication is a legacy, separately
+     ;; invoked projection via finding-ticket/publish!.
      (when occurrence
        (occurrence-evidence! root occurrence id observation))
      (if occurrence
@@ -605,7 +608,7 @@
   ([root finding] (record-system-failure! root finding (finding-ticket/destinations root)))
   ([root {:keys [attempt-id repair-id repair-class failure-stage outcome error
                  occurrence observation]
-          :as finding} publication]
+          :as finding} _publication]
    (when-not (and (string? attempt-id)
                   (#{:machine-failure :environmental-hold
                      :incomplete-recoverable} repair-class)
@@ -674,7 +677,8 @@
                   (contains? finding :origin-run/id)
                   (assoc :origin-run/id (:origin-run/id finding)))]
      (write-new-or-identical! root id record)
-     (with-contended-store-lock root #(finding-ticket/publish! root id publication))
+     ;; REPAIR-NOTICKET-1 (Joe, 2026-11-07): no automatic ticket publication
+     ;; here either; see record-review-failure!.
      (when occurrence
        (occurrence-evidence! root occurrence id observation))
      (if occurrence
@@ -2177,10 +2181,14 @@
 
 
 (defn publish-injury-ticket!
-  "Complete the durable injury's publication, retryable after a ledger append.
-  Existing findings remain immutable: append a byte-pinned attachment using
-  the same CREATE_NEW/force path as administrative dispositions. New findings
-  carry the join inline. No join by failure-kind or target coincidence."
+  "Complete the durable injury's join publication (name kept for the ledger
+  route), retryable after a ledger append. Existing findings remain
+  immutable: append a byte-pinned attachment using the same
+  CREATE_NEW/force path as administrative dispositions. New findings carry
+  the join inline. No join by failure-kind or target coincidence. Returns
+  the finding/join receipt; REPAIR-NOTICKET-1 (Joe, 2026-11-07) removed the
+  automatic ticket publication -- publish a ticket, if one is genuinely
+  wanted, by calling finding-ticket/publish! separately."
   [root entry record]
   (let [pin (:cause-record-pin entry)
         bytes (Files/readAllBytes (.toPath (io/file (:path pin))))
@@ -2243,5 +2251,9 @@
           (let [resolved (injury-join/resolve-join root id)]
             (when-not (and (= :present (:status resolved)) (= join (:join resolved)))
               (throw (ex-info "Injury join refused" resolved)))
+            ;; REPAIR-NOTICKET-1 (Joe, 2026-11-07): returns the finding/join
+            ;; receipt, not a ticket receipt. The name is kept (it is the
+            ;; injury publication step of the ledger route); the ticket was
+            ;; never the durable fact -- the finding and join are.
             {:status :published :finding/id id
-             :join resolved :ticket (finding-ticket/publish! root id)}))))))
+             :join resolved}))))))

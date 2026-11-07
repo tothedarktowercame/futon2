@@ -30,6 +30,9 @@
     (fn [{:keys [root ledger path store opts]}]
       (let [opened (store/ingest-record-file! ledger path)
             id (get-in opened [:injury-ticket :finding/id])
+            ;; REPAIR-NOTICKET-1 (2026-11-07): the ledger route no longer
+            ;; publishes a ticket; drive the legacy path directly.
+            _ (ticket/publish! store id opts)
             finding (edn/read-string (slurp (io/file store "findings" (str id ".edn"))))
             bytes (slurp ledger)
             ticket-path (io/file (:ticket-dir opts) (str "T-" id ".md"))

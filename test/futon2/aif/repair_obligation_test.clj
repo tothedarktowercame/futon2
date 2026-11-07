@@ -5,6 +5,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.finding-ticket :as finding-ticket]
             [futon2.test-support.git-fixture :as git-fixture]
             [futon2.aif.tripwire :as tripwire]))
 
@@ -68,6 +69,50 @@
       (is (= (:finding-count census) (reduce + (map :count (vals buckets)))))
       (is (:reconciled? census)))))
 
+(deftest new-findings-are-durable-but-publish-no-ticket
+  "REPAIR-NOTICKET-1 (Joe, 2026-11-07): a new repair finding no longer
+   publishes a ticket. The finding (and occurrence evidence/join) is still
+   written and readable by the derived-status lifecycle; no Markdown under
+   the publication root, no queue row, no ticket-links receipt."
+  (let [root (temp-root)
+        opts (publication-destinations root)
+        review (repair/record-review-failure!
+                root {:attempt-id "noticket-review" :target "M-noticket"
+                      :commit "deadbeef" :selected-entry {:target "M-noticket"}
+                      :reviewer "reviewer" :review-job "job"
+                      :review-verdict :reject :review-text "Regression fails"
+                      :opened-at "2026-11-07T00:00:00Z"}
+                opts)
+        system (repair/record-system-failure!
+                root {:attempt-id "noticket-system"
+                      :repair-class :machine-failure
+                      :failure-stage :construction :outcome :incomplete
+                      :failure-kind :construction-failed
+                      :error "Construction failed"
+                      :discharge-contract {:requires [:distinct-repair-commit]
+                                           :artifact-shape :code-commit}
+                      :opened-at "2026-11-07T00:01:00Z"}
+                opts)]
+    (is (string? (:repair/id review)))
+    (is (string? (:repair/id system)))
+    (doseq [finding [review system]]
+      (let [id (:repair/id finding)
+            durable (edn/read-string
+                     (slurp (io/file root "findings" (str id ".edn"))))
+            state (repair/repair-derived-state
+                   id "2026-11-08T00:00:00Z" durable nil)]
+        (is (= id (:repair/id durable)) "the finding itself is durable")
+        (is (= :open (:derived-status state))
+            "the finding is readable by the derived-status lifecycle")
+        (is (not (.exists (io/file root "ticket-links" (str id ".edn"))))
+            "no ticket-links receipt is created")))
+    (let [ticket-dir (io/file (:ticket-dir opts))]
+      (is (or (not (.exists ticket-dir))
+              (empty? (filter #(.isFile %) (file-seq ticket-dir))))
+          "no Markdown ticket file is created"))
+    (is (not (.exists (io/file (:queue-path opts))))
+        "no live-queue row is created")))
+
 (deftest automatic-finding-retains-known-selection-context
   (let [root (temp-root)
         ask {:target "M-self-documenting-stack" :outcome :published
@@ -93,6 +138,8 @@
                   :discharge-contract {:requires [:distinct-repair-commit]
                                        :artifact-shape :code-commit}}
                  (publication-destinations root))
+        _ (finding-ticket/publish! root (:repair/id finding)
+                                   (publication-destinations root))
         durable (edn/read-string
                  (slurp (io/file root "findings"
                                  (str (:repair/id finding) ".edn"))))
@@ -122,6 +169,8 @@
                   :discharge-contract {:requires [:distinct-repair-commit]
                                        :artifact-shape :code-commit}}
                  (publication-destinations root))
+        _ (finding-ticket/publish! root (:repair/id finding)
+                                   (publication-destinations root))
         durable (edn/read-string
                  (slurp (io/file root "findings"
                                  (str (:repair/id finding) ".edn"))))

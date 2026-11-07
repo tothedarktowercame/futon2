@@ -157,7 +157,10 @@
               link (ticket-link repair-root id)
               path (get-in link [:finding/ticket :path])]
           (cond
-            (nil? link) {:status :held :reason :ticket-link-unavailable
+            ;; REPAIR-NOTICKET-1 (Joe, 2026-11-07): a finding published after
+            ;; the noticket change has no ticket-link by design. That is a
+            ;; typed, non-failure result: there is no ticket to close.
+            (nil? link) {:status :no-ticket-published
                          :injury-id injury-id :finding-id id}
             (nil? (ticket-text path)) {:status :held :reason :ticket-unreadable
                                        :injury-id injury-id :finding-id id :path path}

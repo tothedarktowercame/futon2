@@ -45,6 +45,7 @@
         (fn [_ store opts]
           (let [record (fixture kind)
                 _ (repair/record-system-failure! store (input record) opts)
+                _ (publisher/publish! store (:repair/id record) opts)
                 path (ticket-path opts record)
                 description (completion-surface/describe
                              {:id (str "T-" (:repair/id record))
@@ -56,12 +57,16 @@
             (is (= 0 (:unlocated-criteria-count description)))))))))
 
 (deftest real-finding-creates-an-ordinary-front-ticket
+  ;; REPAIR-NOTICKET-1 (2026-11-07): the producer no longer publishes; this
+  ;; test now drives the legacy compatibility path (finding-ticket/publish!
+  ;; invoked directly) and still pins the ordinary-front ticket contract.
   (let [live-roots [repair/default-root "/home/joe/code/futon2/holes/tickets"]
         before (mapv file-count live-roots)]
     (with-roots
       (fn [root store opts]
         (let [record (fixture "machine")
               created (repair/record-system-failure! store (input record) opts)
+              _ (publisher/publish! store (:repair/id record) opts)
               path (ticket-path opts record)
               text (slurp path)
               entry {:ticket (str "T-" (:repair/id record)) :inserted-at (:opened-at record)}
@@ -96,12 +101,13 @@
       (with-roots
         (fn [_ store opts]
           (let [record (fixture "machine")
+                _ (repair/record-system-failure! store (input record) opts)
                 path (ticket-path opts record)
                 finding-path (io/file store "findings" (str (:repair/id record) ".edn"))]
             (if (= first-half :ticket)
               (is (thrown-with-msg? clojure.lang.ExceptionInfo #"crash"
                     (with-redefs [queue/enqueue! (fn [& _] (throw (ex-info "crash" {})))]
-                      (repair/record-system-failure! store (input record) opts))))
+                      (publisher/publish! store (:repair/id record) opts))))
               (do (io/make-parents finding-path)
                   (spit finding-path (pr-str record))
                   (queue/enqueue! (:queue-path opts) {:ticket (str "T-" (:repair/id record))
@@ -113,10 +119,13 @@
             (when (= first-half :ticket) (is (= "# Human edit\n\n**Status:** OPEN\n" (slurp path))))))))))
 
 (deftest environmental-and-review-findings-publish
+  ;; REPAIR-NOTICKET-1 (2026-11-07): kept via the direct legacy publish path
+  ;; (the producer coupling it pinned is now deliberately gone).
   (with-roots
     (fn [_ store opts]
       (let [record (fixture "environment")]
         (repair/record-system-failure! store (input record) opts)
+        (publisher/publish! store (:repair/id record) opts)
         (is (str/includes? (slurp (ticket-path opts record)) "Verify or restore guardrail refusal"))
         (is (str/includes? (slurp (ticket-path opts record)) "dated recheck")))
       (let [record (repair/record-review-failure!
@@ -124,6 +133,7 @@
                             :selected-entry {:target "M-example"} :reviewer "reviewer"
                             :review-job "job" :review-verdict :reject :review-text "Regression fails"
                             :opened-at "2026-09-22T00:00:00Z"} opts)]
+        (publisher/publish! store (:repair/id record) opts)
         (is (.isFile (ticket-path opts record))))
       (is (= 2 (count (:entries (queue/read-declaration (:queue-path opts)))))))))
 
@@ -153,6 +163,7 @@
       (let [record (fixture "machine")
             opts (publisher/destinations store)]
         (repair/record-system-failure! store (input record))
+        (publisher/publish! store (:repair/id record) opts)
         (is (.isFile (ticket-path opts record)))
         (is (.isFile (io/file (:queue-path opts))))))))
 
@@ -201,6 +212,9 @@
           (git! repo "add" "--" "unrelated.txt")
           (when locked? (spit index-lock "held by test"))
           (repair/record-system-failure! store (input record) opts)
+          ;; REPAIR-NOTICKET-1 (2026-11-07): drive the publisher directly; the
+          ;; producer no longer publishes.
+          (publisher/publish! store id opts)
           (let [receipt-file (io/file store "ticket-links" (str id ".edn"))
                 receipt (edn/read-string (slurp receipt-file))]
             (if locked?

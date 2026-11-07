@@ -156,6 +156,27 @@
                                    :cause-record-pin pin})))
         "the minted finding joins the injury that pins its run's record")))
 
+(deftest closure-without-ticket-link-is-a-typed-no-ticket-result
+  "REPAIR-NOTICKET-1 (Joe, 2026-11-07): findings minted after the noticket
+   change have no ticket-link. Closing them is not a failure: the typed
+   result says no ticket was published."
+  (let [env (harness/prepare-environment! (temp-dir "wm-production-repair"))
+        cause-pin (get-in env [:ingestion :entry :cause-record-pin])
+        injury-id (get-in env [:ingestion :entry :injury-id])
+        id "repair-ea1-unlinked--attempt-001-author-delivery-wrong-repository"
+        root (temp-dir "wm-repair-store")
+        file (io/file root "findings" (str id ".edn"))]
+    (io/make-parents file)
+    (spit file (str (pr-str (real-finding id cause-pin)) "\n"))
+    (let [result (closure/close-cause-ticket!
+                  root {:injury-id injury-id
+                        :entry {:ordinal 6 :cause-record-pin cause-pin}
+                        :fixed-by (apply str (repeat 40 "b"))
+                        :receipt-pin {:sha256 (apply str (repeat 64 "d"))}})]
+      (is (= :no-ticket-published (:status result)) (pr-str result))
+      (is (= id (:finding-id result)))
+      (is (nil? (:reason result)) "a typed non-failure result carries no :reason"))))
+
 (deftest medic-discharge-closes-own-cause-ticket-by-cause-pin
   (let [env (harness/prepare-environment! (temp-dir "wm-production-repair"))
         cause-pin (get-in env [:ingestion :entry :cause-record-pin])
