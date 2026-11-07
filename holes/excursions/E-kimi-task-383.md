@@ -1,6 +1,6 @@
 # E-kimi-task-383 — Euclid I.16 second conjunct replay
 
-**Requisition:** in-progress — dispatched 2026-11-07T11:58:20Z to kimi-4 as invoke-1794052700372-15114-858fbe62
+**Requisition:** completed — 2026-11-07T12:13:40Z, job invoke-1794052700372-15114-858fbe62, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
