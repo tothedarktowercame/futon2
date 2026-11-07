@@ -1,6 +1,6 @@
 # E-kimi-task-398 — Euclid viewer I.17 trace
 
-**Requisition:** in-progress — dispatched 2026-11-07T14:29:43Z to kimi-2 as invoke-1794061783825-15178-4f5ff4d5
+**Requisition:** completed — 2026-11-07T14:39:21Z, job invoke-1794061783825-15178-4f5ff4d5, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
