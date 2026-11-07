@@ -1,6 +1,6 @@
 # E-kimi-task-389 — Euclid I.18 replay; I.18 closure rule out
 
-**Requisition:** in-progress — dispatched 2026-11-07T12:43:51Z to kimi-4 as invoke-1794055431943-15134-b33ad360
+**Requisition:** completed — 2026-11-07T13:05:22Z, job invoke-1794055431943-15134-b33ad360, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
