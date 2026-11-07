@@ -99,7 +99,7 @@
   {:id :open-cascade-author-answer
    :source "src/futon2/aif/full_loop_runtime.clj"
    :anchor ":open-cascade-author-answer-invalid)"
-   :kinds [:open-cascade-author-answer-invalid :open-cascade-author-contact-failed] :case :debugger-error
+   :kinds [:open-cascade-author-answer-invalid :open-cascade-author-contact-failed :open-cascade-provider-unavailable] :case :debugger-error
    :evidence {:scoredField :absent :operatorSignal :absent
               :satisfactionMeasured :absent :ambiguityCited :derivable
               :questionInBrief :absent :harmRuleMatched :absent
@@ -107,7 +107,7 @@
   {:id :open-cascade-review-answer
    :source "src/futon2/aif/full_loop_runtime.clj"
    :anchor ":kind :open-cascade-review-answer-invalid"
-   :kinds [:open-cascade-review-answer-invalid :open-cascade-review-contact-failed :open-cascade-review-refused]
+   :kinds [:open-cascade-review-answer-invalid :open-cascade-review-contact-failed :open-cascade-review-refused :open-cascade-provider-unavailable]
    :case :debugger-error
    :evidence {:scoredField :absent :operatorSignal :absent
               :satisfactionMeasured :absent :ambiguityCited :derivable

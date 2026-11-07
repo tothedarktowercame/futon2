@@ -135,9 +135,10 @@
     (is (= "rj" (:reviewer-job result)))))
 
 (deftest failed-author-job-429-carries-the-provider-failure-class
-  ;; PROVIDER-FAIL-3: the contact-failed refusal quotes the provider signal
-  ;; (Joe's ruling 2026-11-07: usage issue, overloaded model, or something
-  ;; else). The exact Zai 429 envelope from run 2026-11-07-1249942a.
+  ;; PROVIDER-FAIL-3 (as shaped by PROVIDER-FAIL-4a): the 429 is retried
+  ;; once; when the retry fails with a provider class too, the typed
+  ;; provider stop quotes the provider signal (Joe's ruling 2026-11-07).
+  ;; The exact Zai 429 envelope from run 2026-11-07-1249942a.
   (let [handler (runtime/open-cascade-resume-handler
                  {:author "wm-author"
                   :reviewer "wm-reviewer"
@@ -151,12 +152,114 @@
                   :open-cascade-reviewer-answer-fn
                   (fn [_] {:state "done" :result "must not be called"})})
         result (handler held)]
-    (is (= :open-cascade-author-contact-failed (:kind result)))
+    (is (= :open-cascade-provider-unavailable (:kind result)))
     (is (= {:class :usage-limit
             :http-status 429
             :provider-code "1308"
             :evidence "HTTP 429"}
            (:provider-failure result)))))
+
+(deftest provider-429-retries-once-and-a-good-retry-continues-the-run
+  ;; PROVIDER-FAIL-4a (a): first contact 429/1308, retry answers well-formed.
+  (let [contacts (atom 0)
+        handler (runtime/open-cascade-resume-handler
+                 {:author "wm-author"
+                  :reviewer "wm-reviewer"
+                  :open-cascade-author-answer-fn
+                  (fn [req]
+                    (swap! contacts inc)
+                    (if (= 1 @contacts)
+                      {:state "failed" :job-id "job-pf4a-first" :text nil
+                       :terminal-code "error"
+                       :terminal-message "{\"message\":\"HTTP 429\",\"body\":{\"error\":{\"code\":\"1308\",\"message\":\"Usage limit reached for 5 hour.\"}}}"}
+                      (bound-author-answer req)))
+                  :open-cascade-reviewer-answer-fn
+                  (fn [_] {:state "done" :result "reviewer not reached"})})
+        result (with-redefs [delivery/check-delivery canonical-check]
+                 (handler held))]
+    (is (= 2 @contacts) "exactly one retry, same request")
+    (is (not= :open-cascade-provider-unavailable (:kind result)))
+    (is (not= :open-cascade-author-contact-failed (:kind result)))
+    (is (= {:seat "wm-author"
+            :first-failure {:class :usage-limit
+                            :http-status 429
+                            :provider-code "1308"
+                            :evidence "HTTP 429"}
+            :first-job "job-pf4a-first"}
+           (:provider-retry result)))))
+
+(deftest provider-429-twice-ends-with-the-typed-provider-stop
+  ;; PROVIDER-FAIL-4a (b): author 429, retry 429.
+  (let [contacts (atom 0)
+        handler (runtime/open-cascade-resume-handler
+                 {:author "wm-author"
+                  :reviewer "wm-reviewer"
+                  :open-cascade-author-answer-fn
+                  (fn [_]
+                    (swap! contacts inc)
+                    {:state "failed" :job-id (str "job-429-" @contacts) :text nil
+                     :terminal-code "error"
+                     :terminal-message "{\"message\":\"HTTP 429\",\"body\":{\"error\":{\"code\":\"1308\",\"message\":\"Usage limit reached for 5 hour.\"}}}"})
+                  :open-cascade-reviewer-answer-fn
+                  (fn [_] {:state "done" :result "must not be called"})})
+        result (handler held)]
+    (is (= 2 @contacts))
+    (is (= :error (:status result)))
+    (is (= :open-cascade-provider-unavailable (:kind result)))
+    (is (= "wm-author" (:seat result)))
+    (is (= :usage-limit (get-in result [:provider-failure :class])))
+    (is (= 429 (get-in result [:provider-failure :http-status])))
+    (is (= :usage-limit (get-in result [:provider-retry :first-failure :class])))
+    (is (= "job-429-1" (get-in result [:provider-retry :first-job])))
+    (is (= "job-429-2" (:retry-job result)))))
+
+(deftest reviewer-provider-500-twice-ends-with-the-typed-provider-stop
+  ;; PROVIDER-FAIL-4a (c): reviewer 500/1234 on both contacts.
+  (let [contacts (atom 0)
+        handler (runtime/open-cascade-resume-handler
+                 {:author "wm-author"
+                  :reviewer "wm-reviewer"
+                  :open-cascade-author-answer-fn bound-author-answer
+                  :open-cascade-reviewer-answer-fn
+                  (fn [_]
+                    (swap! contacts inc)
+                    {:state "failed" :job-id (str "rv-500-" @contacts) :text nil
+                     :terminal-code "error"
+                     :terminal-message "{\"message\":\"HTTP 500\",\"body\":{\"error\":{\"code\":\"1234\",\"message\":\"Internal network failure, error id: 20261107173257360c695ff77141f5, please try again later.\"}}}"})})
+        result (with-redefs [delivery/check-delivery canonical-check]
+                 (handler held))]
+    (is (= 2 @contacts))
+    (is (= :open-cascade-provider-unavailable (:kind result)))
+    (is (= "wm-reviewer" (:seat result)))
+    (is (= :provider-error (get-in result [:provider-failure :class])))
+    (is (= "1234" (get-in result [:provider-failure :provider-code])))
+    (is (= "rv-500-1" (get-in result [:provider-retry :first-job])))))
+
+(deftest not-contacted-first-failure-does-not-retry
+  ;; PROVIDER-FAIL-4a (d): :not-contacted is not a provider failure -- one
+  ;; contact only, today's contact-failed refusal unchanged.
+  (let [contacts (atom 0)
+        handler (runtime/open-cascade-resume-handler
+                 {:author "wm-author"
+                  :reviewer "wm-reviewer"
+                  :open-cascade-author-answer-fn
+                  (fn [_]
+                    (swap! contacts inc)
+                    {:state :not-contacted
+                     :reason :designated-author-unavailable
+                     :author "wm-author"})
+                  :open-cascade-reviewer-answer-fn
+                  (fn [_] {:state "done" :result "must not be called"})})
+        result (handler held)]
+    (is (= 1 @contacts) "no retry for a non-provider failure")
+    (is (= :open-cascade-author-contact-failed (:kind result)))
+    (is (nil? (:provider-retry result)))))
+
+;; PROVIDER-FAIL-4a (e): the done-but-unparseable path is unchanged and
+;; contacts as today (one contact per format-correction round) -- covered by
+;; done-but-undecodable-author-answer-keeps-its-answer-invalid-kind and
+;; done-but-undecodable-reviewer-answer-keeps-its-answer-invalid-kind above,
+;; which still pass unmodified.
 
 (deftest uncontacted-designated-author-is-a-typed-contact-failure
   ;; designated-agent-answer-fn answers {:state :not-contacted ...} when the

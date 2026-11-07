@@ -652,6 +652,59 @@
      :job-id (contact-job response)
      :defect (contact-failed-defect response)})})
 
+(defn- contact-provider-failure
+  "PROVIDER-FAIL-3's classification of one contact RESPONSE (nil unless the
+  response names a non-done terminal state): the provider-failure class map,
+  or nil when the response never reached a terminal non-done state."
+  [response]
+  (when (and (map? response) (contains? response :state)
+             (not= "done" (some-> (:state response) name)))
+    (runner/provider-failure-class
+     (select-keys response [:state :terminal-code :terminal-message :events]))))
+
+(defn- with-provider-retry
+  "PROVIDER-FAIL-4a: Joe's ruling 2026-11-07 -- a PROVIDER failure on a seat
+  contact retries once, then ends with a typed provider stop naming the class
+  (usage issue, overloaded model, or something else). CONTACT! is a thunk that
+  performs the contact and returns {:response .. :answer .. :format-correction
+  ..}; the same thunk runs again for the retry, so the request is identical.
+  Returns
+    {:result <the attempt to proceed with, first or retry>}
+    {:retry-note {:seat :first-failure :first-job}} when a retry was made
+    {:provider-stop {:provider-failure <retry's class map>
+                     :retry-job ..}} when the retry also failed with a
+  provider class. A first failure that is NOT a provider failure
+  (:not-contacted, bare cancelled) returns the first attempt unchanged: no
+  retry, PROVIDER-FAIL-2's contact-failed refusal applies. Labels and data
+  only here; what the loop does with the typed stop is PROVIDER-FAIL-4b."
+  [who contact!]
+  (let [{first-response :response :as first} (contact!)
+        first-pf (contact-provider-failure first-response)]
+    (if (or (nil? first-pf) (= :not-a-provider-failure (:class first-pf)))
+      {:result first}
+      (let [{retry-response :response :as retry} (contact!)
+            retry-pf (contact-provider-failure retry-response)
+            note {:seat who
+                  :first-failure first-pf
+                  :first-job (contact-job first-response)}]
+        (cond-> {:result retry :retry-note note}
+          (and retry-pf (not= :not-a-provider-failure (:class retry-pf)))
+          (assoc :provider-stop {:provider-failure retry-pf
+                                 :retry-job (contact-job retry-response)}))))))
+
+(defn- provider-unavailable-refusal
+  "The PROVIDER-FAIL-4a typed stop: the seat was contacted, the provider
+  failed with a class, one retry was made with the same request, and the
+  retry failed with a provider class too. One kind for author and reviewer;
+  :seat names which."
+  [who attempt]
+  {:status :error
+   :kind :open-cascade-provider-unavailable
+   :seat who
+   :provider-failure (get-in attempt [:provider-stop :provider-failure])
+   :provider-retry (:retry-note attempt)
+   :retry-job (get-in attempt [:provider-stop :retry-job])})
+
 (defn open-cascade-resume-handler
   "Production D4 composition. Contact the designated author and distinct
   reviewer through Agency, validate the reviewed answer, hot-load the exact
@@ -684,9 +737,14 @@
                          (vec (sort (keys (capability-dispatch/routes opts))))))]
         (if-not (= :dispatched (:status req))
           (or req ctx)
-          (let [{author-response :response author-answer :answer correction :format-correction}
-                (handoff/contact-with-format-correction
-                 {:contact author-contact :request req :job-ref contact-job})
+          (let [author-attempt
+                (with-provider-retry
+                 author
+                 #(handoff/contact-with-format-correction
+                   {:contact author-contact :request req :job-ref contact-job}))
+                {author-response :response author-answer :answer
+                 correction :format-correction}
+                (:result author-attempt)
                 author-binding (open-resume/validate-author-binding req author-answer)
                 delivery (when (= :bound (:status author-binding))
                            (patch-delivery/check-delivery author-answer))
@@ -772,13 +830,19 @@
                                         [:answer-delivery
                                          :author-response-defects])))
                       claim-defects))
-                reviewer-response (when (= :accepted (:status review-product-check))
-                                    (reviewer-contact
-                                     (cond-> {:requisition req
-                                              :author-answer review-answer}
-                                       (seq review-claim-defects)
-                                       (assoc :claim-defects
-                                              (vec review-claim-defects)))))
+                reviewer-attempt
+                (when (= :accepted (:status review-product-check))
+                  (with-provider-retry
+                   reviewer
+                   (fn []
+                     (let [r (reviewer-contact
+                              (cond-> {:requisition req
+                                       :author-answer review-answer}
+                                (seq review-claim-defects)
+                                (assoc :claim-defects
+                                       (vec review-claim-defects))))]
+                       {:response r :answer (handoff/response-map r)}))))
+                reviewer-response (some-> reviewer-attempt :result :response)
                 reviewed (when reviewer-response
                            (handoff/response-map reviewer-response))
                 review-format-normalization
@@ -1023,6 +1087,12 @@
                   (catch Throwable t
                     {:status :retention-failed :error (ex-message t)})))
                 result (cond
+              (:provider-stop author-attempt)
+              ;; PROVIDER-FAIL-4a: the author's contact failed with a
+              ;; provider class, one retry with the same request failed with
+              ;; a provider class too: the typed provider stop.
+              (provider-unavailable-refusal author author-attempt)
+
               (nil? author-answer)
               (if (and (map? author-response) (contains? author-response :state)
                        (not= "done" (some-> (:state author-response) name)))
@@ -1079,6 +1149,11 @@
               (not= :accepted (:status product-check))
               (assoc product-check :author-job (contact-job author-response))
 
+              (and reviewer-attempt (:provider-stop reviewer-attempt))
+              ;; PROVIDER-FAIL-4a: the reviewer's contact failed with a
+              ;; provider class twice (see the author branch above).
+              (provider-unavailable-refusal reviewer reviewer-attempt)
+
               (nil? reviewed)
               (if (and (map? reviewer-response) (contains? reviewer-response :state)
                        (not= "done" (some-> (:state reviewer-response) name)))
@@ -1121,6 +1196,11 @@
                 :patch-loader (or (:open-cascade-patch-loader opts)
                                   patch-loader)}))]
               (cond-> result
+                (:retry-note author-attempt)
+                (assoc :provider-retry (:retry-note author-attempt))
+                (and (nil? (:retry-note author-attempt))
+                     (:retry-note reviewer-attempt))
+                (assoc :provider-retry (:retry-note reviewer-attempt))
                 (and objection-round (:accepted? objection-round))
                 (assoc :objection-round
                        {:round 1
