@@ -1,6 +1,6 @@
 # E-kimi-task-406 — certify I.19-engine
 
-**Requisition:** in-progress — dispatched 2026-11-07T15:24:55Z to kimi-2 as invoke-1794065095416-15205-f81b0164
+**Requisition:** completed — 2026-11-07T15:44:19Z, job invoke-1794065095416-15205-f81b0164, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
