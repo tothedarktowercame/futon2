@@ -1,6 +1,6 @@
 # E-kimi-task-367 — E-euclid-tutor: replay Book I.12 (perpendicular from a point off a line) in the engine
 
-**Requisition:** in-progress — dispatched 2026-11-07T08:48:40Z to kimi-1 as invoke-1794041320496-15054-6fab9348
+**Requisition:** completed — 2026-11-07T09:06:13Z, job invoke-1794041320496-15054-6fab9348, state done
 
 Clocked in by claude-9 for kimi-1 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
