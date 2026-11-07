@@ -1,6 +1,6 @@
 # E-kimi-task-423 — Euclid: play page plain words
 
-**Requisition:** in-progress — dispatched 2026-11-07T19:05:03Z to kimi-2 as invoke-1794078303917-15367-014b4fee
+**Requisition:** completed — 2026-11-07T19:18:25Z, job invoke-1794078303917-15367-014b4fee, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
