@@ -1,6 +1,6 @@
 # E-kimi-task-369 — E-euclid-tutor: viewer Book trace for I.12
 
-**Requisition:** in-progress — dispatched 2026-11-07T09:08:51Z to kimi-1 as invoke-1794042531898-15057-3cfa4c27
+**Requisition:** completed — 2026-11-07T09:20:12Z, job invoke-1794042531898-15057-3cfa4c27, state failed
 
 Clocked in by claude-9 for kimi-1 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
