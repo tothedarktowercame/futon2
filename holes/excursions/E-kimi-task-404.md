@@ -1,6 +1,6 @@
 # E-kimi-task-404 — viewer I.19
 
-**Requisition:** in-progress — dispatched 2026-11-07T15:13:04Z to kimi-2 as invoke-1794064384095-15199-1c2a9727
+**Requisition:** completed — 2026-11-07T15:24:27Z, job invoke-1794064384095-15199-1c2a9727, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
