@@ -870,7 +870,6 @@ class ContinuousModeTest(unittest.TestCase):
                  mock.patch.object(loop, "fire", side_effect=fire), \
                  mock.patch.object(loop.time, "sleep") as sleep, \
                  mock.patch.object(loop, "notify") as notify, \
-                 mock.patch.object(loop, "notify") as notify, \
                  mock.patch.object(loop, "notify_alert"), \
                  mock.patch.object(loop, "repair") as repair, \
                  mock.patch.object(loop, "log"):
@@ -1374,6 +1373,28 @@ class ProviderUnavailableStopTest(unittest.TestCase):
             self.assertIsNone(loop.provider_unavailable(
                 {"run-record": str(path)}))
 
+    def test_reads_the_shape_the_runner_writes(self):
+        # The :failure map as run-record-failure writes a held provider stop
+        # (printed by provider-fail-class-test, PROVIDER-FAIL-4c review): the
+        # seat and provider detail sit under :detail, the seat a string.
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            path = self._write_record(td, (
+                '{:run/id "run-real" :failure {:kind :open-cascade-provider-unavailable, '
+                ':stage :cascade-resume, :error "held", '
+                ':cause {:kind :open-cascade-provider-unavailable}, '
+                ':detail {:status :error, :kind :open-cascade-provider-unavailable, '
+                ':seat "wm-author", :provider-failure {:class :usage-limit, '
+                ':http-status 429, :provider-code "1308", '
+                ':evidence "HTTP 429 Usage limit reached for 5 hour"}, '
+                ':provider-retry {:retried true, :first-class :usage-limit}, '
+                ':retry-job "invoke-retry-2"}}}'))
+            row = loop.provider_unavailable({"run-record": str(path)})
+        self.assertEqual("usage-limit", row["class"])
+        self.assertEqual("wm-author", row["seat"])
+        self.assertEqual(429, row["http-status"])
+        self.assertEqual("invoke-retry-2", row["retry-job"])
+
     def test_unreadable_record_returns_none_without_raising(self):
         loop = load_loop()
         with tempfile.TemporaryDirectory() as td, \
@@ -1394,7 +1415,7 @@ class ProviderUnavailableStopTest(unittest.TestCase):
                 ':provider-code "1308" :evidence "HTTP 429"} '
                 ':retry-job "job-2"}}'))
             args = loop.parse_args([
-                "run", "--clicks", "1", "--continuous", "--owner", "claude-2",
+                "run", "--clicks", "1", "--continuous", "--owner", "test-owner",
                 "--issuing-caller", "claude-2", "--author", "wm-author",
                 "--reviewer", "wm-reviewer", "--repair-reviewer", "wm-repair-reviewer"])
 
@@ -1417,6 +1438,7 @@ class ProviderUnavailableStopTest(unittest.TestCase):
                  mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
                  mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
                  mock.patch.object(loop, "fire", side_effect=fire), \
+                 mock.patch.object(loop, "notify"), \
                  mock.patch.object(loop, "notify_alert"), \
                  mock.patch.object(loop, "repair") as repair, \
                  mock.patch.object(loop, "log"):

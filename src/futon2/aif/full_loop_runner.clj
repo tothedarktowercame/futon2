@@ -1243,7 +1243,11 @@
   its nested pin, oversized values are dropped with :omitted naming them."
   [:status :kind :reason :repair :requisition-id :cascade-digest
    :author-job :review-job :reviewer :reviewer-job :patch :answer
-   :answer-evidence :delivery-evidence :objection :revision :verdict])
+   :answer-evidence :delivery-evidence :objection :revision :verdict
+   ;; PROVIDER-FAIL-4c review: the typed provider stop (4a) is read back from
+   ;; the record by the injury classifier (4b) and the click loop (4c); without
+   ;; these the record kept only :kind and neither could name the class.
+   :seat :provider-failure :provider-retry :retry-job])
 
 (defn- held-resume-data
   "The close data of a held open-cascade resume. A retained delivery failure's

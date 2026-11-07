@@ -2261,12 +2261,13 @@ def run(args) -> int:
                     "click-id": c["click-id"], **fields})
             shown = [f"{provider.get('class')}",
                      f"on {provider.get('seat')}"]
-            shown.append(f"({provider.get('evidence')}"
-                         + (f", HTTP {provider['http-status']}"
-                            if provider.get("http-status") is not None else "")
-                         + (f", code {provider['provider-code']}"
-                            if provider.get("provider-code") is not None else "")
-                         + ")")
+            parts = [str(provider[key]) if key == "evidence" else
+                     f"{label} {provider[key]}"
+                     for key, label in (("evidence", ""), ("http-status", "HTTP"),
+                                        ("provider-code", "code"))
+                     if provider.get(key) is not None]
+            if parts:
+                shown.append(f"({', '.join(parts)})")
             reason = (f"provider-unavailable: {' '.join(shown)}"
                       f" after one retry; click {c['click-id']}; waiting for Joe")
             return stop(args, "debugger-error", reason, 1, {})

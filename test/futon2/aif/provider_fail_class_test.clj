@@ -108,3 +108,26 @@
     (is (= 429 (:http-status r)))
     (is (nil? (:provider-code r)))
     (is (= "HTTP 429" (:evidence r)))))
+
+(deftest a-provider-stop-reaches-the-run-record-with-its-class
+  ;; PROVIDER-FAIL-4c review: the held-resume projection narrows the refusal
+  ;; to held-refusal-retained-keys; before :seat/:provider-failure/:retry-job
+  ;; were added there, the record kept only :kind and the loop's
+  ;; provider_unavailable (and the 4b classifier) read no class.
+  (let [refusal {:status :error :kind :open-cascade-provider-unavailable
+                 :seat "wm-author"
+                 :provider-failure {:class :usage-limit :http-status 429
+                                    :provider-code "1308"
+                                    :evidence "HTTP 429 Usage limit reached for 5 hour"}
+                 :provider-retry {:retried true :first-class :usage-limit}
+                 :retry-job "invoke-retry-2"}
+        failure (#'runner/run-record-failure
+                 {:data (#'runner/held-resume-data
+                         {:failure-kind :open-cascade-provider-unavailable
+                          :downstream-refusal refusal}
+                         "held" {:repair/id "finding"})})]
+    (is (= :open-cascade-provider-unavailable (:kind failure)))
+    (is (= "wm-author" (get-in failure [:detail :seat])))
+    (is (= :usage-limit (get-in failure [:detail :provider-failure :class])))
+    (is (= 429 (get-in failure [:detail :provider-failure :http-status])))
+    (is (= "invoke-retry-2" (get-in failure [:detail :retry-job])))))
