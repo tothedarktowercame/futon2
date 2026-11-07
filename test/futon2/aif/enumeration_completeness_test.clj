@@ -121,6 +121,24 @@
              (:reason (first (:excluded scan))))
           "the exclusion names its typed reason"))))
 
+(deftest operator-gated-ticket-is-a-typed-exclusion-test
+  ;; TICKET-GATE-1: a live ticket with an explicit operator Gate line is
+  ;; excluded from the available population with reason
+  ;; :ticket-operator-gated. Prose mentions and table cells do not gate.
+  (letfn [(ticket! [id body]
+            (let [f (io/file *root* "repo-a" "holes" "tickets" (str id ".md"))]
+              (io/make-parents f)
+              (spit f (str "**Status: PARTIAL -- still work.**\n\n" body))
+              id))]
+    (ticket! "T-gated" "**Gate:** awaiting Joe's ratification.\n")
+    (ticket! "T-prose" "Do NOT start without Joe.\n")
+    (ticket! "T-table"
+             "| futon3 component | Destination | Gate affected |\n|---|---|---|\n| drawbridge/core.clj | futon3c | Gate 0, Gate 3 |\n")
+    (let [scan (ec/scan-population :ticket *root*)]
+      (is (= ["T-prose" "T-table"] (:available-ids scan)))
+      (is (= {:ticket-operator-gated 1} (into {} (:exclusions-by-reason scan))))
+      (is (= :ticket-operator-gated (:reason (first (:excluded scan))))))))
+
 (deftest exclusions-carry-typed-reasons-test
   (testing "every doc the scan withholds carries a reason, and the reasons are
             the declared ones -- silence is not a filter"

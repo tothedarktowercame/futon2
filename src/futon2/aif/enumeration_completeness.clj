@@ -180,12 +180,21 @@
   (let [lines (str/split-lines (or text ""))
         status (some #(second (re-find #"(?i)^\s*\*\*Status(?:\s*\([^)]*\))?\s*:\s*(.*)$" %))
                      lines)
-        lead (-> (or status "") str/upper-case (str/replace #"^[\s*_]+" ""))]
+        lead (-> (or status "") str/upper-case (str/replace #"^[\s*_]+" ""))
+        gate-line (some #(second (re-find #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Gate:?(?:\*\*)?\s*:?\s*(.+)$" %))
+                        lines)]
     {:status-line status
      :status-class (cond
                      (re-find #"JOE['’]S CALL|AWAIT[^.]*JOE|^(WATCH|FINDING|DESIGN CONSTRAINT)\b" lead) :draft
                      (re-find #"^(DONE|SUPERSEDED|DEFERRED|PARKED|ARCHIVED)" lead) :terminal
                      (close-condition-placeholder-stands? lines) :unstated-close
+                     ;; The explicit-Gate-line rule, written separately from
+                     ;; mission-registry's copy on purpose (same discipline as
+                     ;; `path-fences` and the placeholder above): only a line
+                     ;; that BEGINS `Gate:` and names an operator word gates;
+                     ;; prose mentions and table cells do not (TICKET-GATE-1).
+                     (and gate-line
+                          (re-find #"(?i)\b(?:await|pending|acceptance|decision|ratification|operator|Joe)\b" gate-line)) :operator-gated
                      :else :live)}))
 
 ;; ---------------------------------------------------------------------------
@@ -234,6 +243,11 @@
                                (futon3c/scripts/failure-tickets.py:56-58);
                                the same tickets `mission-registry/live-ticket?`
                                excludes from selection (SELECT-FLAT-2)
+     :ticket-operator-gated    a live ticket with an explicit Gate line
+                               awaiting the operator (the same
+                               explicit-Gate-line rule missions honour,
+                               TICKET-GATE-1); the same tickets
+                               `mission-registry/live-ticket?` excludes
 
    `:counts` is computed from the ledger, not asserted beside it."
   ([kind] (scan-population kind default-code-root))
@@ -275,6 +289,7 @@
                                             :terminal :status-terminal
                                             :draft :status-draft
                                             :unstated-close :ticket-close-condition-unstated
+                                            :operator-gated :ticket-operator-gated
                                             :status-unclassified)))
          excluded (vec (concat (map (fn [p] {:kind kind :id nil :path p
                                              :reason :non-contract-filename})

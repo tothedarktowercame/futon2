@@ -132,6 +132,44 @@
       (is (false? (fm/can-execute? state {:type :advance-ticket :target "T-fail-placeholder"})))
       (is (fm/can-execute? state {:type :advance-ticket :target "T-fail-stated"})))))
 
+(deftest explicit-gate-line-gates-a-ticket-on-the-operator
+  ;; TICKET-GATE-1: tickets honour the missions' explicit Gate line rule
+  ;; (mission_registry.clj operator-gate-lines): only a line that begins
+  ;; `Gate:` and names an operator word gates. Prose ("Do NOT start without
+  ;; Joe") never does; Gate words in a table cell never do.
+  (let [root (fixture-root)
+        write-gate-ticket
+        (fn [id body]
+          (write-ticket root (str "futon3c/holes/tickets/" id ".md")
+                        (str "# " id "\n\n**Status: PARTIAL -- still work.**\n\n" body)))
+        gate-line "**Gate:** awaiting Joe's ratification.\n"
+        prose-only "Do NOT start without Joe. Design note follows.\n"
+        gate-table "| futon3 component | Destination | Gate affected |\n|---|---|---|\n| drawbridge/core.clj | futon3c | Gate 0, Gate 3 |\n| musn/ | futon3c | Gate 2 |\n"]
+    ;; (1) an explicit operator Gate line excludes with the typed marker
+    (write-gate-ticket "T-gated" gate-line)
+    ;; (2) the same ticket without the Gate line, Joe in prose only, stays live
+    (write-gate-ticket "T-prose" prose-only)
+    ;; (3) Gate words in a table cell (the M-peripheral-gauntlet.md:48-50
+    ;; rows verbatim) are not Gate lines and do not gate
+    (write-gate-ticket "T-table" gate-table)
+    (let [tickets (:tickets (registry/load-tickets (.getPath root)))
+          by-id (into {} (map (juxt :id identity) tickets))
+          state {:tickets tickets}
+          actions (vec (ap/propose registry/ticket-enumerator-proposer state))]
+      (is (true? (:operator-gated? (by-id "T-gated"))))
+      (is (= :operator-gated (:status-class (by-id "T-gated"))))
+      (is (= ["**Gate:** awaiting Joe's ratification."]
+             (:operator-gate-lines (by-id "T-gated"))))
+      (is (false? (registry/live-ticket? (by-id "T-gated"))))
+      (is (false? (registry/live-ticket-target? tickets "T-gated")))
+      (is (false? (:operator-gated? (by-id "T-prose"))))
+      (is (registry/live-ticket? (by-id "T-prose")))
+      (is (false? (:operator-gated? (by-id "T-table"))))
+      (is (registry/live-ticket? (by-id "T-table")))
+      (is (= ["T-prose" "T-table"] (sort (map :target actions))))
+      (is (false? (fm/can-execute? state {:type :advance-ticket :target "T-gated"})))
+      (is (fm/can-execute? state {:type :advance-ticket :target "T-prose"})))))
+
 (deftest ticket-prior-and-observation-channel
   (let [f (fm/advance-mission-ordinal-factor 1)
         prediction (#'fm/predict-effects {} {:type :advance-ticket :target "T-live" :weight 1.0})]

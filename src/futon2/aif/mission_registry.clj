@@ -63,6 +63,29 @@
 (def ^:private gate-line-pattern
   #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Gate:?(?:\*\*)?\s*:?\s*(.+)$")
 
+(def ^:private operator-gate-pattern
+  "The operator-keyword test an explicit Gate line must pass to gate the
+   doc on the operator. Kept beside `gate-line-pattern` so missions and
+   tickets share ONE rule (TICKET-GATE-1): status prose records work
+   state, not permission -- only an explicit Gate line mentioning one of
+   these words can remove a doc from selection."
+  #"(?i)\b(?:await|pending|acceptance|decision|ratification|operator|Joe)\b")
+
+(defn operator-gate-lines
+  "The doc's explicit Gate lines that gate work on the operator: lines
+   matching `gate-line-pattern` (a leading `Gate:` in any of its prose
+   spellings) whose text passes `operator-gate-pattern`. Prose mentioning
+   Joe elsewhere does not appear here and never gates. Shared by mission
+   and ticket loading."
+  [lines]
+  (->> (or lines [])
+       (keep (fn [line]
+               (when-let [[_ gate] (re-matches gate-line-pattern line)]
+                 (when (re-find operator-gate-pattern gate)
+                   (str/trim line)))))
+       distinct
+       vec))
+
 (def ^:private unchecked-task-pattern
   #"^\s*[-*]\s+\[\s\]\s+\S.*$")
 
@@ -336,14 +359,9 @@
                               status))
                           (take 20 lines))
         ;; Status prose records work state, not permission.  Only an explicit
-        ;; Gate line can remove a mission from selection.
-        gate-lines (->> lines
-                        (keep (fn [line]
-                                (when-let [[_ gate] (re-matches gate-line-pattern line)]
-                                  (when (re-find #"(?i)\b(?:await|pending|acceptance|decision|ratification|operator|Joe)\b" gate)
-                                    (str/trim line)))))
-                        distinct
-                        vec)
+        ;; Gate line can remove a mission from selection (operator-gate-lines
+        ;; is the shared rule; tickets honour it too since TICKET-GATE-1).
+        gate-lines (operator-gate-lines lines)
         operator-gated? (boolean (seq gate-lines))
         status-class (if operator-gated?
                        :operator-gated
@@ -993,13 +1011,16 @@
                 (collapse-whitespace close-condition-placeholder)))))
 
 (defn live-ticket?
-  "Live by status AND selectable. A ticket whose close condition is still
-   the census generator's `(unstated ...)` placeholder (see
-   `close-condition-placeholder`) is NOT eligible: the exclusion is typed
-   `:ticket-close-condition-unstated`, carried on the ticket map as
-   `:close-condition-unstated` and recorded independently in the
-   enumeration-completeness exclusion ledger, never a silent drop. Writing a
-   close condition into that section restores eligibility on the next load."
+  "Live by status AND selectable. Two typed exclusions, both recorded (never
+   a silent drop): `:ticket-close-condition-unstated` when the close
+   condition is still the census generator's `(unstated ...)` placeholder
+   (carried on the ticket map as `:close-condition-unstated` and in the
+   enumeration-completeness ledger), and `:ticket-operator-gated` when an
+   explicit Gate line awaits the operator (`:operator-gated?`; same
+   `operator-gate-lines` rule as missions -- Joe 2026-11-06, items gated on
+   the operator are their own class and not for automated work). Writing a
+   close condition into the section, or resolving the Gate line, restores
+   eligibility on the next load."
   [ticket]
   (and (= :live (:status-class ticket))
        (not (:close-condition-unstated ticket))))
@@ -1030,11 +1051,22 @@
                 (let [id (str/replace (.getName (io/file path)) #"\.md$" "")
                       text (slurp path)
                       lines (str/split-lines text)
-                      status (ticket-status-text lines)]
+                      status (ticket-status-text lines)
+                      ;; Tickets honour the same explicit-Gate-line rule as
+                      ;; missions (TICKET-GATE-1): a Gate line passing the
+                      ;; operator-keyword test overrides the status table and
+                      ;; removes the ticket from selection. Prose alone
+                      ;; ("Do NOT start without Joe") never gates.
+                      gate-lines (operator-gate-lines lines)]
                   {:id id :kind :ticket :path path
                    :item-line (first-open-checkbox-line lines)
                    :title (mission-title-from-lines id lines)
-                   :status-line status :status-class (classify-ticket-status status)
+                   :status-line status
+                   :status-class (if (seq gate-lines)
+                                   :operator-gated
+                                   (classify-ticket-status status))
+                   :operator-gated? (boolean (seq gate-lines))
+                   :operator-gate-lines gate-lines
                    :close-condition-unstated (close-condition-unstated? lines)
                    :requisition (task-requisition/read-state text)
                    :requisition-record? (task-requisition/requisition-record? {:text text})
