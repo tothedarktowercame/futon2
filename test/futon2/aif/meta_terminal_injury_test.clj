@@ -182,6 +182,50 @@
     ;; the escape hatch for an untyped machine failure.
     (is (= :injury (:classification untyped)))))
 
+(deftest provider-unavailable-is-non-injury-and-carries-the-class
+  ;; PROVIDER-FAIL-4b, Joe's ruling 2026-11-07: a provider failure that
+  ;; stopped the run after one retry (PROVIDER-FAIL-4a 3b9b3a9e0) is a
+  ;; provider condition, not a machine injury. The classification names
+  ;; WHICH provider failure (:provider-failure-class) so the ledger reader
+  ;; need not open the run record. Injuries 0cb09c47 (429 -> dedicated
+  ;; meta-self-heal -> diagnosis 500 -> machine-self-heal-failed) is the
+  ;; counterexample this replaces.
+  (let [record {:run/id "run-pf4b" :click/id "click-pf4b"
+                :failure {:kind :open-cascade-provider-unavailable
+                          :stage :cascade-resume
+                          :provider-failure {:class :usage-limit
+                                             :http-status 429
+                                             :provider-code "1308"
+                                             :evidence "HTTP 429"}}}
+        classification (classify record pin-a)]
+    (is (= :non-injury (:classification classification)))
+    (is (= :provider-unavailable (:non-injury-reason classification)))
+    (is (= :provider-unavailable (:observation-class classification)))
+    (is (= :usage-limit (:provider-failure-class classification))))
+  ;; The same detail map reached through the nested refusal path the terminal
+  ;; record retains when the refusal map lands in :failure :detail.
+  (let [classification
+        (classify {:run/id "run-pf4b-nested" :click/id "click-pf4b-n"
+                   :failure {:stage :cascade-resume
+                             :detail {:failure-kind :open-cascade-provider-unavailable
+                                      :provider-failure {:class :model-overloaded}}}}
+                  pin-a)]
+    (is (= :non-injury (:classification classification)))
+    (is (= :model-overloaded (:provider-failure-class classification)))))
+
+(deftest contact-failed-without-a-provider-stop-stays-an-injury
+  ;; PROVIDER-FAIL-2's kind -- a contact that failed without the retry-then-
+  ;; typed-stop shape (e.g. :not-contacted, or a provider failure whose kind
+  ;; carried no class map) -- is unchanged: an injury.
+  (let [classification
+        (classify {:run/id "run-pf4b-cf" :click/id "click-pf4b-cf"
+                   :failure {:kind :open-cascade-author-contact-failed
+                             :stage :cascade-resume}}
+                  pin-a)]
+    (is (= :injury (:classification classification)))
+    (is (nil? (:non-injury-reason classification)))
+    (is (nil? (:provider-failure-class classification)))))
+
 (deftest abstention-cause-classification-requires-retained-evidence
   ;; Synthetic provider fixture in the P10 retained-cause shape. Recorded L1
   ;; instead stopped at :incomplete-policy-menu-coverage / :no-current-target-

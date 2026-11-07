@@ -37,7 +37,15 @@
    ;; close of click wm-click-8ed79a0b both replayed :injury.  Lean:
    ;; DarkTower.WarMachine.OrdinaryRefusalProseRef repairedKindVerdict
    ;; (guardrailRefusal ↦ nonInjury; buildFailed stays an injury).
-   :guardrail-refusal :ordinary-author-refusal})
+   :guardrail-refusal :ordinary-author-refusal
+  ;; PROVIDER-FAIL-4b, Joe's ruling 2026-11-07: a provider failure on a seat
+  ;; contact retried once and stopped typed (:open-cascade-provider-unavailable,
+  ;; PROVIDER-FAIL-4a 3b9b3a9e0) is a provider condition, not a machine
+  ;; injury: routing it to meta-self-heal made the loop's own diagnosis call
+  ;; hit the same provider and stop machine-self-heal-failed (injury
+  ;; 0cb09c47, 2026-11-07). The kind-without-retry (contact-failed, e.g.
+  ;; :not-contacted) STAYS an injury.
+  :open-cascade-provider-unavailable :provider-unavailable})
 (def occurrence-square-author-response-reasons
   #{:response-invalid :response-decode-threw :response-validation-threw})
 (def successful-outcomes #{:success :closed :grounded-change :cohort-complete})
@@ -119,6 +127,16 @@
       (get-in record [:failure :detail :failure-stage])
       (:stage (retained-q6-failure record))
       :unknown-stage))
+
+(defn- provider-failure-class
+  "PROVIDER-FAIL-4b: WHICH provider failure stopped the run (:usage-limit,
+  :model-overloaded, :provider-error, :timeout), read from the retained
+  refusal detail by the same fallback chain failure-kind uses. Nil when the
+  record carries no :provider-failure map (never invented)."
+  [record]
+  (or (get-in record [:failure :provider-failure :class])
+      (get-in record [:failure :detail :provider-failure :class])
+      (get-in record [:terminal-receipt :provider-failure :class])))
 (defn- run-id [record] (or (:run/id record) (:run-id record)))
 (defn- click-id [record] (or (:click/id record) (:click-id record)))
 (defn- outcome [record]
@@ -343,7 +361,12 @@
                                       :declared-no-work :declared-no-work
                                       :diagnostic-only :diagnostic-only
                                       :absent-terminal-failure :absent-terminal-failure
+                                      :provider-unavailable :provider-unavailable
                                       :non-injury))
+           (and non-injury-reason
+                (= :provider-unavailable non-injury-reason)
+                (provider-failure-class record))
+           (assoc :provider-failure-class (provider-failure-class record))
            (nil? non-injury-reason)
            (assoc :cause-id (cause-id record)
                   :injury-id (injury-id record)
