@@ -1,6 +1,6 @@
 # E-kimi-task-381 — Certify engine I.13 steps in Lean
 
-**Requisition:** in-progress — dispatched 2026-11-07T11:32:31Z to kimi-2 as invoke-1794051151951-15104-52f21115
+**Requisition:** completed — 2026-11-07T12:10:01Z, job invoke-1794051151951-15104-52f21115, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
