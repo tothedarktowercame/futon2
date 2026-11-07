@@ -1,6 +1,6 @@
 # E-kimi-task-365 — E-euclid-tutor binding clash: finish zai-11's engine work with entailment-checked identification
 
-**Requisition:** in-progress — dispatched 2026-11-07T08:33:21Z to kimi-1 as invoke-1794040401355-15051-c48c8d3d
+**Requisition:** completed — 2026-11-07T08:47:37Z, job invoke-1794040401355-15051-c48c8d3d, state done
 
 Clocked in by claude-9 for kimi-1 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
