@@ -287,7 +287,12 @@ JOB_PREVIEW_MAX_JOBS = 1000
 JOB_PREVIEW_TIMEOUT = 20
 # Previews are truncated (~60 chars), so a preview only labels a path it
 # contains in full; a cut-off path never matches the longer real path.
-JOB_PREVIEW_SHELL_TOOLS = {"run_shell", "run_readonly", "shell", "bash"}
+JOB_PREVIEW_SHELL_TOOLS = {"run_shell", "shell", "bash"}
+# Tools that only read: a path in their preview says the agent looked at the
+# file, not that it wrote it, so they never attribute a write.
+JOB_PREVIEW_WRITE_TOOLS = {"edit_file", "write_file", "apply_patch", "create_file"}
+JOB_PREVIEW_READ_TOOLS = {"read_file", "search", "list_dir", "list_files", "glob",
+                          "grep", "view", "run_readonly", "web_fetch"}
 
 
 def _job_ts(value) -> str | None:
@@ -349,7 +354,11 @@ def attribute_entries_by_job_previews(entries: list, jobs: list) -> list:
                 continue
             tools = event.get("tools") or []
             tool = tools[0] if tools else "unknown"
-            heuristic = tool in JOB_PREVIEW_SHELL_TOOLS
+            if tool in JOB_PREVIEW_READ_TOOLS:
+                continue
+            # only explicit write tools are direct evidence; shell and unknown
+            # tools are marked heuristic
+            heuristic = tool not in JOB_PREVIEW_WRITE_TOOLS
             for preview in event.get("previews") or []:
                 if not isinstance(preview, str):
                     continue

@@ -1210,9 +1210,6 @@ class LoopOwnWriteStampTest(unittest.TestCase):
                              entries["loop.log"]["attribution"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class JobPreviewAttributionTest(unittest.TestCase):
     def test_previews_attribute_paths_and_respect_boundaries(self):
@@ -1227,12 +1224,14 @@ class JobPreviewAttributionTest(unittest.TestCase):
             shelled = root / "shelled.txt"
             untouched = root / "untouched.txt"
             truncated = root / "truncated-path-name.txt"
+            read_only = root / "read-only.txt"
 
             def fake_fire(n, args, since):
                 edited.write_text("a")
                 shelled.write_text("b")
                 untouched.write_text("c")
                 truncated.write_text("d")
+                read_only.write_text("e")
                 return {"n": n, "click-id": "wm-click-preview", "outcome": "ok",
                         "since-epoch": since}
 
@@ -1255,6 +1254,11 @@ class JobPreviewAttributionTest(unittest.TestCase):
                  # the preview cut the last character off the path
                  "events": [{"type": "tool_use", "tools": ["edit_file"],
                              "previews": [f"edit_file {str(truncated.resolve())[:-1]}"]}]},
+                {"job-id": "invoke-fix-reader", "agent-id": "zai-11",
+                 "started-at": ts(-600), "finished-at": ts(60),
+                 # reading a file the window wrote is not evidence of writing it
+                 "events": [{"type": "tool_use", "tools": ["read_file"],
+                             "previews": [f"read_file {read_only.resolve()}"]}]},
                 {"job-id": "invoke-fix-late", "agent-id": "claude-9",
                  "started-at": ts(86400), "finished-at": ts(86460),
                  "events": [{"type": "tool_use", "tools": ["edit_file"],
@@ -1269,7 +1273,7 @@ class JobPreviewAttributionTest(unittest.TestCase):
                 click = loop.fire_with_write_manifest(1, object(), 123)
 
             manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
-            self.assertEqual({"status": "checked", "jobs-in-window": 3},
+            self.assertEqual({"status": "checked", "jobs-in-window": 4},
                              manifest["job_preview_check"])
             self.assertEqual(2, manifest["attributed_count"])
             entries = {Path(e["path"]).name: e for e in manifest["entries"]}
@@ -1285,6 +1289,8 @@ class JobPreviewAttributionTest(unittest.TestCase):
             # no preview named it inside the window
             self.assertEqual("click-window/unattributed",
                              entries["untouched.txt"]["attribution"])
+            self.assertEqual("click-window/unattributed",
+                             entries["read-only.txt"]["attribution"])
             # a truncated preview must not match the longer real path
             self.assertEqual("click-window/unattributed",
                              entries["truncated-path-name.txt"]["attribution"])
@@ -1315,3 +1321,7 @@ class JobPreviewAttributionTest(unittest.TestCase):
         self.assertEqual("not-checked", check["status"])
         self.assertEqual("URLError: refused", check["reason"])
         self.assertEqual("click-window/unattributed", result[0]["attribution"])
+
+
+if __name__ == "__main__":
+    unittest.main()
