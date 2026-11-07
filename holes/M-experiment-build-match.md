@@ -1,7 +1,7 @@
 # M-experiment-build-match — register experiments the way we already register folds
 
 **Opened:** 2026-08-01. **Owner:** Claude (claude-4). **Operator:** Joe.
-**Status:** OPEN — SPEC. Deliberately named after `M-actuator-spec-build-match.md`,
+**Status:** CLOSED (checklist finished; last item 75e3a74d4, 2026-11-06; Joe 2026-11-07). Was OPEN — SPEC. Deliberately named after `M-actuator-spec-build-match.md`,
 which is the same idea one domain over.
 
 ## The observation
