@@ -8,6 +8,7 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.interpretation-request :as request]
             [futon2.aif.mission-registry :as registry]
+            [futon2.aif.write-stamp :as write-stamp]
             [futon2.report.cascade-lane :as cascade])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]
@@ -313,3 +314,69 @@
     (is (= #{"embedding" "tier0"}
            (set (map :retriever (:retriever-runs want-slice)))))
     (is (seq (:source-revisions want-slice)))))
+
+(defn stamp-fixture
+  "An authorized-request fixture whose data-root sits inside a throwaway
+  parent, so the stamp directory the pins must use (beside the data-root)
+  is also throwaway."
+  []
+  (let [parent (.toFile (Files/createTempDirectory "wm-pin-stamp" (make-array FileAttribute 0)))
+        _ (swap! roots conj parent)
+        data-root (io/file parent "wm-full-loop-machinery-9")
+        dir (io/file data-root "cohort" "attempt-001")
+        _ (.mkdirs dir)
+        target (io/file parent "M-fixture.md")
+        _ (spit target "# Title\n## IDENTIFY\nHave a spec; want a tested implementation.\nHowever evidence is missing.\n")
+        start (pr-str {:attempt/id "attempt-001" :cohort/id :cohort
+                       :payload {:judgment {:semantic-epoch :test}}})
+        _ (spit (io/file dir "001-time-step.edn") start)
+        code (io/file parent "code.py") _ (spit code "# retriever fixture")
+        index (io/file parent "index.json") _ (spit index "[]")
+        lib1 (io/file parent "lib-one.md") _ (spit lib1 "one")
+        lib2 (io/file parent "lib-two.md") _ (spit lib2 "two")
+        occurrence (retention/mint-occurrence
+                    {:run-id (str (UUID/randomUUID)) :cohort-id "cohort" :attempt-id "attempt-001"
+                     :selected-action {:type :advance-mission :target "M-fixture"}
+                     :now #(Instant/now) :uuid-fn #(UUID/randomUUID)})
+        identity {:occurrence occurrence :semantic-epoch :test
+                  :data-root (.getCanonicalPath data-root)
+                  :start-event-sha256 (evidence/sha256 (.getBytes start "UTF-8"))
+                  :interpreter-job {:status :none :reason :not-dispatched}
+                  :author "fixture" :schema-version 1}]
+    {:parent parent :data-root data-root :identity identity
+     :action {:type :advance-mission :target "M-fixture"}
+     :entry {:id "M-fixture" :path (.getCanonicalPath target)}
+     :opts {:revision-fn (constantly "fixture-revision")
+            :library-fn (constantly [(.getCanonicalPath lib1) (.getCanonicalPath lib2)])
+            :retriever-specs (mapv #(assoc % :implementation (.getCanonicalPath code)
+                                            :index (.getCanonicalPath index)) request/retrievers)}}))
+
+(deftest pinned-evidence-writes-are-stamped-in-click-context
+  (let [{:keys [parent identity action entry opts]} (stamp-fixture)
+        prepared (binding [write-stamp/*click-context*
+                           {:click-id "wm-click-pin-stamp" :run-id "run-pin-stamp"}]
+                   (request/prepare! action identity
+                                     (assoc opts :resolve-fn (constantly entry)
+                                            :retrieve-fn (fn [_] [{:pattern "family/example" :score 1}]))))]
+    (is (= [:unjudged :unjudged] (mapv #(get-in % [:candidates 0 :judgment])
+                                       (get-in prepared [:retrieval :runs]))))
+    (let [stamp-file (io/file parent "wm-write-stamps" "wm-click-pin-stamp.jsonl")]
+      (is (.isFile stamp-file))
+      (let [rows (mapv #(cheshire.core/parse-string % true) (str/split-lines (slurp stamp-file)))]
+        ;; one stamp per pinned file: target, retriever code, index, 2 library
+        (is (= 5 (count rows)))
+        (is (every? #(= "interpretation-request/pin!" (:writer %)) rows))
+        (is (every? #(= "wm-click-pin-stamp" (:click-id %)) rows))
+        (is (every? #(str/ends-with? (:path %) ".source") rows))
+        (is (every? #(.startsWith ^String (:path %) (:data-root identity)) rows))))))
+
+(deftest pins-without-click-context-write-no-stamps-and-still-succeed
+  (let [{:keys [parent identity action entry opts]} (stamp-fixture)
+        prepared (request/prepare! action identity
+                                   (assoc opts :resolve-fn (constantly entry)
+                                          :retrieve-fn (fn [_] [{:pattern "family/example" :score 1}])))
+        stamps (io/file parent "wm-write-stamps")]
+    (is (= [:unjudged :unjudged] (mapv #(get-in % [:candidates 0 :judgment])
+                                       (get-in prepared [:retrieval :runs]))))
+    (is (seq (:sources prepared)))
+    (is (or (not (.exists stamps)) (empty? (.list stamps))))))

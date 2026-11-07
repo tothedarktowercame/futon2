@@ -7,7 +7,8 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
-            [futon2.aif.mission-registry :as registry])
+            [futon2.aif.mission-registry :as registry]
+            [futon2.aif.write-stamp :as write-stamp])
   (:import [java.nio.file Files StandardCopyOption StandardOpenOption]
            [java.time Instant]
            [java.util.concurrent TimeUnit]))
@@ -22,6 +23,27 @@
 (defn- refuse! [kind data]
   (throw (ex-info "Interpretation request refused" (assoc data :interpretation/refusal kind))))
 (defn- need! [condition kind data] (when-not condition (refuse! kind data)))
+
+;; Write attribution for pinned evidence snapshots. Pins write into the
+;; attempt's evidence tree during a click; each one claims its snapshot file
+;; in the click's stamp file through futon2.aif.write-stamp. The stamp root
+;; is bound by captured-request! (derived from the authorized identity's
+;; data-root); pins made without it (preselection proposals) are not stamped
+;; and still succeed. Failures are counted, never thrown: pinning is on the
+;; run's critical path, stamping is bookkeeping.
+(def ^:dynamic *pinned-write-stamp-root* nil)
+(def ^:private pinned-stamp-failures (atom 0))
+(defn pinned-stamp-failure-count [] @pinned-stamp-failures)
+
+(defn- stamp-pinned-write! [^java.io.File dest]
+  (when *pinned-write-stamp-root*
+    (try
+      (write-stamp/record-in-context!
+       {:root *pinned-write-stamp-root*
+        :writer "interpretation-request/pin!"
+        :path dest})
+      (catch Exception _
+        (swap! pinned-stamp-failures inc)))))
 
 (defn resolve-target [action]
   (if (= :advance-ticket (:type action))
@@ -118,6 +140,7 @@
                                                 StandardOpenOption/WRITE]))
           (Files/move tmp-path (.toPath dest)
                       (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE]))
+          (stamp-pinned-write! dest)
           (catch java.nio.file.FileAlreadyExistsException _
             ;; another request moved the same snapshot in first
             (need! (= digest (evidence/sha256 (Files/readAllBytes (.toPath dest))))
@@ -252,7 +275,25 @@
          :interpretation/retriever-set-invalid {})
   (let [dir (io/file root "evidence")
          _ (.mkdirs dir)
-         target-pin (pin! dir (:path entry) revision-fn)
+         ;; Stamp root follows the write-stamp convention used by the other
+         ;; WM writers: the stamp directory sits beside the cohort data-root.
+         ;; Only an authorized identity names that root; preselection
+         ;; proposals (identity nil) pin without stamps.
+         stamp-root (when (map? identity)
+                      (io/file (.getParentFile (io/file (.getCanonicalPath
+                                                          (io/file (:data-root identity)))))
+                              "wm-write-stamps"))
+         click-context write-stamp/*click-context*
+         stamp-click-context! (fn [f]
+                                (fn [& args]
+                                  ;; pmap workers run on other threads and
+                                  ;; would otherwise pin without the click
+                                  ;; identity of this request's run
+                                  (binding [*pinned-write-stamp-root* stamp-root
+                                            write-stamp/*click-context* click-context]
+                                    (apply f args))))
+         target-pin (binding [*pinned-write-stamp-root* stamp-root]
+                       (pin! dir (:path entry) revision-fn))
          _ (on-capture (:source target-pin))
          pinned-at (now)
          kind (if (= :advance-ticket (:type action)) :ticket :mission)
@@ -296,7 +337,8 @@
          ;; concurrently; pmap preserves configured order, and each run keeps
          ;; its own partial/failure accounting and per-subprocess timeout
          runs (vec (pmap
-                    (fn [[r {:keys [kind implementation index k]}]]
+                    (stamp-click-context!
+                     (fn [[r {:keys [kind implementation index k]}]]
                       (let [partial (atom {:retriever (name kind) :version "unavailable"
                                            :index-source {:status :none :reason :capture-failed}
                                            :parameters {:k k :scope (if (= kind :tier0) :whole-index :embedding-index)}
@@ -325,7 +367,7 @@
                           (catch Exception e
                             (assoc @partial :failures [{:kind (or (:interpretation/refusal (ex-data e))
                                                                                 :interpretation/retriever-failed)
-                                                        :reason (.getMessage e) :details (ex-data e)}])))))
+                                                        :reason (.getMessage e) :details (ex-data e)}]))))))
                     (map-indexed vector retriever-specs)))
          request {:schema :wm/interpretation-request-v1 :identity identity
                   :target {:id (:target action) :kind kind :action action
