@@ -200,6 +200,30 @@ def status_line_from_file(path):
     return ""
 
 
+def _int(v):
+    """The embedded EDN reader leaves numbers as '12,' strings; None stays None."""
+    if v is None:
+        return None
+    try:
+        return int(str(v).rstrip(",").strip())
+    except ValueError:
+        return None
+
+
+def primary_checkout(path, code_root="/home/joe/code"):
+    """True when PATH lives in a primary checkout directly under CODE_ROOT
+    (its .git is a directory). A git worktree (.git is a file), e.g.
+    ~/code/futon2-retraction-p1, holds stale copies of items: on 2026-11-07
+    Giraffe's input still listed 132 T-repair-occ tickets from that worktree
+    after REPAIR-MOVE-1 (0b1eb9bd4) had moved them out of futon2's tickets.
+    The WM's own loader reads primary checkouts only."""
+    rel = os.path.relpath(path, code_root)
+    if rel.startswith(".."):
+        return False
+    repo = rel.split(os.sep)[0]
+    return os.path.isdir(os.path.join(code_root, repo, ".git"))
+
+
 def load_run(run_dir):
     """Return (items, readiness): items is a list of dicts with id, kind,
     path, own_status, live; readiness maps id -> {status, reason}."""
@@ -215,6 +239,15 @@ def load_run(run_dir):
                 "status": (v.get(":status") or "")[1:],
                 "reason": (v.get(":reason") or "")[1:],
             }
+    for row in (p.get(":order") or []) if os.path.exists(pass_path) else []:
+        rid = (row.get(":id") or "").lstrip(":")
+        if rid in readiness:
+            readiness[rid].update({
+                "rank": _int(row.get(":rank")),
+                "unblocks": _int(row.get(":unblocks")),
+                "cone": _int(row.get(":cone")),
+                "order_reason": (row.get(":reason") or "").lstrip(":"),
+            })
     items = []
     for raw in data[":items"]:
         iid = raw[":id"][1:]
@@ -222,6 +255,8 @@ def load_run(run_dir):
         if prefix not in KINDS:
             continue
         path = item_path(raw)
+        if not primary_checkout(path) or not os.path.exists(path):
+            continue
         own = raw.get(":declared-status") or status_line_from_file(path)
         items.append(
             {
@@ -287,14 +322,30 @@ def item_payload(item, labels):
         "<p><b>Status line (verbatim):</b><br/><pre>%s</pre></p>"
         % html.escape(item["own_status"])
     )
+    r = item["readiness"]
+    if r.get("rank") is not None:
+        bits.append(
+            "<p><b>Giraffe order:</b> rank %d of the ready set "
+            "(unblocks %s, cone %s; :%s)</p>"
+            % (r["rank"], r.get("unblocks"), r.get("cone"),
+               html.escape(r.get("order_reason") or ""))
+        )
     title = item_title(item["path"])
     # Giraffe headings usually repeat the id; never render it twice.
     if title.startswith(item["id"]):
         name = title.strip()
     else:
         name = (item["id"] + " " + title).strip()
+    # Giraffe's own order, visible in every Plane view: "#12 M-foo ...".
+    # Plane's priority field (urgent/high/medium/low/none) is left at none:
+    # Giraffe has no coarse priority, and inventing buckets would misstate it.
+    # sort_order makes Plane's "Manual" ordering follow the rank.
+    rank = r.get("rank")
+    if rank is not None:
+        name = "#%d %s" % (rank, name)
     return {
         "name": name,
+        "sort_order": float(rank * 1000) if rank is not None else 1e9,
         "description_html": "".join(bits),
         "external_source": EXTERNAL_SOURCE,
         "external_id": item["id"],
@@ -427,6 +478,17 @@ def sync_project(plane, project_id, payloads):
         if st not in (200, 201):
             raise RuntimeError("update %s -> %s %s" % (p["external_id"], st, body))
         stats["updated"] += 1
+    # One-way mirror: an item Giraffe no longer exports (finished, moved, or
+    # read from a worktree) is deleted from Plane, so Plane never shows more
+    # than the source does.
+    wanted = {p["external_id"] for p in payloads}
+    stats["deleted"] = 0
+    for ext, cur in by_ext.items():
+        if ext not in wanted:
+            st, body = plane.req("DELETE", items_path + str(cur["id"]) + "/", None)
+            if st not in (200, 204):
+                raise RuntimeError("delete %s -> %s %s" % (ext, st, body))
+            stats["deleted"] += 1
     return stats
 
 
@@ -517,6 +579,7 @@ def main(argv=None):
                 "external_id": p["external_id"],
                 "body": {
                     "name": p["name"],
+                    "sort_order": p["sort_order"],
                     "description_html": p["description_html"],
                     "external_source": p["external_source"],
                     "external_id": p["external_id"],
@@ -528,8 +591,9 @@ def main(argv=None):
         ]
         stats = sync_project(plane, pid, payloads)
         totals[pname] = stats
-        print("%s: created %d, updated %d, unchanged %d"
-              % (pname, stats["created"], stats["updated"], stats["unchanged"]))
+        print("%s: created %d, updated %d, unchanged %d, deleted %d"
+              % (pname, stats["created"], stats["updated"], stats["unchanged"],
+                 stats["deleted"]))
     tot = {k: sum(s[k] for s in totals.values()) for k in ("created", "updated", "unchanged")}
     print("TOTAL: created %d, updated %d, unchanged %d" % (tot["created"], tot["updated"], tot["unchanged"]))
     return 0

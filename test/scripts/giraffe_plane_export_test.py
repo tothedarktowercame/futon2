@@ -124,5 +124,39 @@ class ItemPayloadTest(unittest.TestCase):
         self.assertEqual(p["name"], "T-foo — do the thing")
 
 
+class SourceAndOrderTest(unittest.TestCase):
+    def test_worktree_paths_are_not_primary_checkouts(self):
+        import tempfile, os
+        root = tempfile.mkdtemp()
+        os.makedirs(os.path.join(root, "futon2", ".git"))
+        os.makedirs(os.path.join(root, "futon2-retraction-p1"))
+        with open(os.path.join(root, "futon2-retraction-p1", ".git"), "w") as f:
+            f.write("gitdir: /elsewhere\n")
+        self.assertTrue(gpe.primary_checkout(
+            os.path.join(root, "futon2", "holes", "tickets", "T-a.md"), root))
+        # The 2026-11-07 case: stale T-repair-occ copies in a worktree.
+        self.assertFalse(gpe.primary_checkout(
+            os.path.join(root, "futon2-retraction-p1", "holes", "tickets", "T-repair-occ-x.md"), root))
+        self.assertFalse(gpe.primary_checkout("/elsewhere/T-a.md", root))
+
+    def test_edn_number_strings(self):
+        self.assertEqual(gpe._int("12,"), 12)
+        self.assertEqual(gpe._int(3), 3)
+        self.assertIsNone(gpe._int(None))
+
+    def test_rank_prefixes_name_and_sets_sort_order(self):
+        it = item(readiness={"status": "ready", "reason": "x", "rank": 7,
+                             "unblocks": 2, "cone": 5, "order_reason": "order/ready-by-unblocks"})
+        p = gpe.item_payload(it, set())
+        self.assertTrue(p["name"].startswith("#7 T-foo"))
+        self.assertEqual(p["sort_order"], 7000.0)
+        self.assertIn("rank 7", p["description_html"])
+
+    def test_unranked_item_sorts_last_without_prefix(self):
+        p = gpe.item_payload(item(), set())
+        self.assertFalse(p["name"].startswith("#"))
+        self.assertEqual(p["sort_order"], 1e9)
+
+
 if __name__ == "__main__":
     unittest.main()
