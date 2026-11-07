@@ -1,0 +1,78 @@
+# E-kimi-task-363 — read operator focus areas
+
+**Requisition:** in-progress — dispatched 2026-11-07T07:13:33Z to 猴-1 as invoke-1794035613602-14972-131fd2c7
+
+Clocked in by operator-focus for 猴-1 on 2026-11-07 (one Kimi task, one excursion, so the seat's
+conversation starts fresh; see scripts/kimi-task.sh).
+
+## Packet
+
+# Operator focus reader v2
+
+Read Joe's turns grouped by receiving seat. Return JSON only, with no explanation:
+`{"answers":[{"seat":"SEAT","area":"AREA","evidence_ids":["ID"]}],"clock_answers":[{"target":"TASK-ID","area":"AREA","line":1}]}`
+
+Return exactly one answer per represented seat. Cite only supplied evidence IDs for that seat. Choose one area from the appended A7 authority.
+
+Judge all supplied turns for a seat together. Do not rank areas.
+
+For every supplied clock target, classify its task excerpt too. `line` must cite a 1-based, nonblank line in that supplied excerpt. Requisition records belong to the area of the task they carried. Do not return a clock answer for a target not supplied.
+
+The A7 authority is appended verbatim at dispatch and its SHA-256 is retained.
+
+
+A7 AREA AUTHORITY (VERBATIM):
+## Kind A7: relate (area reading)
+
+The War Machine picks the next task partly by how it relates to the operator's current focus.
+The focus changes from week to week and is measured separately, from the operator's own turns.
+What does not change is which AREA of the stack a task's work belongs to. That is your question:
+for each item, which area is its work FOR? A reviewer checks your row before it enters the
+corpus, and a row with a weak citation is worse than `unsure`.
+
+Areas (pick from this list; `other:<short name>` only when none fits):
+- `WM`: the War Machine itself. futon2 outer and inner loops (`futon2/src/futon2/aif/`),
+  `wm-contract`, the click loop, its Lean spec (`mathlib4/DarkTower/WarMachine/`), AIF policy
+  and G, injuries and repair tickets (`T-repair-*`), the meta loop.
+- `Giraffe`: the task map the War Machine selects over: M-giraffe, placements, cones and
+  unblocks, the mission field / carpet / embedding landscape.
+- `patterns`: the pattern library and its use: flexiarg, pattern retrieval and calibration,
+  PSR/PUR, pattern graphs.
+- `APM`: the formal proof campaign: APM problems proved in Lean, lemma seats, blueprints, registry.
+- `Arxana`: futon4 Arxana and its Emacs browser views.
+- `Agency`: futon3c agent coordination: bells, whistles, parks, seats, invoke jobs, delivery to
+  REPL buffers, clocks.
+- `memory`: memory and evidence stores and recall: minus40, futon1b evidence, recall and retrieval of memories.
+- `象`: operator-turn capture and labelling (象, turn records, the reply proforma).
+- `futon6`: futon6 and Rob's mfuton work, the Lean mission/math pipeline.
+- `voxterm`: the voice terminal.
+- `futon5`: futon5's cellular-automaton research: MetaCA, xenotypes, propagators, TPG evolution, and its reproduction notebooks.
+- `futonzero`: futonzero: prelim practice, self-play and curriculum over fold deposits, the futonzero MVP and generative work.
+- `business`: Hyperreal and Joe's working life: consulting, engagements, expressions of interest, career and money planning (mostly futon7 and futon5a).
+
+Rules for this kind:
+- Judge by what the item's work is FOR, from its own text, not by words it shares with an area.
+  A file that mentions the War Machine in passing is not `WM`.
+- Give a second area only if the file itself names that area as a consumer or parent; cite that line.
+- A ticket (`T-...`) usually names its parent mission or finding; follow that one file if the
+  ticket alone does not say what it is for, and cite it.
+- An excursion that is a requisition record (`E-kimi-task-N`, or any `E-...` with a
+  **Requisition:** line) belongs to the area of the task it carried.
+- The deciding citation must be a line of prose that says what the work is for. A line that is only
+  a path or a link is not a reason.
+
+Output per item:
+```json
+{"stem": "<id>", "kind": "relate",
+ "what": {"value": "<one sentence: what the item is for>", "cite": "path:line", "quote": "..."},
+ "area": {"value": "<area from the list>", "cite": "path:line", "quote": "<the line that decides it>"} OR {"unsure": "<why>"},
+ "also": {"value": "<second area>", "cite": "path:line", "quote": "..."}   (optional; omit if none),
+ "confidence": "high|medium|low"}
+```
+
+
+INPUT TURNS (JSON):
+[{"evidence-id":"emacs-2a3b2fbd117bb4ed28cd6ae823bcb460","at":"2026-11-07T07:06:42.887012775Z","seat":"codex-21","text":"it still says the same thing, can you reproduce?  i am on chrome under android","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-c85dd12598ce00fa496318fb162a5a26","at":"2026-11-07T05:42:15.779645989Z","seat":"claude-12","text":"Great so I eomnoticing that we're getting pretty much hourly notifications from Fumarimo on matrix telling me about disk writes that are above 11 gigabytes and the reference records are saying what is doing most of the writing and I'm just curious if if all that is really necessary because 11 gigabytes was our threshold for maybe not being quite safe so I wonder if you could look into that","captured-target":null},{"evidence-id":"emacs-1c69731027c51f811d2d903a0e68f17a","at":"2026-11-07T05:22:46.345461451Z","seat":"claude-6","text":"... Uh yes, Hm, we should maybe be a bit more careful here b/c Codex recently reimplemented Inbox Zero... I think pretty much from scratch; we should find old versions and retire them, so we don't extend defective implementations or worse get 2 of them running.  I think if you skim-read  *codex-repl:codex-7* you will see where we left it","captured-target":"M-experiment-build-match"},{"evidence-id":"emacs-a005bca4f4c9582fca104e2a9d75a25e","at":"2026-11-07T05:16:57.316620536Z","seat":"claude-9","text":"That's fine; you could also ask codex-21 for a handoff of their Joyride tools so you can play around with the live code-server as another task","captured-target":"E-euclid-tutor"},{"evidence-id":"emacs-a90d8a02e51b068ef96d4f68648ca9a8","at":"2026-11-07T03:24:36.323869070Z","seat":"codex-22","text":"Right, so this iis interesting b/c for a tutoring situation having multiple presentations, aligned where relevant, is going to be pretty intesting!  There was no specific attempt (at least to my knowledge) to formalise the informal arguments which might be seen as a weakness, but we could also later develop such a treatment if that was worth doing.  \"Worth doing\" in this case might have to do with how well any of the material we do have supports understanding","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-4698e388bd993537031292246782cb57","at":"2026-11-07T02:08:14.860112048Z","seat":"codex-7","text":"Well the next thing to say here is that we can ungate M-repl-circus which was gated on this","captured-target":"E-evidence-cleanup"},{"evidence-id":"emacs-6fa72b3fd5e33670b010492bc4020058","at":"2026-11-05T22:19:13.124137582Z","seat":"claude-8","text":"OK, let's go w/ XTDB for now, that works with the GCC + XTQL direction as you say, and if we need to improve XTDB itself or its tuning, we can do that.  Yes my 猴, yes my circus.","captured-target":"E-evidence-cleanup"},{"evidence-id":"emacs-aa0261c37049775dbe6a145c70815dcf","at":"2026-11-05T22:07:45.834157191Z","seat":"claude-16","text":"OK, let's take the password sync as done, and yes, we should repeat, say, once a month.  But for November 2026 it is done.  What else?","captured-target":"E-autoclock-wow"},{"evidence-id":"emacs-dce7c1902b01808dcd0a9460204c9842","at":"2026-11-05T21:03:57.906639293Z","seat":"claude-14","text":"OK I created the request you can remove the github-purge.txt file","captured-target":"M-codex-sorry-loop"},{"evidence-id":"emacs-af7fc6142ca69a05bfc66dc11420f6b2","at":"2026-11-07T07:04:27.754931613Z","seat":"codex-21","text":"i see a big bar that says No Matching Scope","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-e7ab062a15183ed9331433e3df7fcf70","at":"2026-11-07T06:58:46.809919980Z","seat":"codex-21","text":"it scrolls but no apparent highlighting","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-7003e4dcbc50246fbdf8c3313b7a8f06","at":"2026-11-07T06:54:22.376923820Z","seat":"codex-21","text":"ok make that then","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-4e84fb9a1c3bc268ad2d60e27c94e337","at":"2026-11-07T06:53:15.880154256Z","seat":"codex-21","text":"that did nothing, keep in mind I am on a phone so maybe it is not optimised for mobile?","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-5d0feb1d68bfa5d4790f8b83fe09b854","at":"2026-11-07T06:50:38.015880073Z","seat":"codex-21","text":"this is too confusing and limited to be a useful demo.  tell me exactly what to click om","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-b5d9e76b81b67a847dd92a1b6160ac82","at":"2026-11-07T06:44:51.962458265Z","seat":"codex-21","text":"the ui is not particularly responsive.  it highlights similar terms in latex but does not seem to consistently highlight the corresponding expressions in the HTML view","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-e6b7fff36cbb3104150eeae3f6ce05ec","at":"2026-11-07T06:24:38.286965225Z","seat":"codex-21","text":"I see No Matching Commands","captured-target":"M-jvm-arxana"},{"evidence-id":"emacs-33324cf300bc406f128abadbf2c54ba9","at":"2026-11-07T05:34:45.809090339Z","seat":"claude-12","text":"Great so I eomnoticing that we're getting pretty much hourly notifications from Fumarimo on matrix telling me about disk writes that are above 11 gigabytes and the reference records are saying what is doing most of the writing and I'm just curious if if all that is really necessary because 11 gigabytes was our threshold for maybe not being quite safe so I wonder if you could look into that","captured-target":null},{"evidence-id":"emacs-94d8a9c2face5e7c9b3626fa0235d628","at":"2026-11-07T05:22:21.810672779Z","seat":"claude-6","text":"Hm, we should maybe be a bit more careful here b/c Codex recently reimplemented Inbox Zero... I think pretty much from scratch; we should find old versions and retire them, so we don't extend defective implementations or worse get 2 of them running.  I think if you skim-read  *codex-repl:codex-7* you will see where we left it","captured-target":"M-experiment-build-match"},{"evidence-id":"emacs-e7a210b064f9826acb3b1ede9adab909","at":"2026-11-07T05:19:47.716978957Z","seat":"claude-6","text":"Hm... well this was one of the \"hygiene\" features that we were going to add to Inbox Zero recently but didn't yet, namely, attributed writes","captured-target":"M-experiment-build-match"},{"evidence-id":"emacs-5aa01769649ccbb5fb866e7df712d820","at":"2026-11-07T05:18:34.107442373Z","seat":"claude-6","text":"Hm... I am sensing that there has been an attribution error b/c of not using wm- locked  agents.  I've been working exactly on arxana-vscode and the other demo with other Agency linked agents","captured-target":"M-experiment-build-match"}]
+
+CLOCK TARGETS (JSON):
+[{"target":"M-jvm-arxana","path":"/home/joe/code/futon4/holes/missions/M-jvm-arxana.md","text":"# M-jvm-arxana — one Arxana authority across Emacs and VS Code\n\n**Date:** 2026-11-06  \n**Status:** OPEN — DOCUMENT (INSTANTIATE completed 2026-11-06)\n**Owner:** Joe (operator); Codex-21 technical driver\n**Repos:** `futon4` (legacy Arxana model and Emacs donor), `futon4a` (isolated\nJVM-Arxana Emacs demo client), `futon1`/XTDB (durable graph), `futon3c`\n(headless JVM authority, scope view, WYSIWYG and prospective clients)\n**Related:** `futon3c/holes/missions/M-repl-circus.md`,\n`futon3c/holes/missions/M-ways-of-working.md`,\n`futon3c/holes/missions/M-latex-wysiwyg.md`, `M-webarxana`\n\n## Operator anchor\n\nJoe, 2026-11-06:\n\n> Work in a more technical mission, something like M-jvm-arxana that refers\n> to the existing Elisp+XTDB hybrid and ports it to what we'd need to have an\n> Arxana variant that works across VS Code and Emacs, with the various aligned\n> interfaces. Then we can go back to the other missions and build their"},{"target":"E-euclid-tutor","path":"/home/joe/code/futon0/holes/excursions/E-euclid-tutor.md","text":"# Excursion: E-euclid-tutor\n\n**Status:** OPEN — proof-game prototype built overnight 2026-11-07 (see Checkpoint 1).\n**Date:** 2026-11-07\n**Owner:** claude-9 with Joe\n**Relates to:** `holes/missions/M-futonzero-prelim-practice.md` (the prelim tutor; its lessons live in\n`holes/labs/tutor/`, moved from apm-lean 2026-11-07), `futon2/docs/futonzero-alphazero.md` (FutonZero v1 and Fable's\nreview), `futon6/holes/missions/M-futonzero-grounding.md` (why self-graded loops self-confirm).\n**Why futon0 and not apm-lean:** apm-lean is public and is about the proofs. Tutor work lives here\n(Joe, 2026-11-07).\n\n## Operator voice (Joe, 2026-11-07)\n\n> \"I'm interested in thinking about how to use an alpha-zero style game engine as a proof engine\n> or as part of the backend for my futonzero tutor.\"\n\n> \"we could lean on the existing proofs but help people 'discover' (explicitly not in Moore's\n> sense) the proof techniques. The idea that we're chasing AlphaGeometry is not a bad thing\n> either.\"\n"},{"target":"E-evidence-cleanup","path":"/home/joe/code/futon3c/holes/excursions/E-evidence-cleanup.md","text":"# E-evidence-cleanup: take derived records out of the Evidence Landscape\n\n**Status:** COMPLETE — closure cutover verified 2026-11-07 (Joe + codex-7).\n**Gates** [M-repl-circus](../missions/M-repl-circus.md) IDENTIFY → MAP: there is no\npoint developing the Circus further while its output swamps the evidence it reads.\n\nThe search-facing repair, copy-writer repairs, derived-store cutover, migration,\nand snapshot-backed source erase are live and verified.  The exact closure\nreceipts are recorded under \"Closure completion\" below.\n\n**Stop-the-line finding** (Joe, 2026-11-05). Working note:\n`~/notes/stop-the-line/2026-11-05-evidence-derivatives.md`.\n\n## The finding\n\n`M-x my/evidence-landscape-search` for \"hearo\" (a word from Joe's 11-04 turn)\nreturned 32 hits in the default 24-hour window. None of them was the turn. The\noriginal (`emacs-a7db4b8f30c532f98faca17f6f408589`, 2026-11-04T03:34:29Z) had aged out\nof the window, while derivative writers kept writing copies of its text into new\nrecords up to 22 hours later. Searching all time finds the original among 58 hits."},{"target":"E-autoclock-wow","path":"/home/joe/code/futon3c/holes/excursions/E-autoclock-wow.md","text":"# Excursion: E-autoclock-wow — every dispatch names its META item\n\n**Date:** 2026-11-03\n**Status:** MAP done 2026-11-03; gate design drafted, nothing built\n**Owner:** claude-5 (writing it up); the build goes through M-autoclock-in's owner, claude-4\n**Part of:** M-ways-of-working (Joe, 2026-11-03).\n**Spawned from:** M-autoclock-in §INSTANTIATE-7a and §INSTANTIATE-8; the\n`feedback-reaches-every-participant` way of working\n(`holes/excursions/ways-of-working.json`), whose probe landed today\n(`f391eca2c`, `965e220fa`).\n**Repo:** futon3c (Agency bell handler, `agents/zai_api.clj` requisition\nparsing, `scripts/agency_send.py`), with the Way of Working declared in\n`holes/excursions/ways-of-working.json`.\n\n## HEAD\n\nJoe, 2026-11-03: \"it says 'no mission' here and you could be blocked to\ndispatch until we agree what you're clocked on.\"\n\n**Lift** the Kimi requisition rule (M-autoclock-in §INSTANTIATE-8) from Kimi"}]
