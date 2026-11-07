@@ -956,7 +956,53 @@
       (re-find #"^(WATCH|FINDING|DESIGN CONSTRAINT)\b" s) :not-actionable
       :else :live)))
 
-(defn live-ticket? [ticket] (= :live (:status-class ticket)))
+(def close-condition-placeholder
+  "The close condition the census generator writes while nobody has stated
+   one (futon3c/scripts/failure-tickets.py:56-58, the BODY template's `##
+   What would close this` section). By the generator's own design everything
+   below `census:end` is the operator's, so this placeholder can only be
+   replaced by a person: while it stands the class has no promotion test and
+   cannot reach SELECT. Held run 2026-11-07-2bbc63b7 made that concrete: five
+   policies over such a ticket tied at posterior 0.125 because every
+   discriminating input (habit, observed prefix) was empty and G was
+   identical. SELECT-FLAT-2."
+  "(unstated -- until it is, this class has no promotion test and cannot reach SELECT)")
+
+(defn- collapse-whitespace [s]
+  (str/trim (str/replace (or s "") #"\s+" " ")))
+
+(defn close-condition-section
+  "The lines under the `What would close this` heading, up to the next
+   heading. nil when the ticket has no such heading."
+  [lines]
+  (when-let [after (next (drop-while #(not (re-find #"(?i)^#{2,}\s*What would close this\b" %))
+                                     (or lines [])))]
+    (let [body (take-while #(not (re-find #"^\s*#{1,6}\s" %)) after)]
+      (when (seq body) body))))
+
+(defn close-condition-unstated?
+  "True when the ticket's `What would close this` section is still the
+   census generator's placeholder, verbatim up to whitespace and line
+   wrapping. Keyed on the placeholder TEXT, never on an empty or absent
+   section: a hand-written close condition -- even a partial one, or text
+   added after the placeholder -- differs from it and stays eligible, and a
+   ticket without the heading at all is unaffected."
+  [lines]
+  (boolean (when-let [body (close-condition-section lines)]
+             (= (collapse-whitespace (str/join "\n" body))
+                (collapse-whitespace close-condition-placeholder)))))
+
+(defn live-ticket?
+  "Live by status AND selectable. A ticket whose close condition is still
+   the census generator's `(unstated ...)` placeholder (see
+   `close-condition-placeholder`) is NOT eligible: the exclusion is typed
+   `:ticket-close-condition-unstated`, carried on the ticket map as
+   `:close-condition-unstated` and recorded independently in the
+   enumeration-completeness exclusion ledger, never a silent drop. Writing a
+   close condition into that section restores eligibility on the next load."
+  [ticket]
+  (and (= :live (:status-class ticket))
+       (not (:close-condition-unstated ticket))))
 
 (defn- first-open-checkbox-line [lines]
   (some (fn [[index line]]
@@ -989,6 +1035,7 @@
                    :item-line (first-open-checkbox-line lines)
                    :title (mission-title-from-lines id lines)
                    :status-line status :status-class (classify-ticket-status status)
+                   :close-condition-unstated (close-condition-unstated? lines)
                    :requisition (task-requisition/read-state text)
                    :requisition-record? (task-requisition/requisition-record? {:text text})
                    :source {:path path :sha256 (sha256-text text)}

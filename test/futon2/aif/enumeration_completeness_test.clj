@@ -96,6 +96,31 @@
       (is (= [] (:missing c))
           "the available mission was enumerated; the failure is the extra one"))))
 
+(deftest unstated-close-condition-is-a-typed-ticket-exclusion-test
+  ;; SELECT-FLAT-2: a live census ticket whose close condition is still the
+  ;; generator placeholder is excluded from the available population with
+  ;; reason :ticket-close-condition-unstated (the same tickets
+  ;; mission-registry/live-ticket? refuses), never silently.
+  (letfn [(ticket! [id body]
+            (let [f (io/file *root* "repo-a" "holes" "tickets" (str id ".md"))]
+              (io/make-parents f)
+              (spit f (str "**Status (triaged 2026-09-01): RECLASSIFY CANDIDATE.**\n\n"
+                           body))
+              id))]
+    (ticket! "T-unstated"
+             (str "## What would close this\n\n"
+                  "(unstated -- until it is, this class has no promotion test and cannot reach\n"
+                  "SELECT)\n"))
+    (ticket! "T-stated"
+             "## What would close this\n\nExempt the provider tail and the count stops growing.\n")
+    (ticket! "T-plain" "no close-condition heading at all\n")
+    (let [scan (ec/scan-population :ticket *root*)]
+      (is (= ["T-plain" "T-stated"] (:available-ids scan)))
+      (is (= {:ticket-close-condition-unstated 1} (into {} (:exclusions-by-reason scan))))
+      (is (= :ticket-close-condition-unstated
+             (:reason (first (:excluded scan))))
+          "the exclusion names its typed reason"))))
+
 (deftest exclusions-carry-typed-reasons-test
   (testing "every doc the scan withholds carries a reason, and the reasons are
             the declared ones -- silence is not a filter"

@@ -78,6 +78,60 @@
       (is (false? (fm/can-propose? state :advance-ticket)))
       (is (false? (fm/can-execute? state {:type :advance-ticket :target "T-held"}))))))
 
+(deftest unstated-close-condition-excludes-from-selection
+  ;; SELECT-FLAT-2: a ticket whose close condition is still the census
+  ;; generator's placeholder is not eligible for selection; a hand-written
+  ;; close condition, or no heading at all, stays eligible.
+  (let [root (fixture-root)
+        ;; The placeholder wrapped exactly as failure-tickets.py writes it
+        ;; (copied verbatim from futon3c/holes/tickets/
+        ;; T-fail-operator-cancelled.md lines 25-28; only the wrapping the
+        ;; generator itself uses -- different wrapping must still match).
+        placeholder-close
+        (str "# T-fail-placeholder\n\n"
+             "**Status (triaged 2026-09-01): RECLASSIFY CANDIDATE.**\n\n"
+             "<!-- census:begin -->\n- **class**: `x`\n<!-- census:end -->\n\n"
+             "## Why this file exists\n\nGenerated.\n\n"
+             "## What would close this\n\n"
+             "(unstated -- until it is, this class has no promotion test and cannot reach\n"
+             "SELECT)\n\n"
+             "## Completion criteria\n\n- The decision is taken\n")
+        ;; A hand-written close condition under the same heading (the shape
+        ;; futon3c/holes/tickets/T-fail-invoke-error.md has carried since the
+        ;; 2026-11-07 triage): stays eligible even though it mentions
+        ;; "stated" and SELECT-era vocabulary.
+        hand-written-close
+        (str "# T-fail-stated\n\n"
+             "**Status (triaged 2026-09-01): STILL-OPEN.**\n\n"
+             "## What would close this\n\n"
+             "Split into subclasses and exempt the provider tail (stated from the\n"
+             "2026-11-07 triage above): the provider empty-response count stops\n"
+             "growing once exempt.\n\n"
+             "## Completion criteria\n\n- Subclasses agreed\n")
+        no-heading
+        "# T-plain\n\n**Status: PARTIAL -- still work.**\n"]
+    (write-ticket root "futon3c/holes/tickets/T-fail-placeholder.md" placeholder-close)
+    (write-ticket root "futon3c/holes/tickets/T-fail-stated.md" hand-written-close)
+    (write-ticket root "futon3c/holes/tickets/T-plain.md" no-heading)
+    (let [tickets (:tickets (registry/load-tickets (.getPath root)))
+          by-id (into {} (map (juxt :id identity) tickets))
+          state {:tickets tickets}
+          actions (vec (ap/propose registry/ticket-enumerator-proposer state))]
+      ;; the placeholder ticket is flagged and excluded from liveness...
+      (is (true? (:close-condition-unstated (by-id "T-fail-placeholder"))))
+      (is (false? (registry/live-ticket? (by-id "T-fail-placeholder"))))
+      (is (false? (registry/live-ticket-target? tickets "T-fail-placeholder")))
+      ;; ...the hand-written and no-heading tickets stay eligible
+      (is (false? (:close-condition-unstated (by-id "T-fail-stated"))))
+      (is (false? (:close-condition-unstated (by-id "T-plain"))))
+      (is (registry/live-ticket? (by-id "T-fail-stated")))
+      (is (registry/live-ticket? (by-id "T-plain")))
+      ;; the enumerator proposes only the eligible pair, and executing an
+      ;; action against the excluded ticket is refused
+      (is (= ["T-fail-stated" "T-plain"] (sort (map :target actions))))
+      (is (false? (fm/can-execute? state {:type :advance-ticket :target "T-fail-placeholder"})))
+      (is (fm/can-execute? state {:type :advance-ticket :target "T-fail-stated"})))))
+
 (deftest ticket-prior-and-observation-channel
   (let [f (fm/advance-mission-ordinal-factor 1)
         prediction (#'fm/predict-effects {} {:type :advance-ticket :target "T-live" :weight 1.0})]

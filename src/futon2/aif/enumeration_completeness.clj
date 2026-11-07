@@ -153,16 +153,39 @@
                      (some #(str/starts-with? head %) terminal-leads) :terminal
                      :else :live)}))
 
+(def ^:private close-condition-placeholder
+  "The census generator's unstated close condition (futon3c/scripts/
+   failure-tickets.py:56-58). Written separately from mission-registry's
+   copy on purpose, same discipline as `path-fences`: a fence copied by
+   reference cannot disagree with the thing it audits. Disagreement between
+   the two copies is a finding, not a defect in this check."
+  "(unstated -- until it is, this class has no promotion test and cannot reach SELECT)")
+
+(defn- close-condition-placeholder-stands?
+  "True when the `What would close this` section is exactly the generator's
+   placeholder, up to whitespace and wrapping. Keyed on the placeholder
+   text (mission-registry/live-ticket? excludes the same tickets), never on
+   an empty section."
+  [lines]
+  (let [after (next (drop-while #(not (re-find #"(?i)^#{2,}\s*What would close this\b" %))
+                                (or lines [])))
+        body (str/join "\n" (take-while #(not (re-find #"^\s*#{1,6}\s" %)) (or after [])))]
+    (and (seq body)
+         (= (str/trim (str/replace body #"\s+" " "))
+            (str/replace close-condition-placeholder #"\s+" " ")))))
+
 (defn- classify-ticket-doc-status
   "Independent reading of the ticket status table (lead packet 21033)."
   [text]
-  (let [status (some #(second (re-find #"(?i)^\s*\*\*Status(?:\s*\([^)]*\))?\s*:\s*(.*)$" %))
-                     (str/split-lines text))
+  (let [lines (str/split-lines (or text ""))
+        status (some #(second (re-find #"(?i)^\s*\*\*Status(?:\s*\([^)]*\))?\s*:\s*(.*)$" %))
+                     lines)
         lead (-> (or status "") str/upper-case (str/replace #"^[\s*_]+" ""))]
     {:status-line status
      :status-class (cond
                      (re-find #"JOE['’]S CALL|AWAIT[^.]*JOE|^(WATCH|FINDING|DESIGN CONSTRAINT)\b" lead) :draft
                      (re-find #"^(DONE|SUPERSEDED|DEFERRED|PARKED|ARCHIVED)" lead) :terminal
+                     (close-condition-placeholder-stands? lines) :unstated-close
                      :else :live)}))
 
 ;; ---------------------------------------------------------------------------
@@ -204,6 +227,13 @@
      :status-terminal / :status-draft
                                this check's own reading of the doc's leading
                                state token
+     :ticket-close-condition-unstated
+                               a live ticket whose `What would close this`
+                               section is still the census generator's
+                               `(unstated ...)` placeholder
+                               (futon3c/scripts/failure-tickets.py:56-58);
+                               the same tickets `mission-registry/live-ticket?`
+                               excludes from selection (SELECT-FLAT-2)
 
    `:counts` is computed from the ledger, not asserted beside it."
   ([kind] (scan-population kind default-code-root))
@@ -244,6 +274,7 @@
                                   :reason (case cls
                                             :terminal :status-terminal
                                             :draft :status-draft
+                                            :unstated-close :ticket-close-condition-unstated
                                             :status-unclassified)))
          excluded (vec (concat (map (fn [p] {:kind kind :id nil :path p
                                              :reason :non-contract-filename})
