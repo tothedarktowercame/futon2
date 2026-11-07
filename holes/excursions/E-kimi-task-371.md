@@ -1,6 +1,6 @@
 # E-kimi-task-371 — E-euclid-tutor: review repairs SMT-supplied fact premises (I.10/I.11 Lean proofs)
 
-**Requisition:** in-progress — dispatched 2026-11-07T09:44:24Z to kimi-2 as invoke-1794044664431-15062-354ce5ca
+**Requisition:** completed — 2026-11-07T10:05:04Z, job invoke-1794044664431-15062-354ce5ca, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
