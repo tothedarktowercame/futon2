@@ -191,6 +191,24 @@
     (is (= [:a :b :c :d] (get-in out [:sources :wants target])))
     (is (= input (construction-inputs/flight-assembly-input nil input)) "no flight: unchanged")))
 
+(deftest a-want-the-flight-already-observed-true-is-not-declared-open
+  ;; Held run 2026-11-07-ebaa2c4f (repair wm-click-loop-repair-71d22b03):
+  ;; the dispatched action carried a want already observed true at the
+  ;; pre-author baseline (a criterion stated **Met.** by an earlier
+  ;; attempt's tick), the selected-want policy refused it
+  ;; :selected-want-true-before, and no target-repo commit could cure the
+  ;; refusal — guardrail refusal, illegal-refusal close hold. A
+  ;; universe-true want is a fact, not open work: it is not declared to
+  ;; the tick, and its observed value rides :universes.
+  (let [input {:targets [target] :sources {:wants {target [:a]}}}
+        f {:target target :wants [:a :b :c :d]
+           :universe {:a true :b false}}
+        out (construction-inputs/flight-assembly-input f input)]
+    (is (= [:b :c :d] (get-in out [:sources :wants target]))
+        "the observed-true want is not declared; false and unknown ones stay")
+    (is (= {:a true :b false} (get-in out [:sources :universes target]))
+        "the met want remains a universe fact")))
+
 (deftest a-flight-target-the-sources-never-declared-gets-a-context
   ;; bad case: M-futon-seams has no hand source and no checkbox, so the
   ;; tick's :context-of knows nothing of it and assembly refused it

@@ -13,7 +13,20 @@
   (if flight
     (cond-> (-> input
         (assoc :targets [(:target flight)])
-        (assoc-in [:sources :wants (:target flight)] (vec (:wants flight)))
+        ;; Held run 2026-11-07-ebaa2c4f (repair wm-click-loop-repair-71d22b03):
+        ;; a want the flight's own source already observed true (an A-exits
+        ;; criterion whose stated verdict is **Met.**, tick landed by an
+        ;; earlier attempt) is a fact, not open work. Declaring it to the
+        ;; tick put it on the dispatched action's want list, where the
+        ;; selected-want policy refuses before-true
+        ;; (:selected-want-true-before) — a refusal no target-repo commit
+        ;; can cure, dead-ending the run into a guardrail refusal and an
+        ;; illegal-refusal close hold. The observed value stays in
+        ;; :universes as the fact it is; cascade-problems already treats
+        ;; universe-true tokens exactly that way (its own open-wants).
+        (assoc-in [:sources :wants (:target flight)]
+                  (vec (remove #(true? (get (:universe flight) %))
+                               (:wants flight))))
         ;; wants the flight's source located itself (A-exits criteria):
         ;; their locators and observed values join the target's sources
         (update-in [:sources :locators (:target flight)] merge (:locators flight))

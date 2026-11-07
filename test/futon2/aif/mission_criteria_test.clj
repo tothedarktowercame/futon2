@@ -112,7 +112,18 @@
     (testing "the judge sees the criteria's locators and observations beside the checkbox's"
       (is (= ["M-test"] (:targets input)))
       (is (= 4 (count (get-in input [:sources :locators "M-test"]))))
-      (is (true? (get-in input [:sources :universes "M-test" (:token (first (:criteria (read-with mission))))]))))))
+      (is (true? (get-in input [:sources :universes "M-test" (:token (first (:criteria (read-with mission))))]))))
+    (testing "a criterion already observed Met is a fact, not declared open work"
+      ;; Planted regression, held run 2026-11-07-ebaa2c4f (repair
+      ;; wm-click-loop-repair-71d22b03): the MAP criterion states **Met.**
+      ;; and its locator observes true, so it must not be declared to the
+      ;; tick as an open want — the selected-want policy would refuse it
+      ;; :selected-want-true-before and no target commit could cure that.
+      (let [met-token (:token (first (:criteria (read-with mission))))
+            declared (get-in input [:sources :wants "M-test"])]
+        (is (false? (contains? (set declared) met-token)))
+        (is (true? (get-in input [:sources :universes "M-test" met-token]))
+            "the met criterion stays observable as a universe fact")))))
 
 (deftest acceptance-headings-are-criteria-sections
   ;; M-f11-find-production-successor states its done-definition under
