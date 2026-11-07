@@ -1,6 +1,6 @@
 # E-kimi-task-420 — Euclid: I.7 derive assumed side facts + proposition_6 lemma
 
-**Requisition:** in-progress — dispatched 2026-11-07T18:07:22Z to kimi-4 as invoke-1794074842713-15339-31c56b6c
+**Requisition:** completed — 2026-11-07T18:32:45Z, job invoke-1794074842713-15339-31c56b6c, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
