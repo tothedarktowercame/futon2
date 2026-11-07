@@ -1,6 +1,6 @@
 # E-kimi-task-413 — Euclid: play backend (Witness-style, in order)
 
-**Requisition:** in-progress — dispatched 2026-11-07T16:45:25Z to kimi-2 as invoke-1794069925281-15257-49cc590a
+**Requisition:** completed — 2026-11-07T16:53:07Z, job invoke-1794069925281-15257-49cc590a, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
