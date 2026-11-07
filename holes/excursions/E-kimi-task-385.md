@@ -1,6 +1,6 @@
 # E-kimi-task-385 — Euclid I.16 first conjunct + proposition_16 lemma
 
-**Requisition:** in-progress — dispatched 2026-11-07T12:14:27Z to kimi-4 as invoke-1794053667196-15120-1eed132d
+**Requisition:** completed — 2026-11-07T12:28:33Z, job invoke-1794053667196-15120-1eed132d, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
