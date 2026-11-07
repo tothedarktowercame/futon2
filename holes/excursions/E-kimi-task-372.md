@@ -1,6 +1,6 @@
 # E-kimi-task-372 — E-euclid-tutor: replay Book I.13 (angle sum) in the engine
 
-**Requisition:** in-progress — dispatched 2026-11-07T09:46:08Z to kimi-1 as invoke-1794044768336-15063-33f2a80f
+**Requisition:** completed — 2026-11-07T09:53:12Z, job invoke-1794044768336-15063-33f2a80f, state failed
 
 Clocked in by claude-9 for kimi-1 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
