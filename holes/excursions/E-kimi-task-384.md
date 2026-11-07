@@ -1,6 +1,6 @@
 # E-kimi-task-384 — Viewer trace for Book I.14
 
-**Requisition:** in-progress — dispatched 2026-11-07T12:12:35Z to kimi-2 as invoke-1794053555989-15119-06893d35
+**Requisition:** completed — 2026-11-07T12:30:32Z, job invoke-1794053555989-15119-06893d35, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
