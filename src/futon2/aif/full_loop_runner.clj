@@ -8341,10 +8341,25 @@
                                          (or (:failure-kind data) outcome)))
                        finding
                        (when-not (stop-line/no-finding-required?
-                                  {:outcome outcome
-                                   :grounded-commit (:grounded-commit data)
-                                   :reviewed-claim-refused? (:reviewed-claim-refused? data)
-                                 :failure-kind (:failure-kind data)})
+                                  ;; REPAIR-ABSTAIN-1: the close can see the
+                                  ;; selection's abstention through the same
+                                  ;; retained outer-selection carrier the close
+                                  ;; refusal check reads. Its :outcome is the
+                                  ;; typed abstention map (case keyword) and
+                                  ;; :outer-field/excluded is the checked
+                                  ;; exclusion evidence; a chosen or refused
+                                  ;; selection leaves both inert here.
+                                  (let [retained-selection
+                                        (:outer/selection
+                                         (selected-target-reading/current-options
+                                          opts))]
+                                    {:outcome outcome
+                                     :grounded-commit (:grounded-commit data)
+                                     :reviewed-claim-refused? (:reviewed-claim-refused? data)
+                                     :failure-kind (:failure-kind data)
+                                     :selection-outcome (:outcome retained-selection)
+                                     :outer-field/excluded
+                                     (:outer-field/excluded retained-selection)}))
                          (or existing-finding
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
