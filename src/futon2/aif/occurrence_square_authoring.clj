@@ -2,6 +2,7 @@
   "Pre-G authoring of situation maps for every occurrence in one retained
   target reading. The machine constructs, validates and publishes squares."
   (:require [cheshire.core :as json]
+            [clojure.set :as set]
             [futon2.aif.answer-evidence :as answer-evidence]
             [futon2.aif.occurrence-index :as occurrence-index]
             [clojure.string :as str]
@@ -52,7 +53,10 @@
        "exactly I1, I2, G and B, each with a concise situation element and an "
        "evidence source explaining where that situation is observed. Do not "
        "invent offsets, hashes, theories, maps or policy identities; the machine "
-       "constructs and validates those. Reply with exactly one JSON object: "
+       "constructs and validates those. Return exactly one entry for each "
+       "occurrence listed in the request and no others; copy every "
+       "occurrence_id from the list, never invent or duplicate one. "
+       "Reply with exactly one JSON object: "
        "{schema:'wm/occurrence-square-maps-v2',target:'...',analysis_digest:'...',"
        "entries:[{occurrence_id:[pattern,fragmentIndex],I1:{element,source},"
        "I2:{element,source},G:{element,source},B:{element,source}}]}.\n\n"
@@ -156,8 +160,27 @@
                 (not= target (:target answer))
                 (not= analysis-digest (:analysis_digest answer))
                 (not= expected (set (keys by-id))))
-            {:schema schema :status :error :kind :occurrence-square-answer-unbound
-             :expected expected :received (set (keys by-id))}
+            (let [received (set (keys by-id))
+                  missing (vec (sort (set/difference expected received)))
+                  unexpected (vec (sort (set/difference received expected)))]
+              ;; Held run 2026-11-07-ebaa2c4f (repair wm-click-loop-repair-88a04c65):
+              ;; wm-author returned all 22 expected entries plus one invented
+              ;; duplicate [pattern 22]; the exact-set check refused it, but
+              ;; the refusal retained no answer evidence — the debugger page
+              ;; showed only expected/received, and the raw answer had to be
+              ;; recovered from Agency's live store to diagnose it. The
+              ;; :answer-invalid branch already retains evidence; this branch
+              ;; must too, with the offending ids named.
+              {:schema schema :status :error :kind :occurrence-square-answer-unbound
+               :expected expected :received received
+               :missing missing :unexpected unexpected
+               :answer-evidence
+               (answer-evidence/retain
+                {:raw (or (:raw-answer exchange) (:value exchange))
+                 :agent author
+                 :job-id (:job-id exchange)
+                 :defect {:kind :occurrence-square-answer-unbound
+                          :missing missing :unexpected unexpected}})})
 
             :else
             (let [built

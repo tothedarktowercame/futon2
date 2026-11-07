@@ -66,7 +66,10 @@
     (is (not (re-find #"occurrence-id" wire)))
     (is (re-find #"wm/occurrence-square-maps-v2" wire))
     (is (not (re-find #"maps:\{" wire)))
-    (is (re-find #"Copy target and analysis_digest exactly" wire))))
+    (is (re-find #"Copy target and analysis_digest exactly" wire))
+    (is (re-find #"exactly one entry for each occurrence listed" wire)
+        "the prompt forbids extra or invented occurrence ids (held run
+         2026-11-07-ebaa2c4f, repair wm-click-loop-repair-88a04c65)")))
 
 (deftest v1-maps-wrapper-is-refused
   (let [reading-root (temp-root) square-root (temp-root)
@@ -158,6 +161,36 @@
                 (judgement reading))]
     (is (= :error (:status result)))
     (is (= :occurrence-square-answer-unbound (:kind result)))))
+
+(deftest extra-invented-entry-is-refused-and-retains-answer-evidence
+  ;; Held run 2026-11-07-ebaa2c4f (repair wm-click-loop-repair-88a04c65):
+  ;; wm-author returned every expected entry plus one invented duplicate
+  ;; occurrence_id [pattern 22] for a 22-fragment reading. The exact-set
+  ;; check refused it (correct), but the refusal retained no answer
+  ;; evidence, so the debugger page could not show what the author actually
+  ;; returned. Planted regression: a superset answer is refused AND the
+  ;; evidence names the offending ids.
+  (let [reading-root (temp-root) reading (reading! reading-root)
+        extra (assoc (first (:entries answer)) :occurrence_id [pattern 22])
+        result (sut/repair!
+                {:author "wm-square-author" :target-reading-root reading-root
+                 :occurrence-square-root (temp-root)
+                 :answer-fn (fn [_] (assoc answer :analysis_digest
+                                           (:analysis-digest reading)
+                                           :entries (conj (:entries answer)
+                                                          extra)))}
+                (judgement reading))
+        evidence (:answer-evidence result)]
+    (is (= :error (:status result)))
+    (is (= :occurrence-square-answer-unbound (:kind result)))
+    (is (= [] (:missing result)))
+    (is (= [[pattern 22]] (:unexpected result)))
+    (is (= :wm/rejected-answer-evidence-v1 (:schema evidence)))
+    (is (= "wm-square-author" (:agent evidence)))
+    (is (= :occurrence-square-answer-unbound (get-in evidence [:defect :kind])))
+    (is (= [[pattern 22]] (get-in evidence [:defect :unexpected])))
+    (is (pos? (count (:answer-prefix evidence)))
+        "the retained prefix holds the author's actual answer")))
 
 (deftest rejected-answer-survives-the-persisted-run-record-bounded
   (let [reading-root (temp-root)
