@@ -1,6 +1,6 @@
 # E-kimi-task-400 — certify I.17-engine
 
-**Requisition:** in-progress — dispatched 2026-11-07T14:41:10Z to kimi-2 as invoke-1794062470772-15185-631131e9
+**Requisition:** completed — 2026-11-07T14:49:02Z, job invoke-1794062470772-15185-631131e9, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
