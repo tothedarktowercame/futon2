@@ -134,6 +134,30 @@
     (is (= :response-unparseable (get-in result [:answer-evidence :defect :kind])))
     (is (= "rj" (:reviewer-job result)))))
 
+(deftest failed-author-job-429-carries-the-provider-failure-class
+  ;; PROVIDER-FAIL-3: the contact-failed refusal quotes the provider signal
+  ;; (Joe's ruling 2026-11-07: usage issue, overloaded model, or something
+  ;; else). The exact Zai 429 envelope from run 2026-11-07-1249942a.
+  (let [handler (runtime/open-cascade-resume-handler
+                 {:author "wm-author"
+                  :reviewer "wm-reviewer"
+                  :open-cascade-author-answer-fn
+                  (fn [_]
+                    {:state "failed"
+                     :job-id "invoke-1794040065486-15049"
+                     :text nil
+                     :terminal-code "error"
+                     :terminal-message "{\"message\":\"HTTP 429\",\"body\":{\"error\":{\"code\":\"1308\",\"message\":\"Usage limit reached for 5 hour. Your limit will reset at 2026-11-07 17:26:31\"}}}"})
+                  :open-cascade-reviewer-answer-fn
+                  (fn [_] {:state "done" :result "must not be called"})})
+        result (handler held)]
+    (is (= :open-cascade-author-contact-failed (:kind result)))
+    (is (= {:class :usage-limit
+            :http-status 429
+            :provider-code "1308"
+            :evidence "HTTP 429"}
+           (:provider-failure result)))))
+
 (deftest uncontacted-designated-author-is-a-typed-contact-failure
   ;; designated-agent-answer-fn answers {:state :not-contacted ...} when the
   ;; seat is not invoke-ready: also a contact that produced no answer, so the

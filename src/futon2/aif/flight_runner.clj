@@ -164,8 +164,14 @@
                          ;; the job exists; say which, so the reply can be read
                          (throw (ex-info (str "polling " job-id " failed: " (ex-message e))
                                          {::answer-failed true ::job-id job-id ::seat seat} e))))]
-          {:seat seat :job-id job-id :state (:state job) :text (job-text job)
-           :library-root root})))))
+          ;; PROVIDER-FAIL-3: a non-done terminal state carries the job's own
+          ;; terminal-code/terminal-message through to the caller (absent when
+          ;; the job has none -- e.g. :not-contacted -- never invented), so
+          ;; the contact-failed refusal can classify the provider failure.
+          (cond-> {:seat seat :job-id job-id :state (:state job) :text (job-text job)
+                   :library-root root}
+            (not= "done" (some-> (:state job) name))
+            (merge (select-keys job [:terminal-code :terminal-message]))))))))
 
 (def step-response-schema :wm/enactment-step-response-v1)
 

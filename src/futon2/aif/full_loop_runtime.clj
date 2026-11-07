@@ -636,6 +636,13 @@
   [who who-key job-key response payload]
   {:status :error
    :job-state (:state response)
+   ;; PROVIDER-FAIL-3: classify the provider signal the answer fn carried
+   ;; (terminal-code/terminal-message; absent for a not-contacted seat, in
+   ;; which case the class is honestly :not-a-provider-failure). Labels and
+   ;; data only: retry/stop behaviour is PROVIDER-FAIL-4.
+   :provider-failure
+   (runner/provider-failure-class
+    (select-keys response [:state :terminal-code :terminal-message :events]))
    who-key who
    job-key (contact-job response)
    :answer-evidence

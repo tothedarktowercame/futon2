@@ -2745,6 +2745,122 @@
               (re-find #"selected model is at capacity|model.*capacity|provider.*overload|temporarily unavailable"
                        failure-text))))))
 
+(def ^:private provider-http-status-re
+  "HTTP status as the provider layer spells it in a terminal message or event
+  text: `HTTP 429`, `HTTP 500`, `HTTP 529` (observed 2026-11-07)."
+  #"(?i)\bHTTP[ /](\d{3})\b")
+
+(def ^:private provider-error-code-re
+  #"(?i)\"code\"\s*:\s*\"?([A-Za-z0-9_-]+)")
+
+(def ^:private provider-timeout-re
+  #"(?i)HttpTimeoutException|request timed out")
+
+(def ^:private provider-usage-re
+  #"(?i)usage limit|rate limit")
+
+(def ^:private provider-overload-re
+  ;; Same vocabulary author-infrastructure-failure? recognises, so the two
+  ;; never disagree about what `capacity' means.
+  #"(?i)selected model is at capacity|model[^\n]{0,40}capacity|provider[^\n]{0,40}overload|temporarily unavailable")
+
+(def ^:private provider-network-error-re
+  #"(?i)internal network failure|network failure|connection (?:reset|refused|closed)")
+
+(defn- failure-text
+  "The provider-facing text of a job-like map: the terminal message plus every
+  event's text/message, lowercased only where a rule asks for it (the status
+  and code regexes are case-insensitive themselves, so the raw text is
+  returned and evidence quotes it exactly)."
+  [job]
+  (str (:terminal-message job) " "
+       (str/join " " (keep #(or (:text %) (:message %)) (:events job)))))
+
+(defn provider-failure-class
+  "PROVIDER-FAIL-3: classify a failed seat contact's provider signal. Takes a
+  job-like map {:state :terminal-code :terminal-message :events} (the answer
+  fn's response carries the terminal fields since PROVIDER-FAIL-3; a full job
+  envelope also works) and returns
+
+    {:class <kw>
+     :http-status <int, when a `HTTP nnn' appears in the text>
+     :provider-code <string, when a JSON error code appears in the text>
+     :evidence <the exact substring the class was read from>}
+
+  Classes, in decision order (first match wins):
+    :timeout                HttpTimeoutException / `request timed out' (seen
+                            on kimi jobs 2026-11-07). Deliberately its OWN
+                            class, not :provider-error: a timeout is the one
+                            failure where the provider never answered at all,
+                            so quoting it as `the provider answered with a
+                            server error' would misstate what happened -- and
+                            PROVIDER-FAIL-4's retry decision may want to treat
+                            it separately.
+    :usage-limit            HTTP 429, error code 1308, or `usage/rate limit'
+                            text. Quota, not health: retrying into it changes
+                            nothing until the window resets.
+    :model-overloaded       HTTP 529, the model-capacity/provider-overloaded
+                            codes, or the capacity/overload text
+                            author-infrastructure-failure? already recognises.
+    :provider-error         HTTP 5xx (other than 529), the invoke-* transport
+                            codes, or network-failure text: the provider
+                            answered with a server error or the network failed.
+    :not-a-provider-failure state done, or a failure with no provider signal
+                            (cancelled, not-contacted, a bare nil answer).
+                            Never guessed from nothing.
+
+  String matching is on the raw text, so an unparseable JSON body still
+  classifies: `HTTP 429' inside a malformed envelope is still :usage-limit."
+  [job]
+  (let [text (failure-text job)
+        http-status (some-> (re-find provider-http-status-re text)
+                            second (Integer/parseInt))
+        provider-code (some-> (re-find provider-error-code-re text) second)
+        timeout-m (re-find provider-timeout-re text)]
+    (cond
+      (= "done" (some-> (:state job) name))
+      {:class :not-a-provider-failure}
+
+      timeout-m
+      (cond-> {:class :timeout}
+        http-status (assoc :http-status http-status)
+        (:terminal-code job) (assoc :provider-code (:terminal-code job))
+        :always (assoc :evidence timeout-m))
+
+      (or (= 429 http-status)
+          (= "1308" provider-code)
+          (re-find provider-usage-re text))
+      (cond-> {:class :usage-limit}
+        http-status (assoc :http-status http-status)
+        provider-code (assoc :provider-code provider-code)
+        :always (assoc :evidence (or (some-> (re-find provider-http-status-re text) first)
+                                     (re-find provider-usage-re text)
+                                     (when provider-code
+                                       (str "\"code\":\"" provider-code "\"")))))
+
+      (or (= 529 http-status)
+          (contains? #{"model-capacity" "provider-overloaded"} (:terminal-code job))
+          (contains? #{"model-capacity" "provider-overloaded"} provider-code)
+          (re-find provider-overload-re text))
+      (cond-> {:class :model-overloaded}
+        http-status (assoc :http-status http-status)
+        provider-code (assoc :provider-code provider-code)
+        :always (assoc :evidence (or (re-find provider-overload-re text)
+                                     (some-> (re-find provider-http-status-re text) first))))
+
+      (or (and http-status (<= 500 http-status 599))
+          (contains? #{"invoke-error" "invoke-submit-failed" "invoke-exception"}
+                     (:terminal-code job))
+          (re-find provider-network-error-re text))
+      (cond-> {:class :provider-error}
+        http-status (assoc :http-status http-status)
+        provider-code (assoc :provider-code provider-code)
+        :always (assoc :evidence (or (re-find provider-network-error-re text)
+                                     (some-> (re-find provider-http-status-re text) first))))
+
+      :else
+      {:class :not-a-provider-failure})))
+
 (defn handoff-wait-terminal-condition
   "Project a failed Agency handoff value into its existing terminal failure.
 
