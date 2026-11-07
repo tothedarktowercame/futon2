@@ -1,6 +1,6 @@
 # E-kimi-task-395 — Euclid I.22 discovery + replay
 
-**Requisition:** in-progress — dispatched 2026-11-07T13:53:45Z to kimi-4 as invoke-1794059625807-15162-9fcf3b90
+**Requisition:** completed — 2026-11-07T14:36:31Z, job invoke-1794059625807-15162-9fcf3b90, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
