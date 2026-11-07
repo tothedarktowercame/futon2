@@ -1,6 +1,6 @@
 # E-kimi-task-415 — Euclid: play page (Witness-style)
 
-**Requisition:** in-progress — dispatched 2026-11-07T16:53:48Z to kimi-2 as invoke-1794070428536-15271-07441919
+**Requisition:** completed — 2026-11-07T17:04:47Z, job invoke-1794070428536-15271-07441919, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
