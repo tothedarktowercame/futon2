@@ -1,6 +1,6 @@
 # E-kimi-task-421 — Euclid: play configurations I.8, I.9
 
-**Requisition:** in-progress — dispatched 2026-11-07T18:35:53Z to kimi-4 as invoke-1794076553466-15358-60942a8e
+**Requisition:** completed — 2026-11-07T19:03:58Z, job invoke-1794076553466-15358-60942a8e, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
