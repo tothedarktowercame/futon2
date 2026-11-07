@@ -1,6 +1,6 @@
 # E-kimi-task-376 — E-euclid-tutor: Lean certifies the engine's own I.12 steps
 
-**Requisition:** in-progress — dispatched 2026-11-07T10:30:40Z to kimi-2 as invoke-1794047440972-15078-10ac332d
+**Requisition:** completed — 2026-11-07T10:44:45Z, job invoke-1794047440972-15078-10ac332d, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
