@@ -256,7 +256,14 @@ def item_labels(item, census_row):
             and item["kind"] in ("ticket", "excursion")
         ):
             labels.add("close-unstated")
-        if row.get("hdr_date") == "" or row.get("hdr_status") == "":
+        # "Unread" means the file HAS the field and the WM's summary reader
+        # did not get it (census C3, a reader defect) -- not merely absent.
+        # own_status catches the parenthetical "**Status (triaged ...):**"
+        # form that the census's status_in_file detector also misses.
+        status_present = row.get("status_in_file") == "1" or bool(
+            (row.get("own_status") or "").strip())
+        if (row.get("hdr_status") == "" and status_present) or (
+                row.get("hdr_date") == "" and row.get("date_in_file") == "1"):
             labels.add("header-unread")
         if row.get("timebox_in_file") == "0":
             labels.add("timebox-absent")

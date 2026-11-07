@@ -50,12 +50,28 @@ class ItemLabelsTest(unittest.TestCase):
         self.assertNotIn("close-unstated", gpe.item_labels(item(), {"close_cond": "stated"}))
 
     def test_header_unread_when_either_header_label_unparsed(self):
-        self.assertIn("header-unread", gpe.item_labels(item(), {"hdr_date": "", "hdr_status": "OPEN"}))
-        self.assertIn("header-unread", gpe.item_labels(item(), {"hdr_date": "2026-11-07", "hdr_status": ""}))
+        # Present in the file but not parsed by the summary reader.
+        self.assertIn("header-unread", gpe.item_labels(
+            item(), {"hdr_date": "", "date_in_file": "1", "hdr_status": "OPEN"}))
+        self.assertIn("header-unread", gpe.item_labels(
+            item(), {"hdr_date": "2026-11-07", "hdr_status": "", "status_in_file": "1"}))
         self.assertNotIn(
             "header-unread",
             gpe.item_labels(item(), {"hdr_date": "2026-11-07", "hdr_status": "OPEN"}),
         )
+
+    def test_header_unread_catches_parenthetical_status_the_census_missed(self):
+        # The T-kangaroo row: status_in_file 0, but own_status found
+        # "**Status (triaged 2026-09-01): PARTIAL ...**".
+        self.assertIn("header-unread", gpe.item_labels(item(), {
+            "hdr_status": "", "status_in_file": "0",
+            "own_status": "(triaged 2026-09-01): PARTIAL -- research portions obsolete."}))
+
+    def test_absent_header_is_not_unread(self):
+        # No header in the file at all: nothing for the reader to miss.
+        self.assertNotIn("header-unread", gpe.item_labels(item(), {
+            "hdr_date": "", "date_in_file": "0",
+            "hdr_status": "", "status_in_file": "0", "own_status": ""}))
 
     def test_timebox_absent(self):
         self.assertIn("timebox-absent", gpe.item_labels(item(), {"timebox_in_file": "0"}))
