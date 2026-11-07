@@ -1,6 +1,6 @@
 # E-kimi-task-378 — E-euclid-tutor: Book I.13 leaves the default closure (straight_angle -> cited proposition_13)
 
-**Requisition:** in-progress — dispatched 2026-11-07T11:09:49Z to kimi-4 as invoke-1794049789702-15092-d00be8a1
+**Requisition:** completed — 2026-11-07T11:23:13Z, job invoke-1794049789702-15092-d00be8a1, state failed
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
