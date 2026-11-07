@@ -1,6 +1,6 @@
 # E-kimi-task-393 — Euclid certify I.15-engine
 
-**Requisition:** in-progress — dispatched 2026-11-07T13:29:27Z to kimi-2 as invoke-1794058167400-15152-4c09efbc
+**Requisition:** completed — 2026-11-07T13:56:36Z, job invoke-1794058167400-15152-4c09efbc, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
