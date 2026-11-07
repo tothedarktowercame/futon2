@@ -40,6 +40,14 @@ def load_loop():
     module.DEBUGGER = state / "debugger"
     # write_click_manifest consults Agency job previews; tests never may.
     module.fetch_agency_jobs_in_window = lambda started, ended: ([], None)
+    # Nor the serving debugger: debugger_stops() would see the live loop's
+    # held runs (ContinuousModeTest errored whenever a real click was held),
+    # and retry/abort would act on them. Tests that need these patch them.
+    module.debugger_stops = lambda: []
+    def _refuse(run_id):
+        raise AssertionError(f"test tried to continue live held run {run_id}")
+    module.retry_held_run = _refuse
+    module.abort_held_run = _refuse
     return module
 
 
