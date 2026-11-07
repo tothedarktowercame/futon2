@@ -1,6 +1,6 @@
 # E-kimi-task-396 — Euclid viewer I.16 trace
 
-**Requisition:** in-progress — dispatched 2026-11-07T14:00:14Z to kimi-2 as invoke-1794060014520-15165-202b42a6
+**Requisition:** completed — 2026-11-07T14:14:53Z, job invoke-1794060014520-15165-202b42a6, state failed
 
 Clocked in by claude-9 for kimi-2 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
