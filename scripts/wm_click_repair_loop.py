@@ -134,14 +134,62 @@ def now() -> str:
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+# Files this script itself writes during the current click (absolute paths).
+# They are collected as the writes happen and claimed in the click's stamp
+# file before the write manifest is built, so the manifest labels the loop's
+# own writes "stamped" with writer "wm-click-loop" instead of
+# "click-window/unattributed". Paths noted between clicks are cleared at the
+# start of each click; they belong to no window.
+OWN_WRITE_PATHS: set[str] = set()
+OWN_WRITE_STAMPS_MADE = 0
+OWN_WRITE_STAMP_FAILURES = 0
+
+
+def note_own_write(path) -> None:
+    """Remember a path this script is about to write; never raises."""
+    try:
+        OWN_WRITE_PATHS.add(str(Path(path).resolve()))
+    except (OSError, RuntimeError, ValueError):
+        pass
+
+
+def stamp_own_writes(click_id) -> int:
+    """Claim every path this script wrote during the click in its stamp file.
+
+    One row per path per click, in the format read_write_stamps() accepts.
+    Stamping must never break the loop: failures are counted and swallowed.
+    """
+    global OWN_WRITE_STAMPS_MADE, OWN_WRITE_STAMP_FAILURES
+    if not isinstance(click_id, str) or not click_id.strip():
+        return 0
+    made = 0
+    try:
+        WRITE_STAMP_ROOT.mkdir(parents=True, exist_ok=True)
+        with (WRITE_STAMP_ROOT / f"{click_id}.jsonl").open("a") as fh:
+            for path in sorted(OWN_WRITE_PATHS):
+                try:
+                    fh.write(json.dumps(
+                        {"at": now(), "click-id": click_id, "path": path,
+                         "writer": "wm-click-loop"}, ensure_ascii=False) + "\n")
+                    made += 1
+                except (OSError, ValueError):
+                    OWN_WRITE_STAMP_FAILURES += 1
+    except OSError:
+        OWN_WRITE_STAMP_FAILURES += 1
+    OWN_WRITE_STAMPS_MADE += made
+    return made
+
+
 def log(msg: str) -> None:
     line = f"[{now()}] {msg}"
     print(line, flush=True)
+    note_own_write(LOGFILE)
     with LOGFILE.open("a") as fh:
         fh.write(line + "\n")
 
 
 def record(row: dict) -> None:
+    note_own_write(LEDGER)
     with LEDGER.open("a") as fh:
         fh.write(json.dumps({"at": now(), **row}, ensure_ascii=False) + "\n")
 
@@ -309,6 +357,7 @@ def write_click_manifest(click: dict, started: str, ended: str,
 def fire_with_write_manifest(n: int, args, since_epoch: int) -> dict:
     """Run one click unchanged, registering every declared-root window change."""
     started = now()
+    OWN_WRITE_PATHS.clear()
     try:
         before, before_seconds = snapshot_write_roots()
         snapshot_error = None
@@ -316,6 +365,7 @@ def fire_with_write_manifest(n: int, args, since_epoch: int) -> dict:
         before, snapshot_error = {}, error
     click = fire(n, args, since_epoch)
     ended = now()
+    stamp_own_writes(click.get("click-id"))
     try:
         if snapshot_error is not None:
             raise snapshot_error
@@ -1191,6 +1241,7 @@ def alert_block(log_path: str | None) -> str:
 def queue_alert(c: dict, repeated: bool) -> None:
     row = {"at": now(), "click-id": c["click-id"], "run-id": c["run-id"], "run-record": c.get("run-record"),
            "signature": c["alert"], "verdict": c.get("verdict"), "repeated": repeated, "log": c.get("log")}
+    note_own_write(ALERTS)
     with ALERTS.open("a") as fh:
         fh.write(json.dumps(row, ensure_ascii=False) + "\n")
     record({"event": "alert", "click-id": c["click-id"], "run-id": c["run-id"],
@@ -1380,6 +1431,7 @@ def fire(n: int, args, since_epoch: int) -> dict:
     reset_cast_sessions(args)
     reset_wall_ms = max(0, (time.monotonic_ns() - reset_started_ns) // 1_000_000)
     out = STATE / f"click-{n:03d}-{int(time.time())}.log"
+    note_own_write(out)
     before = budget_lines()
     cmd = [F2 / "scripts" / "wm_click.sh", "--run", "--issuing-caller", args.issuing_caller,
            "--author", args.author, "--reviewer", args.reviewer, "--repair-reviewer", args.repair_reviewer]
@@ -1409,6 +1461,7 @@ def fire(n: int, args, since_epoch: int) -> dict:
                         f"({stop['condition-kind']})")
                     live_page = DEBUGGER / f"held-{stop['run-id']}.md"
                     DEBUGGER.mkdir(parents=True, exist_ok=True)
+                    note_own_write(live_page)
                     live_page.write_text("# Live held phase\n\n" + stop["raw"] + "\n")
                     since_epoch = handle_held_stop(
                         args, stop, in_flight_repairs, live_page, since_epoch)
@@ -1518,6 +1571,7 @@ def debugger_page(c: dict, previous: dict | None) -> tuple[Path, dict]:
                   "CHANGED -- the obstruction moved." if moved(previous["signature"], sig) else
                   "UNCHANGED -- same refusal counts and the same named targets.", ""]
     page = DEBUGGER / f"{c['click-id']}.md"
+    note_own_write(page)
     page.write_text("\n".join(lines))
     return page, {"page": str(page), "signature": sig}
 
@@ -1758,6 +1812,7 @@ def repair(args, reason: str, click: dict | None, prior: list[str],
     record({"event": "repair-dispatched", "tag": tag, "job": job, "seat": args.repair_seat, "reason": reason})
     j = wait_job(job, args.repair_timeout)
     result = str(j.get("result") or j.get("error") or "")
+    note_own_write(STATE / f"{tag}.result.txt")
     (STATE / f"{tag}.result.txt").write_text(result)
     m = re.findall(r"VERDICT:\s*(repaired|no-defect|cannot-repair)", result)
     verdict = m[-1] if m else f"no-verdict (job {j.get('state')})"
@@ -1931,6 +1986,7 @@ def run(args) -> int:
                     ("run-id", "phase", "condition-kind")}})
             live_page = DEBUGGER / f"held-{held['run-id']}.md"
             DEBUGGER.mkdir(parents=True, exist_ok=True)
+            note_own_write(live_page)
             live_page.write_text("# Live held phase\n\n" + held["raw"] + "\n")
             since = handle_held_stop(args, held, [], live_page, since)
             continue

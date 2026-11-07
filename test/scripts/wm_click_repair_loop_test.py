@@ -1123,5 +1123,89 @@ class ContinuousModeTest(unittest.TestCase):
             else:
                 self.assertIn(expected, breach or "", reply)
 
+class LoopOwnWriteStampTest(unittest.TestCase):
+    def test_loop_own_writes_stamp_themselves_foreign_writes_do_not(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            state = base / "state"
+            state.mkdir()
+            root = base / "repo"
+            root.mkdir()
+            stamps = base / "stamps"
+            stamps.mkdir()
+            foreign = root / "foreign.txt"
+            loop.STATE = state
+            loop.LOGFILE = state / "loop.log"
+            loop.LEDGER = state / "ledger.jsonl"
+            loop.ALERTS = state / "alerts.jsonl"
+
+            def fake_fire(n, args, since):
+                # every write surface the loop itself uses during a click
+                loop.log(f"click {n}: firing")
+                loop.record({"event": "cost-receipt", "click-id": "wm-click-self",
+                             "click-number": n})
+                loop.queue_alert({"click-id": "wm-click-self", "run-id": "run-x",
+                                  "alert": ("work Q9 violated",)}, False)
+                # someone else's write inside the same window
+                foreign.write_text("not the loop")
+                return {"n": n, "click-id": "wm-click-self", "run-id": "run-x",
+                        "outcome": "ok", "since-epoch": since}
+
+            with mock.patch.object(loop, "WRITE_ROOTS", [root, state]), \
+                 mock.patch.object(loop, "WRITE_STAMP_ROOT", stamps), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire):
+                click = loop.fire_with_write_manifest(1, object(), 123)
+
+            manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
+            entries = {Path(entry["path"]).name: entry for entry in manifest["entries"]}
+            for name in ("loop.log", "ledger.jsonl", "alerts.jsonl"):
+                self.assertEqual("stamped", entries[name]["attribution"], name)
+                self.assertEqual("wm-click-loop", entries[name]["writer"], name)
+            self.assertEqual("click-window/unattributed",
+                             entries["foreign.txt"]["attribution"])
+            self.assertEqual(3, manifest["stamped_count"])
+            self.assertEqual(1, manifest["unattributed_count"])
+            # the stamp rows are the format read_write_stamps accepts
+            rows = [json.loads(line) for line
+                    in (stamps / "wm-click-self.jsonl").read_text().splitlines()]
+            self.assertEqual({"loop.log", "ledger.jsonl", "alerts.jsonl"},
+                             {Path(row["path"]).name for row in rows})
+            self.assertTrue(all(row["writer"] == "wm-click-loop"
+                                and row["click-id"] == "wm-click-self" for row in rows))
+
+    def test_stamp_failure_is_counted_not_raised(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            state = base / "state"
+            state.mkdir()
+            # a regular file where the stamp directory belongs: mkdir fails
+            blocker = base / "stamps"
+            blocker.write_text("in the way")
+            loop.STATE = state
+            loop.LOGFILE = state / "loop.log"
+            loop.LEDGER = state / "ledger.jsonl"
+            loop.ALERTS = state / "alerts.jsonl"
+            loop.OWN_WRITE_PATHS.clear()
+
+            def fake_fire(n, args, since):
+                loop.log("still writes")
+                return {"n": n, "click-id": "wm-click-blocked",
+                        "outcome": "ok", "since-epoch": since}
+
+            with mock.patch.object(loop, "WRITE_ROOTS", [state]), \
+                 mock.patch.object(loop, "WRITE_STAMP_ROOT", blocker), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire):
+                click = loop.fire_with_write_manifest(1, object(), 123)
+            # the click completed and produced a manifest despite stamp failure
+            self.assertIn("path", click["write_manifest"])
+            self.assertGreaterEqual(loop.OWN_WRITE_STAMP_FAILURES, 1)
+            manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
+            entries = {Path(entry["path"]).name: entry for entry in manifest["entries"]}
+            self.assertEqual("click-window/unattributed",
+                             entries["loop.log"]["attribution"])
+
+
 if __name__ == "__main__":
     unittest.main()
