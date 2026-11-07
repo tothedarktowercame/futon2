@@ -1,6 +1,6 @@
 # E-kimi-task-390 — Euclid I.19 replay + proposition_19 lemma
 
-**Requisition:** in-progress — dispatched 2026-11-07T13:07:28Z to kimi-4 as invoke-1794056848641-15143-4b61227f
+**Requisition:** completed — 2026-11-07T13:17:00Z, job invoke-1794056848641-15143-4b61227f, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
