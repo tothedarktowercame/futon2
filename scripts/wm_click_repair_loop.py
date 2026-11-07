@@ -122,7 +122,11 @@ WRITE_ROOTS = list(dict.fromkeys(
 # No is_dir() filter here: the loop is long-running and a root created after
 # start (self-heal appears with the first META injury) must still be walked.
 # snapshot_write_roots skips a root that does not exist yet.
-WRITE_PRUNED_DIRS = {".git", "target", ".cpcache", ".cache", "node_modules", ".lake"}
+# Package installs and bytecode caches: rebuilt by pip/python, never WM output,
+# and thousands of files per install (click wm-click-eb0ddbda: 3,949 entries
+# from futon0/.venv-srch and /tmp/futon0-pytest site-packages alone).
+WRITE_PRUNED_DIRS = {".git", "target", ".cpcache", ".cache", "node_modules", ".lake",
+                     "site-packages", "__pycache__"}
 WRITE_HASH_LIMIT = 64 * 1024 * 1024
 WRITE_STAMP_ROOT = F2 / "data" / "wm-write-stamps"
 # The click's code: what a repair may change and what a reload must pick up.
