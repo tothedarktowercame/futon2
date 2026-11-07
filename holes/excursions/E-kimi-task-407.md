@@ -1,6 +1,6 @@
 # E-kimi-task-407 — replay proposition_23' + lemma
 
-**Requisition:** in-progress — dispatched 2026-11-07T15:34:34Z to kimi-4 as invoke-1794065674652-15210-0ea4b0cc
+**Requisition:** completed — 2026-11-07T15:54:41Z, job invoke-1794065674652-15210-0ea4b0cc, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
