@@ -75,7 +75,7 @@
                  {:author "wm-author"
                   :reviewer "wm-reviewer"
                   :open-cascade-author-answer-fn
-                  (fn [req]
+                  (fn [_]
                     (swap! contacts inc)
                     (if (= 1 @contacts)
                       {:state "done" :job-id "j1" :result "not json"}
@@ -87,6 +87,22 @@
     (is (= :author-response-unparseable (:kind result)))
     (is (= :response-unparseable (get-in result [:answer-evidence :defect :kind])))
     (is (= "j2" (:author-job result)))))
+
+(deftest keyword-done-state-is-not-a-contact-failure
+  ;; claude-6 review of 6b90b3e7: a :done keyword state is a finished job, so
+  ;; it must stay on the answer-invalid path, as it did before (the legacy
+  ;; branch's string compare sends it to :open-cascade-author-answer-invalid).
+  (let [handler (runtime/open-cascade-resume-handler
+                 {:author "wm-author"
+                  :reviewer "wm-reviewer"
+                  :open-cascade-author-answer-fn
+                  (fn [_] {:state :done :job-id "jk" :result "not json"})
+                  :open-cascade-reviewer-answer-fn
+                  (fn [_] {:state "done" :result "must not be called"})})
+        result (handler held)]
+    (is (= :error (:status result)))
+    (is (not= :open-cascade-author-contact-failed (:kind result)))
+    (is (= :response-unparseable (get-in result [:answer-evidence :defect :kind])))))
 
 (deftest failed-reviewer-job-is-a-contact-failure-not-an-unparseable-answer
   (let [handler (runtime/open-cascade-resume-handler

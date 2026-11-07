@@ -1018,7 +1018,7 @@
                 result (cond
               (nil? author-answer)
               (if (and (map? author-response) (contains? author-response :state)
-                       (not= "done" (:state author-response)))
+                       (not= "done" (some-> (:state author-response) name)))
                 ;; PROVIDER-FAIL-2: the seat was contacted and its job reached
                 ;; a non-done terminal state (a provider 429/500, a timeout, a
                 ;; cancellation, or a not-contacted designated seat): a failed
@@ -1074,7 +1074,7 @@
 
               (nil? reviewed)
               (if (and (map? reviewer-response) (contains? reviewer-response :state)
-                       (not= "done" (:state reviewer-response)))
+                       (not= "done" (some-> (:state reviewer-response) name)))
                 ;; PROVIDER-FAIL-2: the reviewer's job reached a non-done
                 ;; terminal state -- a failed contact, not an unparseable
                 ;; answer (see the author branch above).
