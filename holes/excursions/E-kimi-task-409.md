@@ -1,6 +1,6 @@
 # E-kimi-task-409 — replay I.24 first half
 
-**Requisition:** in-progress — dispatched 2026-11-07T15:55:21Z to kimi-4 as invoke-1794066922033-15218-63a3a44b
+**Requisition:** completed — 2026-11-07T16:22:00Z, job invoke-1794066922033-15218-63a3a44b, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
