@@ -5,115 +5,116 @@
   b873131665de580b3ced5d24a42e723ef78c3f9a2e004cc09e55c75a6e7a67cf).
 
   Resolutions for the twelve :operational-clause-owed holes of the
-  T-fail-operator-cancelled selected-target reading (ticket
-  futon3c/holes/tickets/T-fail-operator-cancelled.md).  Each decision
-  is an operational clause attributed to the reading's occurrence
-  squares over that ticket: the operation names what the occurrence
-  enacts in the census text, completion-check names the observable
-  condition in that text, and :consumes/:produces describe the
-  transition.  Nothing here claims a square-derived completion and no
-  application-order edge is authored."
+  T-fail-operator-cancelled reading (target
+  futon3c/holes/tickets/T-fail-operator-cancelled.md, census-header
+  excerpt, source digest 5b82b64f...609fa).  Each decision is an
+  operational clause attributed to the reading's occurrence squares over
+  that excerpt: the operation names what the occurrence enacts in the
+  ticket text, completion-check names the observable condition in that
+  text, and :consumes/:produces describe the transition.  Nothing here
+  claims a square-derived completion and no application-order edge is
+  authored."
   (:require [futon2.aif.load-identity :as load-identity]))
 
 (load-identity/register! *ns* *file*)
 
 (def clauses
   {["apparatus/new-failure-class-is-a-design-defect" 0]
-   {:operation :name-failure-class-with-multiplicity-in-ticket-title
+   {:operation :classify-failure-class-in-title
     :capability :wm/pattern-apply
-    :consumes :named-failure-class-with-occurrence-count
-    :produces :census-visible-class-entry-for-operator-cancelled
+    :consumes :ledger-typed-terminal-code
+    :produces :named-failure-class-with-multiplicity
     :completion-check
-    [:title-carries-class-name-and-count
-     "ticket title 'T-fail-operator-cancelled -- operator-cancelled (4x)' names the class and its multiplicity, so the census artifact carries an addressable entry rather than an anonymous failure"]}
+    [:title-names-class-and-multiplicity
+     "the ticket title reads 'T-fail-operator-cancelled -- operator-cancelled (4x)', so the failure class is named and counted before anyone responds to it"]}
    ["apparatus/new-failure-class-is-a-design-defect" 1]
-   {:operation :mark-class-as-reclassify-candidate-not-fix
+   {:operation :mark-class-as-reclassify-candidate
     :capability :wm/pattern-apply
-    :consumes :triage-dated-status-line-with-review-count
-    :produces :explicit-reclassification-question-subject-to-census-evidence
+    :consumes :triage-review-observation
+    :produces :reclassification-decision-open-on-the-class
     :completion-check
-    [:status-line-carries-reclassify-candidate
-     "status line '**Status (triaged 2026-09-01): RECLASSIFY CANDIDATE.** 19 at review, mostly deliberate watchdog cancels.' opens the taxonomy question with its triage date and population evidence instead of accepting the class"]}
+    [:status-banner-names-open-decision
+     "the status banner reads 'RECLASSIFY CANDIDATE', keeping the class an open design question rather than an accepted failure"]}
    ["agent/pause-is-not-failure" 2]
-   {:operation :attribute-cancels-to-deliberate-watchdog-action
+   {:operation :attribute-cancels-to-deliberate-watchdog
     :capability :wm/pattern-apply
-    :consumes :review-evidence-of-watchdog-origin
-    :produces :operator-cancel-classified-as-expected-operation
+    :consumes :review-of-19-terminal-codes
+    :produces :cancels-classified-as-deliberate-not-defects
     :completion-check
-    [:status-line-names-deliberate-watchdog-cancels
-     "status line 'mostly deliberate watchdog cancels' attributes the cancels to deliberate watchdog action, which is the expected-operation reading the proposal depends on"]}
+    [:majority-named-deliberate-watchdog-cancels
+     "the banner records that the occurrences are 'mostly deliberate watchdog cancels', separating a chosen stop from a failure"]}
    ["hygiene/exempt-the-in-use" 3]
-   {:operation :census-exempt-operator-cancellation-as-expected-behaviour
+   {:operation :propose-census-exemption-over-fix
     :capability :wm/pattern-apply
-    :consumes :reclassification-question-from-status-line
-    :produces :structural-fact-exemption-in-census-counts
+    :consumes :deliberate-cancel-attribution
+    :produces :exemption-proposal-on-the-table
     :completion-check
-    [:proposal-sentence-exempts-rather-than-fixes
-     "sentence 'Propose census-exempting operator cancellation as expected behaviour rather than fixing anything.' grants the exemption by structural fact before any scoring, not by fixing the cancel"]}
+    [:exempt-expected-behaviour-proposal-stated
+     "the banner proposes 'census-exempting operator cancellation as expected behaviour rather than fixing anything', so the class stays in use while its exemption is decided"]}
    ["buffer-cleaner/observe-categories" 4]
-   {:operation :fence-machine-extracted-census-block-start
+   {:operation :mark-regenerated-census-block-start
     :capability :wm/pattern-apply
-    :consumes :census-facts-preceding-interpretation
-    :produces :delimited-observation-block-of-structural-kind-only
+    :consumes :census-script-output
+    :produces :machine-owned-block-bounded
     :completion-check
-    [:census-begin-marker-fences-the-block
-     "HTML comment '<!-- census:begin -->' opens a fence whose fields carry bare key/value facts, keeping collection policy out of the record"]}
+    [:census-begin-marker-present
+     "the '<!-- census:begin -->' marker opens the machine-regenerated block, bounding what humans may edit"]}
    ["apparatus/new-failure-class-is-a-design-defect" 5]
-   {:operation :register-machine-readable-class-key
+   {:operation :state-class-field-in-census-block
     :capability :wm/pattern-apply
-    :consumes :census-block-class-line
-    :produces :stable-class-key-joinable-across-census-and-tickets
+    :consumes :terminal-code-value-from-ledger
+    :produces :class-field-naming-operator-cancelled
     :completion-check
-    [:census-block-carries-backticked-class-key
-     "census line '- **class**: `operator-cancelled`' carries the backticked class key that later gates and the occurrence count join on"]}
+    [:class-field-matches-ledger-terminal-code
+     "the census block states '- **class**: `operator-cancelled`', tying the ticket to the ledger's terminal-code"]}
    ["buffer-cleaner/observe-categories" 6]
-   {:operation :record-bare-multiplicity-without-threshold
+   {:operation :record-observed-multiplicity
     :capability :wm/pattern-apply
-    :consumes :counted-occurrences-in-window
-    :produces :policy-free-count-feed-for-downstream-decisions
+    :consumes :ledger-count-in-window
+    :produces :multiplicity-4-in-census-block
     :completion-check
-    [:multiplicity-line-is-bare-count
-     "census line '- **multiplicity**: 4' records the count as a bare structural fact with no staleness threshold or verdict baked in"]}
+    [:multiplicity-field-states-4
+     "the census block states '- **multiplicity**: 4', an observed count rather than an impression"]}
    ["buffer-cleaner/observe-categories" 7]
-   {:operation :state-observation-window-without-scoring
+   {:operation :record-observation-window
     :capability :wm/pattern-apply
-    :consumes :timestamp-range-of-census-observation
-    :produces :bounded-re-derivable-observation-scope
+    :consumes :ledger-timestamps
+    :produces :bounded-window-in-census-block
     :completion-check
-    [:window-line-is-bare-timestamp-range
-     "census line '- **window**: 2026-08-23T10:59 -> 2026-08-24T15:16' bounds what the census saw without attaching any staleness verdict"]}
+    [:window-field-names-both-endpoints
+     "the census block states '- **window**: 2026-08-23T10:59 -> 2026-08-24T15:16', bounding the observation in time"]}
    ["agent/pause-is-not-failure" 8]
-   {:operation :attribute-cancels-to-named-agent-control-pair
+   {:operation :record-most-frequent-agent-pair
     :capability :wm/pattern-apply
-    :consumes :most-often-line-with-agent-and-control
-    :produces :provenance-bearing-invoke-job-record-for-cancel
+    :consumes :grouped-terminal-codes-by-agent
+    :produces :dominant-pair-named-in-census-block
     :completion-check
-    [:agent-pair-named-in-most-often-line
-     "census line '- **most often**: `codex-10` <- `countdown-control`' names the cancelled agent and the cancelling control so the cancel record has provenance as a control event"]}
+    [:most-often-field-names-source-and-sender
+     "the census block states '- **most often**: `codex-10` <- `countdown-control`', naming who was cancelled by whom before any blame is assigned"]}
    ["apparatus/new-failure-class-is-a-design-defect" 9]
-   {:operation :locate-class-at-pipeline-stage
+   {:operation :state-current-pipeline-stage
     :capability :wm/pattern-apply
-    :consumes :terminal-code-observation-of-cancelled-invoke
-    :produces :stage-attributed-class-entry-for-design-question
+    :consumes :class-response-state
+    :produces :stage-believe-recorded-in-census-block
     :completion-check
-    [:stage-line-records-believe
-     "census line '- **stage**: BELIEVE' places the cancellation class at the BELIEVE stage, which is where the one-layer-down design question of the reclassification applies"]}
+    [:stage-field-says-believe
+     "the census block states '- **stage**: BELIEVE', an unresponded-to class rather than one already in SELECT"]}
    ["apparatus/recorded-failures-before-live-runs" 10]
-   {:operation :cite-requeryable-evidence-field
+   {:operation :state-census-provenance-source
     :capability :wm/pattern-apply
-    :consumes :census-source-line-with-endpoint-and-field
-    :produces :registered-evidence-source-checkable-by-later-gates
+    :consumes :invoke-job-ledger-query
+    :produces :provenance-field-naming-the-query
     :completion-check
-    [:source-line-names-endpoint-and-field
-     "census line '- **source**: `GET /api/alpha/invoke/jobs`, field `terminal-code`' names the endpoint and field any reviewer can re-read to check the census without spending a live run"]}
+    [:source-field-names-jobs-endpoint-and-field
+     "the census block states '- **source**: `GET /api/alpha/invoke/jobs`, field `terminal-code`', so the count is reproducible from the recorded ledger"]}
    ["buffer-cleaner/observe-categories" 11]
-   {:operation :fence-machine-extracted-census-block-end
+   {:operation :mark-regenerated-census-block-end
     :capability :wm/pattern-apply
-    :consumes :complete-bounded-observation-block
-    :produces :explicit-provenance-boundary-between-facts-and-prose
+    :consumes :machine-owned-block
+    :produces :human-section-separated-from-census
     :completion-check
-    [:census-end-marker-closes-the-block
-     "HTML comment '<!-- census:end -->' terminates the observation block so downstream consumers know exactly which bytes are machine-extracted"]}})
+    [:census-end-marker-present
+     "the '<!-- census:end -->' marker closes the machine block, so everything below it is human-owned and never regenerated"]}})
 
 (defn decisions
   "The hole resolutions for this requisition, bound to the cascade digest
