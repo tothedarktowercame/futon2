@@ -279,6 +279,126 @@ def read_write_stamps(click_id: str | None) -> tuple[dict[str, dict], int, Path 
     return stamps, unreadable, stamp_file
 
 
+# Agency job tool_use previews are a positive attribution source for writes by
+# agents outside the WM (WRITE-ATTRIB-4). The check is bounded and best-effort:
+# an outage is recorded as not-checked, never as a clean window.
+JOB_PREVIEW_PAGE = 250
+JOB_PREVIEW_MAX_JOBS = 1000
+JOB_PREVIEW_TIMEOUT = 20
+# Previews are truncated (~60 chars), so a preview only labels a path it
+# contains in full; a cut-off path never matches the longer real path.
+JOB_PREVIEW_SHELL_TOOLS = {"run_shell", "run_readonly", "shell", "bash"}
+
+
+def _job_ts(value) -> str | None:
+    """Normalize an Agency fractional timestamp to second precision for compare."""
+    if not isinstance(value, str) or len(value) < 19:
+        return None
+    return value[:19] + "Z"
+
+
+def job_overlaps_window(job: dict, started: str, ended: str) -> bool:
+    """True when the job was live at any point inside [started, ended]."""
+    begin = _job_ts(job.get("started-at")) or _job_ts(job.get("created-at"))
+    finish = _job_ts(job.get("finished-at"))
+    if begin is None:
+        # no start timestamp at all: only trust an explicit finish inside
+        return finish is not None and started <= finish
+    if begin > ended:
+        return False
+    return finish is None or finish >= started
+
+
+def fetch_agency_jobs_in_window(started: str, ended: str) -> tuple[list | None, str | None]:
+    """Page the Agency jobs listing newest-first until jobs older than the
+    window (and finished) are passed, bounded by JOB_PREVIEW_MAX_JOBS.
+    Returns (jobs, None) or (None, reason)."""
+    jobs: list = []
+    try:
+        for offset in range(0, JOB_PREVIEW_MAX_JOBS, JOB_PREVIEW_PAGE):
+            page = get_json(f"/api/alpha/invoke/jobs?limit={JOB_PREVIEW_PAGE}"
+                            f"&offset={offset}", timeout=JOB_PREVIEW_TIMEOUT)
+            rows = page.get("jobs") if isinstance(page, dict) else None
+            if not isinstance(rows, list):
+                return None, "jobs listing is not a list"
+            if not rows:
+                break
+            jobs.extend(rows)
+            if len(rows) < JOB_PREVIEW_PAGE:
+                break
+            # newest-first: once a whole page is finished before the window
+            # started, every later page is older still
+            if all(_job_ts(j.get("finished-at")) is not None
+                   and _job_ts(j["finished-at"]) < started for j in rows):
+                break
+        return [j for j in jobs if job_overlaps_window(j, started, ended)], None
+    except Exception as error:
+        return None, f"{type(error).__name__}: {error}"
+
+
+def attribute_entries_by_job_previews(entries: list, jobs: list) -> list:
+    """Relabel click-window/unattributed entries whose path appears in full in
+    a tool_use preview of one of JOBS. Stamped entries are not touched. Pure:
+    no HTTP here, so tests run on fixtures."""
+    hits: dict[str, dict] = {}
+    for job in jobs:
+        agent = job.get("agent-id")
+        job_id = job.get("job-id")
+        for event in job.get("events") or []:
+            if not isinstance(event, dict) or event.get("type") != "tool_use":
+                continue
+            tools = event.get("tools") or []
+            tool = tools[0] if tools else "unknown"
+            heuristic = tool in JOB_PREVIEW_SHELL_TOOLS
+            for preview in event.get("previews") or []:
+                if not isinstance(preview, str):
+                    continue
+                for candidate in _absolute_paths_in_preview(preview):
+                    previous = hits.get(candidate)
+                    if previous is None or (previous.get("heuristic")
+                                            and not heuristic):
+                        hits[candidate] = {"agent-id": agent, "job-id": job_id,
+                                           "tool": tool, "preview": preview,
+                                           "heuristic": heuristic}
+    if not hits:
+        return entries
+    result = []
+    for entry in entries:
+        if entry.get("attribution") == "click-window/unattributed" \
+                and entry.get("path") in hits:
+            hit = hits[entry["path"]]
+            claim = {"attribution": "attributed", "evidence": "agency-job-tool-use-preview"}
+            claim.update({k: hit[k] for k in ("agent-id", "job-id", "tool", "preview")})
+            if hit.get("heuristic"):
+                claim["heuristic"] = True
+            result.append({**entry, **claim})
+        else:
+            result.append(entry)
+    return result
+
+
+def _absolute_paths_in_preview(preview: str):
+    """Absolute path substrings a preview names in full. Previews are one line
+    and truncate around ~60 chars; only whole paths present in the preview are
+    candidates, so truncation never matches a longer real path."""
+    for token in preview.split():
+        token = token.strip("\"'`,();")
+        if token.startswith("/") and len(token) > 1:
+            yield token
+
+
+def apply_job_preview_attribution(entries: list, started: str, ended: str):
+    """Fetch live jobs and relabel; never raises. Returns (entries, check)."""
+    try:
+        jobs, reason = fetch_agency_jobs_in_window(started, ended)
+    except Exception as error:  # fetch itself guards, but keep the caller safe
+        jobs, reason = None, f"{type(error).__name__}: {error}"
+    if jobs is None:
+        return entries, {"status": "not-checked", "reason": reason}
+    return (attribute_entries_by_job_previews(entries, jobs),
+            {"status": "checked", "jobs-in-window": len(jobs)})
+
+
 def write_click_manifest(click: dict, started: str, ended: str,
                          before: dict[str, tuple[int, int]],
                          after: dict[str, tuple[int, int]],
@@ -315,7 +435,11 @@ def write_click_manifest(click: dict, started: str, ended: str,
         except FileNotFoundError:
             entry["change"] = "removed-after-click"
         entries.append(entry)
+    # Agency job tool_use previews can name writers outside the WM; a fetch
+    # failure is recorded, never mistaken for a clean window
+    entries, job_preview_check = apply_job_preview_attribution(entries, started, ended)
     stamped_count = sum(entry["attribution"] == "stamped" for entry in entries)
+    attributed_count = sum(entry["attribution"] == "attributed" for entry in entries)
     unattributed_count = sum(
         entry["attribution"] == "click-window/unattributed" for entry in entries)
     manifest = {
@@ -326,7 +450,9 @@ def write_click_manifest(click: dict, started: str, ended: str,
         "roots": [str(root.resolve()) for root in WRITE_ROOTS],
         "snapshot_seconds": snapshot_seconds,
         "entries": entries,
+        "job_preview_check": job_preview_check,
         "stamped_count": stamped_count,
+        "attributed_count": attributed_count,
         "unattributed_count": unattributed_count,
         "stamp_lines_unreadable": stamp_lines_unreadable,
         "attribution_note": ("click-window/unattributed means the path changed while this "
@@ -335,7 +461,11 @@ def write_click_manifest(click: dict, started: str, ended: str,
                              "this evidence. stamped means a writer "
                              "claimed the path in the click's stamp file; any process that can "
                              "write that file can make the claim, so it names a writer, it "
-                             "does not prove one."),
+                             "does not prove one. attributed means an Agency job's tool_use "
+                             "preview named the path in full while the job was live in the "
+                             "window; entries marked heuristic matched a shell preview, which "
+                             "suggests rather than shows the write. job_preview_check records "
+                             "whether the job check ran at all."),
     }
     safe_id = re.sub(r"[^A-Za-z0-9._-]", "_",
                      str(click.get("click-id") or f"click-unknown-{click.get('n', 'unknown')}"))
@@ -347,6 +477,7 @@ def write_click_manifest(click: dict, started: str, ended: str,
     summary = {"path": str(target.resolve()),
                "sha256": hashlib.sha256(encoded).hexdigest(),
                "count": len(entries), "stamped": stamped_count,
+               "attributed": attributed_count,
                "unattributed": unattributed_count}
     if unattributed_count > 0:
         log(f"click {click.get('click-id')} has {unattributed_count} unattributed "

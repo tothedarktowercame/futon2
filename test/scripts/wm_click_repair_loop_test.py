@@ -1,4 +1,5 @@
 import importlib.util
+import datetime
 import hashlib
 import os
 import json
@@ -37,6 +38,8 @@ def load_loop():
     module.ALERTS = state / "alerts.jsonl"
     module.ACKNOWLEDGED = state / "acknowledged.json"
     module.DEBUGGER = state / "debugger"
+    # write_click_manifest consults Agency job previews; tests never may.
+    module.fetch_agency_jobs_in_window = lambda started, ended: ([], None)
     return module
 
 
@@ -1209,3 +1212,106 @@ class LoopOwnWriteStampTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class JobPreviewAttributionTest(unittest.TestCase):
+    def test_previews_attribute_paths_and_respect_boundaries(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            root = base / "repo"
+            root.mkdir()
+            stamps = base / "stamps"
+            stamps.mkdir()
+            edited = root / "edited.txt"
+            shelled = root / "shelled.txt"
+            untouched = root / "untouched.txt"
+            truncated = root / "truncated-path-name.txt"
+
+            def fake_fire(n, args, since):
+                edited.write_text("a")
+                shelled.write_text("b")
+                untouched.write_text("c")
+                truncated.write_text("d")
+                return {"n": n, "click-id": "wm-click-preview", "outcome": "ok",
+                        "since-epoch": since}
+
+            def ts(delta_seconds):
+                stamp = (datetime.datetime.now(datetime.timezone.utc)
+                         + datetime.timedelta(seconds=delta_seconds))
+                return stamp.strftime("%Y-%m-%dT%H:%M:%S.100000000Z")
+
+            jobs = [
+                {"job-id": "invoke-fix-editor", "agent-id": "claude-9",
+                 "started-at": ts(-3600), "finished-at": ts(60),
+                 "events": [{"type": "tool_use", "tools": ["edit_file"],
+                             "previews": [f"edit_file {edited.resolve()}"]}]},
+                {"job-id": "invoke-fix-shell", "agent-id": "zai-3",
+                 "started-at": ts(-300), "finished-at": None,
+                 "events": [{"type": "tool_use", "tools": ["run_shell"],
+                             "previews": [f"run_shell cat {shelled.resolve()} > /dev/null"]}]},
+                {"job-id": "invoke-fix-truncated", "agent-id": "codex-2",
+                 "started-at": ts(-2400), "finished-at": ts(60),
+                 # the preview cut the last character off the path
+                 "events": [{"type": "tool_use", "tools": ["edit_file"],
+                             "previews": [f"edit_file {str(truncated.resolve())[:-1]}"]}]},
+                {"job-id": "invoke-fix-late", "agent-id": "claude-9",
+                 "started-at": ts(86400), "finished-at": ts(86460),
+                 "events": [{"type": "tool_use", "tools": ["edit_file"],
+                             "previews": [f"edit_file {untouched.resolve()}"]}]},
+            ]
+            loop.fetch_agency_jobs_in_window = lambda started, ended: (
+                [j for j in jobs if loop.job_overlaps_window(j, started, ended)], None)
+
+            with mock.patch.object(loop, "STATE", base / "state"), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [root]), \
+                 mock.patch.object(loop, "fire", side_effect=fake_fire):
+                click = loop.fire_with_write_manifest(1, object(), 123)
+
+            manifest = json.loads(Path(click["write_manifest"]["path"]).read_text())
+            self.assertEqual({"status": "checked", "jobs-in-window": 3},
+                             manifest["job_preview_check"])
+            self.assertEqual(2, manifest["attributed_count"])
+            entries = {Path(e["path"]).name: e for e in manifest["entries"]}
+            self.assertEqual("attributed", entries["edited.txt"]["attribution"])
+            self.assertEqual("claude-9", entries["edited.txt"]["agent-id"])
+            self.assertEqual("invoke-fix-editor", entries["edited.txt"]["job-id"])
+            self.assertEqual("edit_file", entries["edited.txt"]["tool"])
+            self.assertNotIn("heuristic", entries["edited.txt"])
+            # a shell preview still names the writer, marked heuristic
+            self.assertEqual("attributed", entries["shelled.txt"]["attribution"])
+            self.assertIs(True, entries["shelled.txt"]["heuristic"])
+            self.assertEqual("zai-3", entries["shelled.txt"]["agent-id"])
+            # no preview named it inside the window
+            self.assertEqual("click-window/unattributed",
+                             entries["untouched.txt"]["attribution"])
+            # a truncated preview must not match the longer real path
+            self.assertEqual("click-window/unattributed",
+                             entries["truncated-path-name.txt"]["attribution"])
+
+    def test_fetch_failure_records_not_checked_and_keeps_entries(self):
+        loop = load_loop()
+
+        def broken_fetch(started, ended):
+            raise OSError("agency unreachable")
+
+        entries = [{"path": "/tmp/x/one.txt", "change": "new",
+                    "attribution": "click-window/unattributed"},
+                   {"path": "/tmp/x/two.txt", "change": "new",
+                    "attribution": "stamped", "writer": "w"}]
+        loop.fetch_agency_jobs_in_window = broken_fetch
+        result, check = loop.apply_job_preview_attribution(entries, "2026-11-07T06:00:00Z",
+                                                           "2026-11-07T07:00:00Z")
+        self.assertEqual("not-checked", check["status"])
+        self.assertIn("agency unreachable", check["reason"])
+        self.assertEqual(entries, result)
+
+    def test_fetch_none_reason_is_reported(self):
+        loop = load_loop()
+        loop.fetch_agency_jobs_in_window = lambda s, e: (None, "URLError: refused")
+        result, check = loop.apply_job_preview_attribution(
+            [{"path": "/tmp/x/one.txt", "attribution": "click-window/unattributed"}],
+            "2026-11-07T06:00:00Z", "2026-11-07T07:00:00Z")
+        self.assertEqual("not-checked", check["status"])
+        self.assertEqual("URLError: refused", check["reason"])
+        self.assertEqual("click-window/unattributed", result[0]["attribution"])
