@@ -34,6 +34,8 @@
     :job-read-transport-failure :no-addressable-action :no-selection
     :no-selection-made :occurrence-square-answer-invalid
     :open-cascade-author-answer-invalid
+    :open-cascade-author-contact-failed
+    :open-cascade-review-contact-failed
     :ordinary-click-budget-observation-malformed
     :ordinary-click-budget-observation-time-malformed
     :ordinary-click-budget-reader-failed :ordinary-click-budget-reader-unavailable

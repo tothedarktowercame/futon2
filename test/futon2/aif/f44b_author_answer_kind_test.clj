@@ -53,6 +53,9 @@
 (deftest uncontacted-author-is-not-reported-as-a-direct-answer
   ;; designated-agent-answer-fn answers :state :not-contacted when the seat is
   ;; not invoke-ready; response-map decodes that to nil like a refused answer.
+  ;; PROVIDER-FAIL-2: a contact that produced no answer is a failed CONTACT
+  ;; (:open-cascade-author-contact-failed, job state as received), not an
+  ;; unparseable answer -- the :author-job absence still names :not-contacted.
   (let [reviewer-called? (atom false)
         handler (runtime/open-cascade-resume-handler
                  {:author "wm-author"
@@ -67,7 +70,8 @@
                     (reset! reviewer-called? true)
                     {:state "done" :result "must not be called"})})
         result (handler held-error)]
-    (is (= :open-cascade-author-answer-invalid (:kind result)))
+    (is (= :open-cascade-author-contact-failed (:kind result)))
+    (is (= :not-contacted (:job-state result)))
     (is (= {:status :absent
             :reason :not-contacted
             :contact-reason :designated-author-unavailable}

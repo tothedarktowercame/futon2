@@ -614,6 +614,37 @@
                            :direct-answer)}
           (:reason response) (assoc :contact-reason (:reason response))))))
 
+(defn- contact-failed-defect
+  "PROVIDER-FAIL-2: the answer-evidence defect for a contact whose job
+  reached a non-done terminal state. Built here (not inline in the refusal
+  maps) so the defect kind stays a DEFECT kind, not a terminal kind: the
+  terminal-kind scanner reads :kind/:reason literals near a terminal
+  :status literal, and an inline defect map would be read as an
+  unclassified terminal kind."
+  [response]
+  {:kind :contact-failed
+   :job-state (:state response)
+   :message (handoff/response-parse-error response)})
+
+(defn- contact-refusal
+  "The typed failed-contact refusal map (minus its terminal :kind, which the
+  branches attach explicitly) for a nil answer whose job reached a non-done
+  terminal state: there is no answer to parse, so this is a failed contact,
+  not an unparseable answer (PROVIDER-FAIL-2; the typing discipline of
+  cascade-effect-contact-answer: nil + job state => a typed refusal naming
+  the state). Labels only: no retry, no injury-policy or routing change."
+  [who who-key job-key response payload]
+  {:status :error
+   :job-state (:state response)
+   who-key who
+   job-key (contact-job response)
+   :answer-evidence
+   (answer-evidence/retain
+    {:raw payload
+     :agent who
+     :job-id (contact-job response)
+     :defect (contact-failed-defect response)})})
+
 (defn open-cascade-resume-handler
   "Production D4 composition. Contact the designated author and distinct
   reviewer through Agency, validate the reviewed answer, hot-load the exact
@@ -986,21 +1017,31 @@
                     {:status :retention-failed :error (ex-message t)})))
                 result (cond
               (nil? author-answer)
-              {:status :error
-               :kind (if (and correction (= "done" (:state author-response)))
-                       :author-response-unparseable
-                       :open-cascade-author-answer-invalid)
-               :author author
-               :format-correction correction
-               :parser-error (handoff/response-parse-error author-response)
-               :author-job (contact-job author-response)
-               :answer-evidence
-               (answer-evidence/retain
-                {:raw (handoff/response-payload author-response)
-                 :agent author
-                 :job-id (contact-job author-response)
-                 :defect {:kind :response-unparseable
-                          :message (handoff/response-parse-error author-response)}})}
+              (if (and (map? author-response) (contains? author-response :state)
+                       (not= "done" (:state author-response)))
+                ;; PROVIDER-FAIL-2: the seat was contacted and its job reached
+                ;; a non-done terminal state (a provider 429/500, a timeout, a
+                ;; cancellation, or a not-contacted designated seat): a failed
+                ;; contact, typed apart from an unparseable answer.
+                (assoc (contact-refusal author :author :author-job
+                                        author-response
+                                        (handoff/response-payload author-response))
+                       :kind :open-cascade-author-contact-failed)
+                {:status :error
+                 :kind (if (and correction (= "done" (:state author-response)))
+                         :author-response-unparseable
+                         :open-cascade-author-answer-invalid)
+                 :author author
+                 :format-correction correction
+                 :parser-error (handoff/response-parse-error author-response)
+                 :author-job (contact-job author-response)
+                 :answer-evidence
+                 (answer-evidence/retain
+                  {:raw (handoff/response-payload author-response)
+                   :agent author
+                   :job-id (contact-job author-response)
+                   :defect {:kind :response-unparseable
+                            :message (handoff/response-parse-error author-response)}})})
 
               (not= :bound (:status author-binding))
               (assoc author-binding :author-job (contact-job author-response))
@@ -1032,17 +1073,26 @@
               (assoc product-check :author-job (contact-job author-response))
 
               (nil? reviewed)
-              {:status :error
-               :kind :open-cascade-review-answer-invalid
-               :reviewer reviewer
-               :reviewer-job (contact-job reviewer-response)
-               :answer-evidence
-               (answer-evidence/retain
-                {:raw (handoff/response-payload reviewer-response)
-                 :agent reviewer
-                 :job-id (contact-job reviewer-response)
-                 :defect {:kind :response-unparseable
-                          :message (handoff/response-parse-error reviewer-response)}})}
+              (if (and (map? reviewer-response) (contains? reviewer-response :state)
+                       (not= "done" (:state reviewer-response)))
+                ;; PROVIDER-FAIL-2: the reviewer's job reached a non-done
+                ;; terminal state -- a failed contact, not an unparseable
+                ;; answer (see the author branch above).
+                (assoc (contact-refusal reviewer :reviewer :reviewer-job
+                                        reviewer-response
+                                        (handoff/response-payload reviewer-response))
+                       :kind :open-cascade-review-contact-failed)
+                {:status :error
+                 :kind :open-cascade-review-answer-invalid
+                 :reviewer reviewer
+                 :reviewer-job (contact-job reviewer-response)
+                 :answer-evidence
+                 (answer-evidence/retain
+                  {:raw (handoff/response-payload reviewer-response)
+                   :agent reviewer
+                   :job-id (contact-job reviewer-response)
+                   :defect {:kind :response-unparseable
+                            :message (handoff/response-parse-error reviewer-response)}})})
 
               (some? review-refusal)
               (if-let [round objection-round]

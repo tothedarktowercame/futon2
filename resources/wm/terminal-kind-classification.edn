@@ -73,7 +73,9 @@
  :occurrence-square-authoring-threw {:class :recorded-defect :lean-basis nil :raise-sites ["src/futon2/aif/full_loop_runner.clj:3011"]}
  :occurrence-square-redecision-failed {:class :repairable-error :lean-basis nil :raise-sites ["full_loop_runner.clj:8831"]}
  :open-cascade-author-answer-invalid {:class :recorded-defect :lean-basis nil :raise-sites ["full_loop_runtime.clj:985-1000"]}
+ :open-cascade-author-contact-failed {:class :recorded-defect :lean-basis nil :raise-sites ["full_loop_runtime.clj:986"]}
  :open-cascade-review-answer-invalid {:class :recorded-defect :lean-basis nil :raise-sites ["full_loop_runtime.clj:1033"]}
+ :open-cascade-review-contact-failed {:class :recorded-defect :lean-basis nil :raise-sites ["full_loop_runtime.clj:1034"]}
  :open-cascade-review-refused {:class :recorded-defect :lean-basis nil :raise-sites ["src/futon2/aif/full_loop_runtime.clj:759"]}
  :operator-cancelled {:class :operator-termination :lean-basis nil :raise-sites ["src/futon2/aif/meta_terminal_injury.clj:20"]}
  :ordinary-click-budget-observation-malformed {:class :repairable-error :lean-basis nil :raise-sites ["src/futon2/aif/full_loop_runtime.clj:182"]}
