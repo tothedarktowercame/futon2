@@ -1,6 +1,6 @@
 # E-kimi-task-361 — read operator focus areas
 
-**Requisition:** in-progress — dispatched 2026-11-07T05:55:52Z to 猴-1 as invoke-1794030952524-14862-05104e2f
+**Requisition:** completed — 2026-11-07T05:56:22Z, job invoke-1794030952524-14862-05104e2f, state done
 
 Clocked in by operator-focus for 猴-1 on 2026-11-07 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
