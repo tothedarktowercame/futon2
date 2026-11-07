@@ -924,6 +924,76 @@ def machine_self_heal_failure(click: dict):
     return disposition
 
 
+# PROVIDER-FAIL-4c: read the run record the same way the 4b classifier does
+# (meta_terminal_injury.clj failure-kind/provider-failure fallback chains):
+# [:failure :kind] / [:failure :detail :failure-kind] /
+# [:terminal-receipt :failure-kind]; the provider detail from
+# [:failure :provider-failure] / [:failure :detail :provider-failure] /
+# [:terminal-receipt :provider-failure]. bb parses the EDN (the script's
+# existing pattern); cheshire prints one JSON line.
+_PROVIDER_UNAVAILABLE_EDN = (
+    "(require '[clojure.edn :as edn] '[cheshire.core :as json])"
+    "(let [r (edn/read-string {:default tagged-literal}"
+    " (slurp (first *command-line-args*)))"
+    " f (:failure r)"
+    " d (:detail f)"
+    " kind (or (:kind f) (:failure-kind d)"
+    "          (get-in r [:terminal-receipt :failure-kind]))"
+    " pf (or (:provider-failure f) (:provider-failure d)"
+    "        (get-in r [:terminal-receipt :provider-failure]))]"
+    " (println (json/generate-string"
+    "  (if (= :open-cascade-provider-unavailable kind)"
+    "    {\"kind\" (name kind)"
+    "     \"seat\" (some-> (or (:seat f) (:seat d)) name)"
+    "     \"class\" (some-> (:class pf) name)"
+    "     \"http-status\" (:http-status pf)"
+    "     \"provider-code\" (:provider-code pf)"
+    "     \"evidence\" (:evidence pf)"
+    "     \"retry-job\" (str (or (:retry-job f) (:retry-job d)))"
+    "     \"run-id\" (str (or (:run/id r) (:run-id r)))}"
+    "    nil))))")
+
+_provider_unavailable_warned = False
+
+
+def provider_unavailable(click: dict):
+    """PROVIDER-FAIL-4c, Joe's ruling 2026-11-07: a provider failure retried
+    once and stopped typed (PROVIDER-FAIL-4a) ends the click with the typed
+    reason, not as an injury or a self-heal route. Returns None or
+    {"seat", "class", "http-status", "provider-code", "evidence", "retry-job",
+    "run-id"} read from the click's run record. Any read failure returns None,
+    is logged once, and never raises."""
+    global _provider_unavailable_warned
+    lr = click.get("last-result") or {}
+    path = (lr.get("run-record") or click.get("run-record"))
+    if not path or not Path(path).is_file():
+        return None
+    try:
+        r = subprocess.run(["bb", "-e", _PROVIDER_UNAVAILABLE_EDN, str(path)],
+                           capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        if not _provider_unavailable_warned:
+            log(f"provider-unavailable check could not read {path}: {exc}")
+            _provider_unavailable_warned = True
+        return None
+    if r.returncode != 0 or not r.stdout.strip():
+        if not _provider_unavailable_warned:
+            log(f"provider-unavailable check could not read {path}: "
+                f"bb exited {r.returncode}")
+            _provider_unavailable_warned = True
+        return None
+    try:
+        row = json.loads(r.stdout.strip().splitlines()[-1])
+    except (ValueError, IndexError) as exc:
+        if not _provider_unavailable_warned:
+            log(f"provider-unavailable check could not read {path}: {exc}")
+            _provider_unavailable_warned = True
+        return None
+    if not (isinstance(row, dict) and row.get("class")):
+        return None
+    return row
+
+
 def sh(*args, cwd=None, timeout=None, input=None) -> subprocess.CompletedProcess:
     return subprocess.run(list(map(str, args)), cwd=cwd, capture_output=True, text=True,
                           timeout=timeout, input=input)
@@ -2176,6 +2246,29 @@ def run(args) -> int:
             detail = ", ".join(f"{key} {value}" for key, value in fields.items())
             reason = (f"machine-self-heal-failed: click {c['click-id']}"
                       f"{', ' if detail else ''}{detail}; no next iteration started")
+            return stop(args, "debugger-error", reason, 1, {})
+        provider = provider_unavailable(c)
+        if provider:
+            # PROVIDER-FAIL-4c: the click stopped typed after the one retry
+            # PROVIDER-FAIL-4a performed. "debugger-error" is the existing
+            # illegal-stop case on purpose: whether a provider stop is a
+            # LEGAL stop is a specification question for Joe, not this packet.
+            fields = {key: provider.get(key) for key in
+                      ("seat", "class", "http-status", "provider-code",
+                       "evidence", "retry-job", "run-id")
+                      if provider.get(key) is not None}
+            record({"event": "stop-evidence", "kind": "provider-unavailable",
+                    "click-id": c["click-id"], **fields})
+            shown = [f"{provider.get('class')}",
+                     f"on {provider.get('seat')}"]
+            shown.append(f"({provider.get('evidence')}"
+                         + (f", HTTP {provider['http-status']}"
+                            if provider.get("http-status") is not None else "")
+                         + (f", code {provider['provider-code']}"
+                            if provider.get("provider-code") is not None else "")
+                         + ")")
+            reason = (f"provider-unavailable: {' '.join(shown)}"
+                      f" after one retry; click {c['click-id']}; waiting for Joe")
             return stop(args, "debugger-error", reason, 1, {})
         if (_runtime_disposition(c.get("last-result")) is None and
                 _binding_disposition(c.get("click-id")) is None):

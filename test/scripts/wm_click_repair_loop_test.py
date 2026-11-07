@@ -870,6 +870,7 @@ class ContinuousModeTest(unittest.TestCase):
                  mock.patch.object(loop, "fire", side_effect=fire), \
                  mock.patch.object(loop.time, "sleep") as sleep, \
                  mock.patch.object(loop, "notify") as notify, \
+                 mock.patch.object(loop, "notify") as notify, \
                  mock.patch.object(loop, "notify_alert"), \
                  mock.patch.object(loop, "repair") as repair, \
                  mock.patch.object(loop, "log"):
@@ -1329,6 +1330,111 @@ class JobPreviewAttributionTest(unittest.TestCase):
         self.assertEqual("not-checked", check["status"])
         self.assertEqual("URLError: refused", check["reason"])
         self.assertEqual("click-window/unattributed", result[0]["attribution"])
+
+
+class ProviderUnavailableStopTest(unittest.TestCase):
+    """PROVIDER-FAIL-4c, Joe's ruling 2026-11-07: a provider failure retried
+    once (PROVIDER-FAIL-4a) ends the click typed -- never as an injury or a
+    self-heal route. The run record is parsed by the real bb (the script's
+    existing EDN reader); the loop itself never touches the live debugger or
+    Agency (load_loop's stubs)."""
+
+    def _write_record(self, td, text):
+        path = Path(td) / "tick-run-record-run-pf4c.edn"
+        path.write_text(text)
+        return path
+
+    def test_provider_unavailable_reads_the_429_run_record(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            path = self._write_record(td, (
+                '{:run/id "run-pf4c" '
+                ':failure {:kind :open-cascade-provider-unavailable '
+                ':stage :cascade-resume :seat :wm-author '
+                ':provider-failure {:class :usage-limit :http-status 429 '
+                ':provider-code "1308" :evidence "HTTP 429"} '
+                ':provider-retry {:first-job "job-1"} :retry-job "job-2"}}'))
+            row = loop.provider_unavailable({"last-result": {"run-record": str(path)},
+                                             "run-record": str(path)})
+            self.assertEqual({"kind": "open-cascade-provider-unavailable",
+                              "seat": "wm-author",
+                              "class": "usage-limit",
+                              "http-status": 429,
+                              "provider-code": "1308",
+                              "evidence": "HTTP 429",
+                              "retry-job": "job-2",
+                              "run-id": "run-pf4c"}, row)
+
+    def test_contact_failed_without_a_provider_stop_is_not_a_provider_stop(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            path = self._write_record(td, (
+                '{:run/id "run-cf" :failure {:kind :open-cascade-author-contact-failed '
+                ':stage :cascade-resume}}'))
+            self.assertIsNone(loop.provider_unavailable(
+                {"run-record": str(path)}))
+
+    def test_unreadable_record_returns_none_without_raising(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td, \
+                mock.patch.object(loop, "log") as logged:
+            path = self._write_record(td, "{:failure {:kind :not-edn")
+            self.assertIsNone(loop.provider_unavailable({"run-record": str(path)}))
+            self.assertIsNone(loop.provider_unavailable({"run-record": str(path)}))
+            self.assertEqual(1, logged.call_count, "the read failure is logged once")
+
+    def test_run_stops_typed_on_a_provider_unavailable_click(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            path = self._write_record(td, (
+                '{:run/id "run-pf4c" '
+                ':failure {:kind :open-cascade-provider-unavailable '
+                ':stage :cascade-resume :seat :wm-author '
+                ':provider-failure {:class :usage-limit :http-status 429 '
+                ':provider-code "1308" :evidence "HTTP 429"} '
+                ':retry-job "job-2"}}'))
+            args = loop.parse_args([
+                "run", "--clicks", "1", "--continuous", "--owner", "claude-2",
+                "--issuing-caller", "claude-2", "--author", "wm-author",
+                "--reviewer", "wm-reviewer", "--repair-reviewer", "wm-repair-reviewer"])
+
+            def fire(n, a, since):
+                return {"n": n, "rc": 1, "click-id": f"click-{n}", "spent": True,
+                        "outcome": "unknown", "run-id": "run-pf4c", "carried": False,
+                        "last-result": {"run-record": str(path)}, "log": None,
+                        "run-record": str(path), "verdict": {"file": "V"},
+                        "alert": None, "since-epoch": since, "in-flight-repairs": []}
+            with mock.patch.object(loop, "STATE", Path(td)), \
+                 mock.patch.object(loop, "WRITE_ROOTS", [Path(td) / "f2-data",
+                                                          Path(td) / "f2-evidence",
+                                                          Path(td) / "f3-data"]), \
+                 mock.patch.object(loop, "LEDGER", Path(td) / "ledger.jsonl"), \
+                 mock.patch.object(loop, "LOGFILE", Path(td) / "loop.log"), \
+                 mock.patch.object(loop, "STOP_FILE", Path(td) / "STOP"), \
+                 mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
+                 mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
+                 mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+                 mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
+                 mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
+                 mock.patch.object(loop, "fire", side_effect=fire), \
+                 mock.patch.object(loop, "notify_alert"), \
+                 mock.patch.object(loop, "repair") as repair, \
+                 mock.patch.object(loop, "log"):
+                code = loop.run(args)
+            self.assertEqual(1, code)
+            self.assertEqual(0, repair.call_count)
+            rows = [json.loads(line) for line in
+                    (Path(td) / "ledger.jsonl").read_text().splitlines() if line.strip()]
+            evidence = [r for r in rows if r.get("event") == "stop-evidence"
+                        and r.get("kind") == "provider-unavailable"]
+            self.assertEqual(1, len(evidence))
+            self.assertEqual("usage-limit", evidence[0]["class"])
+            self.assertEqual("wm-author", evidence[0]["seat"])
+            stop_row = [r for r in rows if r.get("event") == "stop"][0]
+            self.assertTrue(stop_row["reason"].startswith(
+                "provider-unavailable: usage-limit on wm-author"),
+                            stop_row["reason"])
+            self.assertIn("waiting for Joe", stop_row["reason"])
 
 
 if __name__ == "__main__":
