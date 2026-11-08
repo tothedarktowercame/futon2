@@ -167,7 +167,13 @@ class SourceAndOrderTest(unittest.TestCase):
 class WingTest(unittest.TestCase):
     def test_wing_d_is_named_and_unknown_is_unplaced(self):
         self.assertEqual("D", gpe.wing_key({"wing": "D"}))
-        self.assertIn("next-action", gpe.WINGS["D"][0])
+        self.assertIn("next action", gpe.WINGS["D"][0])
+
+    def test_project_names_pass_planes_name_rule(self):
+        import re
+        for name, ident in list(gpe.WINGS.values()) + [gpe.REPAIRS]:
+            self.assertIsNone(re.match(gpe.PLANE_FORBIDDEN_NAME, name), name)
+            self.assertLessEqual(len(ident), 12)
         self.assertEqual("unplaced", gpe.wing_key({"wing": "unsure"}))
         self.assertEqual("unplaced", gpe.wing_key(None))
 

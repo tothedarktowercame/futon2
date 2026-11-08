@@ -53,17 +53,19 @@ KINDS = {"M": "mission", "T": "ticket", "E": "excursion"}
 
 # Projects are wings (Joe, 2026-11-08: Tickets/Missions/Excursions "are more
 # like tags than projects"; wing D reads better by its name).  Wing names are
-# notes/commons-map/map.edn's.  key -> (project name, identifier).
+# notes/commons-map/map.edn's, without the characters Plane refuses in a
+# project name (PLANE_FORBIDDEN_NAME, db/models/project.py:145).  key -> (project name, identifier).
 WINGS = {
     "A": ("Records carry warrant", "WARRANT"),
-    "B": ("One queryable self-account", "SELFACC"),
+    "B": ("One queryable self account", "SELFACC"),
     "C": ("Feedback reaches every participant", "FEEDBACK"),
-    "D": ("Accountable next-action choice (AIF outer loop)", "OUTERLOOP"),
-    "V": ("Viability (body and energy)", "VIABLE"),
+    "D": ("Accountable next action choice / AIF outer loop", "OUTERLOOP"),
+    "V": ("Viability / body and energy", "VIABLE"),
     "none": ("Outside the wings", "NOWING"),
     "unplaced": ("Not yet placed", "UNPLACED"),
 }
 REPAIRS = ("WM repairs", "REPAIRS")
+PLANE_FORBIDDEN_NAME = r"^.*[&+,:;$^}{*=?@#|'<>.()%!-].*$"
 # The kind-named projects of the first export; removed once the wing
 # projects are populated.
 RETIRED_PROJECTS = ("Missions", "Tickets", "Excursions")
