@@ -77,6 +77,8 @@ TRUNKS = {
     "notrunk": ("Not on a trunk yet", "NOTRUNK"),
 }
 DEFAULT_TRUNKS = "/home/joe/notes/cascade-live-outline/trunks-2026-11-08.tsv"
+# Classify-only FIX/WONTFIX pass (2026-11-08): one verdict label per item.
+DEFAULT_VERDICTS = "/home/joe/notes/cascade-live-outline/fix-wontfix-2026-11-08.tsv"
 REPAIRS = ("WM repairs", "REPAIRS")
 PLANE_FORBIDDEN_NAME = r"^.*[&+,:;$^}{*=?@#|'<>.()%!-].*$"
 # Superseded projects, deleted after sync: the kind-named projects of the
@@ -432,6 +434,25 @@ def load_trunks(path=DEFAULT_TRUNKS):
     return out
 
 
+def load_verdicts(path=DEFAULT_VERDICTS):
+    """id -> list of label names from the FIX/WONTFIX sheet: "fix" or
+    "wontfix: <reason>", plus "wm-paused" when the work would edit War
+    Machine code.  Missing file -> {}."""
+    out = {}
+    if path and os.path.exists(path):
+        with open(path) as fh:
+            for r in csv.DictReader(fh, delimiter="\t"):
+                if not r.get("id"):
+                    continue
+                verdict = (r.get("verdict") or "").strip().upper()
+                reason = (r.get("reason") or "").strip() or "unstated"
+                labels = ["fix"] if verdict == "FIX" else ["wontfix: " + reason]
+                if (r.get("wm_paused") or "").strip() == "yes":
+                    labels.append("wm-paused")
+                out[r["id"]] = labels
+    return out
+
+
 def trunk_key(row):
     t = (row or {}).get("trunk", "")
     return t if t in TRUNKS else "notrunk"
@@ -626,6 +647,7 @@ def main(argv=None):
     ap.add_argument("--a1", default=DEFAULT_A1)
     ap.add_argument("--repairs", default=DEFAULT_REPAIRS)
     ap.add_argument("--trunks", default=DEFAULT_TRUNKS)
+    ap.add_argument("--verdicts", default=DEFAULT_VERDICTS)
     ap.add_argument("--api-base", default=API_BASE)
     args = ap.parse_args(argv)
 
@@ -646,6 +668,7 @@ def main(argv=None):
     # the repair records.  Wing and harm line are labels.
     placements = load_placements(args.a1)
     trunks = load_trunks(args.trunks)
+    verdicts = load_verdicts(args.verdicts)
     by_project = {}
     for it in live:
         pl_ = placements.get(it["id"])
@@ -656,6 +679,7 @@ def main(argv=None):
         tr = trunks.get(it["id"])
         if (tr or {}).get("harm_line"):
             labels.add("harm " + tr["harm_line"])
+        labels.update(verdicts.get(it["id"], []))
         pl = item_payload(it, labels)
         by_project.setdefault(TRUNKS[trunk_key(tr)][0], []).append(pl)
     repairs = load_repairs(args.repairs)

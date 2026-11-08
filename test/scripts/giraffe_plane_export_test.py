@@ -181,6 +181,21 @@ class TrunkTest(unittest.TestCase):
         self.assertEqual("notrunk", gpe.trunk_key(None))
         self.assertEqual({}, gpe.load_trunks(os.path.join(d, "absent.tsv")))
 
+    def test_verdict_sheet_gives_one_verdict_label_and_paused_flag(self):
+        import tempfile
+        d = tempfile.mkdtemp()
+        f = os.path.join(d, "v.tsv")
+        with open(f, "w") as fh:
+            fh.write("id\tverdict\treason\twm_paused\n"
+                     "T-a\tFIX\t\tno\n"
+                     "E-b\tWONTFIX\tmulti-day\tyes\n"
+                     "M-c\tWONTFIX\t\t?\n")
+        v = gpe.load_verdicts(f)
+        self.assertEqual(["fix"], v["T-a"])
+        self.assertEqual(["wontfix: multi-day", "wm-paused"], v["E-b"])
+        self.assertEqual(["wontfix: unstated"], v["M-c"])
+        self.assertEqual({}, gpe.load_verdicts(os.path.join(d, "absent.tsv")))
+
     def test_wings_become_labels_and_their_projects_are_retired(self):
         self.assertEqual("wing A: Records carry warrant",
                          gpe.wing_label({"wing": "A"}))
