@@ -164,6 +164,35 @@ class SourceAndOrderTest(unittest.TestCase):
         self.assertEqual(p["sort_order"], 1e9)
 
 
+class TrunkTest(unittest.TestCase):
+    def test_trunk_sheet_routes_items_and_unknown_is_not_on_a_trunk(self):
+        import tempfile
+        d = tempfile.mkdtemp()
+        f = os.path.join(d, "trunks.tsv")
+        with open(f, "w") as fh:
+            fh.write("id\ttrunk\tharm_line\tbasis\n"
+                     "T-a\tP\t\tplaced in P\n"
+                     "E-b\tharm\tH5\tdisbenefits H5\n"
+                     "M-c\tbogus\t\t?\n")
+        tr = gpe.load_trunks(f)
+        self.assertEqual("P", gpe.trunk_key(tr["T-a"]))
+        self.assertEqual("H5", tr["E-b"]["harm_line"])
+        self.assertEqual("notrunk", gpe.trunk_key(tr["M-c"]))
+        self.assertEqual("notrunk", gpe.trunk_key(None))
+        self.assertEqual({}, gpe.load_trunks(os.path.join(d, "absent.tsv")))
+
+    def test_wings_become_labels_and_their_projects_are_retired(self):
+        self.assertEqual("wing A: Records carry warrant",
+                         gpe.wing_label({"wing": "A"}))
+        self.assertEqual("wing: unplaced", gpe.wing_label(None))
+        self.assertEqual("wing: none", gpe.wing_label({"wing": "none"}))
+        for name, _ in gpe.WINGS.values():
+            self.assertIn(name, gpe.RETIRED_PROJECTS)
+        for name, _ in gpe.TRUNKS.values():
+            self.assertNotIn(name, gpe.RETIRED_PROJECTS)
+        self.assertNotIn(gpe.REPAIRS[0], gpe.RETIRED_PROJECTS)
+
+
 class WingTest(unittest.TestCase):
     def test_wing_d_is_named_and_unknown_is_unplaced(self):
         self.assertEqual("D", gpe.wing_key({"wing": "D"}))
@@ -171,7 +200,7 @@ class WingTest(unittest.TestCase):
 
     def test_project_names_pass_planes_name_rule(self):
         import re
-        for name, ident in list(gpe.WINGS.values()) + [gpe.REPAIRS]:
+        for name, ident in list(gpe.TRUNKS.values()) + [gpe.REPAIRS]:
             self.assertIsNone(re.match(gpe.PLANE_FORBIDDEN_NAME, name), name)
             self.assertLessEqual(len(ident), 12)
         self.assertEqual("unplaced", gpe.wing_key({"wing": "unsure"}))

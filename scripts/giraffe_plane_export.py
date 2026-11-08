@@ -51,10 +51,7 @@ EXTERNAL_SOURCE = "giraffe"
 
 KINDS = {"M": "mission", "T": "ticket", "E": "excursion"}
 
-# Projects are wings (Joe, 2026-11-08: Tickets/Missions/Excursions "are more
-# like tags than projects"; wing D reads better by its name).  Wing names are
-# notes/commons-map/map.edn's, without the characters Plane refuses in a
-# project name (PLANE_FORBIDDEN_NAME, db/models/project.py:145).  key -> (project name, identifier).
+# Wing names (notes/commons-map/map.edn), now carried as labels.
 WINGS = {
     "A": ("Records carry warrant", "WARRANT"),
     "B": ("One queryable self account", "SELFACC"),
@@ -64,11 +61,28 @@ WINGS = {
     "none": ("Outside the wings", "NOWING"),
     "unplaced": ("Not yet placed", "UNPLACED"),
 }
+# Projects are benefit trunks (Joe, 2026-11-08: benefit lines are "trunks",
+# projects "like the branches"; wings become labels).  key -> (project name,
+# identifier); names avoid the characters Plane refuses (PLANE_FORBIDDEN_NAME).
+TRUNKS = {
+    "L": ("Learning", "LEARNING"),
+    "P": ("Patterns and the Alexandrian way", "PATTERNS"),
+    "C": ("Clients and income", "CLIENTS"),
+    "K": ("Collaborators", "COLLAB"),
+    "G": ("Community and governance", "COMMUNITY"),
+    "N": ("Newcomers and users", "NEWCOMERS"),
+    "commons": ("Commons and public", "COMMONS"),
+    "harm": ("Harm avoided", "HARMS"),
+    "nostated": ("No stated benefit or harm", "NOSTATED"),
+    "notrunk": ("Not on a trunk yet", "NOTRUNK"),
+}
+DEFAULT_TRUNKS = "/home/joe/notes/cascade-live-outline/trunks-2026-11-08.tsv"
 REPAIRS = ("WM repairs", "REPAIRS")
 PLANE_FORBIDDEN_NAME = r"^.*[&+,:;$^}{*=?@#|'<>.()%!-].*$"
-# The kind-named projects of the first export; removed once the wing
-# projects are populated.
-RETIRED_PROJECTS = ("Missions", "Tickets", "Excursions")
+# Superseded projects, deleted after sync: the kind-named projects of the
+# first export, then the wing projects (wings are labels from 2026-11-08).
+RETIRED_PROJECTS = ("Missions", "Tickets", "Excursions") + tuple(
+    name for name, _ in WINGS.values())
 DEFAULT_A1 = "/home/joe/code/futon3c/holes/excursions/ant-reads/A1-placements.tsv"
 DEFAULT_EARLY = "/home/joe/notes/commons-map/placements-[12]*.tsv"
 DEFAULT_REPAIRS = "/home/joe/code/futon2/records/repair"
@@ -405,6 +419,31 @@ def load_placements(a1_path=DEFAULT_A1, early_glob=DEFAULT_EARLY):
     return out
 
 
+def load_trunks(path=DEFAULT_TRUNKS):
+    """id -> {"trunk", "harm_line"} from the trunk sheet
+    (notes/cascade-live-outline/build_trunks.py).  Missing file -> {}."""
+    out = {}
+    if path and os.path.exists(path):
+        with open(path) as fh:
+            for r in csv.DictReader(fh, delimiter="\t"):
+                if r.get("id"):
+                    out[r["id"]] = {"trunk": (r.get("trunk") or "").strip(),
+                                    "harm_line": (r.get("harm_line") or "").strip()}
+    return out
+
+
+def trunk_key(row):
+    t = (row or {}).get("trunk", "")
+    return t if t in TRUNKS else "notrunk"
+
+
+def wing_label(placement):
+    k = wing_key(placement)
+    if k in ("A", "B", "C", "D", "V"):
+        return "wing %s: %s" % (k, WINGS[k][0])
+    return "wing: " + k
+
+
 def wing_key(placement):
     w = (placement or {}).get("wing", "")
     return w if w in WINGS else "unplaced"
@@ -586,6 +625,7 @@ def main(argv=None):
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--a1", default=DEFAULT_A1)
     ap.add_argument("--repairs", default=DEFAULT_REPAIRS)
+    ap.add_argument("--trunks", default=DEFAULT_TRUNKS)
     ap.add_argument("--api-base", default=API_BASE)
     args = ap.parse_args(argv)
 
@@ -602,20 +642,26 @@ def main(argv=None):
         % (len(items), len(live), len(items) - len(live))
     )
 
-    # Build payloads grouped by project: one project per wing, plus the
-    # repair records.
+    # Build payloads grouped by project: one project per benefit trunk, plus
+    # the repair records.  Wing and harm line are labels.
     placements = load_placements(args.a1)
+    trunks = load_trunks(args.trunks)
     by_project = {}
     for it in live:
         pl_ = placements.get(it["id"])
         it["way"] = (pl_ or {}).get("way", "")
         row = census.get(it["id"])
-        pl = item_payload(it, item_labels(it, row))
-        by_project.setdefault(WINGS[wing_key(pl_)][0], []).append(pl)
+        labels = item_labels(it, row)
+        labels.add(wing_label(pl_))
+        tr = trunks.get(it["id"])
+        if (tr or {}).get("harm_line"):
+            labels.add("harm " + tr["harm_line"])
+        pl = item_payload(it, labels)
+        by_project.setdefault(TRUNKS[trunk_key(tr)][0], []).append(pl)
     repairs = load_repairs(args.repairs)
     by_project[REPAIRS[0]] = [item_payload(it, item_labels(it, None))
                               for it in repairs]
-    project_specs = list(WINGS.values()) + [REPAIRS]
+    project_specs = list(TRUNKS.values()) + [REPAIRS]
 
     # Summaries for dry-run and final report.
     print("counts per project/state/label:")
@@ -690,7 +736,7 @@ def main(argv=None):
         print("%s: created %d, updated %d, unchanged %d, deleted %d"
               % (pname, stats["created"], stats["updated"], stats["unchanged"],
                  stats["deleted"]))
-    # The kind-named projects are superseded by the wing projects.  Plane is
+    # Superseded projects (RETIRED_PROJECTS) are removed.  Plane is
     # a one-way mirror, so removing them loses nothing the files do not hold.
     for proj in plane.get_all("/workspaces/%s/projects/" % WORKSPACE):
         if proj.get("name") in RETIRED_PROJECTS:
