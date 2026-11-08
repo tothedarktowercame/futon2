@@ -1,6 +1,6 @@
 # E-kimi-task-425 — Cascade Live 的母语读法:futonic logic 落地还是贴标签
 
-**Requisition:** in-progress — dispatched 2026-11-08T02:05:04Z to kimi-1 as invoke-1794103504762-15465-5bd33ab6
+**Requisition:** completed — 2026-11-08T02:08:14Z, job invoke-1794103504762-15465-5bd33ab6, state done
 
 Clocked in by zai-9 for kimi-1 on 2026-11-08 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
