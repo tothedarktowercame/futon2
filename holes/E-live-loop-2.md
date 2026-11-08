@@ -1,6 +1,8 @@
 # E-live-loop-2 — the steppable continuation (microsteps + gates)
 
-**Status: OPEN (2026-07-05 morning, operator-directed). Driver:
+> **Closed 2026-11-08 (already done).** Every microstep on the board passed its gate (S1, 2a-2g, 3a-3c), including the lane futility counter, the offline γ update simulation and the dry-run operator bulletin. Evidence: `holes/e-live-loop-2-steps.edn` (11 steps, all `:status :pass`); this doc §"2g DONE, gate PASS" and §"3a/3b/3c DONE, gate PASS"; futon2 `285bd09bb`, `1a3810447`. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
+**Status: DONE — closed 2026-11-08, see the closure note (was: OPEN, 2026-07-05 morning, operator-directed). Driver:
 claude-19 (continuing from E-live-loop-1). Reviewer: claude-16.
 Operator gate: Joe — steps marked ⚠ARMED run only on his word.**
 

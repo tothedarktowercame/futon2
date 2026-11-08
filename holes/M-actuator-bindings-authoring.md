@@ -1,13 +1,15 @@
 # Task: author SPEC-DERIVED build-match bindings for a done-mission CLean
 
-**Status:** OPEN — No prior status was recorded.
+> **Closed 2026-11-08 (already done).** zai-10 authored the spec-derived autoclock-in bindings in `src/futon2/aif/actuator_a3.clj` (s1, s2, s6 bound; s3-s5 left unbound as abstract; s6 endpoint `ReconstitutableLineage` in `reviewed-endpoint-bindings`) and the grounding note `holes/bindings-autoclock-in-grounding.md`. Evidence: futon2 `9a0a2a2a8`; `actuator_a3.clj:34-43` and `:71-82`; clj-kondo 0/0 and check-parens OK on the current file, 2026-11-08. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
+**Status:** DONE — closed 2026-11-08, see the closure note.
 
 ## Acceptance checklist (2026-09-30)
 
-- [ ] `reviewed-box-bindings` contains a spec-derived six-box entry for `futon3c-d/mission/autoclock-in`, with abstract/process outputs explicitly left unbound.
-- [ ] `reviewed-endpoint-bindings` contains the terminal `s6` `:discharges` binding for `futon3c-d/mission/autoclock-in`.
-- [ ] `holes/bindings-autoclock-in-grounding.md` names every box's `:produces`, chosen substrate type or unbound status, and its spec-derived rationale.
-- [ ] The changed Clojure passes `clj-kondo` and `futon4/dev/check-parens.el` without a substrate write or `:7071` restart.
+- [x] `reviewed-box-bindings` contains a spec-derived six-box entry for `futon3c-d/mission/autoclock-in`, with abstract/process outputs explicitly left unbound. (`9a0a2a2a8`)
+- [x] `reviewed-endpoint-bindings` contains the terminal `s6` `:discharges` binding for `futon3c-d/mission/autoclock-in`. (`9a0a2a2a8`)
+- [x] `holes/bindings-autoclock-in-grounding.md` names every box's `:produces`, chosen substrate type or unbound status, and its spec-derived rationale. (`9a0a2a2a8`)
+- [x] The changed Clojure passes `clj-kondo` and `futon4/dev/check-parens.el` without a substrate write or `:7071` restart. (`9a0a2a2a8`; rechecked 2026-11-08)
 
 **Author:** zai-10 (reviewed lane — claude-4 reviews + runs build-match + returns a gap report).
 **This round's target:** `autoclock-in` (`futon3c-d/mission/autoclock-in`).

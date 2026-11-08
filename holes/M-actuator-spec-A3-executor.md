@@ -1,14 +1,16 @@
 # Spec: A3 — the thin, content-free actuator ("build this")
 
-**Status:** OPEN — No prior status was recorded.
+> **Closed 2026-11-08 (already done).** The content-free executor is `extract-build-package` / `run-a3!` in `src/futon2/aif/actuator_a3.clj`, one path over all four `a3-corpus-ids`, with typed `:spec-too-weak` and `:instruction-inadequate` misses and a dry-run branch that returns before any dispatch; the witness gate and a dry-run determinism test are in `test/futon2/aif/actuator_a3_test.clj`. Evidence: futon2 `7c7851889`, `8516ca2ca`; `actuator_a3.clj:209-221`, `:859-872`; tests `extracts-all-a3-corpus-deposits`, `reports-spec-quality-when-typespec-or-structure-missing`, `advance-mission-doc-closes-only-on-resolving-witness-and-present-hole`, `missing-or-unresolved-witness-with-present-hole-does-not-move-dial`, `dry-run-over-corpus-is-deterministic`; `clojure -M:test -n futon2.aif.actuator-a3-test` on 2026-11-08: 21 tests, 102 assertions, 0 failures; clj-kondo 0/0, check-parens OK. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
+**Status:** DONE — closed 2026-11-08, see the closure note.
 
 ## Acceptance checklist (2026-09-30)
 
-- [ ] One content-free executor extracts build packages for all four named corpus blueprints without per-blueprint branches.
-- [ ] Witness-gate tests reject missing and unresolved evidence refs without moving the dial and accept a resolving witness with the documented dial movement.
-- [ ] Dry-run over all four blueprints is deterministic and performs no builder dispatch or substrate write.
-- [ ] Missing typespec or structure-spec produces a typed `spec-too-weak` or `instruction-inadequate` explanation rather than a silent skip.
-- [ ] The changed Clojure passes `clj-kondo`, `futon4/dev/check-parens.el`, and the named unit tests without live dispatch.
+- [x] One content-free executor extracts build packages for all four named corpus blueprints without per-blueprint branches. (`7c7851889`)
+- [x] Witness-gate tests reject missing and unresolved evidence refs without moving the dial and accept a resolving witness with the documented dial movement. (`8516ca2ca`)
+- [x] Dry-run over all four blueprints is deterministic and performs no builder dispatch or substrate write. (`7c7851889`)
+- [x] Missing typespec or structure-spec produces a typed `spec-too-weak` or `instruction-inadequate` explanation rather than a silent skip. (`7c7851889`)
+- [x] The changed Clojure passes `clj-kondo`, `futon4/dev/check-parens.el`, and the named unit tests without live dispatch. (rechecked 2026-11-08 at futon2 HEAD)
 
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews the *generality*).
 **Tracks:** `futon2/holes/aif-wiring-actuator.html`. Consumes the reviewed

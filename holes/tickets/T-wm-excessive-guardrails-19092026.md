@@ -1,5 +1,7 @@
 # T-wm-excessive-guardrails-19092026 — the day the safety layer stopped the machine
 
+> **Closed 2026-11-08 (already done).** This is a record of the 2026-09-19 defusal and Joe's ruling, with no open work order; the ruling was enacted the same day by making witness halts opt-in, and the repairs it lists are committed. It stays as the reference note for anyone adding a guardrail. Evidence: `src/futon2/aif/tripwire.clj:1405-1414` (`*halt-on-witness?*`, `FUTON_WM_TRIPWIRE_HALT`); futon2 `8f7799b70`, `75fd42608`, `056e429dc`; futon3c `025adb25a`, `c9b9ed6d2`; p4ng `1f59b00`. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
 Joe's verdict, 2026-09-19 (paraphrased, then evidenced):
 
 > All this work has just been to turn off — not really turn off, but *undo* —

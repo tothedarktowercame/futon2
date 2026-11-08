@@ -1,14 +1,16 @@
 # Spec: A3 — "review-any-partial" stage + executor-driven witness-gated doc advancement
 
-**Status:** OPEN — No prior status was recorded.
+> **Closed 2026-11-08 (already done).** `advance-mission-doc!` and `review-partial` were built in `src/futon2/aif/actuator_a3.clj` with one test per acceptance item (present hole, absent hole, missing or unresolved witness, idempotence, mixed set). Evidence: futon2 `8516ca2ca`; `actuator_a3.clj:703`, `:791`; `test/futon2/aif/actuator_a3_test.clj:306-376`; namespace run on 2026-11-08: 21 tests, 102 assertions, 0 failures. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
+**Status:** DONE — closed 2026-11-08, see the closure note.
 
 ## Acceptance checklist (2026-09-30)
 
-- [ ] A resolving witness whose declared hole text is present closes that fixture hole, decrements its count, and makes `dial-moved?` true.
-- [ ] A resolving witness whose declared hole text is absent closes nothing and reports `:hole-text-not-in-doc`.
-- [ ] A missing or unresolved witness for present hole text closes nothing and reports the corresponding witness reason.
-- [ ] A second `advance-mission-doc!` call is idempotent: it closes nothing new and leaves the count stable.
-- [ ] `review-partial` reports the correct resolved, rejected, closed, remaining, and gate-anchored feedback fields for a mixed fixture.
+- [x] A resolving witness whose declared hole text is present closes that fixture hole, decrements its count, and makes `dial-moved?` true. (`8516ca2ca`)
+- [x] A resolving witness whose declared hole text is absent closes nothing and reports `:hole-text-not-in-doc`. (`8516ca2ca`)
+- [x] A missing or unresolved witness for present hole text closes nothing and reports the corresponding witness reason. (`8516ca2ca`)
+- [x] A second `advance-mission-doc!` call is idempotent: it closes nothing new and leaves the count stable. (`8516ca2ca`)
+- [x] `review-partial` reports the correct resolved, rejected, closed, remaining, and gate-anchored feedback fields for a mixed fixture. (`8516ca2ca`)
 
 **Owner/reviewer:** claude-4 (Codex builds, claude-4 reviews the anti-gaming property).
 **Extends:** `src/futon2/aif/actuator_a3.clj` (built + reviewed; commits 7c78518, 08391af, 6f9312d).

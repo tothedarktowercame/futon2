@@ -1,6 +1,8 @@
 # E-live-loop-3 — make the ticks real (scheduled reads at sorry grain)
 
-**Status: OPEN (2026-07-05, operator-directed: "make the fixes needed to
+> **Closed 2026-11-08 (already done).** The stated exit was reached on 2026-07-05: a scheduled (natural) tick read the escrowed deposit at sorry grain and gate L4 passed; L0-L4 and F2 all pass on the board. Evidence: `holes/e-live-loop-3-steps.edn` (L0-L4, F2 all `:status :pass`); this doc §"L4 exit -- the cron tick read the deposit (2026-07-05)"; later follow-on futon2 `f93a25910`. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
+**Status: DONE — closed 2026-11-08, see the closure note (was: OPEN, 2026-07-05, operator-directed: "make the fixes needed to
 prepare for a live-loop-3"). Driver: TBD. Reviewer: claude-16. Operator
 gate: Joe. Board: `e-live-loop-3-steps.edn` via the same stepper
 (`LIVE_LOOP_STEPS=holes/e-live-loop-3-steps.edn bb

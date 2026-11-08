@@ -1,5 +1,7 @@
 # Mission: M-text-sidecar — free-text recall for futon1b + evidence for XTDB #5637
 
+> **Closure check 2026-11-08: partly done.** D1 is done (FTS5 sidecar accepted, futon1b `ea696ce`…`706f16d`). For D2, Joe's account (tothedarktowercame) posted on xtdb/xtdb#5637 on 2026-07-16 (design analysis and an in-core spike; jarohen replied 2026-07-20) and on 2026-09-03 (a reproducible benchmark, https://hyperreal.enterprises/blog/2026-08-24-temporal-text-search-xtdb.html, code in tothedarktowercame/mathse-xtdb-benchmark), which reports current-vs-as-of divergence and re-check false-positive counts. What remains against the D2 bar: those numbers come from a Math.StackExchange corpus, not the futon1b corpus; posting-list skew before/after stop-word filtering is not reported; the futon1b measurements (`futon1b/data/textprobe/divergence-full.edn`) were never posted. Joe to say whether the posted material discharges D2. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
 **Date:** 2026-07-10
 **Status:** OPEN — OPEN — IDENTIFY drafted, awaiting Joe's read
 **Owner:** claude (Fable session, 2026-07-10). Driver: Joe.

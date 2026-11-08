@@ -1,7 +1,9 @@
 # E-aif2-partB — can we trust the AIF specification? (a held deep-research excursion)
 
+> **Closed 2026-11-08 (already done).** The first-pass triangulation of R1-R13 against the canonical AIF decomposition was done on 2026-06-24 and folded into `docs/futon-aif-completeness.md` §"Are R1–R13 enough?", adding R14-R18 as tracked criteria; the optional full adversarial round is not required by any criterion here. Evidence: futon2 `5a04e84f2`; `docs/futon-aif-completeness.md:379` (section) and `:601` (v0.21 changelog naming this excursion). Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
 **Date:** 2026-06-09
-**Status:** **FIRST-PASS DONE (2026-06-24), full adversarial round still optional.** A first-pass triangulation
+**Status:** **DONE — closed 2026-11-08, see the closure note.** (Was: FIRST-PASS DONE (2026-06-24), full adversarial round still optional.) A first-pass triangulation
 (from the in-hand deep-research AIF∩morphogenesis report + the R-contract) was run by claude-2 in a clear window
 and folded into `futon2/docs/futon-aif-completeness.md` §"Are R1–R13 enough?" — R13 written in, and
 **R14–R18 added as first-class tracked-open criteria** with definite status + checkable forms (R14 γ-over-policies

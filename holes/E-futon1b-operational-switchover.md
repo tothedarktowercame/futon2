@@ -1,6 +1,8 @@
 # E-futon1b-operational-switchover — the stack switches to futon1b *operationally first*
 
-**Status: OPEN (plan of record written 2026-07-10, evening). Owner: lucy
+> **Closed 2026-11-08 (already done).** Phases A-D were completed on lucy on 2026-07-10/11 (futon1b evidence and entity routes, futon3c futon1b evidence backend and futon1a disable gate, backfill), and the stack now runs on futon1b as its normal topology; on zone futon1b serves :7073 and nothing listens on futon1a's :7071. Evidence: futon1b `d171150`, `f2f56bc`, `b7a94a2`; futon3c `28032c36a`, `739472ec7`; this doc §"2026-07-11 — PHASE D COMPLETE"; `ss -ltn` on 2026-11-08 shows :7073 and :7072, no :7071; futon3c `CLAUDE.md:97-106`. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
+**Status: DONE — closed 2026-11-08, see the closure note (was: OPEN, plan of record written 2026-07-10, evening). Owner: lucy
 (this box) as the proving ground. Parent: E-futon1a-to-futon1b-migration-pipeline
 (data leg, proven). Boundary: BOUNDARY-futon1a-to-futon1b-2026-07-10.md.**
 

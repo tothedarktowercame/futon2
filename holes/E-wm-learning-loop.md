@@ -1,11 +1,13 @@
 # E-wm-learning-loop — close outcome learning around outer target selection
 
+> **Closed 2026-11-08 (already done).** The last exit box was met by later debugger-attached clicks: run `2026-10-15-b8f72b63` consumed the three-row post-demonstration posterior (`:update-verdict {:rows 3, :applied 3, :unresolved 0}`, `:status :live-consumed`, `:changed? true`) and produced a `:grounded-progress` observation, which the next click `2026-10-16-edabd1a5` folded in and consumed (`:rows 4, :applied 4`, `:live-consumed`); the certificates pin the belief by `:belief-source-pin` sha256 rather than by the revision string `b895dd4c…`, which appears in no run record. Evidence: `data/wm-runs/tick-run-record-2026-10-15-b8f72b63-97c0-4289-948e-d7c370dd2ba4.edn` and `…-2026-10-16-edabd1a5-6399-4156-8839-3e7f2c2d159c.edn` (`:outer-learning` certificate, `:debugger-dwell-status :complete`), later runs through `2026-10-18-f016ed51` continue the same pattern; `holes/labs/wm-contract/outer-belief-terminal-cause-audit-2026-10-19.edn` lists both runs as included. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
 **Date:** 2026-10-14  
-**Status:** LIVE — durable outcome publication, posterior consumption, and
+**Status:** DONE — closed 2026-11-08, see the closure note. (Was: LIVE — durable outcome publication, posterior consumption, and
 live selection are wired.  The 2026-10-15 supervised demonstration validated
 the runtime Lean certificate and a corrected production preview consumed three
 applied observations; one later supervised click must still consume that exact
-post-demonstration revision to close the final temporal-loop exit condition.
+post-demonstration revision to close the final temporal-loop exit condition.)
 **Driver:** War Machine. **Operator:** Joe. **Repository:** `futon2`.  
 **Relates:** [[E-outer-loop-improvement]] · [[E-close-the-loop]] ·
 `src/futon2/aif/meta_live_outer_selector.clj` ·
@@ -497,8 +499,8 @@ the single demonstration target and call the result learning.
   preference term; unchanged centrality alone is insufficient.
 - [x] A production-shaped shadow end-to-end test proves
   `observe → update → changed next decision`.
-- [ ] A supervised two-click demonstration produces both update and consumption
-  certificates.
+- [x] A supervised two-click demonstration produces both update and consumption
+  certificates. (runs `2026-10-15-b8f72b63` → `2026-10-16-edabd1a5`; see the closure note)
 
 **Excursion exit:** the War Machine may claim an outer learning loop only when a
 recorded outcome changes a durable target belief and a later target decision is

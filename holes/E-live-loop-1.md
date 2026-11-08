@@ -1,6 +1,8 @@
 # E-live-loop-1 — from honest nothings to a loop that pays
 
-**Status: OPEN (2026-07-04, late night; operator-directed). Driver:
+> **Closed 2026-11-08 (already done).** S1 and S2 were delivered and met their criteria; S3 (γ over the cascade lane) was re-homed to its successor E-live-loop-2, where step 3b specified and simulated the γ update rule (gate PASS). Evidence: `/home/joe/code/p4ng/flights/e-live-loop-1-s1-sorry-grain.org`; `holes/E-live-loop-1-s2-escrow-design.md`; successor E-live-loop-2 §"3b DONE, gate PASS", futon2 `285bd09bb` (`src/futon2/aif/lane_futility.clj`, `test/futon2/aif/lane_futility_test.clj`). Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
+**Status: DONE — closed 2026-11-08, see the closure note (was: OPEN, 2026-07-04, late night; operator-directed). Driver:
 claude-19. Reviewer: claude-16. Operator gate: Joe (arming decisions are
 his alone). Parent context: M-evaluate-policies (C10/E7-adjacent
 territory), Flight 1 of the WM transparency flights.**
@@ -232,4 +234,4 @@ whatever mission the operator wants to grow from it — the before-picture
 
 - S1 delivered: a before/after table (rel distribution, cascade sizes, F) over at least 10 real sorries, baseline banner re-run as control — check: `/home/joe/code/p4ng/flights/e-live-loop-1-s1-sorry-grain.org` exists with the table and the raw JSON alongside **Met.**
 - S2 design delivered: the escrowed fold-turn record shape, home, replay seam and arming rule written up, with no deposit made inside this excursion — check: `/home/joe/code/futon2/holes/E-live-loop-1-s2-escrow-design.md` **Met.**
-- S3 delivered or explicitly re-homed: either a design note specifying how realized lane-outcomes modulate energy/precision for the cascade lane (the 0/674 observation as an update), or a line in this item naming the successor (e.g. E-live-loop-2/-3) that owns it — check: a dated section or file under `/home/joe/code/futon2/holes/` naming γ over the cascade lane **Not met.**
+- S3 delivered or explicitly re-homed: either a design note specifying how realized lane-outcomes modulate energy/precision for the cascade lane (the 0/674 observation as an update), or a line in this item naming the successor (e.g. E-live-loop-2/-3) that owns it — check: a dated section or file under `/home/joe/code/futon2/holes/` naming γ over the cascade lane **Met** (re-homed to E-live-loop-2 step 3b, `285bd09bb`; see the closure note).

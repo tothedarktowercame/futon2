@@ -1,5 +1,7 @@
 # T-formal-patterns-unblock — make M-formal-patterns' next items concretely selectable
 
+> **Closed 2026-11-08 (already done).** Kimi made M-formal-patterns self-contained and selectable and wrote questions Q1-Q6; Joe answered them on 2026-11-06 and retired M-formal-patterns as superseded in favour of M-formal-patterns-redux, so the Giraffe re-rating in outcome 4 no longer applies. Evidence: futon5 `e1771c1`, `0b8bcc7`, `3877c83`; `futon5/holes/M-formal-patterns.md:3` (SUPERSEDED — WONTFIX); this ticket §"Joe's answers (2026-11-06)" and §Result. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
 **Requisition:** completed — 2026-11-06T07:07:54Z, job invoke-1793946208261-13623-2f819ee8, state done
 
 **Asked by:** Joe, 2026-11-06. **Owner:** claude-6 (review). **Worker:** Kimi seat.

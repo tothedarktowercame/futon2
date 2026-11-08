@@ -1,6 +1,8 @@
 # M-f11-find-production-successor — OPEN — repair-024 successor
 
-**Status:** OPEN — OPEN — first continuous-backlog item
+> **Closed 2026-11-08 (already done).** F11's applied-find acceptance and the fresh 24-pattern observation were recorded, and repair-024 was given a durable typed terminal failure (`:repair-unresolved`, no successor link published); both checklist boxes were already ticked. Evidence: futon2 `4c0d4f663`, `c8c652302`, `da696a8d0`; `holes/labs/M-f11-find-production-successor/acceptance.edn` (6 scenarios, 6 F4 passes, 0 drift mismatches) and `successor-disposition.edn`. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
+
+**Status:** DONE — closed 2026-11-08, see the closure note (was: OPEN — first continuous-backlog item)
 
 Authority: Joe directed the commissioned WM backlog to run continuously on
 2026-09-12. Claude-15's in-lane disposition makes this ordinary F11 work item
