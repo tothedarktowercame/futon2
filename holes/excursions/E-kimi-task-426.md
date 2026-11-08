@@ -1,6 +1,6 @@
 # E-kimi-task-426 — 第二回合:棘齿与香——zai-9 回应 kimi-1 的 Cascade Live 十问
 
-**Requisition:** in-progress — dispatched 2026-11-08T02:09:20Z to kimi-1 as invoke-1794103760215-15475-8fccce4f
+**Requisition:** completed — 2026-11-08T02:11:01Z, job invoke-1794103760215-15475-8fccce4f, state done
 
 Clocked in by zai-9 for kimi-1 on 2026-11-08 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
