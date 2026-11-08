@@ -73,9 +73,15 @@ class ItemLabelsTest(unittest.TestCase):
             "hdr_date": "", "date_in_file": "0",
             "hdr_status": "", "status_in_file": "0", "own_status": ""}))
 
-    def test_timebox_absent(self):
-        self.assertIn("timebox-absent", gpe.item_labels(item(), {"timebox_in_file": "0"}))
-        self.assertNotIn("timebox-absent", gpe.item_labels(item(), {"timebox_in_file": "1"}))
+    def test_timebox_absent_is_not_exported(self):
+        self.assertNotIn("timebox-absent", gpe.item_labels(item(), {"timebox_in_file": "0"}))
+
+    def test_kind_and_each_way_are_labels(self):
+        labels = gpe.item_labels(
+            item(way="records-carry-warrant, eat-your-own-tail"), None)
+        self.assertIn("ticket", labels)
+        self.assertIn("way: records-carry-warrant", labels)
+        self.assertIn("way: eat-your-own-tail", labels)
 
     def test_arxana_hardening_shape(self):
         # From the census row for M-arxana-hardening (2026-11-07 census).
@@ -156,6 +162,36 @@ class SourceAndOrderTest(unittest.TestCase):
         p = gpe.item_payload(item(), set())
         self.assertFalse(p["name"].startswith("#"))
         self.assertEqual(p["sort_order"], 1e9)
+
+
+class WingTest(unittest.TestCase):
+    def test_wing_d_is_named_and_unknown_is_unplaced(self):
+        self.assertEqual("D", gpe.wing_key({"wing": "D"}))
+        self.assertIn("next-action", gpe.WINGS["D"][0])
+        self.assertEqual("unplaced", gpe.wing_key({"wing": "unsure"}))
+        self.assertEqual("unplaced", gpe.wing_key(None))
+
+    def test_a1_reading_overrides_early_sheet(self):
+        import tempfile
+        d = tempfile.mkdtemp()
+        early = os.path.join(d, "placements-1.tsv")
+        a1 = os.path.join(d, "A1.tsv")
+        with open(early, "w") as f:
+            f.write("id\twing\nM-x\tB\nM-y\tC\n")
+        with open(a1, "w") as f:
+            f.write("id\twing\tway\nM-x\tD\tselection-gives-a-reason\n")
+        got = gpe.load_placements(a1, os.path.join(d, "placements-[12]*.tsv"))
+        self.assertEqual({"wing": "D", "way": "selection-gives-a-reason"}, got["M-x"])
+        self.assertEqual("C", got["M-y"]["wing"])
+
+    def test_repair_records_are_open_or_done(self):
+        import tempfile
+        d = tempfile.mkdtemp()
+        for n, st in (("T-repair-a", "OPEN"), ("T-repair-b", "DONE")):
+            with open(os.path.join(d, n + ".md"), "w") as f:
+                f.write("# %s\n\n**Status:** %s\n" % (n, st))
+        got = {i["id"]: gpe.item_state_name(i) for i in gpe.load_repairs(d)}
+        self.assertEqual({"T-repair-a": "Open", "T-repair-b": "Done"}, got)
 
 
 if __name__ == "__main__":

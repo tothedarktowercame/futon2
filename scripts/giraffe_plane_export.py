@@ -49,11 +49,27 @@ TOKEN_PATH = os.environ.get("PLANE_TOKEN_PATH", os.path.expanduser("~/plane/.api
 WORKSPACE = "giraffe"
 EXTERNAL_SOURCE = "giraffe"
 
-KINDS = {  # id prefix -> (project name, project identifier)
-    "M": ("Missions", "MIS"),
-    "T": ("Tickets", "TIC"),
-    "E": ("Excursions", "EXC"),
+KINDS = {"M": "mission", "T": "ticket", "E": "excursion"}
+
+# Projects are wings (Joe, 2026-11-08: Tickets/Missions/Excursions "are more
+# like tags than projects"; wing D reads better by its name).  Wing names are
+# notes/commons-map/map.edn's.  key -> (project name, identifier).
+WINGS = {
+    "A": ("Records carry warrant", "WARRANT"),
+    "B": ("One queryable self-account", "SELFACC"),
+    "C": ("Feedback reaches every participant", "FEEDBACK"),
+    "D": ("Accountable next-action choice (AIF outer loop)", "OUTERLOOP"),
+    "V": ("Viability (body and energy)", "VIABLE"),
+    "none": ("Outside the wings", "NOWING"),
+    "unplaced": ("Not yet placed", "UNPLACED"),
 }
+REPAIRS = ("WM repairs", "REPAIRS")
+# The kind-named projects of the first export; removed once the wing
+# projects are populated.
+RETIRED_PROJECTS = ("Missions", "Tickets", "Excursions")
+DEFAULT_A1 = "/home/joe/code/futon3c/holes/excursions/ant-reads/A1-placements.tsv"
+DEFAULT_EARLY = "/home/joe/notes/commons-map/placements-[12]*.tsv"
+DEFAULT_REPAIRS = "/home/joe/code/futon2/records/repair"
 TERMINAL_STATE_GROUPS = {"completed", "cancelled"}
 
 # Plane State.groups (db/models/state.py StateGroup): we use "started" for
@@ -61,6 +77,8 @@ TERMINAL_STATE_GROUPS = {"completed", "cancelled"}
 STATE_SPECS = {
     "Ready": {"group": "started", "color": "#00a550"},
     "Not ready": {"group": "unstarted", "color": "#60646C"},
+    "Open": {"group": "unstarted", "color": "#60646C"},
+    "Done": {"group": "completed", "color": "#46a758"},
 }
 
 # Census check -> label name (one label per failed check).
@@ -251,7 +269,7 @@ def load_run(run_dir):
     items = []
     for raw in data[":items"]:
         iid = raw[":id"][1:]
-        prefix = iid.split("-")[0][0]
+        prefix = iid[0]
         if prefix not in KINDS:
             continue
         path = item_path(raw)
@@ -261,7 +279,7 @@ def load_run(run_dir):
         items.append(
             {
                 "id": iid,
-                "kind": {"M": "mission", "T": "ticket", "E": "excursion"}[prefix],
+                "kind": KINDS[prefix],
                 "path": path,
                 "own_status": own,
                 "state_group": (raw.get(":state-group") or "")[1:],
@@ -275,7 +293,10 @@ def load_run(run_dir):
 
 def item_labels(item, census_row):
     """Labels for one item.  Pure: item dict + census row (or None)."""
-    labels = set()
+    labels = {item["kind"]} if item.get("kind") else set()
+    for way in re.split(r"[,;|\s]+", item.get("way") or ""):
+        if way and way not in ("none", "way"):
+            labels.add("way: " + way)
     if item["readiness"]["status"] == "ready":
         labels.add("giraffe-ready")
     row = census_row or {}
@@ -300,12 +321,14 @@ def item_labels(item, census_row):
         if (row.get("hdr_status") == "" and status_present) or (
                 row.get("hdr_date") == "" and row.get("date_in_file") == "1"):
             labels.add("header-unread")
-        if row.get("timebox_in_file") == "0":
-            labels.add("timebox-absent")
+        # timebox-absent is not exported: 360 of 368 live items lacked a
+        # timebox on 2026-11-08, so the label told the reader nothing.
     return labels
 
 
 def item_state_name(item):
+    if item.get("state_name"):
+        return item["state_name"]
     return "Ready" if item["readiness"]["status"] == "ready" else "Not ready"
 
 
@@ -322,6 +345,8 @@ def item_payload(item, labels):
         "<p><b>Status line (verbatim):</b><br/><pre>%s</pre></p>"
         % html.escape(item["own_status"])
     )
+    if item.get("way"):
+        bits.append("<p><b>Way of working:</b> %s</p>" % html.escape(item["way"]))
     r = item["readiness"]
     if r.get("rank") is not None:
         bits.append(
@@ -352,6 +377,55 @@ def item_payload(item, labels):
         "state_name": item_state_name(item),
         "label_names": sorted(labels),
     }
+
+
+def load_placements(a1_path=DEFAULT_A1, early_glob=DEFAULT_EARLY):
+    """id -> {"wing", "way"} from the 2026-11-02 placement readings: the
+    re-read A1 rows first, the earlier placement sheets for the rest.  A row
+    whose wing is blank or 'unsure' counts as unplaced."""
+    import glob
+    out = {}
+    for f in sorted(glob.glob(early_glob)):
+        with open(f) as fh:
+            for r in csv.DictReader(fh, delimiter="\t"):
+                if r.get("id"):
+                    out[r["id"]] = {"wing": (r.get("wing") or "").strip(), "way": ""}
+    if a1_path and os.path.exists(a1_path):
+        with open(a1_path) as fh:
+            for r in csv.DictReader(fh, delimiter="\t"):
+                if not r.get("id"):
+                    continue
+                prev = out.get(r["id"], {})
+                wing = (r.get("wing") or "").strip() or prev.get("wing", "")
+                way = (r.get("way") or "").strip()
+                out[r["id"]] = {"wing": wing,
+                                "way": "" if way in ("", "none", "way") else way}
+    return out
+
+
+def wing_key(placement):
+    w = (placement or {}).get("wing", "")
+    return w if w in WINGS else "unplaced"
+
+
+def load_repairs(root=DEFAULT_REPAIRS):
+    """The WM's repair records (REPAIR-MOVE-1, 0b1eb9bd4: records, not
+    tickets, never selectable).  Shown in Plane as one project."""
+    items = []
+    if not os.path.isdir(root):
+        return items
+    for name in sorted(os.listdir(root)):
+        if not (name.startswith("T-repair") and name.endswith(".md")):
+            continue
+        path = os.path.join(root, name)
+        own = status_line_from_file(path)
+        done = bool(re.match(r"\W*(DONE|CLOSED|COMPLETE)", own, re.I))
+        items.append({"id": name[:-3], "kind": "repair", "path": path,
+                      "own_status": own, "state_group": "",
+                      "state_name": "Done" if done else "Open",
+                      "readiness": {"status": "not-selectable",
+                                    "reason": "repair record"}})
+    return items
 
 
 def load_census(path):
@@ -437,6 +511,16 @@ def ensure_project(plane, name, identifier, projects):
     return body["id"]
 
 
+def label_description(name):
+    if name in KINDS.values() or name == "repair":
+        return "item kind"
+    if name.startswith("way: "):
+        return "way of working (A1 placement reading, 2026-11-02)"
+    if name == "giraffe-ready":
+        return "Giraffe readiness :ready"
+    return "Giraffe census check"
+
+
 def ensure_by_name(plane, path, name, spec, existing):
     for s in existing:
         if s.get("name") == name:
@@ -498,6 +582,8 @@ def main(argv=None):
     ap.add_argument("--run", help="run dir or stamp dir-name under the storage root")
     ap.add_argument("--census", nargs="?", const=DEFAULT_CENSUS, default=None)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--a1", default=DEFAULT_A1)
+    ap.add_argument("--repairs", default=DEFAULT_REPAIRS)
     ap.add_argument("--api-base", default=API_BASE)
     args = ap.parse_args(argv)
 
@@ -514,13 +600,20 @@ def main(argv=None):
         % (len(items), len(live), len(items) - len(live))
     )
 
-    # Build payloads grouped by project.
+    # Build payloads grouped by project: one project per wing, plus the
+    # repair records.
+    placements = load_placements(args.a1)
     by_project = {}
     for it in live:
+        pl_ = placements.get(it["id"])
+        it["way"] = (pl_ or {}).get("way", "")
         row = census.get(it["id"])
         pl = item_payload(it, item_labels(it, row))
-        key = KINDS[it["id"][0]][0]
-        by_project.setdefault(key, []).append(pl)
+        by_project.setdefault(WINGS[wing_key(pl_)][0], []).append(pl)
+    repairs = load_repairs(args.repairs)
+    by_project[REPAIRS[0]] = [item_payload(it, item_labels(it, None))
+                              for it in repairs]
+    project_specs = list(WINGS.values()) + [REPAIRS]
 
     # Summaries for dry-run and final report.
     print("counts per project/state/label:")
@@ -553,13 +646,15 @@ def main(argv=None):
 
     projects = plane.get_all("/workspaces/%s/projects/" % WORKSPACE)
     totals = {}
-    for prefix, (pname, ident) in sorted(KINDS.items()):
+    for pname, ident in project_specs:
         pls = by_project.get(pname, [])
         pid = ensure_project(plane, pname, ident, projects)
         states_path = "/workspaces/%s/projects/%s/states/" % (WORKSPACE, pid)
+        existing_states = plane.get_all(states_path)
+        used_states = {p["state_name"] for p in pls} or {"Ready"}
         state_ids = {
-            n: ensure_by_name(plane, states_path, n, spec, plane.get_all(states_path))
-            for n, spec in STATE_SPECS.items()
+            n: ensure_by_name(plane, states_path, n, spec, existing_states)
+            for n, spec in STATE_SPECS.items() if n in used_states
         }
         labels_path = "/workspaces/%s/projects/%s/labels/" % (WORKSPACE, pid)
         existing_labels = plane.get_all(labels_path)
@@ -568,8 +663,7 @@ def main(argv=None):
             n: ensure_by_name(
                 plane, labels_path, n,
                 {"color": LABEL_COLORS.get(n, "#60646C"),
-                 "description": "Giraffe census check" if n != "giraffe-ready"
-                 else "Giraffe readiness :ready"},
+                 "description": label_description(n)},
                 existing_labels,
             )
             for n in all_label_names
@@ -594,6 +688,13 @@ def main(argv=None):
         print("%s: created %d, updated %d, unchanged %d, deleted %d"
               % (pname, stats["created"], stats["updated"], stats["unchanged"],
                  stats["deleted"]))
+    # The kind-named projects are superseded by the wing projects.  Plane is
+    # a one-way mirror, so removing them loses nothing the files do not hold.
+    for proj in plane.get_all("/workspaces/%s/projects/" % WORKSPACE):
+        if proj.get("name") in RETIRED_PROJECTS:
+            st, body = plane.req(
+                "DELETE", "/workspaces/%s/projects/%s/" % (WORKSPACE, proj["id"]), None)
+            print("retired project %s -> %s" % (proj["name"], st))
     tot = {k: sum(s[k] for s in totals.values()) for k in ("created", "updated", "unchanged")}
     print("TOTAL: created %d, updated %d, unchanged %d" % (tot["created"], tot["updated"], tot["unchanged"]))
     return 0
