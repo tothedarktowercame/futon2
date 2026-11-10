@@ -1,6 +1,6 @@
 # E-kimi-task-431 — Euclid play: case figures (a case is a different figure)
 
-**Requisition:** in-progress — dispatched 2026-11-10T03:34:01Z to kimi-2 as invoke-1794281641606-16581-17095f16
+**Requisition:** completed — 2026-11-10T04:08:37Z, job invoke-1794281641606-16581-17095f16, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-10 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
