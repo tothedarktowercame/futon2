@@ -1,6 +1,6 @@
 # E-kimi-task-429 — Docstring index for the ~4400 Mathlib lemmas cited by generated APM proofs (coverage measurement, no prose)
 
-**Requisition:** in-progress — dispatched 2026-11-10T02:11:27Z to kimi-1 as invoke-1794276687376-16506-39d054ce
+**Requisition:** completed — 2026-11-10T02:50:08Z, job invoke-1794276687376-16506-39d054ce, state done
 
 Clocked in by claude-21 for kimi-1 on 2026-11-10 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
