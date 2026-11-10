@@ -1,6 +1,6 @@
 # E-kimi-task-427 — Euclid playtest I.1-I.5 through the browser
 
-**Requisition:** in-progress — dispatched 2026-11-10T01:29:31Z to kimi-1 as invoke-1794274171628-16457-7ae67b3e
+**Requisition:** completed — 2026-11-10T02:02:46Z, job invoke-1794274171628-16457-7ae67b3e, state done
 
 Clocked in by claude-9 for kimi-1 on 2026-11-10 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
