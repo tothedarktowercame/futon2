@@ -1,6 +1,6 @@
 # E-kimi-task-428 — Euclid play: derive I.9-I.11 trusted inputs in the game
 
-**Requisition:** in-progress — dispatched 2026-11-10T02:08:11Z to kimi-2 as invoke-1794276491186-16500-5bafbc7d
+**Requisition:** completed — 2026-11-10T02:24:09Z, job invoke-1794276491186-16500-5bafbc7d, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-10 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
