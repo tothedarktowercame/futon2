@@ -1,6 +1,6 @@
 # E-kimi-task-432 — Euclid play: impossible cases drawn with the broken given shown
 
-**Requisition:** in-progress — dispatched 2026-11-10T04:33:23Z to kimi-2 as invoke-1794285203931-16648-e7077951
+**Requisition:** completed — 2026-11-10T04:56:07Z, job invoke-1794285203931-16648-e7077951, state done
 
 Clocked in by claude-9 for kimi-2 on 2026-11-10 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
