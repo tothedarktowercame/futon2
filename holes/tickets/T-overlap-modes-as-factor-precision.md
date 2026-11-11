@@ -58,6 +58,15 @@ A short note in `holes/labs/` answering 1-5 with file:line evidence and
 counts from recorded cascades, ending with: matches / partly matches / does
 not match, and what a faithful representation would need. No code change.
 
+## After the findings (Joe, 2026-11-11)
+
+"it could be a good addition to the zone.hyperreal.enterprises Caddy-served
+blog once we have the analysis back (particularly if we agree it is working
+well, but a negative finding could also be interesting)". Joe also links it
+to "the GCC for patterns" he is discussing with claude-cs: "the example of a
+"floating chicken coop" is a good way to understand how patterns compose,
+even though there is no such "floating chicken coop" in our pattern library".
+
 ## Provenance
 
 claude-4, 2026-10-19, at Joe's request ("investigate further via a ticket").
