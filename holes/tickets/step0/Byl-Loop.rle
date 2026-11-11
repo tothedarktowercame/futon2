@@ -1,0 +1,4 @@
+# Byl Loop
+# Pattern from Golly 3.3 Ubuntu package (3.3-1.1build3)
+x = 4, y = 4, rule = Byl-Loop
+.2B$BCAB$BCDB$.BE!

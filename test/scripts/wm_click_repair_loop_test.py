@@ -51,6 +51,30 @@ def load_loop():
     return module
 
 
+class RepairLoopRootTest(unittest.TestCase):
+    def test_isolated_code_root_drives_all_campaign_paths(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "campaign"
+            env = dict(os.environ, WM_CODE_ROOT=str(root),
+                       BASE="http://127.0.0.1:17070")
+            program = (
+                "import importlib.util, json; "
+                f"s=importlib.util.spec_from_file_location('isolated_loop',{str(LOOP)!r}); "
+                "m=importlib.util.module_from_spec(s); s.loader.exec_module(m); "
+                "print(json.dumps({'code':str(m.CODE),'f2':str(m.F2),"
+                "'f3c':str(m.F3C),'agency':m.AGENCY,'state':str(m.STATE)}))"
+            )
+            result = subprocess.run(["python3", "-c", program], env=env,
+                                    text=True, capture_output=True, check=True)
+            observed = json.loads(result.stdout)
+            self.assertEqual(str(root), observed["code"])
+            self.assertEqual(str(root / "futon2"), observed["f2"])
+            self.assertEqual(str(root / "futon3c"), observed["f3c"])
+            self.assertEqual("http://127.0.0.1:17070", observed["agency"])
+            self.assertEqual(str(root / "futon2" / "data" / "wm-click-loop"),
+                             observed["state"])
+
+
 class RepairLoopCastTest(unittest.TestCase):
     def test_click_write_manifest_applies_writer_stamps_and_skips_malformed(self):
         loop = load_loop()

@@ -72,9 +72,13 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-CODE = Path.home() / "code"
-F2 = CODE / "futon2"
-F3C = CODE / "futon3c"
+# An isolated campaign may compose the same repos under a non-canonical root.
+# Keep the canonical paths as defaults, while making the root an explicit part
+# of the loop process's environment.  F2/F3C remain independently overridable
+# because wm_click.sh already has that public contract.
+CODE = Path(os.environ.get("WM_CODE_ROOT", Path.home() / "code")).resolve()
+F2 = Path(os.environ.get("F2", CODE / "futon2")).resolve()
+F3C = Path(os.environ.get("F3C", CODE / "futon3c")).resolve()
 META_INJURY_ROOT = F2 / "data" / "wm-meta-injuries-live-2026-10-22"
 STATE = F2 / "data" / "wm-click-loop"
 LEDGER = STATE / "ledger.jsonl"
@@ -86,7 +90,7 @@ ALERTS = STATE / "alerts.jsonl"
 # are excluded only from the repeat comparison, so a known gap awaiting a
 # decision cannot pause the loop while other defects are being found.
 ACKNOWLEDGED = STATE / "acknowledged.json"
-AGENCY = "http://localhost:7070"
+AGENCY = os.environ.get("BASE", "http://localhost:7070").rstrip("/")
 SEND = F3C / "scripts" / "agency_send.py"
 EVAL = F3C / "scripts" / "proof-eval.sh"
 TERMINAL = {"done", "failed", "error", "cancelled", "timeout", "timed-out"}
@@ -1135,10 +1139,12 @@ def source_identity_inventory() -> dict[str, Path]:
     declaration = required_sources_declaration(text)
     for namespace, raw_path in re.findall(r"'([\w.\-]+)\s+\"([^\"]+\.clj)\"", declaration):
         path = Path(raw_path)
-        if raw_path.startswith("/home/joe/code/futon2/"):
-            path = F2 / raw_path.removeprefix("/home/joe/code/futon2/")
-        elif raw_path.startswith("/home/joe/code/futon3c/"):
-            path = F3C / raw_path.removeprefix("/home/joe/code/futon3c/")
+        f2_prefix = str(F2) + "/"
+        f3c_prefix = str(F3C) + "/"
+        if raw_path.startswith(f2_prefix):
+            path = F2 / raw_path.removeprefix(f2_prefix)
+        elif raw_path.startswith(f3c_prefix):
+            path = F3C / raw_path.removeprefix(f3c_prefix)
         entries[namespace] = path
     return entries
 

@@ -1,0 +1,5 @@
+# Langton's Loops
+# Pattern from Golly 3.3 Ubuntu package (3.3-1.1build3)
+x = 15, y = 10, rule = Langtons-Loops
+.8B$BAG.AD.ADB$B.6B.B$BGB4.BAB$BAB4.BAB$B.B4.BAB$BGB4.BAB$BA6BA5B$B.G
+A.GA.G5AB$.13B!

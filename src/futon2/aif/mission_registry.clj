@@ -31,8 +31,11 @@
 (def default-code-root
   "The scan root the registry reads mission documents under. Public because a
    consumer deriving wants from those documents needs the same root to compute
-   a repo-relative locator path."
-  (str (System/getProperty "user.home") "/code"))
+   a repo-relative locator path. FUTON_WM_CODE_ROOT gives an isolated serving
+   process an explicit task-document universe; omission preserves the canonical
+   user-home/code authority."
+  (or (some-> (System/getenv "FUTON_WM_CODE_ROOT") str/trim not-empty)
+      (str (System/getProperty "user.home") "/code")))
 
 (def ^:private mission-path-pattern
   #".*/holes/(?:missions/)?(M-[^/]+)\.md$")
@@ -1036,9 +1039,14 @@
    fences before ID deduplication; bare holes/T-* discovery notes excluded."
   ([] (load-tickets default-code-root))
   ([code-root]
-   {:tickets
+   (let [configured-repos (some->> (System/getenv "FUTON_WM_TICKET_REPOS")
+                                   (re-seq #"[^,[:space:]]+")
+                                   set)]
+    {:tickets
     (->> (or (.listFiles (io/file code-root)) (make-array File 0))
          (filter #(.isDirectory ^File %))
+         (filter #(or (nil? configured-repos)
+                      (contains? configured-repos (.getName ^File %))))
          (map #(io/file % "holes" "tickets"))
          (mapcat #(or (.listFiles ^File %) (make-array File 0)))
          (filter #(.isFile ^File %))
@@ -1073,7 +1081,7 @@
                    :source {:path path :sha256 (sha256-text text)}
                    :parent (some #(when (re-find #"(?i)parent" %)
                                     (re-find #"M-[A-Za-z0-9_-]+" %)) lines)})))
-         dedupe-by-id vec)}))
+         dedupe-by-id vec)})))
 
 (defn ticket-entry [target]
   (when (and (string? target) (str/starts-with? target "T-"))
