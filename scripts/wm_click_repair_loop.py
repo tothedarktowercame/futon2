@@ -1139,9 +1139,17 @@ def source_identity_inventory() -> dict[str, Path]:
     declaration = required_sources_declaration(text)
     for namespace, raw_path in re.findall(r"'([\w.\-]+)\s+\"([^\"]+\.clj)\"", declaration):
         path = Path(raw_path)
+        # The checked declaration is deliberately canonical and therefore
+        # contains /home/joe/code paths even when this process composes an
+        # isolated checkout. Translate declaration identity into the selected
+        # F2/F3C roots; also accept already-relocated declarations.
         f2_prefix = str(F2) + "/"
         f3c_prefix = str(F3C) + "/"
-        if raw_path.startswith(f2_prefix):
+        if raw_path.startswith("/home/joe/code/futon2/"):
+            path = F2 / raw_path.removeprefix("/home/joe/code/futon2/")
+        elif raw_path.startswith("/home/joe/code/futon3c/"):
+            path = F3C / raw_path.removeprefix("/home/joe/code/futon3c/")
+        elif raw_path.startswith(f2_prefix):
             path = F2 / raw_path.removeprefix(f2_prefix)
         elif raw_path.startswith(f3c_prefix):
             path = F3C / raw_path.removeprefix(f3c_prefix)
