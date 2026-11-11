@@ -4517,6 +4517,70 @@
     (is (true? (:readiness/wake-attempted readiness-end)))
     (is (= :woken (:readiness/wake-result readiness-end)))))
 
+(deftest post-wake-busy-seat-is-repolled-before-no-reply
+  ;; Planted for held run 2026-11-11-ac1762fb (repair wm-click-loop-repair-69863e52):
+  ;; the wake whistle itself invokes the seat, so the first roster recheck read
+  ;; the runner's own ping as :busy and sealed :agent-unavailable. A busy
+  ;; post-wake seat gets a bounded re-poll before :no-reply.
+  (let [phases (atom [])
+        roster-calls (atom 0)
+        sleeps (atom [])
+        restored {:zai-5 {:status "restored" :invoke-ready? true}
+                  :codex-7 {:status "idle" :invoke-ready? true}}
+        invoking (assoc-in restored [:zai-5 :status] "invoking")
+        idle (assoc-in restored [:zai-5 :status] "idle")
+        opts (merge
+              (readiness-run-opts
+               phases
+               (fn [_]
+                 (case (swap! roster-calls inc)
+                   1 restored
+                   2 invoking
+                   idle)))
+              {:wake-agent-fn (fn [_ _] {:ok true})
+               :readiness-wake-sleep-fn #(swap! sleeps conj %)
+               :substrate-preflight-fn (fn [_] {:route :test})})
+        result (runner/run-opportunity! opts)
+        readiness-end (first (filter #(and (= :agent-readiness (:phase %))
+                                            (= :end (:transition %)))
+                                     @phases))]
+    (is (= :abstained (:outcome result))
+        "the self-induced busy window passes readiness and reaches the injected abstention")
+    (is (= 3 @roster-calls) "the roster is read once, then rechecked twice")
+    (is (= [runner/readiness-wake-poll-delay-ms] @sleeps)
+        "exactly one poll delay before the seat settles to idle")
+    (is (= :ok (:outcome readiness-end)))
+    (is (true? (:readiness/wake-attempted readiness-end)))
+    (is (= :woken (:readiness/wake-result readiness-end)))))
+
+(deftest post-wake-persistently-busy-seat-exhausts-polls-then-no-reply
+  (let [phases (atom [])
+        roster-calls (atom 0)
+        sleeps (atom [])
+        restored {:zai-5 {:status "restored" :invoke-ready? true}
+                  :codex-7 {:status "idle" :invoke-ready? true}}
+        invoking (assoc-in restored [:zai-5 :status] "invoking")
+        opts (merge
+              (readiness-run-opts
+               phases
+               (fn [_]
+                 (if (= 1 (swap! roster-calls inc)) restored invoking)))
+              {:wake-agent-fn (fn [_ _] {:ok true})
+               :readiness-wake-sleep-fn #(swap! sleeps conj %)
+               :substrate-preflight-fn (fn [_] {:route :test})})
+        result (runner/run-opportunity! opts)
+        readiness-end (first (filter #(and (= :agent-readiness (:phase %))
+                                            (= :end (:transition %)))
+                                     @phases))]
+    (is (= :agent-unavailable (:outcome result)))
+    (is (= :busy (get-in result [:data :failure-detail])))
+    (is (= (repeat runner/readiness-wake-poll-attempts
+                   runner/readiness-wake-poll-delay-ms)
+           @sleeps)
+        "polls are bounded, not unbounded")
+    (is (= (inc (inc runner/readiness-wake-poll-attempts)) @roster-calls))
+    (is (= :no-reply (:readiness/wake-result readiness-end)))))
+
 (deftest no-cast-given-is-recorded-not-filled
   ;; Joe 2026-09-25: no default cast. The runner's config names no seat when
   ;; neither the caller nor the env does, and a tick that selects with no cast
