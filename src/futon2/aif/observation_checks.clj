@@ -27,7 +27,27 @@
 
 (load-identity/register! *ns* *file*)
 
-(def repo-root "/home/joe/code")
+(defn resolve-code-root
+  "Two-argument form is the test seam: an explicit isolated code root wins,
+   nil or blank preserves the canonical user-home/code authority. The
+   one-argument form reads FUTON_WM_CODE_ROOT, matching mission-registry
+   and load-identity."
+  ([code-root]
+   (or (some-> code-root str/trim not-empty (str/replace #"/+$" ""))
+       (str (System/getProperty "user.home") "/code")))
+  ([] (resolve-code-root (System/getenv "FUTON_WM_CODE_ROOT"))))
+
+(def repo-root
+  "Root against which repository-name locators and receipt :source paths
+   resolve. FUTON_WM_CODE_ROOT gives an isolated serving process (the
+   wm-sandbox tree) the same authority every other registry honors
+   (mission-registry, load-identity, data-paths); omission preserves the
+   canonical user-home/code root byte-for-byte. Without this the live tick
+   resolved futon3 receipt sources against /home/joe/code, where the pinned
+   library/apparatus bytes do not exist, and refused the whole declaration
+   with :interpretation-source-unreadable (held run
+   2026-11-11-4f3e780f-dbf4-4af0-9c1b-940bb242f600)."
+  (resolve-code-root))
 
 (defn- refuse [kind data] {:status :missing :kind kind :data data})
 

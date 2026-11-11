@@ -3,7 +3,8 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
-            [futon2.aif.cascade-sources :as cs]))
+            [futon2.aif.cascade-sources :as cs]
+            [futon2.aif.observation-checks :as oc]))
 
 (defn- byte-sha [file]
   (format "%064x" (java.math.BigInteger.
@@ -75,7 +76,7 @@
   (let [dir (tmp-dir)
         decl (edn/read-string (slurp (io/resource "wm/cascade-sources/M-wm-08-external-f2.edn")))
         original (get-in decl [:interpretation-receipts pattern-id])
-        expected (byte-sha (io/file "/home/joe/code" pattern-path))]
+        expected (byte-sha (io/file oc/repo-root pattern-path))]
     (try
       (is (= {:path pattern-path} (:source original)) "The actual defective input.")
       (let [receipt (admission dir original)]
@@ -200,7 +201,7 @@
 ;; itself has to be re-derived — the pin is what makes that distinction
 ;; possible, and re-pinning past it would erase it.
 (deftest every-pinned-interpretation-source-still-matches-its-file
-  (let [repo-root (io/file "/home/joe/code")
+  (let [repo-root (io/file oc/repo-root)
         pins (for [f (file-seq (io/file "resources/wm/cascade-sources"))
                    :when (.endsWith (.getName f) ".edn")
                    :let [d (edn/read-string (slurp f))]
