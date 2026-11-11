@@ -8,7 +8,18 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
-(def production-data-root "/home/joe/code/futon2/data")
+(defn configured-data-root
+  "Select the mutable futon2 authority for one composed serving process.
+   An explicit FUTON2_DATA_ROOT wins; otherwise an isolated WM code root owns
+   its sibling futon2/data. With neither, preserve the canonical authority."
+  [data-root code-root]
+  (or (some-> data-root str not-empty)
+      (some-> code-root str not-empty (io/file "futon2" "data") str)
+      "/home/joe/code/futon2/data"))
+
+(def production-data-root
+  (configured-data-root (System/getenv "FUTON2_DATA_ROOT")
+                        (System/getenv "FUTON_WM_CODE_ROOT")))
 
 (def production-repo-root
   "Canonical futon2 checkout root. Code/config paths must resolve here, never
