@@ -67,6 +67,14 @@ to "the GCC for patterns" he is discussing with claude-cs: "the example of a
 "floating chicken coop" is a good way to understand how patterns compose,
 even though there is no such "floating chicken coop" in our pattern library".
 
+Joe (2026-11-11, a further example): "imagine someone in a submarine saying
+"I really feel cooped up in here". This is an interesting example b/c we
+don't need to go via "floating prison" or "floating chicken coop", even
+though we *might* want to go via "houseboat"." And on order of work: "the
+best way to make sense of #7 would be via some live examples whose
+representational quality we trust, not via historical examples" — so #7
+waits on the Circus invariants (M-repl-circus, "Two invariants").
+
 ## Provenance
 
 claude-4, 2026-10-19, at Joe's request ("investigate further via a ticket").
