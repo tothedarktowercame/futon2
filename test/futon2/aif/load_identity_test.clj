@@ -3,6 +3,16 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.load-identity :as identity]))
 
+(deftest isolated-code-root-resolves-retained-canonical-declaration
+  (is (= "/srv/wm/code/futon2/src/futon2/aif/full_loop_runtime.clj"
+         (identity/resolve-source-path
+          "/home/joe/code/futon2/src/futon2/aif/full_loop_runtime.clj"
+          "/srv/wm/code/")))
+  (is (= "/elsewhere/source.clj"
+         (identity/resolve-source-path "/elsewhere/source.clj" "/srv/wm/code")))
+  (is (= "/home/joe/code/futon2/src/x.clj"
+         (identity/resolve-source-path "/home/joe/code/futon2/src/x.clj" nil))))
+
 (deftest real-load-edit-and-reload
   (let [f (java.io.File/createTempFile "wm-load-identity-" ".clj")
         n (symbol (str "wm-load-fixture-" (System/nanoTime)))
