@@ -82,7 +82,9 @@
 (def default-ticket-readiness-citation-chars 4096)
 (def default-ticket-readiness-candidate-limit 16)
 (def default-ticket-readiness-candidate-chars 1024)
-(def default-giraffe-root "/home/joe/code/storage/giraffe")
+(def default-giraffe-root
+  (or (System/getenv "FUTON_WM_GIRAFFE_ROOT")
+      "/home/joe/code/storage/giraffe"))
 (def self-heal-runtime-config-resource "wm/self-heal-runtime.edn")
 
 (defn self-heal-runtime-config
