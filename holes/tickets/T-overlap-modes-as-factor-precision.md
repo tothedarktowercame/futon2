@@ -2,7 +2,7 @@
 
 **Status:** OPEN — INVESTIGATION (discovery only; no code change until the
 findings are reviewed with Joe)
-Parent: M-aif-a-matrix-faithfulness
+Parent: M-aif-a-matrix-faithfulness; excursion of futon3c M-repl-circus (Joe, 2026-11-11)
 
 ## The question
 
