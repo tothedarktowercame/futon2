@@ -7852,7 +7852,12 @@
        ;; A typed pre-dispatch refusal from a saturated clock store, with the
        ;; dispatch explicitly not created, is a precondition hold rather than
        ;; a fault in the machine's code.
-       :clock/store-busy}
+       :clock/store-busy
+       ;; wm-click-loop-repair-25b11814: a pinned execution cohort whose data
+       ;; root was never activated is the same class of operator/server
+       ;; precondition as an unpreregistered trigger -- activate the cohort;
+       ;; no code repair discharges it.
+       :cohort-not-activated}
      failure-kind)
     :environmental-hold
 

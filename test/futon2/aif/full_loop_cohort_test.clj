@@ -839,6 +839,46 @@
     (is (thrown? clojure.lang.ExceptionInfo (cohort/execution-preflight binding false))))
 )
 
+(deftest execution-preflight-types-missing-activation-distinct-from-mismatch
+  ;; wm-click-loop-repair-25b11814: the pinned binding named cohort
+  ;; wm-contract-machinery-57-v1 whose data root had never been activated.
+  ;; Before this fix both conditions threw the same untyped
+  ;; :execution-cohort-activation-mismatch, the runner boundary classed the
+  ;; absent marker :machine-failure/:initialization-failed, and a repair
+  ;; obligation was opened for an operator precondition.
+  (let [root (tmp-root)
+        path (str root "/cohort.edn")
+        p (-> (edn/read-string (slurp prereg-path))
+              (assoc :cohort/id :run4-test)
+              (assoc-in [:stopping-rule :target] 1))
+        raw (pr-str p)
+        digest (apply str (map #(format "%02x" (bit-and 255 %))
+                              (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                       (.getBytes raw "UTF-8"))))
+        binding {:preregistration path :data-root root :cohort-id :run4-test :sha256 digest}]
+    (spit path raw)
+    (testing "an absent activation marker is a typed precondition, not a mismatch"
+      (let [data (try (cohort/execution-preflight binding) nil
+                      (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        (is (= :execution-cohort-activation-missing (:reason data)))
+        (is (= :cohort-not-activated (:failure-kind data)))
+        (is (= :run4-test (:cohort/id data)))))
+    (testing "a genuine mismatch still refuses, now with both sides"
+      (cohort/activate! path root)
+      ;; Corrupt the durable marker (not the pinned bytes) so the pin still
+      ;; validates and only the activation identity disagrees.
+      (spit (str root "/run4-test/activation.edn")
+            (pr-str {:cohort/id :run4-test
+                     :activated-at "test"
+                     :preregistration-path path
+                     :preregistration-sha256 (apply str (repeat 64 "0"))
+                     :stopping-target 1}))
+      (let [data (try (cohort/execution-preflight binding) nil
+                      (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        (is (= :execution-cohort-activation-mismatch (:reason data)))
+        (is (= digest (get-in data [:expected :preregistration-sha256])))
+        (is (contains? data :actual))))))
+
 (deftest invalid-cell-refusals-carry-failure-kind
   ;; repair-ea1-3f4cac...-untyped-failure: the 2026-09-13 construction
   ;; failure refused here without :failure-kind and was classified

@@ -1162,11 +1162,32 @@
          _ (refuse-unknown-identities! (cohort-dir (:value snapshot) (:data-root binding)))
          state (ledger snapshot (:data-root binding))
          activation (:activation state)]
+     (when (nil? activation)
+       ;; wm-click-loop-repair-25b11814: the pinned server binding named
+       ;; cohort wm-contract-machinery-57-v1, whose data root had never been
+       ;; activated (no activation.edn, root absent). This precondition is
+       ;; what start-attempt! already types as "cohort is not activated";
+       ;; folding it into the mismatch below erased the distinction and the
+       ;; runner boundary charged it :machine-failure/:initialization-failed
+       ;; for an operator/server precondition. Typed here so it discharges as
+       ;; :cleared-precondition, like :trigger-ineligible.
+       (throw (ex-info "Execution cohort is not activated"
+                       {:reason :execution-cohort-activation-missing
+                        :failure-kind :cohort-not-activated
+                        :cohort/id (:cohort-id binding)
+                        :preregistration-sha256 (:sha256 binding)
+                        :data-root (:data-root binding)})))
      (when-not (and (= (:cohort-id binding) (:cohort/id activation))
                     (= (:sha256 binding) (:preregistration-sha256 activation))
                     (= (:target state) (:stopping-target activation)))
        (throw (ex-info "Execution cohort activation mismatch"
-                       {:reason :execution-cohort-activation-mismatch})))
+                       {:reason :execution-cohort-activation-mismatch
+                        :expected {:cohort/id (:cohort-id binding)
+                                   :preregistration-sha256 (:sha256 binding)
+                                   :stopping-target (:target state)}
+                        :actual (select-keys activation
+                                             [:cohort/id :preregistration-sha256
+                                              :stopping-target])})))
      (when (and require-capacity? (not (pos? (:remaining state))))
        (throw (ex-info "Execution cohort is exhausted"
                        {:reason :execution-cohort-exhausted})))
