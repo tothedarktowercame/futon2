@@ -363,14 +363,30 @@
                      (keyword? (:reason %)) (string? (:pin %)) (seq (:pin %)))
                forbidden-evidence)))
 
+(defn configured-task-selection-library-root
+  "Resolve the task-selection pattern root without assuming Joe's zone layout.
+  The dedicated root wins, followed by the general pattern-library root and
+  then the installation code root. The historical home-relative path remains
+  the default for an unconfigured developer checkout."
+  ([] (configured-task-selection-library-root (System/getenv)))
+  ([env]
+   (or (some-> (get env "FUTON_TASK_SELECTION_LIBRARY_ROOT") str/trim not-empty)
+       (some-> (get env "FUTON_PATTERN_LIBRARY_ROOT")
+               str/trim not-empty (str/replace #"/+$" "")
+               (str "/task-selection"))
+       (some-> (get env "FUTON_CODE_ROOT")
+               str/trim not-empty (str/replace #"/+$" "")
+               (str "/futon3/library/task-selection"))
+       (str (System/getProperty "user.home")
+            "/code/futon3/library/task-selection"))))
+
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection."
   [makeup state observation]
   (let [library-root (.getCanonicalPath
                       (io/file (or (:task-selection-library-root makeup)
-                                   (str (System/getProperty "user.home")
-                                        "/code/futon3/library/task-selection"))))
+                                   (configured-task-selection-library-root))))
         construction (menu/construct library-root makeup observation)
         menu (:cascades construction)
         partition (apply-c1-exclusions

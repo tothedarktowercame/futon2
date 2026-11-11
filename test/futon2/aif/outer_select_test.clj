@@ -11,6 +11,23 @@
 
 (clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
 
+(deftest task-selection-library-root-follows-installation-root
+  (is (= "/srv/wm/code/futon3/library/task-selection"
+         (outer-select/configured-task-selection-library-root
+          {"FUTON_CODE_ROOT" "/srv/wm/code/"})))
+  (is (= "/srv/patterns/task-selection"
+         (outer-select/configured-task-selection-library-root
+          {"FUTON_CODE_ROOT" "/ignored/code"
+           "FUTON_PATTERN_LIBRARY_ROOT" "/srv/patterns/"})))
+  (is (= "/srv/task-selection"
+         (outer-select/configured-task-selection-library-root
+          {"FUTON_CODE_ROOT" "/ignored/code"
+           "FUTON_PATTERN_LIBRARY_ROOT" "/ignored/patterns"
+           "FUTON_TASK_SELECTION_LIBRARY_ROOT" "/srv/task-selection"})))
+  (is (= (str (System/getProperty "user.home")
+              "/code/futon3/library/task-selection")
+         (outer-select/configured-task-selection-library-root {}))))
+
 (deftest c2-exclusion-is-accepted-and-unknown-reason-is-refused
   (let [partition {:field [{:target "M-c2"} {:target "M-other"}]
                    :excluded [] :requests []}
