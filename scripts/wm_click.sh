@@ -119,6 +119,25 @@ else
   exit 1
 fi
 
+# The WM's R16 stop-line path parks a continuation when selection terminates
+# without work.  Probe the flag without creating a park: handle-park checks the
+# feature gate before validating the deliberately invalid JSON body, so an
+# enabled server answers 400/invalid-json and a disabled server answers
+# 503/parked-on-disabled.  This is an execution prerequisite, not an
+# informational tripwire; discovering it after selection spends a click merely
+# to learn that the environment was incomplete.
+park_probe=$(curl -s -m 10 -w '\n%{http_code}' -X POST \
+  -H 'Content-Type: application/json' --data 'null' "$BASE/api/alpha/park")
+park_code=${park_probe##*$'\n'}
+park_body=${park_probe%$'\n'*}
+if [ "$park_code" = "400" ] && printf '%s' "$park_body" | grep -q 'invalid-json'; then
+  say "parking" "enabled"
+else
+  emit_phase_since "agency-budget-preflight" "$preflight_started_ns"
+  cannot "parking" "HTTP $park_code -- WM stop-line continuation parking is unavailable"
+  echo; echo "cannot launch (exit 3)"; exit 3
+fi
+
 # The durable ration is knowable before a worker or readiness wake exists.
 # Treat absence/exhaustion as a terminal launch account, not as a live run.
 budget=$(curl -s -m 10 "$BASE/api/alpha/wm/click" | python3 -c '
