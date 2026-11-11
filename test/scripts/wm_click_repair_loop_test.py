@@ -530,6 +530,24 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertFalse(loop.parse_args(base).observe_only)
         self.assertTrue(loop.parse_args(base + ["--observe-only"]).observe_only)
 
+    def test_direct_task_is_explicit_and_defaults_absent(self):
+        loop = load_loop()
+        base = ["run", "--clicks", "1", "--owner", "codex-68",
+                "--issuing-caller", "joe", "--author", "wm-author",
+                "--reviewer", "wm-reviewer",
+                "--repair-reviewer", "wm-repair-reviewer"]
+        self.assertIsNone(loop.parse_args(base).task)
+        self.assertEqual("T-ladder-01-loop-turns-over",
+                         loop.parse_args(base + ["--task", "T-ladder-01-loop-turns-over"]).task)
+
+    def test_repair_dispatch_uses_the_loop_agency_base(self):
+        loop = load_loop()
+        completed = subprocess.CompletedProcess([], 0, '{"job-id":"job-1"}', "")
+        with mock.patch.object(loop, "sh", return_value=completed) as send:
+            self.assertEqual("job-1", loop.dispatch("wm-repair-reviewer", "repair"))
+        self.assertIn("--base", send.call_args.args)
+        self.assertIn(loop.AGENCY, send.call_args.args)
+
     def test_observation_only_debugger_stop_never_dispatches_repair(self):
         loop = load_loop()
         args = loop.parse_args([

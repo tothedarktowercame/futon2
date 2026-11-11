@@ -90,7 +90,7 @@ ALERTS = STATE / "alerts.jsonl"
 # are excluded only from the repeat comparison, so a known gap awaiting a
 # decision cannot pause the loop while other defects are being found.
 ACKNOWLEDGED = STATE / "acknowledged.json"
-AGENCY = os.environ.get("BASE", "http://localhost:7070").rstrip("/")
+AGENCY = os.environ.get("BASE", "http://127.0.0.1:7070").rstrip("/")
 SEND = F3C / "scripts" / "agency_send.py"
 EVAL = F3C / "scripts" / "proof-eval.sh"
 TERMINAL = {"done", "failed", "error", "cancelled", "timeout", "timed-out"}
@@ -1663,6 +1663,8 @@ def fire(n: int, args, since_epoch: int) -> dict:
     before = budget_lines()
     cmd = [F2 / "scripts" / "wm_click.sh", "--run", "--issuing-caller", args.issuing_caller,
            "--author", args.author, "--reviewer", args.reviewer, "--repair-reviewer", args.repair_reviewer]
+    if args.task:
+        cmd.extend(["--task", args.task])
     log(f"click {n}: firing ({out.name})")
     in_flight_repairs = []
     handled_stops = set()
@@ -1985,7 +1987,7 @@ def repair_packet(tag: str, reason: str, click: dict | None, prior: list[str],
 
 def dispatch(seat: str, prompt: str) -> str:
     r = sh(sys.executable, SEND, "--from", "wm-click-loop", "--to", seat, "--kind", "bell",
-           "--mode", "work", input=prompt, timeout=120)
+           "--mode", "work", "--base", AGENCY, input=prompt, timeout=120)
     m = re.search(r'"job-id"\s*:\s*"([^"]+)"', r.stdout)
     if not m:
         raise RuntimeError(f"dispatch to {seat} failed: {r.stdout[-400:]} {r.stderr[-400:]}")
@@ -2428,6 +2430,7 @@ def parse_args(argv=None):
     r.add_argument("--repair-timeout", type=int, default=5400)
     r.add_argument("--owner", required=True)
     r.add_argument("--issuing-caller", required=True)
+    r.add_argument("--task", help="direct task id for a staged or otherwise preselected run")
     r.add_argument("--author", required=True)
     r.add_argument("--reviewer", required=True)
     r.add_argument("--repair-reviewer", required=True)
