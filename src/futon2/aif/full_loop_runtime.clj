@@ -1730,9 +1730,16 @@
   (let [opts (assoc opts :wm/discovery-enactment :off)]
    (if (get-in opts [:task :id])
     (run-ordinary-opportunity-with-task!
-     (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}]
-       (assoc opts :selection-record
-              (retain-selection! opts (assoc named :status :not-exercised :reason :direct-task-entry)
+     (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}
+           retained (assoc named :status :not-exercised :reason :direct-task-entry)]
+       (assoc opts
+              ;; The reading-family scorer consumes :outer/selection for its
+              ;; target-class evidence. A direct task has no comparative
+              ;; selector result, but the caller's pin is itself the retained
+              ;; focus decision and must reach that same carrier.
+              :outer/selection retained
+              :selection-record
+              (retain-selection! opts retained
                                  (assoc named :status :not-exercised :path :direct-task
                                         :reason :task-supplied)))))
     (if-let [giraffe-dir (find-giraffe-run opts)]
