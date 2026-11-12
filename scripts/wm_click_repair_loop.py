@@ -1498,6 +1498,8 @@ def notify_alert(args, c: dict) -> None:
 # self-heal reads and fires no click while more than one injury is open.
 MAX_ACTIVE_INJURIES = 1
 _ACTIVE_INJURY_FORM = (
+    "(do (require 'futon2.aif.meta-injury-store "
+    "'futon2.aif.meta-injury-ledger 'futon2.aif.meta-self-heal-production) "
     "(let [d (futon2.aif.meta-injury-store/load-durable-ledger "
     "futon2.aif.meta-self-heal-production/default-ledger-path)] "
     "(if (map? (:source-pin d)) "
@@ -1505,7 +1507,7 @@ _ACTIVE_INJURY_FORM = (
     "(if (= :computed (:status a)) "
     "(str \"ACTIVE-INJURIES \" (count (:injuries a)) \" \" (pr-str (vec (sort (keys (:injuries a)))))) "
     "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:status a))))) "
-    "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:reason d)))))")
+    "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:reason d))))))")
 
 
 def active_injuries() -> tuple[int | None, str]:
