@@ -57,7 +57,7 @@
         path "/home/joe/code/futon2/holes/tickets/T-source-declared.md"
         source-contract (contract/source-contract
                          "/home/joe/code" target path
-                         "# Ticket\n\n- [ ] Retain the source-declared result\n")
+                         "# Ticket\n\n**Status:** DRAFT\n\n- [ ] Retain the source-declared result\n")
         selected (contract/attach
                   (cascade-action target #{[target :cascade-output]})
                   source-contract)]
@@ -65,7 +65,14 @@
     (is (seq (:want selected)))
     (is (= (:observation-locators source-contract)
            (:observation-locators selected)))
-    (is (map? (:mission-want-source selected)))))
+    (is (= {:kind :current-ticket-head
+            :repo "futon2"
+            :path "holes/tickets/T-source-declared.md"}
+           (select-keys (:mission-want-source selected) [:kind :repo :path])))
+    (is (= #{{:class :C4 :repo "futon2" :sha "HEAD"
+              :path "holes/tickets/T-source-declared.md"
+              :decl "**Status:** DONE"}}
+           (set (vals (:observation-locators selected)))))))
 
 (deftest mission-and-excursion-contracts-are-unchanged
   (doseq [target ["M-control" "E-control"]]
