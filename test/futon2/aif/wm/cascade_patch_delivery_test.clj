@@ -69,5 +69,9 @@
 (deftest prompt-names-canonical-delivery
   (let [prompt (#'runtime/open-cascade-author-prompt {})]
     (is (str/includes? prompt data-paths/production-repo-root))
+    (is (str/includes? prompt
+                       (str "git -C " data-paths/production-repo-root
+                            " rev-parse --show-toplevel")))
+    (is (str/includes? prompt "Do not inspect, reuse, or cite"))
     (is (str/includes? prompt "patch.commit"))
     (is (str/includes? prompt "canonical HEAD"))))
