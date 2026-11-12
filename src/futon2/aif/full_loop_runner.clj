@@ -1895,7 +1895,16 @@
   dispatch. This packet only retains the plan; the singular artifact gate is
   deliberately unchanged."
   [opts code-state entry locators]
-  (let [known (->> (:repo-heads code-state) keys (filter string?) sort vec)
+  (let [serving-repository
+        (fn [repo]
+          (let [sibling (io/file data-paths/production-code-root
+                                 (.getName (io/file repo)))]
+            (if (and (.isDirectory sibling)
+                     (.isDirectory (io/file sibling ".git")))
+              (.getCanonicalPath sibling)
+              repo)))
+        known (->> (:repo-heads code-state) keys (filter string?)
+                   (map serving-repository) distinct sort vec)
         by-name (group-by #(-> % io/file .getName) known)
         resolve-locator-repo
         (fn [repo]
