@@ -1,7 +1,9 @@
 (ns futon2.aif.reading-policy-class-history-index-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.reading-policy-class-free-energy :as class-f]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.reading-policy-class-history-index :as index])
@@ -31,6 +33,19 @@
          (try (class-f/absolute-history-directory! "data/wm-runs") nil
               (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))
   (is (.isAbsolute (class-f/absolute-history-directory! "/home/joe/code/futon2/data/wm-runs"))))
+
+(deftest declared-history-uses-the-configured-data-root
+  (with-redefs [data-paths/path
+                (fn [& parts] (str "/sandbox/data/" (str/join "/" parts)))]
+    (is (= "/sandbox/data/wm-runs"
+           (.getPath (class-f/declared-history-directory!
+                       {:authority :futon2-data :path ["wm-runs"]})))))
+  (is (= :unsupported-class-history-locator
+         (try
+           (class-f/declared-history-directory!
+             {:authority :host-path :path ["home" "joe" "code" "futon2"]})
+           nil
+           (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))))
 
 (deftest absent-and-incomplete-index-are-not-empty-history
   (let [dir (temp-dir)
