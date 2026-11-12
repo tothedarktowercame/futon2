@@ -4722,7 +4722,8 @@
          (case role
            :author
            (str "AUTHOR " author " may deposit one actual-command receipt per discharged limb:\n"
-                ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at].\n"
+                ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at]. "
+                ":limb MUST be a keyword naming the checked limb (for example :ticket-acceptance-check), not a pattern id, occurrence vector, or prose.\n"
                 "Write stdout/stderr bytes to flat companion files and reference them with :stdout-file/:stderr-file.\n"
                 "For a repair target, capture its immutable ORIGINAL obligation record bytes under data/wm-repair-obligations/ as :before and the DERIVED-STATE readback record as :after (repair-derived-state output bytes; still :open is honest, but capture the readback record, never a second copy of the finding -- identical before/after bytes refuse :revision-unchanged, which orphaned cohort-54 attempt-001).\n"
                 "Name that :wm/entity-revision-pair-v1 file subject-*.edn and set :entity/id to the exact selected repair id.\n"

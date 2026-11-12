@@ -8543,7 +8543,9 @@
     (is (str/includes? text "Only the schemas named below are accepted"))
     (is (str/includes? text "Do not invent a run-record"))
     (is (str/includes? text
-                       "stdout/stderr companion bytes referenced by a :wm/limb-receipt-v1"))))
+                       "stdout/stderr companion bytes referenced by a :wm/limb-receipt-v1"))
+    (is (str/includes? text
+                       ":limb MUST be a keyword naming the checked limb"))))
 
 (deftest reviewer-standing-contract-is-the-close-validator-contract
   ;; Run 2026-09-21-1790033693 lost a grounded change because the reviewer
