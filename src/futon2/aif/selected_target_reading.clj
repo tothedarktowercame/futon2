@@ -238,6 +238,8 @@
        :source-path (or outer-path row-path)
        :source-pin-conflict? (boolean (and outer-path row-path
                                            (not= outer-path row-path)))
+       :source-kind (:source-kind row)
+       :item-line (:item-line row)
        :excerpt-digest (:expected-digest failure)
        :failure (:kind failure)})))
 
@@ -313,7 +315,9 @@
       (or (:source-pin-conflict? need)
           (not (string? (:source-path need)))
           (not (.isFile (io/file (:source-path need))))
-          (not (string? (:excerpt-digest need))))
+          (not (string? (:excerpt-digest need)))
+          (and (= :item-section (:source-kind need))
+               (not (pos-int? (:item-line need)))))
       (refused need :selected-target-reading-unpinned)
 
       (not (fn? answer-fn))
@@ -323,9 +327,12 @@
       (let [request-file (request-file request-root run-id (:target need)
                                        (:excerpt-digest need))
             _ (io/make-parents request-file)
-            built (shell/sh "python3" request-builder (:source-path need)
-                            "--target" (str (:target need)) "--mission-head"
-                            "--out" (.getPath request-file))]
+            source-args (if (= :item-section (:source-kind need))
+                          ["--item-line" (str (:item-line need))]
+                          ["--mission-head"])
+            built (apply shell/sh "python3" request-builder (:source-path need)
+                         "--target" (str (:target need))
+                         (concat source-args ["--out" (.getPath request-file)]))]
         (if-not (zero? (:exit built))
           (refused need :selected-target-reading-request-refused
                    {:exit (:exit built) :stderr (:err built)})

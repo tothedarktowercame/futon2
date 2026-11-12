@@ -119,6 +119,35 @@
     (is (= :current-candidate
            (:status (registry/current-reading (str readings) "M-selected" excerpt))))))
 
+(deftest item-section-reading-uses-the-declared-item-line
+  (let [work (temp-dir "selected-item-reading-")
+        readings (temp-dir "selected-item-registry-")
+        source (io/file work "T-item.md")
+        _ (spit source (str "# Ticket\n\n## Context\nEarlier.\n\n"
+                            "## Acceptance\n\n- [ ] Read this item.\n\n"
+                            "## Notes\nLater.\n"))
+        line 8
+        excerpt (registry/item-section-digest source line)
+        j (-> (judgement "T-item" (.getPath source) excerpt)
+              (assoc-in [:cascade-problems :target-sources 0 :source-kind] :item-section)
+              (assoc-in [:cascade-problems :target-sources 0 :item-line] line))
+        observed (atom nil)
+        result (sut/repair!
+                {:run-id "run-item" :author "wm-author"
+                 :answer-fn (fn [{:keys [request]}]
+                              (reset! observed request)
+                              {:analysis (analysis-for request)})
+                 :request-root (str work)
+                 :target-reading-root (str readings)}
+                j)]
+    (is (= :item-section (:source-kind (sut/selected-need j))))
+    (is (= line (:item-line (sut/selected-need j))))
+    (is (= "open-item-section" (get-in @observed [:task :source_kind])))
+    (is (= line (get-in @observed [:task :item :line])))
+    (is (= excerpt (get-in @observed [:task :excerpt_sha256])))
+    (is (not= :selected-target-reading-request-refused (:kind result))
+        "the real builder accepted the item-section invocation")))
+
 (deftest refusal-never-falls-through-to-another-target-or-seat
   (let [source (io/file (temp-dir "selected-reading-refusal-") "M-selected.md")
         _ (spit source "# M-selected\n\n## HEAD\nOPEN work.\n")
