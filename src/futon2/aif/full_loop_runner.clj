@@ -3351,11 +3351,13 @@
   ([judgement] (selected-entry judgement nil))
   ([judgement outer-selection]
   (let [decision (:decision judgement)
-        outer-pin (when outer-selection
+        direct-task? (= :direct-task-entry (:reason outer-selection))
+        enacted-outer? (and outer-selection (not direct-task?))
+        outer-pin (when enacted-outer?
                     (outer-select/validate-enactment-pin! outer-selection))
         retain-outer (fn [entry]
                        (cond-> entry
-                         outer-selection
+                         enacted-outer?
                          (assoc :outer-enactment outer-pin
                                 :outer-enactment-sha (identity/digest outer-pin)
                                 :outer-enactment-required? true)))]
