@@ -162,6 +162,32 @@
     (is (= :error (:status result)))
     (is (= :occurrence-square-answer-unbound (:kind result)))))
 
+(deftest unavailable-pinned-pattern-stops-before-author-contact
+  ;; Held run 2026-11-12-87084895: the reading carried a source pin, but the
+  ;; occurrence-square phase resolved against the wrong library. Treating
+  ;; nil text as a void citation dispatched agents to diagnose an apparatus
+  ;; fault. The machine must retain the pin and stop before that dispatch.
+  (let [reading-root (temp-root)
+        reading (reading! reading-root)
+        calls (atom 0)
+        result (sut/repair!
+                {:author "wm-author"
+                 :target-reading-root reading-root
+                 :occurrence-square-root (temp-root)
+                 :pattern-library-root (temp-root)
+                 :answer-fn (fn [_]
+                              (swap! calls inc)
+                              (throw (ex-info "author must not be contacted" {})))}
+                (judgement reading))]
+    (is (= :error (:status result)))
+    (is (= :occurrence-pattern-source-unavailable (:kind result)))
+    (is (false? (:author-contacted result)))
+    (is (zero? @calls))
+    (is (= [{:occurrence-id [pattern 0]
+             :pattern pattern
+             :expected-sha256 pattern-sha}]
+           (:unavailable result)))))
+
 (deftest extra-invented-entry-is-refused-and-retains-answer-evidence
   ;; Held run 2026-11-07-ebaa2c4f (repair wm-click-loop-repair-88a04c65):
   ;; wm-author returned every expected entry plus one invented duplicate

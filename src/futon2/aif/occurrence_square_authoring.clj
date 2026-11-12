@@ -105,15 +105,35 @@
         (let [resolver (registry/library-resolver
                         (or pattern-library-root (registry/default-library-root)))
               classified (mapv (fn [{:keys [pattern] :as occurrence}]
-                                 (let [parts (square/pattern-parts (resolver pattern))
+                                 (let [text (resolver pattern)
+                                       parts (square/pattern-parts text)
                                        missing (vec (for [part ["IF" "HOWEVER" "BECAUSE" "THEN"]
                                                           :when (str/blank? (get parts part))]
                                                       (keyword part)))]
                                    (assoc occurrence :pattern-parts parts
+                                          :pattern-source-available? (string? text)
                                           :missing-parts missing
                                           :void? (boolean (seq missing)))))
                                (refs reading))
-              occurrences (vec (remove :void? classified))
+              unavailable (vec (for [{:keys [occurrence-id pattern
+                                              pattern-sha256
+                                              pattern-source-available?]}
+                                     classified
+                                     :when (not pattern-source-available?)]
+                                 {:occurrence-id occurrence-id
+                                  :pattern pattern
+                                  :expected-sha256 pattern-sha256}))]
+          (if (seq unavailable)
+            ;; A validated reading carries a source pin for every citation. If
+            ;; that source is no longer resolvable, the apparatus is broken;
+            ;; calling the author with an empty occurrence set misattributes
+            ;; the failure to an agent and later produces void-pattern-citation.
+            {:schema schema :status :error
+             :kind :occurrence-pattern-source-unavailable
+             :author-contacted false
+             :target target :analysis-digest analysis-digest
+             :unavailable unavailable}
+            (let [occurrences (vec (remove :void? classified))
               voids (into {} (for [{:keys [occurrence-id pattern missing-parts]} classified
                                    :when (seq missing-parts)]
                                [occurrence-id {:occurrence-id occurrence-id
@@ -219,4 +239,4 @@
                      :job-id (:job-id exchange)}
                     {:schema schema :status :error
                      :kind :occurrence-square-publication-invalid
-                     :detail published}))))))))))
+                     :detail published}))))))))))))
