@@ -78,6 +78,16 @@ class AlertTest(unittest.TestCase):
     self.addCleanup(server.server_close); self.addCleanup(server.shutdown)
     return f"http://127.0.0.1:{server.server_port}/evidence"
 
+  def test_evidence_url_follows_the_serving_substrate_not_zone_ports(self):
+    module=loaded_alert_module()
+    with mock.patch.dict("os.environ",{},clear=True):
+      self.assertEqual(module.default_evidence_url(),"http://127.0.0.1:7073/api/alpha/evidence")
+    with mock.patch.dict("os.environ",{"FUTON1B_URL":"http://127.0.0.1:7074/"},clear=True):
+      self.assertEqual(module.default_evidence_url(),"http://127.0.0.1:7074/api/alpha/evidence")
+    with mock.patch.dict("os.environ",{"FUTON1B_URL":"http://127.0.0.1:7074",
+                                       "FUTON_WM_EVIDENCE_URL":"http://h:1/e"},clear=True):
+      self.assertEqual(module.default_evidence_url(),"http://h:1/e")
+
   def test_click20_alerts_and_exits_nonzero(self):
     p,rec=self.invoke(); self.assertNotEqual(p.returncode,0); self.assertTrue(p.stdout.startswith("ALERT FOR JOE\n"))
     for q in (1,2,4,5,6,7,9,11): self.assertRegex(p.stdout,rf"(?m)^Q{q} (violated|unverifiable):")
