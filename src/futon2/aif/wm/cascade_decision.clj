@@ -1467,7 +1467,7 @@
                            policy-field
                            (q2-construction/library-manifest
                             (or (:pattern-library-root opts)
-                                selected-reading/default-library-root))))
+                                (selected-reading/default-library-root)))))
                 (assoc-in [:decision :mission-hole-coverage]
                           (or (:mission-hole-coverage assembled)
                               {:status :absent :reason :source-coverage-not-supplied}))

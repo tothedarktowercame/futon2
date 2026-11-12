@@ -103,7 +103,7 @@
 
         :else
         (let [resolver (registry/library-resolver
-                        (or pattern-library-root registry/default-library-root))
+                        (or pattern-library-root (registry/default-library-root)))
               classified (mapv (fn [{:keys [pattern] :as occurrence}]
                                  (let [parts (square/pattern-parts (resolver pattern))
                                        missing (vec (for [part ["IF" "HOWEVER" "BECAUSE" "THEN"]

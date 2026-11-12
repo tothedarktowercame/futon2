@@ -3128,7 +3128,7 @@
     (if (not= :interpretation-owed-after-selection (:status status))
       {:judgement judgement :record nil}
       (let [library-root (or (:pattern-library-root opts)
-                             selected-reading/default-library-root)
+                             (selected-reading/default-library-root))
             request (selected-reading/request decision {:library-root library-root})
             ask (or (:selected-reading-ask-fn opts)
                     (when-let [builder (:selected-reading-ask-builder opts)]

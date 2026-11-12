@@ -233,7 +233,7 @@
                                     (or pattern-texts
                                         (square-registry/library-resolver
                                          (or pattern-library-root
-                                             square-registry/default-library-root)))))]
+                                             (square-registry/default-library-root))))))]
                      (if (and require-occurrence-squares?
                               (= :absent (:status squares)))
                        (failed-field-family

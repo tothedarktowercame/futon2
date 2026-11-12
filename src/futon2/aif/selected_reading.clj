@@ -19,7 +19,8 @@
             [clojure.string :as str]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.reading-interpretation-debt :as debt])
+            [futon2.aif.reading-interpretation-debt :as debt]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files]))
 
 (load-identity/register! *ns* *file*)
@@ -27,7 +28,12 @@
 (def request-schema debt/request-schema)
 (def receipt-schema debt/receipt-schema)
 (def validator-id debt/validator-id)
-(def default-library-root "/home/joe/code/futon3/library")
+(defn default-library-root
+  "Same isolation rule as occurrence-square-registry/default-library-root:
+   the pinned pattern library follows the serving code root, never a
+   hard-coded canonical checkout (repair wm-click-loop-repair-d2550457)."
+  []
+  (data-paths/code-path "futon3" "library"))
 
 (def ^:private digest debt/seal)
 
@@ -62,7 +68,7 @@
   owed pattern has no library file, no request is issued: the result is the
   typed refusal {:status :refused :kind :selected-reading-source-unpinned
   :missing [{:occurrence-id :pattern} …]}, which must not be asked."
-  [decision {:keys [library-root] :or {library-root default-library-root}}]
+  [decision {:keys [library-root] :or {library-root (default-library-root)}}]
   (let [action (:action decision)
         carrier (:interpretation-debt action)
         pins (when (map? carrier)
@@ -125,7 +131,7 @@
   refused :reasons [...]}, and no receipt is written. Otherwise {:status
   :validated :receipts [...] :remaining [...]}; REMAINING owed occurrences
   without a verdict stay open."
-  [request response {:keys [library-root] :or {library-root default-library-root}}]
+  [request response {:keys [library-root] :or {library-root (default-library-root)}}]
   (let [verdicts (:verdicts response)
         refuse (fn [reasons] {:status :interpretation-validation-refused
                               :request-id (:request-id request) :reasons reasons
