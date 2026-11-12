@@ -254,6 +254,20 @@
     (is (= :outer-selection-relation-unavailable
            (get-in row [:failures 0 :reason])))))
 
+(deftest caller-pinned-direct-task-is-focused-by-construction
+  (let [target "T-ladder-01-loop-turns-over"
+        retained {:task target
+                  :status :not-exercised
+                  :reason :direct-task-entry
+                  :entry {:kind :api :caller "codex-6"}}
+        target-classes (sut/target-classes-for-outer-selection retained)]
+    (is (= :focus (get-in target-classes [target :class])))
+    (is (= :focused (get-in target-classes [target :scorer-class])))
+    (is (= "caller-pinned direct task"
+           (get-in target-classes [target :provenance :source])))
+    (is (= :focus
+           (get-in target-classes [target :provenance :relation])))))
+
 (deftest joint-selector-scores-every-policy-once
   (let [result (sut/select-over-families [(computed-family "T-a" 2)
                                           (computed-family "T-b" 3)]
