@@ -4503,7 +4503,7 @@
               {:wake-agent-fn
                (fn [_ agent]
                  (swap! wake-calls conj agent)
-                 {:ok true})
+                 {:ok true :job-id "wake-job-1"})
                :substrate-preflight-fn (fn [_] {:route :test})})
         result (runner/run-opportunity! opts)
         readiness-end (first (filter #(and (= :agent-readiness (:phase %))
@@ -4515,7 +4515,12 @@
     (is (= 2 @roster-calls) "the roster is observed once, then rechecked once")
     (is (= :ok (:outcome readiness-end)))
     (is (true? (:readiness/wake-attempted readiness-end)))
-    (is (= :woken (:readiness/wake-result readiness-end)))))
+    (is (= :woken (:readiness/wake-result readiness-end)))
+    (is (= {:ok true :job-id "wake-job-1"}
+           (:readiness/wake-receipt readiness-end)))))
+
+(deftest readiness-wake-has-a-three-minute-safety-bound
+  (is (= (* 3 60 1000) runner/readiness-wake-timeout-ms)))
 
 (deftest post-wake-busy-seat-is-repolled-before-no-reply
   ;; Planted for held run 2026-11-11-ac1762fb (repair wm-click-loop-repair-69863e52):

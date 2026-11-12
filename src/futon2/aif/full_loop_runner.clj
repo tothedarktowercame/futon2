@@ -182,7 +182,10 @@
 (def default-author-infrastructure-retries 1)
 (def default-revision-rounds 1)
 (def ^:private historical-verification-completion-token (Object.))
-(def readiness-wake-timeout-ms 30000)
+(def readiness-wake-timeout-ms
+  "Safety bound for completing a fresh-session wake; it is not evidence of
+  unavailability before the whistle operation itself has finished."
+  (* 3 60 1000))
 (def readiness-wake-poll-attempts
   "Bounded re-polls of the roster after a wake whistle. The whistle itself
   invokes the seat, so an immediate recheck can read the runner's own
@@ -2071,11 +2074,13 @@
     {:roster roster
      :readiness/wake-attempted false
      :readiness/wake-result :not-needed}
-    (do
-      (try
-        ((or (:wake-agent-fn opts) wake-agent!) opts agent)
-        (catch Throwable _ nil))
-      (let [sleep-fn (or (:readiness-wake-sleep-fn opts) #(Thread/sleep %))
+    (let [wake-receipt (try
+                         ((or (:wake-agent-fn opts) wake-agent!) opts agent)
+                         (catch Throwable e
+                           {:status :wake-threw
+                            :error-class (.getName (class e))
+                            :error (.getMessage e)}))
+          sleep-fn (or (:readiness-wake-sleep-fn opts) #(Thread/sleep %))
             refresh (fn [fallback]
                       (try
                         ((or (:roster-fn opts) agent-roster) (:agency-base opts))
@@ -2084,7 +2089,8 @@
                      (if (available? roster' agent)
                        {:roster roster'
                         :readiness/wake-attempted true
-                        :readiness/wake-result :woken}
+                        :readiness/wake-result :woken
+                        :readiness/wake-receipt wake-receipt}
                        (if (and (pos? attempts)
                                 (= "invoking"
                                    (some-> (agent-record roster' agent)
@@ -2094,8 +2100,9 @@
                            (settle (refresh roster') (dec attempts)))
                          {:roster roster'
                           :readiness/wake-attempted true
-                          :readiness/wake-result :no-reply})))]
-        (settle (refresh roster) readiness-wake-poll-attempts)))))
+                          :readiness/wake-result :no-reply
+                          :readiness/wake-receipt wake-receipt})))]
+      (settle (refresh roster) readiness-wake-poll-attempts))))
 
 (defn agent-readiness!
   "Observe one required agent and attempt one wake when it is restored."
@@ -2121,11 +2128,13 @@
                        (select-keys result
                                     [:readiness/wake-attempted
                                      :readiness/wake-result
+                                     :readiness/wake-receipt
                                      :readiness/substrate-transient])))))
     result))
 
 (defn- readiness-event [result]
   (select-keys result [:readiness/wake-attempted :readiness/wake-result
+                       :readiness/wake-receipt
                        :readiness/substrate-transient]))
 
 (defn readiness
