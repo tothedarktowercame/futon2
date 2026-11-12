@@ -4717,6 +4717,8 @@
          "):\n"
          "DIRECTORY: " evidence-dir "\n"
          "Use flat one-form EDN files only; create no subdirectories. Files are the records; do not echo them in your reply.\n"
+         "Only the schemas named below are accepted as EDN records. Do not invent a run-record, summary, report, or other schema: "
+         "retain command output as stdout/stderr companion bytes referenced by a :wm/limb-receipt-v1.\n"
          (case role
            :author
            (str "AUTHOR " author " may deposit one actual-command receipt per discharged limb:\n"

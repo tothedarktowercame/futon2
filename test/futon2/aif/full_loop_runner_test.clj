@@ -8537,6 +8537,14 @@
     (is (= :reviewer-wait (get-in result [:data :failure-stage])))
     (is (= :complete (:status (loop-node-exercise/receipt d))))))
 
+(deftest author-deposit-contract-forbids-unregistered-record-schemas
+  (let [text (#'runner/evidence-deposit-instruction
+              :author "/evidence" "wm-author" "wm-reviewer" false)]
+    (is (str/includes? text "Only the schemas named below are accepted"))
+    (is (str/includes? text "Do not invent a run-record"))
+    (is (str/includes? text
+                       "stdout/stderr companion bytes referenced by a :wm/limb-receipt-v1"))))
+
 (deftest reviewer-standing-contract-is-the-close-validator-contract
   ;; Run 2026-09-21-1790033693 lost a grounded change because the reviewer
   ;; prompt listed keys but not the shape the close validates. Pin the prompt
