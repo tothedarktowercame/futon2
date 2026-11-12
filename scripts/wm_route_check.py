@@ -272,9 +272,19 @@ def edn(x):
 
 def kw(s): return ":" + s
 
+def default_mathlib_root():
+  """Same defect class as wm_run_alert (wm-click-loop-repair-862319e5): the
+  canonical /home/joe/code/mathlib4 is absent under a sandboxed code root
+  (FUTON_WM_CODE_ROOT), so resolve that first and fall back to the host path."""
+  root = os.environ.get("FUTON_WM_CODE_ROOT") or os.environ.get("FUTON_CODE_ROOT")
+  if root and (Path(root) / "mathlib4").is_dir():
+    return str(Path(root) / "mathlib4")
+  return "/home/joe/code/mathlib4"
+
+
 def main(argv=None):
   p = argparse.ArgumentParser(); p.add_argument("--binding", required=True)
-  p.add_argument("--mathlib-root", default="/home/joe/code/mathlib4")
+  p.add_argument("--mathlib-root", default=default_mathlib_root())
   p.add_argument("--lean-output", help="canned Lean stdout; hermetic tests only")
   p.add_argument("--acceptance-dir", default=ACCEPTANCE_DIR, help="click-state records (click-<id>.edn)")
   a = p.parse_args(argv); binding_path = Path(a.binding); ml = Path(a.mathlib_root)

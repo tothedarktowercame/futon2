@@ -210,6 +210,29 @@ class AlertTest(unittest.TestCase):
     self.assertEqual(1,status); self.assertRegex(stdout,r"(?m)^Q11 not-checked:")
     self.assertIn('":Q11" ":not-checked"',verdict); self.assertIn('":conforms" false',verdict)
 
+  def test_mathlib_root_honors_sandbox_code_root_when_host_checkout_absent(self):
+    """Regression wm-click-loop-repair-862319e5.
+
+    --mathlib-root defaulted to the absolute /home/joe/code/mathlib4, which is
+    absent under a sandboxed code root (FUTON_WM_CODE_ROOT). The post-run
+    Q1--Q10 check then raised FileNotFoundError on Requirements.lean, so
+    wm_click.sh printed 'requirements NOT CHECKED' and exited 1 even though
+    click ownership was confirmed. The default must resolve the sandboxed
+    mathlib4 when the canonical host checkout is missing."""
+    import os as _os
+    module=loaded_alert_module()
+    with tempfile.TemporaryDirectory() as td:
+      sandboxed=Path(td)/"mathlib4"; sandboxed.mkdir()
+      env={k:v for k,v in _os.environ.items()
+           if k not in ("FUTON_WM_CODE_ROOT","FUTON_CODE_ROOT")}
+      env["FUTON_WM_CODE_ROOT"]=td
+      with mock.patch.dict(_os.environ, env, clear=True):
+        self.assertEqual(module.default_mathlib_root(), str(sandboxed))
+    env={k:v for k,v in _os.environ.items()
+         if k not in ("FUTON_WM_CODE_ROOT","FUTON_CODE_ROOT")}
+    with mock.patch.dict(_os.environ, env, clear=True):
+      self.assertEqual(module.default_mathlib_root(), "/home/joe/code/mathlib4")
+
   def test_mislabelled_export_is_not_checked(self):
     module,root,record,facts=self.mocked_evaluation(selection_facts=FACTS); out=io.StringIO()
     with contextlib.redirect_stdout(out):

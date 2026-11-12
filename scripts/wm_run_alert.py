@@ -160,10 +160,27 @@ def run_lines(title, checked):
     shown=checked["bad"] or checked["outcomes"]
     return [f"{title} run:"]+[f"Q{q} {checked['outcomes'][q]}: {numbers(q,checked['facts'])}" for q in shown]
 
+def default_mathlib_root():
+  """Resolve the mathlib4 checkout without assuming the canonical host path.
+
+  Repair wm-click-loop-repair-862319e5: --mathlib-root defaulted to
+  /home/joe/code/mathlib4, which does not exist in the sandboxed code root
+  (FUTON_WM_CODE_ROOT). The post-run Q1--Q10 check then died on
+  FileNotFoundError reading Requirements.lean, wm_click.sh printed
+  'requirements NOT CHECKED' twice and exited 1 on a click it had already
+  confirmed ownership of. Honour the sandbox code root first, keep the
+  canonical host path as the fallback."""
+  for var in ("FUTON_WM_CODE_ROOT", "FUTON_CODE_ROOT"):
+    root = os.environ.get(var)
+    if root and (Path(root) / "mathlib4").is_dir():
+      return str(Path(root) / "mathlib4")
+  return "/home/joe/code/mathlib4"
+
+
 def main(argv=None):
     p=argparse.ArgumentParser(); p.add_argument("--run-record", required=True)
     p.add_argument("--futon2-root", default=str(Path(__file__).resolve().parents[1]))
-    p.add_argument("--mathlib-root", default="/home/joe/code/mathlib4")
+    p.add_argument("--mathlib-root", default=default_mathlib_root())
     p.add_argument("--alerts-log"); p.add_argument("--evidence-url", default="http://127.0.0.1:7073/api/alpha/evidence")
     p.add_argument("--facts-json", help="pre-exported work fixture; tests only")
     p.add_argument("--selection-facts-json", help="pre-exported selection fixture; tests only")
