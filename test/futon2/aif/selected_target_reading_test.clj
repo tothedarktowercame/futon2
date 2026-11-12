@@ -6,6 +6,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.selected-target-reading :as sut]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.target-reading-registry :as registry])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -487,3 +488,21 @@
     (is (= 2 @calls))
     (is (= :selected-target-reading-validation-refused (:kind result)))
     (is (seq (get-in result [:detail :cascade-failures])))))
+
+(deftest default-script-paths-resolve-under-the-serving-code-root
+  ;; Repair wm-click-loop-repair-0efb7397: the defaults were hardcoded to
+  ;; /home/joe/code/... and a click served from an isolated code root
+  ;; refused at selected-target-reading with "can't open file
+  ;; /home/joe/code/futon2/scripts/wm_task_reading.py". The defaults must
+  ;; follow futon2.data-paths (which honors FUTON_WM_CODE_ROOT) and must
+  ;; name files that actually exist in the serving tree.
+  (testing "request builder resolves inside the futon2 checkout and exists"
+    (is (= (data-paths/repo-path "scripts" "wm_task_reading.py")
+           sut/default-request-builder))
+    (is (.isFile (io/file sut/default-request-builder))
+        (str "missing request builder: " sut/default-request-builder)))
+  (testing "analysis validator resolves inside the serving code root and exists"
+    (is (= (data-paths/code-path "futon3c" "scripts" "session_turn_analysis.py")
+           sut/default-analysis-validator))
+    (is (.isFile (io/file sut/default-analysis-validator))
+        (str "missing analysis validator: " sut/default-analysis-validator))))

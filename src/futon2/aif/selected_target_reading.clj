@@ -10,14 +10,22 @@
             [futon2.aif.reading-refusal-history :as repeat-history]
             [futon2.aif.analysis-cascade :as analysis-cascade]
             [futon2.aif.load-identity :as identity]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.target-reading-registry :as registry]))
 
 (def default-request-root
   "/home/joe/code/storage/wm-target-reading-requests")
 (def default-request-builder
-  "/home/joe/code/futon2/scripts/wm_task_reading.py")
+  "wm_task_reading.py lives in the futon2 checkout. Route it through
+   data-paths/repo-path so an isolated serving root (FUTON_WM_CODE_ROOT)
+   resolves its own copy instead of the canonical /home/joe/code checkout,
+   where the script may not exist (repair 0efb7397: a held click refused
+   with 'can't open file /home/joe/code/futon2/scripts/wm_task_reading.py')."
+  (data-paths/repo-path "scripts" "wm_task_reading.py"))
 (def default-analysis-validator
-  "/home/joe/code/futon3c/scripts/session_turn_analysis.py")
+  "Same isolation rule for the futon3c validator (data-paths/code-path
+   honors FUTON_WM_CODE_ROOT, falling back to /home/joe/code)."
+  (data-paths/code-path "futon3c" "scripts" "session_turn_analysis.py"))
 
 (defn- digest [bytes]
   (identity/sha256 bytes))
