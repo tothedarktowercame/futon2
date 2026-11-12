@@ -1,6 +1,6 @@
 # Ladder 03: MMCA against von Neumann's state classes
 
-**Status:** OPEN — AUTHORIZED STAGE 3
+**Status:** DONE
 Parent: M-futonzero-prelim-practice
 
 (Replaces the Byl-loop ticket, 2026-11-11. The Byl inputs stay in `step0/` unused.)
@@ -10,4 +10,4 @@ Von Neumann's 29 states fall into five classes: quiescent (1), ordinary transmis
 
 ## Acceptance criteria
 
-- [ ] A short document with one row per class: the candidate, the file and line or the TN line that supports it, and whether the support is a computed result or a reading. Every cited path resolves in the sandbox. A class with no supported candidate is recorded as "none", not filled by analogy. The document ends with the list of "none" rows as open questions. Expected outcome: **closed / document delivered**, with "none" expected for the sensitised class.
+- [x] A short document with one row per class: the candidate, the file and line or the TN line that supports it, and whether the support is a computed result or a reading. Every cited path resolves in the sandbox. A class with no supported candidate is recorded as "none", not filled by analogy. The document ends with the list of "none" rows as open questions. Expected outcome: **closed / document delivered**, with "none" expected for the sensitised class.
