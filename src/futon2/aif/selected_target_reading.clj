@@ -14,7 +14,15 @@
             [futon2.aif.target-reading-registry :as registry]))
 
 (def default-request-root
-  "/home/joe/code/storage/wm-target-reading-requests")
+  "Where reading requests and their attempts are kept. An isolated serving
+   tree (FUTON_WM_CODE_ROOT, e.g. Lucy's wm-sandbox) keeps them under its own
+   futon2 data root, so a checkpoint restore also restores the refusal
+   history a replay reads; ladder 02 (wm-click-046be689) wrote them to the
+   host's ~/code/storage instead. Without an isolated root, zone keeps the
+   canonical location."
+  (if (some-> (System/getenv "FUTON_WM_CODE_ROOT") str not-empty)
+    (data-paths/path "wm-target-reading-requests")
+    "/home/joe/code/storage/wm-target-reading-requests"))
 (def default-request-builder
   "wm_task_reading.py lives in the futon2 checkout. Route it through
    data-paths/repo-path so an isolated serving root (FUTON_WM_CODE_ROOT)
@@ -262,7 +270,8 @@
        "relations must come from its documented vocabulary. Every fragment must include "
        "a non-empty pattern_refs array; each reference is an object with id, rationale, "
        "status='candidate', and source_sha256. Use only actual patterns under "
-       "/home/joe/code/futon3/library. Do not publish it and do not change repositories. "
+       (data-paths/code-path "futon3" "library")
+       ". Do not publish it and do not change repositories. "
        (when analysis-output-path
          (str "Write the complete analysis JSON to " analysis-output-path
               ". Reply only with {\"path\":\"" analysis-output-path
@@ -271,7 +280,7 @@
               "Small inline analysis objects remain accepted. "
               "The acceptance contract below describes the file contents, not the path/sha256 reply envelope. "))
        "The analysis must have the analysis-input shape accepted by "
-       "/home/joe/code/futon3c/scripts/session_turn_analysis.py complete.\n\n"
+       default-analysis-validator " complete.\n\n"
        (when format-correction
          (str "No JSON object was found in your preceding response. Parser error: "
               (:parser-error format-correction)
