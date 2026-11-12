@@ -4,7 +4,7 @@
 Parent: M-futonzero-prelim-practice
 Gate: awaiting Joe and Fable review; do not select or execute.
 
-Dependency: T-ladder-04-materials-catalogue.
+Dependency: T-ladder-04-materials-catalogue (delivered in the sandbox futon2 checkout, not mmca-clj: namespace `futon2.materials-catalogue` in `futon2/src/futon2/materials_catalogue.clj` (`catalogue`, `fixed-set`, `materials`, `quiescent-edges`, `quiescent-entropy`, `has-bi-infinite-quiescent-word?`), tests in `futon2/test/futon2/materials_catalogue_test.clj`, commit 5e876ff73).
 
 ## Background
 TN-fable-construction-reframe reads coexistence of settled and active regions as a property of how the rule field is laid out. The paper's edge-of-chaos exemplars were found interactively and have not been examined in those terms.

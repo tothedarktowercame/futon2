@@ -4,7 +4,7 @@
 Parent: M-futonzero-prelim-practice
 Gate: awaiting Joe and Fable review; do not select or execute.
 
-Dependency: T-ladder-04-materials-catalogue.
+Dependency: T-ladder-04-materials-catalogue (delivered in the sandbox futon2 checkout, not mmca-clj: namespace `futon2.materials-catalogue` in `futon2/src/futon2/materials_catalogue.clj` (`catalogue`, `fixed-set`, `materials`, `quiescent-edges`, `quiescent-entropy`, `has-bi-infinite-quiescent-word?`), tests in `futon2/test/futon2/materials_catalogue_test.clj`, commit 5e876ff73).
 
 ## Background
 A constructor must turn blank cells into machinery. In MMCA terms: phenotype signals must change a neighbouring cell's rule byte to a chosen one. The only step in `mmca-clj/src/mmca/core.clj` where the phenotype enters the genotype update is the river step (`original-river-combine-rule` with its four-bit phenotype context, then `propagate-at` with `river-writing`). The propagator's source position is random, one of 8.

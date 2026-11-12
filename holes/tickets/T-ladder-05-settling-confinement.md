@@ -4,7 +4,7 @@
 Parent: M-futonzero-prelim-practice
 Gate: awaiting Joe and Fable review; do not select or execute.
 
-Dependency: T-ladder-04-materials-catalogue.
+Dependency: T-ladder-04-materials-catalogue (delivered in the sandbox futon2 checkout, not mmca-clj: namespace `futon2.materials-catalogue` in `futon2/src/futon2/materials_catalogue.clj` (`catalogue`, `fixed-set`, `materials`, `quiescent-edges`, `quiescent-entropy`, `has-bi-infinite-quiescent-word?`), tests in `futon2/test/futon2/materials_catalogue_test.clj`, commit 5e876ff73).
 
 ## Scoped task
 TN-fable-construction-reframe states two things about byte 77 on rings, from Monte Carlo on random 40-cell rings: it settles from any state in at most 6 steps, and a single flip in a settled ring spreads to depth at most 1. Test both exhaustively: every binary ring for n = 3..20 for settling; every fixed-point ring for n = 4..20, flipped at one site, for damage depth.
