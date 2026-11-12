@@ -8545,7 +8545,11 @@
     (is (str/includes? text
                        "stdout/stderr companion bytes referenced by a :wm/limb-receipt-v1"))
     (is (str/includes? text
-                       ":limb MUST be a keyword naming the checked limb"))))
+                       ":limb MUST be a keyword naming the checked limb"))
+    (is (str/includes? text
+                       "only :stdout-file and :stderr-file are optional"))
+    (is (str/includes? text
+                       "No other keys are accepted"))))
 
 (deftest reviewer-standing-contract-is-the-close-validator-contract
   ;; Run 2026-09-21-1790033693 lost a grounded change because the reviewer
