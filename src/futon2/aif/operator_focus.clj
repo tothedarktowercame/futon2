@@ -9,7 +9,8 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [futon2.aif.action-identity :as identity])
+            [futon2.aif.action-identity :as identity]
+            [futon2.aif.substrate :as substrate])
   (:import [java.net URLEncoder]
            [java.time Duration Instant]))
 
@@ -208,7 +209,7 @@
   "Bounded authoritative read: at most three pages of 100. The first keyset
    cursor applies event-time as-of without XTDB's slower system-as-of path.
    No file fallback."
-  [{:keys [base-url timeout-ms as-of] :as opts :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
+  [{:keys [base-url timeout-ms as-of] :as opts :or {base-url (substrate/configured-url) timeout-ms 10000}}]
   (try
     (let [as-of-instant (instant as-of)
           initial-cursor {:at (str as-of-instant) :id as-of-cursor-id}
@@ -249,7 +250,7 @@
 
 (defn read-clocks
   "Read the bounded current clock projection and retain a hash of its exact response."
-  [{:keys [base-url timeout-ms as-of] :or {base-url "http://127.0.0.1:7073" timeout-ms 10000}}]
+  [{:keys [base-url timeout-ms as-of] :or {base-url (substrate/configured-url) timeout-ms 10000}}]
   (try
     (let [url (str base-url
                    "/api/alpha/hyperedges?type=clock%2Fclocked-on&limit=1000&include-total=false&system-as-of=" (enc as-of))
