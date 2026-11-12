@@ -4736,6 +4736,14 @@
                 ":limb MUST be a keyword naming the checked limb (for example :ticket-acceptance-check), not a pattern id, occurrence vector, or prose.\n"
                 "Put checkout SHA, parsed counts, and other command facts in the retained stdout companion, not as extra receipt keys.\n"
                 "Write stdout/stderr bytes to flat companion files and reference them with :stdout-file/:stderr-file.\n"
+                ;; Ladder 02 (wm-click on run 2026-11-12, attempt-002): an approved,
+                ;; working implementation refused at close because its receipt named
+                ;; :stdout-file but not :stderr-file, leaving an empty .stderr.txt to
+                ;; be parsed as EDN. deposit-preflight runs the real admission seam
+                ;; and flags exactly that file; nothing asked the author to run it.
+                "Before replying, check the deposit with the machine's own admission seam: in the futon2 checkout run "
+                "`clojure -M -m futon2.aif.deposit-preflight " evidence-dir " <the :repair/id in your receipt>`. "
+                "It must exit 0. If it prints :WOULD-REFUSE, fix the file marked :culprit? true and run it again.\n"
                 "For a repair target, capture its immutable ORIGINAL obligation record bytes under data/wm-repair-obligations/ as :before and the DERIVED-STATE readback record as :after (repair-derived-state output bytes; still :open is honest, but capture the readback record, never a second copy of the finding -- identical before/after bytes refuse :revision-unchanged, which orphaned cohort-54 attempt-001).\n"
                 "Name that :wm/entity-revision-pair-v1 file subject-*.edn and set :entity/id to the exact selected repair id.\n"
                 "Source-file revision pairs are supporting evidence: name them supporting-*.edn and use the source artifact id. Both roles use keys [:schema :entity/id :before :after :dimensions].\n"
