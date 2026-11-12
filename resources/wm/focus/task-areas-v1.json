@@ -6169,7 +6169,8 @@
    "confidence": "medium",
    "seat": "kimi-1",
    "job": "invoke-1794526237711-18734-6e480b2d",
-   "source": "futon3c/holes/excursions/ant-reads/T-ladder-09-the-mirror.relate.json"
+   "source": "futon3c/holes/excursions/ant-reads/T-ladder-09-the-mirror.relate.json",
+   "also": "futonzero"
   },
   {
    "target": "T-ladder-10-von-neumann-stop",
