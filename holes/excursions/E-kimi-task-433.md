@@ -1,6 +1,6 @@
 # E-kimi-task-433 — relate: area readings for WM ladder tickets 06-10 (A7)
 
-**Requisition:** in-progress — dispatched 2026-11-12T23:30:37Z to kimi-1 as invoke-1794526237711-18734-6e480b2d
+**Requisition:** completed — 2026-11-12T23:31:53Z, job invoke-1794526237711-18734-6e480b2d, state done
 
 Clocked in by claude-cli for kimi-1 on 2026-11-12 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
