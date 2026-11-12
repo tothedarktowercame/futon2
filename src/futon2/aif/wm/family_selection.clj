@@ -202,7 +202,7 @@
         graph-failure (dissoc loaded :status :graph :pin)
         families
         (mapv
-         (fn [{:keys [target-id source-kind source-path source-absent]}]
+         (fn [{:keys [target-id source-kind source-path source-absent item-line]}]
            (cond
              (not graph-ok?)
              (failed-field-family target-id graph-failure)
@@ -210,13 +210,18 @@
              source-absent
              (failed-field-family target-id {:kind source-absent})
 
-             (not (contains? #{nil :head} source-kind))
+             (not (contains? #{nil :head :item-section} source-kind))
              (failed-field-family target-id {:kind :target-source-kind-unsupported
                                              :source-kind source-kind})
 
+             (and (= :item-section source-kind) (not (pos-int? item-line)))
+             (failed-field-family target-id {:kind :target-item-line-absent})
+
              :else
              (try
-               (let [digest (reading-registry/excerpt-digest source-path)]
+               (let [digest (if (= :item-section source-kind)
+                              (reading-registry/item-section-digest source-path item-line)
+                              (reading-registry/excerpt-digest source-path))]
                  (if (map? digest)
                    (failed-field-family target-id (dissoc digest :status))
                    (let [reading (reading-registry/current-reading

@@ -112,17 +112,17 @@
              (get-in result [:families 0 :failures 0 :kind])))
       (is (= 1 (get-in result [:coverage :head-template-only]))))))
 
-(deftest source-kinds-not-yet-readable-are-counted
+(deftest item-section-without-line-is-counted
   (let [graph (graph-file (temp-dir "field-source-kind-graph-"))
         result (sut/families-for-field
                 {:target-sources [{:target-id "T-item" :source-kind :item-section
-                                   :source-path "/not/read-as-head.md" :item-line 8}]
+                                   :source-path "/not/read-as-head.md"}]
                  :reading-root (temp-dir "field-source-kind-reading-")
                  :graph-path graph})]
     (is (= :failed (get-in result [:families 0 :status])))
-    (is (= :target-source-kind-unsupported
+    (is (= :target-item-line-absent
            (get-in result [:families 0 :failures 0 :kind])))
-    (is (= 1 (get-in result [:coverage :source-kind-unsupported])))))
+    (is (= 1 (get-in result [:coverage :source-path-absent])))))
 
 (deftest graph-refusal-precedes-every-reading-lookup
   (let [root (temp-dir "field-refused-reading-")

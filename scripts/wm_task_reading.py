@@ -12,7 +12,9 @@ from pathlib import Path
 import re
 
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.M)
-OPEN_ITEM = re.compile(r"^\s*[-*]\s+\[\s\]\s+\S.*$", re.M)
+# Horizontal whitespace only: ``\s`` also consumes the preceding newline,
+# shifting the item's recorded line and section offset one line backwards.
+OPEN_ITEM = re.compile(r"^[ \t]*[-*][ \t]+\[[ \t]\][ \t]+\S.*$", re.M)
 # Joe, 2026-09-30: this sentence defines HEAD; it is not itself a HEAD.
 HEAD_TEMPLATE_DEFINITION = (
     "The mission's live operator-shape, captured before IDENTIFY hardens it "
