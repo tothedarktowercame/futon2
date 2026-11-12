@@ -400,7 +400,7 @@
 (defn- open-cascade-author-prompt [req]
   (str "Repair the held executable cascade phase without selecting again. "
        "Implement resolutions for exactly the listed holes. Commit the source in "
-       "/home/joe/code/futon2, the canonical absolute repository on the serving "
+       data-paths/production-repo-root ", the canonical absolute repository on the serving "
        "classpath. A sibling worktree is not delivery. Return the full commit SHA "
        "in patch.commit — exactly 40 lowercase hex characters; an abbreviated or "
        "otherwise malformed object id is refused with "
