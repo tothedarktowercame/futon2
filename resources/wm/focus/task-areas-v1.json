@@ -6126,6 +6126,61 @@
    "seat": "zai-1",
    "job": "invoke-1793820075091-12179-a0c4bd01",
    "source": "futon3c/holes/excursions/ant-reads/M-peradam-grounding.relate.json"
+  },
+  {
+   "target": "T-ladder-06-layout-premise",
+   "area": "futonzero",
+   "read-area": "futonzero",
+   "cite": "/home/joe/wm-sandbox/code/futon2/holes/tickets/T-ladder-06-layout-premise.md:4",
+   "quote": "Parent: M-futonzero-prelim-practice",
+   "confidence": "high",
+   "seat": "kimi-1",
+   "job": "invoke-1794526237711-18734-6e480b2d",
+   "source": "futon3c/holes/excursions/ant-reads/T-ladder-06-layout-premise.relate.json"
+  },
+  {
+   "target": "T-ladder-07-wire-control",
+   "area": "futonzero",
+   "read-area": "futonzero",
+   "cite": "/home/joe/wm-sandbox/code/futon2/holes/tickets/T-ladder-07-wire-control.md:4",
+   "quote": "Parent: M-futonzero-prelim-practice",
+   "confidence": "high",
+   "seat": "kimi-1",
+   "job": "invoke-1794526237711-18734-6e480b2d",
+   "source": "futon3c/holes/excursions/ant-reads/T-ladder-07-wire-control.relate.json"
+  },
+  {
+   "target": "T-ladder-08-memory-preregistration",
+   "area": "futonzero",
+   "read-area": "futonzero",
+   "cite": "/home/joe/wm-sandbox/code/futon2/holes/tickets/T-ladder-08-memory-preregistration.md:4",
+   "quote": "Parent: M-futonzero-prelim-practice",
+   "confidence": "high",
+   "seat": "kimi-1",
+   "job": "invoke-1794526237711-18734-6e480b2d",
+   "source": "futon3c/holes/excursions/ant-reads/T-ladder-08-memory-preregistration.relate.json"
+  },
+  {
+   "target": "T-ladder-09-the-mirror",
+   "area": "WM",
+   "read-area": "WM",
+   "cite": "/home/joe/wm-sandbox/code/futon2/holes/tickets/T-ladder-09-the-mirror.md:11",
+   "quote": "A short document identifies resolving WM files for tickets/backlog, author seats, click loop, and contract; distinguishes evidence from interpretation;",
+   "confidence": "medium",
+   "seat": "kimi-1",
+   "job": "invoke-1794526237711-18734-6e480b2d",
+   "source": "futon3c/holes/excursions/ant-reads/T-ladder-09-the-mirror.relate.json"
+  },
+  {
+   "target": "T-ladder-10-von-neumann-stop",
+   "area": "futonzero",
+   "read-area": "futonzero",
+   "cite": "/home/joe/wm-sandbox/code/futon2/holes/tickets/T-ladder-10-von-neumann-stop.md:4",
+   "quote": "Parent: M-futonzero-prelim-practice",
+   "confidence": "high",
+   "seat": "kimi-1",
+   "job": "invoke-1794526237711-18734-6e480b2d",
+   "source": "futon3c/holes/excursions/ant-reads/T-ladder-10-von-neumann-stop.relate.json"
   }
  ]
 }
