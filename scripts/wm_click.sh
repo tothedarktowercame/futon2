@@ -29,6 +29,7 @@
 #
 # Optional: --ask-seats zai-4,zai-5,zai-6 names interpretation workers.
 # Optional: --g-law canonical-coapply selects the canonical law on the reading-family route.
+# Optional: --task T-id directly names the already-screened task for a staged run.
 # Identify the issuer with --issuing-caller NAME or WM_ISSUING_CALLER.
 # Omission is recorded as caller-unknown and does not block a click.
 #
@@ -54,12 +55,13 @@ POST_RECOVERY_POLL_S="${WM_CLICK_POST_RECOVERY_POLL_S:-5}"
 # Zai-backed (futon3c.wm.cast-registry/default-specs).
 AUTHOR="wm-author"; REVIEWER="wm-reviewer"; REPAIR="wm-repair-reviewer"
 ISSUING_CALLER="${WM_ISSUING_CALLER:-caller-unknown}"
-RUN=0; PROBE=0; G_LAW=""; ASK_SEATS=""
+RUN=0; PROBE=0; G_LAW=""; ASK_SEATS=""; TASK=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --run) RUN=1;;
     --ask-seats) ASK_SEATS="$2"; shift;;
+    --task) TASK="$2"; shift;;
     --g-law) G_LAW="${2:-}"; [ "$G_LAW" = "canonical-coapply" ] || { echo "unsupported --g-law" >&2; exit 2; }; shift;;
     --force) :;; # no-op since firing never refuses; kept for old callers
     --probe-seats) PROBE=1;;
@@ -115,6 +117,25 @@ else
   cannot "agency" "HTTP $code -- Agency unreachable, nothing else can be checked"
   echo
   exit 1
+fi
+
+# The WM's R16 stop-line path parks a continuation when selection terminates
+# without work.  Probe the flag without creating a park: handle-park checks the
+# feature gate before validating the deliberately invalid JSON body, so an
+# enabled server answers 400/invalid-json and a disabled server answers
+# 503/parked-on-disabled.  This is an execution prerequisite, not an
+# informational tripwire; discovering it after selection spends a click merely
+# to learn that the environment was incomplete.
+park_probe=$(curl -s -m 10 -w '\n%{http_code}' -X POST \
+  -H 'Content-Type: application/json' --data 'null' "$BASE/api/alpha/park")
+park_code=${park_probe##*$'\n'}
+park_body=${park_probe%$'\n'*}
+if [ "$park_code" = "400" ] && printf '%s' "$park_body" | grep -q 'invalid-json'; then
+  say "parking" "enabled"
+else
+  emit_phase_since "agency-budget-preflight" "$preflight_started_ns"
+  cannot "parking" "HTTP $park_code -- WM stop-line continuation parking is unavailable"
+  echo; echo "cannot launch (exit 3)"; exit 3
 fi
 
 # The durable ration is knowable before a worker or readiness wake exists.
@@ -656,7 +677,7 @@ while [ -z "$clickid" ]; do
   # endpoint refuses as :wm-click-run-id-malformed.
   RUNID="$(date -u +%Y-%m-%d)-$(cat /proc/sys/kernel/random/uuid)"
   echo; echo "firing click, run-id $RUNID"
-  payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" "$G_LAW" "$ASK_SEATS" <<'PYJSON'
+  payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" "$G_LAW" "$ASK_SEATS" "$TASK" <<'PYJSON'
 import json, sys
 payload = dict(zip(
     ["run-id", "author", "reviewer", "repair-reviewer", "issuing-caller"],
@@ -664,6 +685,7 @@ payload = dict(zip(
 if sys.argv[6]:
     payload["g-law"] = sys.argv[6]
 if sys.argv[7].strip(): payload["interpretation-seats"] = sys.argv[7].split(",")
+if sys.argv[8].strip(): payload["task"] = sys.argv[8]
 print(json.dumps(payload))
 PYJSON
 )

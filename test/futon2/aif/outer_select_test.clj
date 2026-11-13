@@ -1,15 +1,34 @@
 (ns futon2.aif.outer-select-test
   (:require [clojure.edn :as edn]
             [clojure.string :as string]
+            [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-menu-fixture :as menu-fixture]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-select :as outer-select]
+            [futon2.aif.outer-state :as outer-state]
             [futon2.aif.action-identity :as identity]
             [wm-run-facts :as facts]
             [wm-check-run-facts :as checker]))
 
 (clojure.test/use-fixtures :each menu-fixture/with-fixture-constructor)
+
+(deftest task-selection-library-root-follows-installation-root
+  (is (= "/srv/wm/code/futon3/library/task-selection"
+         (outer-select/configured-task-selection-library-root
+          {"FUTON_CODE_ROOT" "/srv/wm/code/"})))
+  (is (= "/srv/patterns/task-selection"
+         (outer-select/configured-task-selection-library-root
+          {"FUTON_CODE_ROOT" "/ignored/code"
+           "FUTON_PATTERN_LIBRARY_ROOT" "/srv/patterns/"})))
+  (is (= "/srv/task-selection"
+         (outer-select/configured-task-selection-library-root
+          {"FUTON_CODE_ROOT" "/ignored/code"
+           "FUTON_PATTERN_LIBRARY_ROOT" "/ignored/patterns"
+           "FUTON_TASK_SELECTION_LIBRARY_ROOT" "/srv/task-selection"})))
+  (is (= (str (System/getProperty "user.home")
+              "/code/futon3/library/task-selection")
+         (outer-select/configured-task-selection-library-root {}))))
 
 (deftest c2-exclusion-is-accepted-and-unknown-reason-is-refused
   (let [partition {:field [{:target "M-c2"} {:target "M-other"}]
@@ -41,8 +60,10 @@
                           "Serves way-alpha, also way-beta (work)."))))
 
 (def base-makeup
-  {:cascades [{:id :first :patterns ["test"] :steps [{:gate-status :ready}]}
-              {:id :second :patterns ["test"] :steps [{:gate-status :undetermined}]}]})
+  ;; Real task-selection patterns for the two gate roles, so the canonical
+  ;; selection G interprets each by its own @guard / @predicts.
+  {:cascades [{:id :first :patterns ["only-what-can-start-now"] :steps [{:gate-status :ready}]}
+              {:id :second :patterns ["find-out-before-building"] :steps [{:gate-status :undetermined}]}]})
 (def base-state
   {:c {:focused 55 :related 35 :unrelated 5 :stop-the-line 5
        :not-yet-evaluated 0}
@@ -200,7 +221,9 @@
       (is (empty? (:classes refusal)))
       (is (= :no-pick (get-in refusal [:cascades 0 :pick]))))))
 
-(deftest singleton-non-stopping-posterior-abstains
+(deftest singleton-non-stopping-posterior-is-chosen-against-stopping
+  ;; Joe, 2026-11-13: one class against stopping is a choice (Lean Q2
+  ;; comparisonFloor 1); it was :insufficient-comparison before.
   (let [makeup {:cascades [{:id :ready-a :patterns ["test"] :steps [:ready-gate]}
                            {:id :ready-b :patterns ["test"] :steps [:ready-gate]}
                            {:id :stopping-a :patterns ["test"]
@@ -208,9 +231,8 @@
                            {:id :stopping-b :patterns ["test"]
                             :steps [{:gate-status :not-ready}]}]}
         result (outer-select/select makeup base-state base-observation)]
-    (is (= {:status :abstained :case :insufficient-comparison}
-           (:outcome result)))
-    (is (nil? (:selection result)))
+    (is (= {:status :chosen} (:outcome result)))
+    (is (= "M-ready" (get-in result [:selection :selected :target])))
     (is (= 1 (count (:classes result))))
     (is (= #{:ready-a :ready-b}
            (set (:members (first (:classes result))))))
@@ -243,15 +265,18 @@
         r (outer-select/select makeup base-state observation)]
     (is (= 1 (count (:classes r))))
     (is (= [:a :b] (:members (first (:classes r)))))
-    (is (= {:status :abstained :case :insufficient-comparison} (:outcome r)))
-    (is (nil? (:cascade-id r)))
+    (testing "one policy, compared against stopping (Joe, 2026-11-13)"
+      (is (= {:status :chosen} (:outcome r)))
+      (is (= :a (:cascade-id r)) "first in menu order within the one class"))
     (is (= 2 (count (:cascades r))))))
 
 (deftest distinct-predictions-at-equal-g-refuse
   (let [observation (assoc base-observation :relation (fn [_ _] :focus)
                            :facts {"M-ready" {:status :ready :unblocks 0 :cone 0}
                                    "M-unknown" {:status :ready :unblocks 0 :cone 0}})
-        makeup {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
+        ;; One task per cascade: a ready-gate over both ready tasks would add the
+        ;; chain M-ready then M-unknown, a third policy below the tie.
+        makeup {:cascades [{:id :a :patterns ["test"] :steps [{:gate #(= "M-ready" (:target %))}]}
                            {:id :b :patterns ["test"] :steps [{:gate #(= "M-unknown" (:target %))}]}]}
         original outer-score/score-model
         counter (atom 0)
@@ -290,7 +315,11 @@
     (is (= (:cascade-scores r) (mapv :G (:cascades r))))
     (is (= (:cascade-picks r) (mapv :pick (:cascades r))))
     (is (= (:prediction r) (:prediction (nth (:cascades r) (:cascade-index r)))))
-    (is (= (:abstention r) (outer-score/abstention-score input)))
+    ;; G over cascades (Joe, 2026-11-13): stopping is the empty policy scored by
+    ;; the canonical cascade G; the pick-only abstention terms are retained.
+    (is (= :selection-cascade-grain-g (get-in r [:abstention :g-law])))
+    (is (= (:terms (outer-score/abstention-score input))
+           (get-in r [:abstention :pick-only-terms])))
     (is (< (nth (:cascade-scores r) (:cascade-index r)) (get-in r [:abstention :G])))
     (is (= :pinned (get-in r [:library :status])))))
 
@@ -333,12 +362,14 @@
   (let [calls (atom 0)
         obs (assoc base-observation :field-facts
                    {:enumerated ["M-ready" "M-unknown"] :admitted (:facts base-observation) :excluded []})
-        result (outer-select/select
-                {:cascades [{:id :one-pass :steps [{:gate (fn [_] (swap! calls inc) true)}]}]}
-                base-state obs)]
+        refusal (try (outer-select/select
+                      {:cascades [{:id :one-pass :steps [{:gate (fn [_] (swap! calls inc) true)}]}]}
+                      base-state obs)
+                     (catch clojure.lang.ExceptionInfo e (ex-data e)))]
     (is (= 2 @calls))
-    (is (= {:status :abstained :case :insufficient-comparison}
-           (:outcome result)))))
+    ;; A cascade with no patterns is the empty policy: its G is the stopping G,
+    ;; so with one class compared against stopping it is not below it.
+    (is (= :pick-not-below-abstention (:kind refusal)))))
 
 (deftest forbidden-picks-stay-scored-but-cannot-win
   (let [before (outer-select/select base-makeup base-state base-observation)
@@ -371,8 +402,8 @@
     (is (= 1 (get-in r [:construction :policy-count])))
     (is (= [:second] (:members (first (:stopping-equivalent r)))))
     (is (nil? (some :relation-basis (:classes r))))
-    (is (= {:status :abstained :case :insufficient-comparison} (:outcome r)))
-    (is (nil? (:cascade-id r)))
+    (is (= {:status :chosen} (:outcome r)) "one class against stopping (Joe, 2026-11-13)")
+    (is (= :first (:cascade-id r)))
     (is (= ["M-ready"] (:outer-score/admitted r)))
     (is (= ["M-unknown"] (mapv :target (:outer-score/excluded r))))
     (is (= 2 (count (:cascades r))))
@@ -401,6 +432,12 @@
     (is (= (:stopping-equivalent r) (get-in export [:diagnostics :stoppingEquivalent])))
     (is (= (get-in r [:abstention :terms]) (get-in export [:diagnostics :abstentionTerms :terms])))
     (is (.startsWith (checker/evidence f :q11) ".known"))
+    (testing "Q11 reads each compared class's predicted parameter posterior"
+      (is (every? #(contains? (:prediction %) :parameters) (:cascades r)))
+      (is (= (mapv (fn [c] {"policy" (:id c) "digest" (:parameters-digest c)}) (:classes r))
+             (f "policyParameters")))
+      (is (every? #(string? (get % "digest")) (f "policyParameters")))
+      (is (re-find #"policyParameters := \[\(" (checker/evidence f :q11))))
     (is (= 2 (count (get-in old [:facts "constructedCascades"])))
         "Historical projection uses all retained arrangement classes")))
 
@@ -441,5 +478,109 @@
            (dissoc (with-redefs [outer-select/per-task-ratings (constantly [])]
                      (outer-select/select base-makeup base-state base-observation))
                    :per-task-rating :top-ten)))
-    (doseq [c (:classes s)]
-      (is (< (Math/abs (- (:G c) (:G (by-id (:pick c))))) 1.0e-9)))))
+    ;; Ratings are pick-level and stay the pick-only G of each class's
+    ;; representative; the class G is the cascade-level canonical G and need not
+    ;; equal them (G over cascades, Joe 2026-11-13).
+    (doseq [c (:classes s)
+            :let [rep (first (filter #(= (:id %) (:representative c)) (:cascades s)))
+                  {:keys [risk ambiguity novelty altitude]} (:pick-only-terms rep)]]
+      (is (= :selection-cascade-grain-g (:g-law rep)))
+      (is (< (Math/abs (- (+ (- (+ risk ambiguity) novelty) (or altitude 0))
+                          (:G (by-id (:pick c))))) 1.0e-9)))))
+
+(deftest two-ready-tasks-give-a-chain-in-giraffe-order
+  ;; Lucy 2026-11-13 clicks 2-3 abstained :insufficient-comparison on ladder 08
+  ;; and 10. The field arrives with the lower-ranked task first; Giraffe's rank
+  ;; puts T-08 first, and the chain T-08 then T-10 is the second policy.
+  (let [makeup {:cascades [{:id :start :patterns ["only-what-can-start-now"] :steps [:ready-gate]}
+                           {:id :discover :patterns ["find-out-before-building"]
+                            :steps [{:gate-status :undetermined}]}]}
+        obs {:focus "M-focus"
+             :relation (fn [_ _] :associated)
+             :field [{:target "T-10" :reach 1/2 :reach-source :default-reach}
+                     {:target "T-08" :reach 1/2 :reach-source :default-reach}]
+             :facts {"T-08" {:status :ready :unblocks 0 :cone 0 :rank 1}
+                     "T-10" {:status :ready :unblocks 0 :cone 0 :rank 3}}}
+        r (outer-select/select makeup base-state obs)
+        by-id (into {} (map (juxt :id identity)) (:cascades r))]
+    (is (= ["T-08" "T-10"] (get-in by-id [:start--chain-2 :chain :picks])))
+    (is (= "T-08" (get-in by-id [:start :pick]) (get-in by-id [:start--chain-2 :pick])))
+    (is (= 2 (count (:classes r))) "the chain and its first pick are two policies")
+    (is (= {:status :chosen} (:outcome r)))
+    (is (= :start--chain-2 (:cascade-id r)))
+    (is (= "T-08" (get-in r [:selection :selected :target])))
+    (is (not= (get-in by-id [:start :prediction :parameters])
+              (get-in by-id [:start--chain-2 :prediction :parameters])))
+    ;; wm-click-loop-repair-bb1de665: every cascade digest, chain variants
+    ;; included, must be recomputable from its carrier, because
+    ;; outer-state/chosen-cascade replays exactly that carrier.
+    (doseq [c (vals by-id)]
+      (is (= (:digest c) (menu/cascade-digest c))
+          (str "digest not carrier-recomputable: " (:id c))))))
+
+(defn- digest-pins
+  "Every [key-path digest] where the record carries a string under a key whose
+  name ends in \"digest\", found by walking the whole record (maps and vectors).
+  Enumerated by walk, never listed, so a digest key select starts pinning
+  later appears here and must be classified before the test passes again."
+  [x]
+  (letfn [(walk [path x]
+            (cond
+              (map? x) (mapcat (fn [[k v]]
+                                 (if (and (keyword? k)
+                                          (string/ends-with? (name k) "digest")
+                                          (string? v))
+                                   [[(conj path k) v]]
+                                   (walk (conj path k) v)))
+                               x)
+              (vector? x) (mapcat (fn [i v] (walk (conj path i) v))
+                                  (range) x)
+              :else []))]
+    (walk [] x)))
+
+(def non-replay-digest-key-names
+  "Digest keys the selection record pins that the replay code
+  (outer-state/chosen-cascade) does not consume: they identify predictions,
+  parameters, choice inputs and relation receipts, not cascades. Adding a key
+  name here is the deliberate claim that no cascade-replay path needs it."
+  #{"prediction-digest" "parameters-digest" "choice-input-digest"
+    "receipt-digest" "relation-receipt-digest" "stop-digest"})
+
+(deftest every-cascade-identity-digest-pin-is-replay-recomputable
+  ;; WM hardening package 5 (H-wm-ladder-lucy-handoff-2026-11-13 section 4.5):
+  ;; every digest the selection record pins for the chosen cascade must be
+  ;; recomputable by the code that replays it, outer-state/chosen-cascade.
+  ;; Pre-262ca6bc8, chain variants pinned sha256(pr-str [base-digest :chain k]),
+  ;; which no replay can recompute: the click refused
+  ;; :pending-steps-unrecoverable and stranded its learning step.
+  (let [chain-makeup {:cascades [{:id :start :patterns ["only-what-can-start-now"] :steps [:ready-gate]}
+                                 {:id :discover :patterns ["find-out-before-building"]
+                                  :steps [{:gate-status :undetermined}]}]}
+        chain-obs {:focus "M-focus"
+                   :relation (fn [_ _] :associated)
+                   :field [{:target "T-10" :reach 1/2 :reach-source :default-reach}
+                           {:target "T-08" :reach 1/2 :reach-source :default-reach}]
+                   :facts {"T-08" {:status :ready :unblocks 0 :cone 0 :rank 1}
+                           "T-10" {:status :ready :unblocks 0 :cone 0 :rank 3}}}]
+    (doseq [[label r] [["single-pick" (outer-select/select base-makeup base-state base-observation)]
+                       ["chain" (outer-select/select chain-makeup base-state chain-obs)]]
+            :let [rows (:cascades r)
+                  replayed (mapv outer-state/replayed-cascade-digest rows)]]
+      (testing (str label " selection pins only replay-recomputable cascade digests")
+        (is (= {:status :chosen} (:outcome r))
+            (str label ": fixture must produce a chosen record that pins a digest"))
+        ;; The record-level pin names exactly one cascade row and equals what
+        ;; the replay recomputes for it (the whole of chosen-cascade's check).
+        (is (= (:cascade-digest r) (nth replayed (:cascade-index r)))
+            (str label ": pinned cascade-digest is not what the replay recomputes"))
+        ;; The property: every digest key the record actually carries is
+        ;; either classified as not consumed by the replay, or identifies
+        ;; exactly one cascade row by replayed digest. A new digest key
+        ;; without a replay path fails here.
+        (doseq [[path digest] (digest-pins r)]
+          (when-not (contains? non-replay-digest-key-names (name (peek path)))
+            (is (= 1 (count (filter #{digest} replayed)))
+                (str label ": digest pin " path " does not identify exactly one "
+                     "replay-recomputable cascade row"))))))))
+
+

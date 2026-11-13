@@ -1,5 +1,5 @@
 (ns futon2.aif.area-focus-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.area-focus :as sut]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.operator-focus :as operator-focus]
@@ -48,6 +48,21 @@
         f (java.io.File. d (str "operator-focus-" (apply str (repeat 64 "a")) ".edn"))]
     (spit f "{:as-of \"2026-11-04T00:00:00Z\"}")
     (is (nil? (sut/newest-retained d "2026-11-04T01:01:00Z")))))
+
+(deftest failed-votes-are-not-retained-focus
+  (testing "planted regression wm-click-loop-repair-452e014e: a fresh manifest whose vote failed must not shadow reuse or block re-acquisition"
+    (let [d (.toFile (java.nio.file.Files/createTempDirectory "focus-failed" (make-array java.nio.file.attribute.FileAttribute 0)))
+          present (java.io.File. d (str "operator-focus-" (apply str (repeat 64 "c")) ".edn"))
+          failed  (java.io.File. d (str "operator-focus-" (apply str (repeat 64 "d")) ".edn"))]
+      (spit present "{:as-of \"2026-11-04T00:20:00Z\" :result {:status :present :ranked [{:area \"WM\"}]}}")
+      (spit failed  "{:as-of \"2026-11-04T00:40:00Z\" :result {:status :absent :reason :all-seats-abstained}}")
+      ;; newer failed vote does not satisfy retention: the older present one is reused
+      (is (= (:sha256 (sut/read-manifest present))
+             (:sha256 (sut/newest-retained d "2026-11-04T00:55:00Z"))))
+      (is (= "2026-11-04T00:20:00Z" (:as-of (sut/newest-retained d "2026-11-04T00:55:00Z"))))
+      ;; only failed manifests in the window: nothing retained, caller re-acquires
+      (.delete present)
+      (is (nil? (sut/newest-retained d "2026-11-04T00:55:00Z"))))))
 
 (deftest retained-relations-classifies-with-pinned-sources
   (let [d (.toFile (java.nio.file.Files/createTempDirectory

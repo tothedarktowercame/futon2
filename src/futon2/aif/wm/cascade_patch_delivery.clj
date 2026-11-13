@@ -3,9 +3,10 @@
   (:require [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [futon2.aif.load-identity :as identity]))
+            [futon2.aif.load-identity :as identity]
+            [futon2.data-paths :as data-paths]))
 
-(def canonical-repository "/home/joe/code/futon2")
+(def canonical-repository data-paths/production-repo-root)
 
 (defn- git [root & args]
   (apply shell/sh "git" "-C" root args))

@@ -64,7 +64,12 @@
      :manifest (edn/read-string text)}))
 
 (defn newest-retained
-  "Newest content-addressed focus manifest no more than 60 minutes old."
+  "Newest content-addressed focus manifest no more than 60 minutes old.
+  Only a manifest whose vote succeeded (`:result :status :present`) is
+  reusable: a retained failure (reader abstentions, invalid JSON, a quiet
+  window) is not evidence of focus, and reusing one wedges outer selection
+  behind a stale read for the whole freshness window. Failed manifests make
+  callers re-acquire instead. (wm-click-loop-repair-452e014e)"
   ([dir decision-as-of] (newest-retained dir decision-as-of 60))
   ([dir decision-as-of max-age-minutes]
    (let [now (Instant/parse decision-as-of)]
@@ -72,7 +77,8 @@
           (keep (fn [f] (try (let [pin (read-manifest f)
                                    at (Instant/parse (get-in pin [:manifest :as-of]))
                                    age (.toMinutes (Duration/between at now))]
-                               (when (and (not (neg? age)) (<= age max-age-minutes))
+                               (when (and (not (neg? age)) (<= age max-age-minutes)
+                                          (= :present (get-in pin [:manifest :result :status])))
                                  (assoc pin :as-of (str at) :age-minutes age)))
                              (catch Exception _ nil))))
           (sort-by :as-of #(compare %2 %1)) first))))

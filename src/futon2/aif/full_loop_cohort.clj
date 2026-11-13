@@ -1145,6 +1145,16 @@
                                  :parent (:cohort/id parent)
                                  :claimed (:cohort/id succ)
                                  :path succ-path})))
+              ;; A verified successor charter can exist without its activation:
+              ;; an isolated serving tree (Lucy's wm-sandbox) carries zone's
+              ;; charters 58-99 but none of zone's data roots, so every
+              ;; succession there stopped :cohort-not-activated after the
+              ;; two attempts of a cohort. Activate it exactly as succeed!
+              ;; activates a successor it mints.
+              (let [succ-root (sibling-path (:data-root b))]
+                (.mkdirs (io/file succ-root))
+                (when-not (.exists (activation-path (cohort-dir succ succ-root)))
+                  (activate! succ-path succ-root)))
               (recur (with-meta {:preregistration succ-path
                                  :data-root (sibling-path (:data-root b))
                                  :cohort-id (:cohort/id succ)
@@ -1162,11 +1172,32 @@
          _ (refuse-unknown-identities! (cohort-dir (:value snapshot) (:data-root binding)))
          state (ledger snapshot (:data-root binding))
          activation (:activation state)]
+     (when (nil? activation)
+       ;; wm-click-loop-repair-25b11814: the pinned server binding named
+       ;; cohort wm-contract-machinery-57-v1, whose data root had never been
+       ;; activated (no activation.edn, root absent). This precondition is
+       ;; what start-attempt! already types as "cohort is not activated";
+       ;; folding it into the mismatch below erased the distinction and the
+       ;; runner boundary charged it :machine-failure/:initialization-failed
+       ;; for an operator/server precondition. Typed here so it discharges as
+       ;; :cleared-precondition, like :trigger-ineligible.
+       (throw (ex-info "Execution cohort is not activated"
+                       {:reason :execution-cohort-activation-missing
+                        :failure-kind :cohort-not-activated
+                        :cohort/id (:cohort-id binding)
+                        :preregistration-sha256 (:sha256 binding)
+                        :data-root (:data-root binding)})))
      (when-not (and (= (:cohort-id binding) (:cohort/id activation))
                     (= (:sha256 binding) (:preregistration-sha256 activation))
                     (= (:target state) (:stopping-target activation)))
        (throw (ex-info "Execution cohort activation mismatch"
-                       {:reason :execution-cohort-activation-mismatch})))
+                       {:reason :execution-cohort-activation-mismatch
+                        :expected {:cohort/id (:cohort-id binding)
+                                   :preregistration-sha256 (:sha256 binding)
+                                   :stopping-target (:target state)}
+                        :actual (select-keys activation
+                                             [:cohort/id :preregistration-sha256
+                                              :stopping-target])})))
      (when (and require-capacity? (not (pos? (:remaining state))))
        (throw (ex-info "Execution cohort is exhausted"
                        {:reason :execution-cohort-exhausted})))

@@ -45,7 +45,8 @@
 (defn capture-census
   "Independent file-registry census for an immutable outer decision, never its field."
   [opts]
-  (let [root (or (:code-root opts) "/home/joe/code")
+  (let [root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")
+                 "/home/joe/code")
         base {:source :files :code-root root :captured-at (str (Instant/now))}]
     (try
       (assoc base :open-tasks
@@ -80,7 +81,8 @@
       (assoc from-selection :schema :wm/critical-task-counts-v1)
       (try
         (let [sets ((or (:world-task-sets-fn opts) default-task-sets)
-                    (or (:code-root opts) "/home/joe/code"))
+                    (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")
+                        "/home/joe/code"))
               now-fn (or (:world-now-fn opts) (fn [] (Instant/now)))]
           {:schema :wm/critical-task-counts-v1
            :basis :terminal-fallback
@@ -185,7 +187,8 @@
                           (swap! failures conj {:part name :status :failed
                                                 :error (ex-message e)})
                           {:status :failed :part name})))
-        code-root (or (:code-root opts) "/home/joe/code")
+        code-root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")
+                      "/home/joe/code")
         outer-population (part :outer-task-population
                                #(outer-task-population outer-selection))
         retained-outer-population? (and outer-selection

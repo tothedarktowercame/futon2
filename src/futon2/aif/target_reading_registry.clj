@@ -85,6 +85,48 @@
       {:status :absent :kind :target-head-template-only :source-path (str path)}
       (identity/sha256 (.getBytes source "UTF-8")))))
 
+(defn item-section-text
+  "Return the Markdown section containing the unchecked item at ITEM-LINE.
+  This mirrors wm_task_reading.py/choose_item and containing_section: the
+  nearest preceding heading starts the section and the next heading at the
+  same or a higher level ends it."
+  [path item-line]
+  (let [text (slurp path)
+        item-re #"(?m)^[ \t]*[-*][ \t]+\[[ \t]\][ \t]+\S.*$"
+        heading-re #"(?m)^(#{1,6})\s+(.+?)\s*$"
+        matches (let [m (re-matcher item-re text)]
+                  (loop [out []]
+                    (if (.find m)
+                      (recur (conj out {:start (.start m)
+                                        :line (inc (count (re-seq #"\n" (subs text 0 (.start m)))))}))
+                      out)))
+        item (first (filter #(= item-line (:line %)) matches))]
+    (when-not item
+      (throw (ex-info "item line is not an unchecked item"
+                      {:kind :target-item-line-invalid :path (str path)
+                       :item-line item-line})))
+    (let [headings (let [m (re-matcher heading-re text)]
+                     (loop [out []]
+                       (if (.find m)
+                         (recur (conj out {:start (.start m)
+                                           :level (count (.group m 1))}))
+                         out)))
+          prior (last (filter #(< (:start %) (:start item)) headings))
+          start (or (:start prior) 0)
+          level (or (:level prior) 0)
+          end (or (some (fn [heading]
+                          (when (and (> (:start heading) (:start item))
+                                     (or (zero? level) (<= (:level heading) level)))
+                            (:start heading)))
+                        headings)
+                  (count text))]
+      (str/replace (subs text start end) #"(?s)\s+$" ""))))
+
+(defn item-section-digest
+  "SHA-256 of the exact item-containing section handed to 象."
+  [path item-line]
+  (identity/sha256 (.getBytes (item-section-text path item-line) "UTF-8")))
+
 (defn- target-key [target-id]
   (identity/sha256 (.getBytes (str target-id) "UTF-8")))
 

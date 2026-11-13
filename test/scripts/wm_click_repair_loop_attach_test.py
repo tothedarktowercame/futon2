@@ -10,13 +10,15 @@ from unittest import mock
 
 ROOT = Path(os.environ.get("FUTON2_UNDER_TEST", Path(__file__).resolve().parents[2]))
 
+import wm_click_hermetic  # noqa: E402 (needs the test dir on sys.path first)
+
 
 def load_loop():
     path = ROOT / "scripts" / "wm_click_repair_loop.py"
     spec = importlib.util.spec_from_file_location("wm_click_attach_under_test", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module
+    return wm_click_hermetic.harden(module)
 
 
 class DebuggerAttachTest(unittest.TestCase):

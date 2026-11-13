@@ -1,0 +1,66 @@
+{:wm/preregistration "T-ladder-08-memory-preregistration"
+ :title "M1 memory under fire — preregistration (not run)"
+ :status :presented-for-sign-off-not-run
+ :presented-to "Joe"
+ :authored-by "wm-author"
+ :pinned-before-observation true
+ :engine
+ {:step :propagator-only
+  :rule-layer :frozen
+  :interpretation
+  "With the rule layer exactly frozen this is an experiment on a fixed
+   heterogeneous elementary CA, not on a meta-CA; the result must say so."
+  :even8 [1 0 4 7 2 3 5 6]
+  :even8-order :mmca-clj-wolfram-order
+  :even8-note
+  "Wolfram (writing-position) order, as mmca-clj propagate-at reads it.
+   NOT the futon2.layout-premise catalogue bit order from ladder 06, which
+   is a different operator; that port must not be reused unchanged."
+  :layout {:rule-77 :medium :rule-90 :channel :rule-178 :back-path}
+  :layout-blocks [77 90 178]}
+ :seed 20261113
+ :seed-note "Fixed integer seed, pinned before any observation; Joe's ruling date."
+ :thresholds
+ {:guard-width 4
+  :guard-width-note
+  "Guard blocks of rule 77 of width 4 on each side of the memory region."
+  :horizon 80
+  :horizon-note
+  "Run to t = 80, the horizon claude-4's probe saw the genotype field reach
+   all-77 at; pinned here before any propagator-only observation of the
+   memory configuration."
+  :penetration-limit 1
+  :penetration-limit-note
+  "A perturbation may penetrate the surrounding medium by at most 1 cell.
+   From ladder 05 (exhaustive, n = 4..20): damage depth is exactly 1 for
+   every n, so any observed depth greater than 1 refutes confinement."}
+ :erosion-baseline
+ {:source :T-ladder-05-settling-confinement
+  :claim "maximum transient floor(n/2) - 1"
+  :note
+  "Ladder 05 refuted the TN's six-step settling claim: the maximum
+   transient is floor(n/2) - 1, first exceeding 6 at n = 16 and equal to 9
+   at n = 20 (worst start: a single 1), with exactly the two uniform rings
+   never settling. The erosion baseline is stated from that result, not
+   from the TN. On the pinned configuration the approximately six-step
+   erosion baseline is therefore the ladder-05 bound at the memory width,
+   and any erosion front surviving past floor(w/2) - 1 steps at width w
+   counts as non-baseline behaviour to be reported, not re-baselined."}
+ :control-arm
+ {:from :T-ladder-07-wire-control
+  :wire-test
+  {:channel 90
+   :expected "A perturbation arrives at distance d at time d on the 90 channel."
+   :control-77
+   "No corresponding arrival when the channel is changed to rule 77
+    (ladder 05 confinement: damage depth 1, no transmission)."
+   :control-178-back-path
+   "No corresponding arrival when routed through a 178 back path."
+   :content-check
+   "Transmitted content is checked by XOR superposition (rule 90 linearity)."}
+  :expected-outcome "closed / pass on the layout code and controls, not the substrate."}
+ :falsifier
+ "Running the memory-under-fire experiment before Joe signs this
+  registration, or observing any outcome and then editing a threshold,
+  refutes this preregistration."
+ :expected-outcome "stopped as expected for human sign-off"}

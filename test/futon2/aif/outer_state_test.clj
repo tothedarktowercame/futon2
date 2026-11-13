@@ -1,6 +1,7 @@
 (ns futon2.aif.outer-state-test
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.outer-state :as state]))
 
 (def valid-makeup
@@ -90,9 +91,9 @@
   (testing "both defaults stay in the canonical repo from unrelated process roots"
     (doseq [cwd ["/home/joe/code/futon3c" "/tmp"]
             [path expected] [[state/default-makeup-path
-                              "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn"]
+                              (data-paths/path "wm-learning" "outer-makeup.edn")]
                              [state/default-state-path
-                              "/home/joe/code/futon2/data/wm-learning/outer-state.edn"]]]
+                              (data-paths/path "wm-learning" "outer-state.edn")]]]
       (let [base (java.nio.file.Paths/get cwd (make-array String 0))
             target (java.nio.file.Paths/get path (make-array String 0))]
         (is (.isAbsolute target))

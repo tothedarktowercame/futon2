@@ -72,21 +72,43 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-CODE = Path.home() / "code"
-F2 = CODE / "futon2"
-F3C = CODE / "futon3c"
+# An isolated campaign may compose the same repos under a non-canonical root.
+# Keep the canonical paths as defaults, while making the root an explicit part
+# of the loop process's environment.  F2/F3C remain independently overridable
+# because wm_click.sh already has that public contract.
+CODE = Path(os.environ.get("WM_CODE_ROOT", Path.home() / "code")).resolve()
+F2 = Path(os.environ.get("F2", CODE / "futon2")).resolve()
+F3C = Path(os.environ.get("F3C", CODE / "futon3c")).resolve()
+# Where the Requirements (.lean) live.  An isolated campaign composes its own
+# copy; absent repos simply contribute nothing to the protection scan.
+MATHLIB4 = Path(os.environ.get("FUTON_WM_MATHLIB4", CODE / "mathlib4")).resolve()
 META_INJURY_ROOT = F2 / "data" / "wm-meta-injuries-live-2026-10-22"
 STATE = F2 / "data" / "wm-click-loop"
 LEDGER = STATE / "ledger.jsonl"
 LOGFILE = STATE / "loop.log"
 STOP_FILE = STATE / "STOP"
 ALERTS = STATE / "alerts.jsonl"
+# WM hardening package 1 (H-wm-ladder-lucy-handoff-2026-11-13 section 4): the
+# giraffe run this loop run works on, pinned at launch in loop state -- outside
+# the source tree, so a repair commit to the code cannot change it.  Selection
+# (futon2.aif.full-loop-runtime/find-giraffe-run) reads it and refuses any
+# other run with :giraffe-run-not-pinned.  Cleared when the loop stops.
+GIRAFFE_PIN = STATE / "giraffe-pin.edn"
 # Standing signature rows the owner has acknowledged in writing, each with the
 # reason and the open packet. They stay in every verdict and alert record; they
 # are excluded only from the repeat comparison, so a known gap awaiting a
 # decision cannot pause the loop while other defects are being found.
 ACKNOWLEDGED = STATE / "acknowledged.json"
-AGENCY = "http://localhost:7070"
+# WM hardening package 4 (handoff 2026-11-13 section 3, "Shared-tree races"):
+# while a repair seat holds a run, the loop records a one-writer-per-checkout
+# lease in its own state dir (outside the source tree): seat, job, repos,
+# start time, plus the guidance that other writers work in worktrees under
+# ~/worktrees/<repo>/<name> until the lease is cleared at repair end.
+REPAIR_LEASE = STATE / "repair-lease.json"
+# Loop-own writes, repo-relative, that never count as a dirty checkout even
+# if git were ever made to see them (they are gitignored under data/*).
+OWN_DIRTY_PREFIXES = ("data/wm-click-loop", "data/wm-click-loop/")
+AGENCY = os.environ.get("BASE", "http://127.0.0.1:7070").rstrip("/")
 SEND = F3C / "scripts" / "agency_send.py"
 EVAL = F3C / "scripts" / "proof-eval.sh"
 TERMINAL = {"done", "failed", "error", "cancelled", "timeout", "timed-out"}
@@ -132,6 +154,118 @@ WRITE_STAMP_ROOT = F2 / "data" / "wm-write-stamps"
 # The click's code: what a repair may change and what a reload must pick up.
 CLICK_PATHS = [(F2, "src"), (F2, "scripts/futon2"), (F3C, "src/futon3c/wm")]
 SOURCE_IDENTITY_INVENTORY = F2 / "src" / "futon2" / "aif" / "load_identity.clj"
+# Paths a repair commit may not touch (WM hardening package 3, handoff
+# 2026-11-13 section 3: repair commit 8a0cb58c2 widened field admission via
+# missions-giraffe-manifest? and the loop hot-loaded and retried it).  The
+# list lives here, in the loop script, which is itself protected: a repair
+# cannot widen its own remit by editing the list unnoticed.  Protection of
+# field admission is per file, not per definition: full_loop_runtime.clj
+# holds both find-giraffe-run and missions-giraffe-manifest?, and splitting
+# it would be a bigger change than this package settles.
+PROTECTED_REPAIR_PATHS = (
+    "src/futon2/aif/full_loop_runtime.clj",   # field admission / Giraffe run lookup
+    "src/futon3c/giraffe/run.clj",            # giraffe run verification (verify-run)
+    "scripts/wm_run_facts.clj",                # Requirements facts export
+    "scripts/wm_check_run_facts.clj",          # Requirements checker
+    "scripts/wm_click_repair_loop.py",         # the loop itself
+)
+PROTECTED_REPAIR_PREFIXES = (
+    "DarkTower/WarMachine/Requirements",       # mathlib4 Requirements*.lean
+)
+# Repos whose committed changes are scanned for protected paths during the
+# reload window.  mathlib4 must be here or its protection can never fire:
+# the reload plan only carries .clj/.cljc under CLICK_PATHS, which also hid
+# the loop's own script from the earlier files-based check.
+PROTECTED_SCAN_REPOS = (F2, F3C, MATHLIB4)
+
+
+class DirtyCheckoutError(RuntimeError):
+    """A checkout a repair seat may write holds uncommitted changes; nothing
+    may be dispatched until they are reported and dealt with (package 4)."""
+
+    def __init__(self, dirty):
+        rendered = "; ".join(f"{row['repo']}: {', '.join(row['paths'])}" for row in dirty)
+        super().__init__("uncommitted changes in " + rendered)
+        self.dirty = list(dirty)
+
+
+def dirty_checkout_changes() -> list[dict]:
+    """Uncommitted changes in the checkouts a repair seat may write.
+
+    `git status --porcelain` already hides gitignored paths, so the loop's own
+    state writes (under its state dir) never appear; OWN_DIRTY_PREFIXES is a
+    second belt for the day a whitelist un-ignores one.  A repo that does not
+    exist (a campaign without mathlib4) contributes nothing.
+    """
+    rows = []
+    for repo in (F2, F3C, MATHLIB4):
+        if not (repo / ".git").exists():
+            continue
+        paths = []
+        for line in git(repo, "status", "--porcelain").splitlines():
+            if not line.strip():
+                continue
+            path = line[3:]
+            if " -> " in path:
+                path = path.split(" -> ", 1)[1]
+            path = path.strip('"')
+            if path.startswith(OWN_DIRTY_PREFIXES):
+                continue
+            paths.append(path)
+        if paths:
+            rows.append({"repo": str(repo), "paths": paths})
+    return rows
+
+
+def write_repair_lease(tag: str, job: str, seat: str) -> Path:
+    """Record the one-writer-per-checkout lease for a live repair (package 4)."""
+    lease = {
+        "seat": seat,
+        "job": job,
+        "tag": tag,
+        "repos": [str(r) for r in (F2, F3C, MATHLIB4) if (r / ".git").exists()],
+        "started-at": now(),
+        "note": "one writer per checkout: while this lease exists, other "
+                "writers work in worktrees under ~/worktrees/<repo>/<name>, "
+                "not the shared checkout",
+    }
+    note_own_write(REPAIR_LEASE)
+    REPAIR_LEASE.write_text(json.dumps(lease, indent=1) + "\n", encoding="utf-8")
+    return REPAIR_LEASE
+
+
+def clear_repair_lease(tag: str | None = None) -> None:
+    """End the repair lease; never raises (a crash path must not mask itself)."""
+    if REPAIR_LEASE.exists():
+        REPAIR_LEASE.unlink()
+        record({"event": "repair-lease-cleared", "tag": tag})
+
+
+def foreign_dirty_paths(commits) -> list[dict]:
+    """Dirty checkout paths the repair's own commits do not cover.
+
+    A checkout that became dirty during the repair with paths the seat did
+    not commit is someone else's work in flight: it is reported, never folded
+    into the repair's commits.
+    """
+    committed: dict[Path, set[str]] = {}
+    for repo, sha in commits:
+        committed.setdefault(repo, set()).update(commit_paths(repo, sha))
+    out = []
+    for row in dirty_checkout_changes():
+        repo = Path(row["repo"])
+        if committed.get(repo, set()) >= set(row["paths"]):
+            continue
+        out.append(row)
+    return out
+
+
+class ProtectedPathError(RuntimeError):
+    """A committed change touches a protected path; nothing may be hot-loaded."""
+
+    def __init__(self, paths):
+        super().__init__("protected paths touched: " + ", ".join(paths))
+        self.paths = list(paths)
 
 
 def now() -> str:
@@ -1090,6 +1224,45 @@ def changed_click_files(since_epoch: int) -> list[Path]:
     return sorted(files)
 
 
+def protected_paths_in(rel_paths) -> list[str]:
+    """Repo-relative paths a repair must not touch, sorted, deduplicated."""
+    hits = set()
+    for rel in rel_paths:
+        if rel in PROTECTED_REPAIR_PATHS or rel.startswith(PROTECTED_REPAIR_PREFIXES):
+            hits.add(rel)
+    return sorted(hits)
+
+
+def commit_paths(repo: Path, sha: str) -> list[str]:
+    return git(repo, "show", "--name-only", "--format=", sha).split()
+
+
+def protected_changes_since(since_epoch: int) -> list[str]:
+    """Protected paths committed anywhere scanned since since_epoch.
+
+    Read from git directly, never from the reload plan: the plan carries only
+    .clj/.cljc under CLICK_PATHS, so a mathlib4 .lean file or the loop's own
+    script would otherwise never reach the check.  A scanned repo that does
+    not exist (a campaign without mathlib4) contributes nothing.
+    """
+    hits = set()
+    for repo in PROTECTED_SCAN_REPOS:
+        if not repo.is_dir():
+            continue
+        out = git(repo, "log", "--first-parent", "-m", f"--since=@{since_epoch}",
+                  "--name-only", "--format=")
+        hits.update(protected_paths_in(out.split()))
+    return sorted(hits)
+
+
+def repair_commit_protection(commits) -> list[str]:
+    """Protected paths touched by tagged repair commits, sorted."""
+    hits = set()
+    for repo, sha in commits:
+        hits.update(protected_paths_in(commit_paths(repo, sha)))
+    return sorted(hits)
+
+
 def required_sources_declaration(text: str) -> str:
     """Extract only the map literal assigned to load_identity/required-sources."""
     declaration = re.search(r"\(def\s+required-sources\b", text)
@@ -1135,10 +1308,20 @@ def source_identity_inventory() -> dict[str, Path]:
     declaration = required_sources_declaration(text)
     for namespace, raw_path in re.findall(r"'([\w.\-]+)\s+\"([^\"]+\.clj)\"", declaration):
         path = Path(raw_path)
+        # The checked declaration is deliberately canonical and therefore
+        # contains /home/joe/code paths even when this process composes an
+        # isolated checkout. Translate declaration identity into the selected
+        # F2/F3C roots; also accept already-relocated declarations.
+        f2_prefix = str(F2) + "/"
+        f3c_prefix = str(F3C) + "/"
         if raw_path.startswith("/home/joe/code/futon2/"):
             path = F2 / raw_path.removeprefix("/home/joe/code/futon2/")
         elif raw_path.startswith("/home/joe/code/futon3c/"):
             path = F3C / raw_path.removeprefix("/home/joe/code/futon3c/")
+        elif raw_path.startswith(f2_prefix):
+            path = F2 / raw_path.removeprefix(f2_prefix)
+        elif raw_path.startswith(f3c_prefix):
+            path = F3C / raw_path.removeprefix(f3c_prefix)
         entries[namespace] = path
     return entries
 
@@ -1245,6 +1428,18 @@ def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bo
         return None, "click-in-flight", since_epoch
     started = int(time.time())
     files, identity_dependencies = reload_plan(since_epoch)
+    protected = protected_changes_since(since_epoch)
+    if protected:
+        # A repair commit touched a path that defines what the machine may
+        # work on (handoff 2026-11-13 section 3).  Refuse to load anything,
+        # not just the protected file: loading the rest would run the next
+        # click against a half-widened apparatus.  The raise stops the loop
+        # and bells the owner via main(); it never reloads and never retries.
+        text = "repair touched protected paths; nothing was loaded: " + ", ".join(protected)
+        log(f"reload: REFUSED -- {text}")
+        record({"event": "reload-refused-protected", "ok": False, "since": since_epoch,
+                "protected-paths": protected, "namespaces": []})
+        raise ProtectedPathError(protected)
     skipped = [f for f in files if dirty(f)]
     order = [(ns, f) for ns, f in reload_order([f for f in files if f not in skipped])]
     for f in skipped:
@@ -1484,6 +1679,8 @@ def notify_alert(args, c: dict) -> None:
 # self-heal reads and fires no click while more than one injury is open.
 MAX_ACTIVE_INJURIES = 1
 _ACTIVE_INJURY_FORM = (
+    "(do (require 'futon2.aif.meta-injury-store "
+    "'futon2.aif.meta-injury-ledger 'futon2.aif.meta-self-heal-production) "
     "(let [d (futon2.aif.meta-injury-store/load-durable-ledger "
     "futon2.aif.meta-self-heal-production/default-ledger-path)] "
     "(if (map? (:source-pin d)) "
@@ -1491,7 +1688,7 @@ _ACTIVE_INJURY_FORM = (
     "(if (= :computed (:status a)) "
     "(str \"ACTIVE-INJURIES \" (count (:injuries a)) \" \" (pr-str (vec (sort (keys (:injuries a)))))) "
     "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:status a))))) "
-    "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:reason d)))))")
+    "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:reason d))))))")
 
 
 def active_injuries() -> tuple[int | None, str]:
@@ -1649,6 +1846,8 @@ def fire(n: int, args, since_epoch: int) -> dict:
     before = budget_lines()
     cmd = [F2 / "scripts" / "wm_click.sh", "--run", "--issuing-caller", args.issuing_caller,
            "--author", args.author, "--reviewer", args.reviewer, "--repair-reviewer", args.repair_reviewer]
+    if args.task:
+        cmd.extend(["--task", args.task])
     log(f"click {n}: firing ({out.name})")
     in_flight_repairs = []
     handled_stops = set()
@@ -1971,7 +2170,7 @@ def repair_packet(tag: str, reason: str, click: dict | None, prior: list[str],
 
 def dispatch(seat: str, prompt: str) -> str:
     r = sh(sys.executable, SEND, "--from", "wm-click-loop", "--to", seat, "--kind", "bell",
-           "--mode", "work", input=prompt, timeout=120)
+           "--mode", "work", "--base", AGENCY, input=prompt, timeout=120)
     m = re.search(r'"job-id"\s*:\s*"([^"]+)"', r.stdout)
     if not m:
         raise RuntimeError(f"dispatch to {seat} failed: {r.stdout[-400:]} {r.stderr[-400:]}")
@@ -1993,7 +2192,9 @@ def wait_job(job: str, timeout: int) -> dict:
 
 def tagged_commits(tag: str) -> list[tuple[Path, str]]:
     out = []
-    for repo in (F2, F3C):
+    for repo in (F2, F3C, MATHLIB4):
+        if not repo.is_dir():
+            continue
         for sha in git(repo, "log", "--since=1 day ago", "-F", f"--grep={tag}", "--format=%H").split():
             out.append((repo, sha))
     return out
@@ -2020,28 +2221,62 @@ def repair(args, reason: str, click: dict | None, prior: list[str],
            page: Path | None = None) -> tuple[str, str]:
     """Send one repair job and judge it. Returns (verdict, detail)."""
     tag = f"wm-click-loop-repair-{uuid.uuid4().hex[:8]}"
+    # WM hardening package 4: a dirty checkout would let the seat commit
+    # someone else's uncommitted work as its own.  Report, do not dispatch.
+    dirty = dirty_checkout_changes()
+    if dirty:
+        raise DirtyCheckoutError(dirty)
     ensure_seat(args.repair_seat, args.seat_model)
-    job = dispatch(args.repair_seat, repair_packet(tag, reason, click, prior, page))
-    log(f"repair {tag}: job {job} to {args.repair_seat}: {reason[:160]}")
-    record({"event": "repair-dispatched", "tag": tag, "job": job, "seat": args.repair_seat, "reason": reason})
-    j = wait_job(job, args.repair_timeout)
-    result = str(j.get("result") or j.get("error") or "")
-    note_own_write(STATE / f"{tag}.result.txt")
-    (STATE / f"{tag}.result.txt").write_text(result)
-    m = re.findall(r"VERDICT:\s*(repaired|no-defect|cannot-repair)", result)
-    verdict = m[-1] if m else f"no-verdict (job {j.get('state')})"
-    commits = tagged_commits(tag)
-    detail = f"job {job} {j.get('state')}; verdict {verdict}; commits {[s[:9] for _, s in commits]}"
-    if verdict == "repaired" and not commits:
-        verdict, detail = "unlanded", detail + "; claimed repaired but no commit carries the tag"
-    elif commits:
-        errs = kondo_errors(commits)
-        if errs:
-            verdict, detail = "kondo-errors", detail + "; clj-kondo errors:\n" + errs
-    log(f"repair {tag}: {detail[:400]}")
-    record({"event": "repair-judged", "tag": tag, "job": job, "verdict": verdict, "detail": detail,
-            "commits": [f"{r.name}:{s}" for r, s in commits]})
-    return verdict, detail
+    prompt = repair_packet(tag, reason, click, prior, page) + (
+        "\n\n== repair lease ==\n"
+        f"A one-writer-per-checkout lease for this repair is recorded at {REPAIR_LEASE} "
+        "(seat, job, repos, start time) and cleared when the repair ends. "
+        "Other writers work in worktrees under ~/worktrees/<repo>/<name> until then; "
+        "commit only the paths you changed yourself.")
+    job = dispatch(args.repair_seat, prompt)
+    write_repair_lease(tag, job, args.repair_seat)
+    try:
+        log(f"repair {tag}: job {job} to {args.repair_seat}: {reason[:160]}")
+        record({"event": "repair-dispatched", "tag": tag, "job": job, "seat": args.repair_seat, "reason": reason})
+        j = wait_job(job, args.repair_timeout)
+        result = str(j.get("result") or j.get("error") or "")
+        note_own_write(STATE / f"{tag}.result.txt")
+        (STATE / f"{tag}.result.txt").write_text(result)
+        m = re.findall(r"VERDICT:\s*(repaired|no-defect|cannot-repair)", result)
+        verdict = m[-1] if m else f"no-verdict (job {j.get('state')})"
+        commits = tagged_commits(tag)
+        detail = f"job {job} {j.get('state')}; verdict {verdict}; commits {[s[:9] for _, s in commits]}"
+        if verdict == "repaired" and not commits:
+            verdict, detail = "unlanded", detail + "; claimed repaired but no commit carries the tag"
+        elif commits:
+            protected = repair_commit_protection(commits)
+            if protected:
+                verdict, detail = ("protected-path",
+                                   detail + "; refused: protected paths touched: "
+                                   + ", ".join(protected))
+            else:
+                errs = kondo_errors(commits)
+                if errs:
+                    verdict, detail = "kondo-errors", detail + "; clj-kondo errors:\n" + errs
+        # WM hardening package 4: dirt that appeared during the repair on
+        # paths the seat did not commit is another writer's work in flight.
+        # Alert row only; never folded into the repair's commits.
+        foreign = foreign_dirty_paths(commits)
+        if foreign:
+            row = {"at": now(), "event": "foreign-dirty-paths", "tag": tag,
+                   "job": job, "dirty": foreign}
+            note_own_write(ALERTS)
+            with ALERTS.open("a") as fh:
+                fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+            record(row)
+            detail += ("; alert: checkout dirty on paths the repair did not commit: "
+                       + "; ".join(f"{r['repo']}: {', '.join(r['paths'])}" for r in foreign))
+        log(f"repair {tag}: {detail[:400]}")
+        record({"event": "repair-judged", "tag": tag, "job": job, "verdict": verdict, "detail": detail,
+                "commits": [f"{r.name}:{s}" for r, s in commits]})
+        return verdict, detail
+    finally:
+        clear_repair_lease(tag)
 
 
 # ---------------------------------------------------------------- stop
@@ -2121,6 +2356,20 @@ def _validated_stop(args, claimed_case: str, evidence: dict) -> tuple[str, bool]
             legal = False
     elif claimed_case == "work-exhausted":
         legal = _work_exhausted_checked(evidence)
+    elif claimed_case == "no-giraffe-pin":
+        # WM hardening package 1: an unpinned loop is refused before any
+        # click; the stop is legal exactly when no pin could be recorded.
+        legal = evidence.get("giraffe-pin-recorded") is False
+    elif claimed_case == "protected-path":
+        ev = evidence.get("protected-paths") if isinstance(evidence, dict) else None
+        legal = isinstance(ev, list) and bool(ev)
+    elif claimed_case == "dirty-checkout":
+        # WM hardening package 4: legal only with non-empty evidence paths
+        # (repo plus the uncommitted paths that stopped the dispatch).
+        ev = evidence.get("dirty-checkouts") if isinstance(evidence, dict) else None
+        legal = (isinstance(ev, list) and bool(ev)
+                 and all(isinstance(r, dict) and r.get("repo")
+                         and isinstance(r.get("paths"), list) and r["paths"] for r in ev))
     else:
         legal = claimed_case == "debugger-error"
     return (claimed_case, True) if legal and claimed_case != "debugger-error" else ("debugger-error", False)
@@ -2129,6 +2378,13 @@ def _validated_stop(args, claimed_case: str, evidence: dict) -> tuple[str, bool]
 def stop(args, case: str, reason: str, code: int, evidence: dict) -> int:
     effective_case, legal = _validated_stop(args, case, evidence)
     log(f"STOP: {reason}")
+    # WM hardening package 1: the loop run is over, so its field pin is too.
+    # Left in place it would pin a future run (or a manual click) to a run
+    # that run never chose.
+    if GIRAFFE_PIN.exists():
+        GIRAFFE_PIN.unlink()
+        record({"event": "giraffe-pin-cleared"})
+        log("giraffe pin: cleared")
     row = {"event": "stop", "case": effective_case, "legal": legal,
            "evidence": evidence, "reason": reason}
     if effective_case != case:
@@ -2142,6 +2398,81 @@ def stop(args, case: str, reason: str, code: int, evidence: dict) -> int:
 
 # ---------------------------------------------------------------- main
 
+def _write_giraffe_pin(run_dir: Path, text: str, chosen_by: str) -> None:
+    only = re.search(r":only-ids\s+(\[[^\]]*\]|nil)", text, re.S)
+    only_ids = (re.findall(r'"([^"]*)"', only.group(1))
+                if only and only.group(1) != "nil" else [])
+    pin = ("{:run-id " + _edn_string(run_dir.name)
+           + "\n :only-ids [" + " ".join(_edn_string(i) for i in only_ids) + "]"
+           + "\n :recorded-at " + _edn_string(now()) + "}\n")
+    GIRAFFE_PIN.write_text(pin, encoding="utf-8")
+    scope = f"scoped ({len(only_ids)} members)" if only_ids else "full population"
+    record({"event": "giraffe-pin", "run-id": run_dir.name,
+            "only-ids": only_ids, "chosen-by": chosen_by})
+    log(f"giraffe pin: pinned {run_dir.name} ({scope}; {chosen_by})")
+
+
+def record_giraffe_pin(args) -> bool:
+    """Pin the field's scope for this loop run (WM hardening package 1).
+
+    With ``--giraffe-run <run-id>`` pin exactly that run, refusing the launch
+    when its manifest is missing or does not describe the missions field: the
+    operator names the run, newest-first lookup cannot override them.  Without
+    the flag, fall back to the newest run directory under GIRAFFE_ROOT whose
+    manifest describes the missions field (mirrors
+    missions-giraffe-manifest?: edges under holes/missions/, no :tickets-index
+    source).  Either way the pin records the run id plus its scoped ``--only``
+    member list in loop state, outside the source tree, so a repair commit to
+    the code cannot change it; selection refuses any other run
+    (:giraffe-run-not-pinned).  Returns True when a pin was recorded; the
+    caller must refuse to click unpinned when it returns False.
+    """
+    root = Path(os.environ.get("GIRAFFE_ROOT", "/home/joe/code/storage/giraffe"))
+    if args.giraffe_run:
+        run_dir = root / args.giraffe_run
+        manifest = run_dir / "manifest.edn"
+        if not manifest.is_file():
+            log(f"giraffe pin: --giraffe-run {args.giraffe_run} has no manifest "
+                f"at {manifest}; launch refused")
+            return False
+        try:
+            text = manifest.read_text(encoding="utf-8")
+        except OSError as e:
+            log(f"giraffe pin: {manifest} unreadable ({e}); launch refused")
+            return False
+        if "holes/missions/" not in text or ":tickets-index" in text:
+            log(f"giraffe pin: --giraffe-run {args.giraffe_run} is not a "
+                f"missions-field run; launch refused")
+            return False
+        _write_giraffe_pin(run_dir, text, "operator flag")
+        return True
+    if not root.is_dir():
+        log(f"giraffe pin: root {root} missing; no pin recorded")
+        return False
+    for run_dir in sorted((d for d in root.iterdir() if d.is_dir()),
+                          key=lambda d: d.name, reverse=True):
+        manifest = run_dir / "manifest.edn"
+        if not manifest.is_file():
+            continue
+        try:
+            text = manifest.read_text(encoding="utf-8")
+        except OSError as e:
+            log(f"giraffe pin: {manifest} unreadable ({e}); skipped")
+            continue
+        # Coarse mirror of the manifest gate: a missions-field run has its
+        # edges under holes/missions/ and no :tickets-index source.
+        if "holes/missions/" not in text or ":tickets-index" in text:
+            continue
+        _write_giraffe_pin(run_dir, text, "newest missions-field run")
+        return True
+    log("giraffe pin: no missions-field run found; no pin recorded")
+    return False
+
+
+def _edn_string(s: str) -> str:
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def run(args) -> int:
     lock = (STATE / "loop.lock").open("w")
     try:
@@ -2150,6 +2481,14 @@ def run(args) -> int:
         print("another wm_click_repair_loop holds the lock; exiting")
         return 0
     STOP_FILE.unlink(missing_ok=True)
+    if not record_giraffe_pin(args):
+        # An unpinned loop is the widenable behaviour this package removes:
+        # stop before the first click, typed, with no repair dispatched.
+        return stop(args, "no-giraffe-pin",
+                    "no giraffe run could be pinned at launch; refusing to "
+                    "click unpinned (a pinless loop can be widened to any "
+                    "run, WM hardening package 1)",
+                    1, {"giraffe-pin-recorded": False})
     log(f"=== start: clicks={args.clicks} ticks={args.ticks} stall={args.stall} "
         f"max-repairs={args.max_repairs} repair-seat={args.repair_seat} ===")
     record({"event": "start", "args": vars(args)})
@@ -2414,6 +2753,12 @@ def parse_args(argv=None):
     r.add_argument("--repair-timeout", type=int, default=5400)
     r.add_argument("--owner", required=True)
     r.add_argument("--issuing-caller", required=True)
+    r.add_argument("--task", help="direct task id for a staged or otherwise preselected run")
+    r.add_argument("--giraffe-run",
+                   help="pin exactly this giraffe run id (WM hardening package 1); "
+                        "the launch is refused when its manifest is missing or "
+                        "not a missions-field run. Without it the newest "
+                        "missions-field run is pinned.")
     r.add_argument("--author", required=True)
     r.add_argument("--reviewer", required=True)
     r.add_argument("--repair-reviewer", required=True)
@@ -2430,6 +2775,17 @@ def main() -> int:
         return status()
     try:
         return run(args)
+    except ProtectedPathError as e:
+        # Nothing was loaded: reload_changed refuses before any jvm_eval.
+        return stop(args, "protected-path",
+                    f"repair touched protected paths; nothing was loaded: {e}",
+                    1, {"protected-paths": e.paths})
+    except DirtyCheckoutError as e:
+        # WM hardening package 4: no lease was written, nothing dispatched;
+        # the change is reported so it is not absorbed into a repair commit.
+        return stop(args, "dirty-checkout",
+                    f"checkout dirty before repair dispatch; no repair sent: {e}",
+                    1, {"dirty-checkouts": e.dirty})
     except Exception as e:  # a crash is a stop like any other: the owner hears of it
         import traceback
         log(traceback.format_exc())

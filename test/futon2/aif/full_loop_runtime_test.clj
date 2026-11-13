@@ -8,6 +8,7 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.action-identity :as action-identity]
+            [futon2.aif.area-focus :as area-focus]
             [futon2.aif.flight-runner :as flight-runner]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-runtime :as runtime]
@@ -902,3 +903,28 @@
       (is (string? (:run-id @runner-opts)))
       (is (= (:run-id @runner-opts) (:run-id @judge-opts))
           "accumulation and the durable run record must receive one identity"))))
+
+(deftest outer-selection-reader-contact-carries-the-run-ledger
+  ;; Held run 2026-11-13-dc01c06b (click wm-click-0d1dca09): the operator-focus
+  ;; reader's contact was built from opts with no job ledger, and dispatch! held
+  ;; the click at outer-selection with :wm-job-ledger-unavailable before any
+  ;; job could exist. The ledger must be minted before that contact is built.
+  (let [seen (atom nil)]
+    (with-redefs [runtime/find-giraffe-run (constantly "/tmp/giraffe-run")
+                  outer-state/load-makeup (constantly {})
+                  outer-state/read-state (constantly {})
+                  area-focus/load-corpus (constantly [])
+                  runtime/designated-agent-answer-fn
+                  (fn [opts seat _ _mode]
+                    (reset! seen {:opts opts :seat seat})
+                    (constantly {:state :not-contacted}))
+                  area-focus/acquire-focus!
+                  (fn [_] (throw (ex-info "stop after contact" {::stop true})))]
+      (try (#'runtime/run-ordinary-opportunity-impl!
+            {:run-id "r1" :click-id "c1"
+             :outer/makeup-path "m" :outer/state-path "s"})
+           (catch Exception _ nil)))
+    (is (= "猴-1" (:seat @seen)) "the operator-focus reader is contacted")
+    (is (instance? clojure.lang.Atom
+                   (get-in @seen [:opts :registered-run/job-ledger]))
+        "the reader contact carries the run-local job ledger")))

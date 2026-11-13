@@ -1,3 +1,4 @@
-{:schema :wm/reading-policy-class-f-declaration-v1
+{:schema :wm/reading-policy-class-f-declaration-v2
  :history-window 32
- :run-record-directory "/home/joe/code/futon2/data/wm-runs"}
+ :run-record-directory {:authority :futon2-data
+                        :path ["wm-runs"]}}

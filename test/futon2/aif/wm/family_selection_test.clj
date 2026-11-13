@@ -112,17 +112,17 @@
              (get-in result [:families 0 :failures 0 :kind])))
       (is (= 1 (get-in result [:coverage :head-template-only]))))))
 
-(deftest source-kinds-not-yet-readable-are-counted
+(deftest item-section-without-line-is-counted
   (let [graph (graph-file (temp-dir "field-source-kind-graph-"))
         result (sut/families-for-field
                 {:target-sources [{:target-id "T-item" :source-kind :item-section
-                                   :source-path "/not/read-as-head.md" :item-line 8}]
+                                   :source-path "/not/read-as-head.md"}]
                  :reading-root (temp-dir "field-source-kind-reading-")
                  :graph-path graph})]
     (is (= :failed (get-in result [:families 0 :status])))
-    (is (= :target-source-kind-unsupported
+    (is (= :target-item-line-absent
            (get-in result [:families 0 :failures 0 :kind])))
-    (is (= 1 (get-in result [:coverage :source-kind-unsupported])))))
+    (is (= 1 (get-in result [:coverage :source-path-absent])))))
 
 (deftest graph-refusal-precedes-every-reading-lookup
   (let [root (temp-dir "field-refused-reading-")
@@ -253,6 +253,20 @@
     (is (= :target-class-unknown (get-in row [:failures 0 :kind])))
     (is (= :outer-selection-relation-unavailable
            (get-in row [:failures 0 :reason])))))
+
+(deftest caller-pinned-direct-task-is-focused-by-construction
+  (let [target "T-ladder-01-loop-turns-over"
+        retained {:task target
+                  :status :not-exercised
+                  :reason :direct-task-entry
+                  :entry {:kind :api :caller "codex-6"}}
+        target-classes (sut/target-classes-for-outer-selection retained)]
+    (is (= :focus (get-in target-classes [target :class])))
+    (is (= :focused (get-in target-classes [target :scorer-class])))
+    (is (= "caller-pinned direct task"
+           (get-in target-classes [target :provenance :source])))
+    (is (= :focus
+           (get-in target-classes [target :provenance :relation])))))
 
 (deftest joint-selector-scores-every-policy-once
   (let [result (sut/select-over-families [(computed-family "T-a" 2)

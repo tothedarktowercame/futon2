@@ -6,7 +6,8 @@
             [cheshire.core :as json]
             [futon2.aif.wm.cascade-patch-delivery :as delivery]
             [futon2.aif.wm.open-cascade-resume :as resume]
-            [futon2.aif.full-loop-runtime :as runtime]))
+            [futon2.aif.full-loop-runtime :as runtime]
+            [futon2.data-paths :as data-paths]))
 
 (defn git! [dir & args]
   (let [r (apply shell/sh "git" "-C" (str dir) args)]
@@ -67,6 +68,10 @@
 
 (deftest prompt-names-canonical-delivery
   (let [prompt (#'runtime/open-cascade-author-prompt {})]
-    (is (str/includes? prompt "/home/joe/code/futon2"))
+    (is (str/includes? prompt data-paths/production-repo-root))
+    (is (str/includes? prompt
+                       (str "git -C " data-paths/production-repo-root
+                            " rev-parse --show-toplevel")))
+    (is (str/includes? prompt "Do not inspect, reuse, or cite"))
     (is (str/includes? prompt "patch.commit"))
     (is (str/includes? prompt "canonical HEAD"))))

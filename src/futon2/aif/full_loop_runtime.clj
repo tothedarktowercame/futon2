@@ -12,6 +12,7 @@
             [clojure.string :as str]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.area-focus :as area-focus]
+            [futon2.aif.operator-focus :as operator-focus]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.effective-run-history :as effective-run-history]
@@ -82,7 +83,9 @@
 (def default-ticket-readiness-citation-chars 4096)
 (def default-ticket-readiness-candidate-limit 16)
 (def default-ticket-readiness-candidate-chars 1024)
-(def default-giraffe-root "/home/joe/code/storage/giraffe")
+(def default-giraffe-root
+  (or (System/getenv "FUTON_WM_GIRAFFE_ROOT")
+      "/home/joe/code/storage/giraffe"))
 (def self-heal-runtime-config-resource "wm/self-heal-runtime.edn")
 
 (defn self-heal-runtime-config
@@ -398,8 +401,13 @@
 (defn- open-cascade-author-prompt [req]
   (str "Repair the held executable cascade phase without selecting again. "
        "Implement resolutions for exactly the listed holes. Commit the source in "
-       "/home/joe/code/futon2, the canonical absolute repository on the serving "
-       "classpath. A sibling worktree is not delivery. Return the full commit SHA "
+       data-paths/production-repo-root ", the canonical absolute repository on the serving "
+       "classpath. Before reading or writing a candidate patch, run `git -C "
+       data-paths/production-repo-root " rev-parse --show-toplevel` and require its output "
+       "to equal that exact path. Work only in that checkout. Do not inspect, reuse, or cite "
+       "an existing patch commit from another checkout merely because it names the same "
+       "requisition; create the delivered commit in the serving checkout. A sibling "
+       "worktree is not delivery. Return the full commit SHA "
        "in patch.commit — exactly 40 lowercase hex characters; an abbreviated or "
        "otherwise malformed object id is refused with "
        ":author-delivery-invalid-descriptor and does not fall back to file "
@@ -1411,12 +1419,37 @@
   loopStopLegal: missing ingest or relation evidence remains a debugger error."
   #{:c1-already-satisfied :c3-harm-declined})
 
+(def exhausted-registry-status-classes
+  "Registry status-classes that make a non-open member DONE or gated on the
+  operator (H-wm-ladder-lucy-handoff-2026-11-13 package 2): the pinned scope
+  holds no machine-selectable work. :draft is deliberately absent: a WATCH or
+  FINDING mission is neither done nor operator-gated, and an empty field
+  explained only by drafts stays a debugger question."
+  #{:complete :inactive :operator-gated})
+
+(defn- registry-exhausted-empty-field? [observation]
+  ;; Click 5 of the Lucy loop run: 09 and 10 DONE, 08 gated on Joe. Giraffe
+  ;; and the registry enumerate nothing, so no exclusion row exists to carry
+  ;; the legality; the exhaustion is legible only in :registry/non-open.
+  (let [non-open (:registry/non-open observation)]
+    (and (vector? non-open)
+         (seq non-open)
+         (every? #(contains? exhausted-registry-status-classes
+                             (:status-class %))
+                 non-open))))
+
 (defn- legal-terminal-empty-field? [observation failure-data]
   (let [excluded (into (vec (:outer-field/excluded observation))
                        (:outer-score/excluded failure-data))]
     (and (= [] (:outer-score/admitted failure-data))
-         (seq excluded)
-         (every? #(contains? legal-terminal-exclusion-reasons (:reason %)) excluded))))
+         (or (and (seq excluded)
+                  (every? #(contains? legal-terminal-exclusion-reasons (:reason %))
+                          excluded))
+             ;; No exclusion row at all is legal only when the whole
+             ;; non-open population is DONE or gated on the operator; an
+             ;; empty pass over an unexplained population stays a fault.
+             (and (= [] excluded)
+                  (registry-exhausted-empty-field? observation))))))
 
 (defn- missions-giraffe-manifest? [manifest]
   (let [edge-path (get-in manifest [:sources :edges :path])]
@@ -1434,15 +1467,49 @@
            (:ok? (verify-run dir))))
     (catch Exception _ false)))
 
-(defn- find-giraffe-run [opts]
+(defn- find-unpinned-giraffe-run [opts]
   (if-let [explicit (:outer/giraffe-run-dir opts)]
     (when (verified-giraffe-run? (io/file explicit)) (io/file explicit))
     (let [root (io/file (or (:outer/giraffe-root opts) default-giraffe-root))]
       (when (.isDirectory root)
         (->> (.listFiles root)
              (filter #(.isDirectory ^java.io.File %))
-             (sort-by #(.getName ^java.io.File %) #(compare %2 %1))
+             (sort-by #(.getName ^java.io.File %) (fn [a b] (compare b a)))
              (some #(when (verified-giraffe-run? %) %)))))))
+
+(defn- giraffe-run-pin
+  "The Giraffe run a loop run is pinned to, if any.  A loop launch records
+  the run id and, for a scoped run, its `--only` member list in the loop's
+  state tree (data/wm-click-loop/giraffe-pin.edn) — outside the source
+  tree, so a repair commit to the code cannot change it.  Explicit opts win
+  for direct callers and tests; a missing or unreadable pin file means no
+  pin, and behaviour is exactly the unpinned one."
+  [opts]
+  (or (:outer/giraffe-pin opts)
+      (let [f (io/file (or (:outer/giraffe-pin-path opts)
+                           (data-paths/path "wm-click-loop" "giraffe-pin.edn")))]
+        (when (.isFile f)
+          (try (edn/read-string (slurp f))
+               (catch Exception _ nil))))))
+
+(defn- find-giraffe-run [opts]
+  (if-let [pin (giraffe-run-pin opts)]
+    (let [found (find-unpinned-giraffe-run opts)]
+      (cond
+        (nil? found) nil
+        ;; The pinned run is never silently swapped in for the found one and
+        ;; no fallback past this refusal exists, so a repair that widens the
+        ;; lookup (the 8a0cb58c2 move: reject the scoped run, fall back to a
+        ;; full-population pass) is stopped here, before the run is read.
+        (not= (:run-id pin) (.getName ^java.io.File found))
+        (throw (ex-info (str "giraffe run not pinned: pinned " (:run-id pin)
+                             ", found " (.getName ^java.io.File found))
+                        {:kind :giraffe-run-not-pinned
+                         :pinned-id (:run-id pin)
+                         :found-id (.getName ^java.io.File found)
+                         :pinned-only-ids (:only-ids pin)}))
+        :else found))
+    (find-unpinned-giraffe-run opts)))
 
 (defn- outer-selection-refusal [e]
   {:absent :outer-selection-refused
@@ -1725,12 +1792,26 @@
   chosen task has closed; while it remains open observed gain is `:none`.
   META injuries are arbitrated before this function."
   [opts]
-  (let [opts (assoc opts :wm/discovery-enactment :off)]
+  ;; Outer selection contacts a seat (the operator-focus reader) before the
+  ;; runner starts, and dispatch! refuses a WM-run contact that has no run-local
+  ;; job ledger (held run 2026-11-13-dc01c06b, click wm-click-0d1dca09). Mint
+  ;; the ledger here and pass the same atom on, as :selection-timing/state is,
+  ;; so the runner records the reader's job with the rest of this click's jobs.
+  (let [opts (-> (assoc opts :wm/discovery-enactment :off)
+                 (update :registered-run/job-ledger
+                         #(or % (atom {:order [] :jobs {}}))))]
    (if (get-in opts [:task :id])
     (run-ordinary-opportunity-with-task!
-     (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}]
-       (assoc opts :selection-record
-              (retain-selection! opts (assoc named :status :not-exercised :reason :direct-task-entry)
+     (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}
+           retained (assoc named :status :not-exercised :reason :direct-task-entry)]
+       (assoc opts
+              ;; The reading-family scorer consumes :outer/selection for its
+              ;; target-class evidence. A direct task has no comparative
+              ;; selector result, but the caller's pin is itself the retained
+              ;; focus decision and must reach that same carrier.
+              :outer/selection retained
+              :selection-record
+              (retain-selection! opts retained
                                  (assoc named :status :not-exercised :path :direct-task
                                         :reason :task-supplied)))))
     (if-let [giraffe-dir (find-giraffe-run opts)]
@@ -1742,7 +1823,10 @@
               decision-as-of (or (:decision-as-of opts) (str (Instant/now)))
               area-corpus (area-focus/load-corpus)
               focus-pin (area-focus/acquire-focus!
-                         {:decision-as-of decision-as-of
+                         {:reader-contact (designated-agent-answer-fn
+                                           opts (or (:operator-focus/reader-seat opts) "猴-1")
+                                           operator-focus/reader-prompt "brief")
+                          :decision-as-of decision-as-of
                           :manifest-dir (or (:operator-focus/manifest-dir opts)
                                             (str (data-paths/path "wm-runs")))
                           :code-root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")

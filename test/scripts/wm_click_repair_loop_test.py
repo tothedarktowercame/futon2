@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
 LOOP = ROOT / "scripts" / "wm_click_repair_loop.py"
 DEBUGGER = ROOT / "scripts" / "wm_click_debugger.bb"
 
+import wm_click_hermetic  # noqa: E402 (needs the test dir on sys.path first)
+
 
 # The supervisor's state paths are absolute (~/code/futon2/data/wm-click-loop),
 # so a test that reaches log()/record() without patching them writes the
@@ -38,17 +40,34 @@ def load_loop():
     module.ALERTS = state / "alerts.jsonl"
     module.ACKNOWLEDGED = state / "acknowledged.json"
     module.DEBUGGER = state / "debugger"
-    # write_click_manifest consults Agency job previews; tests never may.
-    module.fetch_agency_jobs_in_window = lambda started, ended: ([], None)
-    # Nor the serving debugger: debugger_stops() would see the live loop's
-    # held runs (ContinuousModeTest errored whenever a real click was held),
-    # and retry/abort would act on them. Tests that need these patch them.
-    module.debugger_stops = lambda: []
-    def _refuse(run_id):
-        raise AssertionError(f"test tried to continue live held run {run_id}")
-    module.retry_held_run = _refuse
-    module.abort_held_run = _refuse
-    return module
+    # Hermeticity: jvm_eval/get_json/post_json/ensure_seat and the Agency
+    # preview / debugger seams refuse loudly; a test needing a value patches
+    # in its own fake.
+    return wm_click_hermetic.harden(module)
+
+
+class RepairLoopRootTest(unittest.TestCase):
+    def test_isolated_code_root_drives_all_campaign_paths(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "campaign"
+            env = dict(os.environ, WM_CODE_ROOT=str(root),
+                       BASE="http://127.0.0.1:17070")
+            program = (
+                "import importlib.util, json; "
+                f"s=importlib.util.spec_from_file_location('isolated_loop',{str(LOOP)!r}); "
+                "m=importlib.util.module_from_spec(s); s.loader.exec_module(m); "
+                "print(json.dumps({'code':str(m.CODE),'f2':str(m.F2),"
+                "'f3c':str(m.F3C),'agency':m.AGENCY,'state':str(m.STATE)}))"
+            )
+            result = subprocess.run(["python3", "-c", program], env=env,
+                                    text=True, capture_output=True, check=True)
+            observed = json.loads(result.stdout)
+            self.assertEqual(str(root), observed["code"])
+            self.assertEqual(str(root / "futon2"), observed["f2"])
+            self.assertEqual(str(root / "futon3c"), observed["f3c"])
+            self.assertEqual("http://127.0.0.1:17070", observed["agency"])
+            self.assertEqual(str(root / "futon2" / "data" / "wm-click-loop"),
+                             observed["state"])
 
 
 class RepairLoopCastTest(unittest.TestCase):
@@ -506,6 +525,24 @@ class RepairLoopCastTest(unittest.TestCase):
         self.assertFalse(loop.parse_args(base).observe_only)
         self.assertTrue(loop.parse_args(base + ["--observe-only"]).observe_only)
 
+    def test_direct_task_is_explicit_and_defaults_absent(self):
+        loop = load_loop()
+        base = ["run", "--clicks", "1", "--owner", "codex-68",
+                "--issuing-caller", "joe", "--author", "wm-author",
+                "--reviewer", "wm-reviewer",
+                "--repair-reviewer", "wm-repair-reviewer"]
+        self.assertIsNone(loop.parse_args(base).task)
+        self.assertEqual("T-ladder-01-loop-turns-over",
+                         loop.parse_args(base + ["--task", "T-ladder-01-loop-turns-over"]).task)
+
+    def test_repair_dispatch_uses_the_loop_agency_base(self):
+        loop = load_loop()
+        completed = subprocess.CompletedProcess([], 0, '{"job-id":"job-1"}', "")
+        with mock.patch.object(loop, "sh", return_value=completed) as send:
+            self.assertEqual("job-1", loop.dispatch("wm-repair-reviewer", "repair"))
+        self.assertIn("--base", send.call_args.args)
+        self.assertIn(loop.AGENCY, send.call_args.args)
+
     def test_observation_only_debugger_stop_never_dispatches_repair(self):
         loop = load_loop()
         args = loop.parse_args([
@@ -845,6 +882,16 @@ class ContinuousModeTest(unittest.TestCase):
             chosen.write_text('{:selection-outcome {:status :chosen, :pick "M-x"}}')
             self.assertIsNone(loop.nothing_beats_stopping(str(chosen)))
             self.assertIsNone(loop.nothing_beats_stopping(None))
+            # run() records a giraffe pin before its first click (WM hardening
+            # package 1): give it a minimal missions-field run under the temp
+            # tree, never the real /home/joe/code/storage/giraffe.
+            giraffe = Path(td) / "giraffe"
+            fixture_run = giraffe / "20260101T000000.000Z-fixture"
+            fixture_run.mkdir(parents=True)
+            (fixture_run / "manifest.edn").write_text(
+                "{:invocation {:edges \"/fixture/holes/missions/edges.json\"\n"
+                "  :only-ids [\"T-fixture\"]}\n"
+                " :sources {:edges {:path \"/fixture/holes/missions/edges.json\"}}}\n")
             args = loop.parse_args([
                 "run", "--clicks", "3", "--continuous", "--owner", "claude-2",
                 "--issuing-caller", "claude-2", "--author", "wm-author",
@@ -865,6 +912,10 @@ class ContinuousModeTest(unittest.TestCase):
                  mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
                  mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
                  mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+                 mock.patch.object(loop, "jvm_eval",
+                                   side_effect=wm_click_hermetic.healthy_jvm_eval), \
+                 mock.patch.object(loop, "GIRAFFE_PIN", Path(td) / "giraffe-pin.edn"), \
+                 mock.patch.dict(os.environ, {"GIRAFFE_ROOT": str(giraffe)}), \
                  mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
                  mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
                  mock.patch.object(loop, "fire", side_effect=fire), \
@@ -915,6 +966,8 @@ class ContinuousModeTest(unittest.TestCase):
              mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
              mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "acknowledged.json"), \
              mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+             mock.patch.object(loop, "jvm_eval",
+                               side_effect=wm_click_hermetic.healthy_jvm_eval), \
              mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
              mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)) as reload, \
              mock.patch.object(loop, "fire", side_effect=fire), \
@@ -1419,6 +1472,17 @@ class ProviderUnavailableStopTest(unittest.TestCase):
                 "--issuing-caller", "claude-2", "--author", "wm-author",
                 "--reviewer", "wm-reviewer", "--repair-reviewer", "wm-repair-reviewer"])
 
+            # run() records a giraffe pin before its first click (WM hardening
+            # package 1): give it a minimal missions-field run under the temp
+            # tree, never the real /home/joe/code/storage/giraffe.
+            giraffe = Path(td) / "giraffe"
+            fixture_run = giraffe / "20260101T000000.000Z-fixture"
+            fixture_run.mkdir(parents=True)
+            (fixture_run / "manifest.edn").write_text(
+                "{:invocation {:edges \"/fixture/holes/missions/edges.json\"\n"
+                "  :only-ids [\"T-fixture\"]}\n"
+                " :sources {:edges {:path \"/fixture/holes/missions/edges.json\"}}}\n")
+
             def fire(n, a, since):
                 return {"n": n, "rc": 1, "click-id": f"click-{n}", "spent": True,
                         "outcome": "unknown", "run-id": "run-pf4c", "carried": False,
@@ -1435,6 +1499,10 @@ class ProviderUnavailableStopTest(unittest.TestCase):
                  mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
                  mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
                  mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+                 mock.patch.object(loop, "jvm_eval",
+                                   side_effect=wm_click_hermetic.healthy_jvm_eval), \
+                 mock.patch.object(loop, "GIRAFFE_PIN", Path(td) / "giraffe-pin.edn"), \
+                 mock.patch.dict(os.environ, {"GIRAFFE_ROOT": str(giraffe)}), \
                  mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
                  mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
                  mock.patch.object(loop, "fire", side_effect=fire), \
@@ -1457,6 +1525,181 @@ class ProviderUnavailableStopTest(unittest.TestCase):
                 "provider-unavailable: usage-limit on wm-author"),
                             stop_row["reason"])
             self.assertIn("waiting for Joe", stop_row["reason"])
+
+
+class RepairProtectedPathTest(unittest.TestCase):
+    """WM hardening package 3 (handoff 2026-11-13 section 3): a repair commit
+    that touches a protected path is not hot-loaded; the loop stops instead."""
+
+    # The scope-widening repair commit named in the handoff; in this repo's
+    # history (reverted by 08fb7d3c0).
+    BAD_SHA = "8a0cb58c2a5709318612fe6bc96b26bcc782906f"
+
+    def test_protected_patterns_cover_the_handoff_list(self):
+        loop = load_loop()
+        self.assertEqual(
+            ["DarkTower/WarMachine/Requirements.lean",
+             "DarkTower/WarMachine/RequirementsQ12.lean"],
+            loop.protected_paths_in(["DarkTower/WarMachine/Requirements.lean",
+                                     "DarkTower/WarMachine/RequirementsQ12.lean",
+                                     "DarkTower/WarMachine/Other.lean"]))
+        self.assertEqual(
+            ["scripts/wm_check_run_facts.clj", "scripts/wm_click_repair_loop.py",
+             "scripts/wm_run_facts.clj", "src/futon2/aif/full_loop_runtime.clj",
+             "src/futon3c/giraffe/run.clj"],
+            loop.protected_paths_in(["scripts/wm_run_facts.clj",
+                                     "scripts/wm_check_run_facts.clj",
+                                     "scripts/wm_click_repair_loop.py",
+                                     "src/futon2/aif/full_loop_runtime.clj",
+                                     "src/futon3c/giraffe/run.clj"]))
+        self.assertEqual([], loop.protected_paths_in(
+            ["src/futon2/aif/wm/family_selection.clj",
+             "test/futon2/aif/full_loop_giraffe_scoped_run_test.clj",
+             "scripts/futon2/other.clj"]))
+
+    def test_bad_case_repair_8a0cb58c2_is_not_loaded_and_stops_the_loop(self):
+        loop = load_loop()
+        loop.F2 = ROOT
+        # Treat 8a0cb58c2 as the repair commit: its committed paths enter the
+        # reload plan exactly as changed_click_files would serve them.
+        rels = loop.commit_paths(ROOT, self.BAD_SHA)
+        self.assertIn("src/futon2/aif/full_loop_runtime.clj", rels)
+        files = [ROOT / rel for rel in rels if rel.endswith((".clj", ".cljc"))]
+
+        def no_jvm(form, timeout=600):
+            raise AssertionError("nothing may be hot-loaded when a protected path changed")
+
+        # Realistic epoch: git does not parse bare small numbers as dates.
+        since = int(loop.git(ROOT, "show", "-s", "--format=%ct", self.BAD_SHA).strip()) - 60
+        with mock.patch.object(loop, "click_running", return_value=False), \
+             mock.patch.object(loop, "changed_click_files", return_value=files), \
+             mock.patch.object(loop, "PROTECTED_SCAN_REPOS", (ROOT,)), \
+             mock.patch.object(loop, "jvm_eval", side_effect=no_jvm), \
+             mock.patch.object(loop, "record") as record, \
+             mock.patch.object(loop, "log"):
+            with self.assertRaises(loop.ProtectedPathError) as raised:
+                loop.reload_changed(since)
+        self.assertIn("src/futon2/aif/full_loop_runtime.clj", raised.exception.paths)
+        self.assertEqual("reload-refused-protected", record.call_args.args[0]["event"])
+        self.assertIn("src/futon2/aif/full_loop_runtime.clj",
+                      record.call_args.args[0]["protected-paths"])
+        # The same commit judged as a tagged repair is refused, not "repaired".
+        self.assertEqual(["src/futon2/aif/full_loop_runtime.clj"],
+                         loop.repair_commit_protection([(ROOT, self.BAD_SHA)]))
+
+    def test_a_repair_touching_only_unprotected_files_still_loads(self):
+        loop = load_loop()
+        family = loop.F2 / "src/futon2/aif/wm/family_selection.clj"
+        with mock.patch.object(loop, "click_running", return_value=False), \
+             mock.patch.object(loop, "changed_click_files", return_value=[family]), \
+             mock.patch.object(loop, "dirty", return_value=False), \
+             mock.patch.object(loop, "jvm_eval", side_effect=lambda form, timeout=600: {
+                 "rc": 0, "out": ":standing-reset" if "reset-context!" in form else ":reloaded",
+                 "err": ""}) as reload, \
+             mock.patch.object(loop, "record"), \
+             mock.patch.object(loop, "log"):
+            ok, text, _ = loop.reload_changed(123)
+        self.assertTrue(ok)
+        self.assertEqual("", text)
+        self.assertTrue(any(c.args[0].startswith("(try (require")
+                            for c in reload.call_args_list))
+        self.assertIn("reset-context!", reload.call_args.args[0], "the standing context reset still runs")
+
+    def test_protected_path_stop_is_legal_only_with_evidence(self):
+        loop = load_loop()
+        args = mock.Mock(clicks=3, ticks=3)
+        self.assertEqual(("protected-path", True), loop._validated_stop(
+            args, "protected-path", {"protected-paths": ["src/futon2/aif/full_loop_runtime.clj"]}))
+        self.assertEqual(("debugger-error", False), loop._validated_stop(
+            args, "protected-path", {"protected-paths": []}))
+        self.assertEqual(("debugger-error", False), loop._validated_stop(
+            args, "protected-path", {}))
+
+    @staticmethod
+    def _repo_with_commit(td: str, rel: str, message: str) -> Path:
+        """A throwaway git repo with one commit touching REL."""
+        repo = Path(td) / ("repo-" + rel.replace("/", "_"))
+        repo.mkdir(parents=True)
+        subprocess.run(["git", "-C", repo, "init", "-q"], check=True)
+        subprocess.run(["git", "-C", repo, "config", "user.email", "t@t"], check=True)
+        subprocess.run(["git", "-C", repo, "config", "user.name", "t"], check=True)
+        target = repo / rel
+        target.parent.mkdir(parents=True)
+        target.write_text("-- fixture\n")
+        subprocess.run(["git", "-C", repo, "add", rel], check=True)
+        subprocess.run(["git", "-C", repo, "commit", "-q", "-m", message], check=True)
+        return repo
+
+    def test_mathlib4_requirements_change_in_the_window_is_refused(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            repo = self._repo_with_commit(
+                td, "DarkTower/WarMachine/Requirements.lean", "widen requirements")
+
+            def no_jvm(form, timeout=600):
+                raise AssertionError("nothing may be hot-loaded when a protected path changed")
+
+            since = int(loop.time.time()) - 3600  # bare small numbers are not dates
+            with mock.patch.object(loop, "click_running", return_value=False), \
+                 mock.patch.object(loop, "changed_click_files", return_value=[]), \
+                 mock.patch.object(loop, "PROTECTED_SCAN_REPOS", (loop.F2, loop.F3C, repo),
+                                   create=True), \
+                 mock.patch.object(loop, "jvm_eval", side_effect=no_jvm), \
+                 mock.patch.object(loop, "record") as record, \
+                 mock.patch.object(loop, "log"):
+                with self.assertRaises(loop.ProtectedPathError) as raised:
+                    loop.reload_changed(since)
+            self.assertEqual(["DarkTower/WarMachine/Requirements.lean"],
+                             raised.exception.paths)
+            self.assertEqual("reload-refused-protected", record.call_args.args[0]["event"])
+            # The same repo's tagged repair commits are found and judged too.
+            sha = loop.git(repo, "rev-parse", "HEAD").strip()
+            loop.MATHLIB4 = repo
+            self.assertIn((repo, sha), loop.tagged_commits("widen requirements"))
+            self.assertEqual(["DarkTower/WarMachine/Requirements.lean"],
+                             loop.repair_commit_protection([(repo, sha)]))
+
+    def test_change_to_giraffe_run_verification_is_refused(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            repo = self._repo_with_commit(
+                td, "src/futon3c/giraffe/run.clj", "weaken verify-run")
+            with mock.patch.object(loop, "click_running", return_value=False), \
+                 mock.patch.object(loop, "changed_click_files", return_value=[]), \
+                 mock.patch.object(loop, "PROTECTED_SCAN_REPOS", (repo,), create=True), \
+                 mock.patch.object(loop, "jvm_eval",
+                                   side_effect=AssertionError(
+                                       "nothing may be hot-loaded")), \
+                 mock.patch.object(loop, "record"), \
+                 mock.patch.object(loop, "log"):
+                with self.assertRaises(loop.ProtectedPathError) as raised:
+                    loop.reload_changed(int(loop.time.time()) - 3600)
+            self.assertEqual(["src/futon3c/giraffe/run.clj"], raised.exception.paths)
+
+    def test_repair_judgment_refuses_a_tagged_protected_commit(self):
+        loop = load_loop()
+        args = mock.Mock(repair_seat="wm-repair", seat_model=None, repair_timeout=1)
+        with tempfile.TemporaryDirectory() as td:
+            # Package 4's dirty-checkout guard reads the live F2/F3C/MATHLIB4;
+            # this test is about protected paths, so point them at stand-ins
+            # that do not exist (no .git -> nothing dirty, nothing folded).
+            clean = [Path(td) / n for n in ("no-f2", "no-f3c", "no-mathlib4")]
+            with mock.patch.object(loop, "F2", clean[0]), \
+                 mock.patch.object(loop, "F3C", clean[1]), \
+                 mock.patch.object(loop, "MATHLIB4", clean[2]), \
+                 mock.patch.object(loop, "ensure_seat"), \
+                 mock.patch.object(loop, "dispatch", return_value="job-1"), \
+                 mock.patch.object(loop, "wait_job",
+                                   return_value={"state": "done",
+                                                 "result": "VERDICT: repaired"}), \
+                 mock.patch.object(loop, "tagged_commits",
+                                   return_value=[(ROOT, self.BAD_SHA)]), \
+                 mock.patch.object(loop, "record"), \
+                 mock.patch.object(loop, "log"):
+                verdict, detail = loop.repair(args, "held run stopped", None, [])
+        self.assertEqual("protected-path", verdict)
+        self.assertIn("src/futon2/aif/full_loop_runtime.clj", detail)
+        self.assertIn("refused", detail)
 
 
 if __name__ == "__main__":

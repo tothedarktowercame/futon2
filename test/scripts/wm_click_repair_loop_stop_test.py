@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 import warnings
@@ -10,19 +11,24 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 
+import wm_click_hermetic  # noqa: E402 (needs the test dir on sys.path first)
+
 
 def load_loop():
     path = ROOT / "scripts" / "wm_click_repair_loop.py"
     spec = importlib.util.spec_from_file_location("wm_click_repair_loop_under_test", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module
+    return wm_click_hermetic.harden(module)
 
 
 class SelfHealStopTest(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("ignore", ResourceWarning)
         self.loop = load_loop()
+        # run() reads the injury ledger and debugger state from the serving
+        # JVM; the hardened module refuses that, so supply the explicit fake.
+        self.loop.jvm_eval = wm_click_hermetic.healthy_jvm_eval
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         root = Path(self.temp.name)
@@ -44,7 +50,22 @@ class SelfHealStopTest(unittest.TestCase):
         assert not any(isinstance(v, Path) and v.is_relative_to(canonical_state)
                        for v in vars(self.loop).values())
         self.loop.META_INJURY_ROOT = root / "injuries"
-        self.args = SimpleNamespace(
+        # A launch records a giraffe pin before its first click (WM hardening
+        # package 1), so run() needs a pinnable missions-field run.  Point
+        # GIRAFFE_ROOT at a minimal fixture under the temp tree: the tests must
+        # never read /home/joe/code/storage/giraffe, and a missing pin would
+        # stop every test typed as no-giraffe-pin before its clicks.
+        giraffe_run = root / "giraffe" / "20260101T000000.000Z-fixture"
+        giraffe_run.mkdir(parents=True)
+        (giraffe_run / "manifest.edn").write_text(
+            "{:invocation {:edges \"/fixture/holes/missions/edges.json\"\n"
+            "  :only-ids [\"T-fixture\"]}\n"
+            " :sources {:edges {:path \"/fixture/holes/missions/edges.json\"}}}\n")
+        giraffe_env = mock.patch.dict(os.environ,
+                                      {"GIRAFFE_ROOT": str(root / "giraffe")})
+        giraffe_env.start()
+        self.addCleanup(giraffe_env.stop)
+        self.args = SimpleNamespace(giraffe_run=None,
             clicks=2, ticks=99, stall=3, max_repairs=3,
             repair_seat="repair", continuous=True, observe_only=False,
             owner="owner", issuing_caller="caller", author="author",
@@ -197,6 +218,22 @@ class SelfHealStopTest(unittest.TestCase):
         self.assertEqual(1, calls)
         self.assertEqual("work-exhausted", row["case"])
         self.assertTrue(row["legal"])
+
+    def test_work_exhausted_click_dispatches_no_repair_seat(self):
+        # H-wm-ladder-lucy-handoff-2026-11-13 package 2 (click 5): a typed
+        # :work-exhausted stop pauses and alerts; the repair seat whose scope
+        # the Lucy run saw widened must never be dispatched for it.
+        record = self.outer_abstention_record("[]", "loop-stop")
+        with mock.patch.object(self.loop, "repair") as repair_mock:
+            rc, calls, rows = self.run_with([
+                self.click({}, outcome="abstained", run_record=record)])
+        row = [r for r in rows if r.get("event") == "stop"][-1]
+        self.assertEqual(0, rc)
+        self.assertEqual("work-exhausted", row["case"])
+        self.assertTrue(row["legal"])
+        self.assertEqual(0, repair_mock.call_count)
+        # run_with patches notify itself; the alert is the stop row's bell.
+        self.assertFalse(any(r.get("event") == "repair-dispatched" for r in rows))
 
     def test_false_work_exhaustion_claim_is_a_debugger_error(self):
         record = self.outer_abstention_record('["still-live"]', "loop-stop")

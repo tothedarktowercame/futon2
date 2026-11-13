@@ -7,8 +7,10 @@ Serving activation of the verifier itself is a separate reviewed operation.
 """
 import argparse
 import json
+import os
 import re
 import sys
+from pathlib import Path
 
 import wm_click_repair_loop as reload
 
@@ -37,6 +39,24 @@ def declaration():
 def idle():
     if reload.get_json("/api/alpha/wm/click").get("running?") is not False:
         raise PreparationRefused("click-running-or-status-unavailable")
+
+
+def ensure_flight_ledger():
+    """Establish the authoritative empty Prefix-F ledger before selection.
+
+    A missing directory means history is unknown; an existing empty directory
+    is the censusable statement that no flights have yet been recorded.
+    Resolve the same mutable-data authority as futon2.data-paths.
+    """
+    data_root = (os.environ.get("FUTON2_DATA_ROOT")
+                 or (str(Path(os.environ["FUTON_WM_CODE_ROOT"]) / "futon2" / "data")
+                     if os.environ.get("FUTON_WM_CODE_ROOT") else None)
+                 or "/home/joe/code/futon2/data")
+    ledger = Path(data_root) / "wm-interpretations" / "flights"
+    if ledger.exists() and not ledger.is_dir():
+        raise PreparationRefused(f"flight-ledger-not-directory: {ledger}")
+    ledger.mkdir(parents=True, exist_ok=True)
+    return {"status": "present", "path": str(ledger)}
 
 
 def clean(files):
@@ -75,6 +95,7 @@ def prepare(dry_run=False):
     if dry_run:
         return {"status": "not-prepared", "reason": "dry-run"}
     idle()
+    flight_ledger = ensure_flight_ledger()
     names, inventory = declaration()
     namespace_closures = {name: set(reload.dependency_closure([inventory[name]]))
                           for name in names}
@@ -118,6 +139,7 @@ def prepare(dry_run=False):
     return {"status": "current" if all(row["status"] == "current" for row in after.values())
             else "prepared",
             "namespaces": after, "reloaded": reloaded,
+            "flight-ledger": flight_ledger,
             "skipped-dirty": [str(path) for path in sorted(dirty)]}
 
 

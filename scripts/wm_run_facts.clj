@@ -1098,10 +1098,28 @@
      "constructorPatternCount" (count (:pool c))
      "libraryPatternCount" (:count library)
      "constructedCascades" ids "comparedPolicies" score-ids
+     ;; Q12 (G over cascades, Joe 2026-11-13): every constructed selection
+     ;; cascade's pick, fired task-selection patterns and G. A record scored
+     ;; pick-only carries no fired patterns, so Q12 is unverifiable there.
+     "cascadeComposition"
+     (let [cs (:cascades selection)
+           rows (mapv (fn [c] (when (and (contains? c :fired-patterns) (exact-g (:G c)))
+                                {"cascade" (str (:id c)) "pick" (str (:pick c))
+                                 "fired" (sorted-ids (:fired-patterns c)) "g" (exact-g (:G c))}))
+                      cs)]
+       (if (and (seq cs) (every? some? rows))
+         (vec (sort-by #(get % "cascade") rows))
+         (not-recomputable "selection cascades lack recorded fired patterns (pick-only scoring)")))
      "classMembers" (mapv #(hash-map "class" (:id %) "members" (mapv str (:members %))) classes)
      "cascadesWithoutG" (sorted-ids (map policy-id (remove #(exact-g (:G %)) scored)))
      "policyG" (rows-or-nr g-rows "constructed cascade missing finite G")
      "policyPrediction" (rows-or-nr prediction-rows "constructed cascade missing prediction")
+     ;; Q11: the parameter posterior each compared class predicts.  A record
+     ;; scored pick-only carries none: [] (Lean reads 0 for every policy).
+     "policyParameters" (if (and classes (every? :parameters-digest scored))
+                          (vec (sort-by #(get % "policy")
+                                        (map #(hash-map "policy" (policy-id %) "digest" (:parameters-digest %)) scored)))
+                          [])
      "abstentionG" (or (exact-g (get-in selection [:abstention :G]))
                         (not-recomputable "abstention G unavailable"))
      "abstentionPrediction" (if-let [prediction (seq (get-in selection [:abstention :prediction]))]

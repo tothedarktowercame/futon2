@@ -40,7 +40,10 @@
   no purpose. A ticket with no source want falls back to its selected cascade."
   [code-root target path text]
   (when (want-contract-target? {:target target})
-    (let [source (wants/mission-source code-root {:id target :path path :text text})]
+    (let [entry {:id target :path path :text text :status-class :live}
+          source (if (ticket? {:target target})
+                   (wants/ticket-source code-root entry)
+                   (wants/mission-source code-root entry))]
       (if (seq (:want source))
         {:want (vec (:want source))
          :observation-locators (into {} (map (fn [[token locator]]

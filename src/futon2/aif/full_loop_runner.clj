@@ -182,7 +182,16 @@
 (def default-author-infrastructure-retries 1)
 (def default-revision-rounds 1)
 (def ^:private historical-verification-completion-token (Object.))
-(def readiness-wake-timeout-ms 30000)
+(def readiness-wake-timeout-ms
+  "Safety bound for completing a fresh-session wake; it is not evidence of
+  unavailability before the whistle operation itself has finished."
+  (* 3 60 1000))
+(def readiness-wake-poll-attempts
+  "Bounded re-polls of the roster after a wake whistle. The whistle itself
+  invokes the seat, so an immediate recheck can read the runner's own
+  ping as :busy; only a busy seat gets more attempts."
+  3)
+(def readiness-wake-poll-delay-ms 1000)
 (def substrate-retry-delay-ms 5000)
 (def strategic-selection-retry-delay-ms 5000)
 
@@ -1886,7 +1895,16 @@
   dispatch. This packet only retains the plan; the singular artifact gate is
   deliberately unchanged."
   [opts code-state entry locators]
-  (let [known (->> (:repo-heads code-state) keys (filter string?) sort vec)
+  (let [serving-repository
+        (fn [repo]
+          (let [sibling (io/file data-paths/production-code-root
+                                 (.getName (io/file repo)))]
+            (if (and (.isDirectory sibling)
+                     (.isDirectory (io/file sibling ".git")))
+              (.getCanonicalPath sibling)
+              repo)))
+        known (->> (:repo-heads code-state) keys (filter string?)
+                   (map serving-repository) distinct sort vec)
         by-name (group-by #(-> % io/file .getName) known)
         resolve-locator-repo
         (fn [repo]
@@ -2054,24 +2072,46 @@
            (catch Throwable _ {:ok true :raw (:body r)})))))
 
 (defn- wake-restored-agent!
-  "Wake `agent` only when its observed status is restored, then re-read roster."
+  "Wake `agent` only when its observed status is restored, then re-read roster.
+
+  A whistle invokes the seat, so the first refreshed roster can read the
+  runner's own ping as :busy. While the seat stays invoking, re-poll the
+  roster a bounded number of times before declaring :no-reply; a seat that
+  is restored or unreachable after the whistle is judged immediately."
   [opts roster agent]
   (if-not (restored? roster agent)
     {:roster roster
      :readiness/wake-attempted false
      :readiness/wake-result :not-needed}
-    (do
-      (try
-        ((or (:wake-agent-fn opts) wake-agent!) opts agent)
-        (catch Throwable _ nil))
-      (let [refreshed (try
+    (let [wake-receipt (try
+                         ((or (:wake-agent-fn opts) wake-agent!) opts agent)
+                         (catch Throwable e
+                           {:status :wake-threw
+                            :error-class (.getName (class e))
+                            :error (.getMessage e)}))
+          sleep-fn (or (:readiness-wake-sleep-fn opts) #(Thread/sleep %))
+            refresh (fn [fallback]
+                      (try
                         ((or (:roster-fn opts) agent-roster) (:agency-base opts))
-                        (catch Throwable _ roster))]
-        {:roster refreshed
-         :readiness/wake-attempted true
-         :readiness/wake-result (if (available? refreshed agent)
-                                  :woken
-                                  :no-reply)}))))
+                        (catch Throwable _ fallback)))
+            settle (fn settle [roster' attempts]
+                     (if (available? roster' agent)
+                       {:roster roster'
+                        :readiness/wake-attempted true
+                        :readiness/wake-result :woken
+                        :readiness/wake-receipt wake-receipt}
+                       (if (and (pos? attempts)
+                                (= "invoking"
+                                   (some-> (agent-record roster' agent)
+                                           :status name)))
+                         (do
+                           (sleep-fn readiness-wake-poll-delay-ms)
+                           (settle (refresh roster') (dec attempts)))
+                         {:roster roster'
+                          :readiness/wake-attempted true
+                          :readiness/wake-result :no-reply
+                          :readiness/wake-receipt wake-receipt})))]
+      (settle (refresh roster) readiness-wake-poll-attempts))))
 
 (defn agent-readiness!
   "Observe one required agent and attempt one wake when it is restored."
@@ -2097,11 +2137,13 @@
                        (select-keys result
                                     [:readiness/wake-attempted
                                      :readiness/wake-result
+                                     :readiness/wake-receipt
                                      :readiness/substrate-transient])))))
     result))
 
 (defn- readiness-event [result]
   (select-keys result [:readiness/wake-attempted :readiness/wake-result
+                       :readiness/wake-receipt
                        :readiness/substrate-transient]))
 
 (defn readiness
@@ -3104,7 +3146,7 @@
     (if (not= :interpretation-owed-after-selection (:status status))
       {:judgement judgement :record nil}
       (let [library-root (or (:pattern-library-root opts)
-                             selected-reading/default-library-root)
+                             (selected-reading/default-library-root))
             request (selected-reading/request decision {:library-root library-root})
             ask (or (:selected-reading-ask-fn opts)
                     (when-let [builder (:selected-reading-ask-builder opts)]
@@ -3327,11 +3369,13 @@
   ([judgement] (selected-entry judgement nil))
   ([judgement outer-selection]
   (let [decision (:decision judgement)
-        outer-pin (when outer-selection
+        direct-task? (= :direct-task-entry (:reason outer-selection))
+        enacted-outer? (and outer-selection (not direct-task?))
+        outer-pin (when enacted-outer?
                     (outer-select/validate-enactment-pin! outer-selection))
         retain-outer (fn [entry]
                        (cond-> entry
-                         outer-selection
+                         enacted-outer?
                          (assoc :outer-enactment outer-pin
                                 :outer-enactment-sha (identity/digest outer-pin)
                                 :outer-enactment-required? true)))]
@@ -4682,11 +4726,24 @@
          "):\n"
          "DIRECTORY: " evidence-dir "\n"
          "Use flat one-form EDN files only; create no subdirectories. Files are the records; do not echo them in your reply.\n"
+         "Only the schemas named below are accepted as EDN records. Do not invent a run-record, summary, report, or other schema: "
+         "retain command output as stdout/stderr companion bytes referenced by a :wm/limb-receipt-v1.\n"
          (case role
            :author
            (str "AUTHOR " author " may deposit one actual-command receipt per discharged limb:\n"
-                ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at].\n"
+                ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at]. "
+                "Those eight keys are required; only :stdout-file and :stderr-file are optional. No other keys are accepted. "
+                ":limb MUST be a keyword naming the checked limb (for example :ticket-acceptance-check), not a pattern id, occurrence vector, or prose.\n"
+                "Put checkout SHA, parsed counts, and other command facts in the retained stdout companion, not as extra receipt keys.\n"
                 "Write stdout/stderr bytes to flat companion files and reference them with :stdout-file/:stderr-file.\n"
+                ;; Ladder 02 (wm-click on run 2026-11-12, attempt-002): an approved,
+                ;; working implementation refused at close because its receipt named
+                ;; :stdout-file but not :stderr-file, leaving an empty .stderr.txt to
+                ;; be parsed as EDN. deposit-preflight runs the real admission seam
+                ;; and flags exactly that file; nothing asked the author to run it.
+                "Before replying, check the deposit with the machine's own admission seam: in the futon2 checkout run "
+                "`clojure -M -m futon2.aif.deposit-preflight " evidence-dir " <the :repair/id in your receipt>`. "
+                "It must exit 0. If it prints :WOULD-REFUSE, fix the file marked :culprit? true and run it again.\n"
                 "For a repair target, capture its immutable ORIGINAL obligation record bytes under data/wm-repair-obligations/ as :before and the DERIVED-STATE readback record as :after (repair-derived-state output bytes; still :open is honest, but capture the readback record, never a second copy of the finding -- identical before/after bytes refuse :revision-unchanged, which orphaned cohort-54 attempt-001).\n"
                 "Name that :wm/entity-revision-pair-v1 file subject-*.edn and set :entity/id to the exact selected repair id.\n"
                 "Source-file revision pairs are supporting evidence: name them supporting-*.edn and use the source artifact id. Both roles use keys [:schema :entity/id :before :after :dimensions].\n"
@@ -7852,7 +7909,12 @@
        ;; A typed pre-dispatch refusal from a saturated clock store, with the
        ;; dispatch explicitly not created, is a precondition hold rather than
        ;; a fault in the machine's code.
-       :clock/store-busy}
+       :clock/store-busy
+       ;; wm-click-loop-repair-25b11814: a pinned execution cohort whose data
+       ;; root was never activated is the same class of operator/server
+       ;; precondition as an unpreregistered trigger -- activate the cohort;
+       ;; no code repair discharges it.
+       :cohort-not-activated}
      failure-kind)
     :environmental-hold
 
@@ -11640,7 +11702,11 @@
                                 :declaration-reads/state (atom nil)
                                 :habit-reads/state (atom [])
                                 :job-liveness/state (atom [])
-                                :registered-run/job-ledger (atom {:order [] :jobs {}})
+                                ;; Reuse a ledger minted before outer selection,
+                                ;; whose reader job belongs to this click.
+                                :registered-run/job-ledger
+                                (or (:registered-run/job-ledger raw-opts)
+                                    (atom {:order [] :jobs {}}))
                                 :scan-report/state (atom nil)
                                 :preference-refresh/state (atom nil)
                                 :outer-repeat-comparison/state (atom nil)
