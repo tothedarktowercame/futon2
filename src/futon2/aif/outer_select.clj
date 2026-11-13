@@ -283,18 +283,27 @@
       (.setScale 6 java.math.RoundingMode/HALF_EVEN)
       (.movePointRight 6) .longValueExact))
 
+(defn parameters-digest
+  "Digest of the parameter posterior a cascade predicts (Requirements Q11), or nil
+  for a record scored pick-only, which carries none."
+  [cascade]
+  (when (contains? (:prediction cascade) :parameters)
+    (identity/digest (get-in cascade [:prediction :parameters]))))
+
 (defn prediction-classes
   "Prediction outcomes (canonical digest) and quantized G identify one policy.
   Preserve menu order only to choose an arrangement within that policy."
   [cascades]
-  (let [key-of #(vector (identity/digest (get-in % [:prediction :outcomes])) (g-units (:G %)))
+  (let [key-of #(vector (identity/digest (get-in % [:prediction :outcomes])) (g-units (:G %))
+                        (parameters-digest %))
         groups (group-by key-of cascades)]
     (mapv (fn [k]
             (let [members (get groups k) representative (first members)]
               (assert (every? #(= (second k) (g-units (:G %))) members))
               (merge (select-keys representative [:pick :G :terms :prediction :relation-basis])
-                     {:id (identity/sha256 (pr-str k)) :prediction-digest (first k)
-                      :g-units (second k) :members (mapv :id members)
+                     {:id (identity/sha256 (pr-str (if (nth k 2) k (subvec k 0 2))))
+                      :prediction-digest (first k) :g-units (second k)
+                      :parameters-digest (nth k 2) :members (mapv :id members)
                       :representative (:id representative)})))
           (distinct (map key-of cascades)))))
 
@@ -463,8 +472,14 @@
                           (assoc record :pick-only-terms (:terms record) :G :inadmissible
                                  :g-law :selection-cascade-grain-g
                                  :canonical-refusal (or (:refusal e) (:refusal canonical)))))
-          cascades (mapv #(assoc (canonical-g % (get-in canonical [:by-id (:id %)]))
-                                 :fired-patterns (get-in canonical [:fired (:id %)] []))
+          ;; Requirements Q11: a cascade predicts outcomes AND the posterior of
+          ;; the patterns it fires; the novelty term of its G is information
+          ;; gain about exactly those parameters.
+          cascades (mapv #(let [fired (get-in canonical [:fired (:id %)] [])]
+                            (-> (canonical-g % (get-in canonical [:by-id (:id %)]))
+                                (assoc :fired-patterns fired)
+                                (assoc-in [:prediction :parameters]
+                                          (selection-g/predicted-parameters fired))))
                          cascades)
           scores (mapv :G cascades)
           abstention (assoc (canonical-g (outer-score/abstention-score score-input) (:stopping canonical))

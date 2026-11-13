@@ -424,6 +424,12 @@
     (is (= (:stopping-equivalent r) (get-in export [:diagnostics :stoppingEquivalent])))
     (is (= (get-in r [:abstention :terms]) (get-in export [:diagnostics :abstentionTerms :terms])))
     (is (.startsWith (checker/evidence f :q11) ".known"))
+    (testing "Q11 reads each compared class's predicted parameter posterior"
+      (is (every? #(contains? (:prediction %) :parameters) (:cascades r)))
+      (is (= (mapv (fn [c] {"policy" (:id c) "digest" (:parameters-digest c)}) (:classes r))
+             (f "policyParameters")))
+      (is (every? #(string? (get % "digest")) (f "policyParameters")))
+      (is (re-find #"policyParameters := \[\(" (checker/evidence f :q11))))
     (is (= 2 (count (get-in old [:facts "constructedCascades"])))
         "Historical projection uses all retained arrangement classes")))
 

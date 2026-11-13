@@ -67,3 +67,17 @@
         "no cone, no unblocks on T-08: prepare-the-ground and what-others-wait-on-first cannot fire")
     (is (= ["only-what-can-start-now" "serves-a-way"] (fired :serves-a-way)))
     (is (= [] (fired :futon2.aif.selection-canonical-g/stopping)))))
+
+(deftest predicted-parameters-are-per-pattern-for-requirements-q11
+  (let [es [{:id :only-what-can-start-now :patterns only :pick "T-08" :relation-class :useful-elsewhere}
+            {:id :serves-a-way :patterns serves :pick "T-09" :relation-class :useful-elsewhere}]
+        fired (:fired (sg/score es facts))
+        p #(sg/predicted-parameters (fired %))]
+    (testing "the Lucy 08/09 pair: one outcome class, different parameters"
+      (is (= {"only-what-can-start-now" [2 1]} (p :only-what-can-start-now)))
+      (is (= {"only-what-can-start-now" [2 1] "serves-a-way" [2 1]} (p :serves-a-way))))
+    (testing "the click-12 facade: different picks, same patterns, same posterior"
+      (is (= (sg/predicted-parameters ["only-what-can-start-now"])
+             (p :only-what-can-start-now))))
+    (is (= {} (sg/predicted-parameters [])) "the empty policy predicts no change")))
+

@@ -287,13 +287,14 @@
                               (if-let [path (facts "selectionPath")]
                                 (selection-path-term path)
                                 "none")))
-        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s, previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d, refusalHistory := %s"
+        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, policyParameters := %s, abstentionPrediction := %s, previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d, refusalHistory := %s"
                                (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
                                (decision (facts "currentChoice"))
                                (target-construction (facts "targetConstruction"))
                                (fs (facts "comparedPolicies")) (fs (facts "constructedCascades"))
                                (policy-g (facts "policyG")) (rational-term (facts "abstentionG"))
                                (policy-prediction (facts "policyPrediction"))
+                               (policy-prediction (or (facts "policyParameters") []))
                                (digest-term (facts "abstentionPrediction"))
                                (previous-decision (facts "previousChoice"))
                                (outcomes (facts "previousOutcome"))

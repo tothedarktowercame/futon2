@@ -112,6 +112,16 @@
           (vec (sort (keep #(when-not (= stop-unit %) (str (first %))) fired)))
           (recur (into s (mapcat #(:produces (patterns %)) frontier)) (inc t) (into fired frontier)))))))
 
+(defn predicted-parameters
+  "The parameter posterior a cascade predicts (Requirements Q11): each task-selection
+  pattern it fires, from the Beta(1,1) prior the scorer's novelty term uses, after
+  one success at theta 1, i.e. [2 1].  Keyed by pattern, not by pattern and task:
+  the parameter is the pattern's reliability, so two picks under the same patterns
+  predict the same posterior (the click-12 facade stays visible to Q11).  The
+  empty policy predicts no change: {}."
+  [fired]
+  (into (sorted-map) (map #(vector (str %) [2 1])) fired))
+
 (defn score
   "Canonical G for every menu cascade and for stopping.
   ENTRIES: [{:id :patterns :pick :relation-class}]; FACTS: target -> fact map.
