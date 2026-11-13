@@ -270,7 +270,9 @@
   (let [observation (assoc base-observation :relation (fn [_ _] :focus)
                            :facts {"M-ready" {:status :ready :unblocks 0 :cone 0}
                                    "M-unknown" {:status :ready :unblocks 0 :cone 0}})
-        makeup {:cascades [{:id :a :patterns ["test"] :steps [:ready-gate]}
+        ;; One task per cascade: a ready-gate over both ready tasks would add the
+        ;; chain M-ready then M-unknown, a third policy below the tie.
+        makeup {:cascades [{:id :a :patterns ["test"] :steps [{:gate #(= "M-ready" (:target %))}]}
                            {:id :b :patterns ["test"] :steps [{:gate #(= "M-unknown" (:target %))}]}]}
         original outer-score/score-model
         counter (atom 0)
@@ -479,3 +481,28 @@
       (is (= :selection-cascade-grain-g (:g-law rep)))
       (is (< (Math/abs (- (+ (- (+ risk ambiguity) novelty) (or altitude 0))
                           (:G (by-id (:pick c))))) 1.0e-9)))))
+
+(deftest two-ready-tasks-give-a-chain-in-giraffe-order
+  ;; Lucy 2026-11-13 clicks 2-3 abstained :insufficient-comparison on ladder 08
+  ;; and 10. The field arrives with the lower-ranked task first; Giraffe's rank
+  ;; puts T-08 first, and the chain T-08 then T-10 is the second policy.
+  (let [makeup {:cascades [{:id :start :patterns ["only-what-can-start-now"] :steps [:ready-gate]}
+                           {:id :discover :patterns ["find-out-before-building"]
+                            :steps [{:gate-status :undetermined}]}]}
+        obs {:focus "M-focus"
+             :relation (fn [_ _] :associated)
+             :field [{:target "T-10" :reach 1/2 :reach-source :default-reach}
+                     {:target "T-08" :reach 1/2 :reach-source :default-reach}]
+             :facts {"T-08" {:status :ready :unblocks 0 :cone 0 :rank 1}
+                     "T-10" {:status :ready :unblocks 0 :cone 0 :rank 3}}}
+        r (outer-select/select makeup base-state obs)
+        by-id (into {} (map (juxt :id identity)) (:cascades r))]
+    (is (= ["T-08" "T-10"] (get-in by-id [:start--chain-2 :chain :picks])))
+    (is (= "T-08" (get-in by-id [:start :pick]) (get-in by-id [:start--chain-2 :pick])))
+    (is (= 2 (count (:classes r))) "the chain and its first pick are two policies")
+    (is (= {:status :chosen} (:outcome r)))
+    (is (= :start--chain-2 (:cascade-id r)))
+    (is (= "T-08" (get-in r [:selection :selected :target])))
+    (is (not= (get-in by-id [:start :prediction :parameters])
+              (get-in by-id [:start--chain-2 :prediction :parameters])))))
+

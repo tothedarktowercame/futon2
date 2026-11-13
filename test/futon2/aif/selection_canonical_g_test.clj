@@ -81,3 +81,38 @@
              (p :only-what-can-start-now))))
     (is (= {} (sg/predicted-parameters [])) "the empty policy predicts no change")))
 
+;; Lucy 2026-11-13, clicks 2-3: with ladder 09 closed the field was 08 and 10,
+;; every pick-making cascade picked 08 and one class was compared.  A chain
+;; (Joe: "it might select 8 first b/c it anticipates selecting 10 next") is a
+;; second policy with the same first pick.
+(def facts-08-10
+  {"T-08" {:status "ready" :unblocks 0 :cone 0 :prerequisites [] :rank 1
+           :placement {:status "open" :action "work" :ways []}}
+   "T-10" {:status "ready" :unblocks 0 :cone 0 :prerequisites [] :rank 3
+           :placement {:status "open" :action "work" :ways []}}})
+
+(deftest chain-anticipating-the-next-pick-is-a-distinct-lower-g-policy
+  (let [es [{:id :alone :patterns only :pick "T-08" :relation-class :useful-elsewhere}
+            {:id :chain :patterns only :pick "T-08" :picks ["T-08" "T-10"]
+             :relation-class :useful-elsewhere}]
+        r (sg/score es facts-08-10)
+        G #(get-in r [:by-id % :G-cascade])]
+    (is (nil? (:refusal r)))
+    (is (< (G :chain) (G :alone) (get-in r [:stopping :G-cascade]))
+        "novelty-only ranking: the chain's second pick fires one more unit")
+    (is (= [["only-what-can-start-now" "T-08"] ["only-what-can-start-now" "T-10"]]
+           (get-in r [:fired-units :chain])))
+    (is (= {"only-what-can-start-now" [3 1]}
+           (sg/predicted-parameters (map first (get-in r [:fired-units :chain])))))
+    (is (= {"only-what-can-start-now" [2 1]}
+           (sg/predicted-parameters (map first (get-in r [:fired-units :alone])))))))
+
+(deftest chain-later-pick-waits-for-the-earlier-pick
+  (testing "find-out-before-building never produces can-begin, so a chain under it
+            fires only on its first pick"
+    (let [facts {"T-a" {:status "undetermined" :unblocks 0 :cone 0 :prerequisites []}
+                 "T-b" {:status "undetermined" :unblocks 0 :cone 0 :prerequisites []}}
+          r (sg/score [{:id :c :patterns ["find-out-before-building"] :pick "T-a"
+                        :picks ["T-a" "T-b"] :relation-class :useful-elsewhere}] facts)]
+      (is (= [["find-out-before-building" "T-a"]] (get-in r [:fired-units :c]))))))
+

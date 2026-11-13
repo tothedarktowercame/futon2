@@ -390,6 +390,41 @@
        (str (System/getProperty "user.home")
             "/code/futon3/library/task-selection"))))
 
+(def max-chain-depth
+  "Longest chain prefix built from one cascade's ordered field (bounds the
+  policy space; the scorer's horizon cap is 10 epochs)."
+  3)
+
+(defn giraffe-ordered
+  "The admitted field in Giraffe rank order (Joe, 2026-11-13: Giraffe, JIRA plus
+  AIF, weighs in as an outer-outer loop).  Every cascade's own steps are stable
+  sorts and gates, so rank decides only among what a cascade leaves tied.  A task
+  without a rank keeps its place after the ranked ones."
+  [facts field]
+  (vec (sort-by #(let [r (:rank (value-of facts (:target %)))]
+                   (if (nat-int? r) [0 r] [1 0]))
+                field)))
+
+(defn chain-variants
+  "Semilattice cascades over the ordered field (Joe, 2026-11-13: a cascade \"might
+  select 8 first b/c it anticipates selecting 10 next\"): for each menu cascade
+  with recorded steps that leave an ordered field of two or more tasks, the chain prefixes of
+  depth 2 .. max-chain-depth.  A chain enacts its first pick; its later picks'
+  patterns fire once that pick can begin (selection-canonical-g/candidate).
+  Ranking among depths is by novelty alone for now (Joe: accepted)."
+  [menu facts field]
+  (vec (for [c menu
+             ;; Function steps (the unit seam) give no recorded order to chain
+             ;; over, and are applied exactly once by contract.
+             :when (not-any? #(and (map? %) (or (contains? % :gate) (contains? % :order)))
+                             (:steps c))
+             :let [order (try (mapv :target (outer-score/apply-selection-cascade (:steps c) facts field))
+                              (catch clojure.lang.ExceptionInfo _ []))]
+             k (range 2 (inc (min max-chain-depth (count order))))]
+         (assoc c :id (keyword (str (name (:id c)) "--chain-" k))
+                :chain {:base (:id c) :depth k :picks (subvec order 0 k)}
+                :digest (identity/sha256 (pr-str [(:digest c) :chain k]))))))
+
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection."
@@ -414,7 +449,12 @@
       (when-not (= (set (keys (:admitted field-facts)))
                    (set (map :target (:field observation))))
         (refuse! :task-field-facts-mismatch {})))
-    (let [observation (assoc observation :field (:field partition))]
+    (let [observation (assoc observation :field (giraffe-ordered (:facts observation) (:field partition)))
+          variants (chain-variants menu (:facts observation) (:field observation))
+          menu (into menu variants)
+          construction (cond-> construction
+                         (contains? construction :enactment-modes)
+                         (update :enactment-modes into (map (juxt :id :enactment-mode)) variants))]
     (when (empty? (:field partition))
       (refuse! :outer-score/no-admitted-tasks
                {:field-facts field-facts :outer-score/admitted []
@@ -455,9 +495,12 @@
           ;; same scorer the work run uses, and stopping is the empty policy on that
           ;; scale. The pick-only outer-score G stays only as :pick-only-terms.
           canonical (selection-g/score
-                     (mapv (fn [c] {:id (:id c) :patterns (:patterns c) :pick (:pick c)
-                                    :relation-class (get-in c [:relation :class])}) cascades)
-                     (into {} (for [c cascades :let [t (:pick c)]
+                     (mapv (fn [c] (cond-> {:id (:id c) :patterns (:patterns c) :pick (:pick c)
+                                            :relation-class (get-in c [:relation :class])}
+                                     (:chain c) (assoc :picks (get-in c [:chain :picks]))))
+                           cascades)
+                     (into {} (for [c cascades
+                                    t (or (get-in c [:chain :picks]) [(:pick c)])
                                     :when (and t (not= :no-pick t))]
                                 [t (value-of (:facts observation) t)]))
                      (merge selection-g/interpretations
@@ -479,7 +522,8 @@
                             (-> (canonical-g % (get-in canonical [:by-id (:id %)]))
                                 (assoc :fired-patterns fired)
                                 (assoc-in [:prediction :parameters]
-                                          (selection-g/predicted-parameters fired))))
+                                          (selection-g/predicted-parameters
+                                           (map first (get-in canonical [:fired-units (:id %)]))))))
                          cascades)
           scores (mapv :G cascades)
           abstention (assoc (canonical-g (outer-score/abstention-score score-input) (:stopping canonical))
