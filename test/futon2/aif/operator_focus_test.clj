@@ -51,8 +51,24 @@
   (testing "unmapped seats with no clock abstain and never create a default"
     (let [v (focus/focus-vote [(turn "x" "a" "2026-11-03T12:00:00Z" "hello")]
                               areas {:as-of as-of})]
-      (is (= :no-recent-operator-turns (get-in v [:result :reason])))
+      (is (= :all-seats-abstained (get-in v [:result :reason])))
       (is (= :both-halves-abstained (get-in v [:abstentions 0 :reason])))))
+  (testing "planted regression wm-click-loop-repair-b1a9839d: turns read but reader reply unparseable is not 'no recent operator turns'"
+    (let [turns (mapv (fn [i] (turn (str "e" i) "claude-4"
+                                    (format "2026-11-12T23:%02d:00.000Z" (- 47 i)) "work"))
+                      (range 5))
+          v (focus/focus-vote turns areas
+                              {:as-of "2026-11-13T02:28:18Z"
+                               :text-answers {"claude-4" {:status :abstained
+                                                          :reason :reader-invalid-json}}})]
+      (is (= :all-seats-abstained (get-in v [:result :reason])))
+      (is (not= :no-recent-operator-turns (get-in v [:result :reason])))
+      (is (= ["claude-4"] (:seats v)))
+      (is (= :reader-invalid-json (get-in v [:seat-votes 0 :text-half :reason])))))
+  (testing "a genuinely quiet window keeps the no-recent-operator-turns reason"
+    (let [v (focus/focus-vote [(turn "old" "a" "2026-10-26T00:00:00Z" "hello")]
+                              areas {:as-of as-of})]
+      (is (= :no-recent-operator-turns (get-in v [:result :reason])))))
   (testing "a recent clock and contrary text each cast half"
     (let [v (focus/focus-vote
              [(assoc (turn "x" "a" "2026-11-03T12:00:00Z" "please work on M-giraffe")

@@ -146,7 +146,12 @@
                          (reduce-kv #(update %1 %2 (fnil + 0) %3) m (or votes {})))
                        (sorted-map) seat-results)
         result (if (empty? totals)
-                 {:status :absent :reason :no-recent-operator-turns}
+                 (if (seq eligible)
+                   ;; Turns were read inside the window but every seat abstained
+                   ;; (e.g. an unparseable reader reply). Distinct from a truly
+                   ;; quiet window so held-run diagnosis names the real cause.
+                   {:status :absent :reason :all-seats-abstained}
+                   {:status :absent :reason :no-recent-operator-turns})
                  (let [ordered (sort-by (juxt (comp - double val) key) totals)
                        threshold (val (nth ordered (min 2 (dec (count ordered)))))
                        retained (take-while #(>= (val %) threshold) ordered)
