@@ -7,9 +7,9 @@
             [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.action-identity :as identity]
+            [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.substrate :as substrate])
   (:import [java.net URLEncoder]
            [java.time Duration Instant]))
@@ -319,36 +319,70 @@
   (let [m (edn/read-string (slurp path))]
     {:manifest m :result (:result m)}))
 
-(defn dispatch-reader! [sent {:keys [prompt-resource reader-seat caller kimi-script task-repo agency-base reader-timeout-ms clock-inputs a7-path code-root]
-                              :or {reader-seat "猴-1" caller "operator-focus"
-                                   agency-base "http://127.0.0.1:7070" reader-timeout-ms 600000}}]
+(def reader-contract
+  "The operator-focus reading as a War Machine handoff (handoff-contract), so its
+  reply is decoded and validated by the common boundary like every other handoff.
+  It was dispatched as a work-mode requisition bell (kimi-task.sh) and parsed by
+  hand; on Lucy, 2026-11-13, two seats answered correctly in prose while trying to
+  deliver by bell and IRC, the reply never parsed, focus was absent, and a click
+  stopped :outer-score/no-admitted-tasks (wm-click-3c5a5b02)."
+  (handoff/contract
+   {:id :wm/operator-focus-reading :version 1
+    :response {:answers [{:seat "receiving seat" :area "A7 area or other:<name>"
+                          :evidence_ids ["evidence ids of that seat's sent turns, verbatim"]}]
+               :clock_answers [{:target "clock target id" :area "A7 area" :line "cited line number"}]}
+    :validator {:id :operator-focus/check-reply :version 1}}))
+
+(defn reader-prompt
+  "The reader's prompt for one ISSUED request: the reader resource, the A7 area
+  authority, the inputs, the contract, and on a format-correction round the
+  parser's complaint. Brief mode: reply only, no tool use, no delivery."
+  [{:keys [prompt format-correction]}]
+  (str prompt
+       (when format-correction
+         (str "\n\nYour previous reply was not one JSON object ("
+              (:parser-error format-correction)
+              "). Reply with exactly one JSON object following the contract above, and nothing else."))))
+
+(defn dispatch-reader!
+  "Ask the reader seat through the handoff boundary. READER-CONTACT (from the
+  runtime: designated-agent-answer-fn, brief mode) receives the request; without
+  one the exchange is a typed :not-contacted. Returns the shape read-focus! reads."
+  [sent {:keys [prompt-resource reader-seat reader-contact clock-inputs a7-path code-root]
+         :or {reader-seat "猴-1"}}]
   (let [code-root (or code-root (System/getenv "FUTON_CODE_ROOT"))
         _ (when (str/blank? code-root) (throw (ex-info "FUTON_CODE_ROOT is required" {:reason :code-root-absent})))
-        kimi-script (or kimi-script (str code-root "/futon3c/scripts/kimi-task.sh"))
         a7-path (or a7-path (str code-root "/futon3c/holes/excursions/ant-prompts/A7-relate.md"))
         resource (slurp (io/resource prompt-resource))
         a7 (slurp a7-path)
-        f (java.io.File/createTempFile "operator-focus-" ".md")
         clipped (mapv #(update % :text (fn [s] (subs (str s) 0 (min 600 (count (str s)))))) sent)
-        _ (spit f (str resource "\n\nA7 AREA AUTHORITY (VERBATIM):\n" a7
-                       "\n\nINPUT TURNS (JSON):\n" (json/generate-string clipped)
-                       "\n\nCLOCK TARGETS (JSON):\n" (json/generate-string clock-inputs)))
-        r (shell/sh kimi-script "--from" caller "--to" reader-seat
-                    "--purpose" "read operator focus areas" (.getPath f)
-                    :env (assoc (into {} (System/getenv)) "KIMI_TASK_REPO" (or task-repo (System/getProperty "user.dir"))))
-        job (second (re-find #"job=(\S+)" (:out r)))]
-    (if-not (and (zero? (:exit r)) job)
-      {:status :absent :reason :reader-dispatch-failed :stderr (:err r)}
-      (loop [left reader-timeout-ms]
-        (let [response (http/get (str agency-base "/api/alpha/invoke/jobs/" job) {:timeout 10000 :throw false})
-              body (when (= 200 (:status response)) (json/parse-string (:body response) true))
-              j (or (:job body) body) state (or (:status j) (:state j)) raw (or (:result j) (:response j))]
-          (cond raw {:status :ok :job-id job :seat reader-seat :prompt-sha256 (identity/sha256 resource)
-                     :raw-reply raw :raw-reply-sha256 (identity/sha256 raw) :sent-turns clipped
-                     :area-authority-sha256 (identity/sha256 a7)}
-                (contains? #{"failed" "cancelled" :failed :cancelled} state) {:status :absent :reason :reader-job-failed :job-id job}
-                (<= left 0) {:status :absent :reason :reader-job-timeout :job-id job}
-                :else (do (Thread/sleep 2000) (recur (- left 2000)))))))))
+        prompt (str resource "\n\nA7 AREA AUTHORITY (VERBATIM):\n" a7
+                    "\n\nINPUT TURNS (JSON):\n" (json/generate-string clipped)
+                    "\n\nCLOCK TARGETS (JSON):\n" (json/generate-string clock-inputs)
+                    "\n\n" (handoff/prompt-block reader-contract))
+        request {:kind :operator-focus-reading :target "operator-focus" :prompt prompt}
+        base {:seat reader-seat :prompt-sha256 (identity/sha256 resource)
+              :area-authority-sha256 (identity/sha256 a7) :sent-turns clipped
+              :contract (select-keys reader-contract [:id :version])}
+        formatted (when (fn? reader-contact)
+                    (handoff/contact-with-format-correction
+                     {:contact reader-contact :request request :decode handoff/response-map}))
+        exchange (handoff/exchange
+                  {:contact (when formatted (constantly (:response formatted)))
+                   ;; exchange decodes the payload string (handoff/response-payload),
+                   ;; the correction round decodes the job envelope (response-map)
+                   :request request :decode handoff/response-json-object
+                   :validate (fn [m] (when-not (sequential? (:answers m))
+                                       (throw (ex-info "reply lacks answers" {:reply m})))
+                               m)})]
+    (if (= :validated (:status exchange))
+      (let [raw (json/generate-string (:value exchange))]
+        (assoc base :status :ok :job-id (:job-id exchange) :raw-reply raw
+               :raw-reply-sha256 (identity/sha256 raw)
+               :format-correction (:format-correction formatted)))
+      (assoc base :status :absent :reason :reader-handoff-refused
+             :handoff (dissoc exchange :raw-answer)
+             :format-correction (:format-correction formatted)))))
 
 (defn read-focus!
   "Read, vote, and retain exactly the authoritative turns read."

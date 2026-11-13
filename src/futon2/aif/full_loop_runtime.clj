@@ -12,6 +12,7 @@
             [clojure.string :as str]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.area-focus :as area-focus]
+            [futon2.aif.operator-focus :as operator-focus]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.effective-run-history :as effective-run-history]
@@ -1756,7 +1757,10 @@
               decision-as-of (or (:decision-as-of opts) (str (Instant/now)))
               area-corpus (area-focus/load-corpus)
               focus-pin (area-focus/acquire-focus!
-                         {:decision-as-of decision-as-of
+                         {:reader-contact (designated-agent-answer-fn
+                                           opts (or (:operator-focus/reader-seat opts) "猴-1")
+                                           operator-focus/reader-prompt "brief")
+                          :decision-as-of decision-as-of
                           :manifest-dir (or (:operator-focus/manifest-dir opts)
                                             (str (data-paths/path "wm-runs")))
                           :code-root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")

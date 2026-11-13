@@ -158,3 +158,43 @@
         r (focus/read-turns {:as-of as-of
                              :http-get (fn [_ _] {:status 200 :body body})})]
     (is (= ["kept"] (mapv :evidence-id (:turns r))))))
+
+;; The reader is a handoff (handoff-contract): the Lucy 2026-11-13 failure was a
+;; correct judgement in prose, "evidence_ids":[all five], which never parsed.
+(def ^:private lucy-prose-reply
+  (str "Answer delivered for E-kimi-task-437.\n\n**Result:** `{\"answers\":[{\"seat\":\"claude-4\","
+       "\"area\":\"futon5\",\"evidence_ids\":[all 5 emacs-* IDs]}],\"clock_answers\":[]}`"))
+
+(defn- reader-run [replies]
+  (let [left (atom replies) requests (atom [])
+        a7 (doto (java.io.File/createTempFile "a7-authority" ".md") (spit "A7"))
+        contact (fn [req] (swap! requests conj req)
+                  (let [r (first @left)] (swap! left rest)
+                    {:seat "猴-1" :job-id (str "job-" (count @requests)) :state "done" :text r}))]
+    [(focus/dispatch-reader!
+      [{:evidence-id "e1" :seat "claude-4" :text "MCA"}]
+      {:prompt-resource "wm/focus/operator-focus-reader-v1.md" :reader-contact contact
+       :a7-path (.getPath a7) :code-root "/tmp"})
+     @requests]))
+
+(deftest reader-reply-in-prose-gets-one-format-correction
+  (let [[r reqs] (reader-run [lucy-prose-reply
+                              "{\"answers\":[{\"seat\":\"claude-4\",\"area\":\"futon5\",\"evidence_ids\":[\"e1\"]}],\"clock_answers\":[]}"])]
+    (is (= :ok (:status r)))
+    (is (= 2 (count reqs)) "one correction round")
+    (is (:format-correction (second reqs)))
+    (is (re-find #"ACCEPTANCE CONTRACT" (focus/reader-prompt (first reqs))))
+    (is (re-find #"futon5" (:raw-reply r)))))
+
+(deftest reader-that-never-replies-json-is-a-typed-refusal
+  (let [[r _] (reader-run [lucy-prose-reply lucy-prose-reply])]
+    (is (= :absent (:status r)))
+    (is (= :reader-handoff-refused (:reason r)))
+    (is (= :response-invalid (get-in r [:handoff :reason])))))
+
+(deftest reader-without-contact-is-not-contacted
+  (let [a7 (doto (java.io.File/createTempFile "a7-authority" ".md") (spit "A7"))
+        r (focus/dispatch-reader! [] {:prompt-resource "wm/focus/operator-focus-reader-v1.md"
+                                               :a7-path (.getPath a7) :code-root "/tmp"})]
+    (is (= :absent (:status r)))
+    (is (= :not-contacted (get-in r [:handoff :status])))))
