@@ -1,5 +1,12 @@
 # WM ladder field policy
 
+**Closed 2026-11-13.** This was the field policy for the Lucy ladder experiment
+(`T-ladder-*`). The experiment is over: every ladder ticket is DONE or ABANDONED
+(WONTFIX), and the tickets were merged into zone's futon2 as a record. Zone's live
+tickets are not governed by this policy. Write-up:
+`holes/labs/H-wm-ladder-lucy-handoff-2026-11-13.md` and
+`holes/labs/L-wm-ladder-learnings-2026-11-13.md`.
+
 Authorized by Joe, 2026-11-11.
 
 The field advances by committed ticket status, one checkpoint per closed

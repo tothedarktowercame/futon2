@@ -1,6 +1,6 @@
 # Ladder 07: M3 wire with medium-swap control
 
-**Status:** SUPERSEDED — folded into T-ladder-08-memory-preregistration as its control arm (claude-4 review, Joe 2026-11-13)
+**Status:** ABANDONED (WONTFIX) — superseded: folded into T-ladder-08-memory-preregistration as its control arm (claude-4 review, Joe 2026-11-13)
 Parent: M-futonzero-prelim-practice
 
 Dependencies: T-ladder-05-settling-confinement and Joe's engine ruling from T-ladder-06-layout-premise.

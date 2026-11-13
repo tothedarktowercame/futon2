@@ -1,6 +1,6 @@
 # Ladder 08: M1 memory under fire preregistration
 
-**Status:** OPEN — PREREGISTRATION PRESENTED, AWAITING JOE'S SIGN-OFF (stopped before running; see data/wm-d-task-enactment/T-ladder-08-memory-preregistration/preregistration-memory-under-fire.edn)
+**Status:** ABANDONED (WONTFIX) — the Lucy ladder experiment closed with the preregistration presented and not run (see data/wm-d-task-enactment/T-ladder-08-memory-preregistration/preregistration-memory-under-fire.edn); Joe 2026-11-13
 Parent: M-futonzero-prelim-practice
 
 Dependencies: T-ladder-05-settling-confinement and Joe's engine ruling from T-ladder-06-layout-premise.

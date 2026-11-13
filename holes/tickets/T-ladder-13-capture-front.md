@@ -1,8 +1,7 @@
 # Ladder 13: the capture front
 
-**Status:** OPEN — DRAFT FOR REVIEW
+**Status:** ABANDONED (WONTFIX) — draft never reviewed; the Lucy ladder experiment closed (Joe 2026-11-13)
 Parent: M-futonzero-prelim-practice
-Gate: awaiting Joe and Fable review; do not select or execute.
 
 Proposed by reviewer claude-4 (2026-11-13). Under `genotype-step` with even8, the 77|90|178 layout of ladder 06 is captured: the 90 and 178 blocks dissolve within about 10-20 steps and by t = 80 the rule field is all 77. This is the one place in the ladder where the rule layer is alive.
 
