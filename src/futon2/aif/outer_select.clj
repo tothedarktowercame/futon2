@@ -6,7 +6,8 @@
             [futon2.aif.outer-argue :as outer-argue]
             [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-observation :as observation]
-            [futon2.aif.outer-score :as outer-score]))
+            [futon2.aif.outer-score :as outer-score]
+            [futon2.aif.selection-canonical-g :as selection-g]))
 
 (declare value-of)
 
@@ -440,8 +441,31 @@
           details (mapv #(outer-score/score-model score-input %) models)
           library (:library construction)
           cascades (mapv #(cascade-record observation %1 %2 %3) menu models details)
+          ;; G over cascades (Joe, 2026-11-13; Lean SelectionGOverCascades): each
+          ;; cascade's G is the canonical cascade G of its patterns on its pick, the
+          ;; same scorer the work run uses, and stopping is the empty policy on that
+          ;; scale. The pick-only outer-score G stays only as :pick-only-terms.
+          canonical (selection-g/score
+                     (mapv (fn [c] {:id (:id c) :patterns (:patterns c) :pick (:pick c)
+                                    :relation-class (get-in c [:relation :class])}) cascades)
+                     (into {} (for [c cascades :let [t (:pick c)]
+                                    :when (and t (not= :no-pick t))]
+                                [t (value-of (:facts observation) t)]))
+                     (merge selection-g/interpretations
+                            (:task-selection-interpretations makeup)))
+          canonical-terms (fn [e] (let [t (get-in e [:certificate :g-terms])]
+                                    {:risk (:risk t) :ambiguity (:ambiguity t)
+                                     :novelty (:expected-information-gain t)}))
+          canonical-g (fn [record e]
+                        (if (= :scored (:status e))
+                          (assoc record :pick-only-terms (:terms record) :terms (canonical-terms e)
+                                 :G (:G-cascade e) :g-law :selection-cascade-grain-g)
+                          (assoc record :pick-only-terms (:terms record) :G :inadmissible
+                                 :g-law :selection-cascade-grain-g
+                                 :canonical-refusal (or (:refusal e) (:refusal canonical)))))
+          cascades (mapv #(canonical-g % (get-in canonical [:by-id (:id %)])) cascades)
           scores (mapv :G cascades)
-          abstention (outer-score/abstention-score score-input)
+          abstention (canonical-g (outer-score/abstention-score score-input) (:stopping canonical))
           ratings (per-task-ratings score-input)
           legacy-relations (mapv (fn [c] {:target (:pick c) :relation (get-in c [:relation :class])
                                          :relation-known? (when-not (= :no-pick (:pick c))

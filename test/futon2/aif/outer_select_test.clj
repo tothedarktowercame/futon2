@@ -58,8 +58,10 @@
                           "Serves way-alpha, also way-beta (work)."))))
 
 (def base-makeup
-  {:cascades [{:id :first :patterns ["test"] :steps [{:gate-status :ready}]}
-              {:id :second :patterns ["test"] :steps [{:gate-status :undetermined}]}]})
+  ;; Real task-selection patterns for the two gate roles, so the canonical
+  ;; selection G interprets each by its own @guard / @predicts.
+  {:cascades [{:id :first :patterns ["only-what-can-start-now"] :steps [{:gate-status :ready}]}
+              {:id :second :patterns ["find-out-before-building"] :steps [{:gate-status :undetermined}]}]})
 (def base-state
   {:c {:focused 55 :related 35 :unrelated 5 :stop-the-line 5
        :not-yet-evaluated 0}
@@ -307,7 +309,11 @@
     (is (= (:cascade-scores r) (mapv :G (:cascades r))))
     (is (= (:cascade-picks r) (mapv :pick (:cascades r))))
     (is (= (:prediction r) (:prediction (nth (:cascades r) (:cascade-index r)))))
-    (is (= (:abstention r) (outer-score/abstention-score input)))
+    ;; G over cascades (Joe, 2026-11-13): stopping is the empty policy scored by
+    ;; the canonical cascade G; the pick-only abstention terms are retained.
+    (is (= :selection-cascade-grain-g (get-in r [:abstention :g-law])))
+    (is (= (:terms (outer-score/abstention-score input))
+           (get-in r [:abstention :pick-only-terms])))
     (is (< (nth (:cascade-scores r) (:cascade-index r)) (get-in r [:abstention :G])))
     (is (= :pinned (get-in r [:library :status])))))
 
@@ -458,5 +464,12 @@
            (dissoc (with-redefs [outer-select/per-task-ratings (constantly [])]
                      (outer-select/select base-makeup base-state base-observation))
                    :per-task-rating :top-ten)))
-    (doseq [c (:classes s)]
-      (is (< (Math/abs (- (:G c) (:G (by-id (:pick c))))) 1.0e-9)))))
+    ;; Ratings are pick-level and stay the pick-only G of each class's
+    ;; representative; the class G is the cascade-level canonical G and need not
+    ;; equal them (G over cascades, Joe 2026-11-13).
+    (doseq [c (:classes s)
+            :let [rep (first (filter #(= (:id %) (:representative c)) (:cascades s)))
+                  {:keys [risk ambiguity novelty altitude]} (:pick-only-terms rep)]]
+      (is (= :selection-cascade-grain-g (:g-law rep)))
+      (is (< (Math/abs (- (+ (- (+ risk ambiguity) novelty) (or altitude 0))
+                          (:G (by-id (:pick c))))) 1.0e-9)))))

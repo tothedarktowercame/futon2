@@ -2,7 +2,8 @@
   "Small-menu scoring fixtures only. Production library construction is tested
   without this redefinition in outer-menu-test and outer-menu-wiring-test."
   (:require [futon2.aif.outer-menu :as menu]
-            [futon2.aif.q2-construction :as q2]))
+            [futon2.aif.q2-construction :as q2]
+            [futon2.aif.selection-canonical-g :as selection-g]))
 
 (defn with-fixture-constructor [f]
   (with-redefs [menu/construct
@@ -21,4 +22,9 @@
                            (:cascades makeup))}
                       (:enactment-modes makeup)
                       (assoc :enactment-modes (:enactment-modes makeup)))))]
-    (f)))
+    ;; The fixture library's synthetic pattern "test" needs an interpretation for
+    ;; the canonical selection G (selection-canonical-g): read it like
+    ;; only-what-can-start-now, so a ready pick can begin.
+    (binding [selection-g/*extra-interpretations*
+              {"test" {:consumes #{:ready} :forbids #{} :produces #{:can-begin}}}]
+      (f))))
