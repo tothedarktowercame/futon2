@@ -180,10 +180,27 @@
                                                       {:status :synthetic :source "selection class route: pick class once can-begin holds (Joe 2026-11-13)"})]))
         schedule (into {} (for [tau (range 1 (inc h))]
                             [tau (if (= tau h) shape/terminal-class-preference {:ending/not-yet-evaluated 1})]))
+        fired-of (into {} (map (fn [c] [(:id c) (set (fired-units c state h))])) cands)
+        picks-by-id (into {} (map (juxt :id picks-of)) all)
+        ;; Parameters are per pattern (Requirements Q11): a pattern's unit on a
+        ;; chain's k-th pick starts from the posterior its firings on the
+        ;; earlier picks of the same chain leave, Beta(1 + n, 1), so a pattern
+        ;; repeated along a chain is less novel than a second, different
+        ;; pattern (Lucy 2026-11-13, wm-click-3e072695: serves-a-way on 09 and
+        ;; the chain 09 then 10 under only-what-can-start-now tied at
+        ;; Beta(1,1) per unit). A single-pick cascade keeps Beta(1,1).
+        counts-for (fn [c]
+                     (let [picks (picks-by-id (:id c)) fired (fired-of (:id c))
+                           index (zipmap picks (range))]
+                       (into {} (map (fn [[p t :as u]]
+                                       [u [(inc (count (filter #(and (= p (first %))
+                                                                     (< (get index (second %) -1)
+                                                                        (get index t -1)))
+                                                               fired)))
+                                           1]]))
+                             (get-in c [:precedence :co-apply :units]))))
         opts {:horizon-steps h
-              :pattern-counts (into {} (map (fn [c] [(:id c) (into {} (map #(vector % [1 1]))
-                                                                   (get-in c [:precedence :co-apply :units]))]))
-                                    cands)
+              :pattern-counts (into {} (map (fn [c] [(:id c) (counts-for c)])) cands)
               :observation-model-of (into {} (map model-for all))
               :authorized-class-preference schedule
               :require-ruled-class-kernel? true

@@ -116,3 +116,23 @@
                         :picks ["T-a" "T-b"] :relation-class :useful-elsewhere}] facts)]
       (is (= [["find-out-before-building" "T-a"]] (get-in r [:fired-units :c]))))))
 
+(deftest a-repeated-pattern-is-less-novel-than-a-second-pattern
+  ;; Lucy 2026-11-13, wm-click-3e072695 (field 09 and 10): serves-a-way on 09
+  ;; and the chain 09 then 10 under only-what-can-start-now each fired two
+  ;; units at Beta(1,1) and tied at the minimum.  Parameters are per pattern,
+  ;; so the chain's second only-what-can-start-now starts from Beta(2,1).
+  (let [facts {"T-09" {:status "ready" :unblocks 0 :cone 0 :prerequisites [] :rank 2
+                       :placement {:status "open" :action "work" :ways ["one-queryable-self-account"]}}
+               "T-10" {:status "ready" :unblocks 0 :cone 0 :prerequisites [] :rank 3
+                       :placement {:status "open" :action "work" :ways []}}}
+        es [{:id :way :patterns serves :pick "T-09" :relation-class :useful-elsewhere}
+            {:id :chain :patterns only :pick "T-09" :picks ["T-09" "T-10"]
+             :relation-class :useful-elsewhere}
+            {:id :alone :patterns only :pick "T-09" :relation-class :useful-elsewhere}]
+        r (sg/score es facts)
+        G #(get-in r [:by-id % :G-cascade])]
+    (is (nil? (:refusal r)))
+    (is (= 2 (count (get-in r [:fired-units :way]))) (= 2 (count (get-in r [:fired-units :chain]))))
+    (is (< (G :way) (G :chain) (G :alone))
+        "two patterns once each < one pattern twice < one pattern once")))
+
