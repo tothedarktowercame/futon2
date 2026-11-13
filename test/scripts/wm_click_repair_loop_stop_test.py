@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 import warnings
@@ -44,7 +45,22 @@ class SelfHealStopTest(unittest.TestCase):
         assert not any(isinstance(v, Path) and v.is_relative_to(canonical_state)
                        for v in vars(self.loop).values())
         self.loop.META_INJURY_ROOT = root / "injuries"
-        self.args = SimpleNamespace(
+        # A launch records a giraffe pin before its first click (WM hardening
+        # package 1), so run() needs a pinnable missions-field run.  Point
+        # GIRAFFE_ROOT at a minimal fixture under the temp tree: the tests must
+        # never read /home/joe/code/storage/giraffe, and a missing pin would
+        # stop every test typed as no-giraffe-pin before its clicks.
+        giraffe_run = root / "giraffe" / "20260101T000000.000Z-fixture"
+        giraffe_run.mkdir(parents=True)
+        (giraffe_run / "manifest.edn").write_text(
+            "{:invocation {:edges \"/fixture/holes/missions/edges.json\"\n"
+            "  :only-ids [\"T-fixture\"]}\n"
+            " :sources {:edges {:path \"/fixture/holes/missions/edges.json\"}}}\n")
+        giraffe_env = mock.patch.dict(os.environ,
+                                      {"GIRAFFE_ROOT": str(root / "giraffe")})
+        giraffe_env.start()
+        self.addCleanup(giraffe_env.stop)
+        self.args = SimpleNamespace(giraffe_run=None,
             clicks=2, ticks=99, stall=3, max_repairs=3,
             repair_seat="repair", continuous=True, observe_only=False,
             owner="owner", issuing_caller="caller", author="author",

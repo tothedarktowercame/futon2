@@ -887,6 +887,16 @@ class ContinuousModeTest(unittest.TestCase):
             chosen.write_text('{:selection-outcome {:status :chosen, :pick "M-x"}}')
             self.assertIsNone(loop.nothing_beats_stopping(str(chosen)))
             self.assertIsNone(loop.nothing_beats_stopping(None))
+            # run() records a giraffe pin before its first click (WM hardening
+            # package 1): give it a minimal missions-field run under the temp
+            # tree, never the real /home/joe/code/storage/giraffe.
+            giraffe = Path(td) / "giraffe"
+            fixture_run = giraffe / "20260101T000000.000Z-fixture"
+            fixture_run.mkdir(parents=True)
+            (fixture_run / "manifest.edn").write_text(
+                "{:invocation {:edges \"/fixture/holes/missions/edges.json\"\n"
+                "  :only-ids [\"T-fixture\"]}\n"
+                " :sources {:edges {:path \"/fixture/holes/missions/edges.json\"}}}\n")
             args = loop.parse_args([
                 "run", "--clicks", "3", "--continuous", "--owner", "claude-2",
                 "--issuing-caller", "claude-2", "--author", "wm-author",
@@ -907,6 +917,8 @@ class ContinuousModeTest(unittest.TestCase):
                  mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
                  mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
                  mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+                 mock.patch.object(loop, "GIRAFFE_PIN", Path(td) / "giraffe-pin.edn"), \
+                 mock.patch.dict(os.environ, {"GIRAFFE_ROOT": str(giraffe)}), \
                  mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
                  mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
                  mock.patch.object(loop, "fire", side_effect=fire), \
@@ -1461,6 +1473,17 @@ class ProviderUnavailableStopTest(unittest.TestCase):
                 "--issuing-caller", "claude-2", "--author", "wm-author",
                 "--reviewer", "wm-reviewer", "--repair-reviewer", "wm-repair-reviewer"])
 
+            # run() records a giraffe pin before its first click (WM hardening
+            # package 1): give it a minimal missions-field run under the temp
+            # tree, never the real /home/joe/code/storage/giraffe.
+            giraffe = Path(td) / "giraffe"
+            fixture_run = giraffe / "20260101T000000.000Z-fixture"
+            fixture_run.mkdir(parents=True)
+            (fixture_run / "manifest.edn").write_text(
+                "{:invocation {:edges \"/fixture/holes/missions/edges.json\"\n"
+                "  :only-ids [\"T-fixture\"]}\n"
+                " :sources {:edges {:path \"/fixture/holes/missions/edges.json\"}}}\n")
+
             def fire(n, a, since):
                 return {"n": n, "rc": 1, "click-id": f"click-{n}", "spent": True,
                         "outcome": "unknown", "run-id": "run-pf4c", "carried": False,
@@ -1477,6 +1500,8 @@ class ProviderUnavailableStopTest(unittest.TestCase):
                  mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
                  mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
                  mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+                 mock.patch.object(loop, "GIRAFFE_PIN", Path(td) / "giraffe-pin.edn"), \
+                 mock.patch.dict(os.environ, {"GIRAFFE_ROOT": str(giraffe)}), \
                  mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
                  mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
                  mock.patch.object(loop, "fire", side_effect=fire), \
