@@ -1428,9 +1428,16 @@
 
 (defn- missions-giraffe-manifest? [manifest]
   (let [edge-path (get-in manifest [:sources :edges :path])]
+    ;; A scoped run (`:only-ids`) sampled a hand-picked subset of tasks; its
+    ;; pass rows say nothing about the open registry population.  Admitting it
+    ;; as the live missions pass empties the scored field -- every open task
+    ;; reads as :unread-new against a pass that never enumerated it -- and
+    ;; outer selection refuses with :outer-score/no-admitted-tasks
+    ;; (held run 2026-11-13-073aa327, repair wm-click-loop-repair-619d23da).
     (and (string? edge-path)
          (boolean (re-find #"(^|/)holes/missions/" edge-path))
-         (not (contains? (:sources manifest) :tickets-index)))))
+         (not (contains? (:sources manifest) :tickets-index))
+         (not (seq (get-in manifest [:invocation :only-ids]))))))
 
 (defn- verified-giraffe-run? [dir]
   (try
