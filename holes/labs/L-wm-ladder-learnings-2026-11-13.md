@@ -113,3 +113,13 @@ sensitive. That makes it a natural next rung.
 - Packages 1, 2, 3 and 5 dispatched to zai-1..zai-4, one worktree each
   (`~/worktrees/futon2/wm-hard-pN`). Packages 4 and 6 follow (4 touches the same loop script as
   3; 6 needs Lucy's mathlib4 commits brought over first).
+- Package 5 accepted (`cec9ffb94`): a property test that every digest pin in a selection record
+  is recomputed by the replay code; fails with the pre-`262ca6bc8` minting.
+- Package 1 accepted (`18ff29864`, `2273919a6`): the loop pins the Giraffe run at launch (named
+  with `--giraffe-run`, else the newest missions run), selection refuses any other run with
+  `:giraffe-run-not-pinned`, and a loop that cannot pin stops before its first click
+  (`no-giraffe-pin`, no repair dispatched).
+- Baseline (zai-4): `full-loop-runtime-test` fails the same 9 tests (15 assertions) on zone
+  `main`, on the Lucy tip and on the merge, so the Lucy commits introduced none of them. They
+  return nil or refuse where the tests expect campaign, placement-history and snapshot state;
+  a separate repair, not a blocker for this merge.
