@@ -84,6 +84,11 @@ resolves. If yes, the observation needs a want signature for selection (the
 work run's analogue is the mission's outstanding clauses). §2.2 as written
 does not add one.
 
+**Decision (Joe, 2026-11-13):** the class route, as written above. "Let's go
+with the 'class' route (since I think using the correct G-over-cascades should
+get us unstuck). The 'tokens' route may actually be better long term but we have
+one mission now not two." Pattern predictions do not carry preference for now.
+
 ### 2.3 Lean
 
 - `R20Step`: selection-run G := `cascadeGrainG` over the candidate of §2.1-2.2;
