@@ -78,6 +78,17 @@ def path_line(f):
                   f"consumedRuns {consumed_runs_name(path.get('consumedRuns'))}"))
     return f"{count}; {', '.join(parts)}, learningApplied {provenance_name(path.get('learningApplied'))}"
 
+def composition_line(f):
+    """Q12: same-pick cascades whose fired patterns differ, and how many share a G."""
+    comp = f.get("cascadeComposition")
+    if f.get("kind") != "selection": return "work run: no task-selection cascades"
+    if nr(comp): return f"cascadeComposition: {comp['not-recomputable']}"
+    if not isinstance(comp, list): return "cascadeComposition absent"
+    pairs = [(a, b) for i, a in enumerate(comp) for b in comp[i+1:]
+             if a.get("pick") == b.get("pick") and a.get("fired") != b.get("fired")]
+    same_g = sum(1 for a, b in pairs if a.get("g") == b.get("g"))
+    return f"{len(comp)} cascades; {len(pairs)} same-pick pairs with different fired patterns, {same_g} sharing a G"
+
 def numbers(q, f):
     opened = sum(card(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) if not any(nr(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) else "NR"
     table = {
@@ -89,7 +100,8 @@ def numbers(q, f):
       6: f"previous {val(f['previousChoice'])} -> current {val(f['currentChoice'])}; digests {val(f['previousInputDigest'])}/{val(f['currentInputDigest'])}",
       7: path_line(f),
       9: f"{val(f['completionPairsStrictlyPreferred'])}/{val(f['completionPreferencePairs'])} completion pairs strictly preferred",
-      11: strict_minimum_line(f)}
+      11: strict_minimum_line(f),
+      12: composition_line(f)}
     return table[q]
 
 def edn(x):
