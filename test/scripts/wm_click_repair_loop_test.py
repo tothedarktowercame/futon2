@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
 LOOP = ROOT / "scripts" / "wm_click_repair_loop.py"
 DEBUGGER = ROOT / "scripts" / "wm_click_debugger.bb"
 
+import wm_click_hermetic  # noqa: E402 (needs the test dir on sys.path first)
+
 
 # The supervisor's state paths are absolute (~/code/futon2/data/wm-click-loop),
 # so a test that reaches log()/record() without patching them writes the
@@ -38,17 +40,10 @@ def load_loop():
     module.ALERTS = state / "alerts.jsonl"
     module.ACKNOWLEDGED = state / "acknowledged.json"
     module.DEBUGGER = state / "debugger"
-    # write_click_manifest consults Agency job previews; tests never may.
-    module.fetch_agency_jobs_in_window = lambda started, ended: ([], None)
-    # Nor the serving debugger: debugger_stops() would see the live loop's
-    # held runs (ContinuousModeTest errored whenever a real click was held),
-    # and retry/abort would act on them. Tests that need these patch them.
-    module.debugger_stops = lambda: []
-    def _refuse(run_id):
-        raise AssertionError(f"test tried to continue live held run {run_id}")
-    module.retry_held_run = _refuse
-    module.abort_held_run = _refuse
-    return module
+    # Hermeticity: jvm_eval/get_json/post_json/ensure_seat and the Agency
+    # preview / debugger seams refuse loudly; a test needing a value patches
+    # in its own fake.
+    return wm_click_hermetic.harden(module)
 
 
 class RepairLoopRootTest(unittest.TestCase):
@@ -907,6 +902,8 @@ class ContinuousModeTest(unittest.TestCase):
                  mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
                  mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
                  mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+                 mock.patch.object(loop, "jvm_eval",
+                                   side_effect=wm_click_hermetic.healthy_jvm_eval), \
                  mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
                  mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
                  mock.patch.object(loop, "fire", side_effect=fire), \
@@ -957,6 +954,8 @@ class ContinuousModeTest(unittest.TestCase):
              mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
              mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "acknowledged.json"), \
              mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+             mock.patch.object(loop, "jvm_eval",
+                               side_effect=wm_click_hermetic.healthy_jvm_eval), \
              mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
              mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)) as reload, \
              mock.patch.object(loop, "fire", side_effect=fire), \
@@ -1477,6 +1476,8 @@ class ProviderUnavailableStopTest(unittest.TestCase):
                  mock.patch.object(loop, "ALERTS", Path(td) / "alerts.jsonl"), \
                  mock.patch.object(loop, "ACKNOWLEDGED", Path(td) / "ack.json"), \
                  mock.patch.object(loop, "DEBUGGER", Path(td) / "debugger"), \
+                 mock.patch.object(loop, "jvm_eval",
+                                   side_effect=wm_click_hermetic.healthy_jvm_eval), \
                  mock.patch.object(loop, "jvm_start_epoch", return_value=123), \
                  mock.patch.object(loop, "reload_when_idle", return_value=(True, "", 123)), \
                  mock.patch.object(loop, "fire", side_effect=fire), \
