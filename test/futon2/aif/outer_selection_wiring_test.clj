@@ -327,6 +327,35 @@
     (is (= "true\n" (:out supervisor-check)))
     (is (= "true\n" (:out supervisor-claim)))))
 
+(deftest exhausted-registry-empty-field-reaches-work-exhaustion
+  ;; H-wm-ladder-lucy-handoff-2026-11-13 package 2 (click 5): every member of
+  ;; the pinned scope is DONE or gated on the operator, so the registry
+  ;; enumerates nothing and selection refuses :outer-score/no-admitted-tasks
+  ;; with no exclusion rows at all. That arrival must reach the typed
+  ;; :work-exhausted loop stop, not a debugger fault the repair seat is asked
+  ;; to make go away.
+  (let [result (call-ordinary
+                {:decision-as-of "2026-10-28T12:00:00Z"}
+                {#'outer-observation/outer-observation
+                 (fn [_]
+                   (assoc fixtures/base-observation
+                          :field [] :facts {}
+                          :outer-field/excluded []
+                          :mission-source-sha256-by-target {}
+                          :registry/non-open
+                          [{:id "T-08" :status-class :operator-gated}
+                           {:id "T-09" :status-class :complete}
+                           {:id "T-10" :status-class :complete}]
+                          :giraffe/run-id "fixture-missions-run"))
+                 #'effective-run-history/index-rows (fn [_] [])
+                 #'runtime/run-ordinary-opportunity-with-task!
+                 (fn [_] (throw (AssertionError. "empty field must not run a task")))})
+        retained (:outer/selection result)]
+    (is (= :no-task-selected (:absent result)))
+    (is (= [] (:outer-field/admitted retained)))
+    (is (= :work-exhausted (get-in result [:refusal/disposition :case])))
+    (is (= :loop-stop (get-in result [:refusal/disposition :disposition])))))
+
 (deftest c3-legal-terminal-exclusion-makes-work-exhaustion-reachable
   ;; RefusalLegality.legal_terminal_excludes / legal_terminals_bounded: a
   ;; current C3 exclusion removes the last scored target and reaches L1.

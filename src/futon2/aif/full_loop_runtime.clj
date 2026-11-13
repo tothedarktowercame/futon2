@@ -1419,12 +1419,37 @@
   loopStopLegal: missing ingest or relation evidence remains a debugger error."
   #{:c1-already-satisfied :c3-harm-declined})
 
+(def exhausted-registry-status-classes
+  "Registry status-classes that make a non-open member DONE or gated on the
+  operator (H-wm-ladder-lucy-handoff-2026-11-13 package 2): the pinned scope
+  holds no machine-selectable work. :draft is deliberately absent: a WATCH or
+  FINDING mission is neither done nor operator-gated, and an empty field
+  explained only by drafts stays a debugger question."
+  #{:complete :inactive :operator-gated})
+
+(defn- registry-exhausted-empty-field? [observation]
+  ;; Click 5 of the Lucy loop run: 09 and 10 DONE, 08 gated on Joe. Giraffe
+  ;; and the registry enumerate nothing, so no exclusion row exists to carry
+  ;; the legality; the exhaustion is legible only in :registry/non-open.
+  (let [non-open (:registry/non-open observation)]
+    (and (vector? non-open)
+         (seq non-open)
+         (every? #(contains? exhausted-registry-status-classes
+                             (:status-class %))
+                 non-open))))
+
 (defn- legal-terminal-empty-field? [observation failure-data]
   (let [excluded (into (vec (:outer-field/excluded observation))
                        (:outer-score/excluded failure-data))]
     (and (= [] (:outer-score/admitted failure-data))
-         (seq excluded)
-         (every? #(contains? legal-terminal-exclusion-reasons (:reason %)) excluded))))
+         (or (and (seq excluded)
+                  (every? #(contains? legal-terminal-exclusion-reasons (:reason %))
+                          excluded))
+             ;; No exclusion row at all is legal only when the whole
+             ;; non-open population is DONE or gated on the operator; an
+             ;; empty pass over an unexplained population stays a fault.
+             (and (= [] excluded)
+                  (registry-exhausted-empty-field? observation))))))
 
 (defn- missions-giraffe-manifest? [manifest]
   (let [edge-path (get-in manifest [:sources :edges :path])]

@@ -198,6 +198,22 @@ class SelfHealStopTest(unittest.TestCase):
         self.assertEqual("work-exhausted", row["case"])
         self.assertTrue(row["legal"])
 
+    def test_work_exhausted_click_dispatches_no_repair_seat(self):
+        # H-wm-ladder-lucy-handoff-2026-11-13 package 2 (click 5): a typed
+        # :work-exhausted stop pauses and alerts; the repair seat whose scope
+        # the Lucy run saw widened must never be dispatched for it.
+        record = self.outer_abstention_record("[]", "loop-stop")
+        with mock.patch.object(self.loop, "repair") as repair_mock:
+            rc, calls, rows = self.run_with([
+                self.click({}, outcome="abstained", run_record=record)])
+        row = [r for r in rows if r.get("event") == "stop"][-1]
+        self.assertEqual(0, rc)
+        self.assertEqual("work-exhausted", row["case"])
+        self.assertTrue(row["legal"])
+        self.assertEqual(0, repair_mock.call_count)
+        # run_with patches notify itself; the alert is the stop row's bell.
+        self.assertFalse(any(r.get("event") == "repair-dispatched" for r in rows))
+
     def test_false_work_exhaustion_claim_is_a_debugger_error(self):
         record = self.outer_abstention_record('["still-live"]', "loop-stop")
         rc, _, rows = self.run_with([
