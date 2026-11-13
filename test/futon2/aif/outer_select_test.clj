@@ -220,7 +220,9 @@
       (is (empty? (:classes refusal)))
       (is (= :no-pick (get-in refusal [:cascades 0 :pick]))))))
 
-(deftest singleton-non-stopping-posterior-abstains
+(deftest singleton-non-stopping-posterior-is-chosen-against-stopping
+  ;; Joe, 2026-11-13: one class against stopping is a choice (Lean Q2
+  ;; comparisonFloor 1); it was :insufficient-comparison before.
   (let [makeup {:cascades [{:id :ready-a :patterns ["test"] :steps [:ready-gate]}
                            {:id :ready-b :patterns ["test"] :steps [:ready-gate]}
                            {:id :stopping-a :patterns ["test"]
@@ -228,9 +230,8 @@
                            {:id :stopping-b :patterns ["test"]
                             :steps [{:gate-status :not-ready}]}]}
         result (outer-select/select makeup base-state base-observation)]
-    (is (= {:status :abstained :case :insufficient-comparison}
-           (:outcome result)))
-    (is (nil? (:selection result)))
+    (is (= {:status :chosen} (:outcome result)))
+    (is (= "M-ready" (get-in result [:selection :selected :target])))
     (is (= 1 (count (:classes result))))
     (is (= #{:ready-a :ready-b}
            (set (:members (first (:classes result))))))
@@ -263,8 +264,9 @@
         r (outer-select/select makeup base-state observation)]
     (is (= 1 (count (:classes r))))
     (is (= [:a :b] (:members (first (:classes r)))))
-    (is (= {:status :abstained :case :insufficient-comparison} (:outcome r)))
-    (is (nil? (:cascade-id r)))
+    (testing "one policy, compared against stopping (Joe, 2026-11-13)"
+      (is (= {:status :chosen} (:outcome r)))
+      (is (= :a (:cascade-id r)) "first in menu order within the one class"))
     (is (= 2 (count (:cascades r))))))
 
 (deftest distinct-predictions-at-equal-g-refuse
@@ -359,12 +361,14 @@
   (let [calls (atom 0)
         obs (assoc base-observation :field-facts
                    {:enumerated ["M-ready" "M-unknown"] :admitted (:facts base-observation) :excluded []})
-        result (outer-select/select
-                {:cascades [{:id :one-pass :steps [{:gate (fn [_] (swap! calls inc) true)}]}]}
-                base-state obs)]
+        refusal (try (outer-select/select
+                      {:cascades [{:id :one-pass :steps [{:gate (fn [_] (swap! calls inc) true)}]}]}
+                      base-state obs)
+                     (catch clojure.lang.ExceptionInfo e (ex-data e)))]
     (is (= 2 @calls))
-    (is (= {:status :abstained :case :insufficient-comparison}
-           (:outcome result)))))
+    ;; A cascade with no patterns is the empty policy: its G is the stopping G,
+    ;; so with one class compared against stopping it is not below it.
+    (is (= :pick-not-below-abstention (:kind refusal)))))
 
 (deftest forbidden-picks-stay-scored-but-cannot-win
   (let [before (outer-select/select base-makeup base-state base-observation)
@@ -397,8 +401,8 @@
     (is (= 1 (get-in r [:construction :policy-count])))
     (is (= [:second] (:members (first (:stopping-equivalent r)))))
     (is (nil? (some :relation-basis (:classes r))))
-    (is (= {:status :abstained :case :insufficient-comparison} (:outcome r)))
-    (is (nil? (:cascade-id r)))
+    (is (= {:status :chosen} (:outcome r)) "one class against stopping (Joe, 2026-11-13)")
+    (is (= :first (:cascade-id r)))
     (is (= ["M-ready"] (:outer-score/admitted r)))
     (is (= ["M-unknown"] (mapv :target (:outer-score/excluded r))))
     (is (= 2 (count (:cascades r))))

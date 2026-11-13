@@ -590,12 +590,15 @@
                                       :per-task-rating ratings
                                       :library-root library-root})
             evidence (assoc evidence :why why :argument argument)]
-        (if (< (count classes) 2)
+        ;; Stopping is the other side of every comparison (Joe, 2026-11-13, on a
+        ;; field holding only ladder 10: \"the choice is between doing 10 and
+        ;; stopping, and stopping should be worse at this stage\"). One class
+        ;; is chosen when its G is strictly below the stopping G (Lean Q2
+        ;; comparisonFloor 1, Q11); only a menu whose every policy predicts
+        ;; stopping abstains here.
+        (if (empty? classes)
           (assoc evidence
-                 :outcome {:status :abstained
-                           :case (if (empty? classes)
-                                   :all-policies-predict-stopping
-                                   :insufficient-comparison)}
+                 :outcome {:status :abstained :case :all-policies-predict-stopping}
                  :selection nil :prediction (:prediction abstention))
           (do
         (when (< 1 (count tied))
