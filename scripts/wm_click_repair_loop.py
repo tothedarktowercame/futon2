@@ -79,6 +79,9 @@ from pathlib import Path
 CODE = Path(os.environ.get("WM_CODE_ROOT", Path.home() / "code")).resolve()
 F2 = Path(os.environ.get("F2", CODE / "futon2")).resolve()
 F3C = Path(os.environ.get("F3C", CODE / "futon3c")).resolve()
+# Where the Requirements (.lean) live.  An isolated campaign composes its own
+# copy; absent repos simply contribute nothing to the protection scan.
+MATHLIB4 = Path(os.environ.get("FUTON_WM_MATHLIB4", CODE / "mathlib4")).resolve()
 META_INJURY_ROOT = F2 / "data" / "wm-meta-injuries-live-2026-10-22"
 STATE = F2 / "data" / "wm-click-loop"
 LEDGER = STATE / "ledger.jsonl"
@@ -146,6 +149,7 @@ SOURCE_IDENTITY_INVENTORY = F2 / "src" / "futon2" / "aif" / "load_identity.clj"
 # it would be a bigger change than this package settles.
 PROTECTED_REPAIR_PATHS = (
     "src/futon2/aif/full_loop_runtime.clj",   # field admission / Giraffe run lookup
+    "src/futon3c/giraffe/run.clj",            # giraffe run verification (verify-run)
     "scripts/wm_run_facts.clj",                # Requirements facts export
     "scripts/wm_check_run_facts.clj",          # Requirements checker
     "scripts/wm_click_repair_loop.py",         # the loop itself
@@ -153,6 +157,11 @@ PROTECTED_REPAIR_PATHS = (
 PROTECTED_REPAIR_PREFIXES = (
     "DarkTower/WarMachine/Requirements",       # mathlib4 Requirements*.lean
 )
+# Repos whose committed changes are scanned for protected paths during the
+# reload window.  mathlib4 must be here or its protection can never fire:
+# the reload plan only carries .clj/.cljc under CLICK_PATHS, which also hid
+# the loop's own script from the earlier files-based check.
+PROTECTED_SCAN_REPOS = (F2, F3C, MATHLIB4)
 
 
 class ProtectedPathError(RuntimeError):
@@ -1128,17 +1137,26 @@ def protected_paths_in(rel_paths) -> list[str]:
     return sorted(hits)
 
 
-def repo_rel(path: Path) -> str:
-    for repo in (F2, F3C):
-        try:
-            return Path(path).relative_to(repo).as_posix()
-        except ValueError:
-            continue
-    return Path(path).name
-
-
 def commit_paths(repo: Path, sha: str) -> list[str]:
     return git(repo, "show", "--name-only", "--format=", sha).split()
+
+
+def protected_changes_since(since_epoch: int) -> list[str]:
+    """Protected paths committed anywhere scanned since since_epoch.
+
+    Read from git directly, never from the reload plan: the plan carries only
+    .clj/.cljc under CLICK_PATHS, so a mathlib4 .lean file or the loop's own
+    script would otherwise never reach the check.  A scanned repo that does
+    not exist (a campaign without mathlib4) contributes nothing.
+    """
+    hits = set()
+    for repo in PROTECTED_SCAN_REPOS:
+        if not repo.is_dir():
+            continue
+        out = git(repo, "log", "--first-parent", "-m", f"--since=@{since_epoch}",
+                  "--name-only", "--format=")
+        hits.update(protected_paths_in(out.split()))
+    return sorted(hits)
 
 
 def repair_commit_protection(commits) -> list[str]:
@@ -1314,7 +1332,7 @@ def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bo
         return None, "click-in-flight", since_epoch
     started = int(time.time())
     files, identity_dependencies = reload_plan(since_epoch)
-    protected = protected_paths_in(repo_rel(f) for f in files)
+    protected = protected_changes_since(since_epoch)
     if protected:
         # A repair commit touched a path that defines what the machine may
         # work on (handoff 2026-11-13 section 3).  Refuse to load anything,
@@ -2078,7 +2096,9 @@ def wait_job(job: str, timeout: int) -> dict:
 
 def tagged_commits(tag: str) -> list[tuple[Path, str]]:
     out = []
-    for repo in (F2, F3C):
+    for repo in (F2, F3C, MATHLIB4):
+        if not repo.is_dir():
+            continue
         for sha in git(repo, "log", "--since=1 day ago", "-F", f"--grep={tag}", "--format=%H").split():
             out.append((repo, sha))
     return out
