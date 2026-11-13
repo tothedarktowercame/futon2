@@ -1,6 +1,7 @@
 (ns futon2.aif.outer-select-test
   (:require [clojure.edn :as edn]
             [clojure.string :as string]
+            [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-menu-fixture :as menu-fixture]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-score :as outer-score]
@@ -504,5 +505,11 @@
     (is (= :start--chain-2 (:cascade-id r)))
     (is (= "T-08" (get-in r [:selection :selected :target])))
     (is (not= (get-in by-id [:start :prediction :parameters])
-              (get-in by-id [:start--chain-2 :prediction :parameters])))))
+              (get-in by-id [:start--chain-2 :prediction :parameters])))
+    ;; wm-click-loop-repair-bb1de665: every cascade digest, chain variants
+    ;; included, must be recomputable from its carrier, because
+    ;; outer-state/chosen-cascade replays exactly that carrier.
+    (doseq [c (vals by-id)]
+      (is (= (:digest c) (menu/cascade-digest c))
+          (str "digest not carrier-recomputable: " (:id c))))))
 

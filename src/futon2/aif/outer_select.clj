@@ -421,9 +421,13 @@
              :let [order (try (mapv :target (outer-score/apply-selection-cascade (:steps c) facts field))
                               (catch clojure.lang.ExceptionInfo _ []))]
              k (range 2 (inc (min max-chain-depth (count order))))]
-         (assoc c :id (keyword (str (name (:id c)) "--chain-" k))
-                :chain {:base (:id c) :depth k :picks (subvec order 0 k)}
-                :digest (identity/sha256 (pr-str [(:digest c) :chain k]))))))
+         (let [chained (assoc c :id (keyword (str (name (:id c)) "--chain-" k))
+                               :chain {:base (:id c) :depth k :picks (subvec order 0 k)})]
+           ;; The digest must be recomputable from the carrier alone
+           ;; (name/readme-cascade/units/edges), exactly as
+           ;; outer-state/chosen-cascade replays it. Hashing the base
+           ;; digest instead pins a value no replay can reproduce.
+           (assoc chained :digest (menu/cascade-digest chained))))))
 
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
