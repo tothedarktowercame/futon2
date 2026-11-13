@@ -169,4 +169,15 @@ sensitive. That makes it a natural next rung.
 - Package 6 dispatched to zai-1 (Lean for chains, new module `SelectionGOverChains.lean` in
   `~/worktrees/mathlib4-wm-p6`). The Clojure scorer was checked first: it gates a later pick's
   units on the previous pick's `:can-begin`, as the handoff says.
+- Package 6 accepted (zai-1, mathlib4 `7c08e601a7`, fast-forwarded onto `darktower`): new
+  module `SelectionGOverChains.lean`, no existing file changed. It models a chain as units over
+  (pattern, pick), with later picks gated on the previous pick's `canBegin`, the first pick's
+  class observed, and Beta(1 + n, 1) counts per pattern along the chain. `ladder_bad_case`: with
+  counts fixed at (1,1), the click-2 pair (serves-a-way on 09; the 09-then-10 chain) tie.
+  `ladder_ordering`: with the chain counts, way < chain < alone, as the Clojure test asserts.
+  Limits: both theorems assume the three policies' risk-plus-ambiguity part is the same `g`
+  (only the novelty part is computed: 1/2, 5/12, 1/4); and agreement of a one-pick chain with
+  `SelectionGOverCascades.selectionG` is proved only for the counts, because the token types
+  differ (`Fin 1 x SelectionToken` against `SelectionToken`) and no transport lemma exists. Q11 and
+  Q12 have no chain clause yet; zai-1 judged that new work, not a correction.
 
