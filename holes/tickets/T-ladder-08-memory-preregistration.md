@@ -1,6 +1,6 @@
 # Ladder 08: M1 memory under fire preregistration
 
-**Status:** OPEN — AUTHORIZED STAGE 6
+**Status:** OPEN — PREREGISTRATION PRESENTED, AWAITING JOE'S SIGN-OFF (stopped before running; see data/wm-d-task-enactment/T-ladder-08-memory-preregistration/preregistration-memory-under-fire.edn)
 Parent: M-futonzero-prelim-practice
 
 Dependencies: T-ladder-05-settling-confinement and Joe's engine ruling from T-ladder-06-layout-premise.
@@ -14,4 +14,8 @@ Write, but do not run, a deterministic preregistration EDN for memory-under-fire
 
 ## Acceptance criteria
 
-- [ ] The EDN parses, names the engine (propagator-only, with even8 in mmca-clj order) and seed, pins all thresholds and the control arm before observation, and is presented to Joe for sign-off. Stop before running the experiment. Expected outcome: **stopped as expected for human sign-off**.
+- [x] The EDN parses, names the engine (propagator-only, with even8 in mmca-clj order) and seed, pins all thresholds and the control arm before observation, and is presented to Joe for sign-off. Stop before running the experiment. Expected outcome: **stopped as expected for human sign-off**.
+
+## Delivered (2026-11-13, wm-author)
+
+The preregistration is written and parsed, not run: `data/wm-d-task-enactment/T-ladder-08-memory-preregistration/preregistration-memory-under-fire.edn` (clojure.edn/read-string exits 0; engine `:propagator-only`, even8 `[1 0 4 7 2 3 5 6]` in mmca-clj Wolfram order, seed 20261113). All thresholds pinned before observation — guard width 4, horizon 80, penetration limit 1 — the erosion baseline stated from ladder 05's `floor(n/2) - 1` result (which refuted the TN's six-step claim), not from the TN, and the ladder 07 wire test carried as the control arm (90-channel speed-1 arrival, 77 and 178-back-path non-arrival, XOR content check). The registration's own falsifier names running before sign-off. Stopped here: **stopped as expected for human sign-off**; the experiment runs only after Joe signs.
