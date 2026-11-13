@@ -5,7 +5,6 @@
        org.suskalo/farolero {:mvn/version "1.5.1"}
        org.babashka/http-client {:mvn/version "0.4.22"}
        cheshire/cheshire {:mvn/version "5.13.0"}
-       common/common {:local/root "../futon1/apps/common"}
        futon3a/meme-store {:local/root "../futon3a"}}
  :aliases
  {:war-machine {:main-opts ["-m" "futon2.report.war-machine-visual"]}
