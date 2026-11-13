@@ -1,5 +1,6 @@
 (ns futon2.aif.outer-state-update-test
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-state :as state]))
 
@@ -112,3 +113,42 @@
       (is (= 263/200 (get-in after [:c :related])))
       (is (> (get-in after [:state-counts :ready :doable])
              (get-in after [:state-counts :ready :blocked]))))))
+
+(deftest chain-variant-selection-replays-through-chosen-cascade
+  ;; wm-click-loop-repair-bb1de665: held run 2026-11-13-ea3be8a8 stopped at
+  ;; outer-selection (pending-steps-unrecoverable) because chain-variants
+  ;; minted sha256(pr-str [base-digest :chain k]) while chosen-cascade
+  ;; replays the digest from the carrier (name/readme-cascade/units/edges).
+  ;; A chain row whose digest is not carrier-recomputable is unrecoverable
+  ;; forever, so the state update must accept a carrier-pinned chain row.
+  (let [unit {:pattern "futon3/library/task-selection/only-what-can-start-now.flexiarg"
+              :sha256 (apply str (repeat 64 "b")) :index 0}
+        carrier-digest (fn [entry]
+                         (identity/sha256
+                          (pr-str [(name (:id entry)) (:readme-cascade entry)
+                                   (mapv (fn [u] [(:pattern u) (:sha256 u) (:index u)])
+                                         (:units entry))
+                                   (:edges entry)])))
+        base (assoc {:id :start :readme-cascade 1 :units [unit] :edges []
+                     :steps [:ready-gate]}
+                    :digest nil)
+        chain (-> base
+                  (assoc :id :start--chain-2
+                         :chain {:base :start :depth 2 :picks ["M-task" "M-other"]})
+                  (assoc :digest (carrier-digest (assoc base :id :start--chain-2))))
+        rows [(dissoc (assoc base :digest (carrier-digest base)) :chain)
+              chain]
+        chain-selection {:cascade-index 1
+                         :cascade-id :start--chain-2
+                         :cascade-digest (:digest chain)
+                         :cascades rows
+                         :steps [:ready-gate]
+                         :selection {:candidates [candidate] :selected candidate}}
+        before (assoc (state/init-state makeup) :source :init)
+        after (state/next-state makeup before chain-selection observation
+                                {:ending-class :related :observed-gain :one})]
+    (is (= 1 (:click-count after))
+        "a carrier-pinned chain selection must replay, not refuse")
+    (is (not= (:digest (second rows))
+              (:digest (first rows)))
+        "the chain's carrier digest differs from its base's")))

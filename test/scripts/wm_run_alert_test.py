@@ -78,6 +78,16 @@ class AlertTest(unittest.TestCase):
     self.addCleanup(server.server_close); self.addCleanup(server.shutdown)
     return f"http://127.0.0.1:{server.server_port}/evidence"
 
+  def test_evidence_url_follows_the_serving_substrate_not_zone_ports(self):
+    module=loaded_alert_module()
+    with mock.patch.dict("os.environ",{},clear=True):
+      self.assertEqual(module.default_evidence_url(),"http://127.0.0.1:7073/api/alpha/evidence")
+    with mock.patch.dict("os.environ",{"FUTON1B_URL":"http://127.0.0.1:7074/"},clear=True):
+      self.assertEqual(module.default_evidence_url(),"http://127.0.0.1:7074/api/alpha/evidence")
+    with mock.patch.dict("os.environ",{"FUTON1B_URL":"http://127.0.0.1:7074",
+                                       "FUTON_WM_EVIDENCE_URL":"http://h:1/e"},clear=True):
+      self.assertEqual(module.default_evidence_url(),"http://h:1/e")
+
   def test_click20_alerts_and_exits_nonzero(self):
     p,rec=self.invoke(); self.assertNotEqual(p.returncode,0); self.assertTrue(p.stdout.startswith("ALERT FOR JOE\n"))
     for q in (1,2,4,5,6,7,9,11): self.assertRegex(p.stdout,rf"(?m)^Q{q} (violated|unverifiable):")
@@ -209,6 +219,29 @@ class AlertTest(unittest.TestCase):
     status,stdout,verdict=self.evaluate(selection_output={q:"holds" for q in REQUIREMENTS if q != 11})
     self.assertEqual(1,status); self.assertRegex(stdout,r"(?m)^Q11 not-checked:")
     self.assertIn('":Q11" ":not-checked"',verdict); self.assertIn('":conforms" false',verdict)
+
+  def test_mathlib_root_honors_sandbox_code_root_when_host_checkout_absent(self):
+    """Regression wm-click-loop-repair-862319e5.
+
+    --mathlib-root defaulted to the absolute /home/joe/code/mathlib4, which is
+    absent under a sandboxed code root (FUTON_WM_CODE_ROOT). The post-run
+    Q1--Q10 check then raised FileNotFoundError on Requirements.lean, so
+    wm_click.sh printed 'requirements NOT CHECKED' and exited 1 even though
+    click ownership was confirmed. The default must resolve the sandboxed
+    mathlib4 when the canonical host checkout is missing."""
+    import os as _os
+    module=loaded_alert_module()
+    with tempfile.TemporaryDirectory() as td:
+      sandboxed=Path(td)/"mathlib4"; sandboxed.mkdir()
+      env={k:v for k,v in _os.environ.items()
+           if k not in ("FUTON_WM_CODE_ROOT","FUTON_CODE_ROOT")}
+      env["FUTON_WM_CODE_ROOT"]=td
+      with mock.patch.dict(_os.environ, env, clear=True):
+        self.assertEqual(module.default_mathlib_root(), str(sandboxed))
+    env={k:v for k,v in _os.environ.items()
+         if k not in ("FUTON_WM_CODE_ROOT","FUTON_CODE_ROOT")}
+    with mock.patch.dict(_os.environ, env, clear=True):
+      self.assertEqual(module.default_mathlib_root(), "/home/joe/code/mathlib4")
 
   def test_mislabelled_export_is_not_checked(self):
     module,root,record,facts=self.mocked_evaluation(selection_facts=FACTS); out=io.StringIO()

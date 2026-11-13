@@ -31,24 +31,36 @@
 
 (defn target-classes-for-outer-selection
   "Project the retained outer selection through the same relation vocabulary
-  used by run-ending-classification.  Absence and unmapped relations remain a
-  typed unknown; they are never converted to the direct scorer's focused
-  default."
+  used by run-ending-classification.  A caller-pinned direct task is focused
+  by construction: it bypasses comparative outer selection precisely because
+  the caller supplied the focus.  Absence and unmapped relations on a genuine
+  outer selection remain a typed unknown; they are never converted to the
+  direct scorer's focused default."
   [outer-selection]
-  (let [target (get-in outer-selection [:selection :selected :target])
+  (let [direct-task? (and (= :direct-task-entry (:reason outer-selection))
+                          (string? (:task outer-selection)))
+        target (if direct-task?
+                 (:task outer-selection)
+                 (get-in outer-selection [:selection :selected :target]))
         relation (:selected-relation outer-selection)
-        scorer-class (get focus-receipt/scorer-class relation)]
+        scorer-class (if direct-task?
+                       :focused
+                       (get focus-receipt/scorer-class relation))]
     (if target
-      {target {:class (if scorer-class relation :unknown)
+      {target {:class (cond direct-task? :focus
+                            scorer-class relation
+                            :else :unknown)
                :scorer-class scorer-class
                :reason (when-not scorer-class
                          :outer-selection-relation-unavailable)
                :provenance {:status :retained
-                            :source "outer selection selected relation"
+                            :source (if direct-task?
+                                      "caller-pinned direct task"
+                                      "outer selection selected relation")
                             :outer-selection-sha256
                             (action-identity/digest outer-selection)
                             :target target
-                            :relation relation}}}
+                            :relation (if direct-task? :focus relation)}}}
       {})))
 
 (defn- annotate-failure [target failure]
@@ -202,7 +214,7 @@
         graph-failure (dissoc loaded :status :graph :pin)
         families
         (mapv
-         (fn [{:keys [target-id source-kind source-path source-absent]}]
+         (fn [{:keys [target-id source-kind source-path source-absent item-line]}]
            (cond
              (not graph-ok?)
              (failed-field-family target-id graph-failure)
@@ -210,13 +222,18 @@
              source-absent
              (failed-field-family target-id {:kind source-absent})
 
-             (not (contains? #{nil :head} source-kind))
+             (not (contains? #{nil :head :item-section} source-kind))
              (failed-field-family target-id {:kind :target-source-kind-unsupported
                                              :source-kind source-kind})
 
+             (and (= :item-section source-kind) (not (pos-int? item-line)))
+             (failed-field-family target-id {:kind :target-item-line-absent})
+
              :else
              (try
-               (let [digest (reading-registry/excerpt-digest source-path)]
+               (let [digest (if (= :item-section source-kind)
+                              (reading-registry/item-section-digest source-path item-line)
+                              (reading-registry/excerpt-digest source-path))]
                  (if (map? digest)
                    (failed-field-family target-id (dissoc digest :status))
                    (let [reading (reading-registry/current-reading
@@ -228,7 +245,7 @@
                                     (or pattern-texts
                                         (square-registry/library-resolver
                                          (or pattern-library-root
-                                             square-registry/default-library-root)))))]
+                                             (square-registry/default-library-root))))))]
                      (if (and require-occurrence-squares?
                               (= :absent (:status squares)))
                        (failed-field-family

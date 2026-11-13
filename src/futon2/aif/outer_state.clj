@@ -18,7 +18,7 @@
 (def pending-discharge-refusal-kinds
   #{:pending-steps-unrecoverable :terminal-ending-class-absent :run-abandoned})
 ;; The serving JVM runs from futon3c; live stores belong to canonical futon2.
-(def default-makeup-path "/home/joe/code/futon2/data/wm-learning/outer-makeup.edn")
+(def default-makeup-path (data-paths/path "wm-learning" "outer-makeup.edn"))
 (def default-state-path (data-paths/path "wm-learning" "outer-state.edn"))
 
 (def ^:dynamic *before-state-move*

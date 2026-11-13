@@ -2,7 +2,8 @@
   "Source digests sampled as participating namespaces load. Not bytecode hashes.
    Edits between compiler read and registration, failed/partial loads, load-string
    and later Var mutation cannot be certified by this mechanism."
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str])
   (:import [java.security MessageDigest]))
 
 (defonce registry (atom {}))
@@ -121,6 +122,20 @@
       (with-open [in (io/input-stream source)] (.readAllBytes in)))
     (catch Exception _ nil)))
 
+(defn resolve-source-path
+  "Translate a retained canonical source declaration into an explicitly
+   composed WM code root. The one-argument form reads FUTON_WM_CODE_ROOT;
+   omission preserves the canonical declaration byte-for-byte."
+  ([path]
+   (resolve-source-path path (System/getenv "FUTON_WM_CODE_ROOT")))
+  ([path code-root]
+   (let [canonical-prefix "/home/joe/code/"
+         root (some-> code-root str str/trim not-empty
+                      (str/replace #"/+$" ""))]
+     (if (and root (string? path) (str/starts-with? path canonical-prefix))
+       (str root "/" (subs path (count canonical-prefix)))
+       path))))
+
 (defn register!
   "Overwrite this namespace's entry on every load, preserving other entries.
    Call with *ns* and *file*, at the top of the participating source. Captures
@@ -159,7 +174,8 @@
   ([] (report required-sources read-bytes))
   ([required canonical-read]
    (let [entries @registry
-         sources (merge (zipmap (keys entries) (repeat nil)) required)]
+         sources (-> (merge (zipmap (keys entries) (repeat nil)) required)
+                     (update-vals resolve-source-path))]
      (into (sorted-map)
            (map (fn [[n path]] [n (check (get entries n) path canonical-read)])) sources))))
 

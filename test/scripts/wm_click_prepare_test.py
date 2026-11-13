@@ -19,6 +19,26 @@ def load_prepare():
 
 
 class PrepareTest(unittest.TestCase):
+    def test_missing_flight_ledger_is_initialized_at_the_data_authority(self):
+        p = load_prepare()
+        with tempfile.TemporaryDirectory() as td, \
+             mock.patch.dict(os.environ, {"FUTON2_DATA_ROOT": td}, clear=False):
+            result = p.ensure_flight_ledger()
+            expected = Path(td) / "wm-interpretations" / "flights"
+            self.assertEqual({"status": "present", "path": str(expected)}, result)
+            self.assertTrue(expected.is_dir())
+
+    def test_non_directory_flight_ledger_refuses(self):
+        p = load_prepare()
+        with tempfile.TemporaryDirectory() as td, \
+             mock.patch.dict(os.environ, {"FUTON2_DATA_ROOT": td}, clear=False):
+            ledger = Path(td) / "wm-interpretations" / "flights"
+            ledger.parent.mkdir(parents=True)
+            ledger.write_text("not a ledger")
+            with self.assertRaisesRegex(p.PreparationRefused,
+                                        "flight-ledger-not-directory"):
+                p.ensure_flight_ledger()
+
     def test_dependency_order_and_real_read_only_edn_response(self):
         p = load_prepare()
         names, inventory = p.declaration()

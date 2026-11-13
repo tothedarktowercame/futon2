@@ -482,7 +482,11 @@
         observation {:field field :facts facts :focus (first targets)
                      :relation (fn [_ t] (if (= t (first targets)) :focus :associated))
                      :field-facts {:enumerated targets :admitted facts :excluded []}}
-        makeup {:cascades (mapv (fn [t] {:id t :steps [{:gate #(= t (:target %))}]}) targets)}
+        ;; Each cascade enacts only-what-can-start-now (the rows are ready); under
+        ;; G over cascades a cascade with no pattern is the empty policy and
+        ;; cannot reach its pick's class (Joe, 2026-11-13).
+        makeup {:cascades (mapv (fn [t] {:id t :patterns ["only-what-can-start-now"]
+                                         :steps [{:gate #(= t (:target %))}]}) targets)}
         selection (outer-select/select makeup fixtures/base-state observation)
         carrier (atom {:task {:id (first targets)} :outer/selection selection})
         persisted (atom [])

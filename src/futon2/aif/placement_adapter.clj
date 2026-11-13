@@ -1,13 +1,20 @@
 (ns futon2.aif.placement-adapter
   "Read pinned ant placements and attach them to outer-observation facts."
   (:require [clojure.java.io :as io]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files]
            [java.security MessageDigest]))
 
 (def default-paths
-  {:tsv "/home/joe/code/futon3c/holes/excursions/ant-reads/A1-placements.tsv"
-   :classes "/home/joe/code/futon3c/holes/excursions/ant-reads/classes.tsv"})
+  "The A1 placement reads of the serving code root (FUTON_WM_CODE_ROOT, else
+   /home/joe/code). These were absolute /home/joe/code paths: on Lucy's
+   wm-sandbox that file does not exist, so every task's placement was :absent,
+   the serves-a-way cascade could never pick, and a ladder field of equal
+   tickets collapsed to one prediction class (wm-click-9790344a abstained
+   :insufficient-comparison)."
+  {:tsv (data-paths/code-path "futon3c" "holes" "excursions" "ant-reads" "A1-placements.tsv")
+   :classes (data-paths/code-path "futon3c" "holes" "excursions" "ant-reads" "classes.tsv")})
 
 (def absent-placement {:status :absent :reason :no-placement-yet})
 

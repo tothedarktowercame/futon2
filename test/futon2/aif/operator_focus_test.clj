@@ -51,8 +51,24 @@
   (testing "unmapped seats with no clock abstain and never create a default"
     (let [v (focus/focus-vote [(turn "x" "a" "2026-11-03T12:00:00Z" "hello")]
                               areas {:as-of as-of})]
-      (is (= :no-recent-operator-turns (get-in v [:result :reason])))
+      (is (= :all-seats-abstained (get-in v [:result :reason])))
       (is (= :both-halves-abstained (get-in v [:abstentions 0 :reason])))))
+  (testing "planted regression wm-click-loop-repair-b1a9839d: turns read but reader reply unparseable is not 'no recent operator turns'"
+    (let [turns (mapv (fn [i] (turn (str "e" i) "claude-4"
+                                    (format "2026-11-12T23:%02d:00.000Z" (- 47 i)) "work"))
+                      (range 5))
+          v (focus/focus-vote turns areas
+                              {:as-of "2026-11-13T02:28:18Z"
+                               :text-answers {"claude-4" {:status :abstained
+                                                          :reason :reader-invalid-json}}})]
+      (is (= :all-seats-abstained (get-in v [:result :reason])))
+      (is (not= :no-recent-operator-turns (get-in v [:result :reason])))
+      (is (= ["claude-4"] (:seats v)))
+      (is (= :reader-invalid-json (get-in v [:seat-votes 0 :text-half :reason])))))
+  (testing "a genuinely quiet window keeps the no-recent-operator-turns reason"
+    (let [v (focus/focus-vote [(turn "old" "a" "2026-10-26T00:00:00Z" "hello")]
+                              areas {:as-of as-of})]
+      (is (= :no-recent-operator-turns (get-in v [:result :reason])))))
   (testing "a recent clock and contrary text each cast half"
     (let [v (focus/focus-vote
              [(assoc (turn "x" "a" "2026-11-03T12:00:00Z" "please work on M-giraffe")
@@ -142,3 +158,43 @@
         r (focus/read-turns {:as-of as-of
                              :http-get (fn [_ _] {:status 200 :body body})})]
     (is (= ["kept"] (mapv :evidence-id (:turns r))))))
+
+;; The reader is a handoff (handoff-contract): the Lucy 2026-11-13 failure was a
+;; correct judgement in prose, "evidence_ids":[all five], which never parsed.
+(def ^:private lucy-prose-reply
+  (str "Answer delivered for E-kimi-task-437.\n\n**Result:** `{\"answers\":[{\"seat\":\"claude-4\","
+       "\"area\":\"futon5\",\"evidence_ids\":[all 5 emacs-* IDs]}],\"clock_answers\":[]}`"))
+
+(defn- reader-run [replies]
+  (let [left (atom replies) requests (atom [])
+        a7 (doto (java.io.File/createTempFile "a7-authority" ".md") (spit "A7"))
+        contact (fn [req] (swap! requests conj req)
+                  (let [r (first @left)] (swap! left rest)
+                    {:seat "猴-1" :job-id (str "job-" (count @requests)) :state "done" :text r}))]
+    [(focus/dispatch-reader!
+      [{:evidence-id "e1" :seat "claude-4" :text "MCA"}]
+      {:prompt-resource "wm/focus/operator-focus-reader-v1.md" :reader-contact contact
+       :a7-path (.getPath a7) :code-root "/tmp"})
+     @requests]))
+
+(deftest reader-reply-in-prose-gets-one-format-correction
+  (let [[r reqs] (reader-run [lucy-prose-reply
+                              "{\"answers\":[{\"seat\":\"claude-4\",\"area\":\"futon5\",\"evidence_ids\":[\"e1\"]}],\"clock_answers\":[]}"])]
+    (is (= :ok (:status r)))
+    (is (= 2 (count reqs)) "one correction round")
+    (is (:format-correction (second reqs)))
+    (is (re-find #"ACCEPTANCE CONTRACT" (focus/reader-prompt (first reqs))))
+    (is (re-find #"futon5" (:raw-reply r)))))
+
+(deftest reader-that-never-replies-json-is-a-typed-refusal
+  (let [[r _] (reader-run [lucy-prose-reply lucy-prose-reply])]
+    (is (= :absent (:status r)))
+    (is (= :reader-handoff-refused (:reason r)))
+    (is (= :response-invalid (get-in r [:handoff :reason])))))
+
+(deftest reader-without-contact-is-not-contacted
+  (let [a7 (doto (java.io.File/createTempFile "a7-authority" ".md") (spit "A7"))
+        r (focus/dispatch-reader! [] {:prompt-resource "wm/focus/operator-focus-reader-v1.md"
+                                               :a7-path (.getPath a7) :code-root "/tmp"})]
+    (is (= :absent (:status r)))
+    (is (= :not-contacted (get-in r [:handoff :status])))))

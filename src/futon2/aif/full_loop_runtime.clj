@@ -12,6 +12,7 @@
             [clojure.string :as str]
             [futon2.aif.cascade-feedback :as cascade-feedback]
             [futon2.aif.area-focus :as area-focus]
+            [futon2.aif.operator-focus :as operator-focus]
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.cascade-revision-producer :as cascade-revision-producer]
             [futon2.aif.effective-run-history :as effective-run-history]
@@ -82,7 +83,9 @@
 (def default-ticket-readiness-citation-chars 4096)
 (def default-ticket-readiness-candidate-limit 16)
 (def default-ticket-readiness-candidate-chars 1024)
-(def default-giraffe-root "/home/joe/code/storage/giraffe")
+(def default-giraffe-root
+  (or (System/getenv "FUTON_WM_GIRAFFE_ROOT")
+      "/home/joe/code/storage/giraffe"))
 (def self-heal-runtime-config-resource "wm/self-heal-runtime.edn")
 
 (defn self-heal-runtime-config
@@ -398,8 +401,13 @@
 (defn- open-cascade-author-prompt [req]
   (str "Repair the held executable cascade phase without selecting again. "
        "Implement resolutions for exactly the listed holes. Commit the source in "
-       "/home/joe/code/futon2, the canonical absolute repository on the serving "
-       "classpath. A sibling worktree is not delivery. Return the full commit SHA "
+       data-paths/production-repo-root ", the canonical absolute repository on the serving "
+       "classpath. Before reading or writing a candidate patch, run `git -C "
+       data-paths/production-repo-root " rev-parse --show-toplevel` and require its output "
+       "to equal that exact path. Work only in that checkout. Do not inspect, reuse, or cite "
+       "an existing patch commit from another checkout merely because it names the same "
+       "requisition; create the delivered commit in the serving checkout. A sibling "
+       "worktree is not delivery. Return the full commit SHA "
        "in patch.commit — exactly 40 lowercase hex characters; an abbreviated or "
        "otherwise malformed object id is refused with "
        ":author-delivery-invalid-descriptor and does not fall back to file "
@@ -1725,12 +1733,26 @@
   chosen task has closed; while it remains open observed gain is `:none`.
   META injuries are arbitrated before this function."
   [opts]
-  (let [opts (assoc opts :wm/discovery-enactment :off)]
+  ;; Outer selection contacts a seat (the operator-focus reader) before the
+  ;; runner starts, and dispatch! refuses a WM-run contact that has no run-local
+  ;; job ledger (held run 2026-11-13-dc01c06b, click wm-click-0d1dca09). Mint
+  ;; the ledger here and pass the same atom on, as :selection-timing/state is,
+  ;; so the runner records the reader's job with the rest of this click's jobs.
+  (let [opts (-> (assoc opts :wm/discovery-enactment :off)
+                 (update :registered-run/job-ledger
+                         #(or % (atom {:order [] :jobs {}}))))]
    (if (get-in opts [:task :id])
     (run-ordinary-opportunity-with-task!
-     (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}]
-       (assoc opts :selection-record
-              (retain-selection! opts (assoc named :status :not-exercised :reason :direct-task-entry)
+     (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}
+           retained (assoc named :status :not-exercised :reason :direct-task-entry)]
+       (assoc opts
+              ;; The reading-family scorer consumes :outer/selection for its
+              ;; target-class evidence. A direct task has no comparative
+              ;; selector result, but the caller's pin is itself the retained
+              ;; focus decision and must reach that same carrier.
+              :outer/selection retained
+              :selection-record
+              (retain-selection! opts retained
                                  (assoc named :status :not-exercised :path :direct-task
                                         :reason :task-supplied)))))
     (if-let [giraffe-dir (find-giraffe-run opts)]
@@ -1742,7 +1764,10 @@
               decision-as-of (or (:decision-as-of opts) (str (Instant/now)))
               area-corpus (area-focus/load-corpus)
               focus-pin (area-focus/acquire-focus!
-                         {:decision-as-of decision-as-of
+                         {:reader-contact (designated-agent-answer-fn
+                                           opts (or (:operator-focus/reader-seat opts) "猴-1")
+                                           operator-focus/reader-prompt "brief")
+                          :decision-as-of decision-as-of
                           :manifest-dir (or (:operator-focus/manifest-dir opts)
                                             (str (data-paths/path "wm-runs")))
                           :code-root (or (:code-root opts) (System/getenv "FUTON_CODE_ROOT")

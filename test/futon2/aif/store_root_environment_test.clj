@@ -11,6 +11,14 @@
             [futon2.aif.tripwire :as tripwire]
             [futon2.aif.wm.on-prod-history :as on-prod]))
 
+(deftest isolated-wm-root-owns-its-mutable-data
+  (is (= "/srv/wm/code/futon2/data"
+         (data-paths/configured-data-root nil "/srv/wm/code")))
+  (is (= "/explicit/data"
+         (data-paths/configured-data-root "/explicit/data" "/srv/wm/code")))
+  (is (= "/home/joe/code/futon2/data"
+         (data-paths/configured-data-root nil nil))))
+
 (deftest production-defaults-are-unchanged-without-environment-overrides
   (when-not (some #(System/getenv %)
                   ["FUTON_WM_TRACE_DIR" "FUTON_WM_RUN_RECORD_DIR"

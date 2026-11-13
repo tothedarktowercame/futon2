@@ -51,6 +51,30 @@ def load_loop():
     return module
 
 
+class RepairLoopRootTest(unittest.TestCase):
+    def test_isolated_code_root_drives_all_campaign_paths(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "campaign"
+            env = dict(os.environ, WM_CODE_ROOT=str(root),
+                       BASE="http://127.0.0.1:17070")
+            program = (
+                "import importlib.util, json; "
+                f"s=importlib.util.spec_from_file_location('isolated_loop',{str(LOOP)!r}); "
+                "m=importlib.util.module_from_spec(s); s.loader.exec_module(m); "
+                "print(json.dumps({'code':str(m.CODE),'f2':str(m.F2),"
+                "'f3c':str(m.F3C),'agency':m.AGENCY,'state':str(m.STATE)}))"
+            )
+            result = subprocess.run(["python3", "-c", program], env=env,
+                                    text=True, capture_output=True, check=True)
+            observed = json.loads(result.stdout)
+            self.assertEqual(str(root), observed["code"])
+            self.assertEqual(str(root / "futon2"), observed["f2"])
+            self.assertEqual(str(root / "futon3c"), observed["f3c"])
+            self.assertEqual("http://127.0.0.1:17070", observed["agency"])
+            self.assertEqual(str(root / "futon2" / "data" / "wm-click-loop"),
+                             observed["state"])
+
+
 class RepairLoopCastTest(unittest.TestCase):
     def test_click_write_manifest_applies_writer_stamps_and_skips_malformed(self):
         loop = load_loop()
@@ -505,6 +529,24 @@ class RepairLoopCastTest(unittest.TestCase):
                 "--repair-reviewer", "wm-repair-reviewer"]
         self.assertFalse(loop.parse_args(base).observe_only)
         self.assertTrue(loop.parse_args(base + ["--observe-only"]).observe_only)
+
+    def test_direct_task_is_explicit_and_defaults_absent(self):
+        loop = load_loop()
+        base = ["run", "--clicks", "1", "--owner", "codex-68",
+                "--issuing-caller", "joe", "--author", "wm-author",
+                "--reviewer", "wm-reviewer",
+                "--repair-reviewer", "wm-repair-reviewer"]
+        self.assertIsNone(loop.parse_args(base).task)
+        self.assertEqual("T-ladder-01-loop-turns-over",
+                         loop.parse_args(base + ["--task", "T-ladder-01-loop-turns-over"]).task)
+
+    def test_repair_dispatch_uses_the_loop_agency_base(self):
+        loop = load_loop()
+        completed = subprocess.CompletedProcess([], 0, '{"job-id":"job-1"}', "")
+        with mock.patch.object(loop, "sh", return_value=completed) as send:
+            self.assertEqual("job-1", loop.dispatch("wm-repair-reviewer", "repair"))
+        self.assertIn("--base", send.call_args.args)
+        self.assertIn(loop.AGENCY, send.call_args.args)
 
     def test_observation_only_debugger_stop_never_dispatches_repair(self):
         loop = load_loop()

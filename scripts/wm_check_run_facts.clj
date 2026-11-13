@@ -152,6 +152,14 @@
   (str "[" (str/join ", " (for [row rows]
                             (format "(%d, %s)" (id (row "policy")) (rational-term (row "g")))))
        "]"))
+(defn cascade-composition
+  "Requirements.CascadeComposition rows for Q12."
+  [rows]
+  (str "[" (str/join ", " (for [row rows]
+                            (format "{ cascade := %d, pick := %d, fired := %s, g := %s }"
+                                    (id (row "cascade")) (id (row "pick"))
+                                    (fs (row "fired")) (rational-term (row "g")))))
+       "]"))
 (defn policy-prediction [rows]
   (str "[" (str/join ", " (for [row rows]
                             (format "(%d, %s)" (id (row "policy")) (digest-term (row "digest")))))
@@ -191,15 +199,21 @@
    ;; the previous run's refusal and the input digests too.
    :q11 ["currentChoice" "comparedPolicies" "constructedCascades" "targetConstruction" "abstentionPrediction"
          "enumeratedTasks" "kind" "policyG" "abstentionG" "policyPrediction"
-         "previousChoice" "previousOutcome" "previousInputDigest" "currentInputDigest" "refusalHistory"]})
+         "previousChoice" "previousOutcome" "previousInputDigest" "currentInputDigest" "refusalHistory"]
+   ;; Q12: selection G over cascades (Joe, 2026-11-13).
+   :q12 ["kind" "cascadeComposition"]})
 
 (defn required-keys
   "A work run has no selection path to export, so Q7 does not wait on one.  A
   selection run does, and a path on a work run is rendered for Q7 to refuse."
   [facts q]
-  (if (and (= :q7 q) (= "work" (facts "kind")) (not (contains? facts "selectionPath")))
+  (cond
+    (and (= :q7 q) (= "work" (facts "kind")) (not (contains? facts "selectionPath")))
     (remove #{"selectionPath"} (deps q))
-    (deps q)))
+    ;; A work run constructs no task-selection cascades: Q12 reads only its kind.
+    (and (= :q12 q) (= "work" (facts "kind")))
+    ["kind"]
+    :else (deps q)))
 
 (defn partial-run-fact-fields
   "Read the field names from Lean's PartialRunFacts declaration.  This keeps
@@ -245,6 +259,11 @@
                               (facts "libraryPatternCount") (facts "constructorPatternCount")
                               (fs (facts "comparedPolicies")) (fs (facts "constructedCascades"))))
         :q3 (ev-known (str "cascadesWithoutG := " (fs (facts "cascadesWithoutG"))))
+        :q12 (if (= "work" (facts "kind"))
+               (ev-known (format "kind := %s" (kind-term (facts "kind"))))
+               (ev-known (format "kind := %s, cascadeComposition := %s"
+                                 (kind-term (facts "kind"))
+                                 (cascade-composition (facts "cascadeComposition")))))
         :q4 (let [g (facts "gTerms")]
               (ev-known (format "policyPreferences := %s, gTerms := ⟨%s, %s, %s⟩, policiesWithRiskTerm := %d, policiesWithAmbiguityTerm := %d, policiesWithInformationTerm := %d, comparedPolicies := %s"
                                 (policy-preferences (facts "policyPreferences"))
@@ -268,13 +287,14 @@
                               (if-let [path (facts "selectionPath")]
                                 (selection-path-term path)
                                 "none")))
-        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, abstentionPrediction := %s, previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d, refusalHistory := %s"
+        :q11 (ev-known (format "kind := %s, enumeratedTasks := %s, currentDecision := %s, targetConstruction := %s, comparedPolicies := %s, constructedCascades := %s, policyG := %s, abstentionG := %s, policyPrediction := %s, policyParameters := %s, abstentionPrediction := %s, previousDecision := %s, previousOutcome := %s, previousInputDigest := %d, currentInputDigest := %d, refusalHistory := %s"
                                (kind-term (facts "kind")) (fs (facts "enumeratedTasks"))
                                (decision (facts "currentChoice"))
                                (target-construction (facts "targetConstruction"))
                                (fs (facts "comparedPolicies")) (fs (facts "constructedCascades"))
                                (policy-g (facts "policyG")) (rational-term (facts "abstentionG"))
                                (policy-prediction (facts "policyPrediction"))
+                               (policy-prediction (or (facts "policyParameters") []))
                                (digest-term (facts "abstentionPrediction"))
                                (previous-decision (facts "previousChoice"))
                                (outcomes (facts "previousOutcome"))
@@ -313,7 +333,7 @@
 
 (defn lean-source
   ([export definition-name]
-   (lean-source export definition-name [:q1 :q2 :q3 :q4 :q5 :q6 :q7 :q9 :q11]))
+   (lean-source export definition-name [:q1 :q2 :q3 :q4 :q5 :q6 :q7 :q9 :q11 :q12]))
   ([export definition-name partial-fields]
    (let [unknown (seq (remove deps partial-fields))]
      (when unknown

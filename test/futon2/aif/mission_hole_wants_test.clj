@@ -150,3 +150,16 @@
            (:holes source))
         "the current status is the source-stated interpretation criterion")
     (is (nil? (mhw/ticket-source "/root" (assoc ticket :status-class :terminal))))))
+
+(deftest registry-path-rooted-under-another-honored-tree-still-mints-a-repo-name-locator
+  (testing "machinery-57 attempt-001: a sandbox-rooted registry path minted :repo \"\""
+    (let [read (mhw/read-current-mission
+                 "/root" {:path "/home/joe/code/futon2/holes/tickets/T-x.md"
+                          :text "# x\n\n**Status:** OPEN\n"})]
+      (is (= {:repo "futon2" :path "holes/tickets/T-x.md"
+              :text "# x\n\n**Status:** OPEN\n"}
+             read)
+          "the path is stripped against every honored code root, not only the caller's"))
+    (is (= {:repo "" :path "elsewhere/x.md" :text "t"}
+           (mhw/read-current-mission "/root" {:path "/elsewhere/x.md" :text "t"}))
+        "a path under no honored root keeps its legacy shape rather than guessing")))

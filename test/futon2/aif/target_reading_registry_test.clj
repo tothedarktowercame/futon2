@@ -106,6 +106,21 @@
         (is (= (get-in request [:task :excerpt_sha256])
                (sut/excerpt-digest file)))))))
 
+(deftest python-and-clojure-item-section-digests-agree
+  (let [dir (temp-root) file (io/file dir "ticket.md") out (io/file dir "request.json")
+        text (str "# Ticket\n\n## Context\nEarlier.\n\n"
+                  "## Acceptance\n\n- [ ] First check.\n- [ ] Second check.\n\n"
+                  "## Notes\nLater.\n")]
+    (spit file text)
+    (let [item-line 8
+          run (shell/sh "python3" "scripts/wm_task_reading.py" (.getPath file)
+                        "--item-line" (str item-line) "--out" (.getPath out))
+          request (json/parse-string (slurp out) true)]
+      (is (zero? (:exit run)) (:err run))
+      (is (= (get-in request [:task :excerpt_sha256])
+             (sut/item-section-digest file item-line)))
+      (is (= (:source_text request) (sut/item-section-text file item-line))))))
+
 (deftest template-only-head-is-not-a-reading-source
   (let [dir (temp-root) file (io/file dir "template.md") out (io/file dir "request.json")]
     (spit file (str "# Mission\n\n" template-head "\n\n## IDENTIFY\nLater.\n"))

@@ -2,6 +2,7 @@
   "Per-reading-policy class-channel F from retained completed-run records."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.reading-policy-class-history-index :as history-index]))
 
 (def terminal-classes #{:focused :related :unrelated :stop-the-line})
@@ -13,12 +14,25 @@
                       {:kind :relative-class-history-root :path path})))
     directory))
 
+(defn declared-history-directory!
+  "Resolve the declaration's named storage authority.  Class history belongs
+  to the same isolated futon2 data root as the run records which produce it."
+  [{:keys [authority path] :as locator}]
+  (when-not (and (= :futon2-data authority)
+                 (vector? path)
+                 (seq path)
+                 (every? string? path))
+    (throw (ex-info "Unsupported class history locator"
+                    {:kind :unsupported-class-history-locator
+                     :locator locator})))
+  (absolute-history-directory! (apply data-paths/path path)))
+
 (defn history-context
   "Read the declared window and retained records. The declaration, rather than
   scorer code, owns both the rate-like window and history location."
   [policy-key]
   (let [declaration (-> "wm/reading-policy-class-f-v1.edn" io/resource slurp edn/read-string)
-        directory (absolute-history-directory! (:run-record-directory declaration))]
+        directory (declared-history-directory! (:run-record-directory declaration))]
     (history-index/history directory policy-key (:history-window declaration))))
 
 (defn- q6-terminal [record]

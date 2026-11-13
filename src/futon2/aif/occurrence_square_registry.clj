@@ -3,12 +3,25 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.interpretation-evidence :as evidence]
-            [futon2.aif.three-halves-square :as square])
+            [futon2.aif.three-halves-square :as square]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardCopyOption]))
 
 (def schema :wm/occurrence-square-registry-v1)
 (def default-root "/home/joe/code/storage/wm-occurrence-squares")
-(def default-library-root "/home/joe/code/futon3/library")
+
+(defn default-library-root
+  "The pinned pattern library beneath the SERVING code root, resolved through
+   the same authority as the 象 validator (selected-target-reading runs
+   session_turn_analysis.py, which locates its library at parents[2] of its
+   own file). Hard-coding /home/joe/code/futon3/library stranded every
+   citation of a pattern that exists only in the isolated FUTON_WM_CODE_ROOT
+   copy: the resolver returned nil, occurrence-square authoring voided the
+   whole reading :pattern-part-missing, and selection terminated with no
+   addressable action (held run 2026-11-12-87084895, repair
+   wm-click-loop-repair-d2550457)."
+  []
+  (data-paths/code-path "futon3" "library"))
 
 (defn- key-file [root target analysis-digest]
   (io/file (or root default-root) (evidence/value-digest (str target))
@@ -18,7 +31,7 @@
   "Return a pure-at-call-site pattern-text resolver rooted in LIBRARY-ROOT.
   The registry still checks the carried source pin; this only supplies the
   bytes against which the authored four map labels are checked."
-  ([] (library-resolver default-library-root))
+  ([] (library-resolver (default-library-root)))
   ([library-root]
    (fn [pattern]
      (let [relative (str (if (keyword? pattern)

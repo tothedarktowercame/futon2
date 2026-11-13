@@ -23,6 +23,7 @@
   (:require [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.observation-checks :as checks]
+            [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.string :as str]))
 
@@ -68,18 +69,45 @@
      :path (str/replace-first rel (str repo "/") "")
      :decl (closed-form hole)}))
 
+(defn- code-roots
+  "Every root this installation honors for registry mission paths: the
+   caller's CODE-ROOT, the canonical /home/joe/code declaration, and the
+   FUTON_WM_CODE_ROOT the serving process composes (load-identity's
+   translation of canonical declarations into the isolated serving tree).
+   WM-CONTRACT-MACHINERY-57 attempt-001 minted a ticket-closure locator
+   with :repo \"\" because the ticket registry carried a path rooted in one
+   tree while the minting process stripped only its own code-root; every
+   later C4 read then refused :different-artifact-repository before the
+   want could ever be measured."
+  [code-root]
+  (distinct
+   (keep #(some-> (io/file %) .getCanonicalPath str)
+         [(str code-root)
+          "/home/joe/code"
+          (str/replace (load-identity/resolve-source-path "/home/joe/code/")
+                       #"/+$" "")])))
+
 (defn read-current-mission
   "Read MISSION from its repository HEAD.  The registry's `:open-holes` is
   discovery metadata, not decision state; selection must derive wants and
-  observations from one current byte string."
+  observations from one current byte string.  The registry path is stripped
+  against every honored code root (see `code-roots`) so a path recorded
+  under one serving tree still mints a repository-name locator under
+  another."
   [code-root mission]
   (let [abs (str (:path mission))
-        rel (str/replace-first abs (str code-root "/") "")
+        strip (some #(when (str/starts-with? abs (str % "/"))
+                       {:root % :rel (subs abs (inc (count %)))})
+                    (code-roots code-root))
+        rel (:rel strip abs)
         [repo & parts] (str/split rel #"/")
         path (str/join "/" parts)]
     (if (contains? mission :text)
       {:repo repo :path path :text (:text mission)}
-      (let [{:keys [exit out]} (sh/sh "git" "-C" (str code-root "/" repo)
+      (let [repo-dir (when (and (:root strip) repo)
+                       (let [d (io/file (:root strip) repo)]
+                         (when (.isDirectory d) (str d))))
+            {:keys [exit out]} (sh/sh "git" "-C" (or repo-dir (str code-root "/" repo))
                                       "show" (str "HEAD:" path))]
         (when (zero? exit) {:repo repo :path path :text out})))))
 

@@ -525,3 +525,27 @@
     (is (= :unknown-sha (get-in result [:refused :bad :kind]))))
   (with-redefs [oc/check-mechanisms (dissoc oc/check-mechanisms :C4)]
     (is (= :check-descriptor-mismatch (:kind (oc/loaded-check :C4))))))
+
+;; ---------------------------------------------------------------------------
+;; wm-click-loop-repair-34d2741c: repo-root must honor the composed WM code
+;; root. Held run 2026-11-11-4f3e780f-dbf4-4af0-9c1b-940bb242f600 stopped at
+;; selection with :invalid-cascade-source
+;; :interpretation-source-unreadable because the pinned receipt source
+;; futon3/library/apparatus/one-authority-per-question.flexiarg resolved
+;; against the hard-coded /home/joe/code while the serving process ran in an
+;; isolated tree selected by FUTON_WM_CODE_ROOT, which every other registry
+;; (mission-registry, load-identity, data-paths) already honors.
+(deftest resolve-code-root-honors-isolated-wm-code-root
+  (let [canonical (str (System/getProperty "user.home") "/code")]
+    (is (= canonical (oc/resolve-code-root nil)) "omission preserves canonical")
+    (is (= canonical (oc/resolve-code-root "")) "blank preserves canonical")
+    (is (= canonical (oc/resolve-code-root "   ")) "whitespace preserves canonical")
+    (is (= "/somewhere/isolated" (oc/resolve-code-root "/somewhere/isolated")))
+    (is (= "/somewhere/isolated" (oc/resolve-code-root "/somewhere/isolated/")) "trailing slash is kept as written"))
+  ;; receipt-source resolution (cascade-sources) searches repo-root first for
+  ;; relative paths; with the isolated root honored the pinned bytes resolve.
+  (let [isolated (oc/resolve-code-root "/home/joe/wm-sandbox/code")
+        pinned "futon3/library/apparatus/one-authority-per-question.flexiarg"]
+    (when (.exists (java.io.File. (str isolated "/" pinned)))
+      (is (some-> (java.io.File. (str oc/repo-root "/" pinned)) .exists)
+          (str "repo-root must resolve the pinned receipt source; repo-root=" oc/repo-root)))))

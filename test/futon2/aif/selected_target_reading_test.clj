@@ -6,6 +6,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.selected-target-reading :as sut]
+            [futon2.data-paths :as data-paths]
             [futon2.aif.target-reading-registry :as registry])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -117,6 +118,35 @@
         "the resumed inner decision sees the publication in the same step")
     (is (= :current-candidate
            (:status (registry/current-reading (str readings) "M-selected" excerpt))))))
+
+(deftest item-section-reading-uses-the-declared-item-line
+  (let [work (temp-dir "selected-item-reading-")
+        readings (temp-dir "selected-item-registry-")
+        source (io/file work "T-item.md")
+        _ (spit source (str "# Ticket\n\n## Context\nEarlier.\n\n"
+                            "## Acceptance\n\n- [ ] Read this item.\n\n"
+                            "## Notes\nLater.\n"))
+        line 8
+        excerpt (registry/item-section-digest source line)
+        j (-> (judgement "T-item" (.getPath source) excerpt)
+              (assoc-in [:cascade-problems :target-sources 0 :source-kind] :item-section)
+              (assoc-in [:cascade-problems :target-sources 0 :item-line] line))
+        observed (atom nil)
+        result (sut/repair!
+                {:run-id "run-item" :author "wm-author"
+                 :answer-fn (fn [{:keys [request]}]
+                              (reset! observed request)
+                              {:analysis (analysis-for request)})
+                 :request-root (str work)
+                 :target-reading-root (str readings)}
+                j)]
+    (is (= :item-section (:source-kind (sut/selected-need j))))
+    (is (= line (:item-line (sut/selected-need j))))
+    (is (= "open-item-section" (get-in @observed [:task :source_kind])))
+    (is (= line (get-in @observed [:task :item :line])))
+    (is (= excerpt (get-in @observed [:task :excerpt_sha256])))
+    (is (not= :selected-target-reading-request-refused (:kind result))
+        "the real builder accepted the item-section invocation")))
 
 (deftest refusal-never-falls-through-to-another-target-or-seat
   (let [source (io/file (temp-dir "selected-reading-refusal-") "M-selected.md")
@@ -487,3 +517,21 @@
     (is (= 2 @calls))
     (is (= :selected-target-reading-validation-refused (:kind result)))
     (is (seq (get-in result [:detail :cascade-failures])))))
+
+(deftest default-script-paths-resolve-under-the-serving-code-root
+  ;; Repair wm-click-loop-repair-0efb7397: the defaults were hardcoded to
+  ;; /home/joe/code/... and a click served from an isolated code root
+  ;; refused at selected-target-reading with "can't open file
+  ;; /home/joe/code/futon2/scripts/wm_task_reading.py". The defaults must
+  ;; follow futon2.data-paths (which honors FUTON_WM_CODE_ROOT) and must
+  ;; name files that actually exist in the serving tree.
+  (testing "request builder resolves inside the futon2 checkout and exists"
+    (is (= (data-paths/repo-path "scripts" "wm_task_reading.py")
+           sut/default-request-builder))
+    (is (.isFile (io/file sut/default-request-builder))
+        (str "missing request builder: " sut/default-request-builder)))
+  (testing "analysis validator resolves inside the serving code root and exists"
+    (is (= (data-paths/code-path "futon3c" "scripts" "session_turn_analysis.py")
+           sut/default-analysis-validator))
+    (is (.isFile (io/file sut/default-analysis-validator))
+        (str "missing analysis validator: " sut/default-analysis-validator))))

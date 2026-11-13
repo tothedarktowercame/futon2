@@ -72,9 +72,13 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-CODE = Path.home() / "code"
-F2 = CODE / "futon2"
-F3C = CODE / "futon3c"
+# An isolated campaign may compose the same repos under a non-canonical root.
+# Keep the canonical paths as defaults, while making the root an explicit part
+# of the loop process's environment.  F2/F3C remain independently overridable
+# because wm_click.sh already has that public contract.
+CODE = Path(os.environ.get("WM_CODE_ROOT", Path.home() / "code")).resolve()
+F2 = Path(os.environ.get("F2", CODE / "futon2")).resolve()
+F3C = Path(os.environ.get("F3C", CODE / "futon3c")).resolve()
 META_INJURY_ROOT = F2 / "data" / "wm-meta-injuries-live-2026-10-22"
 STATE = F2 / "data" / "wm-click-loop"
 LEDGER = STATE / "ledger.jsonl"
@@ -86,7 +90,7 @@ ALERTS = STATE / "alerts.jsonl"
 # are excluded only from the repeat comparison, so a known gap awaiting a
 # decision cannot pause the loop while other defects are being found.
 ACKNOWLEDGED = STATE / "acknowledged.json"
-AGENCY = "http://localhost:7070"
+AGENCY = os.environ.get("BASE", "http://127.0.0.1:7070").rstrip("/")
 SEND = F3C / "scripts" / "agency_send.py"
 EVAL = F3C / "scripts" / "proof-eval.sh"
 TERMINAL = {"done", "failed", "error", "cancelled", "timeout", "timed-out"}
@@ -1135,10 +1139,20 @@ def source_identity_inventory() -> dict[str, Path]:
     declaration = required_sources_declaration(text)
     for namespace, raw_path in re.findall(r"'([\w.\-]+)\s+\"([^\"]+\.clj)\"", declaration):
         path = Path(raw_path)
+        # The checked declaration is deliberately canonical and therefore
+        # contains /home/joe/code paths even when this process composes an
+        # isolated checkout. Translate declaration identity into the selected
+        # F2/F3C roots; also accept already-relocated declarations.
+        f2_prefix = str(F2) + "/"
+        f3c_prefix = str(F3C) + "/"
         if raw_path.startswith("/home/joe/code/futon2/"):
             path = F2 / raw_path.removeprefix("/home/joe/code/futon2/")
         elif raw_path.startswith("/home/joe/code/futon3c/"):
             path = F3C / raw_path.removeprefix("/home/joe/code/futon3c/")
+        elif raw_path.startswith(f2_prefix):
+            path = F2 / raw_path.removeprefix(f2_prefix)
+        elif raw_path.startswith(f3c_prefix):
+            path = F3C / raw_path.removeprefix(f3c_prefix)
         entries[namespace] = path
     return entries
 
@@ -1484,6 +1498,8 @@ def notify_alert(args, c: dict) -> None:
 # self-heal reads and fires no click while more than one injury is open.
 MAX_ACTIVE_INJURIES = 1
 _ACTIVE_INJURY_FORM = (
+    "(do (require 'futon2.aif.meta-injury-store "
+    "'futon2.aif.meta-injury-ledger 'futon2.aif.meta-self-heal-production) "
     "(let [d (futon2.aif.meta-injury-store/load-durable-ledger "
     "futon2.aif.meta-self-heal-production/default-ledger-path)] "
     "(if (map? (:source-pin d)) "
@@ -1491,7 +1507,7 @@ _ACTIVE_INJURY_FORM = (
     "(if (= :computed (:status a)) "
     "(str \"ACTIVE-INJURIES \" (count (:injuries a)) \" \" (pr-str (vec (sort (keys (:injuries a)))))) "
     "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:status a))))) "
-    "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:reason d)))))")
+    "(str \"ACTIVE-INJURIES-UNREADABLE \" (pr-str (:reason d))))))")
 
 
 def active_injuries() -> tuple[int | None, str]:
@@ -1649,6 +1665,8 @@ def fire(n: int, args, since_epoch: int) -> dict:
     before = budget_lines()
     cmd = [F2 / "scripts" / "wm_click.sh", "--run", "--issuing-caller", args.issuing_caller,
            "--author", args.author, "--reviewer", args.reviewer, "--repair-reviewer", args.repair_reviewer]
+    if args.task:
+        cmd.extend(["--task", args.task])
     log(f"click {n}: firing ({out.name})")
     in_flight_repairs = []
     handled_stops = set()
@@ -1971,7 +1989,7 @@ def repair_packet(tag: str, reason: str, click: dict | None, prior: list[str],
 
 def dispatch(seat: str, prompt: str) -> str:
     r = sh(sys.executable, SEND, "--from", "wm-click-loop", "--to", seat, "--kind", "bell",
-           "--mode", "work", input=prompt, timeout=120)
+           "--mode", "work", "--base", AGENCY, input=prompt, timeout=120)
     m = re.search(r'"job-id"\s*:\s*"([^"]+)"', r.stdout)
     if not m:
         raise RuntimeError(f"dispatch to {seat} failed: {r.stdout[-400:]} {r.stderr[-400:]}")
@@ -2414,6 +2432,7 @@ def parse_args(argv=None):
     r.add_argument("--repair-timeout", type=int, default=5400)
     r.add_argument("--owner", required=True)
     r.add_argument("--issuing-caller", required=True)
+    r.add_argument("--task", help="direct task id for a staged or otherwise preselected run")
     r.add_argument("--author", required=True)
     r.add_argument("--reviewer", required=True)
     r.add_argument("--repair-reviewer", required=True)

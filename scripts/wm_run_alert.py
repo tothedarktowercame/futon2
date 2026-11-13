@@ -78,6 +78,17 @@ def path_line(f):
                   f"consumedRuns {consumed_runs_name(path.get('consumedRuns'))}"))
     return f"{count}; {', '.join(parts)}, learningApplied {provenance_name(path.get('learningApplied'))}"
 
+def composition_line(f):
+    """Q12: same-pick cascades whose fired patterns differ, and how many share a G."""
+    comp = f.get("cascadeComposition")
+    if f.get("kind") != "selection": return "work run: no task-selection cascades"
+    if nr(comp): return f"cascadeComposition: {comp['not-recomputable']}"
+    if not isinstance(comp, list): return "cascadeComposition absent"
+    pairs = [(a, b) for i, a in enumerate(comp) for b in comp[i+1:]
+             if a.get("pick") == b.get("pick") and a.get("fired") != b.get("fired")]
+    same_g = sum(1 for a, b in pairs if a.get("g") == b.get("g"))
+    return f"{len(comp)} cascades; {len(pairs)} same-pick pairs with different fired patterns, {same_g} sharing a G"
+
 def numbers(q, f):
     opened = sum(card(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) if not any(nr(f[k]) for k in ("openMissions", "openExcursions", "openTickets")) else "NR"
     table = {
@@ -89,7 +100,8 @@ def numbers(q, f):
       6: f"previous {val(f['previousChoice'])} -> current {val(f['currentChoice'])}; digests {val(f['previousInputDigest'])}/{val(f['currentInputDigest'])}",
       7: path_line(f),
       9: f"{val(f['completionPairsStrictlyPreferred'])}/{val(f['completionPreferencePairs'])} completion pairs strictly preferred",
-      11: strict_minimum_line(f)}
+      11: strict_minimum_line(f),
+      12: composition_line(f)}
     return table[q]
 
 def edn(x):
@@ -160,11 +172,43 @@ def run_lines(title, checked):
     shown=checked["bad"] or checked["outcomes"]
     return [f"{title} run:"]+[f"Q{q} {checked['outcomes'][q]}: {numbers(q,checked['facts'])}" for q in shown]
 
+def default_evidence_url():
+  """Resolve the evidence endpoint without assuming the canonical host's ports.
+
+  On Lucy, 127.0.0.1:7073 is nginx's HTTPS listener, not futon1b; the sandbox
+  futon1b serves on FUTON1B_URL (:7074). Posting to the hard-coded :7073 made
+  every Lucy click end "EVIDENCE PUBLICATION FAILED: HTTPError status 400"
+  (wm-click-aa0b6e63, wm-click-c5727dd3). An explicit FUTON_WM_EVIDENCE_URL
+  wins, then FUTON1B_URL; zone, which sets neither for the launcher, keeps :7073.
+  """
+  explicit=os.environ.get("FUTON_WM_EVIDENCE_URL","").strip()
+  if explicit: return explicit
+  base=os.environ.get("FUTON1B_URL","").strip().rstrip("/")
+  if base: return base+"/api/alpha/evidence"
+  return "http://127.0.0.1:7073/api/alpha/evidence"
+
+def default_mathlib_root():
+  """Resolve the mathlib4 checkout without assuming the canonical host path.
+
+  Repair wm-click-loop-repair-862319e5: --mathlib-root defaulted to
+  /home/joe/code/mathlib4, which does not exist in the sandboxed code root
+  (FUTON_WM_CODE_ROOT). The post-run Q1--Q10 check then died on
+  FileNotFoundError reading Requirements.lean, wm_click.sh printed
+  'requirements NOT CHECKED' twice and exited 1 on a click it had already
+  confirmed ownership of. Honour the sandbox code root first, keep the
+  canonical host path as the fallback."""
+  for var in ("FUTON_WM_CODE_ROOT", "FUTON_CODE_ROOT"):
+    root = os.environ.get(var)
+    if root and (Path(root) / "mathlib4").is_dir():
+      return str(Path(root) / "mathlib4")
+  return "/home/joe/code/mathlib4"
+
+
 def main(argv=None):
     p=argparse.ArgumentParser(); p.add_argument("--run-record", required=True)
     p.add_argument("--futon2-root", default=str(Path(__file__).resolve().parents[1]))
-    p.add_argument("--mathlib-root", default="/home/joe/code/mathlib4")
-    p.add_argument("--alerts-log"); p.add_argument("--evidence-url", default="http://127.0.0.1:7073/api/alpha/evidence")
+    p.add_argument("--mathlib-root", default=default_mathlib_root())
+    p.add_argument("--alerts-log"); p.add_argument("--evidence-url", default=default_evidence_url())
     p.add_argument("--facts-json", help="pre-exported work fixture; tests only")
     p.add_argument("--selection-facts-json", help="pre-exported selection fixture; tests only")
     p.add_argument("--no-evidence", action="store_true", help="hermetic tests only")
