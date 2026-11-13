@@ -1442,15 +1442,49 @@
            (:ok? (verify-run dir))))
     (catch Exception _ false)))
 
-(defn- find-giraffe-run [opts]
+(defn- find-unpinned-giraffe-run [opts]
   (if-let [explicit (:outer/giraffe-run-dir opts)]
     (when (verified-giraffe-run? (io/file explicit)) (io/file explicit))
     (let [root (io/file (or (:outer/giraffe-root opts) default-giraffe-root))]
       (when (.isDirectory root)
         (->> (.listFiles root)
              (filter #(.isDirectory ^java.io.File %))
-             (sort-by #(.getName ^java.io.File %) #(compare %2 %1))
+             (sort-by #(.getName ^java.io.File %) (fn [a b] (compare b a)))
              (some #(when (verified-giraffe-run? %) %)))))))
+
+(defn- giraffe-run-pin
+  "The Giraffe run a loop run is pinned to, if any.  A loop launch records
+  the run id and, for a scoped run, its `--only` member list in the loop's
+  state tree (data/wm-click-loop/giraffe-pin.edn) — outside the source
+  tree, so a repair commit to the code cannot change it.  Explicit opts win
+  for direct callers and tests; a missing or unreadable pin file means no
+  pin, and behaviour is exactly the unpinned one."
+  [opts]
+  (or (:outer/giraffe-pin opts)
+      (let [f (io/file (or (:outer/giraffe-pin-path opts)
+                           (data-paths/path "wm-click-loop" "giraffe-pin.edn")))]
+        (when (.isFile f)
+          (try (edn/read-string (slurp f))
+               (catch Exception _ nil))))))
+
+(defn- find-giraffe-run [opts]
+  (if-let [pin (giraffe-run-pin opts)]
+    (let [found (find-unpinned-giraffe-run opts)]
+      (cond
+        (nil? found) nil
+        ;; The pinned run is never silently swapped in for the found one and
+        ;; no fallback past this refusal exists, so a repair that widens the
+        ;; lookup (the 8a0cb58c2 move: reject the scoped run, fall back to a
+        ;; full-population pass) is stopped here, before the run is read.
+        (not= (:run-id pin) (.getName ^java.io.File found))
+        (throw (ex-info (str "giraffe run not pinned: pinned " (:run-id pin)
+                             ", found " (.getName ^java.io.File found))
+                        {:kind :giraffe-run-not-pinned
+                         :pinned-id (:run-id pin)
+                         :found-id (.getName ^java.io.File found)
+                         :pinned-only-ids (:only-ids pin)}))
+        :else found))
+    (find-unpinned-giraffe-run opts)))
 
 (defn- outer-selection-refusal [e]
   {:absent :outer-selection-refused
