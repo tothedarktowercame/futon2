@@ -1070,6 +1070,40 @@
                                       (catch clojure.lang.ExceptionInfo e e))))))))))
 
 
+(deftest resolve-lineage-activates-an-existing-unactivated-successor
+  ;; Lucy's sandbox: successor charters copied from zone, data roots absent.
+  (let [root (tmp-root)
+        lab (io/file root "M-aif-full-loop-95")
+        _ (.mkdirs lab)
+        path (.getPath (io/file lab "cohort.edn"))
+        data-root (.getPath (io/file root "wm-full-loop-machinery-95"))
+        prereg (-> (read-string (slurp "holes/labs/M-aif-full-loop-57/cohort.edn"))
+                   (assoc :cohort/id :wm-contract-machinery-95-v1)
+                   (assoc-in [:stopping-rule :target] 1))
+        _ (spit path (with-out-str (pp/pprint prereg)))
+        _ (.mkdirs (io/file data-root))
+        _ (cohort/activate! path data-root)
+        binding {:preregistration path :data-root data-root
+                 :cohort-id :wm-contract-machinery-95-v1
+                 :sha256 (@#'cohort/sha256 (slurp path))}
+        cell (term {:opportunity-id "lin/two" :trigger :duree-click-on-demand
+                    :machine-state {} :agent-roster []
+                    :code-state {:git-sha "t" :git-dirty? false
+                                 :resolved-mode-flags {} :configuration-digest "t"}
+                    :semantic-epoch :test})]
+    (cohort/start-attempt! (cohort/pin-preregistration binding) data-root cell)
+    (let [minted (cohort/resolve-lineage! binding)
+          succ (read-string (slurp (:preregistration minted)))
+          activation (cohort/activation-path (cohort/cohort-dir succ (:data-root minted)))]
+      (is (.exists activation) "succeed! activates the successor it mints")
+      ;; The charter stays; only its activation is missing, as on Lucy.
+      (io/delete-file activation)
+      (is (not (.exists activation)))
+      (let [b (cohort/resolve-lineage! binding)]
+        (is (= :wm-contract-machinery-96-v1 (:cohort-id b)))
+        (is (.exists activation)
+            "an existing verified successor is activated, not left inert")))))
+
 (deftest resolve-lineage-memoizes-ledgers-by-complete-input-fingerprint
   (let [root (tmp-root)
         lab (io/file root "M-aif-full-loop-195")

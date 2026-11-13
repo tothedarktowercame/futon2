@@ -1145,6 +1145,16 @@
                                  :parent (:cohort/id parent)
                                  :claimed (:cohort/id succ)
                                  :path succ-path})))
+              ;; A verified successor charter can exist without its activation:
+              ;; an isolated serving tree (Lucy's wm-sandbox) carries zone's
+              ;; charters 58-99 but none of zone's data roots, so every
+              ;; succession there stopped :cohort-not-activated after the
+              ;; two attempts of a cohort. Activate it exactly as succeed!
+              ;; activates a successor it mints.
+              (let [succ-root (sibling-path (:data-root b))]
+                (.mkdirs (io/file succ-root))
+                (when-not (.exists (activation-path (cohort-dir succ succ-root)))
+                  (activate! succ-path succ-root)))
               (recur (with-meta {:preregistration succ-path
                                  :data-root (sibling-path (:data-root b))
                                  :cohort-id (:cohort/id succ)
