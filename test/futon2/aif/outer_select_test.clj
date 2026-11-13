@@ -6,6 +6,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-select :as outer-select]
+            [futon2.aif.outer-state :as outer-state]
             [futon2.aif.action-identity :as identity]
             [wm-run-facts :as facts]
             [wm-check-run-facts :as checker]))
@@ -516,4 +517,70 @@
     (doseq [c (vals by-id)]
       (is (= (:digest c) (menu/cascade-digest c))
           (str "digest not carrier-recomputable: " (:id c))))))
+
+(defn- digest-pins
+  "Every [key-path digest] where the record carries a string under a key whose
+  name ends in \"digest\", found by walking the whole record (maps and vectors).
+  Enumerated by walk, never listed, so a digest key select starts pinning
+  later appears here and must be classified before the test passes again."
+  [x]
+  (letfn [(walk [path x]
+            (cond
+              (map? x) (mapcat (fn [[k v]]
+                                 (if (and (keyword? k)
+                                          (string/ends-with? (name k) "digest")
+                                          (string? v))
+                                   [[(conj path k) v]]
+                                   (walk (conj path k) v)))
+                               x)
+              (vector? x) (mapcat (fn [i v] (walk (conj path i) v))
+                                  (range) x)
+              :else []))]
+    (walk [] x)))
+
+(def non-replay-digest-key-names
+  "Digest keys the selection record pins that the replay code
+  (outer-state/chosen-cascade) does not consume: they identify predictions,
+  parameters, choice inputs and relation receipts, not cascades. Adding a key
+  name here is the deliberate claim that no cascade-replay path needs it."
+  #{"prediction-digest" "parameters-digest" "choice-input-digest"
+    "receipt-digest" "relation-receipt-digest" "stop-digest"})
+
+(deftest every-cascade-identity-digest-pin-is-replay-recomputable
+  ;; WM hardening package 5 (H-wm-ladder-lucy-handoff-2026-11-13 section 4.5):
+  ;; every digest the selection record pins for the chosen cascade must be
+  ;; recomputable by the code that replays it, outer-state/chosen-cascade.
+  ;; Pre-262ca6bc8, chain variants pinned sha256(pr-str [base-digest :chain k]),
+  ;; which no replay can recompute: the click refused
+  ;; :pending-steps-unrecoverable and stranded its learning step.
+  (let [chain-makeup {:cascades [{:id :start :patterns ["only-what-can-start-now"] :steps [:ready-gate]}
+                                 {:id :discover :patterns ["find-out-before-building"]
+                                  :steps [{:gate-status :undetermined}]}]}
+        chain-obs {:focus "M-focus"
+                   :relation (fn [_ _] :associated)
+                   :field [{:target "T-10" :reach 1/2 :reach-source :default-reach}
+                           {:target "T-08" :reach 1/2 :reach-source :default-reach}]
+                   :facts {"T-08" {:status :ready :unblocks 0 :cone 0 :rank 1}
+                           "T-10" {:status :ready :unblocks 0 :cone 0 :rank 3}}}]
+    (doseq [[label r] [["single-pick" (outer-select/select base-makeup base-state base-observation)]
+                       ["chain" (outer-select/select chain-makeup base-state chain-obs)]]
+            :let [rows (:cascades r)
+                  replayed (mapv outer-state/replayed-cascade-digest rows)]]
+      (testing (str label " selection pins only replay-recomputable cascade digests")
+        (is (= {:status :chosen} (:outcome r))
+            (str label ": fixture must produce a chosen record that pins a digest"))
+        ;; The record-level pin names exactly one cascade row and equals what
+        ;; the replay recomputes for it (the whole of chosen-cascade's check).
+        (is (= (:cascade-digest r) (nth replayed (:cascade-index r)))
+            (str label ": pinned cascade-digest is not what the replay recomputes"))
+        ;; The property: every digest key the record actually carries is
+        ;; either classified as not consumed by the replay, or identifies
+        ;; exactly one cascade row by replayed digest. A new digest key
+        ;; without a replay path fails here.
+        (doseq [[path digest] (digest-pins r)]
+          (when-not (contains? non-replay-digest-key-names (name (peek path)))
+            (is (= 1 (count (filter #{digest} replayed)))
+                (str label ": digest pin " path " does not identify exactly one "
+                     "replay-recomputable cascade row"))))))))
+
 

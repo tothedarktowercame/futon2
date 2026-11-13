@@ -176,6 +176,18 @@
                 [:doable :blocked]))
       decayed)))
 
+(defn replayed-cascade-digest
+  "The digest this namespace recomputes when replaying a pinned cascade: the
+  carrier (name/readme-cascade/units/edges) hashed exactly as the selection
+  side mints it (outer-menu/cascade-digest and its callers). Any digest a
+  selection record pins for cascade identity must equal this, or the replay
+  refuses :pending-steps-unrecoverable."
+  [entry]
+  (identity/sha256
+   (pr-str [(name (:id entry)) (:readme-cascade entry)
+            (mapv (fn [u] [(:pattern u) (:sha256 u) (:index u)]) (:units entry))
+            (:edges entry)])))
+
 (defn- chosen-cascade
   "Replay retained steps, never the current makeup menu. A modern digest
   identifies exactly one retained composition; legacy records need their own
@@ -186,11 +198,7 @@
         matches (filter #(if digest (= digest (:digest %))
                              (= (:cascade-id selection-result) (:id %))) rows)
         entry (when (= 1 (count matches)) (first matches))
-        actual (when (and digest entry)
-                 (identity/sha256
-                  (pr-str [(name (:id entry)) (:readme-cascade entry)
-                           (mapv (fn [u] [(:pattern u) (:sha256 u) (:index u)]) (:units entry))
-                           (:edges entry)])))
+        actual (when (and digest entry) (replayed-cascade-digest entry))
         steps (if digest (:steps entry) (or (:steps entry) (:steps selection-result)))
         typed? (and (vector? steps)
                     (every? #(or (contains? #{:ready-gate :placed-gate :by-cone :by-unblocks :by-rank} %)
