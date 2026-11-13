@@ -1501,5 +1501,106 @@ class ProviderUnavailableStopTest(unittest.TestCase):
             self.assertIn("waiting for Joe", stop_row["reason"])
 
 
+class RepairProtectedPathTest(unittest.TestCase):
+    """WM hardening package 3 (handoff 2026-11-13 section 3): a repair commit
+    that touches a protected path is not hot-loaded; the loop stops instead."""
+
+    # The scope-widening repair commit named in the handoff; in this repo's
+    # history (reverted by 08fb7d3c0).
+    BAD_SHA = "8a0cb58c2a5709318612fe6bc96b26bcc782906f"
+
+    def test_protected_patterns_cover_the_handoff_list(self):
+        loop = load_loop()
+        self.assertEqual(
+            ["DarkTower/WarMachine/Requirements.lean",
+             "DarkTower/WarMachine/RequirementsQ12.lean"],
+            loop.protected_paths_in(["DarkTower/WarMachine/Requirements.lean",
+                                     "DarkTower/WarMachine/RequirementsQ12.lean",
+                                     "DarkTower/WarMachine/Other.lean"]))
+        self.assertEqual(
+            ["scripts/wm_check_run_facts.clj", "scripts/wm_click_repair_loop.py",
+             "scripts/wm_run_facts.clj", "src/futon2/aif/full_loop_runtime.clj"],
+            loop.protected_paths_in(["scripts/wm_run_facts.clj",
+                                     "scripts/wm_check_run_facts.clj",
+                                     "scripts/wm_click_repair_loop.py",
+                                     "src/futon2/aif/full_loop_runtime.clj"]))
+        self.assertEqual([], loop.protected_paths_in(
+            ["src/futon2/aif/wm/family_selection.clj",
+             "test/futon2/aif/full_loop_giraffe_scoped_run_test.clj",
+             "scripts/futon2/other.clj"]))
+
+    def test_bad_case_repair_8a0cb58c2_is_not_loaded_and_stops_the_loop(self):
+        loop = load_loop()
+        loop.F2 = ROOT
+        # Treat 8a0cb58c2 as the repair commit: its committed paths enter the
+        # reload plan exactly as changed_click_files would serve them.
+        rels = loop.commit_paths(ROOT, self.BAD_SHA)
+        self.assertIn("src/futon2/aif/full_loop_runtime.clj", rels)
+        files = [ROOT / rel for rel in rels if rel.endswith((".clj", ".cljc"))]
+
+        def no_jvm(form, timeout=600):
+            raise AssertionError("nothing may be hot-loaded when a protected path changed")
+
+        with mock.patch.object(loop, "click_running", return_value=False), \
+             mock.patch.object(loop, "changed_click_files", return_value=files), \
+             mock.patch.object(loop, "jvm_eval", side_effect=no_jvm), \
+             mock.patch.object(loop, "record") as record, \
+             mock.patch.object(loop, "log"):
+            with self.assertRaises(loop.ProtectedPathError) as raised:
+                loop.reload_changed(123)
+        self.assertEqual(["src/futon2/aif/full_loop_runtime.clj"], raised.exception.paths)
+        self.assertEqual("reload-refused-protected", record.call_args.args[0]["event"])
+        self.assertEqual(["src/futon2/aif/full_loop_runtime.clj"],
+                         record.call_args.args[0]["protected-paths"])
+        # The same commit judged as a tagged repair is refused, not "repaired".
+        self.assertEqual(["src/futon2/aif/full_loop_runtime.clj"],
+                         loop.repair_commit_protection([(ROOT, self.BAD_SHA)]))
+
+    def test_a_repair_touching_only_unprotected_files_still_loads(self):
+        loop = load_loop()
+        family = loop.F2 / "src/futon2/aif/wm/family_selection.clj"
+        with mock.patch.object(loop, "click_running", return_value=False), \
+             mock.patch.object(loop, "changed_click_files", return_value=[family]), \
+             mock.patch.object(loop, "dirty", return_value=False), \
+             mock.patch.object(loop, "jvm_eval", side_effect=lambda form, timeout=600: {
+                 "rc": 0, "out": ":standing-reset" if "reset-context!" in form else ":reloaded",
+                 "err": ""}) as reload, \
+             mock.patch.object(loop, "record"), \
+             mock.patch.object(loop, "log"):
+            ok, text, _ = loop.reload_changed(123)
+        self.assertTrue(ok)
+        self.assertEqual("", text)
+        self.assertTrue(any(c.args[0].startswith("(try (require")
+                            for c in reload.call_args_list))
+        self.assertIn("reset-context!", reload.call_args.args[0], "the standing context reset still runs")
+
+    def test_protected_path_stop_is_legal_only_with_evidence(self):
+        loop = load_loop()
+        args = mock.Mock(clicks=3, ticks=3)
+        self.assertEqual(("protected-path", True), loop._validated_stop(
+            args, "protected-path", {"protected-paths": ["src/futon2/aif/full_loop_runtime.clj"]}))
+        self.assertEqual(("debugger-error", False), loop._validated_stop(
+            args, "protected-path", {"protected-paths": []}))
+        self.assertEqual(("debugger-error", False), loop._validated_stop(
+            args, "protected-path", {}))
+
+    def test_repair_judgment_refuses_a_tagged_protected_commit(self):
+        loop = load_loop()
+        args = mock.Mock(repair_seat="wm-repair", seat_model=None, repair_timeout=1)
+        with mock.patch.object(loop, "ensure_seat"), \
+             mock.patch.object(loop, "dispatch", return_value="job-1"), \
+             mock.patch.object(loop, "wait_job",
+                               return_value={"state": "done",
+                                             "result": "VERDICT: repaired"}), \
+             mock.patch.object(loop, "tagged_commits",
+                               return_value=[(ROOT, self.BAD_SHA)]), \
+             mock.patch.object(loop, "record"), \
+             mock.patch.object(loop, "log"):
+            verdict, detail = loop.repair(args, "held run stopped", None, [])
+        self.assertEqual("protected-path", verdict)
+        self.assertIn("src/futon2/aif/full_loop_runtime.clj", detail)
+        self.assertIn("refused", detail)
+
+
 if __name__ == "__main__":
     unittest.main()

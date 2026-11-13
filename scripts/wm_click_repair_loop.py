@@ -136,6 +136,31 @@ WRITE_STAMP_ROOT = F2 / "data" / "wm-write-stamps"
 # The click's code: what a repair may change and what a reload must pick up.
 CLICK_PATHS = [(F2, "src"), (F2, "scripts/futon2"), (F3C, "src/futon3c/wm")]
 SOURCE_IDENTITY_INVENTORY = F2 / "src" / "futon2" / "aif" / "load_identity.clj"
+# Paths a repair commit may not touch (WM hardening package 3, handoff
+# 2026-11-13 section 3: repair commit 8a0cb58c2 widened field admission via
+# missions-giraffe-manifest? and the loop hot-loaded and retried it).  The
+# list lives here, in the loop script, which is itself protected: a repair
+# cannot widen its own remit by editing the list unnoticed.  Protection of
+# field admission is per file, not per definition: full_loop_runtime.clj
+# holds both find-giraffe-run and missions-giraffe-manifest?, and splitting
+# it would be a bigger change than this package settles.
+PROTECTED_REPAIR_PATHS = (
+    "src/futon2/aif/full_loop_runtime.clj",   # field admission / Giraffe run lookup
+    "scripts/wm_run_facts.clj",                # Requirements facts export
+    "scripts/wm_check_run_facts.clj",          # Requirements checker
+    "scripts/wm_click_repair_loop.py",         # the loop itself
+)
+PROTECTED_REPAIR_PREFIXES = (
+    "DarkTower/WarMachine/Requirements",       # mathlib4 Requirements*.lean
+)
+
+
+class ProtectedPathError(RuntimeError):
+    """A committed change touches a protected path; nothing may be hot-loaded."""
+
+    def __init__(self, paths):
+        super().__init__("protected paths touched: " + ", ".join(paths))
+        self.paths = list(paths)
 
 
 def now() -> str:
@@ -1094,6 +1119,36 @@ def changed_click_files(since_epoch: int) -> list[Path]:
     return sorted(files)
 
 
+def protected_paths_in(rel_paths) -> list[str]:
+    """Repo-relative paths a repair must not touch, sorted, deduplicated."""
+    hits = set()
+    for rel in rel_paths:
+        if rel in PROTECTED_REPAIR_PATHS or rel.startswith(PROTECTED_REPAIR_PREFIXES):
+            hits.add(rel)
+    return sorted(hits)
+
+
+def repo_rel(path: Path) -> str:
+    for repo in (F2, F3C):
+        try:
+            return Path(path).relative_to(repo).as_posix()
+        except ValueError:
+            continue
+    return Path(path).name
+
+
+def commit_paths(repo: Path, sha: str) -> list[str]:
+    return git(repo, "show", "--name-only", "--format=", sha).split()
+
+
+def repair_commit_protection(commits) -> list[str]:
+    """Protected paths touched by tagged repair commits, sorted."""
+    hits = set()
+    for repo, sha in commits:
+        hits.update(protected_paths_in(commit_paths(repo, sha)))
+    return sorted(hits)
+
+
 def required_sources_declaration(text: str) -> str:
     """Extract only the map literal assigned to load_identity/required-sources."""
     declaration = re.search(r"\(def\s+required-sources\b", text)
@@ -1259,6 +1314,18 @@ def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bo
         return None, "click-in-flight", since_epoch
     started = int(time.time())
     files, identity_dependencies = reload_plan(since_epoch)
+    protected = protected_paths_in(repo_rel(f) for f in files)
+    if protected:
+        # A repair commit touched a path that defines what the machine may
+        # work on (handoff 2026-11-13 section 3).  Refuse to load anything,
+        # not just the protected file: loading the rest would run the next
+        # click against a half-widened apparatus.  The raise stops the loop
+        # and bells the owner via main(); it never reloads and never retries.
+        text = "repair touched protected paths; nothing was loaded: " + ", ".join(protected)
+        log(f"reload: REFUSED -- {text}")
+        record({"event": "reload-refused-protected", "ok": False, "since": since_epoch,
+                "protected-paths": protected, "namespaces": []})
+        raise ProtectedPathError(protected)
     skipped = [f for f in files if dirty(f)]
     order = [(ns, f) for ns, f in reload_order([f for f in files if f not in skipped])]
     for f in skipped:
@@ -2053,9 +2120,15 @@ def repair(args, reason: str, click: dict | None, prior: list[str],
     if verdict == "repaired" and not commits:
         verdict, detail = "unlanded", detail + "; claimed repaired but no commit carries the tag"
     elif commits:
-        errs = kondo_errors(commits)
-        if errs:
-            verdict, detail = "kondo-errors", detail + "; clj-kondo errors:\n" + errs
+        protected = repair_commit_protection(commits)
+        if protected:
+            verdict, detail = ("protected-path",
+                               detail + "; refused: protected paths touched: "
+                               + ", ".join(protected))
+        else:
+            errs = kondo_errors(commits)
+            if errs:
+                verdict, detail = "kondo-errors", detail + "; clj-kondo errors:\n" + errs
     log(f"repair {tag}: {detail[:400]}")
     record({"event": "repair-judged", "tag": tag, "job": job, "verdict": verdict, "detail": detail,
             "commits": [f"{r.name}:{s}" for r, s in commits]})
@@ -2139,6 +2212,9 @@ def _validated_stop(args, claimed_case: str, evidence: dict) -> tuple[str, bool]
             legal = False
     elif claimed_case == "work-exhausted":
         legal = _work_exhausted_checked(evidence)
+    elif claimed_case == "protected-path":
+        ev = evidence.get("protected-paths") if isinstance(evidence, dict) else None
+        legal = isinstance(ev, list) and bool(ev)
     else:
         legal = claimed_case == "debugger-error"
     return (claimed_case, True) if legal and claimed_case != "debugger-error" else ("debugger-error", False)
@@ -2449,6 +2525,11 @@ def main() -> int:
         return status()
     try:
         return run(args)
+    except ProtectedPathError as e:
+        # Nothing was loaded: reload_changed refuses before any jvm_eval.
+        return stop(args, "protected-path",
+                    f"repair touched protected paths; nothing was loaded: {e}",
+                    1, {"protected-paths": e.paths})
     except Exception as e:  # a crash is a stop like any other: the owner hears of it
         import traceback
         log(traceback.format_exc())
