@@ -463,9 +463,12 @@
                           (assoc record :pick-only-terms (:terms record) :G :inadmissible
                                  :g-law :selection-cascade-grain-g
                                  :canonical-refusal (or (:refusal e) (:refusal canonical)))))
-          cascades (mapv #(canonical-g % (get-in canonical [:by-id (:id %)])) cascades)
+          cascades (mapv #(assoc (canonical-g % (get-in canonical [:by-id (:id %)]))
+                                 :fired-patterns (get-in canonical [:fired (:id %)] []))
+                         cascades)
           scores (mapv :G cascades)
-          abstention (canonical-g (outer-score/abstention-score score-input) (:stopping canonical))
+          abstention (assoc (canonical-g (outer-score/abstention-score score-input) (:stopping canonical))
+                            :fired-patterns [])
           ratings (per-task-ratings score-input)
           legacy-relations (mapv (fn [c] {:target (:pick c) :relation (get-in c [:relation :class])
                                          :relation-known? (when-not (= :no-pick (:pick c))

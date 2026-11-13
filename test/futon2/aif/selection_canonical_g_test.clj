@@ -56,3 +56,14 @@
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"no interpretation"
                         (sg/score [{:id :x :patterns ["take-the-cheap-win"] :pick "T-08"
                                     :relation-class :useful-elsewhere}] facts))))
+
+(deftest fired-patterns-are-recorded-for-requirements-q12
+  (let [es [{:id :only-what-can-start-now :patterns only :pick "T-08" :relation-class :useful-elsewhere}
+            {:id :giraffe-order :patterns giraffe :pick "T-08" :relation-class :useful-elsewhere}
+            {:id :serves-a-way :patterns serves :pick "T-09" :relation-class :useful-elsewhere}]
+        fired (:fired (sg/score es facts))]
+    (is (= ["only-what-can-start-now"] (fired :only-what-can-start-now)))
+    (is (= ["only-what-can-start-now"] (fired :giraffe-order))
+        "no cone, no unblocks on T-08: prepare-the-ground and what-others-wait-on-first cannot fire")
+    (is (= ["only-what-can-start-now" "serves-a-way"] (fired :serves-a-way)))
+    (is (= [] (fired :futon2.aif.selection-canonical-g/stopping)))))

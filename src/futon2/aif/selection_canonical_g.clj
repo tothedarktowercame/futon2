@@ -20,6 +20,7 @@
   pick's tokens, which equals the Lean per-candidate initial state."
   (:require [clojure.set :as set]
             [futon2.aif.cascade-coapply-g :as canonical]
+            [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.cascade-shape-g :as shape]))
 
@@ -98,6 +99,19 @@
                                :patterns (into {} (map (fn [[p t :as u]] [u (pattern-record t (interps p))]))
                                                units)}}})))
 
+(defn fired-patterns
+  "The task-selection patterns that fire along CAND's trajectory from STATE over H
+  epochs: with theta 1 the co-application transition is deterministic, so this is
+  the union of the enabled frontiers (cascade-model-manifest/enabled-frontier, the
+  scorer's own). The empty policy fires nothing. Requirements Q12 reads it."
+  [cand state h]
+  (let [{:keys [units descent patterns]} (get-in cand [:precedence :co-apply])]
+    (loop [s state t 0 fired #{}]
+      (let [frontier (when (< t h) (model/enabled-frontier units descent patterns s))]
+        (if (empty? frontier)
+          (vec (sort (keep #(when-not (= stop-unit %) (str (first %))) fired)))
+          (recur (into s (mapcat #(:produces (patterns %)) frontier)) (inc t) (into fired frontier)))))))
+
 (defn score
   "Canonical G for every menu cascade and for stopping.
   ENTRIES: [{:id :patterns :pick :relation-class}]; FACTS: target -> fact map.
@@ -143,4 +157,5 @@
         rows (if (vector? results) results (:candidates results))
         by-id (into {} (map (juxt :cascade-id identity)) rows)]
     {:by-id (dissoc by-id stop-id) :stopping (get by-id stop-id) :horizon h
+     :fired (into {} (map (fn [c] [(:id c) (fired-patterns c state h)])) cands)
      :refusal (when-not (vector? results) results)})))
