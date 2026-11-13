@@ -1520,11 +1520,13 @@ class RepairProtectedPathTest(unittest.TestCase):
                                      "DarkTower/WarMachine/Other.lean"]))
         self.assertEqual(
             ["scripts/wm_check_run_facts.clj", "scripts/wm_click_repair_loop.py",
-             "scripts/wm_run_facts.clj", "src/futon2/aif/full_loop_runtime.clj"],
+             "scripts/wm_run_facts.clj", "src/futon2/aif/full_loop_runtime.clj",
+             "src/futon3c/giraffe/run.clj"],
             loop.protected_paths_in(["scripts/wm_run_facts.clj",
                                      "scripts/wm_check_run_facts.clj",
                                      "scripts/wm_click_repair_loop.py",
-                                     "src/futon2/aif/full_loop_runtime.clj"]))
+                                     "src/futon2/aif/full_loop_runtime.clj",
+                                     "src/futon3c/giraffe/run.clj"]))
         self.assertEqual([], loop.protected_paths_in(
             ["src/futon2/aif/wm/family_selection.clj",
              "test/futon2/aif/full_loop_giraffe_scoped_run_test.clj",
@@ -1542,17 +1544,20 @@ class RepairProtectedPathTest(unittest.TestCase):
         def no_jvm(form, timeout=600):
             raise AssertionError("nothing may be hot-loaded when a protected path changed")
 
+        # Realistic epoch: git does not parse bare small numbers as dates.
+        since = int(loop.git(ROOT, "show", "-s", "--format=%ct", self.BAD_SHA).strip()) - 60
         with mock.patch.object(loop, "click_running", return_value=False), \
              mock.patch.object(loop, "changed_click_files", return_value=files), \
+             mock.patch.object(loop, "PROTECTED_SCAN_REPOS", (ROOT,)), \
              mock.patch.object(loop, "jvm_eval", side_effect=no_jvm), \
              mock.patch.object(loop, "record") as record, \
              mock.patch.object(loop, "log"):
             with self.assertRaises(loop.ProtectedPathError) as raised:
-                loop.reload_changed(123)
-        self.assertEqual(["src/futon2/aif/full_loop_runtime.clj"], raised.exception.paths)
+                loop.reload_changed(since)
+        self.assertIn("src/futon2/aif/full_loop_runtime.clj", raised.exception.paths)
         self.assertEqual("reload-refused-protected", record.call_args.args[0]["event"])
-        self.assertEqual(["src/futon2/aif/full_loop_runtime.clj"],
-                         record.call_args.args[0]["protected-paths"])
+        self.assertIn("src/futon2/aif/full_loop_runtime.clj",
+                      record.call_args.args[0]["protected-paths"])
         # The same commit judged as a tagged repair is refused, not "repaired".
         self.assertEqual(["src/futon2/aif/full_loop_runtime.clj"],
                          loop.repair_commit_protection([(ROOT, self.BAD_SHA)]))
@@ -1584,6 +1589,67 @@ class RepairProtectedPathTest(unittest.TestCase):
             args, "protected-path", {"protected-paths": []}))
         self.assertEqual(("debugger-error", False), loop._validated_stop(
             args, "protected-path", {}))
+
+    @staticmethod
+    def _repo_with_commit(td: str, rel: str, message: str) -> Path:
+        """A throwaway git repo with one commit touching REL."""
+        repo = Path(td) / ("repo-" + rel.replace("/", "_"))
+        repo.mkdir(parents=True)
+        subprocess.run(["git", "-C", repo, "init", "-q"], check=True)
+        subprocess.run(["git", "-C", repo, "config", "user.email", "t@t"], check=True)
+        subprocess.run(["git", "-C", repo, "config", "user.name", "t"], check=True)
+        target = repo / rel
+        target.parent.mkdir(parents=True)
+        target.write_text("-- fixture\n")
+        subprocess.run(["git", "-C", repo, "add", rel], check=True)
+        subprocess.run(["git", "-C", repo, "commit", "-q", "-m", message], check=True)
+        return repo
+
+    def test_mathlib4_requirements_change_in_the_window_is_refused(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            repo = self._repo_with_commit(
+                td, "DarkTower/WarMachine/Requirements.lean", "widen requirements")
+
+            def no_jvm(form, timeout=600):
+                raise AssertionError("nothing may be hot-loaded when a protected path changed")
+
+            since = int(loop.time.time()) - 3600  # bare small numbers are not dates
+            with mock.patch.object(loop, "click_running", return_value=False), \
+                 mock.patch.object(loop, "changed_click_files", return_value=[]), \
+                 mock.patch.object(loop, "PROTECTED_SCAN_REPOS", (loop.F2, loop.F3C, repo),
+                                   create=True), \
+                 mock.patch.object(loop, "jvm_eval", side_effect=no_jvm), \
+                 mock.patch.object(loop, "record") as record, \
+                 mock.patch.object(loop, "log"):
+                with self.assertRaises(loop.ProtectedPathError) as raised:
+                    loop.reload_changed(since)
+            self.assertEqual(["DarkTower/WarMachine/Requirements.lean"],
+                             raised.exception.paths)
+            self.assertEqual("reload-refused-protected", record.call_args.args[0]["event"])
+            # The same repo's tagged repair commits are found and judged too.
+            sha = loop.git(repo, "rev-parse", "HEAD").strip()
+            loop.MATHLIB4 = repo
+            self.assertIn((repo, sha), loop.tagged_commits("widen requirements"))
+            self.assertEqual(["DarkTower/WarMachine/Requirements.lean"],
+                             loop.repair_commit_protection([(repo, sha)]))
+
+    def test_change_to_giraffe_run_verification_is_refused(self):
+        loop = load_loop()
+        with tempfile.TemporaryDirectory() as td:
+            repo = self._repo_with_commit(
+                td, "src/futon3c/giraffe/run.clj", "weaken verify-run")
+            with mock.patch.object(loop, "click_running", return_value=False), \
+                 mock.patch.object(loop, "changed_click_files", return_value=[]), \
+                 mock.patch.object(loop, "PROTECTED_SCAN_REPOS", (repo,), create=True), \
+                 mock.patch.object(loop, "jvm_eval",
+                                   side_effect=AssertionError(
+                                       "nothing may be hot-loaded")), \
+                 mock.patch.object(loop, "record"), \
+                 mock.patch.object(loop, "log"):
+                with self.assertRaises(loop.ProtectedPathError) as raised:
+                    loop.reload_changed(int(loop.time.time()) - 3600)
+            self.assertEqual(["src/futon3c/giraffe/run.clj"], raised.exception.paths)
 
     def test_repair_judgment_refuses_a_tagged_protected_commit(self):
         loop = load_loop()
