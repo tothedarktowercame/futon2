@@ -154,3 +154,11 @@ sensitive. That makes it a natural next rung.
   not commit is alerted, never committed. The lease is a record: nothing else reads it yet.
   Consequence on zone: the shared `~/code` checkouts are seldom clean (futon3c had 4 untracked
   files when this was tested), so a repair there will usually stop instead of dispatching.
+- Merged to `main` on Joe's word (2026-11-13), as `b0c4ab196`: the Lucy ladder commits and
+  packages 1-5 and 7. The ladder tickets came in closed: 01-06, 09 and 10 DONE; 07, 08, 11, 12
+  and 13 ABANDONED (WONTFIX), which Giraffe reads as cancelled. `FIELD.md` and the tickets
+  README say the ladder policy no longer governs anything. On `main` one protected-path test
+  failed because it scanned the real repos and found the merge itself; fixed to scan only
+  its fixture. `:draft` items still do not count toward an exhausted field (Joe: a draft
+  counts as done only if it is done). Package 6 is not merged.
+
