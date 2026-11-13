@@ -1034,6 +1034,33 @@
             (inc index)))
         (map-indexed vector lines)))
 
+(defn- ticket-doc->entry [path]
+  (let [id (str/replace (.getName (io/file path)) #"\.md$" "")
+        text (slurp path)
+        lines (str/split-lines text)
+        status (ticket-status-text lines)
+        ;; Tickets honour the same explicit-Gate-line rule as
+        ;; missions (TICKET-GATE-1): a Gate line passing the
+        ;; operator-keyword test overrides the status table and
+        ;; removes the ticket from selection. Prose alone
+        ;; ("Do NOT start without Joe") never gates.
+        gate-lines (operator-gate-lines lines)]
+    {:id id :kind :ticket :path path
+     :item-line (first-open-checkbox-line lines)
+     :title (mission-title-from-lines id lines)
+     :status-line status
+     :status-class (if (seq gate-lines)
+                     :operator-gated
+                     (classify-ticket-status status))
+     :operator-gated? (boolean (seq gate-lines))
+     :operator-gate-lines gate-lines
+     :close-condition-unstated (close-condition-unstated? lines)
+     :requisition (task-requisition/read-state text)
+     :requisition-record? (task-requisition/requisition-record? {:text text})
+     :source {:path path :sha256 (sha256-text text)}
+     :parent (some #(when (re-find #"(?i)parent" %)
+                      (re-find #"M-[A-Za-z0-9_-]+" %)) lines)}))
+
 (defn load-tickets
   "Immediate primary-checkout holes/tickets/T-*.md only. Same mission scan
    fences before ID deduplication; bare holes/T-* discovery notes excluded."
@@ -1055,32 +1082,7 @@
          (remove sandbox-path?)
          (remove #(non-primary-path? (str/replace % "/holes/tickets/" "/holes/missions/")))
          (sort-by (juxt count identity))
-         (map (fn [path]
-                (let [id (str/replace (.getName (io/file path)) #"\.md$" "")
-                      text (slurp path)
-                      lines (str/split-lines text)
-                      status (ticket-status-text lines)
-                      ;; Tickets honour the same explicit-Gate-line rule as
-                      ;; missions (TICKET-GATE-1): a Gate line passing the
-                      ;; operator-keyword test overrides the status table and
-                      ;; removes the ticket from selection. Prose alone
-                      ;; ("Do NOT start without Joe") never gates.
-                      gate-lines (operator-gate-lines lines)]
-                  {:id id :kind :ticket :path path
-                   :item-line (first-open-checkbox-line lines)
-                   :title (mission-title-from-lines id lines)
-                   :status-line status
-                   :status-class (if (seq gate-lines)
-                                   :operator-gated
-                                   (classify-ticket-status status))
-                   :operator-gated? (boolean (seq gate-lines))
-                   :operator-gate-lines gate-lines
-                   :close-condition-unstated (close-condition-unstated? lines)
-                   :requisition (task-requisition/read-state text)
-                   :requisition-record? (task-requisition/requisition-record? {:text text})
-                   :source {:path path :sha256 (sha256-text text)}
-                   :parent (some #(when (re-find #"(?i)parent" %)
-                                    (re-find #"M-[A-Za-z0-9_-]+" %)) lines)})))
+         (map ticket-doc->entry)
          dedupe-by-id vec)})))
 
 (defn ticket-entry [target]
@@ -1153,6 +1155,29 @@
          (sort-by (juxt count identity))
          (map excursion-doc->entry)
          dedupe-by-id vec)}))
+
+(defn task-document-entry
+  "Read one primary-checkout task document through the census parsers/fences.
+   No substrate access or whole-census scan. Caller must reject duplicate IDs
+   against its authority snapshot before using the returned source."
+  [path]
+  (let [path (.getAbsolutePath (io/file path))
+        kind (task-document-kind path)
+        repo (when kind (io/file (first (str/split path #"/holes/"))))
+        ticket-repos (some->> (System/getenv "FUTON_WM_TICKET_REPOS")
+                              (re-seq #"[^,[:space:]]+") set)]
+    (when (and kind (.isFile (io/file path)) (primary-checkout? repo)
+               (not (sandbox-path? path))
+               (not (non-primary-path? (if (= :ticket kind)
+                                        (str/replace path "/holes/tickets/" "/holes/missions/")
+                                        path)))
+               (or (not= :ticket kind) (nil? ticket-repos)
+                   (contains? ticket-repos (.getName repo))))
+      (let [entry ((case kind :mission mission-doc->entry
+                              :excursion excursion-doc->entry
+                              :ticket ticket-doc->entry) path)]
+        (when-not (and (= :mission kind) (derived-mission-id? (:id entry)))
+          (assoc entry :kind kind))))))
 
 (defn live-excursion? [excursion] (live-mission? excursion))
 
