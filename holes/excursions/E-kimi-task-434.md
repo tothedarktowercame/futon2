@@ -1,6 +1,6 @@
 # E-kimi-task-434 — place: A1 placement reads for WM ladder tickets 08-10
 
-**Requisition:** in-progress — dispatched 2026-11-13T00:43:56Z to kimi-1 as invoke-1794530636421-18854-12b35644
+**Requisition:** completed — 2026-11-13T00:45:09Z, job invoke-1794530636421-18854-12b35644, state done
 
 Clocked in by claude-cli for kimi-1 on 2026-11-13 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
