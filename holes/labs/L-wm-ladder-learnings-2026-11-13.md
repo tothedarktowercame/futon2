@@ -123,3 +123,17 @@ sensitive. That makes it a natural next rung.
   `main`, on the Lucy tip and on the merge, so the Lucy commits introduced none of them. They
   return nil or refuse where the tests expect campaign, placement-history and snapshot state;
   a separate repair, not a blocker for this merge.
+- Package 3 accepted (`b88ad8dcb`, merged `ea05e009d`): the loop refuses to hot-load, and stops,
+  when a reload or tagged repair commit touches a protected path (`full_loop_runtime.clj`, the
+  run-facts scripts, the loop itself). Follow-up with zai-3: the mathlib4 Requirements entry was
+  vacuous (the loop never examines mathlib4 changes), and `verify-run` (futon3c) is added.
+- Package 2 accepted (`514e1bd73`, merged `64a9adf79`). Cause: the click-5 field was empty with
+  no exclusion rows at all (DONE and gated items never enter the open roster), and the legality
+  check for a terminal empty field required exclusion rows. It now also accepts an empty field
+  whose non-open registry members are all complete, inactive or operator-gated; the loop's
+  existing work-exhausted stop then fires with no repair dispatched.
+- Found while merging: `wm_click_repair_loop_test.py` reaches `jvm_eval` and so runs
+  `proof-eval` against the live futon3c JVM (read-only injury-ledger queries, but production on
+  zone; on Lucy it was the sandbox's JVM). Package 7 (zai-4) makes the loop tests hermetic.
+  Package 1's follow-up broke 13 stop tests (args without `giraffe_run`); zai-1 is fixing it,
+  with tests given a temp `GIRAFFE_ROOT`.
