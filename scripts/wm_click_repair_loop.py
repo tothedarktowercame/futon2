@@ -85,6 +85,12 @@ LEDGER = STATE / "ledger.jsonl"
 LOGFILE = STATE / "loop.log"
 STOP_FILE = STATE / "STOP"
 ALERTS = STATE / "alerts.jsonl"
+# WM hardening package 1 (H-wm-ladder-lucy-handoff-2026-11-13 section 4): the
+# giraffe run this loop run works on, pinned at launch in loop state -- outside
+# the source tree, so a repair commit to the code cannot change it.  Selection
+# (futon2.aif.full-loop-runtime/find-giraffe-run) reads it and refuses any
+# other run with :giraffe-run-not-pinned.  Cleared when the loop stops.
+GIRAFFE_PIN = STATE / "giraffe-pin.edn"
 # Standing signature rows the owner has acknowledged in writing, each with the
 # reason and the open packet. They stay in every verdict and alert record; they
 # are excluded only from the repeat comparison, so a known gap awaiting a
@@ -2147,6 +2153,13 @@ def _validated_stop(args, claimed_case: str, evidence: dict) -> tuple[str, bool]
 def stop(args, case: str, reason: str, code: int, evidence: dict) -> int:
     effective_case, legal = _validated_stop(args, case, evidence)
     log(f"STOP: {reason}")
+    # WM hardening package 1: the loop run is over, so its field pin is too.
+    # Left in place it would pin a future run (or a manual click) to a run
+    # that run never chose.
+    if GIRAFFE_PIN.exists():
+        GIRAFFE_PIN.unlink()
+        record({"event": "giraffe-pin-cleared"})
+        log("giraffe pin: cleared")
     row = {"event": "stop", "case": effective_case, "legal": legal,
            "evidence": evidence, "reason": reason}
     if effective_case != case:
@@ -2160,6 +2173,55 @@ def stop(args, case: str, reason: str, code: int, evidence: dict) -> int:
 
 # ---------------------------------------------------------------- main
 
+def record_giraffe_pin(args) -> bool:
+    """Pin the field's scope for this loop run (WM hardening package 1).
+
+    Resolve the giraffe run every click of this run will work on -- the newest
+    run directory under GIRAFFE_ROOT whose manifest describes the missions
+    field (mirrors missions-giraffe-manifest?: edges under holes/missions/,
+    no :tickets-index source) -- and record its run id plus its scoped
+    ``--only`` member list in loop state.  Verification still happens at
+    selection time; the pin only names the run, and selection refuses any
+    other (:giraffe-run-not-pinned).  Returns True when a pin was recorded.
+    """
+    root = Path(os.environ.get("GIRAFFE_ROOT", "/home/joe/code/storage/giraffe"))
+    if not root.is_dir():
+        log(f"giraffe pin: root {root} missing; no pin recorded")
+        return False
+    for run_dir in sorted((d for d in root.iterdir() if d.is_dir()),
+                          key=lambda d: d.name, reverse=True):
+        manifest = run_dir / "manifest.edn"
+        if not manifest.is_file():
+            continue
+        try:
+            text = manifest.read_text(encoding="utf-8")
+        except OSError as e:
+            log(f"giraffe pin: {manifest} unreadable ({e}); skipped")
+            continue
+        # Coarse mirror of the manifest gate: a missions-field run has its
+        # edges under holes/missions/ and no :tickets-index source.
+        if "holes/missions/" not in text or ":tickets-index" in text:
+            continue
+        only = re.search(r":only-ids\s+(\[[^\]]*\]|nil)", text, re.S)
+        only_ids = (re.findall(r'"([^"]*)"', only.group(1))
+                    if only and only.group(1) != "nil" else [])
+        pin = ("{:run-id " + _edn_string(run_dir.name)
+               + "\n :only-ids [" + " ".join(_edn_string(i) for i in only_ids) + "]"
+               + "\n :recorded-at " + _edn_string(now()) + "}\n")
+        GIRAFFE_PIN.write_text(pin, encoding="utf-8")
+        scope = f"scoped ({len(only_ids)} members)" if only_ids else "full population"
+        record({"event": "giraffe-pin", "run-id": run_dir.name,
+                "only-ids": only_ids})
+        log(f"giraffe pin: pinned {run_dir.name} ({scope})")
+        return True
+    log("giraffe pin: no missions-field run found; no pin recorded")
+    return False
+
+
+def _edn_string(s: str) -> str:
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def run(args) -> int:
     lock = (STATE / "loop.lock").open("w")
     try:
@@ -2168,6 +2230,7 @@ def run(args) -> int:
         print("another wm_click_repair_loop holds the lock; exiting")
         return 0
     STOP_FILE.unlink(missing_ok=True)
+    record_giraffe_pin(args)
     log(f"=== start: clicks={args.clicks} ticks={args.ticks} stall={args.stall} "
         f"max-repairs={args.max_repairs} repair-seat={args.repair_seat} ===")
     record({"event": "start", "args": vars(args)})
