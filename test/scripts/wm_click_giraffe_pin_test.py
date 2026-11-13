@@ -49,7 +49,8 @@ def load_loop():
         "wm_click_repair_loop", ROOT / "scripts" / "wm_click_repair_loop.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module
+    import wm_click_hermetic
+    return wm_click_hermetic.harden(module)
 
 
 class GiraffePinTest(unittest.TestCase):
