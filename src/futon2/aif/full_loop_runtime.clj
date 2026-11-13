@@ -1733,7 +1733,14 @@
   chosen task has closed; while it remains open observed gain is `:none`.
   META injuries are arbitrated before this function."
   [opts]
-  (let [opts (assoc opts :wm/discovery-enactment :off)]
+  ;; Outer selection contacts a seat (the operator-focus reader) before the
+  ;; runner starts, and dispatch! refuses a WM-run contact that has no run-local
+  ;; job ledger (held run 2026-11-13-dc01c06b, click wm-click-0d1dca09). Mint
+  ;; the ledger here and pass the same atom on, as :selection-timing/state is,
+  ;; so the runner records the reader's job with the rest of this click's jobs.
+  (let [opts (-> (assoc opts :wm/discovery-enactment :off)
+                 (update :registered-run/job-ledger
+                         #(or % (atom {:order [] :jobs {}}))))]
    (if (get-in opts [:task :id])
     (run-ordinary-opportunity-with-task!
      (let [named {:task (get-in opts [:task :id]) :entry (direct-task-entry opts)}

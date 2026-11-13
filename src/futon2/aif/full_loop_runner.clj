@@ -11702,7 +11702,11 @@
                                 :declaration-reads/state (atom nil)
                                 :habit-reads/state (atom [])
                                 :job-liveness/state (atom [])
-                                :registered-run/job-ledger (atom {:order [] :jobs {}})
+                                ;; Reuse a ledger minted before outer selection,
+                                ;; whose reader job belongs to this click.
+                                :registered-run/job-ledger
+                                (or (:registered-run/job-ledger raw-opts)
+                                    (atom {:order [] :jobs {}}))
                                 :scan-report/state (atom nil)
                                 :preference-refresh/state (atom nil)
                                 :outer-repeat-comparison/state (atom nil)
