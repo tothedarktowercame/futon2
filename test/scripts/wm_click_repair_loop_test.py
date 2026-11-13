@@ -1654,16 +1654,24 @@ class RepairProtectedPathTest(unittest.TestCase):
     def test_repair_judgment_refuses_a_tagged_protected_commit(self):
         loop = load_loop()
         args = mock.Mock(repair_seat="wm-repair", seat_model=None, repair_timeout=1)
-        with mock.patch.object(loop, "ensure_seat"), \
-             mock.patch.object(loop, "dispatch", return_value="job-1"), \
-             mock.patch.object(loop, "wait_job",
-                               return_value={"state": "done",
-                                             "result": "VERDICT: repaired"}), \
-             mock.patch.object(loop, "tagged_commits",
-                               return_value=[(ROOT, self.BAD_SHA)]), \
-             mock.patch.object(loop, "record"), \
-             mock.patch.object(loop, "log"):
-            verdict, detail = loop.repair(args, "held run stopped", None, [])
+        with tempfile.TemporaryDirectory() as td:
+            # Package 4's dirty-checkout guard reads the live F2/F3C/MATHLIB4;
+            # this test is about protected paths, so point them at stand-ins
+            # that do not exist (no .git -> nothing dirty, nothing folded).
+            clean = [Path(td) / n for n in ("no-f2", "no-f3c", "no-mathlib4")]
+            with mock.patch.object(loop, "F2", clean[0]), \
+                 mock.patch.object(loop, "F3C", clean[1]), \
+                 mock.patch.object(loop, "MATHLIB4", clean[2]), \
+                 mock.patch.object(loop, "ensure_seat"), \
+                 mock.patch.object(loop, "dispatch", return_value="job-1"), \
+                 mock.patch.object(loop, "wait_job",
+                                   return_value={"state": "done",
+                                                 "result": "VERDICT: repaired"}), \
+                 mock.patch.object(loop, "tagged_commits",
+                                   return_value=[(ROOT, self.BAD_SHA)]), \
+                 mock.patch.object(loop, "record"), \
+                 mock.patch.object(loop, "log"):
+                verdict, detail = loop.repair(args, "held run stopped", None, [])
         self.assertEqual("protected-path", verdict)
         self.assertIn("src/futon2/aif/full_loop_runtime.clj", detail)
         self.assertIn("refused", detail)

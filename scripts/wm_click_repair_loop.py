@@ -99,6 +99,15 @@ GIRAFFE_PIN = STATE / "giraffe-pin.edn"
 # are excluded only from the repeat comparison, so a known gap awaiting a
 # decision cannot pause the loop while other defects are being found.
 ACKNOWLEDGED = STATE / "acknowledged.json"
+# WM hardening package 4 (handoff 2026-11-13 section 3, "Shared-tree races"):
+# while a repair seat holds a run, the loop records a one-writer-per-checkout
+# lease in its own state dir (outside the source tree): seat, job, repos,
+# start time, plus the guidance that other writers work in worktrees under
+# ~/worktrees/<repo>/<name> until the lease is cleared at repair end.
+REPAIR_LEASE = STATE / "repair-lease.json"
+# Loop-own writes, repo-relative, that never count as a dirty checkout even
+# if git were ever made to see them (they are gitignored under data/*).
+OWN_DIRTY_PREFIXES = ("data/wm-click-loop", "data/wm-click-loop/")
 AGENCY = os.environ.get("BASE", "http://127.0.0.1:7070").rstrip("/")
 SEND = F3C / "scripts" / "agency_send.py"
 EVAL = F3C / "scripts" / "proof-eval.sh"
@@ -168,6 +177,87 @@ PROTECTED_REPAIR_PREFIXES = (
 # the reload plan only carries .clj/.cljc under CLICK_PATHS, which also hid
 # the loop's own script from the earlier files-based check.
 PROTECTED_SCAN_REPOS = (F2, F3C, MATHLIB4)
+
+
+class DirtyCheckoutError(RuntimeError):
+    """A checkout a repair seat may write holds uncommitted changes; nothing
+    may be dispatched until they are reported and dealt with (package 4)."""
+
+    def __init__(self, dirty):
+        rendered = "; ".join(f"{row['repo']}: {', '.join(row['paths'])}" for row in dirty)
+        super().__init__("uncommitted changes in " + rendered)
+        self.dirty = list(dirty)
+
+
+def dirty_checkout_changes() -> list[dict]:
+    """Uncommitted changes in the checkouts a repair seat may write.
+
+    `git status --porcelain` already hides gitignored paths, so the loop's own
+    state writes (under its state dir) never appear; OWN_DIRTY_PREFIXES is a
+    second belt for the day a whitelist un-ignores one.  A repo that does not
+    exist (a campaign without mathlib4) contributes nothing.
+    """
+    rows = []
+    for repo in (F2, F3C, MATHLIB4):
+        if not (repo / ".git").exists():
+            continue
+        paths = []
+        for line in git(repo, "status", "--porcelain").splitlines():
+            if not line.strip():
+                continue
+            path = line[3:]
+            if " -> " in path:
+                path = path.split(" -> ", 1)[1]
+            path = path.strip('"')
+            if path.startswith(OWN_DIRTY_PREFIXES):
+                continue
+            paths.append(path)
+        if paths:
+            rows.append({"repo": str(repo), "paths": paths})
+    return rows
+
+
+def write_repair_lease(tag: str, job: str, seat: str) -> Path:
+    """Record the one-writer-per-checkout lease for a live repair (package 4)."""
+    lease = {
+        "seat": seat,
+        "job": job,
+        "tag": tag,
+        "repos": [str(r) for r in (F2, F3C, MATHLIB4) if (r / ".git").exists()],
+        "started-at": now(),
+        "note": "one writer per checkout: while this lease exists, other "
+                "writers work in worktrees under ~/worktrees/<repo>/<name>, "
+                "not the shared checkout",
+    }
+    note_own_write(REPAIR_LEASE)
+    REPAIR_LEASE.write_text(json.dumps(lease, indent=1) + "\n", encoding="utf-8")
+    return REPAIR_LEASE
+
+
+def clear_repair_lease(tag: str | None = None) -> None:
+    """End the repair lease; never raises (a crash path must not mask itself)."""
+    if REPAIR_LEASE.exists():
+        REPAIR_LEASE.unlink()
+        record({"event": "repair-lease-cleared", "tag": tag})
+
+
+def foreign_dirty_paths(commits) -> list[dict]:
+    """Dirty checkout paths the repair's own commits do not cover.
+
+    A checkout that became dirty during the repair with paths the seat did
+    not commit is someone else's work in flight: it is reported, never folded
+    into the repair's commits.
+    """
+    committed: dict[Path, set[str]] = {}
+    for repo, sha in commits:
+        committed.setdefault(repo, set()).update(commit_paths(repo, sha))
+    out = []
+    for row in dirty_checkout_changes():
+        repo = Path(row["repo"])
+        if committed.get(repo, set()) >= set(row["paths"]):
+            continue
+        out.append(row)
+    return out
 
 
 class ProtectedPathError(RuntimeError):
@@ -2131,34 +2221,62 @@ def repair(args, reason: str, click: dict | None, prior: list[str],
            page: Path | None = None) -> tuple[str, str]:
     """Send one repair job and judge it. Returns (verdict, detail)."""
     tag = f"wm-click-loop-repair-{uuid.uuid4().hex[:8]}"
+    # WM hardening package 4: a dirty checkout would let the seat commit
+    # someone else's uncommitted work as its own.  Report, do not dispatch.
+    dirty = dirty_checkout_changes()
+    if dirty:
+        raise DirtyCheckoutError(dirty)
     ensure_seat(args.repair_seat, args.seat_model)
-    job = dispatch(args.repair_seat, repair_packet(tag, reason, click, prior, page))
-    log(f"repair {tag}: job {job} to {args.repair_seat}: {reason[:160]}")
-    record({"event": "repair-dispatched", "tag": tag, "job": job, "seat": args.repair_seat, "reason": reason})
-    j = wait_job(job, args.repair_timeout)
-    result = str(j.get("result") or j.get("error") or "")
-    note_own_write(STATE / f"{tag}.result.txt")
-    (STATE / f"{tag}.result.txt").write_text(result)
-    m = re.findall(r"VERDICT:\s*(repaired|no-defect|cannot-repair)", result)
-    verdict = m[-1] if m else f"no-verdict (job {j.get('state')})"
-    commits = tagged_commits(tag)
-    detail = f"job {job} {j.get('state')}; verdict {verdict}; commits {[s[:9] for _, s in commits]}"
-    if verdict == "repaired" and not commits:
-        verdict, detail = "unlanded", detail + "; claimed repaired but no commit carries the tag"
-    elif commits:
-        protected = repair_commit_protection(commits)
-        if protected:
-            verdict, detail = ("protected-path",
-                               detail + "; refused: protected paths touched: "
-                               + ", ".join(protected))
-        else:
-            errs = kondo_errors(commits)
-            if errs:
-                verdict, detail = "kondo-errors", detail + "; clj-kondo errors:\n" + errs
-    log(f"repair {tag}: {detail[:400]}")
-    record({"event": "repair-judged", "tag": tag, "job": job, "verdict": verdict, "detail": detail,
-            "commits": [f"{r.name}:{s}" for r, s in commits]})
-    return verdict, detail
+    prompt = repair_packet(tag, reason, click, prior, page) + (
+        "\n\n== repair lease ==\n"
+        f"A one-writer-per-checkout lease for this repair is recorded at {REPAIR_LEASE} "
+        "(seat, job, repos, start time) and cleared when the repair ends. "
+        "Other writers work in worktrees under ~/worktrees/<repo>/<name> until then; "
+        "commit only the paths you changed yourself.")
+    job = dispatch(args.repair_seat, prompt)
+    write_repair_lease(tag, job, args.repair_seat)
+    try:
+        log(f"repair {tag}: job {job} to {args.repair_seat}: {reason[:160]}")
+        record({"event": "repair-dispatched", "tag": tag, "job": job, "seat": args.repair_seat, "reason": reason})
+        j = wait_job(job, args.repair_timeout)
+        result = str(j.get("result") or j.get("error") or "")
+        note_own_write(STATE / f"{tag}.result.txt")
+        (STATE / f"{tag}.result.txt").write_text(result)
+        m = re.findall(r"VERDICT:\s*(repaired|no-defect|cannot-repair)", result)
+        verdict = m[-1] if m else f"no-verdict (job {j.get('state')})"
+        commits = tagged_commits(tag)
+        detail = f"job {job} {j.get('state')}; verdict {verdict}; commits {[s[:9] for _, s in commits]}"
+        if verdict == "repaired" and not commits:
+            verdict, detail = "unlanded", detail + "; claimed repaired but no commit carries the tag"
+        elif commits:
+            protected = repair_commit_protection(commits)
+            if protected:
+                verdict, detail = ("protected-path",
+                                   detail + "; refused: protected paths touched: "
+                                   + ", ".join(protected))
+            else:
+                errs = kondo_errors(commits)
+                if errs:
+                    verdict, detail = "kondo-errors", detail + "; clj-kondo errors:\n" + errs
+        # WM hardening package 4: dirt that appeared during the repair on
+        # paths the seat did not commit is another writer's work in flight.
+        # Alert row only; never folded into the repair's commits.
+        foreign = foreign_dirty_paths(commits)
+        if foreign:
+            row = {"at": now(), "event": "foreign-dirty-paths", "tag": tag,
+                   "job": job, "dirty": foreign}
+            note_own_write(ALERTS)
+            with ALERTS.open("a") as fh:
+                fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+            record(row)
+            detail += ("; alert: checkout dirty on paths the repair did not commit: "
+                       + "; ".join(f"{r['repo']}: {', '.join(r['paths'])}" for r in foreign))
+        log(f"repair {tag}: {detail[:400]}")
+        record({"event": "repair-judged", "tag": tag, "job": job, "verdict": verdict, "detail": detail,
+                "commits": [f"{r.name}:{s}" for r, s in commits]})
+        return verdict, detail
+    finally:
+        clear_repair_lease(tag)
 
 
 # ---------------------------------------------------------------- stop
@@ -2245,6 +2363,13 @@ def _validated_stop(args, claimed_case: str, evidence: dict) -> tuple[str, bool]
     elif claimed_case == "protected-path":
         ev = evidence.get("protected-paths") if isinstance(evidence, dict) else None
         legal = isinstance(ev, list) and bool(ev)
+    elif claimed_case == "dirty-checkout":
+        # WM hardening package 4: legal only with non-empty evidence paths
+        # (repo plus the uncommitted paths that stopped the dispatch).
+        ev = evidence.get("dirty-checkouts") if isinstance(evidence, dict) else None
+        legal = (isinstance(ev, list) and bool(ev)
+                 and all(isinstance(r, dict) and r.get("repo")
+                         and isinstance(r.get("paths"), list) and r["paths"] for r in ev))
     else:
         legal = claimed_case == "debugger-error"
     return (claimed_case, True) if legal and claimed_case != "debugger-error" else ("debugger-error", False)
@@ -2655,6 +2780,12 @@ def main() -> int:
         return stop(args, "protected-path",
                     f"repair touched protected paths; nothing was loaded: {e}",
                     1, {"protected-paths": e.paths})
+    except DirtyCheckoutError as e:
+        # WM hardening package 4: no lease was written, nothing dispatched;
+        # the change is reported so it is not absorbed into a repair commit.
+        return stop(args, "dirty-checkout",
+                    f"checkout dirty before repair dispatch; no repair sent: {e}",
+                    1, {"dirty-checkouts": e.dirty})
     except Exception as e:  # a crash is a stop like any other: the owner hears of it
         import traceback
         log(traceback.format_exc())
