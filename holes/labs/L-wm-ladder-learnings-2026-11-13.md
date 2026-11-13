@@ -135,7 +135,9 @@ sensitive. That makes it a natural next rung.
 - Found while merging: `wm_click_repair_loop_test.py` reaches `jvm_eval` and so runs
   `proof-eval` against the live futon3c JVM (read-only injury-ledger queries, but production on
   zone; on Lucy it was the sandbox's JVM). Package 1's follow-up broke 13 stop tests (args
-  without `giraffe_run`); zai-1 is fixing it, with tests given a temp `GIRAFFE_ROOT`.
+  without `giraffe_run`). Fixed by zai-1 (`e48fcd803`: a temp `GIRAFFE_ROOT` fixture and pin
+  path), merged as `bee827fc9` with the stop tests also given package 7's JVM fake. All four
+  loop test files pass on `wm-hardening`, including package 2's work-exhausted stop test.
 - Package 7 accepted (`9fee35c86`): `test/scripts/wm_click_hermetic.py` makes `jvm_eval`,
   `get_json`, `post_json` and `ensure_seat` fail loudly in the loop tests unless a test supplies
   a fake. The loop test file went from about 439 s to about 7 s, and no test reaches the JVM.
