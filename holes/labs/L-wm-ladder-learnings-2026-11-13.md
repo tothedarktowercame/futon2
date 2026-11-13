@@ -161,4 +161,12 @@ sensitive. That makes it a natural next rung.
   failed because it scanned the real repos and found the merge itself; fixed to scan only
   its fixture. `:draft` items still do not count toward an exhausted field (Joe: a draft
   counts as done only if it is done). Package 6 is not merged.
+- Lucy's four mathlib4 spec commits applied to zone `darktower` on Joe's go (2026-11-13):
+  `53ce362666` SelectionGOverCascades, `0a7fe55d8f` Q12, `6d42d78f13` Q11 predicted
+  parameters, `21ce348d78` Q2 floor 1. Without them zone's futon2 `main` generated Q12 rows
+  that zone's Requirements did not have. Built clean (32 s, only the changed modules); a term
+  generated from the `ac5bc477` fixture elaborates and Q12 holds.
+- Package 6 dispatched to zai-1 (Lean for chains, new module `SelectionGOverChains.lean` in
+  `~/worktrees/mathlib4-wm-p6`). The Clojure scorer was checked first: it gates a later pick's
+  units on the previous pick's `:can-begin`, as the handoff says.
 
