@@ -134,6 +134,21 @@ sensitive. That makes it a natural next rung.
   existing work-exhausted stop then fires with no repair dispatched.
 - Found while merging: `wm_click_repair_loop_test.py` reaches `jvm_eval` and so runs
   `proof-eval` against the live futon3c JVM (read-only injury-ledger queries, but production on
-  zone; on Lucy it was the sandbox's JVM). Package 7 (zai-4) makes the loop tests hermetic.
-  Package 1's follow-up broke 13 stop tests (args without `giraffe_run`); zai-1 is fixing it,
-  with tests given a temp `GIRAFFE_ROOT`.
+  zone; on Lucy it was the sandbox's JVM). Package 1's follow-up broke 13 stop tests (args
+  without `giraffe_run`); zai-1 is fixing it, with tests given a temp `GIRAFFE_ROOT`.
+- Package 7 accepted (`9fee35c86`): `test/scripts/wm_click_hermetic.py` makes `jvm_eval`,
+  `get_json`, `post_json` and `ensure_seat` fail loudly in the loop tests unless a test supplies
+  a fake. The loop test file went from about 439 s to about 7 s, and no test reaches the JVM.
+- Package 3 follow-up accepted (`9008a44b8`): the loop now scans futon2, futon3c and mathlib4
+  with `git log --since` over the reload window, so Lean and script changes are checked too
+  (before, only reloaded `.clj` files were). futon3c `giraffe/run.clj` (`verify-run`) is
+  protected. Consequence: any agent's commit to a protected path during a loop run stops the
+  loop. That is the safe direction, but futon3c is busy.
+- Package 4 accepted (`b05bd0aa8`): before dispatching a repair seat the loop runs
+  `git status --porcelain` on futon2, futon3c and mathlib4 and, if any is dirty (untracked files
+  included), stops with the typed case `dirty-checkout`, naming repo and paths, and dispatches
+  nothing. While a repair runs, `data/wm-click-loop/repair-lease.json` names the seat, job and
+  repos; it is cleared in a `finally`. Dirt that appears during the repair on paths the seat did
+  not commit is alerted, never committed. The lease is a record: nothing else reads it yet.
+  Consequence on zone: the shared `~/code` checkouts are seldom clean (futon3c had 4 untracked
+  files when this was tested), so a repair there will usually stop instead of dispatching.
