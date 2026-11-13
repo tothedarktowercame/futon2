@@ -1640,10 +1640,11 @@ class RepairProtectedPathTest(unittest.TestCase):
                 raise AssertionError("nothing may be hot-loaded when a protected path changed")
 
             since = int(loop.time.time()) - 3600  # bare small numbers are not dates
+            # Scan only the throwaway repo: the real futon2/futon3c may hold
+            # protected commits inside the window (a merge did, 2026-11-13).
             with mock.patch.object(loop, "click_running", return_value=False), \
                  mock.patch.object(loop, "changed_click_files", return_value=[]), \
-                 mock.patch.object(loop, "PROTECTED_SCAN_REPOS", (loop.F2, loop.F3C, repo),
-                                   create=True), \
+                 mock.patch.object(loop, "PROTECTED_SCAN_REPOS", (repo,), create=True), \
                  mock.patch.object(loop, "jvm_eval", side_effect=no_jvm), \
                  mock.patch.object(loop, "record") as record, \
                  mock.patch.object(loop, "log"):
