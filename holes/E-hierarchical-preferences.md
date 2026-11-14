@@ -1,5 +1,7 @@
 # Excursion: hierarchical preferences, where a higher level sets C (E-hierarchical-preferences)
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 **Date:** 2026-10-28 · **Status:** HELD. Written down so it is not lost; not part of the R20 step rebuild.
 **Authored by:** claude-11, at Joe's request ("write down the hierarchical preferences extension that we talked about").
 **Relates:** [[SPEC-r20-step-function-2026-10-28]] (section "Preferences C are learned", paragraph "Later upgrade") · [[E-C-vector-live]] · [[M-G-over-cascades]] · pattern `aif/hierarchical-and-temporal-depth` · problem node `problems/r15-hierarchy-and-timescale`.

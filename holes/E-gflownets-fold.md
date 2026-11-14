@@ -1,5 +1,7 @@
 # Excursion: the GFlowNet fold sampler, reopened on executable reward (E-gflownets-fold)
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 **Date:** 2026-07-03 · **Status:** CHARTERED (IDENTIFY/MAP — Joe: "we have the empirical data
 that was blocking that before") · **Owner:** TBD (hand-off charter; CPU rungs first).
 **Naming note (Joe's question):** plain `E-gflownets-fold`, no JAX — the vendored GFN library is

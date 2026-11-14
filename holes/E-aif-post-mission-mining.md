@@ -1,5 +1,7 @@
 # E-aif-post-mission-mining — the follow-on ledger after the mining run landed
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 **Date:** 2026-07-03 · **Status:** LEDGER (so the follow-ons don't evaporate — Joe's ask).
 **Context:** the AIF loop closed live and the gold-gated PROOF-MINE sweep landed the same day
 (R16+R14 ✓ contract v0.22 · 43 git-validated `:discharged-by` · §11 coverage 138/189, tail 70→51).

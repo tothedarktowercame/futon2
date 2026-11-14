@@ -1,5 +1,7 @@
 # T-giraffe-undetermined-triage — read Giraffe's undetermined items before the War Machine works on them
 
+**Status:** COMPLETE (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as done but unmarked. Correct it if wrong.)
+
 > **Closed 2026-11-08 (already done).** All twelve items in groups A-C were read by three Kimi seats and each carries a verdict (current, blocked with questions for Joe, or likely outdated) with evidence; the per-item questions are follow-ups on those items, not on this ticket. Evidence: requisition completed 2026-11-06T07:17:16Z (E-kimi-task-348/349/350); futon2 `157b26da0`, `daec6857e`; this ticket §Group A, §Group B, §Group C. Checked by f2 in the closure pass (claude-6, FIX/WONTFIX sheet).
 
 **Requisition:** completed — 2026-11-06T07:17:16Z, three Kimi seats (E-kimi-task-348, 349, 350), state done

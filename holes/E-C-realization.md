@@ -1,5 +1,7 @@
 # E-C-realization — the interactive lane for making C real
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 Opened 2026-09-09 by claude-1 under Joe's ruling
 (holes/labs/wm-contract/RULINGS-walkthrough-2026-09-09.md Items 18c-18d):
 "I am not happy to kick the can without real work to make C real... if we are

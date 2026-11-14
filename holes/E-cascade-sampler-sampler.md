@@ -1,5 +1,7 @@
 # E-cascade-sampler-sampler — a contest over cascade-sampling methods
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 Date: 2026-06-12
 Parent: `M-wm-policies` (the build); resolves-candidate for the semilattice-vs-
 linear-rollout tension in `futon2/docs/futonzero-alphazero.md` §5.

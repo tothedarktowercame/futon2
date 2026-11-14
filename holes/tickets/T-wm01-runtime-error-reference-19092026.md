@@ -1,5 +1,7 @@
 # WM-01 P-4b: width repair and runtime reference boundary
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 Author: codex-1, 2026-09-19. Partial delivery; not node acceptance.
 
 The numerical test now keeps rational endpoints through subtraction, ordering,

@@ -1,5 +1,7 @@
 # Excursion: E-aif-ants-epistemics — bring the epistemic half online
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 **Type:** E-prefix excursion (bounded scope-out, single-agent-owned end-to-end).
 **Spawned:** 2026-08-01, on the close of M-aif-stack S1 (Slice 5 confirmation).
 **Owner:** TBD. **Operator:** Joe.

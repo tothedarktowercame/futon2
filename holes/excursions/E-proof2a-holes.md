@@ -1,5 +1,7 @@
 # E-proof2a-holes — coordinating the closure of PROOF-2a's holes
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 Date: 2026-09-25
 Owner: claude-8 (project lead, Joe 2026-09-24). Driver: Joe.
 Parent: `holes/labs/wm-contract/PROOF-2a-THEOREM-draft-2026-09-24.md`.

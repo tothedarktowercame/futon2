@@ -1,5 +1,7 @@
 # Excursion: the serious GPU embedding pipeline for the fold's phase 2 (E-fold-embed-pipeline)
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 **Date:** 2026-07-01 · **Status:** CHARTERED (design) · **Owner:** claude-4 (end-to-end).
 **Parent:** [[M-fold-ansatz]] — this is its **phase 2** (`cascade → SORRY`, the substrate-2 interface),
 carved out as an excursion because it is a *real ML build*, not a mission's worth of open specification.

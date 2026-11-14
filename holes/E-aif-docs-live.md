@@ -1,5 +1,7 @@
 # Excursion: one live data model behind paper + tracker + explainer (E-aif-docs-live)
 
+**Status:** OPEN (set 2026-11-14 by claude-13 from Giraffe's latest reading, which read it as open; this document had no status line. Correct it if wrong.)
+
 **Date:** 2026-07-01 · **Status:** CHARTERED — parked; **resume at a pause point** (work in
 progress now: claude-5's DISSOLUTION (A) body-reconstruction + the `cascade-real/graph` endpoint are
 being actively built; do NOT refactor the endpoint/explainer under them). **Owner:** claude-4.
