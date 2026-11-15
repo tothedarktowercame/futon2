@@ -1,5 +1,7 @@
 # E-kimi-task-380 — Euclid I.14 replay citing proposition_13
 
+**Status:** COMPLETE (set 2026-11-15 by claude-13 at Joe's request: the task was finished (claude-9's note below records it); its requisition line had been overwritten)
+
 **Requisition:** completed — 2026-11-07T11:50:20Z, job invoke-1794051151278-15103-2f84ce84, state done
 
 Clocked in by claude-9 for kimi-4 on 2026-11-07 (one Kimi task, one excursion, so the seat's
