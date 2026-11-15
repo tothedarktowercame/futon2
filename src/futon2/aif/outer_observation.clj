@@ -324,10 +324,14 @@
 
   Required keys are `:run-dir`, `:makeup`, `:focus-inputs`, and
   `:decision-as-of`.  Optional `:previous-focus` and `:relation-context` are
-  passed to the shared focus producer.  Unknown relations remain `:unknown`."
+  passed to the shared focus producer.  Optional `:authority` (default
+  `(target-authority)`, the live substrate registry) supplies the open-task
+  census the field is partitioned against — tests pass an explicit fixture
+  authority so no live registry is read.  Unknown relations remain `:unknown`."
   [{:keys [run-dir makeup focus-inputs decision-as-of previous-focus relation-context
+           authority
            area-corpus focus-manifest focus-manifest-sha256 focus-manifest-source]}]
-  (let [giraffe (giraffe-field run-dir makeup)
+  (let [giraffe (giraffe-field run-dir makeup (or authority (target-authority)))
         area-mode? (and area-corpus focus-manifest)
         focus-result (when-not area-mode? (focus-receipt/decision-focus focus-inputs decision-as-of previous-focus))
         focus-info (when focus-result (:info focus-result))
