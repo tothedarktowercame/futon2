@@ -53,6 +53,23 @@
     (is (nil? (sut/response-json-object "[1,2]")))
     (is (nil? (sut/response-json-object nil)))))
 
+(deftest leading-scalar-prose-before-one-unfenced-object-decodes
+  ;; M-repl-circus 2026-11-15: cheshire stops at the leading "0" of
+  ;; "0 problems — ..." and parsed the whole string as the scalar 0, so the
+  ;; single balanced object after it was refused. The scalar whole-parse must
+  ;; count as unparsed and the span rule decides.
+  (is (= {:answer "yes"}
+         (sut/response-json-object
+          "0 problems — pin matches.\n\n{\"answer\":\"yes\"}")))
+  (is (= {:answer "yes"}
+         (sut/response-json-object "42\n\n{\"answer\":\"yes\"}")))
+  ;; documented refusals unchanged
+  (is (nil? (sut/response-json-object "0")))
+  (is (nil? (sut/response-json-object "0 problems, no object")))
+  (is (nil? (sut/response-json-object "0\n\n{\"a\":1}\n{\"b\":2}")))
+  (is (nil? (sut/response-json-object "0 problems {\"a\":")))
+  (is (nil? (sut/response-json-object "[{\"a\":1}]"))))
+
 (deftest one-payload-rule-covers-current-legacy-event-and-direct-replies
   (is (= "full" (sut/response-payload
                    {:result "full" :result-summary "prefix" :text "legacy"})))

@@ -69,6 +69,11 @@
   The fence rule keeps precedence when a fence is present. More than one
   fence, two unfenced objects, a `{` in the prose that leaves the object
   unclosed, arrays, scalars, prose alone and malformed JSON are refused as nil.
+  A whole-string scalar parse is not trusted: cheshire stops at the first
+  scalar (M-repl-circus, 2026-11-15: prose beginning \"0 problems — pin
+  matches.\\n\\n{...}\" parsed as the number 0 and the balanced object was
+  refused), so a scalar whole-parse counts as unparsed and the span rule
+  decides; a scalar ALONE still has no object span and stays refused.
 
   This is a representation rule, not a semantic validator: callers still
   validate request binding, schema and fields after decoding."
@@ -81,11 +86,17 @@
         (when (= 1 (count fences))
           (let [candidate (second (first fences))]
             (or (parse-map candidate) (parse-edn-map candidate))))
-        (let [whole (try (json/parse-string raw true)
-                         (catch Exception _ ::unparsed))
+        (let [whole (let [v (try (json/parse-string raw true)
+                                 (catch Exception _ ::unparsed))]
+                      ;; a whole string that parses to an array is refused
+                      ;; here; a bare object is its own single span. A scalar
+                      ;; whole-parse is demoted to ::unparsed: cheshire stops
+                      ;; at the leading scalar of "0 problems ... {..}" style
+                      ;; prose (M-repl-circus, 2026-11-15), and the span rule
+                      ;; must decide; a scalar alone has no span and stays
+                      ;; refused.
+                      (if (coll? v) v ::unparsed))
               spans (balanced-object-spans raw)]
-          ;; a whole string that parses to an array or scalar is refused
-          ;; here; a bare object is its own single span
           (when (and (or (map? whole) (= ::unparsed whole))
                      (= 1 (count spans)))
             (let [candidate (first spans)]
