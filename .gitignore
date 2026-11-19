@@ -65,9 +65,6 @@ resources/wm/*
 # cost scales, machine-read by futon2.aif.wm.action-scale.
 !resources/wm/action-scales.edn
 
-# local file that shouldn't be tracked here
-LICENSE
-
 # Added 2026-05-26 by street-sweeper Phase B (allostatic-relief for INV-13 rejects)
 # data/* (not data/) so the M-capability-zones harvest artifact can be
 # whitelisted below; intermediates (harvest-prepared, embed-checkpoints)

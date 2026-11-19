@@ -153,4 +153,4 @@ Reserves appear in the HUD as `Hive C:## A:##`. When harvest stalls, reserves ti
 
 ## License
 
-Eclipse Public License (EPL) 1.0. See `LICENSE` for details.
+Apache License 2.0. See `LICENSE` for details.
