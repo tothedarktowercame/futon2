@@ -62,17 +62,18 @@
 (load-identity/register! *ns* *file*)
 
 (def default-pattern-graph-path
-  "/home/joe/code/storage/operator-turns/mined-pattern-graph.json")
+  (data-paths/local-path "/home/joe/code/storage/operator-turns/mined-pattern-graph.json"))
 (def default-pattern-graph-diff-dir
   (data-paths/path "wm-pattern-graph-diffs"))
 (def default-reading-precision-campaign-path
-  "/home/joe/code/futon2/resources/wm/reading-precision-beta/wm-readiness-2026-10-17-campaign.edn")
+  (data-paths/local-path
+   "/home/joe/code/futon2/resources/wm/reading-precision-beta/wm-readiness-2026-10-17-campaign.edn"))
 (def default-cascade-continuation-close-root
   (data-paths/path "wm-cascade-continuation-closes"))
 (def default-cascade-continuation-failure-root
   (data-paths/path "wm-cascade-continuation-failures"))
 (def default-ticket-readiness-manifest
-  "/home/joe/code/futon2/data/wm-ticket-readiness/manifest.edn")
+  (data-paths/path "wm-ticket-readiness" "manifest.edn"))
 (def default-ticket-readiness-prompt-budget-chars
   ;; futon3c.agents.zai-api/default-context-policy records 128000 as the
   ;; conservative floor used when the provider publishes no measured limit.
