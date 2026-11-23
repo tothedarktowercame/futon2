@@ -8,17 +8,19 @@
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.mission-registry :as registry]
-            [futon2.aif.write-stamp :as write-stamp])
+            [futon2.aif.write-stamp :as write-stamp]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardCopyOption StandardOpenOption]
            [java.time Instant]
            [java.util.concurrent TimeUnit]))
 
 (def retrievers
-  [{:kind :embedding :implementation "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_construct.py"
-    :index "/home/joe/code/futon3a/resources/notions/minilm_pattern_embeddings.json" :k 40}
-   {:kind :tier0 :implementation "/home/joe/code/futon6/scripts/cas_select.py"
-    :index "/home/joe/code/futon3/resources/sigils/patterns-index.tsv" :k 8}])
-(def library-root "/home/joe/code/futon3/library")
+  [{:kind :embedding
+    :implementation (data-paths/local-path "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_construct.py")
+    :index (data-paths/local-path "/home/joe/code/futon3a/resources/notions/minilm_pattern_embeddings.json") :k 40}
+   {:kind :tier0 :implementation (data-paths/local-path "/home/joe/code/futon6/scripts/cas_select.py")
+    :index (data-paths/local-path "/home/joe/code/futon3/resources/sigils/patterns-index.tsv") :k 8}])
+(def library-root (data-paths/local-path "/home/joe/code/futon3/library"))
 (def timeout-ms 30000)
 (defn- refuse! [kind data]
   (throw (ex-info "Interpretation request refused" (assoc data :interpretation/refusal kind))))
@@ -155,8 +157,10 @@
   "Bounded subprocess; executable code and indices are checked by prepare! around this call."
   [request]
   (let [proc (.start (ProcessBuilder.
-                     ^java.util.List ["/home/joe/code/futon3a/.venv/bin/python3" "-B"
-                                      "/home/joe/code/futon2/scripts/interpretation_retrieve.py"]))
+                     ^java.util.List [(data-paths/local-path
+                                       "/home/joe/code/futon3a/.venv/bin/python3") "-B"
+                                      (data-paths/local-path
+                                       "/home/joe/code/futon2/scripts/interpretation_retrieve.py")]))
         out (future (slurp (.getInputStream proc))) err (future (slurp (.getErrorStream proc)))]
     (with-open [w (io/writer (.getOutputStream proc))] (.write w (json/generate-string request)))
     (if (.waitFor proc timeout-ms TimeUnit/MILLISECONDS)
