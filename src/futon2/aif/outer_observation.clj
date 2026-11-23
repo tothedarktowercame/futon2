@@ -86,6 +86,21 @@
     (catch Exception e
       (refuse! :giraffe-verifier-unavailable {:message (.getMessage e)}))))
 
+(defn- read-run-file [run-dir filename kind]
+  (try
+    (if-let [reader (*resolve-var* 'futon3c.giraffe.run-data/read-run-file)]
+      (reader run-dir filename)
+      (refuse! kind {:path (str (io/file run-dir filename))
+                     :message "Giraffe run-data reader unavailable"}))
+    (catch clojure.lang.ExceptionInfo e
+      (if (:kind (ex-data e))
+        (throw e)
+        (refuse! kind {:path (str (io/file run-dir filename))
+                       :message (.getMessage e)})))
+    (catch Exception e
+      (refuse! kind {:path (str (io/file run-dir filename))
+                     :message (.getMessage e)}))))
+
 (defn- target-authority []
   (let [loaded-tickets (mission-registry/load-tickets)
         loaded-excursions (mission-registry/load-excursions)]
@@ -227,7 +242,7 @@
          (refuse! :giraffe-run-incomplete {:run-dir (.getPath dir)}))
        (let [admission (load-admission-config)
              manifest (read-edn-file manifest-file :giraffe-manifest-malformed)
-             pass (read-edn-file pass-file :giraffe-pass-malformed)
+             pass (read-run-file dir "pass.edn" :giraffe-pass-malformed)
              manifest-sha (sha256 (Files/readAllBytes (.toPath manifest-file)))
              pass-sha (sha256 (Files/readAllBytes (.toPath pass-file)))
              rows (:order pass)

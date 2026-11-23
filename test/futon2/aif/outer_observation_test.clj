@@ -130,6 +130,34 @@
                             :pass-output (update pass :order #(mapv (fn [row] (assoc row :dependency-reading {:record-pin {:sha256 (identity/sha256 (pr-str row))}})) %))})]
     (io/file (:dir result))))
 
+(defn- with-run-reader [f]
+  (binding [observation/*resolve-var*
+            (fn [symbol]
+              (case symbol
+                futon3c.giraffe.run/verify-run (fn [_] {:ok? true})
+                futon3c.giraffe.run-data/read-run-file (actual-var symbol)))]
+    (f)))
+
+(deftest giraffe-field-reads-indexed-and-legacy-pass-files
+  (let [indexed (fixture-run!)
+        read-run-file (actual-var 'futon3c.giraffe.run-data/read-run-file)
+        logical-pass (read-run-file indexed "pass.edn")]
+    (is (= 3 (count (:field (with-run-reader
+                              #(observation/giraffe-field indexed makeup fixture-authority))))))
+    (let [legacy (fixture-run!)]
+      (spit (io/file legacy "pass.edn") (pr-str logical-pass))
+      (is (= 3 (count (:field (with-run-reader
+                                #(observation/giraffe-field legacy makeup fixture-authority)))))))
+    (let [invalid (fixture-run!)]
+      (spit (io/file invalid "pass.edn")
+            (pr-str (assoc logical-pass :order [{:status :ready}])))
+      (is (= :giraffe-pass-invalid
+             (try
+               (with-run-reader
+                 #(observation/giraffe-field invalid makeup fixture-authority))
+               :unexpected-success
+               (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))))))
+
 (defn requisition-fixture-run! []
   (let [root (temp-dir)
         rows (mapv (fn [id]

@@ -302,6 +302,8 @@
         (string? x) x
         :else nil))
 
+(def ^:dynamic *resolve-var* requiring-resolve)
+
 (defn- read-graph-input
   "Read input.edn only when its bytes match the input.edn row in manifest.edn."
   [run-dir]
@@ -320,7 +322,8 @@
             (nil? pin) {:absent :giraffe-input-pin-unavailable}
             (not= pin actual) {:absent :giraffe-input-pin-mismatch
                                :expected pin :actual actual}
-            :else {:input (edn/read-string (slurp input-file))
+            :else {:input ((*resolve-var* 'futon3c.giraffe.run-data/read-run-file)
+                           run-dir "input.edn")
                    :input-sha actual :run (:run-id manifest)}))
         (catch Exception e
           {:absent :giraffe-graph-unreadable :message (.getMessage e)})))))
