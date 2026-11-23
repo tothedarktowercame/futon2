@@ -130,5 +130,61 @@ class DebuggerPollTest(unittest.TestCase):
         plan.assert_not_called()
 
 
+class DrawbridgeGuardTest(unittest.TestCase):
+    def setUp(self):
+        self.loop = load_loop()
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        root = Path(self.temp.name)
+        self.loop.F3C = root / "sandbox" / "futon3c"
+        self.loop.F3C.mkdir(parents=True)
+        self.loop.STATE = root / "state"
+        self.loop.STATE.mkdir()
+        self.loop.LEDGER = self.loop.STATE / "ledger.jsonl"
+        self.loop.LOGFILE = self.loop.STATE / "loop.log"
+        self.loop.STOP_FILE = self.loop.STATE / "STOP"
+        self.args = SimpleNamespace(
+            clicks=0, ticks=99, stall=3, max_repairs=3, repair_seat="repair",
+            continuous=False, observe_only=False, owner="owner",
+            issuing_caller="caller", author="author", reviewer="reviewer",
+            repair_reviewer="repair-reviewer")
+
+    def run_guard(self, response):
+        with (mock.patch.object(self.loop, "record_giraffe_pin", return_value=True),
+              mock.patch.object(self.loop, "jvm_eval", return_value=response),
+              mock.patch.object(self.loop, "jvm_start_epoch", return_value=123),
+              mock.patch.object(self.loop, "reload_when_idle",
+                                return_value=(True, "", 123)) as reload,
+              mock.patch.object(self.loop, "notify")):
+            rc = self.loop.run(self.args)
+        rows = [json.loads(line) for line in self.loop.LEDGER.read_text().splitlines()]
+        return rc, reload, next((row for row in rows if row.get("event") == "stop"), None)
+
+    def test_right_cwd_proceeds_to_reload(self):
+        response = {"rc": 0, "out": f'{{:ok true, :value "{self.loop.F3C}"}}', "err": ""}
+        rc, reload, stopped = self.run_guard(response)
+        self.assertEqual(0, rc)
+        reload.assert_called_once_with(123)
+        self.assertEqual("operator-override", stopped["case"])
+
+    def test_different_cwd_stops_before_reload(self):
+        response = {"rc": 0, "out": '{:ok true, :value "/home/joe/code/futon3c"}', "err": ""}
+        rc, reload, stopped = self.run_guard(response)
+        self.assertEqual(1, rc)
+        reload.assert_not_called()
+        self.assertEqual("debugger-error", stopped["case"])
+        self.assertEqual(
+            f"drawbridge-wrong-jvm: expected {self.loop.F3C} got /home/joe/code/futon3c",
+            stopped["reason"])
+
+    def test_forbidden_stops_before_reload(self):
+        rc, reload, stopped = self.run_guard({"rc": 0, "out": "forbidden", "err": ""})
+        self.assertEqual(1, rc)
+        reload.assert_not_called()
+        self.assertEqual("debugger-error", stopped["case"])
+        self.assertEqual("drawbridge-forbidden: sandbox credentials rejected",
+                         stopped["reason"])
+
+
 if __name__ == "__main__":
     unittest.main()

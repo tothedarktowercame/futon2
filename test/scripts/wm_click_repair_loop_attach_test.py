@@ -73,6 +73,7 @@ class DebuggerAttachTest(unittest.TestCase):
 
         with (mock.patch.object(self.loop, "jvm_start_epoch", return_value=0),
               mock.patch.object(self.loop, "record_giraffe_pin", return_value=True),
+              mock.patch.object(self.loop, "drawbridge_cwd_guard", return_value=None),
               mock.patch.object(self.loop, "reload_when_idle", return_value=(True, "", 0)),
               mock.patch.object(self.loop, "injury_limit_breach", return_value=None),
               mock.patch.object(self.loop, "jvm_eval", side_effect=jvm_eval),

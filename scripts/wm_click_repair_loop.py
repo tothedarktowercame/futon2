@@ -1184,6 +1184,25 @@ def jvm_eval(form: str, timeout: int = 600) -> dict:
 
 # ---------------------------------------------------------------- reload
 
+def drawbridge_cwd_guard() -> str | None:
+    """Return a typed refusal reason unless Drawbridge serves this F3C."""
+    expected = F3C.resolve()
+    r = jvm_eval('(System/getProperty "user.dir")', timeout=30)
+    out = r.get("out", "").strip()
+    if out == "forbidden":
+        return "drawbridge-forbidden: sandbox credentials rejected"
+    if r.get("rc") != 0:
+        detail = (out or r.get("err") or "no evaluator detail")[-300:]
+        return f"drawbridge-unreadable: {detail}"
+    match = re.search(r':value\s+"([^"]+)"', out)
+    if not match:
+        return f"drawbridge-unreadable: {out or 'empty response'}"
+    actual = Path(match.group(1)).resolve()
+    if actual != expected:
+        return f"drawbridge-wrong-jvm: expected {expected} got {actual}"
+    return None
+
+
 def jvm_start_epoch() -> int:
     r = jvm_eval("(quot (.getStartTime (java.lang.management.ManagementFactory/getRuntimeMXBean)) 1000)")
     m = re.search(r":value (\d+)", r["out"])
@@ -1678,6 +1697,7 @@ def notify_alert(args, c: dict) -> None:
                       f"Queue: {ALERTS}",
                       "The loop pauses if the same signature repeats on the next click."])
     r = sh(sys.executable, SEND, "--from", "wm-click-loop", "--to", args.owner, "--kind", "bell",
+           "--base", AGENCY,
            input=body, timeout=120)
     log(f"alert belled to {args.owner}: {r.stdout.strip()[-200:]}")
 
@@ -2337,6 +2357,7 @@ def notify(args, case: str, legal: bool, reason: str) -> None:
                       "Restart only with the same explicit cast recorded in the start row; "
                       "no cast identity has a default."])
     r = sh(sys.executable, SEND, "--from", "wm-click-loop", "--to", args.owner, "--kind", "bell",
+           "--base", AGENCY,
            input=body, timeout=120)
     log(f"notified {args.owner}: {r.stdout.strip()[-200:]}")
 
@@ -2539,6 +2560,8 @@ def run(args) -> int:
     log(f"=== start: clicks={args.clicks} ticks={args.ticks} stall={args.stall} "
         f"max-repairs={args.max_repairs} repair-seat={args.repair_seat} ===")
     record({"event": "start", "args": vars(args)})
+    if reason := drawbridge_cwd_guard():
+        return stop(args, "debugger-error", reason, 1, {})
     since = jvm_start_epoch()
     initial_reload_started_ns = time.monotonic_ns()
     ok, text, since = reload_when_idle(since)
