@@ -1420,7 +1420,16 @@ def reload_changed(since_epoch: int, held_run_id: str | None = None) -> tuple[bo
     """Reload every click-path namespace committed since since_epoch. Returns
     (ok, failure-text, new-since). Reload only between clicks, or while the
     named run is demonstrably stopped at the restart debugger."""
-    if click_running() and not (held_run_id and debugger_stop(held_run_id)):
+    running = click_running()
+    held = None
+    if running and held_run_id:
+        try:
+            held = debugger_stop(held_run_id)
+        except DebuggerUnreadable:
+            # An unreadable debugger cannot prove that a live click is safely
+            # stopped. Defer exactly as for any other in-flight click.
+            held = None
+    if running and not held:
         log("reload: deferred; a click is in flight")
         record({"event": "reload", "ok": None, "since": since_epoch,
                 "reason": "click-in-flight", "namespaces": [],
@@ -1846,6 +1855,12 @@ HELD_NO_DEFECT_RETRIES: set = set()
 # hold at one of them is aborted, not repaired again.
 HELD_RETRIED: set = set()
 
+# The click poll sleeps ten seconds. Thirty consecutive unreadable debugger
+# samples therefore allow about five minutes for a transient Drawbridge or
+# evaluator failure before the child launcher is killed and supervision stops.
+DEBUGGER_POLL_SECONDS = 10
+DEBUGGER_UNREADABLE_LIMIT = 30
+
 
 def _retried_no_defect(stop: dict) -> bool:
     return (stop["run-id"], stop["phase"]) in HELD_NO_DEFECT_RETRIES
@@ -1865,6 +1880,8 @@ def fire(n: int, args, since_epoch: int) -> dict:
     log(f"click {n}: firing ({out.name})")
     in_flight_repairs = []
     handled_stops = set()
+    debugger_unreadable_streak = 0
+    debugger_unreadable = None
     # w+ so the log can be read back through this descriptor: on 2026-11-05
     # click 5's log was unlinked mid-click (directory changed 04:57:14Z) and
     # out.read_text() then crashed the loop with FileNotFoundError.
@@ -1876,7 +1893,20 @@ def fire(n: int, args, since_epoch: int) -> dict:
             if time.time() >= deadline:
                 proc.kill()
                 raise subprocess.TimeoutExpired(cmd, 3 * 3600)
-            stop = debugger_stop()
+            try:
+                stop = debugger_stop()
+                debugger_unreadable_streak = 0
+            except DebuggerUnreadable as e:
+                stop = None
+                debugger_unreadable_streak += 1
+                debugger_unreadable = str(e)
+                if debugger_unreadable_streak == 1:
+                    record({"event": "debugger-unreadable", "click-number": n,
+                            "consecutive": 1, "detail": debugger_unreadable})
+                if debugger_unreadable_streak >= DEBUGGER_UNREADABLE_LIMIT:
+                    proc.kill()
+                    proc.wait()
+                    break
             if stop:
                 signature = (stop["run-id"], stop["phase"], stop["condition-kind"],
                              stop.get("stopped-at"))
@@ -1892,7 +1922,7 @@ def fire(n: int, args, since_epoch: int) -> dict:
                     live_page.write_text("# Live held phase\n\n" + stop["raw"] + "\n")
                     since_epoch = handle_held_stop(
                         args, stop, in_flight_repairs, live_page, since_epoch)
-            time.sleep(10)
+            time.sleep(DEBUGGER_POLL_SECONDS)
         rc = proc.returncode
         fh.flush()
         fh.seek(0)
@@ -1924,7 +1954,10 @@ def fire(n: int, args, since_epoch: int) -> dict:
             "run-id": run_id, "carried": carried(run_id), "last-result": lr, "log": str(out),
             "run-record": record_path, "verdict": verdict, "alert": click_alert(verdict), "why": why,
             "since-epoch": since_epoch, "in-flight-repairs": in_flight_repairs,
-            "reset-wall-ms": reset_wall_ms}
+            "reset-wall-ms": reset_wall_ms,
+            "debugger-unreadable": (debugger_unreadable
+                                    if debugger_unreadable_streak >= DEBUGGER_UNREADABLE_LIMIT
+                                    else None)}
 
 
 # ---------------------------------------------------------------- debugger
@@ -2587,6 +2620,9 @@ def run(args) -> int:
         c["reset-wall-ms"] = c.get("reset-wall-ms", 0) + reload_ms
         initial_reload_pending = False
         since = c.pop("since-epoch")
+        if c.get("debugger-unreadable"):
+            return stop(args, "debugger-error",
+                        f"debugger-unreadable: {c['debugger-unreadable']}", 1, {})
         spent += 1 if c["spent"] else 0
         if c["carried"]:
             ticks += 1
