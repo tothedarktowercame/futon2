@@ -1711,15 +1711,29 @@ def injury_limit_breach() -> str | None:
     return None
 
 
+class DebuggerUnreadable(RuntimeError):
+    """The serving debugger could not be required or queried."""
+
+
+def _debugger_form(call: str) -> str:
+    return f"(do (require 'futon2.aif.wm.debugger) {call})"
+
+
+def _debugger_eval(call: str) -> dict:
+    r = jvm_eval(_debugger_form(call), timeout=30)
+    if r["rc"] != 0:
+        detail = (r.get("out") or r.get("err") or "no evaluator detail")[-300:]
+        raise DebuggerUnreadable(detail)
+    return r
+
+
 def debugger_stops() -> list[dict]:
     """Read the serving debugger, not the click's coarse public phase.
 
     The value is deliberately reduced to identifiers safe for the loop.  The
     full stop remains in the JVM and is copied into the live repair packet.
     """
-    r = jvm_eval("(futon2.aif.wm.debugger/stopped)", timeout=30)
-    if r["rc"] != 0:
-        return None
+    r = _debugger_eval("(futon2.aif.wm.debugger/stopped)")
     ids = re.findall(r':run-id\s+"([^"]+)"', r["out"])
     phases = re.findall(r':phase\s+:([\w.-]+)', r["out"])
     kinds = re.findall(r':condition\s+\{:kind\s+:([\w./-]+)', r["out"])
@@ -1740,12 +1754,12 @@ def debugger_stop(run_id: str | None = None) -> dict | None:
 
 
 def debugger_attached() -> bool:
-    r = jvm_eval("(futon2.aif.wm.debugger/attached?)", timeout=30)
-    return r["rc"] == 0 and bool(re.search(r":value\s+true\b", r["out"]))
+    r = _debugger_eval("(futon2.aif.wm.debugger/attached?)")
+    return bool(re.search(r":value\s+true\b", r["out"]))
 
 
 def attach_debugger() -> dict:
-    return jvm_eval("(futon2.aif.wm.debugger/attach!)", timeout=30)
+    return _debugger_eval("(futon2.aif.wm.debugger/attach!)")
 
 
 def retry_held_run(run_id: str) -> dict:
@@ -2525,7 +2539,10 @@ def run(args) -> int:
             reload_ms = max(0, (time.monotonic_ns() - reload_started_ns) // 1_000_000)
             if not ok:
                 return stop(args, "debugger-error", f"paused: a namespace committed since the last click will not load: {text[:300]}", 1, {})
-        stops = debugger_stops()
+        try:
+            stops = debugger_stops()
+        except DebuggerUnreadable as e:
+            return stop(args, "debugger-error", f"debugger-unreadable: {e}", 1, {})
         if len(stops) > 1:
             reason = (f"self-heal-debugger-frames-stacked: {len(stops)} debugger stops; "
                       "no click fired")
@@ -2547,13 +2564,16 @@ def run(args) -> int:
         if breach:
             record({"event": "stop-evidence", "kind": "injury-limit", "detail": breach})
             return stop(args, "debugger-error", f"injury-limit: {breach}", 1, {})
-        attached = debugger_attached()
-        if not attached:
-            result = attach_debugger()
-            record({"event": "debugger-attached", "click-number": spent + 1,
-                    "result": result.get("out", "")[-500:]})
-        attached = debugger_attached()
-        stops_after_attach = debugger_stops()
+        try:
+            attached = debugger_attached()
+            if not attached:
+                result = attach_debugger()
+                record({"event": "debugger-attached", "click-number": spent + 1,
+                        "result": result.get("out", "")[-500:]})
+            attached = debugger_attached()
+            stops_after_attach = debugger_stops()
+        except DebuggerUnreadable as e:
+            return stop(args, "debugger-error", f"debugger-unreadable: {e}", 1, {})
         if not attached or stops_after_attach:
             reason = ("debugger-not-attached: verification failed "
                       f"(attached={attached}, stops={len(stops_after_attach)}); no click fired")

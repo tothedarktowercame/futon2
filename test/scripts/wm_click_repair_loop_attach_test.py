@@ -18,7 +18,13 @@ def load_loop():
     spec = importlib.util.spec_from_file_location("wm_click_attach_under_test", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return wm_click_hermetic.harden(module)
+    debugger_functions = {name: getattr(module, name) for name in
+                          ("_debugger_eval", "debugger_stops",
+                           "debugger_attached", "attach_debugger")}
+    module = wm_click_hermetic.harden(module)
+    for name, function in debugger_functions.items():
+        setattr(module, name, function)
+    return module
 
 
 class DebuggerAttachTest(unittest.TestCase):
@@ -66,9 +72,12 @@ class DebuggerAttachTest(unittest.TestCase):
             return value or {"rc": 0, "out": "{:value nil}", "err": ""}
 
         with (mock.patch.object(self.loop, "jvm_start_epoch", return_value=0),
+              mock.patch.object(self.loop, "record_giraffe_pin", return_value=True),
               mock.patch.object(self.loop, "reload_when_idle", return_value=(True, "", 0)),
+              mock.patch.object(self.loop, "injury_limit_breach", return_value=None),
               mock.patch.object(self.loop, "jvm_eval", side_effect=jvm_eval),
-              mock.patch.object(self.loop, "fire", return_value=dict(self.click)) as fire,
+              mock.patch.object(self.loop, "fire_with_write_manifest",
+                                return_value=dict(self.click)) as fire,
               mock.patch.object(self.loop, "notify")):
             rc = self.loop.run(self.args)
         rows = [json.loads(line) for line in self.loop.LEDGER.read_text().splitlines()]
@@ -76,22 +85,26 @@ class DebuggerAttachTest(unittest.TestCase):
 
     def test_detached_zero_stops_attaches_then_fires(self):
         rc, fires, calls, rows = self.run_case({
-            "(futon2.aif.wm.debugger/stopped)": [
+            self.loop._debugger_form("(futon2.aif.wm.debugger/stopped)"): [
                 {"rc": 0, "out": "{:value []}", "err": ""},
                 {"rc": 0, "out": "{:value []}", "err": ""}],
-            "(futon2.aif.wm.debugger/attached?)": [
+            self.loop._debugger_form("(futon2.aif.wm.debugger/attached?)"): [
                 {"rc": 0, "out": "{:ok true, :value false}", "err": ""},
                 {"rc": 0, "out": "{:value true}", "err": ""}],
-            "(futon2.aif.wm.debugger/attach!)": {"rc": 0, "out": "{:value :attached}", "err": ""}})
+            self.loop._debugger_form("(futon2.aif.wm.debugger/attach!)"):
+                {"rc": 0, "out": "{:value :attached}", "err": ""}})
         self.assertEqual((0, 1), (rc, fires))
-        self.assertIn("(futon2.aif.wm.debugger/attach!)", calls)
+        self.assertIn(self.loop._debugger_form("(futon2.aif.wm.debugger/attach!)"), calls)
         self.assertTrue(any(row.get("event") == "debugger-attached" for row in rows))
 
     def test_attach_does_not_take_stops_without_fire(self):
         rc, fires, _, rows = self.run_case({
-            "(futon2.aif.wm.debugger/stopped)": {"rc": 0, "out": "{:value []}", "err": ""},
-            "(futon2.aif.wm.debugger/attached?)": {"rc": 0, "out": "{:ok true, :value false}", "err": ""},
-            "(futon2.aif.wm.debugger/attach!)": {"rc": 0, "out": "{:value nil}", "err": ""}})
+            self.loop._debugger_form("(futon2.aif.wm.debugger/stopped)"):
+                {"rc": 0, "out": "{:value []}", "err": ""},
+            self.loop._debugger_form("(futon2.aif.wm.debugger/attached?)"):
+                {"rc": 0, "out": "{:ok true, :value false}", "err": ""},
+            self.loop._debugger_form("(futon2.aif.wm.debugger/attach!)"):
+                {"rc": 0, "out": "{:value nil}", "err": ""}})
         self.assertEqual((1, 0), (rc, fires))
         self.assertTrue(any(row.get("kind") == "debugger-not-attached" for row in rows))
 
@@ -99,17 +112,41 @@ class DebuggerAttachTest(unittest.TestCase):
         stopped = ('{:value [{:run-id "one" :phase :author :condition {:kind :a}} '
                    '{:run-id "two" :phase :review :condition {:kind :b}}]}')
         rc, fires, _, rows = self.run_case({
-            "(futon2.aif.wm.debugger/stopped)": {"rc": 0, "out": stopped, "err": ""}})
+            self.loop._debugger_form("(futon2.aif.wm.debugger/stopped)"):
+                {"rc": 0, "out": stopped, "err": ""}})
         self.assertEqual((1, 0), (rc, fires))
         self.assertTrue(any(row.get("kind") == "self-heal-debugger-frames-stacked"
                             for row in rows))
 
     def test_already_attached_does_not_attach_and_fires(self):
         rc, fires, calls, _ = self.run_case({
-            "(futon2.aif.wm.debugger/stopped)": {"rc": 0, "out": "{:value []}", "err": ""},
-            "(futon2.aif.wm.debugger/attached?)": {"rc": 0, "out": "{:value true}", "err": ""}})
+            self.loop._debugger_form("(futon2.aif.wm.debugger/stopped)"):
+                {"rc": 0, "out": "{:value []}", "err": ""},
+            self.loop._debugger_form("(futon2.aif.wm.debugger/attached?)"):
+                {"rc": 0, "out": "{:value true}", "err": ""}})
         self.assertEqual((0, 1), (rc, fires))
-        self.assertNotIn("(futon2.aif.wm.debugger/attach!)", calls)
+        self.assertNotIn(self.loop._debugger_form("(futon2.aif.wm.debugger/attach!)"), calls)
+
+    def test_unreadable_debugger_is_typed_stop_without_fire(self):
+        form = self.loop._debugger_form("(futon2.aif.wm.debugger/stopped)")
+        rc, fires, _, rows = self.run_case({
+            form: {"rc": 1, "out": "", "err": "namespace unavailable"}})
+        self.assertEqual((1, 0), (rc, fires))
+        stop = next(row for row in rows if row.get("event") == "stop")
+        self.assertEqual("debugger-error", stop["case"])
+        self.assertIn("debugger-unreadable: namespace unavailable", stop["reason"])
+
+    def test_one_stop_is_parsed_after_require(self):
+        form = self.loop._debugger_form("(futon2.aif.wm.debugger/stopped)")
+        with mock.patch.object(
+                self.loop, "jvm_eval",
+                return_value={"rc": 0,
+                              "out": ('{:value [{:run-id "held-1" :phase :author '
+                                      ':condition {:kind :review-needed}}]}'),
+                              "err": ""}) as evaluate:
+            stops = self.loop.debugger_stops()
+        self.assertEqual(["held-1"], [stop["run-id"] for stop in stops])
+        evaluate.assert_called_once_with(form, timeout=30)
 
 
 if __name__ == "__main__":
