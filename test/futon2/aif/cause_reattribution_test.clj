@@ -7,7 +7,8 @@
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.meta-medic-authority :as authority]
-            [futon2.aif.meta-terminal-injury :as terminal])
+            [futon2.aif.meta-terminal-injury :as terminal]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -41,6 +42,24 @@
                   (not= :cause-reattribution (:kind candidate))))]
     {:root root :ledger-path ledger-path :run-path run-path :receipt receipt
      :pin pin :history history :operation operation :authority normal}))
+
+(deftest retained-receipt-pin-relocates-with-digest-enforcement
+  (let [root (temp-root)
+        target (io/file root "futon2/data/receipt.edn")
+        value {:schema reattribution/receipt-schema :status :checked}
+        bytes (.getBytes (str (pr-str value) "\n") "UTF-8")
+        canonical "/home/joe/code/futon2/data/receipt.edn"
+        original-local-path data-paths/local-path]
+    (io/make-parents target)
+    (Files/write (.toPath target) bytes (make-array java.nio.file.OpenOption 0))
+    (with-redefs [data-paths/local-path
+                  #(original-local-path % (str root) nil)]
+      (is (= value (#'reattribution/read-pin
+                    {:path canonical :sha256 (load-identity/sha256 bytes)})))
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo #"receipt pin mismatch"
+           (#'reattribution/read-pin
+            {:path canonical :sha256 (apply str (repeat 64 "0"))}))))))
 
 (deftest retained-ordinal-117-reattribution-is-atomic-and-reloadable
   (let [{:keys [ledger-path run-path receipt operation authority]} (fixture-case)

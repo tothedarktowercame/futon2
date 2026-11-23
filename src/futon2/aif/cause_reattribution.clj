@@ -2,14 +2,16 @@
   "Retained authority for an exact atomic cause reattribution."
   (:require [clojure.edn :as edn]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files Paths]))
 
 (def receipt-schema :wm/cause-reattribution-receipt-v1)
 (def verifier "DarkTower.WarMachine.HistoricalMisclassificationCorrection")
 
 (defn- read-pin [{:keys [path sha256]}]
-  (let [bytes (Files/readAllBytes (Paths/get path (make-array String 0)))]
+  (let [bytes (Files/readAllBytes
+               (Paths/get (data-paths/local-path path) (make-array String 0)))]
     (when-not (= sha256 (load-identity/sha256 bytes))
       (throw (ex-info "cause reattribution receipt pin mismatch" {})))
     (edn/read-string (String. bytes "UTF-8"))))
