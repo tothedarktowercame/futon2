@@ -3,7 +3,29 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.medic-disposition :as medic]
             [futon2.aif.out-of-band-fix :as fix]
-            [futon2.aif.meta-self-heal-production :as production]))
+            [futon2.aif.meta-self-heal-production :as production]
+            [futon2.aif.load-identity :as identity]
+            [futon2.data-paths :as data-paths]))
+
+(deftest read-pin-relocates-without-weakening-the-digest
+  (let [root (java.nio.file.Files/createTempDirectory
+              "oob-relocated" (make-array java.nio.file.attribute.FileAttribute 0))
+        target (.resolve root "futon2/data/receipt.edn")
+        bytes (.getBytes "{:status :checked}\n" "UTF-8")
+        canonical "/home/joe/code/futon2/data/receipt.edn"
+        original-local-path data-paths/local-path
+        local #(original-local-path % (str root) nil)]
+    (java.nio.file.Files/createDirectories (.getParent target)
+                                            (make-array java.nio.file.attribute.FileAttribute 0))
+    (java.nio.file.Files/write target bytes (make-array java.nio.file.OpenOption 0))
+    (with-redefs [data-paths/local-path local]
+      (is (= (String. bytes "UTF-8")
+             (fix/read-pin {:path canonical :sha256 (identity/sha256 bytes)})))
+      (try
+        (fix/read-pin {:path canonical :sha256 (apply str (repeat 64 "0"))})
+        (is false "digest drift must refuse")
+        (catch clojure.lang.ExceptionInfo e
+          (is (= :out-of-band/pin-mismatch (:reason (ex-data e)))))))))
 
 (deftest checked-three-evidence-rule
   (let [green {:tests 1 :failures 0 :errors 0}

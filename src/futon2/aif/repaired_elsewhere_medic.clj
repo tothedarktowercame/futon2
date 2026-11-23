@@ -9,7 +9,8 @@
             [futon2.aif.meta-injury-ledger :as ledger]
             [futon2.aif.meta-injury-store :as store]
             [futon2.aif.out-of-band-fix :as out-of-band]
-            [futon2.aif.repair-obligation :as repair])
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.data-paths :as data-paths])
   (:import [java.time Instant]))
 
 (def receipt-schema :wm/repaired-elsewhere-medic-receipt-v1)
@@ -22,7 +23,8 @@
 (defn- sha-bytes [^bytes bs] (identity/sha256 bs))
 
 (defn- read-pin [pin]
-  (let [bs (java.nio.file.Files/readAllBytes (.toPath (io/file (:path pin))))]
+  (let [bs (java.nio.file.Files/readAllBytes
+            (.toPath (io/file (data-paths/local-path (:path pin)))))]
     (when-not (= (:sha256 pin) (sha-bytes bs))
       (throw (ex-info "Pinned value changed" {:reason :repaired-elsewhere/pin-mismatch})))
     (edn/read-string (String. bs "UTF-8"))))

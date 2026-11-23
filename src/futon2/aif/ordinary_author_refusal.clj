@@ -7,7 +7,8 @@
             [futon2.aif.handoff-contract :as handoff]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.meta-terminal-injury :as terminal]
-            [futon2.aif.occurrence-square-authoring :as square-authoring]))
+            [futon2.aif.occurrence-square-authoring :as square-authoring]
+            [futon2.data-paths :as data-paths]))
 
 (def receipt-schema :wm/ordinary-author-refusal-receipt-v1)
 (def verifier-id "futon2.aif.ordinary-author-refusal/retained-authority")
@@ -21,7 +22,8 @@
 
 (defn- resolve-pin [pin]
   (try
-    (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file (:path pin))))]
+    (let [bytes (java.nio.file.Files/readAllBytes
+                 (.toPath (io/file (data-paths/local-path (:path pin)))))]
       (when (= (:sha256 pin) (identity/sha256 bytes))
         (let [text (String. bytes "UTF-8")
               value (try (edn/read-string text)

@@ -5,7 +5,7 @@
   fresh directory, so defaults remain hermetic even when the process cwd is
   the production checkout or a git worktree."
   (:require [clojure.java.io :as io])
-  (:import [java.nio.file Files]
+  (:import [java.nio.file Files Path Paths]
            [java.nio.file.attribute FileAttribute]))
 
 (defn configured-data-root
@@ -29,6 +29,32 @@
 (def production-code-root
   "Canonical parent containing the futon repositories."
   (.getPath (.getParentFile (io/file production-repo-root))))
+
+(defn local-path
+  "Resolve a retained canonical host path into this serving composition.
+
+  Paths below /home/joe/code follow production-code-root. Paths below
+  /home/joe/notes follow FUTON_WM_NOTES_ROOT when it is non-empty. Matching is
+  by Path components, so similarly prefixed names such as /home/joe/codex are
+  not relocated. Relative and unrelated absolute paths are unchanged."
+  ([p]
+   (local-path p production-code-root (System/getenv "FUTON_WM_NOTES_ROOT")))
+  ([p code-root notes-root]
+   (let [path (Paths/get (str p) (make-array String 0))
+         code-prefix (Paths/get "/home/joe/code" (make-array String 0))
+         notes-prefix (Paths/get "/home/joe/notes" (make-array String 0))
+         relocate (fn [^Path prefix root]
+                    (str (.resolve (Paths/get root (make-array String 0))
+                                   (.relativize prefix path))))]
+     (cond
+       (and (.isAbsolute path) (.startsWith path code-prefix))
+       (relocate code-prefix code-root)
+
+       (and (.isAbsolute path) (.startsWith path notes-prefix)
+            (some-> notes-root str not-empty))
+       (relocate notes-prefix notes-root)
+
+       :else (str p)))))
 
 (defn repo-path [& parts]
   (str (apply io/file production-repo-root parts)))

@@ -6,14 +6,16 @@
             [clojure.string :as str]
             [clojure.walk :as walk]
             [futon2.aif.action-identity :as action-identity]
-            [futon2.aif.load-identity :as identity]))
+            [futon2.aif.load-identity :as identity]
+            [futon2.data-paths :as data-paths]))
 
 (defn- refuse! [reason & [detail]]
   (throw (ex-info "Out-of-band fixing attribution refused"
                   {:status :refused :reason reason :detail detail})))
 (defn- sha [s] (identity/sha256 (.getBytes s "UTF-8")))
 (defn read-pin [pin]
-  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file (:path pin))))]
+  (let [bytes (java.nio.file.Files/readAllBytes
+               (.toPath (io/file (data-paths/local-path (:path pin)))))]
     (when-not (= (:sha256 pin) (identity/sha256 bytes))
       (refuse! :out-of-band/pin-mismatch pin))
     (String. bytes "UTF-8")))

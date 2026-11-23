@@ -7,7 +7,8 @@
             [futon2.aif.action-identity :as action-identity]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.meta-injury-ledger :as ledger]
-            [futon2.aif.out-of-band-fix :as out-of-band]))
+            [futon2.aif.out-of-band-fix :as out-of-band]
+            [futon2.data-paths :as data-paths]))
 
 (def receipt-schema :wm/environmental-probe-receipt-v1)
 (def checked-medic-verifier
@@ -20,7 +21,8 @@
 (defn- sha-text [text] (sha-bytes (.getBytes text "UTF-8")))
 
 (defn- read-pin [pin]
-  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file (:path pin))))]
+  (let [bytes (java.nio.file.Files/readAllBytes
+               (.toPath (io/file (data-paths/local-path (:path pin)))))]
     (when-not (= (:sha256 pin) (sha-bytes bytes))
       (throw (ex-info "Environmental probe pin mismatch"
                       {:status :refused :reason :environmental-probe/pin-mismatch})))
