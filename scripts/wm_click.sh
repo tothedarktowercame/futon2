@@ -308,7 +308,7 @@ prepare_sources() {
 }
 
 probe_heap() {
-  local started listing pids pid gc_output heap_output metrics old_used_mb max_mb threshold_mb rc=0
+  local started listing candidates pids pid gc_output heap_output metrics old_used_mb max_mb threshold_mb rc=0 expected_cwd
   started=$(phase_now_ns)
   # Measured after a full GC on 2026-10-26: 4645 MiB old/non-young use in a
   # 12288 MiB heap. 8192 MiB preserves about 4 GiB for one click; this is an
@@ -325,10 +325,13 @@ probe_heap() {
     HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
     return "$rc"
   fi
-  pids=$(printf '%s\n' "$listing" |
+  candidates=$(printf '%s\n' "$listing" |
     awk '$2 == "clojure.main" && $0 ~ / -m futon3c[.]dev([[:space:]]|$)/ {print $1}')
+  expected_cwd=$(realpath "$F3C")
+  pids=$(printf '%s\n' "$candidates" |
+    python3 "$F2/scripts/wm_click_select_jvm.py" "$expected_cwd")
   if [ "$(printf '%s\n' "$pids" | awk 'NF {n++} END {print n+0}')" -ne 1 ]; then
-    cannot "heap after GC" "expected one futon3c.dev JVM, found: ${pids:-none}"
+    cannot "heap after GC" "expected one futon3c.dev JVM with cwd $expected_cwd, found: ${pids:-none}"
     HEAP_TRIPWIRE_NS=$((HEAP_TRIPWIRE_NS + $(phase_now_ns) - started))
     return 3
   fi
