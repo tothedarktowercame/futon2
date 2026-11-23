@@ -12,14 +12,15 @@
             [clojure.string :as str]
             [futon2.aif.fold-escrow :as esc]
             [futon2.aif.mission-registry :as missions]
-            [futon2.aif.substrate :as substrate])
+            [futon2.aif.substrate :as substrate]
+            [futon2.data-paths :as data-paths])
   (:import [java.time Instant]))
 
-(def default-log-file "/home/joe/code/futon2/logs/actuator-a3.log")
+(def default-log-file (data-paths/local-path "/home/joe/code/futon2/logs/actuator-a3.log"))
 (def default-agency-send "/home/joe/code/futon3c/scripts/agency_send.py")
 (def default-drawbridge-url "http://localhost:6768/eval")
-(def default-admin-token-path "/home/joe/code/futon3c/.admintoken")
-(def default-a4-before-dir "/home/joe/code/futon2/logs/a4-before")
+(def default-admin-token-path (data-paths/local-path "/home/joe/code/futon3c/.admintoken"))
+(def default-a4-before-dir (data-paths/local-path "/home/joe/code/futon2/logs/a4-before"))
 
 (def reviewed-endpoint-bindings
   {"futon5a-d/mission/learning-loop"
@@ -125,9 +126,15 @@
     :s4 {:kind :entity
          :type :evidence}}})
 
+(defn admin-token-from
+  "Resolve Drawbridge credentials without touching TOKEN-PATH when ENV has a token."
+  [env token-path]
+  (or (some-> (get env "FUTON3C_ADMIN_TOKEN") str/trim not-empty)
+      (try (str/trim (slurp token-path))
+           (catch Throwable _ nil))))
+
 (defn- admin-token []
-  (try (str/trim (slurp default-admin-token-path))
-       (catch Throwable _ nil)))
+  (admin-token-from (System/getenv) default-admin-token-path))
 
 (declare evidence-resolves? result-truthy? drawbridge-eval drawbridge-submit-tx!)
 

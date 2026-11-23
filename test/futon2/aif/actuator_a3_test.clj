@@ -8,6 +8,11 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
+(deftest environment-admin-token-does-not-read-the-fallback-file
+  (is (= "sandbox-secret"
+         (a3/admin-token-from {"FUTON3C_ADMIN_TOKEN" "sandbox-secret"}
+                              "/does/not/exist/.admintoken"))))
+
 (deftest extracts-all-a3-corpus-deposits
   (let [by-id (a3/deposits-by-id)
         packages (mapv #(a3/extract-build-package (get by-id %)) a3/a3-corpus-ids)]
