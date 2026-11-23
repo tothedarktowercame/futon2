@@ -199,8 +199,8 @@
     (if (zero? exit) (.trim out) {:absent :git-head-unavailable})))
 
 (defn source-revisions
-  ([] (source-revisions {"futon2" "/home/joe/code/futon2"
-                         "futon3-pattern-library" "/home/joe/code/futon3"}))
+  ([] (source-revisions {"futon2" (data-paths/local-path "/home/joe/code/futon2")
+                         "futon3-pattern-library" (data-paths/local-path "/home/joe/code/futon3")}))
   ([roots]
    (into (sorted-map) (map (fn [[id path]] [id (git-head path)]) roots))))
 
@@ -221,8 +221,8 @@
 
 (defn chronology-start [opts]
   (let [revisions (source-revisions (or (:registered-run/source-roots opts)
-                                        {"futon2" "/home/joe/code/futon2"
-                                         "futon3-pattern-library" "/home/joe/code/futon3"}))
+                                        {"futon2" (data-paths/local-path "/home/joe/code/futon2")
+                                         "futon3-pattern-library" (data-paths/local-path "/home/joe/code/futon3")}))
         config (select-keys opts [:author :reviewer :repair-reviewer :window-days
                                   :semantic-epoch :trigger :execution-cohort])
         prior (latest-prior-record (or (:run-record-dir opts)
@@ -234,8 +234,8 @@
 
 (defn chronology-finish [start opts refresh]
   (let [after (source-revisions (or (:registered-run/source-roots opts)
-                                    {"futon2" "/home/joe/code/futon2"
-                                     "futon3-pattern-library" "/home/joe/code/futon3"}))
+                                    {"futon2" (data-paths/local-path "/home/joe/code/futon2")
+                                     "futon3-pattern-library" (data-paths/local-path "/home/joe/code/futon3")}))
         substrate (get refresh :freshness {:absent :refresh-not-recorded})]
     (assoc start
            :source-revisions-after after
