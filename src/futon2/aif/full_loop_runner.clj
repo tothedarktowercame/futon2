@@ -1979,7 +1979,7 @@
   (task-execution/fresh-artifact-binding opts repo before job))
 
 (defn- primary-repos []
-  (->> (or (.listFiles (io/file "/home/joe/code")) [])
+  (->> (or (.listFiles (io/file (data-paths/local-path "/home/joe/code"))) [])
        (filter #(.isDirectory %))
        (filter #(re-matches #"futon[^/]*" (.getName %)))
        (filter #(or (.exists (io/file % ".git"))
@@ -2024,7 +2024,8 @@
 
 (defn- stack-code-state []
   (let [states (mapv repo-state (primary-repos))
-        f2 (first (filter #(= "/home/joe/code/futon2" (:repo %)) states))]
+        f2-root (data-paths/local-path "/home/joe/code/futon2")
+        f2 (first (filter #(= f2-root (:repo %)) states))]
     (assoc f2 :repo-heads (into {} (map (juxt :repo :git-sha) states)))))
 
 (defn agent-roster
