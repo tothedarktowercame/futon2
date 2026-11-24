@@ -50,6 +50,41 @@
     (is (= (get-in with-empty [:stopping :G-cascade])
            (get-in with-empty [:by-id :operator-focus :G-cascade])))))
 
+(deftest named-later-item-makes-prepare-the-ground-a-distinct-policy
+  (let [groundwork {:status :present :item "T-later"
+                    :edge {:kind :depends-on :quote "later needs this"
+                           :source-pin {:path "/repo/later.md" :sha256 "abc"
+                                        :line 4 :quote "later needs this"}}}
+        fs {"T-pick" {:status :ready :cone 2 :unblocks 1 :prerequisites []
+                       :named-later-item groundwork}}
+        entries [{:id :operator-focus :patterns operator-focus :pick "T-pick"
+                  :relation-class :focus}
+                 {:id :giraffe-order :patterns giraffe :pick "T-pick"
+                  :relation-class :focus}]
+        result (sg/score entries fs)]
+    (is (contains? (sg/fact-tokens "T-pick" (fs "T-pick") :focus)
+                   ["T-pick" :named-later-item]))
+    (is (= ["only-what-can-start-now" "prepare-the-ground"
+            "what-others-wait-on-first"]
+           (get-in result [:fired :giraffe-order])))
+    (is (not= (get-in result [:by-id :operator-focus :G-cascade])
+              (get-in result [:by-id :giraffe-order :G-cascade])))
+    (is (= groundwork (get-in result [:named-later-items "T-pick"])))))
+
+(deftest cone-alone-does-not-invent-a-named-later-item
+  (let [fact {:status :ready :cone 3 :unblocks 0 :prerequisites []
+              :named-later-item {:status :absent
+                                 :reason :named-later-item-edge-absent}}
+        result (sg/score [{:id :giraffe-order :patterns giraffe :pick "T-pick"
+                           :relation-class :focus}]
+                         {"T-pick" fact})]
+    (is (not (contains? (sg/fact-tokens "T-pick" fact :focus)
+                        ["T-pick" :named-later-item])))
+    (is (= ["only-what-can-start-now"]
+           (get-in result [:fired :giraffe-order])))
+    (is (= :named-later-item-edge-absent
+           (get-in result [:named-later-items "T-pick" :reason])))))
+
 (deftest same-pick-same-patterns-same-g
   (let [es [{:id :a :patterns only :pick "T-08" :relation-class :useful-elsewhere}
             {:id :b :patterns only :pick "T-08" :relation-class :useful-elsewhere}]]

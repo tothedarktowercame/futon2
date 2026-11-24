@@ -35,6 +35,28 @@
             "outer-observation-test"
             (make-array java.nio.file.attribute.FileAttribute 0))))
 
+(deftest named-later-item-comes-only-from-a-readable-counting-edge
+  (let [pin {:path "/repo/Later.md" :sha256 "abc" :line 7
+             :quote "Later needs Target"}
+        edge {:kind :item :class :closure :from :Later :to :Target
+              :reading-kind :depends-on :quote "Later needs Target"
+              :evidence-pin pin}]
+    (is (= {:status :present :item "Later"
+            :edge {:kind :depends-on :quote "Later needs Target"
+                   :source-pin pin}}
+           (observation/named-later-item-evidence "Target" 2 [edge])))
+    (is (= {:status :absent :reason :named-later-item-edge-absent
+            :edge-count 0}
+           (observation/named-later-item-evidence "Target" 2 [])))
+    (is (= {:status :absent :reason :named-later-item-edge-unreadable
+            :edge-count 1}
+           (observation/named-later-item-evidence
+            "Target" 2 [(dissoc edge :evidence-pin)])))
+    (is (= {:status :absent :reason :zero-cone}
+           (observation/named-later-item-evidence "Target" 0 [edge])))
+    (is (= {:status :absent :reason :cone-unavailable}
+           (observation/named-later-item-evidence "Target" nil [edge])))))
+
 (defn temp-git-source! []
   (let [root (temp-dir)
         source (io/file root "M-ready.md")]

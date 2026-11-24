@@ -57,6 +57,7 @@
            (= "undetermined" (status-of fact)) (conj :undetermined)
            (pos? (or (:unblocks fact) 0)) (conj :unblocks)
            (pos? (or (:cone fact) 0)) (conj :cone)
+           (= :present (get-in fact [:named-later-item :status])) (conj :named-later-item)
            (= :focus relation-class) (conj :operator-ask)
            placed? (conj :placed-work)
            (and present? (not placed?)) (conj :non-work-placement)
@@ -217,6 +218,9 @@
         rows (if (vector? results) results (:candidates results))
         by-id (into {} (map (juxt :cascade-id identity)) rows)]
     {:by-id (dissoc by-id stop-id) :stopping (get by-id stop-id) :horizon h
+     :named-later-items (into {} (map (fn [target]
+                                       [target (get-in facts [target :named-later-item])])
+                                     picks))
      :fired (into {} (map (fn [c] [(:id c) (fired-patterns c state h)])) cands)
      :fired-units (into {} (map (fn [c] [(:id c) (fired-units c state h)])) cands)
      :refusal (when-not (vector? results) results)})))

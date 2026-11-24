@@ -228,6 +228,47 @@
            :source (or (:registry-source authority) :unspecified)
            :registry-pin (data-pin groups))))
 
+(defn named-later-item-evidence
+  "A pinned direct need edge from a downstream item to TARGET, or a typed
+  absence. Giraffe stores needs as downstream -> prerequisite in input.edn;
+  alternative edges do not belong to the need graph used for its cone."
+  [target cone edges]
+  (cond
+    (not (number? cone))
+    {:status :absent :reason :cone-unavailable}
+
+    (not (pos? cone))
+    {:status :absent :reason :zero-cone}
+
+    :else
+    (let [target (keyword target)
+          incoming (->> edges
+                        (filter #(and (= :item (:kind %))
+                                      (not= :alternative (:class %))
+                                      (= target (:to %))))
+                        (sort-by #(pr-str [(:from %) (:reading-kind %)
+                                           (get-in % [:evidence-pin :path])
+                                           (get-in % [:evidence-pin :line])]))
+                        vec)
+          usable (filter (fn [edge]
+                           (let [pin (:evidence-pin edge)]
+                             (and (some? (:from edge))
+                                  (string? (:quote edge)) (seq (:quote edge))
+                                  (string? (:path pin)) (seq (:path pin))
+                                  (string? (:sha256 pin)) (seq (:sha256 pin)))))
+                         incoming)]
+      (if-let [edge (first usable)]
+        {:status :present
+         :item (name (:from edge))
+         :edge {:kind (:reading-kind edge)
+                :quote (:quote edge)
+                :source-pin (:evidence-pin edge)}}
+        {:status :absent
+         :reason (if (seq incoming)
+                   :named-later-item-edge-unreadable
+                   :named-later-item-edge-absent)
+         :edge-count (count incoming)}))))
+
 (defn giraffe-field
   "The registry-open task population, partitioned into pinned pass facts and
   typed task exclusions. No inner-policy or makeup reach participates."
@@ -245,7 +286,12 @@
              pass (read-run-file dir "pass.edn" :giraffe-pass-malformed)
              manifest-sha (sha256 (Files/readAllBytes (.toPath manifest-file)))
              pass-sha (sha256 (Files/readAllBytes (.toPath pass-file)))
-             rows (:order pass)
+             input (read-run-file dir "input.edn" :giraffe-input-malformed)
+             rows (mapv (fn [row]
+                          (assoc row :named-later-item
+                                 (named-later-item-evidence (:id row) (:cone row)
+                                                           (:edges input))))
+                        (:order pass))
              _ (when-not (and (vector? rows) (every? #(and (:id %) (contains? % :status)) rows)
                               (= (count rows) (count (set (map :id rows)))))
                  (refuse! :giraffe-pass-invalid {:run-dir (.getPath dir)}))
@@ -307,6 +353,7 @@
                              {:candidate {:target target :reach (:value reach) :reach-source (:source reach)}
                               :target target
                               :fact (assoc (select-keys row [:status :cone :unblocks :rank :rank-basis :graph-terms
+                                                            :named-later-item
                                                             :completion :dependency-reading])
                                            :pin pin :reach reach :reach-source (:source reach))})))) )
                    enumerated declarations)

@@ -545,6 +545,7 @@
                     :knowledge-producer-requests (:requests partition)
                     :library library :construction construction :cascades cascades :abstention abstention
                     :per-task-rating ratings :top-ten (rating-top-ten ratings)
+                    :named-later-items (:named-later-items canonical)
                     :forbidden forbidden-evidence
                     :cascade-scores scores :cascade-picks (mapv :pick cascades)
                     :cascade-pick-relations legacy-relations}
