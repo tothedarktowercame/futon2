@@ -8,11 +8,13 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.analysis-cascade :as analysis-cascade]
-            [futon2.aif.load-identity :as identity])
+            [futon2.aif.load-identity :as identity]
+            [futon2.data-paths :as data-paths])
   (:import [java.nio.file Files StandardCopyOption]
            [java.time Instant]))
 
-(def default-root "/home/joe/code/storage/wm-target-readings")
+(def default-root
+  (data-paths/code-path "storage" "wm-target-readings"))
 
 (identity/register! *ns* *file*)
 

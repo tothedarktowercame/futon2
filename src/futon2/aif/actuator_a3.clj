@@ -17,7 +17,8 @@
   (:import [java.time Instant]))
 
 (def default-log-file (data-paths/local-path "/home/joe/code/futon2/logs/actuator-a3.log"))
-(def default-agency-send "/home/joe/code/futon3c/scripts/agency_send.py")
+(def default-agency-send
+  (data-paths/code-path "futon3c" "scripts" "agency_send.py"))
 (def default-drawbridge-url "http://localhost:6768/eval")
 (def default-admin-token-path (data-paths/local-path "/home/joe/code/futon3c/.admintoken"))
 (def default-a4-before-dir (data-paths/local-path "/home/joe/code/futon2/logs/a4-before"))
@@ -562,7 +563,7 @@
   (let [cmd ["python3" agency-send "--to" builder "--kind" "bell" "--from" reviewer
              "--mission" (:mission package)]
         pb (ProcessBuilder. ^java.util.List cmd)]
-    (.directory pb (io/file "/home/joe/code"))
+    (.directory pb (io/file data-paths/production-code-root))
     (.redirectErrorStream pb true)
     (let [p (.start pb)]
       (spit (.getOutputStream p) (build-prompt package))

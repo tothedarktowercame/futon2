@@ -22,7 +22,7 @@
    canonical location."
   (if (some-> (System/getenv "FUTON_WM_CODE_ROOT") str not-empty)
     (data-paths/path "wm-target-reading-requests")
-    "/home/joe/code/storage/wm-target-reading-requests"))
+    (data-paths/code-path "storage" "wm-target-reading-requests")))
 (def default-request-builder
   "wm_task_reading.py lives in the futon2 checkout. Route it through
    data-paths/repo-path so an isolated serving root (FUTON_WM_CODE_ROOT)

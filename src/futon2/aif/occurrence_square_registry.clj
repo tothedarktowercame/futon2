@@ -8,7 +8,8 @@
   (:import [java.nio.file Files StandardCopyOption]))
 
 (def schema :wm/occurrence-square-registry-v1)
-(def default-root "/home/joe/code/storage/wm-occurrence-squares")
+(def default-root
+  (data-paths/code-path "storage" "wm-occurrence-squares"))
 
 (defn default-library-root
   "The pinned pattern library beneath the SERVING code root, resolved through

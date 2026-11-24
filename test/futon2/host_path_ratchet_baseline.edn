@@ -2,7 +2,7 @@
  :allowlist {}
  :files
  {"src/futon2/aif/a4a_substrate.clj" 3
-  "src/futon2/aif/actuator_a3.clj" 9
+  "src/futon2/aif/actuator_a3.clj" 7
   "src/futon2/aif/arguing_worlds.clj" 2
   "src/futon2/aif/c_vector.clj" 1
   "src/futon2/aif/capability_zones.clj" 1
@@ -29,18 +29,15 @@
   "src/futon2/aif/meta_self_heal_production.clj" 1
   "src/futon2/aif/mission_hole_wants.clj" 2
   "src/futon2/aif/mission_wants_view.clj" 1
-  "src/futon2/aif/occurrence_square_registry.clj" 1
   "src/futon2/aif/pattern_registry.clj" 1
   "src/futon2/aif/receipt_construction.clj" 2
   "src/futon2/aif/registered_run_telemetry.clj" 6
   "src/futon2/aif/rollout.clj" 1
   "src/futon2/aif/seat_call_index.clj" 1
-  "src/futon2/aif/selected_target_reading.clj" 1
   "src/futon2/aif/selection_authoring_coupling.clj" 4
   "src/futon2/aif/selection_rationale.clj" 1
   "src/futon2/aif/selection_world.clj" 3
   "src/futon2/aif/shadow_cascade_g.clj" 2
-  "src/futon2/aif/target_reading_registry.clj" 1
   "src/futon2/aif/task_belief_ladder.clj" 1
   "src/futon2/aif/tripwire_calibration.clj" 3
   "src/futon2/aif/want_interpretation.clj" 3
