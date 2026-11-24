@@ -20,6 +20,11 @@
       (refuse! :out-of-band/pin-mismatch pin))
     (String. bytes "UTF-8")))
 (defn- git [repo & args] (apply shell/sh "git" "-C" repo args))
+(defn configured-out-of-band-worktree-root
+  [configured-root home]
+  (str (io/file (or (some-> configured-root str not-empty)
+                    (str (io/file home "worktrees")))
+                "futon2" "out-of-band")))
 (defn- checked-git [repo & args]
   (let [r (apply git repo args)]
     (when-not (zero? (:exit r)) (refuse! :out-of-band/git-failed (select-keys r [:exit :err])))
@@ -258,7 +263,11 @@
                                (zero? (:failures current-report))
                                (pos? (:tests current-report)))
                   (refuse! :out-of-band/current-not-green {:run current :report current-report}))
-              worktree (str (System/getProperty "user.home") "/worktrees/futon2/out-of-band/" (java.util.UUID/randomUUID))
+              worktree (str (io/file
+                             (configured-out-of-band-worktree-root
+                              (System/getenv "FUTON_WM_WORKTREE_ROOT")
+                              (System/getProperty "user.home"))
+                             (str (java.util.UUID/randomUUID))))
               _ (io/make-parents (str worktree "/placeholder"))
               _ (checked-git repo "worktree" "add" "--detach" worktree base)
               applied (git worktree "apply" "-R" "--3way" "-" :in patch)

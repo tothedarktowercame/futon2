@@ -228,7 +228,7 @@ def write_repair_lease(tag: str, job: str, seat: str) -> Path:
         "repos": [str(r) for r in (F2, F3C, MATHLIB4) if (r / ".git").exists()],
         "started-at": now(),
         "note": "one writer per checkout: while this lease exists, other "
-                "writers work in worktrees under ~/worktrees/<repo>/<name>, "
+                f"writers work in worktrees under {WORKTREE_ROOT}/<repo>/<name>, "
                 "not the shared checkout",
     }
     note_own_write(REPAIR_LEASE)
@@ -2300,7 +2300,7 @@ def repair(args, reason: str, click: dict | None, prior: list[str],
         "\n\n== repair lease ==\n"
         f"A one-writer-per-checkout lease for this repair is recorded at {REPAIR_LEASE} "
         "(seat, job, repos, start time) and cleared when the repair ends. "
-        "Other writers work in worktrees under ~/worktrees/<repo>/<name> until then; "
+        f"Other writers work in worktrees under {WORKTREE_ROOT}/<repo>/<name> until then; "
         "commit only the paths you changed yourself.")
     job = dispatch(args.repair_seat, prompt)
     write_repair_lease(tag, job, args.repair_seat)

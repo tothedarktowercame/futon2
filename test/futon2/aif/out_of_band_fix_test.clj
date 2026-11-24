@@ -132,3 +132,9 @@
            (medic/qualify (constantly true) entry-154
                           (assoc candidate :predecessor-entry-id nil)
                           (assoc candidate :predecessor-entry-id nil))))))
+
+(deftest out-of-band-worktree-root-is-configurable
+  (is (= "/tmp/wm-worktrees/futon2/out-of-band"
+         (fix/configured-out-of-band-worktree-root "/tmp/wm-worktrees" "/home/test")))
+  (is (= "/home/test/worktrees/futon2/out-of-band"
+         (fix/configured-out-of-band-worktree-root nil "/home/test"))))
