@@ -136,11 +136,13 @@ CANONICAL_FUTON_ROOTS = [
     if path.is_dir() and (path / ".git").exists()
     and CANONICAL_FUTON_RE.fullmatch(path.name)
 ]
+WORKTREE_ROOT = Path(os.environ.get(
+    "FUTON_WM_WORKTREE_ROOT", Path.home() / "worktrees"))
 WRITE_ROOTS = list(dict.fromkeys(
     path.resolve() for path in
     [*CANONICAL_FUTON_ROOTS,
      F2 / "data", F2 / "evidence", F3C / "data",
-     Path.home() / "worktrees" / "futon2" / "self-heal", Path("/tmp")]))
+     WORKTREE_ROOT / "futon2" / "self-heal", Path("/tmp")]))
 # No is_dir() filter here: the loop is long-running and a root created after
 # start (self-heal appears with the first META injury) must still be walked.
 # snapshot_write_roots skips a root that does not exist yet.
