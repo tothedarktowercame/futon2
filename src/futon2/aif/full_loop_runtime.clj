@@ -86,7 +86,7 @@
 (def default-ticket-readiness-candidate-chars 1024)
 (def default-giraffe-root
   (or (System/getenv "FUTON_WM_GIRAFFE_ROOT")
-      "/home/joe/code/storage/giraffe"))
+      (data-paths/code-path "storage" "giraffe")))
 (def self-heal-runtime-config-resource "wm/self-heal-runtime.edn")
 
 (defn self-heal-runtime-config
