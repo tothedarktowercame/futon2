@@ -17,7 +17,8 @@
             [clojure.string :as str]
             [futon2.aif.held-out-split :as split]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.observation-checks :as checks]))
+            [futon2.aif.observation-checks :as checks]
+            [futon2.data-paths :as data-paths]))
 
 (load-identity/register! *ns* *file*)
 
@@ -29,7 +30,7 @@
 (def ^:dynamic *repo-root*
   "Checkout root that repo-relative record paths resolve against; see
    futon2.aif.held-out-observations for why the reader's cwd is not one."
-  "/home/joe/code/futon2")
+  data-paths/production-repo-root)
 
 (defn- sha256-of [f]
   (let [bytes (Files/readAllBytes (.toPath (io/file f)))]

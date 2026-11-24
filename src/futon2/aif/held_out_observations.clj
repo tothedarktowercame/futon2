@@ -6,7 +6,8 @@
             [clojure.string :as str]
             [futon2.aif.held-out-split :as split]
             [futon2.aif.load-identity :as load-identity]
-            [futon2.aif.observation-checks :as checks]))
+            [futon2.aif.observation-checks :as checks]
+            [futon2.data-paths :as data-paths]))
 
 (load-identity/register! *ns* *file*)
 
@@ -50,7 +51,7 @@
    stay checkable; resolution needs a root, and the reader's working
    directory is not one -- verifying from the serving JVM (cwd futon3c)
    marked every row :source-missing (claude-5, reviewing 61c573a8)."
-  "/home/joe/code/futon2")
+  data-paths/production-repo-root)
 
 (defn- resolve-source [path]
   (let [f (io/file path)]

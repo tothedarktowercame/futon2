@@ -17,8 +17,6 @@
   "src/futon2/aif/full_loop_cohort.clj" 1
   "src/futon2/aif/full_loop_runner.clj" 5
  "src/futon2/aif/full_loop_runtime.clj" 2
-  "src/futon2/aif/held_out_calibration.clj" 1
-  "src/futon2/aif/held_out_observations.clj" 1
   "src/futon2/aif/interoceptive_activation.clj" 7
   "src/futon2/aif/interoceptive_store_lock.clj" 1
   "src/futon2/aif/interpretation_request.clj" 7
