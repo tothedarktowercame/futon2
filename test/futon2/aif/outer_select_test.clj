@@ -79,6 +79,33 @@
    :facts {"M-ready" {:status :ready :unblocks 1 :cone 2}
            "M-unknown" {:status :undetermined :unblocks 0 :cone 1}}})
 
+(deftest operator-focus-cascade-reaches-the-ready-focus-task
+  (let [makeup {:cascades [{:id :operator-focus
+                            :patterns ["only-what-can-start-now" "the-operator-asked"]
+                            :steps [:ready-gate :focus-gate :by-cone :by-unblocks]}
+                           {:id :ordinary
+                            :patterns ["only-what-can-start-now"]
+                            :steps [:ready-gate :by-cone :by-unblocks]}]
+                :enactment-modes {:operator-focus :implementation
+                                  :ordinary :implementation}}
+        facts {"T-elsewhere" {:status :ready :rank 1 :cone 0 :unblocks 0
+                               :prerequisites []}
+               "T-focus" {:status :ready :rank 1 :cone 0 :unblocks 0
+                           :prerequisites []}}
+        field [{:target "T-elsewhere" :reach 3/4}
+               {:target "T-focus" :reach 3/4}]
+        observation (fn [relation]
+                      {:focus "M-focus" :relation relation :field field :facts facts})
+        focused (outer-select/select
+                 makeup base-state
+                 (observation (fn [_ target]
+                                (if (= "T-focus" target) :focus :useful-elsewhere))))
+        by-id (fn [result id] (first (filter #(= id (:id %)) (:cascades result))))]
+    (is (= :operator-focus (:cascade-id focused)))
+    (is (= "T-focus" (get-in focused [:selection :selected :target])))
+    (is (< (:G (by-id focused :operator-focus))
+           (:G (by-id focused :ordinary))))))
+
 (deftest chosen-outer-cascade-retains-typed-enactment-pin
   (let [discovery-makeup
         {:cascades [{:id :find-out-before-building :patterns ["test"]

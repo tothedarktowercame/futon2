@@ -129,6 +129,44 @@
         (is (= :outer-score/placement-unavailable (:kind (ex-data e))))
         (is (= :unwired (:target (ex-data e))))))))
 
+(deftest focus-gate-uses-the-selection-relation
+  (let [field [{:target :elsewhere} {:target :focus} {:target :unknown}]
+        fs {:elsewhere {:status :ready :unblocks 0 :cone 0}
+            :focus {:status :ready :unblocks 0 :cone 0}
+            :unknown {:status :ready :unblocks 0 :cone 0}}
+        relation (fn [_ target]
+                   ({:elsewhere :useful-elsewhere :focus :focus :unknown :unknown} target))
+        context {:relation-class #(relation :declared-focus %)}]
+    (is (= [{:target :focus}]
+           (score/apply-selection-step fs field :focus-gate context)))
+    (is (= :focus
+           (:target (score/cascade-pick [:ready-gate :focus-gate :by-cone :by-unblocks]
+                                        fs field context))))
+    (is (= [{:step :ready-gate :in 3 :out 3}
+            {:step :focus-gate :in 3 :out 1}
+            {:step :by-cone :pick-value 0}
+            {:step :by-unblocks :pick-value 0}]
+           (:trace (score/apply-selection-cascade-traced
+                    [:ready-gate :focus-gate :by-cone :by-unblocks]
+                    fs field context))))))
+
+(deftest focus-gate-never-admits-missing-unknown-or-not-ready-focus
+  (let [field [{:target :elsewhere} {:target :focus}]
+        fs {:elsewhere {:status :ready :unblocks 0 :cone 0}
+            :focus {:status :not-ready :unblocks 0 :cone 0}}
+        cascade [:ready-gate :focus-gate]
+        context (fn [relation] {:relation-class #(relation :declared-focus %)})]
+    (is (nil? (score/cascade-pick cascade fs field
+                                  (context (fn [_ _] :useful-elsewhere))))
+        "a focus manifest declaring nothing leaves no focus pick")
+    (is (nil? (score/cascade-pick cascade fs field
+                                  (context (fn [_ target]
+                                             (if (= :focus target) :focus :useful-elsewhere)))))
+        "the ready gate excludes an on-focus task that is not ready")
+    (is (nil? (score/cascade-pick [:focus-gate] fs field
+                                  (context (fn [_ _] :unknown))))
+        "an unrecognised relation is never treated as focus")))
+
 (deftest novelty-decides-outer-choice
   (testing "Lean slice 3f-iii (novelty decides): equal q, class, reach and gain;
             only the status's total counts differ, so the less-known pick scores lower"
@@ -167,8 +205,8 @@
         "known-relation prediction is byte-identical")))
 
 (deftest typed-steps-and-rank-match-the-interpreter
-  (is (= [:ready-gate :placed-gate :by-cone :by-unblocks]
-         (mapv score/typed-step [:ready-gate :placed-gate :by-cone :by-unblocks])))
+  (is (= [:ready-gate :focus-gate :placed-gate :by-cone :by-unblocks]
+         (mapv score/typed-step [:ready-gate :focus-gate :placed-gate :by-cone :by-unblocks])))
   (is (= [{:named "repair obligation?"} :ready-gate {:named "verifiable result required"}]
          (mapv score/typed-step ["repair obligation?" :ready-gate "verifiable result required"])))
   (is (= [{:status-gate :undetermined} :by-rank]

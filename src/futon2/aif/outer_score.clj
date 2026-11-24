@@ -121,7 +121,8 @@
 
 (defn apply-selection-step
   "Lean `applySelectionStep`: apply one gate or stable ordering using Giraffe facts."
-  [facts field step]
+  ([facts field step] (apply-selection-step facts field step nil))
+  ([facts field step {:keys [relation-class]}]
   (cond
     (and (map? step) (contains? step :gate))
     (filterv (:gate step) field)
@@ -131,6 +132,12 @@
 
     (= :ready-gate step)
     (filterv #(= :ready (:status (value-of facts (:target %)))) field)
+
+    (= :focus-gate step)
+    (if-not (fn? relation-class)
+      (throw (ex-info "Focus relation unavailable"
+                      {:kind :outer-score/relation-producer-unavailable}))
+      (filterv #(= :focus (relation-class (:target %))) field))
 
     (= :placed-gate step)
     (filterv #(placed-workable? facts (:target %)) field)
@@ -150,12 +157,13 @@
 
     :else
     (throw (ex-info "Unknown outer selection step"
-                    {:kind :outer-score/unknown-selection-step :step step}))))
+                    {:kind :outer-score/unknown-selection-step :step step})))))
 
 (defn apply-selection-cascade
   "Lean `applySelectionCascade`: apply selection steps from left to right."
-  [cascade facts field]
-  (reduce (partial apply-selection-step facts) (vec field) cascade))
+  ([cascade facts field] (apply-selection-cascade cascade facts field nil))
+  ([cascade facts field selection-context]
+   (reduce #(apply-selection-step facts %1 %2 selection-context) (vec field) cascade)))
 
 (declare typed-step)
 
@@ -171,10 +179,11 @@
 (defn apply-selection-cascade-traced
   "Apply a cascade and retain the deterministic facts that explain each step.
   The returned field is exactly `apply-selection-cascade`'s field."
-  [cascade facts field]
+  ([cascade facts field] (apply-selection-cascade-traced cascade facts field nil))
+  ([cascade facts field selection-context]
   (reduce
    (fn [{:keys [field trace]} step]
-     (let [next-field (apply-selection-step facts field step)
+     (let [next-field (apply-selection-step facts field step selection-context)
            typed (typed-step step)
            ordered? (contains? #{:by-rank :by-cone :by-unblocks} step)
            pick (first next-field)
@@ -190,12 +199,13 @@
                                        :margin (Math/abs (double (- runner-value pick-value)))))
                        {:step typed :in (count field) :out (count next-field)}))}))
    {:field (vec field) :trace []}
-   cascade))
+   cascade)))
 
 (defn cascade-pick
   "Lean `cascadePick`: return the first candidate left by the cascade, or nil."
-  [cascade facts field]
-  (first (apply-selection-cascade cascade facts field)))
+  ([cascade facts field] (cascade-pick cascade facts field nil))
+  ([cascade facts field selection-context]
+   (first (apply-selection-cascade cascade facts field selection-context))))
 
 (defn- normalize [counts support]
   (let [total (reduce + 0 (map #(double (or (value-of counts %) 0)) support))]
@@ -254,7 +264,7 @@
   (cond
     (and (map? step) (contains? step :gate)) {:named (or (:name step) fallback-name)}
     (and (map? step) (contains? step :order)) {:named (or (:name step) fallback-name)}
-    (= :ready-gate step) :ready-gate
+    (contains? #{:ready-gate :focus-gate} step) step
     (and (map? step) (contains? step :gate-status)) {:status-gate (:gate-status step)}
     (and (map? step) (contains? step :status-gate)) step
     (contains? #{:placed-gate :by-cone :by-unblocks :by-rank} step) step

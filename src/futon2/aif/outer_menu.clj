@@ -22,7 +22,7 @@
       {:sha256 (identity/sha256 bytes) :text (String. bytes "UTF-8")})))
 
 (defn- valid-step? [step]
-  (or (contains? #{:ready-gate :placed-gate :by-cone :by-unblocks :by-rank} step)
+  (or (contains? #{:ready-gate :focus-gate :placed-gate :by-cone :by-unblocks :by-rank} step)
       (and (map? step) (= #{:status-gate} (set (keys step)))
            (contains? #{:ready :not-ready :undetermined} (:status-gate step)))))
 

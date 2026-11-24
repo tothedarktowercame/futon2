@@ -27,6 +27,7 @@
 (def interpretations
   "Lean SelectionGOverCascades.interpret, from each pattern's @guard and @predicts."
   {"only-what-can-start-now"   {:consumes #{:ready} :forbids #{:unmet-need} :produces #{:can-begin}}
+   "the-operator-asked"        {:consumes #{:operator-ask} :forbids #{} :produces #{:operator-recognises-delivery}}
    "what-others-wait-on-first" {:consumes #{:ready :unblocks} :forbids #{} :produces #{:ready-count-rises}}
    "prepare-the-ground"        {:consumes #{:cone :named-later-item} :forbids #{} :produces #{:later-item-reshaped}}
    "find-out-before-building"  {:consumes #{:undetermined} :forbids #{} :produces #{:design-decided}}
@@ -43,7 +44,8 @@
 
 (defn fact-tokens
   "Lean initialTokens: the selected task's whole-task facts as tokens."
-  [target fact]
+  ([target fact] (fact-tokens target fact nil))
+  ([target fact relation-class]
   (let [placement (:placement fact)
         placed? (and (seq (:ways placement))
                      (= "work" (some-> (:action placement) name))
@@ -55,9 +57,10 @@
            (= "undetermined" (status-of fact)) (conj :undetermined)
            (pos? (or (:unblocks fact) 0)) (conj :unblocks)
            (pos? (or (:cone fact) 0)) (conj :cone)
+           (= :focus relation-class) (conj :operator-ask)
            placed? (conj :placed-work)
            (and present? (not placed?)) (conj :non-work-placement)
-           (some #(not= :met (:resolution %)) (:prerequisites fact)) (conj :unmet-need)))))
+           (some #(not= :met (:resolution %)) (:prerequisites fact)) (conj :unmet-need))))))
 
 (defn- pattern-record
   ([target interp] (pattern-record target interp #{}))
@@ -160,7 +163,12 @@
         interps (merge interps *extra-interpretations*)
         cands (mapv #(candidate interps %) all)
         picks (distinct (mapcat picks-of entries))
-        state (into #{} (mapcat #(fact-tokens % (get facts %))) picks)
+        relation-by-pick (into {} (mapcat (fn [entry]
+                                            (map (fn [pick]
+                                                   [pick (:relation-class entry)])
+                                                 (picks-of entry)))
+                                          entries))
+        state (into #{} (mapcat #(fact-tokens % (get facts %) (get relation-by-pick %))) picks)
         h (max 1 (min scorer/max-horizon
                       (reduce max 1 (map #(count (get-in % [:precedence :co-apply :units])) cands))))
         universe (set/union state #{stop-acceptance}

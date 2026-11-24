@@ -55,6 +55,7 @@
 (defn- render-step [step]
   (cond
     (= :ready-gate step) "ready gate"
+    (= :focus-gate step) "focus gate"
     (= :placed-gate step) "placed gate"
     (map? step) (str "status gate " (:status-gate step))
     :else (name step)))
@@ -412,13 +413,14 @@
   depth 2 .. max-chain-depth.  A chain enacts its first pick; its later picks'
   patterns fire once that pick can begin (selection-canonical-g/candidate).
   Ranking among depths is by novelty alone for now (Joe: accepted)."
-  [menu facts field]
+  [menu facts field selection-context]
   (vec (for [c menu
              ;; Function steps (the unit seam) give no recorded order to chain
              ;; over, and are applied exactly once by contract.
              :when (not-any? #(and (map? %) (or (contains? % :gate) (contains? % :order)))
                              (:steps c))
-             :let [order (try (mapv :target (outer-score/apply-selection-cascade (:steps c) facts field))
+             :let [order (try (mapv :target (outer-score/apply-selection-cascade
+                                             (:steps c) facts field selection-context))
                               (catch clojure.lang.ExceptionInfo _ []))]
              k (range 2 (inc (min max-chain-depth (count order))))]
          (let [chained (assoc c :id (keyword (str (name (:id c)) "--chain-" k))
@@ -454,7 +456,8 @@
                    (set (map :target (:field observation))))
         (refuse! :task-field-facts-mismatch {})))
     (let [observation (assoc observation :field (giraffe-ordered (:facts observation) (:field partition)))
-          variants (chain-variants menu (:facts observation) (:field observation))
+          selection-context {:relation-class #(relation-class observation %)}
+          variants (chain-variants menu (:facts observation) (:field observation) selection-context)
           menu (into menu variants)
           construction (cond-> construction
                          (contains? construction :enactment-modes)
@@ -473,7 +476,8 @@
                            ;; steps. The scorer receives that exact pick.
                            (let [candidate (outer-score/cascade-pick (:steps cascade)
                                                                     (:facts observation)
-                                                                    (:field observation))]
+                                                                    (:field observation)
+                                                                    selection-context)]
                              (when (and field-facts candidate (not (number? (:reach candidate))))
                                (refuse! :outer-score/reach-unavailable
                                         {:target (:target candidate) :field-facts field-facts}))
@@ -490,7 +494,7 @@
                                     []
                                     (:trace (outer-score/apply-selection-cascade-traced
                                              (:steps cascade) (:facts observation)
-                                             (:field observation))))]) menu))
+                                             (:field observation) selection-context)))]) menu))
           details (mapv #(outer-score/score-model score-input %) models)
           library (:library construction)
           cascades (mapv #(cascade-record observation %1 %2 %3) menu models details)

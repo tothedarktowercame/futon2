@@ -16,6 +16,39 @@
 (def only ["only-what-can-start-now"])
 (def giraffe ["only-what-can-start-now" "prepare-the-ground" "what-others-wait-on-first"])
 (def serves ["only-what-can-start-now" "serves-a-way" "what-others-wait-on-first"])
+(def operator-focus ["only-what-can-start-now" "the-operator-asked"])
+
+(deftest focused-pick-has-lower-canonical-g-than-an-identical-unrelated-pick
+  (let [same-facts {"T-focus" (facts "T-08")
+                    "T-elsewhere" (facts "T-08")}
+        entries [{:id :operator-focus :patterns operator-focus :pick "T-focus"
+                  :relation-class :focus}
+                 {:id :ordinary :patterns only :pick "T-elsewhere"
+                  :relation-class :useful-elsewhere}]
+        result (sg/score entries same-facts)
+        focus-row (get-in result [:by-id :operator-focus])
+        other-row (get-in result [:by-id :ordinary])]
+    (is (nil? (:refusal result)))
+    (is (= ["only-what-can-start-now" "the-operator-asked"]
+           (get-in result [:fired :operator-focus])))
+    (is (< (:G-cascade focus-row) (:G-cascade other-row)))
+    (is (= (- (Math/log 0.55))
+           (get-in focus-row [:certificate :g-terms :risk])))
+    (is (= (- (Math/log 0.05))
+           (get-in other-row [:certificate :g-terms :risk])))))
+
+(deftest empty-focus-cascade-does-not-change-another-cascades-g
+  (let [ordinary {:id :ordinary :patterns only :pick "T-08"
+                  :relation-class :useful-elsewhere}
+        baseline (sg/score [ordinary] facts)
+        with-empty (sg/score [ordinary {:id :operator-focus
+                                        :patterns operator-focus
+                                        :pick nil}]
+                             facts)]
+    (is (= (get-in baseline [:by-id :ordinary :G-cascade])
+           (get-in with-empty [:by-id :ordinary :G-cascade])))
+    (is (= (get-in with-empty [:stopping :G-cascade])
+           (get-in with-empty [:by-id :operator-focus :G-cascade])))))
 
 (deftest same-pick-same-patterns-same-g
   (let [es [{:id :a :patterns only :pick "T-08" :relation-class :useful-elsewhere}
