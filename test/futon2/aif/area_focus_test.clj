@@ -1,5 +1,6 @@
 (ns futon2.aif.area-focus-test
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.area-focus :as sut]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.operator-focus :as operator-focus]
@@ -9,6 +10,20 @@
            "also" {:target "also" :area "APM" :also "WM"}
            "other" {:target "other" :area "memory"}})
 (def present {:result {:status :present :ranked [{:area "WM" :share 1/2}]}})
+
+(defn- focus-manifest! [dir name as-of]
+  (let [f (java.io.File. dir name)
+        text (pr-str {:as-of as-of :result {:status :present
+                                            :ranked [{:area "WM"}]}})]
+    (spit f text)
+    {:file f :sha256 (identity/sha256 text)}))
+
+(defn- pin-env [{:keys [file sha256]}]
+  {sut/focus-pin-path-env (.getAbsolutePath ^java.io.File file)
+   sut/focus-pin-sha-env sha256})
+
+(defn- thrown-data [f]
+  (try (f) nil (catch clojure.lang.ExceptionInfo e (ex-data e))))
 
 (deftest area-relation-rule
   (is (= [:focus :focus :focused]
@@ -48,6 +63,51 @@
         f (java.io.File. d (str "operator-focus-" (apply str (repeat 64 "a")) ".edn"))]
     (spit f "{:as-of \"2026-11-04T00:00:00Z\"}")
     (is (nil? (sut/newest-retained d "2026-11-04T01:01:00Z")))))
+
+(deftest explicit-pin-is-not-age-gated-or-displaced
+  (let [d (.toFile (java.nio.file.Files/createTempDirectory
+                    "focus-pinned" (make-array java.nio.file.attribute.FileAttribute 0)))
+        pin (focus-manifest! d "pinned.edn" "2026-11-03T00:00:00Z")
+        _newer (focus-manifest! d
+                                (str "operator-focus-" (apply str (repeat 64 "e")) ".edn")
+                                "2026-11-04T00:30:00Z")
+        getenv-fn (pin-env pin)
+        opts {:decision-as-of "2026-11-04T01:00:00Z"
+              :manifest-dir d :getenv-fn getenv-fn}]
+    (with-redefs [operator-focus/read-focus!
+                  (fn [_] (throw (ex-info "canonical read must not run" {})))]
+      (testing "25-hour pin is returned by both entry points"
+        (doseq [loaded [(sut/newest-retained d (:decision-as-of opts) 60 getenv-fn)
+                        (sut/acquire-focus! opts)]]
+          (is (= (.getCanonicalPath ^java.io.File (:file pin)) (:path loaded)))
+          (is (= (:sha256 pin) (:sha256 loaded)))
+          (is (= "2026-11-03T00:00:00Z" (:as-of loaded)))
+          (is (= 1500 (:age-minutes loaded)))))
+      (testing "newer directory manifest cannot displace the explicit pin"
+        (is (= (:sha256 pin)
+               (:sha256 (sut/newest-retained d (:decision-as-of opts)
+                                             60 getenv-fn))))))))
+
+(deftest changed-or-incomplete-explicit-pin-refuses-without-reading
+  (let [d (.toFile (java.nio.file.Files/createTempDirectory
+                    "focus-pin-refusal" (make-array java.nio.file.attribute.FileAttribute 0)))
+        pin (focus-manifest! d "pinned.edn" "2026-11-03T00:00:00Z")
+        getenv-fn (pin-env pin)
+        opts {:decision-as-of "2026-11-04T01:00:00Z"
+              :manifest-dir d :getenv-fn getenv-fn}]
+    (spit (:file pin) (str (slurp (:file pin)) " "))
+    (with-redefs [operator-focus/read-focus!
+                  (fn [_] (throw (ex-info "canonical read must not run" {})))]
+      (let [data (thrown-data #(sut/acquire-focus! opts))]
+        (is (= :focus-pin/mismatch (:kind data)))
+        (is (= (:sha256 pin) (get-in data [:pinned :sha256])))
+        (is (not= (get-in data [:pinned :sha256])
+                  (get-in data [:loaded :sha256]))))
+      (doseq [env [{sut/focus-pin-path-env (.getAbsolutePath ^java.io.File (:file pin))}
+                   {sut/focus-pin-sha-env (:sha256 pin)}]]
+        (is (= :focus-pin/incomplete
+               (:kind (thrown-data
+                       #(sut/newest-retained d (:decision-as-of opts) 60 env)))))))))
 
 (deftest failed-votes-are-not-retained-focus
   (testing "planted regression wm-click-loop-repair-452e014e: a fresh manifest whose vote failed must not shadow reuse or block re-acquisition"

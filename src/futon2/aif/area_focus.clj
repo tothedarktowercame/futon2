@@ -63,6 +63,46 @@
     {:path (.getCanonicalPath (io/file path)) :sha256 (identity/sha256 text)
      :manifest (edn/read-string text)}))
 
+(def focus-pin-path-env "FUTON_WM_FOCUS_PIN_PATH")
+(def focus-pin-sha-env "FUTON_WM_FOCUS_PIN_SHA256")
+
+(defn verify-pin [{:keys [path sha256]}]
+  (try (let [loaded (read-manifest path)]
+         (if (= sha256 (:sha256 loaded)) loaded
+             {:deferred :focus-source-changed :pinned {:path path :sha256 sha256}
+              :loaded (select-keys loaded [:path :sha256])}))
+       (catch Exception _ {:deferred :focus-source-changed
+                           :pinned {:path path :sha256 sha256}})))
+
+(defn- pinned-focus
+  [decision-as-of getenv-fn]
+  (let [path (getenv-fn focus-pin-path-env)
+        sha256 (getenv-fn focus-pin-sha-env)
+        path? (some? path)
+        sha? (some? sha256)]
+    (when (not= path? sha?)
+      (throw (ex-info "Operator-focus pin requires both path and sha256"
+                      {:kind :focus-pin/incomplete
+                       :path-set? path? :sha256-set? sha?})))
+    (when (and path? sha?)
+      (let [pinned {:path path :sha256 sha256}
+            loaded (verify-pin pinned)
+            loaded-pin (if (:deferred loaded)
+                         (merge {:path path :sha256 nil} (:loaded loaded))
+                         (select-keys loaded [:path :sha256]))]
+        (when (or (:deferred loaded)
+                  (not= :present (get-in loaded [:manifest :result :status])))
+          (throw (ex-info "Pinned operator-focus manifest does not match"
+                          {:kind :focus-pin/mismatch
+                           :pinned pinned
+                           :loaded (cond-> loaded-pin
+                                     (:manifest loaded)
+                                     (assoc :status (get-in loaded [:manifest :result :status])))})))
+        (let [at (Instant/parse (get-in loaded [:manifest :as-of]))
+              now (Instant/parse decision-as-of)]
+          (assoc loaded :as-of (str at)
+                 :age-minutes (.toMinutes (Duration/between at now))))))))
+
 (defn newest-retained
   "Newest content-addressed focus manifest no more than 60 minutes old.
   Only a manifest whose vote succeeded (`:result :status :present`) is
@@ -70,26 +110,31 @@
   window) is not evidence of focus, and reusing one wedges outer selection
   behind a stale read for the whole freshness window. Failed manifests make
   callers re-acquire instead. (wm-click-loop-repair-452e014e)"
-  ([dir decision-as-of] (newest-retained dir decision-as-of 60))
+  ([dir decision-as-of]
+   (newest-retained dir decision-as-of 60 #(System/getenv %)))
   ([dir decision-as-of max-age-minutes]
-   (let [now (Instant/parse decision-as-of)]
-     (->> (manifest-files dir)
-          (keep (fn [f] (try (let [pin (read-manifest f)
-                                   at (Instant/parse (get-in pin [:manifest :as-of]))
-                                   age (.toMinutes (Duration/between at now))]
-                               (when (and (not (neg? age)) (<= age max-age-minutes)
-                                          (= :present (get-in pin [:manifest :result :status])))
-                                 (assoc pin :as-of (str at) :age-minutes age)))
-                             (catch Exception _ nil))))
-          (sort-by :as-of #(compare %2 %1)) first))))
+   (newest-retained dir decision-as-of max-age-minutes #(System/getenv %)))
+  ([dir decision-as-of max-age-minutes getenv-fn]
+   (or (pinned-focus decision-as-of getenv-fn)
+       (let [now (Instant/parse decision-as-of)]
+         (->> (manifest-files dir)
+              (keep (fn [f] (try (let [pin (read-manifest f)
+                                       at (Instant/parse (get-in pin [:manifest :as-of]))
+                                       age (.toMinutes (Duration/between at now))]
+                                   (when (and (not (neg? age)) (<= age max-age-minutes)
+                                              (= :present (get-in pin [:manifest :result :status])))
+                                     (assoc pin :as-of (str at) :age-minutes age)))
+                                 (catch Exception _ nil))))
+              (sort-by :as-of #(compare %2 %1)) first)))))
 
 (defn retained-relations
   "Classify TARGETS from the newest retained focus manifest, without acquiring
   or minting focus. Returns nil when no <=60-minute manifest is available."
-  [targets {:keys [decision-as-of manifest-dir corpus-source]
+  [targets {:keys [decision-as-of manifest-dir corpus-source getenv-fn]
             :or {manifest-dir (str mission-registry/default-code-root
                                    "/futon2/" default-manifest-dir)}}]
-  (when-let [pin (newest-retained manifest-dir decision-as-of)]
+  (when-let [pin (newest-retained manifest-dir decision-as-of 60
+                                  (or getenv-fn #(System/getenv %)))]
     (let [{:keys [rows sha256]} (if corpus-source
                                   (load-corpus corpus-source)
                                   (load-corpus))
@@ -109,19 +154,13 @@
        {:focus-manifest (select-keys pin [:path :sha256])
         :area-corpus-sha256 sha256}})))
 
-(defn verify-pin [{:keys [path sha256]}]
-  (try (let [loaded (read-manifest path)]
-         (if (= sha256 (:sha256 loaded)) loaded
-             {:deferred :focus-source-changed :pinned {:path path :sha256 sha256}
-              :loaded (select-keys loaded [:path :sha256])}))
-       (catch Exception _ {:deferred :focus-source-changed
-                           :pinned {:path path :sha256 sha256}})))
-
 (defn acquire-focus!
   "Reuse a <=60-minute retained manifest, otherwise perform one canonical read."
   [{:keys [decision-as-of manifest-dir code-root getenv-fn] :as opts}]
-  (or (newest-retained (or manifest-dir default-manifest-dir) decision-as-of)
-      (let [root (or code-root ((or getenv-fn #(System/getenv %)) "FUTON_CODE_ROOT")
+  (let [getenv-fn (or getenv-fn #(System/getenv %))]
+    (or (newest-retained (or manifest-dir default-manifest-dir)
+                         decision-as-of 60 getenv-fn)
+      (let [root (or code-root (getenv-fn "FUTON_CODE_ROOT")
                      mission-registry/default-code-root)
             pin (operator-focus/read-focus!
                  (merge {:as-of decision-as-of :manifest-dir (or manifest-dir default-manifest-dir)
@@ -131,4 +170,4 @@
                         (dissoc opts :getenv-fn)))]
         (when (= :ok (:status pin))
           {:path (:path pin) :sha256 (:sha256 pin) :manifest (:manifest pin)
-           :as-of (get-in pin [:manifest :as-of]) :age-minutes 0}))))
+           :as-of (get-in pin [:manifest :as-of]) :age-minutes 0})))))
