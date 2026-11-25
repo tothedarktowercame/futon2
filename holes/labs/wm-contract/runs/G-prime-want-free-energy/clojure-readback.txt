@@ -1,0 +1,18 @@
+G' want free energy -- Clojure readback
+production calls: none wired yet; measured surface is chance, want-term, push, step-g', total-g', per-step, score-cascade-co', score-cascade-co-n'
+agreement measured against the EXISTING production risk: futon2.aif.cascade-g/step-g (CascadeEFE.risk)
+Lean keeps log symbolic; rational chances compare EXACTLY, want terms at tolerance 1e-12
+references transcribed from WantFreeEnergyWitness (see header)
+chance nine-in-ten actual 41/50 expected 41/50 exact=true
+chance certain actual 9/10 expected 9/10 exact=true
+chance mix-half actual 11/20 expected 11/20 exact=true
+chance uniform actual 12/25 expected 12/25 exact=true
+chance uniform-climb actual 57/100 expected 57/100 exact=true
+b17 no-trace realised actual 3/34 expected 3/34 exact=true
+want-term nine-in-ten actual 0.19845093872383832 expected 0.19845093872383832 delta 0.0000000000000000
+want-term certain actual 0.10536051565782628 expected 0.10536051565782628 delta 0.0000000000000000
+want-term uniform-climb actual 0.56211891815354130 expected 0.56211891815354130 delta 0.0000000000000000
+agreement (point prediction, rung candidate): g' 1.6094379124341003 canonical G enclosure [1.6094379124341000 1.6094379124341000] delta-from-midpoint 2.2204460492503130e-16
+score-cascade-co' two-step total 1.0470678242305730 per-step actual 0.52353391211528650 expected 0.52353391211528650 delta 0.0000000000000000
+score-cascade-co-n' novelty 1/4: g'-novelty actual 0.79706782423057310 expected 0.79706782423057310 delta 0.0000000000000000
+VERDICT: every measured case matches its transcribed Lean reference.
