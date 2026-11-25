@@ -58,7 +58,7 @@
             [futon2.aif.habit-prior :as habit-prior]
             [futon2.aif.machine-accumulation :as machine-accumulation]
             [futon2.aif.strategic-habit :as strategic-habit]
-            [futon2.aif.mission-c :as mission-c] [futon2.aif.mission-epistemic-value :as mission-epistemic]
+            [futon2.aif.mission-c :as mission-c]
             [futon2.aif.mission-gauges :as mission-gauges]
             [futon2.aif.mission-hole-wants :as mission-hole-wants]
             [futon2.aif.mission-registry :as mission-registry]
@@ -72,13 +72,11 @@
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.policy-precision :as policy-precision]
-            [futon2.aif.realized-outcome :as ro]
             [futon2.aif.selection-rationale :as selection-rationale]
             [futon2.aif.selection-timing :as selection-timing]
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
-            [futon2.aif.task-belief-ladder :as ladder]
             [futon2.aif.trace :as trace])
   (:import (java.time Instant LocalDate ZoneId ZonedDateTime)
            (java.time.format DateTimeFormatter)))
@@ -253,68 +251,6 @@
 
    Dynamic binding exists only for isolated tests."
   (= "1" (System/getenv "FUTON_WM_FPI_POSTERIOR")))
-
-(def ^:dynamic *live-doability?*
-  "U44 doability-liveness switch, read once when this namespace loads.
-   `FUTON_WM_LIVE_DOABILITY=1` gives the doability factor the `:mission/phase`
-   already carried on the `code/v05/mission-doc` hyperedge `mission-doc-index`
-   fetches, instead of the phase `compute-delta-t-mission` tries to resolve
-   through `futon3c.aif.mission-delta-t`.
-
-   WHY THERE IS ANYTHING TO SWITCH: futon3c is not on futon2's classpath, so
-   that `requiring-resolve` returns nil, the `{:delta-T 0.0}` fallback carries
-   no `:mission-phase`, and `phase-doable` has taken the \"unknown\" 0.3 for
-   every candidate since 2026-07-19 -- `:phase` is nil on every ranked mission
-   row in every trace file from `wm-trace-2026-07-19.edn` onward (C492 section
-   4b). The string the factor wants is on the hyperedge the judge already read.
-
-   DEFAULT OFF, AND THE FLIP IS NOT THIS SWITCH'S TO MAKE: turning it on
-   changes the `:doable` of most candidates, which is the silent default change
-   U22 forbade, so the default ranking stays byte-identical and the flip goes
-   back to Joe as J7's revisit. Dynamic binding exists only for isolated tests.
-   The same input is reachable per call as the `:live-doability?` opt."
-  (= "1" (System/getenv "FUTON_WM_LIVE_DOABILITY")))
-
-(defn- live-doability?
-  "The declared input, opt first and environment second. An opt that is present
-   and false is a declaration too, so `contains?` decides rather than truthiness."
-  [opts]
-  (if (contains? opts :live-doability?)
-    (boolean (:live-doability? opts))
-    *live-doability?*))
-
-(def ^:dynamic *task-belief-ladder?*
-  "U52 three-rung ladder switch, read once when this namespace loads.
-   `FUTON_WM_TASK_BELIEF_LADDER=1` puts the ladder of
-   `aif-equations.edn :choices :task-belief-actand-source` (Joe, 2026-09-03)
-   between candidate enrichment and EFE ranking: rung 1 direct case history,
-   rung 2 constructive generalization from kin marked `:constructed` with its
-   derivation, rung 3 a typed refusal.
-
-   WHAT IT IS AIMED AT. U51 measured a 55-way controller-score tie on the
-   recorded s5 field at ranks 73-127, chosen inside at rank 123; the 55 are
-   exactly the `:advance-mission` candidates for which every scored channel is
-   silent, so each takes the same `:mission-value-factor` 0.09, and the mission
-   the machine has chosen 44 times scores identically to 54 it has never
-   chosen. The ladder makes case history enter that number.
-
-   DEFAULT OFF, AND THE FLIP IS NOT THIS SWITCH'S TO MAKE: with the flag on
-   every in-scope candidate's `:mission-value-factor` moves and 39 of the s5
-   plateau leave the field entirely, which is the silent default change U22
-   forbade. The flip goes to Joe through the flip-readiness gate
-   (`runs/RUNTIME-VALIDATION-CATALOG.edn :flips :task-belief-ladder`), and the
-   kin relation and support map the ladder declares are a `:choices` question
-   this row does not answer. Dynamic binding exists only for isolated tests.
-   The same input is reachable per call as the `:task-belief-ladder?` opt."
-  (= "1" (System/getenv "FUTON_WM_TASK_BELIEF_LADDER")))
-
-(defn- task-belief-ladder?
-  "The declared input, opt first and environment second. An opt that is present
-   and false is a declaration too, so `contains?` decides rather than truthiness."
-  [opts]
-  (if (contains? opts :task-belief-ladder?)
-    (boolean (:task-belief-ladder? opts))
-    *task-belief-ladder?*))
 
 (defn f-pi-posterior-preconditions!
   "RUN9 / stage S4. `FUTON_WM_FPI_POSTERIOR=1` needs an F_pi to put in the
@@ -753,9 +689,6 @@
 (def ^:private capability-star-map-path
   (str home "/code/futon0/holes/missions/M-capability-star-map.graph.edn"))
 (defonce ^:private capability-star-map-cache (atom nil))
-(def ^:private forward-model-centrality-path
-  (str home "/code/futon7/holes/M-futon-forward-model.centrality.json"))
-(defonce ^:private centrality-cache (atom nil))
 (defn- arena-ambiguity-mode
   "D5c PRODUCTION FLIP (Joe, 2026-07-03, M-evaluate-policies §14): the audit's
    named repair for G-ambiguity — per-channel Gaussian entropy ½ln(2πe·σ²) —
@@ -1212,20 +1145,6 @@
     (record-input-read! path result)
     result))
 
-(defn- parse-json-string [path text]
-  (try
-    (json/parse-string text false)
-    (catch Exception e
-      {:unreadable path
-       :cause (ex-message e)})))
-
-(defn- read-json-file [path]
-  (let [result (if (.exists (java.io.File. path))
-                 (parse-json-string path (slurp path))
-                 {:missing path})]
-    (record-input-read! path result)
-    result))
-
 (defn- capability-star-map []
   (let [{:keys [path graph]} @capability-star-map-cache]
     (if (= path capability-star-map-path)
@@ -1234,22 +1153,6 @@
         (reset! capability-star-map-cache {:path capability-star-map-path
                                            :graph graph})
         graph))))
-
-(defn- centrality-joint-map []
-  (let [{:keys [path centrality]} @centrality-cache]
-    (if (= path forward-model-centrality-path)
-      centrality
-      (let [raw-centrality (read-json-file forward-model-centrality-path)
-            centrality (if (unreadable-input? raw-centrality)
-                         {}
-                         (->> (or raw-centrality {})
-                              (keep (fn [[mission row]]
-                                      (when-let [c (get row "c_joint")]
-                                        [(str mission) (double c)])))
-                              (into {})))]
-        (reset! centrality-cache {:path forward-model-centrality-path
-                                  :centrality centrality})
-        centrality))))
 
 (defn- parse-substrate-edn [body]
   (cond
@@ -1402,16 +1305,6 @@
 
 (defn- mission-index-endpoint [entry]
   (if (map? entry) (:endpoint entry) entry))
-
-(defn- mission-index-operator-gates [entry]
-  (if (map? entry) (vec (:operator-gates entry)) []))
-
-(defn- mission-index-phase
-  "U44: `:mission/phase` as the mission-doc hyperedge carries it, or nil. An
-   entry that is a bare endpoint string (the pre-index shape some callers and
-   tests still pass) has no phase to give and says so by returning nil."
-  [entry]
-  (when (map? entry) (:phase entry)))
 
 ;; S4: write-only mission clocking. This deliberately does not feed the clock
 ;; back into observation, ranking, weights, or selection; the read side is a
@@ -2353,403 +2246,6 @@
         (throw (ex-info (ex-message e)
                         (assoc (ex-data e) :published-record record) e))))
     {:path path :record record :judgement (trace/reconcile-accumulation result record)})))
-
-(defn- compute-delta-t-mission
-  [mission-endpoint]
-  (if-let [f (try (requiring-resolve 'futon3c.aif.mission-delta-t/delta-t-mission)
-                  (catch Throwable _ nil))]
-    ;; delta-t's one-arity default is 200, below the live mission-doc census;
-    ;; a truncated type fetch silently turns later missions into nil-phase
-    ;; "unknown" entries. Match the judge's complete mission-doc read.
-    (f mission-endpoint {:limit 500
-                         :families ["code/v05/mission-doc"]})
-    {:delta-T 0.0}))
-
-(def ^:private non-progress-decay-k 1.0)
-
-(def ^:private default-strategy-cascade-path
-  "/home/joe/code/futon7/holes/M-futon-forward-model.backlog-cascade-merged-v0.edn")
-
-(def ^:private default-mission-value-weights
-  {:central 0.25
-   :strategic 0.45
-   :doable 0.30 :epistemic 0.0})
-
-(def ^:private phase-doability
-  {"head" 0.1
-   "identify" 0.2
-   "map" 0.3
-   "derive" 0.5
-   "argue" 0.6
-   "verify" 0.8
-   "instantiate" 1.0
-   "document" 0.4
-   "complete" 0.0
-   "unknown" 0.3})
-
-(def ^:dynamic *observed-outcomes*
-  "Realized outcomes OBSERVED AFTER THE FACT, keyed by the `:run/id` of the
-   record they are about: `{run-id <:wm/realized-outcome-v1 record>}`.
-
-   OFF BY DEFAULT AND EMPTY ON EVERY LIVE PATH, and that is the point. The
-   decay input becoming readable is a flip decision, not a default (worklist
-   `:U59`): with this empty, `trace-outcome` answers exactly what it answered
-   before -- nothing, on all 889 records -- and the non-progress count, the
-   decay it feeds and therefore every selection score are byte-identical.
-
-   The post-accept observation pass (`wm_step.sh observe`) writes such records
-   into the accepted run store; binding this to them is what a MEASUREMENT of
-   the difference does, and `u59_decay_difference.bb` is the measurement."
-  {})
-
-(defn- trace-outcome
-  "The categorical outcome of a trace record, through the one vocabulary
-   (`futon2.aif.realized-outcome/categorical-outcome`, which holds the three
-   places this function used to spell out). Unchanged when
-   `*observed-outcomes*` is empty, which is every live path.
-
-   The three in-record places carry nothing on any record in the live corpus
-   (889 of 889, C511-repair-or-elaborate.md section 3), because their only
-   producers are on the enactment path that `run-tick-once` does not reach. The
-   observed side-channel is the fourth place, and it is joined by `:run/id`
-   because an observation is taken after the record is written and cannot be a
-   key on it."
-  [trace-record]
-  (or (ro/categorical-outcome trace-record)
-      (:outcome (get *observed-outcomes* (:run/id trace-record)))))
-
-(defn- previous-selection-non-progress?
-  [action prev-trace-record]
-  (let [previous-action (get-in prev-trace-record [:decision :action])
-        target (:target action)
-        same-selection? (and (= :advance-mission (:type previous-action))
-                             (= target (:target previous-action)))
-        target-mu-pre (get-in prev-trace-record [:mu-pre target])
-        target-mu-post (get-in prev-trace-record [:mu-post target])
-        mu-moved? (not= target-mu-pre target-mu-post)
-        ;; The same one accessor the batch path uses -- this was the second
-        ;; hand-inlined copy of the three places (worklist :U59).
-        outcome (trace-outcome prev-trace-record)]
-    (and same-selection?
-         (or (not mu-moved?)
-             (not= :grounded-change outcome)))))
-
-(defn- repair-selection? [trace-record]
-  (let [previous-action (get-in trace-record [:decision :action])
-        target (some-> (:target previous-action) name)]
-    (or (= :repair-machine-failure (:type previous-action))
-        (boolean (some-> target (str/starts-with? "repair-attempt-"))))))
-
-(defn- recent-non-progress-count [action trace-records]
-  (let [target (:target action)]
-    (loop [records (reverse (take-last 12 trace-records))
-           count 0]
-      (if-let [record (first records)]
-        (let [previous-action (get-in record [:decision :action])]
-          (cond
-            (repair-selection? record)
-            (recur (rest records) count)
-
-            (and (= :advance-mission (:type previous-action))
-                 (= target (:target previous-action)))
-            (if (= :grounded-change (trace-outcome record))
-              count
-              (recur (rest records) (inc count)))
-
-            :else count))
-        count))))
-
-(defn- consecutive-non-progress-count
-  [action trace-history]
-  (if (sequential? trace-history)
-    (recent-non-progress-count action trace-history)
-    ;; Backward-compatible one-record API: retain the carried count semantics.
-    (if (previous-selection-non-progress? action trace-history)
-      (inc (long (or (get-in trace-history
-                             [:decision :action :non-progress-count])
-                     0)))
-      0)))
-
-(defn- positive-double [x]
-  (when (number? x)
-    (max 0.0 (double x))))
-
-(defn- normalized-value [raw max-raw]
-  (when (number? raw)
-    (if (pos? (double max-raw))
-      (/ (double raw) (double max-raw))
-      0.0)))
-
-(defn- mission-value-weights
-  [opts]
-  (let [configured (or (:mission-value-weights opts)
-                       (some-> (System/getenv "FUTON_WM_VALUE_WEIGHTS")
-                               clojure.edn/read-string)
-                       default-mission-value-weights)
-        weights (merge {:epistemic 0.0} (select-keys configured [:central :strategic :doable :epistemic]))
-        values (vals weights)
-        valid-values? (every? #(and (number? %)
-                                    (<= 0.0 (double %) 1.0))
-                              values)
-        total (when valid-values?
-                (reduce + 0.0 (map double values)))]
-    (when-not (and (= (set (keys weights))
-                      #{:central :strategic :doable :epistemic})
-                   valid-values?
-                   (< (Math/abs (- 1.0 total)) 1.0e-9))
-      (throw (ex-info "Mission-value weights must be non-negative and sum to 1"
-                      {:weights configured})))
-    (update-vals weights double)))
-
-(defn- read-strategy-cascade
-  [path]
-  (clojure.edn/read-string (slurp path)))
-
-(defn- cascade-mission-tokens
-  [mission]
-  (map normalize-mission-id
-       (re-seq #"M-[A-Za-z0-9-]+" (str mission))))
-
-(defn- cascade-role-map
-  [cascade]
-  (let [id->missions (into {}
-                           (map (fn [{:keys [id mission]}]
-                                  [id (cascade-mission-tokens mission)]))
-                           (:boxes cascade))
-        missions-for #(set (mapcat id->missions %))
-        all-missions (set (mapcat val id->missions))
-        spine-missions (missions-for (:spine cascade))
-        terminal-missions (missions-for (:terminals cascade))]
-    (into {}
-          (map (fn [mission]
-                 [mission (cond
-                            (contains? spine-missions mission) 1.0
-                            (contains? terminal-missions mission) 0.7
-                            :else 0.4)]))
-          all-missions)))
-
-(defn- normalized-centrality-map
-  [centrality]
-  (let [by-mission (into {}
-                         (keep (fn [[mission value]]
-                                 (when-some [n (positive-double value)]
-                                   [(normalize-mission-id mission) n])))
-                         centrality)
-        cmax (reduce max 0.0 (vals by-mission))]
-    (if (pos? cmax)
-      (update-vals by-mission #(/ % cmax))
-      (zipmap (keys by-mission) (repeat 0.0)))))
-
-(defn- normalized-phase
-  [phase]
-  (when (some? phase)
-    (-> phase name str/lower-case)))
-
-(defn- phase-doable
-  [phase]
-  (get phase-doability (or phase "unknown") 0.3))
-
-(defn enrich-candidates-with-mission-value
-  "Attach strategic value signals to mission and pattern candidates.
-
-  All substrate reads happen here, at the judge boundary. Mission value blends
-  globally normalized centrality, active-cascade role, phase doability, and --
-  only when the declared :epistemic weight is positive -- the mission-grain
-  epistemic term (futon2.aif.mission-epistemic-value), then applies the
-  completion/operator gates and repeated-non-progress decay. Pattern value
-  continues to use the batch-normalized retrieval score. Optional opts support
-  :strategy-cascade-path and :mission-value-weights; the environment variables
-  are FUTON_WM_STRATEGY_CASCADE and FUTON_WM_VALUE_WEIGHTS (an EDN map).
-
-  U44: :live-doability? (or FUTON_WM_LIVE_DOABILITY=1) feeds the doability
-  factor the :mission/phase on the mission-doc hyperedge instead of the phase
-  compute-delta-t-mission cannot resolve. Default off, and off is
-  byte-identical -- see *live-doability?*."
-  ([candidates prev-trace-record]
-   (enrich-candidates-with-mission-value candidates prev-trace-record {}))
-  ([candidates prev-trace-record opts]
-   (let [weights (mission-value-weights opts)
-         cascade-path (or (:strategy-cascade-path opts)
-                          (System/getenv "FUTON_WM_STRATEGY_CASCADE")
-                          default-strategy-cascade-path)
-         centrality (normalized-centrality-map (centrality-joint-map))
-         strategic (cascade-role-map (read-strategy-cascade cascade-path))
-         live? (live-doability? opts)
-         mission-idx (mission-doc-index) delta-cache (atom {})
-         epistemic-idx (mission-epistemic/field-readings weights opts)
-         with-value
-         (mapv
-          (fn [action]
-            (case (:type action)
-              :advance-mission
-              (let [mission (normalize-mission-id
-                             (action-target-key (:target action)))
-                    mission-doc (get mission-idx mission)
-                    endpoint (mission-index-endpoint mission-doc)
-                    operator-gates (mission-index-operator-gates mission-doc)
-                    delta-result (when endpoint
-                                   (or (get @delta-cache endpoint)
-                                       (let [result (compute-delta-t-mission endpoint)]
-                                         (swap! delta-cache assoc endpoint result)
-                                         result)))
-                    delta-phase (normalized-phase (:mission-phase delta-result))
-                    ;; U44: with the declared input on, the phase comes off the
-                    ;; hyperedge this index already holds; the delta-t reading
-                    ;; stays the fallback so the two carriers can still
-                    ;; disagree in the record rather than one erasing the other.
-                    doc-phase (when live? (normalized-phase
-                                           (mission-index-phase mission-doc)))
-                    phase (if live? (or doc-phase delta-phase) delta-phase)
-                    central (get centrality mission 0.0)
-                    strategic-value (get strategic mission 0.0)
-                    phase-doable-value (phase-doable phase)
-                    operator-gated (boolean (seq operator-gates))
-                    doable (if operator-gated 0.0 phase-doable-value)
-                    completion-gate (if (= "complete" phase) 0.0 1.0)
-                    operator-gate-factor (if operator-gated 0.0 1.0)
-                    epi (mission-epistemic/record-for epistemic-idx mission phase)
-                    blended (+ (* (:central weights) central) (* (:strategic weights) strategic-value)
-                               (* (:doable weights) phase-doable-value) (* (:epistemic weights) (:epistemic epi 0.0)))]
-                (cond-> (assoc (merge action epi)
-                               :central central
-                               :strategic strategic-value
-                               :doable doable
-                               :phase phase
-                               :completion-gate-factor completion-gate
-                               :operator-gate-factor operator-gate-factor
-                               ::pre-operator-gate-value
-                               (* blended completion-gate)
-                               ::raw-mission-value
-                               (* blended completion-gate operator-gate-factor))
-                  ;; U44: the field appears only under the declared input, so
-                  ;; the default record is byte-identical. It says WHICH
-                  ;; carrier the number came from, because "unknown 0.3" from
-                  ;; an unreadable phase and 0.3 from a phase that is actually
-                  ;; "map" are the same scalar and different facts.
-                  live?
-                  (assoc :phase-source (cond doc-phase :mission-doc-hyperedge
-                                             delta-phase :delta-t
-                                             :else :unreadable))
-                  operator-gated
-                  (assoc :operator-gated true
-                         :operator-gates operator-gates)))
-
-              :fire-pattern
-              (if-some [retrieval-value (positive-double (:retrieval-score action))]
-                (assoc action ::raw-pattern-value retrieval-value)
-                action)
-
-              action))
-          candidates)
-         max-pattern-value (reduce max 0.0 (keep ::raw-pattern-value with-value))
-         max-pre-gate-mission-value
-         (reduce max 0.0 (keep ::pre-operator-gate-value with-value))]
-     (mapv
-      (fn [action]
-        (let [raw-mission (::raw-mission-value action)
-              raw-pattern (::raw-pattern-value action)
-              non-progress-count (if (some? raw-mission)
-                                   (consecutive-non-progress-count
-                                    action prev-trace-record)
-                                   0)
-              non-progress? (pos? non-progress-count)
-              decay (if non-progress?
-                      (/ 1.0 (+ 1.0 (* non-progress-decay-k
-                                       non-progress-count)))
-                      1.0)
-              value (or raw-mission
-                        (normalized-value raw-pattern max-pattern-value))]
-          (cond-> (dissoc action ::raw-mission-value ::raw-pattern-value
-                          ::pre-operator-gate-value)
-            (some? raw-mission) (assoc :non-progress-decay decay
-                                       :non-progress? non-progress?
-                                       :non-progress-count non-progress-count)
-            (and (:operator-gated action)
-                 (= max-pre-gate-mission-value
-                    (::pre-operator-gate-value action)))
-            (assoc :operator-gate-top-candidate true)
-            (some? value) (assoc :mission-value-factor (* value decay)))))
-      with-value))))
-
-(defn- trace-corpus-dates
-  "The dates of every daily trace file under `dir`, oldest first. The corpus is
-   enumerated from the filenames rather than from a date window, so a gap in the
-   record is a gap and not a silently shortened range."
-  [dir]
-  (let [root (io/file dir)]
-    (if (.isDirectory root)
-      (->> (.listFiles root)
-           (filter #(.isFile ^java.io.File %))
-           (keep #(second (re-matches #"wm-trace-(\d{4}-\d{2}-\d{2})\.edn"
-                                      (.getName ^java.io.File %))))
-           sort
-           vec)
-      [])))
-
-(defn case-history-index
-  "[type target] -> the number of persisted decisions that CHOSE that key, over
-   the whole recorded trace corpus at `dir`.
-
-   THIS IS `WAS CHOSEN`, NEVER `AND IT WORKED`. U51 measured 17 distinct chosen
-   keys over 889 records and 0 of them carrying an outcome -- no record reaches
-   any of the three places `trace-outcome` looks -- so rung 1 means the machine
-   selected this before and nothing in the corpus says whether it helped. The
-   ladder is built on the only history the corpus actually holds, and the
-   account says so rather than letting `case history` be read as `evidence of
-   success`."
-  [dir]
-  (reduce (fn [acc date-str]
-            (reduce (fn [acc rec]
-                      (let [a (get-in rec [:decision :action])
-                            k [(:type a) (:target a)]]
-                        ;; A typed action with no target IS a decision the
-                        ;; corpus records -- 146 of the 889 are
-                        ;; [:learn-action-class nil] -- so it is counted here
-                        ;; and excluded by the ladder's SCOPE rule instead. The
-                        ;; index is the corpus; what the ladder scores is a
-                        ;; separate, stated rule, and keeping the two apart is
-                        ;; what lets this count be checked against U51's.
-                        (if (:type a)
-                          (update acc k (fnil inc 0))
-                          acc)))
-                    acc
-                    (trace/read-trace :dir dir :date-str date-str)))
-          {}
-          (trace-corpus-dates dir)))
-
-(def ^:private case-history-index-memo (memoize case-history-index))
-
-(defn apply-task-belief-ladder
-  "U52. The three-rung ladder, applied between candidate enrichment and EFE
-   ranking. Returns `{:candidates ... :refusals ... :census ... :ladder ...}`.
-
-   WITH THE DECLARED INPUT ABSENT THIS IS THE IDENTITY: the same candidate
-   vector object comes back, `:refusals` is empty and `:ladder` is nil, so a
-   default tick cannot differ from a pre-U52 tick by construction rather than
-   by comparison. The comparison is run anyway -- runs/U52-ladder/.
-
-   `opts` may carry `:task-belief-ladder?`, `:relation`,
-   `:generalization-discount`, `:support->factor`, `:case-history` (an index,
-   which is how the replay path avoids re-reading the corpus) and
-   `:trace-dir`."
-  ([candidates] (apply-task-belief-ladder candidates {}))
-  ([candidates opts]
-   (if-not (task-belief-ladder? opts)
-     {:candidates candidates :refusals [] :census {} :ladder nil}
-     (let [history (or (:case-history opts)
-                       (case-history-index-memo (or (:trace-dir opts)
-                                                    default-wm-trace-dir)))
-           ctx (ladder/field-context candidates history opts)
-           {:keys [candidates refusals census]} (ladder/apply-ladder candidates ctx)]
-       {:candidates candidates
-        :refusals refusals
-        :census census
-        :ladder {:relation (:relation ctx)
-                 :relation-statement (:relation-statement ctx)
-                 :generalization-discount (:generalization-discount ctx)
-                 :history-size (count history)
-                 :census census
-                 :refused (count refusals)}}))))
 
 (defn- since-str
   "Date string for N days ago."

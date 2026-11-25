@@ -36,7 +36,6 @@
   "src/futon2/aif/selection_rationale.clj" 1
   "src/futon2/aif/selection_world.clj" 3
   "src/futon2/aif/shadow_cascade_g.clj" 2
-  "src/futon2/aif/task_belief_ladder.clj" 1
   "src/futon2/aif/tripwire_calibration.clj" 3
   "src/futon2/aif/want_interpretation.clj" 3
   "src/futon2/aif/wm/family_selection.clj" 1

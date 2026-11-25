@@ -11,11 +11,9 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
-            [futon2.aif.efe :as efe]
             [futon2.aif.enumeration-completeness :as ec]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.mission-c :as mc]
-            [futon2.aif.mission-epistemic-value :as mev]
             [futon2.aif.mission-gauges :as gauges]
             [futon2.aif.observation :as observation]
                         [futon2.aif.preferences :as pref]
@@ -378,7 +376,7 @@
            (:exclusions result)))
     (is (not-any? #(= :unknown (:id %)) (:priorities result)))))
 
-(deftest futon1b-edn-mission-index-enables-strategic-enrichment-test
+(deftest futon1b-edn-mission-index-normalizes-both-prop-shapes-test
   (let [body (pr-str
               {:hyperedges
                [{:hx/type "code/v05/mission-doc"
@@ -388,46 +386,25 @@
                 {:hx/type "code/v05/mission-doc"
                  :hx/ends [{:entity-id "repo-d/mission/beta"}]
                  :hx/props {:mission/id "M-beta"
-                            :mission/phase "derive"}}]})
-        candidates [{:type :advance-mission :target "M-alpha"
-                     :open-hole-count 4}
-                    {:type :advance-mission :target "M-beta"
-                     :open-hole-count 4}]
-        state {:observation {:mission-health 0.3 :sorry-count-norm 0.85}
-               :belief {}}]
+                            :mission/phase "derive"}}]})]
     (with-redefs-fn
-      {#'http/get (fn [_url _opts] {:status 200 :body body})
-       #'wm/centrality-joint-map (fn [] {"M-alpha" 0.8 "M-beta" 0.4})
-       #'wm/compute-delta-t-mission
-       (fn [endpoint]
-         {:mission-T (if (= endpoint "repo-d/mission/alpha") 1.0 0.7)
-          :mission-phase (if (= endpoint "repo-d/mission/alpha")
-                           "head"
-                           "derive")})}
+      {#'http/get (fn [_url _opts] {:status 200 :body body})}
       (fn []
         (let [hxs (#'wm/fetch-hyperedges-by-type "code/v05/mission-doc")
-              mission-idx (#'wm/mission-doc-index)
-              enriched (wm/enrich-candidates-with-mission-value candidates nil)
-              factors (mapv :mission-value-factor enriched)
-              gs (mapv #(-> (efe/compute-efe state %) :G-efe) enriched)]
+              mission-idx (#'wm/mission-doc-index)]
           (is (= 2 (count hxs)))
           (is (map? (:hx/props (first hxs)))
               "EDN-string props normalize to a map")
           (is (= ["repo-d/mission/beta"] (:hx/endpoints (second hxs)))
               "structured :hx/ends normalize to string endpoints")
-          ;; U44: the index carries the phase off the hyperedge now; it is
-          ;; read only when the declared input is on, and the enrichment two
-          ;; lines below is the default path, so the factors are unchanged.
           (is (= {"alpha" {:endpoint "repo-d/mission/alpha"
                             :operator-gates []
                             :phase "head"}
                   "beta" {:endpoint "repo-d/mission/beta"
                            :operator-gates []
                            :phase "derive"}}
-                 mission-idx))
-          (is (every? some? factors))
-          (is (apply distinct? factors))
-          (is (apply distinct? gs)))))))
+                 mission-idx)))))))
+
 
 (deftest futon1b-edn-r12-apparatus-reader-test
   (let [body (pr-str
@@ -445,20 +422,6 @@
         (is (= 1 (:total-records result)))
         (is (= 0.67 (get-in result [:per-class :advance-mission
                                     :intrinsic-value])))))))
-
-(deftest delta-t-wrapper-requests-complete-mission-census-test
-  (let [called (atom nil)]
-    (with-redefs [clojure.core/requiring-resolve
-                  (fn [_]
-                    (fn [endpoint opts]
-                      (reset! called [endpoint opts])
-                      {:mission-phase "instantiate"}))]
-      (is (= {:mission-phase "instantiate"}
-             (#'wm/compute-delta-t-mission "repo/mission/example")))
-      (is (= ["repo/mission/example"
-              {:limit 500
-               :families ["code/v05/mission-doc"]}]
-             @called)))))
 
 (deftest mission-doc-index-parses-zero-one-and-many-operator-gates
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
@@ -751,157 +714,6 @@
            (#'wm/detect-repos {:evidence/tags ["futon0"]
                                :evidence/type "coordination"
                                :evidence/body {:text "war-machine changes in futon3c"}})))))
-
-(deftest three-factor-mission-value-enrichment-and-non-progress-decay
-  (let [candidates [{:type :advance-mission :target "M-spine" :open-hole-count 4}
-                    {:type :advance-mission :target "M-head" :open-hole-count 4}
-                    {:type :advance-mission :target "M-instantiate" :open-hole-count 4}
-                    {:type :advance-mission :target "M-complete" :open-hole-count 4}
-                    {:type :fire-pattern :target :pattern/high :retrieval-score 8.0}
-                    {:type :fire-pattern :target :pattern/low :retrieval-score 2.0}]
-        prev {:decision {:action {:type :advance-mission :target "M-spine"}}
-              :mu-pre {"M-spine" {:addressed 0.2}}
-              :mu-post {"M-spine" {:addressed 0.2}}
-              :outcome :grounded-no-change}
-        delta-by-endpoint {"mission/spine" {:mission-phase "identify"}
-                           "mission/head" {:mission-phase "head"}
-                           "mission/instantiate" {:mission-phase "instantiate"}
-                           "mission/complete" {:mission-phase "complete"}}
-        cascades {"cascade-a"
-                  {:boxes [{:id :spine :mission "M-spine"}
-                           {:id :instant :mission "M-instantiate + M-complete"}]
-                   :spine [:spine]
-                   :terminals [:instant]}
-                  "cascade-b"
-                  {:boxes [{:id :same :mission "M-spine"}]
-                   :terminals [:same]}}
-        redefs {#'wm/centrality-joint-map
-                (fn [] {"M-spine" 0.0
-                        "M-head" 0.5
-                        "M-instantiate" 0.5
-                        "M-complete" 1.0})
-                #'wm/mission-doc-index
-                (fn [] {"spine" "mission/spine"
-                        "head" "mission/head"
-                        "instantiate" "mission/instantiate"
-                        "complete" "mission/complete"})
-                #'wm/compute-delta-t-mission #(get delta-by-endpoint %)
-                #'wm/read-strategy-cascade #(get cascades %)}]
-    (with-redefs-fn
-      redefs
-      (fn []
-        (let [[stuck head instantiate complete pattern-high pattern-low]
-              (wm/enrich-candidates-with-mission-value
-               candidates prev {:strategy-cascade-path "cascade-a"})
-              [fresh] (wm/enrich-candidates-with-mission-value
-                       [(first candidates)] nil
-                       {:strategy-cascade-path "cascade-a"})]
-          (is (= {:central 0.0
-                  :strategic 1.0
-                  :doable 0.2
-                  :phase "identify"}
-                 (select-keys stuck [:central :strategic :doable :phase])))
-          (is (pos? (:mission-value-factor fresh))
-              "a zero-centrality spine mission still has additive value")
-          (is (= 0.5 (:central instantiate))
-              "centrality uses the global cmax, not the candidate batch")
-          (is (> (:doable instantiate) (:doable head)))
-          (is (> (:mission-value-factor instantiate)
-                 (:mission-value-factor head)))
-          (is (zero? (:mission-value-factor complete)))
-          (is (= 0.5 (:non-progress-decay stuck)))
-          (is (true? (:non-progress? stuck)))
-          (is (= 1 (:non-progress-count stuck)))
-          (is (= (* 0.5 (:mission-value-factor fresh))
-                 (:mission-value-factor stuck)))
-          (is (< (:mission-value-factor stuck)
-                 (:mission-value-factor fresh)))
-          (is (= 1.0 (:mission-value-factor pattern-high)))
-          (is (= 0.25 (:mission-value-factor pattern-low)))
-          (let [[alternate]
-                (wm/enrich-candidates-with-mission-value
-                 [(first candidates)] nil
-                 {:strategy-cascade-path "cascade-b"})]
-            (is (not= (:mission-value-factor fresh)
-                      (:mission-value-factor alternate))
-                "swapping cascades changes the same mission's value"))
-          (let [[doable-only]
-                (wm/enrich-candidates-with-mission-value
-                 [(first candidates)] nil
-                 {:strategy-cascade-path "cascade-a"
-                  :mission-value-weights {:central 0.0
-                                          :strategic 0.0
-                                          :doable 1.0}})]
-            (is (= 0.2 (:mission-value-factor doable-only))
-                "opts override the default three-factor weights"))
-          (let [[stuck-again]
-                (wm/enrich-candidates-with-mission-value
-                 [(first candidates)]
-                 {:decision {:action stuck}
-                  :mu-pre {"M-spine" {:addressed 0.2}}
-                  :mu-post {"M-spine" {:addressed 0.2}}
-                  :outcome :grounded-no-change}
-                 {:strategy-cascade-path "cascade-a"})]
-            (is (= 2 (:non-progress-count stuck-again)))
-            (is (= (/ 1.0 3.0) (:non-progress-decay stuck-again))))
-          (let [state {:observation {:mission-health 0.3
-                                     :sorry-count-norm 0.85}
-                       :belief {}}
-                stuck-g (:G-efe (efe/compute-efe state stuck))
-                instantiate-g (:G-efe (efe/compute-efe state instantiate))]
-            (is (not= stuck-g instantiate-g)
-                "judge-enriched equal-hole candidates have distinct strategic G")))))))
-
-(deftest operator-gate-is-a-multiplicative-mask-with-visible-components
-  (with-redefs-fn
-    {#'wm/centrality-joint-map
-     (fn [] {"M-gated" 1.0 "M-open" 0.5})
-     #'wm/mission-doc-index
-     (fn [] {"gated" {:endpoint "mission/gated"
-                       :operator-gates
-                       [{:kind "operator-acceptance"
-                         :text "Joe accepts the result"}]}
-             "open" {:endpoint "mission/open"
-                     :operator-gates []}})
-     #'wm/compute-delta-t-mission
-     (fn [_] {:mission-phase "instantiate"})
-     #'wm/read-strategy-cascade
-     (fn [_] {:boxes [] :spine [] :terminals []})}
-    (fn []
-      (let [[gated open]
-            (wm/enrich-candidates-with-mission-value
-             [{:type :advance-mission :target "M-gated"}
-              {:type :advance-mission :target "M-open"}]
-             [] {:strategy-cascade-path "unused"})]
-        (is (= 1.0 (:central gated)))
-        (is (= 0.0 (:strategic gated)))
-        (is (= 0.0 (:doable gated)))
-        (is (true? (:operator-gated gated)))
-        (is (= 0.0 (:operator-gate-factor gated)))
-        (is (= 1.0 (:completion-gate-factor gated)))
-        (is (zero? (:mission-value-factor gated)))
-        (is (true? (:operator-gate-top-candidate gated)))
-        (is (pos? (:mission-value-factor open)))))))
-
-(deftest non-progress-window-skips-repairs-and-resets-on-grounded-work
-  (let [action {:type :advance-mission :target "M-learning-loop"}
-        failed {:decision {:action action} :outcome :build-failed}
-        repair {:decision {:action {:type :repair-machine-failure
-                                    :target "repair-attempt-043-build-failed"}}
-                :outcome :grounded-change}
-        grounded {:decision {:action action} :outcome :grounded-change}]
-    (is (= 2 (#'wm/consecutive-non-progress-count
-              action [failed repair failed])))
-    (is (= 0 (#'wm/consecutive-non-progress-count
-              action [failed repair grounded])))
-    (is (= 1 (#'wm/consecutive-non-progress-count
-              action [grounded repair failed])))
-    (is (= 4 (#'wm/consecutive-non-progress-count
-              action (assoc-in failed [:decision :action :non-progress-count] 3)))
-        "the single-record API retains its carried-count behavior")
-    (is (= 1 (#'wm/consecutive-non-progress-count
-              action [failed {:decision {:action {:type :no-op}}} failed]))
-        "a targetless record (no-op/abstain) breaks the chain without throwing")))
 
 ;; ---------------------------------------------------------------------------
 ;; RUN8 / stage S3 — the variational-τ precondition guard. The τ_eff dispatch
@@ -2085,255 +1897,6 @@
       (is (not (str/includes? md "case: "))))))
 
 ;; ---------------------------------------------------------------------------
-;; U22 -- the epistemic term of mission value. Declared input, default off.
-
-(def ^:private u22-mission-docs
-  "Three candidates the judge can read, plus the neighbourhood two of them
-   declare. M-surveyor is in MAP with ten cross-refs whose phase the judge
-   cannot read; M-builder is in INSTANTIATE with the same unread
-   neighbourhood; M-mapped is in MAP with nothing left to find."
-  (let [dark (mapv #(str "M-dark-" %) (range 10))]
-    (into [{:hx/endpoints ["repo-d/mission/surveyor"]
-            :hx/props {:mission/id "surveyor" :mission/phase "map"
-                       :mission/mtime "2026-01-01"
-                       :mission/cross-refs dark}}
-           {:hx/endpoints ["repo-d/mission/builder"]
-            :hx/props {:mission/id "builder" :mission/phase "instantiate"
-                       :mission/mtime "2026-01-01"
-                       :mission/cross-refs dark}}
-           {:hx/endpoints ["repo-d/mission/mapped"]
-            :hx/props {:mission/id "mapped" :mission/phase "map"
-                       :mission/mtime "2026-09-03"
-                       :mission/cross-refs ["M-builder"]}}]
-          (map (fn [id] {:hx/endpoints [(str "repo-d/mission/" id)]
-                         :hx/props {"mission/id" (str/replace id "M-" "")
-                                    "mission/mtime" "2026-09-03"}}))
-          dark)))
-
-(def ^:private u22-declared-weights
-  "DECLARED for this test only. The default is :epistemic 0.0; the flip is J."
-  {:central 0.20 :strategic 0.30 :doable 0.25 :epistemic 0.25})
-
-(defn- u22-enrich
-  [weights]
-  (with-redefs-fn
-    {#'wm/centrality-joint-map (fn [] {"M-surveyor" 0.0 "M-builder" 0.9
-                                       "M-mapped" 1.0})
-     #'wm/mission-doc-index (fn [] {"surveyor" {:endpoint "mission/surveyor"}
-                                    "builder" {:endpoint "mission/builder"}
-                                    "mapped" {:endpoint "mission/mapped"}})
-     #'wm/compute-delta-t-mission (fn [_] {:delta-T 0.0})
-     #'wm/read-strategy-cascade (fn [_] {:boxes [] :spine [] :terminals []})}
-    (fn []
-      (wm/enrich-candidates-with-mission-value
-       [{:type :advance-mission :target "M-surveyor"}
-        {:type :advance-mission :target "M-builder"}
-        {:type :advance-mission :target "M-mapped"}]
-       nil
-       (cond-> {:strategy-cascade-path "unused"
-                :epistemic-as-of (java.time.LocalDate/parse "2026-09-03")
-                :hyperedges-by-type-fn (fn [_] u22-mission-docs)}
-         weights (assoc :mission-value-weights weights))))))
-
-(defn- u22-rank
-  [entries id]
-  (->> entries
-       (sort-by (comp - :mission-value-factor))
-       (map :target)
-       vec
-       (#(inc (.indexOf ^java.util.List % id)))))
-
-(deftest the-epistemic-weight-defaults-to-zero-and-reads-nothing
-  (testing "the default weights carry the fourth key at zero"
-    (is (= {:central 0.25 :strategic 0.45 :doable 0.30 :epistemic 0.0}
-           @#'wm/default-mission-value-weights))
-    (is (= 1.0 (reduce + 0.0 (vals @#'wm/default-mission-value-weights)))))
-  (testing "a three-key weights map is still accepted, epistemic defaulted"
-    (is (= {:central 0.0 :strategic 0.0 :doable 1.0 :epistemic 0.0}
-           (#'wm/mission-value-weights
-            {:mission-value-weights {:central 0.0 :strategic 0.0 :doable 1.0}}))))
-  (testing "off, no epistemic field is attached and the value is the old blend"
-    (let [entries (u22-enrich nil)]
-      (is (every? #(and (nil? (:epistemic %)) (nil? (:epistemic-basis %)))
-                  entries))
-      ;; central 1.0 * 0.25 + doable 0.3 * 0.30 = 0.34 for M-mapped
-      (is (every? (fn [[entry expected]]
-                    (< (Math/abs (- (double (:mission-value-factor entry))
-                                    expected))
-                       1.0e-9))
-                  (map vector entries [0.09 0.315 0.34]))))))
-
-(deftest a-declared-epistemic-weight-moves-a-map-phase-mission-up
-  (let [before (u22-enrich nil)
-        after (u22-enrich u22-declared-weights)]
-    (is (= [3 2 1] (mapv #(u22-rank before %)
-                         ["M-surveyor" "M-builder" "M-mapped"]))
-        "the exploit-only blend puts the survey mission last")
-    (is (= [1 3 2] (mapv #(u22-rank after %)
-                         ["M-surveyor" "M-builder" "M-mapped"]))
-        "the survey mission takes rank 1 once the term is weighted")
-    (testing "for a stated reason, carried in the record"
-      (let [basis (->> after
-                       (filter #(= "M-surveyor" (:target %)))
-                       first
-                       :epistemic-basis)]
-        (is (= :measured (:status basis)))
-        (is (= "map" (:phase basis)))
-        (is (= 11 (:question-count basis)) "ten neighbours plus freshness")
-        (is (= 11 (:open-question-count basis)))
-        (is (true? (:clamped? basis)) "past the declared reference of ten")
-        (is (= 1.0 (:availability basis)))
-        (is (= :doability-phase-absent (:phase-agreement basis))
-            "the doability factor got no phase in this process; the epistemic
-             term read one, and the record says so rather than reconciling it")))))
-
-(deftest a-map-phase-with-nothing-unread-does-not-move
-  (let [after (u22-enrich u22-declared-weights)
-        mapped (first (filter #(= "M-mapped" (:target %)) after))]
-    (is (= "map" (get-in mapped [:epistemic-basis :phase])))
-    (is (zero? (:epistemic mapped))
-        "M-mapped is in MAP too; its neighbourhood is read and its doc is fresh")
-    (is (= 2 (u22-rank after "M-mapped"))
-        "it keeps its place ahead of M-builder on the exploit factors alone")))
-
-
-;; ---------------------------------------------------------------------------
-;; U44 -- doability liveness. Declared input, default off, and the default is
-;; byte-identical rather than merely "close".
-
-(def ^:private u44-mission-idx
-  "The index shape the repair reads: `:phase` carried off the mission-doc
-   hyperedge. M-instantiated and M-headed have one; M-shipped is marked
-   complete, which is what makes the completion gate observable; M-phaseless
-   has no phase at all, so its live reading must be a typed absence and not a
-   guess."
-  {"instantiated" {:endpoint "mission/instantiated" :phase "instantiate"}
-   "headed" {:endpoint "mission/headed" :phase "head"}
-   "shipped" {:endpoint "mission/shipped" :phase "complete"}
-   "phaseless" {:endpoint "mission/phaseless"}})
-
-(defn- u44-enrich
-  ([opts] (u44-enrich opts (fn [_] {:delta-T 0.0})))
-  ([opts delta-t-fn]
-   (with-redefs-fn
-     {#'wm/centrality-joint-map (fn [] {})
-      #'wm/mission-doc-index (fn [] u44-mission-idx)
-      #'wm/compute-delta-t-mission delta-t-fn
-      #'wm/read-strategy-cascade (fn [_] {:boxes [] :spine [] :terminals []})}
-     (fn []
-       (wm/enrich-candidates-with-mission-value
-        [{:type :advance-mission :target "M-instantiated"}
-         {:type :advance-mission :target "M-headed"}
-         {:type :advance-mission :target "M-shipped"}
-         {:type :advance-mission :target "M-phaseless"}]
-        nil
-        (merge {:strategy-cascade-path "unused"
-                :mission-value-weights {:central 0.20 :strategic 0.50
-                                        :doable 0.30}}
-               opts))))))
-
-(defn- u44-by-id [entries]
-  (into {} (map (juxt :target identity)) entries))
-
-(deftest the-live-doability-input-defaults-to-off
-  (testing "with no declared input the phase is nil and every doable is the
-            'unknown' 0.3 -- the inert state C492 section 4b measured"
-    (let [entries (u44-enrich {})]
-      (is (every? #(nil? (:phase %)) entries))
-      (is (= #{0.3} (set (map :doable entries))))
-      (is (every? #(not (contains? % :phase-source)) entries)
-          "the field the repair adds is absent from the default record")))
-  (testing "an explicit false is the same judgement as saying nothing"
-    (is (= (u44-enrich {}) (u44-enrich {:live-doability? false})))))
-
-(deftest a-declared-live-doability-reads-the-phase-off-the-hyperedge
-  (let [by-id (u44-by-id (u44-enrich {:live-doability? true}))]
-    (testing "the fiat table is applied to the phase the index already carried"
-      (is (= [1.0 0.1] [(:doable (by-id "M-instantiated"))
-                        (:doable (by-id "M-headed"))]))
-      (is (= ["instantiate" "head"] [(:phase (by-id "M-instantiated"))
-                                     (:phase (by-id "M-headed"))])))
-    (testing "and the record says which carrier the number came from"
-      (is (= :mission-doc-hyperedge (:phase-source (by-id "M-instantiated")))))
-    (testing "a mission with no phase on the hyperedge is typed, not guessed:
-              it keeps the 'unknown' 0.3 and says the reading was unreadable"
-      (is (= 0.3 (:doable (by-id "M-phaseless"))))
-      (is (nil? (:phase (by-id "M-phaseless"))))
-      (is (= :unreadable (:phase-source (by-id "M-phaseless")))))))
-
-(deftest the-delta-t-carrier-remains-the-fallback
-  (testing "when the hyperedge has no phase and delta-t resolves one, the live
-            path takes it and records THAT carrier -- the repair adds a source,
-            it does not replace one"
-    (let [by-id (u44-by-id (u44-enrich {:live-doability? true}
-                                       (fn [_] {:mission-phase "verify"})))]
-      (is (= 0.8 (:doable (by-id "M-phaseless"))))
-      (is (= :delta-t (:phase-source (by-id "M-phaseless")))))
-    (testing "and the hyperedge wins where both carriers have a reading"
-      (let [by-id (u44-by-id (u44-enrich {:live-doability? true}
-                                         (fn [_] {:mission-phase "verify"})))]
-        (is (= "instantiate" (:phase (by-id "M-instantiated"))))
-        (is (= :mission-doc-hyperedge
-               (:phase-source (by-id "M-instantiated"))))))))
-
-(deftest the-completion-gate-was-inert-for-the-same-reason
-  (testing "a mission the field marks complete is ranked like any other while
-            the phase is nil: the gate is (= \"complete\" phase) and phase is nil"
-    (let [shipped (get (u44-by-id (u44-enrich {})) "M-shipped")]
-      (is (= 1.0 (:completion-gate-factor shipped)))
-      (is (pos? (double (:mission-value-factor shipped))))))
-  (testing "with the phase read, the gate fires and the value is zero"
-    (let [shipped (get (u44-by-id (u44-enrich {:live-doability? true}))
-                       "M-shipped")]
-      (is (= 0.0 (:completion-gate-factor shipped)))
-      (is (= 0.0 (:doable shipped)))
-      (is (zero? (double (:mission-value-factor shipped)))))))
-
-(deftest the-environment-switch-and-the-opt-are-one-input
-  (testing "the var bound on, with no opt passed, is the opt passed true"
-    (is (= (with-redefs-fn {#'wm/*live-doability?* true}
-             (fn [] (u44-enrich {})))
-           (u44-enrich {:live-doability? true}))))
-  (testing "and a per-call opt overrides the process-wide switch in both
-            directions, because an opt that is present is a declaration"
-    (is (= (with-redefs-fn {#'wm/*live-doability?* true}
-             (fn [] (u44-enrich {:live-doability? false})))
-           (u44-enrich {})))
-    (is (= (with-redefs-fn {#'wm/*live-doability?* false}
-             (fn [] (u44-enrich {:live-doability? true})))
-           (u44-enrich {:live-doability? true})))))
-
-(deftest mission-doc-index-carries-the-phase-it-used-to-discard
-  (let [hxs [{:hx/endpoints ["repo/mission/kw"]
-              :hx/props {:mission/id "M-kw" :mission/phase "derive"}}
-             {:hx/endpoints ["repo/mission/str"]
-              :hx/props {"mission/id" "M-str" "mission/phase" "argue"}}
-             {:hx/endpoints ["repo/mission/none"]
-              :hx/props {:mission/id "M-none"}}]]
-    (with-redefs-fn {#'wm/fetch-hyperedges-by-type (constantly hxs)}
-      (fn []
-        (let [idx (#'wm/mission-doc-index)]
-          (testing "both prop shapes the family is served in"
-            (is (= "derive" (get-in idx ["kw" :phase])))
-            (is (= "argue" (get-in idx ["str" :phase]))))
-          (testing "and no phase is no phase"
-            (is (nil? (get-in idx ["none" :phase])))))))))
-
-(deftest the-doability-prior-is-pinned-across-the-two-namespaces
-  (is (= @#'wm/phase-doability mev/phase-doability-prior)
-      "mission-epistemic-value reads its workable partition off this table"))
-
-(deftest weights-that-do-not-sum-to-one-are-refused
-  (is (thrown? clojure.lang.ExceptionInfo
-               (#'wm/mission-value-weights
-                {:mission-value-weights {:central 0.25 :strategic 0.45
-                                         :doable 0.30 :epistemic 0.20}})))
-  (is (thrown? clojure.lang.ExceptionInfo
-               (#'wm/mission-value-weights
-                {:mission-value-weights {:central 0.20 :strategic 0.35
-                                         :doable 0.25 :epistemic -0.20}}))))
-
-;; ---------------------------------------------------------------------------
 ;; U37: the enumeration-completeness projection at its call site.
 
 (deftest enumeration-completeness-projection-is-flag-gated
@@ -2372,79 +1935,6 @@
                   "nothing outside the decision moved")))))))
 
 ;; ---------------------------------------------------------------------------
-;; U52 -- the three-rung ladder at the selection scoring seam
-;; ---------------------------------------------------------------------------
-
-(def ^:private u52-candidates
-  [{:type :advance-mission :target "M-known"
-    :mission-path "/nowhere/M-known.md" :mission-value-factor 0.09}
-   {:type :advance-mission :target "M-unknown"
-    :mission-path "/nowhere/M-unknown.md" :mission-value-factor 0.09}
-   {:type :no-op :target nil}])
-
-(deftest u52-ladder-default-is-the-identity
-  (testing "with no declared input the SAME vector object comes back"
-    (let [out (wm/apply-task-belief-ladder u52-candidates)]
-      (is (identical? u52-candidates (:candidates out)))
-      (is (= [] (:refusals out)))
-      (is (nil? (:ladder out))
-          "and no ladder record is attached, so a default judgement carries no U52 key")))
-
-  (testing "an opt that is present and false is a declaration too"
-    (binding [wm/*task-belief-ladder?* true]
-      (is (identical? u52-candidates
-                      (:candidates (wm/apply-task-belief-ladder
-                                    u52-candidates
-                                    {:task-belief-ladder? false}))))))
-
-  (testing "the dynamic var alone turns it on"
-    (binding [wm/*task-belief-ladder?* true]
-      (is (some? (:ladder (wm/apply-task-belief-ladder
-                           u52-candidates
-                           {:case-history {}})))))))
-
-(deftest u52-ladder-on-rungs-and-refusal
-  (let [out (wm/apply-task-belief-ladder
-             u52-candidates
-             {:task-belief-ladder? true
-              :relation :k-doc-xref
-              :case-history {[:advance-mission "M-known"] 4}})
-        kept (into {} (map (juxt :target identity)) (:candidates out))]
-    (is (= {1 1, 3 1, :out-of-scope 1} (:census out))
-        "one direct case history, one nothing, one out of scope")
-    (is (= 1 (count (:refusals out))))
-    (is (= [:advance-mission "M-unknown"]
-           (:refusal/action-key (first (:refusals out)))))
-    (is (nil? (kept "M-unknown")) "a refused candidate leaves the field")
-    (is (= (* 0.09 0.8) (:mission-value-factor (kept "M-known"))))
-    (is (= 0.09 (:task-belief/pre-ladder-mission-value-factor (kept "M-known")))
-        "the pre-ladder number stays on the record beside the new one")
-    (is (= 1 (:history-size (:ladder out)))
-        "the ladder record says how many keys the index it read carried")))
-
-(deftest u52-case-history-index-counts-chosen-actions
-  (let [dir (str (Files/createTempDirectory "u52-trace" (into-array FileAttribute [])))
-        write! (fn [date recs]
-                 (spit (io/file dir (str "wm-trace-" date ".edn"))
-                       (str/join "\n" (map pr-str recs))))]
-    (write! "2026-09-01"
-            [{:decision {:action {:type :advance-mission :target "M-a"}}}
-             {:decision {:action {:type :advance-mission :target "M-a"}}}
-             {:decision {:action {:type :learn-action-class :target nil}}}])
-    (write! "2026-09-02"
-            [{:decision {:action {:type :advance-mission :target "M-b"}}}])
-    ;; a file that is not a daily trace must not be read as one
-    (spit (io/file dir "notes.edn") (pr-str {:decision {:action {:type :advance-mission :target "M-c"}}}))
-    (let [idx (wm/case-history-index dir)]
-      (is (= {[:advance-mission "M-a"] 2
-              [:advance-mission "M-b"] 1
-              [:learn-action-class nil] 1}
-             idx)
-          "a typed action with no target is a decision the corpus records and is counted; the ladder's SCOPE rule is what excludes it")
-      (is (nil? (get idx [:advance-mission "M-c"]))
-          "and a file that is not a daily trace is not corpus"))))
-
-
 
 ;; ---------------------------------------------------------------------------
 ;; R12 admission block (regression, 2026-09-18)

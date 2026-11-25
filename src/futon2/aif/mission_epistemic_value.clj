@@ -2,8 +2,7 @@
   "The EPISTEMIC term of mission value: what advancing a mission would tell the
    judge about the field, in nats.
 
-   WHY THIS EXISTS. The three-factor mission value
-   (`futon2.report.war-machine/enrich-candidates-with-mission-value`) prices
+   WHY THIS EXISTS. The three-factor mission value prices
    only the exploit side. `central` and `strategic` say where a payoff lands;
    `doable` says how close the mission is to delivering one (the
    `phase-doability` table rises monotonically toward INSTANTIATE). Nothing in

@@ -30,7 +30,7 @@
 
    The numeric legs and the categorical outcome are DIFFERENT ANSWERS, not two
    spellings of one: the legs are gamma's calibration pair, the categorical is
-   what `recent-non-progress-count` and the tripwires branch on. Carrying both
+   what the tripwires branch on. Carrying both
    under one key is the unification; picking one would have left the other
    reader dark.
 
