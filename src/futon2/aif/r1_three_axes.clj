@@ -110,7 +110,11 @@
   (cond
     (fn? A) (fn [state kind] (check-prob state kind (A state kind)))
     (map? A) (fn [state kind]
-               (check-prob state kind (get-in A [state kind] 0)))
+               (let [p (get-in A [state kind] ::missing)]
+                 (when (= ::missing p)
+                   (throw (ex-info "likelihood map has no entry for this state and record kind (no default 0: a missing entry would silently rule the state out)"
+                                   {:type :missing-likelihood :state state :kind kind})))
+                 (check-prob state kind p)))
     :else (throw (ex-info "likelihood must be a function or a nested map"
                           {:type :invalid-likelihood :A A}))))
 
@@ -214,4 +218,6 @@
      (let [match? (= (get state (get axis-getters axis)) v0)]
        (case kind
          :says-true (if match? r (- 1 r))
-         :says-false (if match? (- 1 r) r))))))
+         :says-false (if match? (- 1 r) r)
+         (throw (ex-info "axis-reading: record kind must be :says-true or :says-false"
+                         {:type :invalid-record-kind :kind kind})))))))

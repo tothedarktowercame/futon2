@@ -115,3 +115,13 @@
           skewed (r1t/update-belief uniform pending-reading [:says-true])]
       (is (= uniform (r1t/update-belief uniform coin [:says-true])))
       (is (= skewed (r1t/update-belief skewed coin [:says-false]))))))
+
+(deftest likelihood-refuses-gaps
+  (testing "claude-14 review: a map-form A with a missing entry is refused, not read as 0
+  (a partial map would otherwise pin the belief to whichever states it names); an unknown
+  record kind for an axis-reading is refused as ex-info"
+    (let [partial {(first r1t/states) {:x 1}}]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo #"no entry"
+                            (r1t/update-belief uniform partial [:x]))))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"record kind"
+                          (r1t/update-belief uniform pending-reading [:says-maybe])))))
