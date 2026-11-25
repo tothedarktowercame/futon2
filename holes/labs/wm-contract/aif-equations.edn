@@ -58,7 +58,19 @@
   :a-s-revision-3 {:cite "A-S: the observation model A from the record, Revision 3 (claude-12, 2026-09-26; futon2 c9cba0b82). holes/labs/wm-contract/proof2/packets/A-S.md, from the heading '## Revision 3'. A STACK DESIGN NOTE, not a paper: the local authority for a :stack-defined row whose content the War Machine supplies."
                    :used-for "channel identity: a label is evidence for class c's rates only when its :check-mechanism names the check the flight runs as c at the loaded code identity (§1); the reader's rules: active mechanism only, per-cell minimum of 5, the Jeffreys prior, a class left out rather than pooled (§2)"
                    :verified {:s1 "the check mechanism and the observer are independent identities (§1(a)); a label under another mechanism or another identity is not evidence for A_c" :s2 "population = the active mechanism; both cells >= 5; prior alpha = beta = 1/2; an excluded class is unmeasured, never silent"}
-                   :retrieved "holes/labs/wm-contract/proof2/packets/A-S.md (in-tree)"}}
+                   :retrieved "holes/labs/wm-contract/proof2/packets/A-S.md (in-tree)"}
+  :tull2023 {:cite "Tull, S., Kleiner, J., & St Clere Smithe, T. (2023). Active Inference in String Diagrams: A Categorical Account of Predictive Processing and Free Energy. arXiv:2308.00861 (CC BY 4.0)."
+             :used-for "G''s pragmatic term as the surprise of the preferences (Cor. 38, Prop. 37)"
+             :verified {:cor38 "preference surprise of a plan" :prop37 "preference surprise as -log of expected preference value"}
+             :retrieved "refs/tull2023.pdf (indexed refs/README.md, fetched 2026-11-25)"}
+  :parr2019gfe {:cite "Parr, T., & Friston, K. J. (2019). Generalised free energy and active inference. Biological Cybernetics, 113, 495-513 (CC BY 4.0)."
+                :used-for "preferences as the prior over future outcomes; the generalised free energy form G' instantiates at the cascade grain"
+                :verified {:gfe "GFE definition at parr2019gfe.txt:575-600 (refs/README.md index entry)"}
+                :retrieved "refs/parr2019gfe.xml (indexed refs/README.md, fetched 2026-11-25)"}
+  :millidge2021 {:cite "Millidge, B., Tschantz, A., & Buckley, C. L. (2021). Whence the expected free energy? Neural Computation, 33(2), 447-482."
+                 :used-for "the epistemic (ambiguity) term is a design choice: G' keeps it by statement, not by derivation"
+                 :verified {:s4 "EFE decompositions and the epistemic term's non-uniqueness (refs/README.md index entry)"}
+                 :retrieved "refs/millidge2021.pdf (indexed refs/README.md, fetched 2026-11-25)"}}
 
  ;; Exogenous symbols: imported by equations, defined by no equation here.
  ;; :class :stack-defined means the War Machine supplies the content.
@@ -206,6 +218,20 @@
               :removed-by "futon2 0d29c706, Joe's flat-path removal ruling"
               :successor "WIRE-2: per-policy F_pi now reaches selection as :f (cascade-free-energy/policy-free-energy), consumed by select-action-cascades (policy.clj:151-231)"}]}
 }
+  {:id :want-free-energy
+   :latex "G'_\\pi = -\\log \\sum_o Q(o\\mid\\pi)\\,c(o) + \\text{ambiguity}"
+   :formal "wantTerm q w = -log (sum_o q(o) * c(o)); stepG' q a w = wantTerm (push q a) w + ambiguity q a; per-step = total / H"
+   :eq "Tull, Kleiner and St Clere Smithe 2023, Cor. 38 / Prop. 37 (preference surprise); Parr and Friston 2019 (generalised free energy, preferences as the prior over outcomes); Millidge, Tschantz and Buckley 2021 (the epistemic term kept by statement, unchanged)"
+   :defines :G' :node :R5 :class :theory-defined :ref :parr2019gfe
+   :imports [:A :B :q0]
+   :lean "WantFreeEnergy.stepG' / WantFreeEnergy.totalG' / WantFreeEnergy.scoreCascadeCo' / WantFreeEnergy.scoreCascadeCoN' (carriers); WantFreeEnergyWitness chance_nine_in_ten, chance_certain, chance_mix_half, chance_uniform, chance_uniform_climb, b17_noTrace_realised, perStep (transcribed numerals)"
+   :lean-status :closed
+   :lean-at "mathlib4 worktree c14-cascade-outcome, branch c14/cascade-outcome-type (WantFreeEnergy.lean, WantFreeEnergyBenefit.lean, WantFreeEnergyWitness.lean)"
+   :lean-note "G' replaces ONLY the pragmatic (risk) term of CascadeEFE.stepG; ambiguity is kept by statement and novelty is subtracted at the cascade level exactly as CascadeCoApplyGNovelty.scoreCascadeCoN. Agreement on a certain prediction: stepG'_eq_stepG_of_point. Want values in (0,1]; hard wants (0) deferred, so chance is always positive and G' has no inadmissibleRisk refusal (chance_pos)."
+   :readback "holes/labs/wm-contract/runs/G-prime-want-free-energy/clojure-readback.txt (driver holes/labs/wm-contract/want_free_energy_readback.clj; reproduces byte for byte, sha256 8f5dfbef41cda821677a68d1e1c55d646ceabd62c57eb6c91f1406aafd0189d0; rational chances exact, want terms delta 0.0 at 1e-12, agreement with cascade-g/step-g delta 2.2e-16 inside its rational enclosure)"
+   :code "futon2 src/futon2/aif/want_free_energy.clj (ns futon2.aif.want-free-energy: want-effect validation in (0,1], chance, want-term, push, prediction, ambiguity, step-g', total-g', per-step, score-cascade-co', score-cascade-co-n'). PURE, NOT WIRED into the click (requisition E-kimi-task-436 item 1); the readback measures the intended surface against the existing production risk futon2.aif.cascade-g/step-g. Reuses futon2.aif.r1-belief (rungs, climb, update) for the witness cases."
+   :live-consumer nil
+   :note "DECLARED 2026-11-25 (kimi-1, E-kimi-task-436, assigned by Joe via claude-14: an aligned Clojure implementation so that we could just get started running this model, in the well-established way that produces runtime certificates). G' plans by the chance the wants are met: c(o) in (0,1] per outcome, 1 = meets every want clause, not a distribution (PreferenceSurpriseUncertain.rankings_disagree records why the distribution reading misleads below reliability 1). This row CHANGES NO :choices: selection still runs the canonical G; G' is a stated alternative beside it, as the Lean module states the replacement so the two can be compared before anything in the machine changes. Normalisation per Joe 2026-11-25 (sensible): per-step = horizon total / H (WantFreeEnergyWitness.perStep), matching Requirements.GNormalization per-step rates. Requirements.lean and :choices are untouched by this packet."}
   {:id :belief-update
    :latex "\\mu \\leftarrow \\mu + \\alpha\\,\\Pi\\,\\varepsilon" :model :legacy-channel-model :legacy-note "P9 (Joe, 2026-09-16; p4ng 2a7b3f9, PROPOSAL-wm-model-design-2026-09-16.md §P9): one overall categorical model is the War Machine target. This row is a correct statement of its citation for the Gaussian channel-belief model and its Lean binding and re-audit stand, but it is not the WM target; the categorical counterpart is named in :superseded-by." :superseded-by :state-belief-update
    :lean-audit {:date "2026-09-16" :auditor :codex-10 :verdict :diverges
