@@ -84,7 +84,7 @@
    The default weights map that switched this off
    (`war-machine/default-mission-value-weights`) went with the flat ranking
    path that read it (futon2 8c95a293d, 2026-11-25); callers now pass their
-   weights explicitly, and nothing on the click calls this namespace."
+   weights explicitly."
   (:require [clojure.string :as str]
             [futon2.aif.epistemic-value :as epistemic-value]
             [futon2.aif.substrate :as substrate])
