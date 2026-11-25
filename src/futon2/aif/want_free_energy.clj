@@ -159,9 +159,13 @@
             (- (* (double p) (Math/log (double p)))))))
 
 (defn ambiguity
-  "CascadeEFE.ambiguity: sum_s q(s) * entropy(a(s, .)). The SAME ambiguity
-  the canonical G computes (futon2.aif.categorical-ambiguity), kept by
-  statement (Millidge et al. 2021); G' replaces only the risk term."
+  "CascadeEFE.ambiguity: sum_s q(s) * entropy(a(s, .)), the same FORMULA as
+  the canonical G's ambiguity (futon2.aif.cascade-g/step-g, via
+  categorical-ambiguity), kept by statement (Millidge et al. 2021). This is a
+  reference port: it does not go through cascade-g's authority, model-revision
+  and provenance contracts or its rational enclosures, and no test compares
+  it with cascade-g's :ambiguity (claude-14 review, 2026-11-25). The wiring
+  step computes G' inside cascade-g/step-g instead."
   [q a y-support]
   (check-prediction q (into {} (map (fn [x] [x 1]) (keys a))))
   (check-kernel a y-support)
