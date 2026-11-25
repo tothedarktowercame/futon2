@@ -17,6 +17,7 @@
           [["DONE-IN-FACT, widened." :complete]
            ["SUPERSEDED." :inactive] ["DEFERRED / parked 2026-06-10." :inactive]
            ["PARKED" :inactive] ["ARCHIVED" :inactive]
+           ["ABANDONED (WONTFIX) — the Lucy ladder experiment closed" :inactive]
            ["WATCH — not a defect, no action" :not-actionable]
            ["FINDING, not a defect. Do not hotfix." :not-actionable]
            ["DESIGN CONSTRAINT. Blocked on a prior question" :not-actionable]

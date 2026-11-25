@@ -962,7 +962,9 @@
     (proposer-id [_] :mission-enumerator)))
 
 ;; Ticket status table (Joe / claude-20, packet 21033, 2026-09-15):
-;; DONE* -> complete; SUPERSEDED/DEFERRED/PARKED/ARCHIVED -> inactive;
+;; DONE* -> complete; SUPERSEDED/DEFERRED/PARKED/ARCHIVED/ABANDONED -> inactive;
+;; (mission table, Joe 2026-11-13: the Lucy ladder tickets closed as
+;; ABANDONED are inactive, not open work)
 ;; WATCH/FINDING/DESIGN CONSTRAINT or awaiting Joe/Joe's call -> not-actionable;
 ;; PARTIAL/OPEN/STILL-OPEN/SCOPED/DESIGNED/RECLASSIFY and unknown -> live.
 (defn ticket-status-text [lines]
@@ -973,7 +975,7 @@
     (cond
       (re-find #"JOE['’]S CALL|AWAIT[^.]*JOE" s) :not-actionable
       (str/starts-with? s "DONE") :complete
-      (re-find #"^(SUPERSEDED|DEFERRED|PARKED|ARCHIVED)\b" s) :inactive
+      (re-find #"^(SUPERSEDED|DEFERRED|PARKED|ARCHIVED|ABANDONED)\b" s) :inactive
       (re-find #"^(WATCH|FINDING|DESIGN CONSTRAINT)\b" s) :not-actionable
       :else :live)))
 
