@@ -45,23 +45,27 @@
 
  :wm-loop-want
  {:doc "The WM-loop want's six clauses, M-cascade-live-causal.md lines 283-291
-        (\"Wants as sentences\"), as {:clause :source :verdict} data."
+        (\"Wants as sentences\"), as {:clause :source :verdict} data.
+        Verdict vocabulary is the catalogue's (observed / not-yet-observed /
+        no-channel / standing-supported / standing-refuted); a clause not yet
+        checked against its source is :unassessed, never :no-channel, since a
+        named source means a channel exists (claude-14 review, 2026-11-25)."
   :clauses
   [{:clause "every click ends in a selection or a typed stop, none in silence"
     :source "run records"
-    :verdict :no-channel}
+    :verdict :unassessed}
    {:clause "every selection carries its reason and its G"
     :source "the trace"
-    :verdict :no-channel}
+    :verdict :unassessed}
    {:clause "no tie is broken except by G"
     :source "selection records"
-    :verdict :no-channel}
+    :verdict :unassessed}
    {:clause "a stop-the-line halts the loop until it is explained"
     :source "stop records and their explanations"
-    :verdict :channel-to-be-checked}
+    :verdict :unassessed}
    {:clause "R1 is no older than the latest change to its inputs"
     :source "entity events and input hashes"
-    :verdict :channel-to-be-built}
+    :verdict :no-channel}
    {:clause "spend stays within the guard"
     :source "quota records"
-    :verdict :no-channel}]}}
+    :verdict :unassessed}]}}
