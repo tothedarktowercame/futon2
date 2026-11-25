@@ -3,7 +3,8 @@
             [futon2.aif.cascade-coapply-g :as g]
             [futon2.aif.cascade-observation-scoring :as scorer]
             [futon2.aif.cascade-policy :as policy]
-            [futon2.aif.cascade-shape-g :as shape]))
+            [futon2.aif.cascade-shape-g :as shape]
+            [futon2.aif.want-free-energy :as wfe]))
 
 (defn pattern [id needs produces theta]
   (assoc (policy/token-interpretation id {:guard {:needs needs :forbids produces}
@@ -239,3 +240,95 @@
   (is (= :invalid-observation-preference
          (:kind (g/compare-at-horizon {:cascade-belief {#{} 1}} [join]
                                       (assoc (opts 2 {:join counts}) :cascade-spec {:want :bad}))))))
+
+;;; ------------------------------------------------------------------------
+;;; G' (want free energy, E-kimi-task-438). The pragmatic term of the
+;;; canonical co-application G is the want term -log(chance) with C read as
+;;; a want effect; the expected values below are RE-DERIVED from the
+;;; reference port futon2.aif.want-free-energy (chance, want-term), which is
+;;; certified against the Lean witnesses in WantFreeEnergyWitness.lean (see
+;;; holes/labs/wm-contract/runs/G-prime-want-free-energy/clojure-readback.txt).
+;;; Where a fixture's prediction is a point mass, G' equals the old
+;;; risk-based G by stepG'_eq_stepG_of_point, and the test says so.
+
+(deftest gprime-point-predictions-keep-the-old-g
+  ;; The join fixture's thetas are all 1: every prediction is a point mass,
+  ;; so G' == the risk-based G per step (stepG'_eq_stepG_of_point) and no
+  ;; numeric pin in this namespace moves for these fixtures.
+  (let [rs (g/compare-at-horizon {:cascade-belief {#{} 1}} [join] (opts 2 {:join counts}))
+        e (first rs)]
+    (is (vector? rs) (pr-str rs))
+    (is (= :want-free-energy/v1 (:g-law e)))
+    (is (every? (fn [step] (== (:want-term step) (:risk step)))
+                (get-in e [:certificate :steps])))
+    (is (= (:G-efe e) (reduce + (map :g (get-in e [:certificate :steps])))))
+    (is (= (/ (:G-efe e) 2) (:g-per-step e)))))
+
+(deftest gprime-chance-and-want-term-are-the-reference-port's
+  ;; Horizon 1, one pattern with theta 9/10: the terminal prediction is
+  ;; {:focused 9/10 :stop-the-line 1/10} under the ruled C
+  ;; {:focused 11/20 :stop-the-line 1/20 ...}. chance is EXACTLY
+  ;; 9/10*11/20 + 1/10*1/20 = 1/2, the same shape as
+  ;; WantFreeEnergyWitness.chance_nine_in_ten (bern 9/10 under C 9/10:1/10
+  ;; giving 41/50); the expected value here is computed by the reference
+  ;; port's chance/want-term, not by the wiring under test.
+  (let [theta-candidate (candidate :bern {:c (pattern :c #{} #{c} 9/10)} [])
+        want-effect {:focused 11/20 :stop-the-line 1/20}
+        expected-chance (wfe/chance {:focused 9/10 :stop-the-line 1/10} want-effect)
+        expected-want (wfe/want-term {:focused 9/10 :stop-the-line 1/10} want-effect)
+        rs (g/compare-at-horizon {:cascade-belief {#{} 1}} [theta-candidate]
+                                 (opts 1 {:bern {:c [1 1]}}))
+        e (first rs)
+        step (first (get-in e [:certificate :steps]))]
+    (is (vector? rs) (pr-str rs))
+    (is (= 1/2 expected-chance))
+    (is (= 1/2 (:chance step)) "chance is the exact rational sum_o Q(o|pi)*c(o)")
+    (is (close? expected-want (:want-term step)))
+    (let [[lo hi] (:want-term-enclosure step)]
+      (is (<= (double lo) (:want-term step) (double hi))
+          "cascade-g/log-bounds encloses the reported want term"))
+    ;; G' = want + ambiguity(0) - novelty; counts [1 1] give beta-novelty
+    ;; 1/4 at the single pre-step belief {#{} 1}.
+    (is (close? (- expected-want 1/4) (:G-efe e)))
+    (is (close? (:G-efe e) (:g-per-step e)) "H = 1: per-step is the total")
+    ;; The reported risk is computed in the same pass and is NOT the want
+    ;; term for this non-point prediction (KL(q||C) != -log chance here).
+    (is (not (close? (:risk step) (:want-term step))))))
+
+(deftest gprime-hard-want-refuses-never-minus-log-zero
+  ;; Planted bad case: C with 0 mass on a predicted outcome is the deferred
+  ;; hard-want case. The candidate refuses with the existing
+  ;; :inadmissible-risk shape; -log 0 is never produced or ranked.
+  (let [options (assoc-in (opts 1 {:bern {:c [1 1]}})
+                          [:observation-model :class-preference 1]
+                          {:focused 0 :related 1 :unrelated 0 :stop-the-line 0})
+        bad (candidate :bern {:c (pattern :c #{} #{c} 9/10)} [])
+        result (g/compare-at-horizon {:cascade-belief {#{} 1}} [bad] options)]
+    (is (= :inadmissible-risk (get-in result [:candidates 0 :refusal :kind]))
+        (pr-str result))
+    (is (not (contains? result :G-efe)))))
+
+(deftest gprime-ranking-mutant-check-risk-order-disagrees
+  ;; MUTANT CHECK: ranking by the reported :risk instead of :G-efe must FAIL
+  ;; this test. Candidate certain accepts for sure (theta 1): point
+  ;; prediction {:focused 1}, so want = risk = -ln(11/20)
+  ;; (stepG'_eq_stepG_of_point). Candidate bern has theta 9/10: prediction
+  ;; {:focused 9/10 :stop-the-line 1/10}, chance exactly 1/2 (see above).
+  ;; risk(bern) = KL < risk(certain) (spreading towards C lowers KL), while
+  ;; chance(certain) = 11/20 > 1/2 = chance(bern), so G' ranks certain
+  ;; first and the reported-:risk order ranks bern first.
+  (let [certain (candidate :certain {:c (pattern :c #{} #{c} 1)} [])
+        bern (candidate :bern {:c (pattern :c #{} #{c} 9/10)} [])
+        options (opts 1 {:certain {:c [1 1]} :bern {:c [1 1]}})
+        rs (g/compare-at-horizon {:cascade-belief {#{} 1}} [certain bern] options)
+        by-id (into {} (map (juxt :cascade-id identity) rs))
+        risk-of (fn [id] (reduce + (map :risk (get-in by-id [id :certificate :steps]))))
+        want-of (fn [id] (reduce + (map :want-term (get-in by-id [id :certificate :steps]))))]
+    (is (vector? rs) (pr-str rs))
+    (is (< (risk-of :bern) (risk-of :certain))
+        "the mutant (rank on reported :risk) prefers bern")
+    (is (< (want-of :certain) (want-of :bern))
+        "G' prefers certain: its chance the wants are met is higher")
+    (is (= :certain (:cascade-id (first rs))))
+    (is (= 1 (:rank (first rs))))
+    (is (= :want-free-energy/v1 (:g-law (first rs))))))
