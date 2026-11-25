@@ -1,5 +1,5 @@
 G' want free energy -- Clojure readback
-production calls: none wired yet; measured surface is chance, want-term, push, step-g', total-g', per-step, score-cascade-co', score-cascade-co-n'
+production calls: the wiring section runs compare-at-horizon (:g-law :want-free-energy/v1 since E-kimi-task-438); the first section measures the reference-port surface chance, want-term, push, step-g', total-g', per-step, score-cascade-co', score-cascade-co-n'
 agreement measured against the EXISTING production risk: futon2.aif.cascade-g/step-g (CascadeEFE.risk)
 Lean keeps log symbolic; rational chances compare EXACTLY, want terms at tolerance 1e-12
 references transcribed from WantFreeEnergyWitness (see header)
@@ -15,4 +15,10 @@ want-term uniform-climb actual 0.56211891815354130 expected 0.56211891815354130 
 agreement (point prediction, rung candidate): g' 1.6094379124341003 canonical G enclosure [1.6094379124341000 1.6094379124341000] delta-from-midpoint 2.2204460492503130e-16
 score-cascade-co' two-step total 1.0470678242305730 per-step actual 0.52353391211528650 expected 0.52353391211528650 delta 0.0000000000000000
 score-cascade-co-n' novelty 1/4: g'-novelty actual 0.79706782423057310 expected 0.79706782423057310 delta 0.0000000000000000
+wiring (E-kimi-task-438): the cases below run the PRODUCTION futon2.aif.cascade-coapply-g/compare-at-horizon, both lanes' law (:g-law :want-free-energy/v1)
+wiring chance nine-in-ten (bern 9/10 under C 9/10:1/10) actual 41/50 expected 41/50 exact=true
+wiring chance certain (point prediction) actual 9/10 expected 9/10 exact=true
+wiring agreement (point prediction, stepG'_eq_stepG_of_point): :G-efe -0.14463948434217372 old risk-based G -0.14463948434217366 delta -5.5511151231257830e-17
+wiring non-point contrast (bern): :G-efe -0.051549061276161684 old risk-based G -0.25000000000000000 delta 0.19845093872383832 (differs: not a point mass)
+wiring g-law :want-free-energy/v1 g-per-step -0.14463948434217372
 VERDICT: every measured case matches its transcribed Lean reference.

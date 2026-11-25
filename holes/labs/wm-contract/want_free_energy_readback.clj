@@ -20,10 +20,10 @@
 ;; states the chance exactly (a rational) and keeps log symbolic; this readback
 ;; evaluates only the log (Math/log) and compares want terms at 1e-12.
 ;;
-;; WHICH CALLS ARE PRODUCTION: none yet -- this namespace
-;; (futon2.aif.want-free-energy) is pure and not wired into the click
-;; (requisition item 1: "no wiring into the click in this packet"). The calls
-;; measured are the intended production surface: chance, want-term, push,
+;; WHICH CALLS ARE PRODUCTION: since E-kimi-task-438 the production
+;; comparison (futon2.aif.cascade-coapply-g/compare-at-horizon, both lanes)
+;; scores by G' -- the wiring section below runs it. The first section still
+;; measures the reference-port surface itself: chance, want-term, push,
 ;; step-g', total-g', per-step, score-cascade-co', score-cascade-co-n'. The
 ;; agreement case measures G' against the EXISTING production risk function
 ;; (futon2.aif.cascade-g/step-g, the CascadeEFE.risk behind the canonical
@@ -33,7 +33,10 @@
 ;; stepG'_eq_stepG_of_point requires of C).
 (require '[clojure.java.io :as io]
          '[clojure.string :as str]
+         '[futon2.aif.cascade-coapply-g :as coapply]
          '[futon2.aif.cascade-g :as canonical-g]
+         '[futon2.aif.cascade-policy :as policy]
+         '[futon2.aif.cascade-shape-g :as shape]
          '[futon2.aif.r1-belief :as r1]
          '[futon2.aif.want-free-energy :as wfe])
 
@@ -111,9 +114,66 @@
 (def scored-n (wfe/score-cascade-co-n' candidate 1/4))
 (def per-step-expected (/ (:g' scored) 2))
 
+;;; ## Wiring section (E-kimi-task-438): G' inside compare-at-horizon
+;;
+;; The canonical co-application G now scores by the want term on BOTH lanes
+;; (decision 4: the lane's C read as a want effect). The fixtures below run
+;; the production entry point futon2.aif.cascade-coapply-g/compare-at-horizon
+;; at horizon 1 over one-pattern candidates; the expected chances are the
+;; transcribed WantFreeEnergyWitness rationals above.
+;;
+;;   wiring-nine-in-ten   bern(9/10) under C 9/10:1/10   -> chance 41/50
+;;   wiring-certain       point prediction under the same C -> chance 9/10
+;;   wiring-agreement     on the point prediction, the wired :G-efe equals
+;;                        the old risk-based G for the same entry
+;;                        (stepG'_eq_stepG_of_point), reported side by side.
+
+(def wiring-token ["T" :c])
+(defn- wiring-pattern [theta]
+  (assoc (policy/token-interpretation :c {:guard {:needs #{} :forbids #{wiring-token}}
+                                          :produces #{wiring-token}})
+         :theta theta))
+(defn- wiring-candidate [id theta]
+  {:kind :cascade-candidate :id id :target "T"
+   :precedence {:co-apply {:units [:c] :descent []
+                           :patterns {:c (wiring-pattern theta)}}}})
+(def wiring-c {:focused 9/10 :stop-the-line 1/10})
+(def wiring-model
+  (shape/class-emission-model "T" #{wiring-token} #{wiring-token} 1 :focused
+    {:status :synthetic :source "G' readback wiring fixture"}
+    wiring-c))
+(defn- wiring-opts [id]
+  {:horizon-steps 1 :pattern-counts {id {:c [1 1]}}
+   :observation-model wiring-model
+   :prediction-context {:occurrence-id "gprime-readback" :tau 1}
+   :cascade-spec {:want #{wiring-token} :evidence #{} :zeroed #{}}})
+(defn- wire [id theta]
+  (let [c (wiring-candidate id theta)
+        r (coapply/compare-at-horizon {:cascade-belief {#{} 1}} [c] (wiring-opts id))]
+    (when-not (and (vector? r) (= :scored (:status (first r))))
+      (throw (ex-info "wiring fixture refused" {:result r})))
+    (first r)))
+
+(def wired-bern (wire :wiring-bern 9/10))
+(def wired-certain (wire :wiring-certain 1))
+(def wiring-bern-chance (get-in wired-bern [:certificate :steps 0 :chance]))
+(def wiring-certain-chance (get-in wired-certain [:certificate :steps 0 :chance]))
+;; The old risk-based G for the same entry, recomputed from the REPORTED
+;; fields (:risk per step, :g-terms :risk) and the novelty total: risk +
+;; ambiguity - novelty. This is what compare-at-horizon ranked on before
+;; E-kimi-task-438.
+(defn- legacy-risk-g [entry]
+  (let [steps (get-in entry [:certificate :steps])
+        novelty (get-in entry [:certificate :parameter-novelty :total])]
+    (- (+ (reduce + 0.0 (map :risk steps))
+          (reduce + 0.0 (map :ambiguity steps)))
+       (double novelty))))
+(def wiring-certain-legacy-g (legacy-risk-g wired-certain))
+(def wiring-bern-legacy-g (legacy-risk-g wired-bern))
+
 (def lines
   ["G' want free energy -- Clojure readback"
-   "production calls: none wired yet; measured surface is chance, want-term, push, step-g', total-g', per-step, score-cascade-co', score-cascade-co-n'"
+   "production calls: the wiring section runs compare-at-horizon (:g-law :want-free-energy/v1 since E-kimi-task-438); the first section measures the reference-port surface chance, want-term, push, step-g', total-g', per-step, score-cascade-co', score-cascade-co-n'"
    "agreement measured against the EXISTING production risk: futon2.aif.cascade-g/step-g (CascadeEFE.risk)"
    "Lean keeps log symbolic; rational chances compare EXACTLY, want terms at tolerance 1e-12"
    "references transcribed from WantFreeEnergyWitness (see header)"
@@ -144,6 +204,19 @@
    (format "score-cascade-co-n' novelty 1/4: g'-novelty actual %.17g expected %.17g delta %.17g"
            (:g'-novelty scored-n) (- (:g' scored) 0.25)
            (delta (:g'-novelty scored-n) (- (:g' scored) 0.25)))
+   "wiring (E-kimi-task-438): the cases below run the PRODUCTION futon2.aif.cascade-coapply-g/compare-at-horizon, both lanes' law (:g-law :want-free-energy/v1)"
+   (format "wiring chance nine-in-ten (bern 9/10 under C 9/10:1/10) actual %s expected %s exact=%s"
+           wiring-bern-chance nine-in-ten-expected (== wiring-bern-chance nine-in-ten-expected))
+   (format "wiring chance certain (point prediction) actual %s expected %s exact=%s"
+           wiring-certain-chance certain-expected (== wiring-certain-chance certain-expected))
+   (format "wiring agreement (point prediction, stepG'_eq_stepG_of_point): :G-efe %.17g old risk-based G %.17g delta %.17g"
+           (:G-efe wired-certain) wiring-certain-legacy-g
+           (delta (:G-efe wired-certain) wiring-certain-legacy-g))
+   (format "wiring non-point contrast (bern): :G-efe %.17g old risk-based G %.17g delta %.17g (differs: not a point mass)"
+           (:G-efe wired-bern) wiring-bern-legacy-g
+           (delta (:G-efe wired-bern) wiring-bern-legacy-g))
+   (format "wiring g-law %s g-per-step %.17g"
+           (:g-law wired-certain) (:g-per-step wired-certain))
    (if (and (== nine-in-ten nine-in-ten-expected)
             (== certain certain-expected)
             (== mix-half mix-half-expected)
@@ -155,7 +228,11 @@
             (close? wt-uniform-climb wt-uniform-climb-expected)
             (close? agreement-g' agreement-mid)
             (close? (:per-step scored) per-step-expected)
-            (close? (:g'-novelty scored-n) (- (:g' scored) 0.25)))
+            (close? (:g'-novelty scored-n) (- (:g' scored) 0.25))
+            (== wiring-bern-chance nine-in-ten-expected)
+            (== wiring-certain-chance certain-expected)
+            (close? (:G-efe wired-certain) wiring-certain-legacy-g)
+            (not (close? (:G-efe wired-bern) wiring-bern-legacy-g)))
      "VERDICT: every measured case matches its transcribed Lean reference."
      "VERDICT: MISMATCH.")])
 
