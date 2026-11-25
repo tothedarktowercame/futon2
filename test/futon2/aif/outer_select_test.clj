@@ -571,7 +571,10 @@
   parameters, choice inputs and relation receipts, not cascades. Adding a key
   name here is the deliberate claim that no cascade-replay path needs it."
   #{"prediction-digest" "parameters-digest" "choice-input-digest"
-    "receipt-digest" "relation-receipt-digest" "stop-digest"})
+    "receipt-digest" "relation-receipt-digest" "stop-digest"
+    ;; The shadow's prediction digests (selection-shared-prediction): they
+    ;; identify shared-scorer belief trajectories, not cascades.
+    "shared-prediction-digest" "stopping-shared-prediction-digest"})
 
 (deftest every-cascade-identity-digest-pin-is-replay-recomputable
   ;; WM hardening package 5 (H-wm-ladder-lucy-handoff-2026-11-13 section 4.5):
