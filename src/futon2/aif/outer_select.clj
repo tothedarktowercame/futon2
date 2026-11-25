@@ -389,7 +389,9 @@
   *r1-of*)."
   [makeup]
   (or (:r1-of makeup) *r1-of*
-      (let [f (try (requiring-resolve 'futon3c.cascade.live-r1/item-r1)
+      ;; requiring-resolve returns a Var; deref it (a Var is not fn?, so
+      ;; testing the Var itself would refuse every live click).
+      (let [f (try (some-> (requiring-resolve 'futon3c.cascade.live-r1/item-r1) deref)
                    (catch Throwable _ nil))]
         (when-not (fn? f)
           (refuse! :r1-unavailable

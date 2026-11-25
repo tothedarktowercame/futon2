@@ -135,3 +135,13 @@
     (let [r1 (#'futon2.aif.selection-canonical-g/r1-belief
               [:p] (constantly {:status :linked :below 0}) #{[:p :ready]})]
       (is (= {#{[:p :ready]} 1} (:belief r1))))))
+
+(deftest selection-r1-of-resolves-a-var
+  (testing "claude-14 review: the live path resolves item-r1 through requiring-resolve, which
+  returns a Var; selection-r1-of must hand back the function, not refuse :r1-unavailable"
+    (let [item-r1 (fn [_] {:status :unlinked})]
+      (with-redefs [requiring-resolve (fn [_] (intern (create-ns 'c14.fake-live-r1) 'item-r1 item-r1))]
+        (binding [futon2.aif.outer-select/*r1-of* nil]
+          (let [f (futon2.aif.outer-select/selection-r1-of {})]
+            (is (fn? f))
+            (is (= {:status :unlinked} (f "M-x")))))))))
