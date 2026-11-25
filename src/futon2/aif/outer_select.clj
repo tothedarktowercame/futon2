@@ -374,6 +374,28 @@
            ;; digest instead pins a value no replay can reproduce.
            (assoc chained :digest (menu/cascade-digest chained))))))
 
+(def ^:dynamic *r1-of*
+  "Test seam: the r1-of for selections whose makeup carries none, as
+  selection-canonical-g/*extra-interpretations* is for interpretations.
+  Production leaves it nil (the futon3c item-r1 resolve below runs)."
+  nil)
+
+(defn selection-r1-of
+  "The r1-of fn selection_canonical_g/score requires (SelectionR1, E4):
+  futon3c.cascade.live-r1/item-r1, reached with requiring-resolve as
+  full_loop_runtime already reaches futon3c fns. When futon3c is not on the
+  classpath the selection refuses typed :r1-unavailable -- never a silent
+  point-mass fallback. A makeup may pass :r1-of explicitly (tests bind
+  *r1-of*)."
+  [makeup]
+  (or (:r1-of makeup) *r1-of*
+      (let [f (try (requiring-resolve 'futon3c.cascade.live-r1/item-r1)
+                   (catch Throwable _ nil))]
+        (when-not (fn? f)
+          (refuse! :r1-unavailable
+                   {:reason "futon3c.cascade.live-r1/item-r1 is not resolvable and no :r1-of was supplied"}))
+        f)))
+
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection.
@@ -454,7 +476,8 @@
                                     :when (and t (not= :no-pick t))]
                                 [t (value-of (:facts observation) t)]))
                      (merge selection-g/interpretations
-                            (:task-selection-interpretations makeup)))
+                            (:task-selection-interpretations makeup))
+                     (selection-r1-of makeup))
           canonical-terms (fn [e] (let [t (get-in e [:certificate :g-terms])]
                                     {:risk (:risk t) :ambiguity (:ambiguity t)
                                      :novelty (:expected-information-gain t)}))
@@ -499,7 +522,10 @@
                     :named-later-items (:named-later-items canonical)
                     :forbidden forbidden-evidence
                     :cascade-scores scores :cascade-picks (mapv :pick cascades)
-                    :cascade-pick-relations legacy-relations}
+                    :cascade-pick-relations legacy-relations
+                    ;; SelectionR1 (E4): what selection read for each pick, so
+                    ;; it shows at [:after :selection-world] in the stepper.
+                    :r1 (:r1 canonical)}
                      field-facts (assoc :field-facts field-facts
                                         :giraffe/pass-sha256 (:giraffe/pass-sha256 observation)
                                         :default-reach-ignored (:default-reach-ignored observation)))

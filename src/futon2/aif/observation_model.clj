@@ -224,7 +224,7 @@
    of its target's acceptance is :stop-the-line per Joe's ruling
    (unmeasured/not reached). One target per candidate: the emission is
    deterministic and ambiguity is genuinely 0."
-  [{:keys [acceptance target-class]} state target terminal?]
+  [{:keys [acceptance target-class] :as model} state target terminal?]
   (if-not terminal?
     {:ending/not-yet-evaluated 1}
     (let [own (some (fn [token] (when (and (= target (first token))
@@ -236,14 +236,25 @@
       ;; case, no averaging, no uniform, no exclusion. The refusal carries
       ;; the possible terminal costs under Joe's C so the certificate states
       ;; them; selection proceeds only over candidates that have a scalar.
+      ;; SelectionR1 (E4): a model carrying :benefit-below-token (task
+      ;; selection only) ends the pick in its class only while the pick's
+      ;; linked benefit is below CAPABILITY; without the token the ending is
+      ;; :unrelated. Reading-policy models carry no such key and are unchanged.
       (let [c (and own (contains? target-class target) (get target-class target))]
-        (if (= :unknown c)
+        (cond
+          (= :unknown c)
           (refuse! :class-unknown-no-scalar-g
                    {:target target
                     :possible-costs {:focused (- (Math/log 0.55))
                                      :related (- (Math/log 0.35))
                                      :unrelated (- (Math/log 0.05))}})
-          (if c {c 1} {:stop-the-line 1}))))))
+
+          (and c (contains? model :benefit-below-token)
+               (not (contains? state (:benefit-below-token model))))
+          {:unrelated 1}
+
+          c {c 1}
+          :else {:stop-the-line 1})))))
 
 (defn- class-predictive
   [{:keys [horizon] :as model} belief tau target]

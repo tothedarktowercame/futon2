@@ -149,16 +149,91 @@
   [fired]
   (into (sorted-map) (map (fn [[p n]] [(str p) [(inc n) 1]])) (frequencies (map str fired))))
 
+(def max-r1-joint
+  "Most linked picks in one menu before the R1 joint belief refuses
+  (:r1-joint-too-large). 2^10 states per candidate is the enumeration bound;
+  we never truncate and never approximate (Joe 2026-11-25, E4)."
+  10)
+
+(defn benefit-below-token
+  "SelectionR1's token: the pick's linked benefit is below CAPABILITY. No
+  task-selection pattern consumes, forbids or produces it
+  (interpret_ignores_benefitBelow), so the trajectory carries its mass
+  unchanged."
+  [pick]
+  [pick :benefit-below])
+
+(defn- r1-belief
+  "The SelectionR1 initial belief over token sets. R1-OF maps a pick to
+  futon3c.cascade.live-r1/item-r1's result:
+
+    {:status :linked :below q ...}  -- mass q on the pick's fact tokens WITH
+                                       [pick :benefit-below], 1-q without
+    {:status :unlinked}             -- the token is present deterministically
+                                       (q = 1: exactly today's point mass)
+    {:status :refused :reason ..}   -- refuses selection, typed :r1-refused
+
+  The joint is the product over the LINKED picks' two-point mixtures (the
+  Lean states the mixture per pick; benefits are independent under R1).
+  Zero-mass components are dropped, so q = 1 is byte-identical to the
+  pre-E4 point mass (predEnding_class_q_one). Refuses :r1-joint-too-large
+  with the count over max-r1-joint linked picks. Returns
+  {:belief {state mass} :r1 {pick sanitised-item-r1-result}}."
+  [picks r1-of base-state]
+  (let [r1-by-pick (into {} (map (fn [p] [p (r1-of p)])) picks)
+        _ (doseq [[p r] r1-by-pick]
+            (when (= :refused (:status r))
+              (throw (ex-info "R1 refused for a menu pick"
+                              {:status :refused :kind :r1-refused :pick p
+                               :detail (:reason r)})))
+            (when-not (contains? #{:linked :unlinked} (:status r))
+              (throw (ex-info "R1 result for a menu pick is neither linked, unlinked nor refused"
+                              {:status :refused :kind :r1-refused :pick p
+                               :detail (:status r)}))))
+        linked (vec (sort-by pr-str (filter #(= :linked (:status (r1-by-pick %))) picks)))
+        _ (when (< max-r1-joint (count linked))
+            (throw (ex-info "R1 joint belief over linked picks is too large to enumerate"
+                            {:status :refused :kind :r1-joint-too-large
+                             :count (count linked) :bound max-r1-joint})))
+        _ (doseq [p linked]
+            (let [q (:below (r1-by-pick p))]
+              (when-not (and (number? q) (<= 0 q 1))
+                (throw (ex-info "R1 :below must be a number in [0, 1]"
+                                {:status :refused :kind :r1-refused :pick p
+                                 :detail q})))))
+        base (into base-state (map benefit-below-token)
+                   (filter #(= :unlinked (:status (r1-by-pick %))) picks))]
+    {:belief
+     (reduce (fn [belief p]
+               (let [q (:below (r1-by-pick p))]
+                 (into {}
+                       (mapcat (fn [[state mass]]
+                                 (cond-> [[(conj state (benefit-below-token p)) (*' mass q)]]
+                                   (pos? (-' 1 q))
+                                   (conj [state (*' mass (-' 1 q))]))))
+                       belief)))
+             {base 1}
+             linked)
+     :r1 (into {} (map (fn [[p r]]
+                         [p (select-keys r [:status :benefits :below :log-hash :calibration])]))
+               r1-by-pick)}))
+
 (defn score
   "Canonical G for every menu cascade and for stopping.
   ENTRIES: [{:id :patterns :pick :relation-class}]; FACTS: target -> fact map.
   INTERPS defaults to the library's executable patterns; a makeup may add its own
   (fixtures state their synthetic patterns' interpretations explicitly).
   An entry may carry :picks, an ordered chain whose first element is :pick.
+  R1-OF (SelectionR1, E4) maps each pick to its item-r1 result. The 1/2-arity
+  forms keep the pre-E4 point mass (every pick unlinked) for direct callers;
+  outer-select never uses them -- it resolves futon3c.cascade.live-r1/item-r1
+  or refuses :r1-unavailable, and tests pass an explicit fn.
   Returns {:by-id {id entry} :stopping entry :horizon h :fired {id names}
-  :fired-units {id units} :refusal r}."
+  :fired-units {id units} :r1 {pick result} :refusal r}."
   ([entries facts] (score entries facts interpretations))
-  ([entries facts interps]
+  ([entries facts interps] (score entries facts interps
+                                 (constantly {:status :unlinked})))
+  ([entries facts interps r1-of]
   (let [stop-id ::stopping
         all (conj (vec entries) {:id stop-id :patterns [] :pick :no-pick})
         interps (merge interps *extra-interpretations*)
@@ -170,9 +245,15 @@
                                                  (picks-of entry)))
                                           entries))
         state (into #{} (mapcat #(fact-tokens % (get facts %) (get relation-by-pick %))) picks)
+        ;; SelectionR1 (E4): the initial belief is the product of the linked
+        ;; picks' below-CAPABILITY mixtures; unlinked picks keep the point
+        ;; mass. No pattern touches the benefit token, so fired-unit
+        ;; computation stays on the deterministic base state.
+        {:keys [belief r1]} (r1-belief picks r1-of state)
         h (max 1 (min scorer/max-horizon
                       (reduce max 1 (map #(count (get-in % [:precedence :co-apply :units])) cands))))
         universe (set/union state #{stop-acceptance}
+                            (into #{} (map benefit-below-token) picks)
                             ;; every pick's acceptance, even when no pattern of its
                             ;; cascade produces it (the channel requires acceptance in U)
                             (into #{} (map #(vector % :can-begin)) picks)
@@ -184,9 +265,13 @@
                     (if (or (nil? pick) (= :no-pick pick))
                       [id (shape/class-emission-model :no-pick universe #{stop-acceptance} h :unrelated
                                                       {:status :synthetic :source "selection stopping: the empty policy observes stop-the-line"})]
-                      [id (shape/class-emission-model pick universe #{[pick :can-begin]} h
-                                                      (get class-of-relation relation-class :unknown)
-                                                      {:status :synthetic :source "selection class route: pick class once can-begin holds (Joe 2026-11-13)"})]))
+                      [id (assoc (shape/class-emission-model pick universe #{[pick :can-begin]} h
+                                                             (get class-of-relation relation-class :unknown)
+                                                             {:status :synthetic :source "selection class route: pick class once can-begin holds (Joe 2026-11-13)"})
+                                 ;; SelectionR1 (E4): the pick's class counts
+                                 ;; as its ending only while its linked
+                                 ;; benefit is below CAPABILITY.
+                                 :benefit-below-token (benefit-below-token pick))]))
         schedule (into {} (for [tau (range 1 (inc h))]
                             [tau (if (= tau h) shape/terminal-class-preference {:ending/not-yet-evaluated 1})]))
         fired-of (into {} (map (fn [c] [(:id c) (set (fired-units c state h))])) cands)
@@ -214,7 +299,7 @@
               :authorized-class-preference schedule
               :require-ruled-class-kernel? true
               :prediction-context {:occurrence-id [:selection-comparison (mapv :id all)] :tau h}}
-        results (canonical/compare-at-horizon {:cascade-belief {state 1}} cands opts)
+        results (canonical/compare-at-horizon {:cascade-belief belief} cands opts)
         rows (if (vector? results) results (:candidates results))
         by-id (into {} (map (juxt :cascade-id identity)) rows)]
     {:by-id (dissoc by-id stop-id) :stopping (get by-id stop-id) :horizon h
@@ -223,4 +308,5 @@
                                      picks))
      :fired (into {} (map (fn [c] [(:id c) (fired-patterns c state h)])) cands)
      :fired-units (into {} (map (fn [c] [(:id c) (fired-units c state h)])) cands)
+     :r1 r1
      :refusal (when-not (vector? results) results)})))
