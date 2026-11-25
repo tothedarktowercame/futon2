@@ -111,14 +111,26 @@
     (is (= (:G-efe (first rs)) (:G-efe (first impossible))))
     (is (= {:status :not-requested :reason :prediction-only-score} (:inference (first rs))))
     (is (not (contains? (first rs) :posterior)))
-    (is (not (contains? (first rs) :f)))))
+    ;; 980b78939 (2026-10-29, "Retain class F absence and impossibility
+    ;; outcomes") deliberately retains the :f key; under prediction-only
+    ;; scoring its value is nil. The pre-980b78939 expectation asserted the
+    ;; key was absent.
+    (is (nil? (:f (first rs))))))
 
 (deftest legacy-class-conditioning-remains-unchanged
-  (let [state {:cascade-belief {#{} 1}} options (opts 2 {:join counts})
+  ;; 0be247a91 (2026-10-29, "Supply reading-policy class free energy") made
+  ;; the class-emission :condition query require an explicit
+  ;; :class-free-energy history in the prediction context (empty retained
+  ;; history computes F = 0.0, as in class-observation-scoring-test's
+  ;; empty-retained-history-closes-q7-f-path); this fixture supplies it.
+  (let [state {:cascade-belief {#{} 1}}
+        options (assoc-in (opts 2 {:join counts})
+                          [:prediction-context :class-free-energy]
+                          {:policy-key :test-policy :window 0 :sources []})
         missing (scorer/rank-cascade-actions state [join] (dissoc options :observation))
         matched (scorer/rank-cascade-actions state [join] options)]
-    (is (vector? missing))
-    (is (= :not-supplied (get-in missing [0 :f :status])))
+    (is (vector? missing) (pr-str missing))
+    (is (= :computed (get-in missing [0 :f :status])))
     (is (vector? matched) (pr-str matched))
     (is (= :computed (get-in matched [0 :inference :status])))
     (is (contains? (first matched) :posterior))))

@@ -1,5 +1,6 @@
 (ns futon2.aif.wm.family-selection-canonical-g-test
   (:require [clojure.test :refer [deftest is use-fixtures]]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.policy :as policy]
             [futon2.aif.q4-preference :as q4]
@@ -7,18 +8,39 @@
             [futon2.aif.cascade-shape-g :as shape]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.reading-policy-preference :as pref]
+            [futon2.aif.reading-policy-class-free-energy :as class-f]
             [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.wm.family-canonical-g :as canonical-g]
             [futon2.aif.wm.cascade-decision :as decision]
             [futon2.aif.wm.family-selection :as sut]))
 
 (defn fixture [f]
-  (let [root (.toFile (java.nio.file.Files/createTempDirectory "canonical-g-live-" (make-array java.nio.file.attribute.FileAttribute 0)))]
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory "canonical-g-live-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        ;; a8a4caec6's class history index: the family lane's class F reads
+        ;; the run-record directory declared by wm/reading-policy-class-f-v1.edn
+        ;; under the (per-JVM, shared) test data root. An empty index over an
+        ;; empty directory is :complete with empty retained history (F = 0.0),
+        ;; as class-observation-scoring-test's
+        ;; empty-retained-history-closes-q7-f-path pins. Without it the index
+        ;; is :history-index-absent and the family refuses (observed when this
+        ;; namespace runs alone; full-suite runs previously created the index
+        ;; as a side effect of other namespaces). The file is removed again
+        ;; when this fixture created it, so other namespaces see the same
+        ;; environment with or without this namespace.
+        declaration (-> "wm/reading-policy-class-f-v1.edn" io/resource slurp edn/read-string)
+        history-dir (class-f/declared-history-directory!
+                     (:run-record-directory declaration))
+        index (io/file history-dir "reading-policy-class-history-index.ednl")
+        preexisting? (.isFile index)]
     (try
+      (.mkdirs history-dir)
+      (when-not preexisting? (spit index ""))
       (with-redefs [ledger/default-root (.getPath root)
                     policy/select-action-cascades (fn [ranked _] {:action (:action (first ranked))})]
         (f))
-      (finally (doseq [file (reverse (file-seq root))] (io/delete-file file))))))
+      (finally
+        (when-not preexisting? (io/delete-file index true))
+        (doseq [file (reverse (file-seq root))] (io/delete-file file))))))
 (use-fixtures :each fixture)
 
 (defn family [target patterns]
