@@ -24,6 +24,7 @@
   (:require [clojure.set :as set]
             [futon2.aif.reading-policy-class-free-energy :as class-f]
             [clojure.string :as str]
+            [futon2.aif.cascade-g :as cascade-g]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.matched-observation-evidence :as evidence]))
 
@@ -258,6 +259,26 @@
       (refuse! :invalid-class-preference {:tau tau :preference pref}))
     pref))
 
+(defn- ->exact-rational
+  "The exact rational a finite number represents (doubles rationalize to
+   their exact binary value); anything else is refused, never rounded."
+  [x]
+  (cond
+    (or (integer? x) (ratio? x)) x
+    (and (number? x) (Double/isFinite (double x))) (rationalize x)
+    :else (refuse! :invalid-chance-input {:value x})))
+
+(defn- want-chance
+  "WantFreeEnergy.chance on this path: the lane's C mass READ AS A WANT
+   EFFECT, chance(q, c) = sum_o q(o) * c(o), exact (rational). c(o) = 0 on a
+   predicted outcome is the deferred hard-want case: chance loses that mass
+   (the caller's :infinite-risk check refuses the candidate; -log 0 is never
+   ranked)."
+  [prediction pref]
+  (reduce +' 0 (for [[o p] prediction
+                     :when (pos? p)]
+                 (*' (->exact-rational p) (->exact-rational (get pref o 0))))))
+
 (defn- class-preference!
   "Class preferences are keyed by class keyword, not token subset, and must
    be a NORMALISED distribution (handoff A: a total inside [0,1] -- including
@@ -304,11 +325,25 @@
               tau (or tau (:horizon model))
               pref (class-preference! model (class-preference-for model tau))
               prediction (class-predictive model belief tau target)
-              risk (m/outcome-risk (ordered prediction) pref)]
+              risk (m/outcome-risk (ordered prediction) pref)
+              ;; G' (want free energy): the lane's C read as a want effect.
+              ;; chance is EXACT (rational); the want term is -log chance as
+              ;; a double, exactly as risk is a double today (decision 1,
+              ;; E-kimi-task-438). The rational enclosure of the want term is
+              ;; recorded for audit; ranking uses the double, unchanged.
+              chance (want-chance prediction pref)
+              want-term (if (pos? chance)
+                          (- (Math/log (double chance)))
+                          ##Inf)
+              want-term-enclosure (when (pos? chance)
+                                    (let [[lo hi] (cascade-g/log-bounds chance)]
+                                      [(-' hi) (-' lo)]))]
           ;; Deterministic emission: ambiguity is exactly 0 at every step;
           ;; before the horizon the single :ending/not-yet-evaluated symbol
           ;; against preference 1 gives risk exactly 0.
           {:prediction prediction :risk risk :ambiguity 0.0
+           :chance chance :want-term want-term
+           :want-term-enclosure want-term-enclosure
            :g-evaluation :class-emission
            :tau tau
            :g (cond (= :infinite risk) ##Inf

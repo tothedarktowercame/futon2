@@ -131,9 +131,18 @@
                                (get-in components [:selected-decision :terms])))
       :normalization-not-bound-to-g-terms
       (not (and (finite? g) (every? finite? (vals bound))
-                (<= (Math/abs (- (double g) (- (+ (:risk bound) (:ambiguity bound))
-                                               (:information-gain bound))))
-                    pref/normalization-tolerance)))
+                ;; G' (want free energy, E-kimi-task-438): when the receipt
+                ;; declares a want term, the compared G is
+                ;; want-term + ambiguity - information-gain; otherwise the
+                ;; legacy risk composition. The want term travels as a
+                ;; sibling of :terms/:raw (those round-trip through
+                ;; normalize-g-terms exactly).
+                (let [pragmatic (if (number? (:want-term norm))
+                                  (:want-term norm)
+                                  (:risk bound))]
+                  (<= (Math/abs (- (double g) (- (+ pragmatic (:ambiguity bound))
+                                                 (:information-gain bound))))
+                      pref/normalization-tolerance))))
       :normalization-not-bound-to-g-terms
       ;; a recorded finite term must be the normalized one
       (some (fn [[t v]] (and (finite? v) (not= v (get bound t)))) terms)

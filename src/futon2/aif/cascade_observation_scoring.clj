@@ -228,6 +228,17 @@
                                                    :context prediction-context}))
         raw-risk (reduce + 0.0 (map :risk steps))
         raw-ambiguity (reduce + 0.0 (map :ambiguity steps))
+        ;; G' (want free energy, E-kimi-task-438 decision 2): under
+        ;; :g-law :want-free-energy/v1 the pragmatic term is the want term
+        ;; (-log chance) summed over steps; risk stays computed in the same
+        ;; pass and is REPORTED, never ranked on. One code path.
+        want-law? (= :want-free-energy/v1 (:g-law opts))
+        raw-want (when want-law?
+                   (if (every? #(contains? % :want-term) steps)
+                     (reduce + 0.0 (map :want-term steps))
+                     (throw (ex-info "want free energy requires per-step want terms"
+                                     {:status :missing :kind :want-term-not-computed
+                                      :candidate (:id candidate)}))))
         raw-information (if (= :beta-pattern (:parameter-information-mode opts))
                           (candidate-information-gain candidate) 0.0)
         normalize? (= :per-step-capacity-and-pattern (:g-normalization opts))
@@ -239,7 +250,11 @@
         {:keys [risk ambiguity information-gain]}
         (normalize-g-terms declaration {:risk raw-risk :ambiguity raw-ambiguity
                                         :information-gain raw-information})
-        g (- (+ risk ambiguity) information-gain)
+        g (if want-law?
+            ;; The canonical path declares :raw-cumulative, so the want term
+            ;; passes through unnormalized exactly as risk does.
+            (- (+ raw-want ambiguity) information-gain)
+            (- (+ risk ambiguity) information-gain))
         entry {:action candidate :cascade true :cascade-id (:id candidate)
                :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
                :observation-model observation-model
@@ -273,18 +288,36 @@
                                                          :distribution (get-in preference [(:tau step) :distribution])}) steps)}
                              :c-source (or (get-in opts [:cascade-spec :c])
                                            {:absent :no-c-source-in-cascade-spec})
-                             :g-terms {:risk risk :ambiguity ambiguity
-                                       :expected-information-gain information-gain
-                                       :combination :risk-plus-ambiguity-minus-information-gain
-                                       :normalization-declaration declaration
-                                       :normalization (if normalize?
-                                                        {:risk :per-horizon-step-and-log-outcome-support
-                                                         :ambiguity :per-horizon-step
-                                                         :information :per-distinct-pattern}
-                                                        :none)
-                                       :raw {:risk raw-risk :ambiguity raw-ambiguity
-                                             :expected-information-gain raw-information}
-                                       :units :nats}
+                             :g-terms (cond->
+                                       {:risk risk :ambiguity ambiguity
+                                        :expected-information-gain information-gain
+                                        :combination (if want-law?
+                                                       :want-term-plus-ambiguity-minus-information-gain
+                                                       :risk-plus-ambiguity-minus-information-gain)
+                                        :normalization-declaration declaration
+                                        :normalization (if normalize?
+                                                         {:risk :per-horizon-step-and-log-outcome-support
+                                                          :ambiguity :per-horizon-step
+                                                          :information :per-distinct-pattern}
+                                                         :none)
+                                        :raw {:risk raw-risk :ambiguity raw-ambiguity
+                                              ;; :raw must stay exactly the
+                                              ;; three normalize-g-terms
+                                              ;; inputs: q4-preference
+                                              ;; recomputes the terms from it
+                                              ;; (recompute-equality). The
+                                              ;; want term is recorded
+                                              ;; alongside, never inside.
+                                              :expected-information-gain raw-information}
+                                        :units :nats}
+                                        want-law?
+                                        (assoc :g-law :want-free-energy/v1
+                                               :want-term raw-want
+                                               :want {:law :want-free-energy/v1
+                                                      :lean "WantFreeEnergy.wantTerm"
+                                                      :chance-lean "WantFreeEnergy.chance"
+                                                      :c-reading :C-read-as-want-effect
+                                                      :enclosure :futon2.aif.cascade-g/log-bounds}))
                              :rates-provenance {:source :observation-model/query
                                                 :model observation-model}
                              :f (:f conditioned)}}]

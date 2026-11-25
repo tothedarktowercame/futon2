@@ -42,6 +42,10 @@
            :g-law :canonical-coapply :scorer-version :canonical-coapply-g-v1
            :g (:G-efe entry) :controller-score (:controller-score entry)
            :risk (:risk terms) :ambiguity (:ambiguity terms)
+           ;; G' (want free energy, E-kimi-task-438): the ranked pragmatic
+           ;; term of the canonical G is now the want term; :risk stays
+           ;; reported alongside, computed in the same pass.
+           :want-term (:want-term terms)
            :information-gain (:expected-information-gain terms)
            :horizon (:horizon-steps entry) :horizon-choice horizon-choice
            :preference-at-each-step (:class-preference model)
@@ -56,6 +60,7 @@
            :class-emission {:status :computed :consumed-in-g? true
                             :composition :class-risk-plus-ambiguity-minus-frontier-novelty
                             :model model :risk (:risk terms) :ambiguity (:ambiguity terms)
+                            :want-term (:want-term terms)
                             :certificate (:certificate entry)}
            :scorer-result (with-meta [entry] {:cascade-scoring {:model model}})
            :selection-candidate carrier :selection-law (selection/law-receipt [carrier]))))
@@ -160,6 +165,7 @@
         terms (get-in entry [:certificate :g-terms])
         fields {:g (:G-efe entry) :controller-score (:controller-score entry)
                 :risk (:risk terms) :ambiguity (:ambiguity terms)
+                :want-term (:want-term terms)
                 :information-gain (:expected-information-gain terms)}
         valid? (and (= :scored (:status entry))
                     (= {:cascade-belief {#{} 1}} state)
@@ -191,6 +197,11 @@
                              :ambiguity (get-in terms [:raw :ambiguity])
                              :information-gain (get-in terms [:raw :expected-information-gain])}
                        :terms (select-keys record [:risk :ambiguity :information-gain])
+                       ;; The G' pragmatic term (E-kimi-task-438), a sibling
+                       ;; of :terms/:raw — those two must round-trip through
+                       ;; normalize-g-terms exactly, so the want term is
+                       ;; recorded here, never inside them.
+                       :want-term (:want-term record)
                        :consumed-fit-ambiguity? false}
        :authority {:kind :class-emission :source :authorized-factorized-preference
                    :model-horizon h

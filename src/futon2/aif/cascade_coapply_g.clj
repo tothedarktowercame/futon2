@@ -67,7 +67,14 @@
                                                 observation-model candidate-opts)
           ranked (scorer/rank-cascade-actions state [c]
                    (assoc candidate-opts :g-normalization :raw-cumulative :parameter-information-mode :none
-                               :require-finite-risk? true :prediction-only? true))]
+                               ;; G' (want free energy): the pragmatic term of
+                               ;; the canonical G is the want term
+                               ;; -log(chance), with C read as a want effect
+                               ;; (E-kimi-task-438). The old risk stays
+                               ;; computed and reported in the same pass,
+                               ;; never ranked on.
+                               :require-finite-risk? true :prediction-only? true
+                               :g-law :want-free-energy/v1))]
       (if-not (vector? ranked)
         {:cascade-id (:id c) :action c :status :refused :refusal ranked}
         (let [e (first ranked) steps (get-in e [:certificate :steps])
@@ -78,11 +85,24 @@
               novelty (reduce + 0 (map :expected-novelty terms))
               g (- (:G-efe e) novelty)]
           (-> e (dissoc :rank :g-tie)
-              (assoc :status :scored :controller-score g :G-efe g :G-cascade g)
+              (assoc :status :scored :controller-score g :G-efe g :G-cascade g
+                     :g-law :want-free-energy/v1
+                     ;; Decision 3 (Joe): the per-step report is G'/H. All
+                     ;; candidates in one comparison share H, so ranking on
+                     ;; the raw total is the same order.
+                     :g-per-step (/ g (:horizon-steps opts)))
               (assoc-in [:certificate :steps]
                         (mapv (fn [step term]
                                 (assoc step :expected-information-gain (:expected-novelty term)
-                                       :g (- (:g step) (:expected-novelty term)))) steps terms))
+                                       ;; The step's G' contribution: want
+                                       ;; term + ambiguity - novelty share.
+                                       ;; :risk stays as the reported legacy
+                                       ;; field, computed in the same pass.
+                                       :g (- (+ (if (contains? step :want-term)
+                                                  (:want-term step)
+                                                  (:g step))
+                                                (:ambiguity step))
+                                             (:expected-novelty term)))) steps terms))
               (assoc-in [:certificate :g-terms :expected-information-gain] novelty)
               (assoc-in [:certificate :g-terms :raw :expected-information-gain] novelty)
               (cond-> (not (contains? opts :cascade-spec))
@@ -142,7 +162,9 @@
     (when (or (and (contains? opts :g-normalization)
                    (not= :raw-cumulative (:g-normalization opts)))
               (and (contains? opts :parameter-information-mode)
-                   (not= :frontier-beta-approximation (:parameter-information-mode opts))))
+                   (not= :frontier-beta-approximation (:parameter-information-mode opts)))
+              (and (contains? opts :g-law)
+                   (not= :want-free-energy/v1 (:g-law opts))))
       (refuse! :conflicting-score-law {}))
     (scorer/validate-comparison-inputs! (:cascade-belief state)
                                         (assoc opts ::scorer/class-only? true))
@@ -160,6 +182,7 @@
                             (< 1 (count ties)) (assoc :g-tie (mapv :cascade-id ties))))) sorted)
                 refused)
           {:formal-contract :cascade-coapply-g-novelty
+           :g-law :want-free-energy/v1
            :lean-reduction
            (let [models (if-let [ms (:observation-model-of opts)]
                           (map #(get ms (:id %)) candidates) [(:observation-model opts)])
