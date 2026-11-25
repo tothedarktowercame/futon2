@@ -191,3 +191,88 @@
   (testing "cause counts with a non-positive entry are refused (CauseCounts.pos)"
     (is (thrown? clojure.lang.ExceptionInfo
                  (r1/theta (assoc-in counts [:design-link :used] [0 1]) :design-link :used)))))
+
+;;; ## Argued records: Pearl's rule (R1ArguedRecords.lean)
+
+(deftest coin-reader-moves-nothing
+  (testing "R1ArguedRecords.coin_reader_moves_nothing: reliability 1/2 is a flat likelihood"
+    (let [channel (r1/reading-channel :witnessed 1/2)]
+      (is (= uniform (r1/update-belief uniform channel [:says-true])))
+      (is (= uniform (r1/update-belief uniform channel [:says-false])))
+      (let [skewed {:none 1/2 :available 1/4 :used 1/8 :witnessed 1/16 :realised 1/16}]
+        (is (= skewed (r1/update-belief skewed channel [:says-true])))))))
+
+(deftest perfect-reader-pins
+  (testing "R1ArguedRecords.perfect_reader_pins: reliability 1 makes the claimed rung certain"
+    (let [channel (r1/reading-channel :used 1)]
+      (is (= {:none 0 :available 0 :used 1 :witnessed 0 :realised 0}
+             (r1/update-belief uniform channel [:says-true]))))
+    (testing "the complement pins every rung but the disclaimed one to zero only at r=1... r=1 says-false rules k0 out"
+      (let [channel (r1/reading-channel :used 1)]
+        (is (= 0 (get (r1/update-belief uniform channel [:says-false]) :used)))))))
+
+(deftest reading-raises-claimed
+  (testing "R1ArguedRecords.reading_raises_claimed: r > 1/2 raises the claimed rung when 0 < p < 1"
+    (let [channel (r1/reading-channel :witnessed 3/4)
+          prior {:none 1/2 :available 1/4 :used 1/8 :witnessed 1/16 :realised 1/16}
+          posterior (r1/update-belief prior channel [:says-true])]
+      (is (< (get prior :witnessed) (get posterior :witnessed)))
+      (is (= 1 (reduce + 0 (vals posterior))))
+      (is (every? ratio? (vals posterior))))
+    (testing "a worse-than-chance reader lowers the claimed rung"
+      (let [channel (r1/reading-channel :witnessed 1/4)
+            posterior (r1/update-belief uniform channel [:says-true])]
+        (is (< (get posterior :witnessed) 1/5))))))
+
+(deftest witness-three-quarters-realised
+  (testing "R1ArguedRecords.witness_three_quarters_realised: uniform prior, r = 3/4 claiming REALISED -> 3/7 exactly"
+    (let [posterior (r1/update-belief uniform (r1/reading-channel :realised 3/4) [:says-true])]
+      (is (= 3/7 (get posterior :realised)))
+      (is (ratio? (get posterior :realised)))
+      (is (= 1 (reduce + 0 (vals posterior)))))))
+
+(deftest missing-reliability-refused
+  (testing "reading-channel with no r is refused: there is no default reliability"
+    (is (try (r1/reading-channel :used)
+             false
+             (catch clojure.lang.ExceptionInfo e
+               (= :missing-reliability (:type (ex-data e))))))
+    (is (try (r1/reading-channel :used nil)
+             false
+             (catch clojure.lang.ExceptionInfo e
+               (= :invalid-reliability (:type (ex-data e))))))))
+
+(deftest reliability-outside-unit-interval-refused
+  (testing "r outside [0, 1] is refused (the Lean hypotheses h0, h1)"
+    (is (try (r1/reading-channel :used 1.2)
+             false
+             (catch clojure.lang.ExceptionInfo e
+               (= :invalid-reliability (:type (ex-data e))))))
+    (is (try (r1/reading-channel :used -1/10)
+             false
+             (catch clojure.lang.ExceptionInfo e
+               (= :invalid-reliability (:type (ex-data e))))))
+    (is (try (r1/reading-channel :not-a-rung 3/4)
+             false
+             (catch clojure.lang.ExceptionInfo e
+               (= :invalid-rung (:type (ex-data e))))))))
+
+(deftest readings-commute
+  (testing "Pearl updates commute (Jacobs Prop. 4.3(3) via update_cons): two readings, either order"
+    (let [alice (r1/reading-channel :witnessed 3/4)
+          bob (r1/reading-channel :realised 2/3)
+          at-once (r1/update-belief uniform
+                                    (fn [rung kind]
+                                      (case kind
+                                        :alice-says (alice rung :says-true)
+                                        :bob-says (bob rung :says-true)))
+                                    [:alice-says :bob-says])
+          combined (fn [rung kind]
+                     (case kind
+                       :alice-says (alice rung :says-true)
+                       :bob-says (bob rung :says-true)))]
+      (is (= at-once
+             (r1/update-belief (r1/update-belief uniform combined [:alice-says])
+                               combined [:bob-says])
+             (r1/update-belief (r1/update-belief uniform combined [:bob-says])
+                               combined [:alice-says]))))))

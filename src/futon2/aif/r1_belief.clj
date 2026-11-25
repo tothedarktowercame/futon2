@@ -31,6 +31,36 @@
     :witnessed :realised
     :realised :realised))
 
+;;; ## Argued records: Pearl's rule (R1ArguedRecords.lean)
+
+(defn reading-channel
+  "R1ArguedRecords.readingChannel: a reader claiming rung k0 with
+  reliability r is a channel from the true rung to the reader's say-so.
+  For the record kind :says-true (the reader says the benefit is at k0)
+  the likelihood is r at k0 and 1 - r elsewhere; for :says-false (the
+  reader says it is not) the likelihood is the complement. Pearl's
+  virtual evidence: factor the reading in as a likelihood, so iterated
+  readings commute (Jacobs 2019 Prop. 4.3(3), via update-cons).
+
+  r is REQUIRED and must be a number in [0, 1] (the Lean hypotheses h0,
+  h1): there is no default reliability. Refuses (ex-info) a missing r, a
+  non-number r, r outside [0, 1], or a k0 that is not a rung. Exact
+  ratios throughout."
+  ([k0]
+   (throw (ex-info "reading-channel requires an explicit reliability r in [0, 1] (no default)"
+                   {:type :missing-reliability :k0 k0})))
+  ([k0 r]
+   (when-not (contains? (set rungs) k0)
+     (throw (ex-info "reading-channel: claimed rung must be one of the R1 rungs"
+                     {:type :invalid-rung :k0 k0})))
+   (when-not (and (number? r) (<= 0 r 1))
+     (throw (ex-info "reading-channel: reliability must be a number in [0, 1]"
+                     {:type :invalid-reliability :r r})))
+   (fn [rung kind]
+     (case kind
+       :says-true (if (= rung k0) r (- 1 r))
+       :says-false (if (= rung k0) (- 1 r) r)))))
+
 ;;; ## Slow belief (R1DeepTemporal.SlowBelief)
 
 (defn check-belief
