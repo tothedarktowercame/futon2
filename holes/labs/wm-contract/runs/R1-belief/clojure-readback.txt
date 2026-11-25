@@ -1,0 +1,6 @@
+R1 belief -- Clojure readback
+references transcribed from R1DeepTemporalB17.noTrace_realised and R1ArguedRecords.witness_three_quarters_realised (see header)
+exact ratio comparison (==), no tolerance
+b17 no-trace realised actual 3/34 expected 3/34 exact=true
+witness three-quarters realised actual 3/7 expected 3/7 exact=true
+VERDICT: every measured case matches its transcribed Lean reference.
