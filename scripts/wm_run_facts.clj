@@ -1084,8 +1084,15 @@
                           (if classes (distinct (map :class policies)) (map :digest policies))))
         score-ids (sorted-ids (map policy-id scored))
         g-rows (mapv #(when-let [g (exact-g (:G %))] {"policy" (policy-id %) "g" g}) scored)
+        ;; The prediction a row carries: the shared scorer's belief
+        ;; trajectory (step 2a, 2026-11-25), or the historical outer-score
+        ;; :outcomes for records written before the switch.
+        prediction-content (fn [prediction]
+                             (if (contains? prediction :trajectory)
+                               (get-in prediction [:trajectory :trajectory])
+                               (:outcomes prediction)))
         prediction-rows (mapv #(when (seq (:prediction %))
-                                {"policy" (policy-id %) "digest" (action-identity/digest (if classes (get-in % [:prediction :outcomes]) (:prediction %)))}) scored)
+                                {"policy" (policy-id %) "digest" (action-identity/digest (if classes (prediction-content (:prediction %)) (:prediction %)))}) scored)
         rows-or-nr (fn [rows why] (if (every? some? rows)
                                    (vec (sort-by #(get % "policy") rows))
                                    (not-recomputable why)))]
@@ -1123,7 +1130,7 @@
      "abstentionG" (or (exact-g (get-in selection [:abstention :G]))
                         (not-recomputable "abstention G unavailable"))
      "abstentionPrediction" (if-let [prediction (seq (get-in selection [:abstention :prediction]))]
-                               (action-identity/digest (if classes (get-in selection [:abstention :prediction :outcomes]) (into {} prediction)))
+                               (action-identity/digest (if classes (prediction-content (into {} prediction)) (into {} prediction)))
                                (not-recomputable "abstention prediction unavailable"))}))
 
 (defn- selection-decision

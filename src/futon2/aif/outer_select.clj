@@ -258,13 +258,13 @@
           (update :field #(filterv (comp not excluded-targets :target) %))
           (update :excluded into exclusions)))))
 
-(defn- cascade-record [observation cascade model score]
-  (let [candidate (:pick model) target (:target candidate)
+(defn- cascade-record [observation cascade candidate]
+  (let [target (:target candidate)
         class (if candidate (relation-class observation target) :no-pick)
         receipt (get-in (value-of (:facts observation) target) [:relation :receipt])]
     (when (and receipt (not= class (:class receipt)))
       (refuse! :relation-receipt-class-mismatch {:target target :class class :receipt receipt}))
-    (merge (update cascade :steps #(mapv (fn [i step] (outer-score/typed-step step (str (name (:id cascade)) "/step-" i))) (range) %)) score
+    (merge (update cascade :steps #(mapv (fn [i step] (outer-score/typed-step step (str (name (:id cascade)) "/step-" i))) (range) %))
            {:pick (or target :no-pick)
             :pick-facts (when candidate
                           (select-keys (value-of (:facts observation) target)
@@ -292,23 +292,6 @@
   (when (contains? (:prediction cascade) :parameters)
     (identity/digest (get-in cascade [:prediction :parameters]))))
 
-(defn prediction-classes
-  "Prediction outcomes (canonical digest) and quantized G identify one policy.
-  Preserve menu order only to choose an arrangement within that policy."
-  [cascades]
-  (let [key-of #(vector (identity/digest (get-in % [:prediction :outcomes])) (g-units (:G %))
-                        (parameters-digest %))
-        groups (group-by key-of cascades)]
-    (mapv (fn [k]
-            (let [members (get groups k) representative (first members)]
-              (assert (every? #(= (second k) (g-units (:G %))) members))
-              (merge (select-keys representative [:pick :G :terms :prediction :relation-basis])
-                     {:id (identity/sha256 (pr-str (if (nth k 2) k (subvec k 0 2))))
-                      :prediction-digest (first k) :g-units (second k)
-                      :parameters-digest (nth k 2) :members (mapv :id members)
-                      :representative (:id representative)})))
-          (distinct (map key-of cascades)))))
-
 (defn choice-input-digest
   "Choice-scoped Q6 inputs. Whole-field reading/graph pins remain in the
   construction, not in the equality test for repeating a choice situation."
@@ -321,47 +304,6 @@
     {:sha256 (identity/digest covers) :covers covers
      :excludes {:reading (:reading c) :graph (:graph c)
                 :reason "whole-field pins change on every click; the field enters the digest through the classes it produces"}}))
-
-(defn per-task-ratings
-  "Diagnostic conditional G: score each admitted candidate as the pick, using
-  the click's existing relation producer and score inputs. This does not run a
-  selection cascade or affect eligibility, classes, Q6 inputs or the decision.
-  Unformable models remain rows with typed absence, never new refusals."
-  [score-input]
-  (mapv
-   (fn [candidate]
-     (let [target (:target candidate)]
-       (try
-         (let [fact (value-of (:facts score-input) target)
-               relation (relation-class score-input target)
-               row (merge {:target target :relation {:class relation}}
-                          (select-keys fact [:status :rank :cone :unblocks]))]
-           (if (= ::no-relation-fn relation)
-             (assoc row :absence {:kind :relation-producer-unavailable})
-             (if-not (and (number? (:reach candidate))
-                          (Double/isFinite (double (:reach candidate))))
-               (assoc row :absence {:kind :reach-unavailable})
-               (let [input (assoc score-input :cascade [] :field [candidate]
-                                  :relation (fn [_ _] relation))
-                     score (outer-score/score-model input (outer-score/outer-model input))
-                     g (:G score)]
-                 (if (and (number? g) (Double/isFinite (double g)))
-                   (merge row (select-keys score [:terms :G :altitude-source])
-                          {:prediction-digest (identity/digest (get-in score [:prediction :outcomes]))})
-                   (assoc row :absence {:kind :score-inadmissible :score g}))))))
-         (catch Exception e
-           {:target target
-            :relation {:status :absent :reason :rating-model-unavailable}
-            :absence {:kind (or (:kind (ex-data e)) :model-unavailable)
-                      :message (ex-message e)}}))))
-   (:field score-input)))
-
-(defn rating-top-ten
-  "Lowest diagnostic G; equal G is displayed by target id, not adjudicated.
-  This display order does not break a selection tie. Absence rows stay outside."
-  [ratings]
-  (vec (take 10 (sort-by (juxt :G :target) (filter #(number? (:G %)) ratings)))))
-
 
 (defn valid-forbidden-evidence?
   "The exact check `select` applies to `:forbidden`/`:forbidden-evidence`:
@@ -434,8 +376,10 @@
 
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
-  abstention can select. Refusals retain the same evidence as successful selection."
-  [makeup state observation]
+  abstention can select. Refusals retain the same evidence as successful selection.
+  STATE is the carried outer-state (step 2b retires it); since step 2a nothing
+  in the decision reads it -- the signature stays for the runtime's call."
+  [makeup _state observation]
   (let [library-root (.getCanonicalPath
                       (io/file (or (:task-selection-library-root makeup)
                                    (configured-task-selection-library-root))))
@@ -468,25 +412,22 @@
                {:field-facts field-facts :outer-score/admitted []
                 :outer-score/excluded (:excluded partition)}))
     (when-not (seq menu) (refuse! :empty-cascade-menu {}))
-    (let [score-input (merge (select-keys observation [:focus :relation :facts :field])
-                             {:state-counts (:state-counts state) :ending-counts (:c state)
-                              :gain-counts (:gain-counts state)})
-          models (mapv (fn [cascade]
-                         (try
-                           ;; Apply the cascade once, including any function
-                           ;; steps. The scorer receives that exact pick.
-                           (let [candidate (outer-score/cascade-pick (:steps cascade)
-                                                                    (:facts observation)
-                                                                    (:field observation)
-                                                                    selection-context)]
-                             (when (and field-facts candidate (not (number? (:reach candidate))))
-                               (refuse! :outer-score/reach-unavailable
-                                        {:target (:target candidate) :field-facts field-facts}))
-                             (outer-score/outer-model
-                              (assoc score-input :cascade [] :field (if candidate [candidate] []))))
-                           (catch clojure.lang.ExceptionInfo e
-                             (throw (ex-info (ex-message e)
-                                             (cond-> (assoc (ex-data e) :construction construction) field-facts (assoc :field-facts field-facts)) e))))) menu)
+    (let [candidates (mapv (fn [cascade]
+                             (try
+                               ;; Apply the cascade once, including any function
+                               ;; steps. The canonical scorer receives that
+                               ;; exact pick.
+                               (let [candidate (outer-score/cascade-pick (:steps cascade)
+                                                                        (:facts observation)
+                                                                        (:field observation)
+                                                                        selection-context)]
+                                 (when (and field-facts candidate (not (number? (:reach candidate))))
+                                   (refuse! :outer-score/reach-unavailable
+                                            {:target (:target candidate) :field-facts field-facts}))
+                                 candidate)
+                               (catch clojure.lang.ExceptionInfo e
+                                 (throw (ex-info (ex-message e)
+                                                 (cond-> (assoc (ex-data e) :construction construction) field-facts (assoc :field-facts field-facts)) e))))) menu)
           traces (into {} (map (fn [cascade]
                                  [(:id cascade)
                                   (if (some #(and (map? %)
@@ -496,13 +437,13 @@
                                     (:trace (outer-score/apply-selection-cascade-traced
                                              (:steps cascade) (:facts observation)
                                              (:field observation) selection-context)))]) menu))
-          details (mapv #(outer-score/score-model score-input %) models)
           library (:library construction)
-          cascades (mapv #(cascade-record observation %1 %2 %3) menu models details)
+          cascades (mapv #(cascade-record observation %1 %2) menu candidates)
           ;; G over cascades (Joe, 2026-11-13; Lean SelectionGOverCascades): each
           ;; cascade's G is the canonical cascade G of its patterns on its pick, the
           ;; same scorer the work run uses, and stopping is the empty policy on that
-          ;; scale. The pick-only outer-score G stays only as :pick-only-terms.
+          ;; scale. (M-cascade-live-causal step 2a, Joe 2026-11-25 19:34: the
+          ;; pick-only outer-score G is gone; there is one scorer.)
           canonical (selection-g/score
                      (mapv (fn [c] (cond-> {:id (:id c) :patterns (:patterns c) :pick (:pick c)
                                             :relation-class (get-in c [:relation :class])}
@@ -519,25 +460,35 @@
                                      :novelty (:expected-information-gain t)}))
           canonical-g (fn [record e]
                         (if (= :scored (:status e))
-                          (assoc record :pick-only-terms (:terms record) :terms (canonical-terms e)
+                          (assoc record :terms (canonical-terms e)
                                  :G (:G-cascade e) :g-law :selection-cascade-grain-g)
-                          (assoc record :pick-only-terms (:terms record) :G :inadmissible
+                          (assoc record :G :inadmissible
                                  :g-law :selection-cascade-grain-g
                                  :canonical-refusal (or (:refusal e) (:refusal canonical)))))
-          ;; Requirements Q11: a cascade predicts outcomes AND the posterior of
-          ;; the patterns it fires; the novelty term of its G is information
-          ;; gain about exactly those parameters.
+          ;; Requirements Q11: a cascade predicts the shared scorer's
+          ;; trajectory AND the posterior of the patterns it fires; the
+          ;; novelty term of its G is information gain about exactly those
+          ;; parameters. The trajectory is the shared prediction
+          ;; (selection-shared-prediction): per-step beliefs from the
+          ;; certificate, or a typed absence for a refused entry.
           cascades (mapv #(let [fired (get-in canonical [:fired (:id %)] [])]
                             (-> (canonical-g % (get-in canonical [:by-id (:id %)]))
                                 (assoc :fired-patterns fired)
-                                (assoc-in [:prediction :parameters]
-                                          (selection-g/predicted-parameters
-                                           (map first (get-in canonical [:fired-units (:id %)]))))))
+                                (assoc :prediction
+                                       {:trajectory (shared-prediction/shared-prediction
+                                                     (get-in canonical [:by-id (:id %)]))
+                                        :parameters (selection-g/predicted-parameters
+                                                     (map first (get-in canonical [:fired-units (:id %)])))})))
                          cascades)
           scores (mapv :G cascades)
-          abstention (assoc (canonical-g (outer-score/abstention-score score-input) (:stopping canonical))
-                            :fired-patterns [])
-          ratings (per-task-ratings score-input)
+          abstention (assoc (canonical-g {} (:stopping canonical))
+                            :fired-patterns []
+                            ;; Retained for the why renderer's altitude pin
+                            ;; (the resource, not the outer-score model).
+                            :altitude-source (outer-score/abstention-altitude)
+                            :prediction {:trajectory (shared-prediction/shared-prediction
+                                                      (:stopping canonical))
+                                         :parameters {}})
           legacy-relations (mapv (fn [c] {:target (:pick c) :relation (get-in c [:relation :class])
                                          :relation-known? (when-not (= :no-pick (:pick c))
                                                             (known-relation? (get-in c [:relation :class])))}) cascades)
@@ -545,7 +496,6 @@
                     :outer-score/excluded (:excluded partition)
                     :knowledge-producer-requests (:requests partition)
                     :library library :construction construction :cascades cascades :abstention abstention
-                    :per-task-rating ratings :top-ten (rating-top-ten ratings)
                     :named-later-items (:named-later-items canonical)
                     :forbidden forbidden-evidence
                     :cascade-scores scores :cascade-picks (mapv :pick cascades)
@@ -558,8 +508,17 @@
         (refuse! :cascade-score-inadmissible (merge evidence bad)))
       (when-not (finite? (:G abstention))
         (refuse! :abstention-score-inadmissible evidence))
-      (let [all-classes (prediction-classes cascades)
-            stop-digest (identity/digest (get-in abstention [:prediction :outcomes]))
+      (let [raw-classes (shared-prediction/canonical-prediction-classes
+                         cascades (:by-id canonical) g-units parameters-digest)
+            by-id (into {} (map (juxt :id identity)) cascades)
+            all-classes (mapv (fn [c]
+                                (merge (select-keys (by-id (:representative c))
+                                                    [:pick :G :terms :prediction :relation-basis])
+                                       (-> c
+                                           (assoc :prediction-digest (:shared-prediction-digest c))
+                                           (dissoc :shared-prediction-digest))))
+                              raw-classes)
+            stop-digest (shared-prediction/shared-prediction-digest (:stopping canonical))
             stopping (filterv #(= stop-digest (:prediction-digest %)) all-classes)
             classes (filterv #(not= stop-digest (:prediction-digest %)) all-classes)
             class-of (into {} (for [c all-classes member (:members c)] [member (:id c)]))
@@ -568,7 +527,6 @@
                                 :stopping-equivalent
                                 (mapv (fn [c]
                                         {:class (:id c) :members (:members c) :pick (:pick c)
-                                         :landing (get-in c [:prediction :landing])
                                          :g-units (:g-units c) :reason :predicts-stopping}) stopping)
                                 :previous (or (:previous-selection observation)
                                               {:status :absent :reason :previous-selection-not-supplied})
@@ -593,15 +551,8 @@
                                (:id prospective))
             argument (argument-frame {:why why :cascades cascades
                                       :relations legacy-relations
-                                      :per-task-rating ratings
                                       :library-root library-root})
-            evidence (assoc evidence :why why :argument argument)
-            ;; Shadow only (Joe 2026-11-25 19:34, retirement-plan.md C1/C2/C4/C5):
-            ;; the same grouping computed from the SHARED scorer's own per-step
-            ;; prediction. No decision reads this; every key above is unchanged.
-            shadow (shared-prediction/shadow cascades canonical classes stopping
-                                             (:id prospective) g-units parameters-digest)
-            evidence (assoc evidence :shared-prediction-shadow shadow)]
+            evidence (assoc evidence :why why :argument argument)]
         ;; Stopping is the other side of every comparison (Joe, 2026-11-13, on a
         ;; field holding only ladder 10: \"the choice is between doing 10 and
         ;; stopping, and stopping should be worse at this stage\"). One class
@@ -620,7 +571,7 @@
                                    :selection-evidence evidence}))
         (let [chosen-class (first tied)
               index (first (keep-indexed #(when (= (:representative chosen-class) (:id %2)) %1) cascades))
-              chosen (nth cascades index) picked (:pick (nth models index))]
+              chosen (nth cascades index) picked (nth candidates index)]
           (when-not (< minimum (:G abstention))
             (refuse! :pick-not-below-abstention {:cascade (:id chosen) :G minimum
                                                :abstention-G (:G abstention)

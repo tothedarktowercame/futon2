@@ -271,19 +271,20 @@
     (is (= :chosen (get-in result [:outcome :status])))
     (is (= 2 (count (:classes result))))))
 
-(deftest chosen-prediction-is-the-chosen-model-push
+(deftest chosen-prediction-is-the-shared-trajectory
+  ;; Step 2a (Joe 2026-11-25 19:34): the chosen cascade's :prediction is the
+  ;; SHARED scorer's prediction -- the per-step belief trajectory from its
+  ;; certificate -- with the Q11 parameter posterior, not outer-score's push.
   (let [result (outer-select/select base-makeup base-state base-observation)
-        chosen (nth (:cascades base-makeup) (:cascade-index result))
-        model (outer-score/outer-model
-               (merge (select-keys base-observation [:focus :relation :facts :field])
-                      {:state-counts (:state-counts base-state)
-                       :cascade (:steps chosen)}))
-        prediction (:prediction result)]
-    (is (= (outer-score/push model) (:outcomes prediction)))
-    (is (= (select-keys model [:q :status :landing])
-           (select-keys prediction [:q :status :landing])))
-    (is (< (Math/abs (- 1.0 (reduce + (vals (:outcomes prediction)))))
-           1.0e-12))))
+        prediction (:prediction result)
+        trajectory (get-in prediction [:trajectory :trajectory])]
+    (is (= :ok (get-in prediction [:trajectory :status])))
+    (is (seq trajectory))
+    (is (every? #(contains? % :belief) trajectory))
+    (is (every? #(< (Math/abs (- 1.0 (reduce + (vals (:belief %))))) 1.0e-9)
+                trajectory))
+    (is (contains? prediction :parameters))
+    (is (= prediction (:prediction (nth (:cascades result) (:cascade-index result)))))))
 
 (deftest identical-predictions-are-one-policy-and-not-a-comparison
   (let [observation (assoc base-observation :relation (fn [_ _] :focus))
@@ -305,17 +306,15 @@
         ;; chain M-ready then M-unknown, a third policy below the tie.
         makeup {:cascades [{:id :a :patterns ["test"] :steps [{:gate #(= "M-ready" (:target %))}]}
                            {:id :b :patterns ["test"] :steps [{:gate #(= "M-unknown" (:target %))}]}]}
-        original outer-score/score-model
-        counter (atom 0)
-        refusal (with-redefs [outer-score/score-model
-                             (fn [input model]
-                               (let [r (original input model)]
-                                 (if (= 2 (swap! counter inc))
-                                   (assoc-in r [:prediction :outcomes] {[:related :one] 1.0}) r)))]
-                  (try (outer-select/select makeup base-state observation)
-                       (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+        ;; Symmetric facts and patterns: equal G, but the trajectories differ
+        ;; (tokens are target-qualified), so the shared prediction keeps the
+        ;; two cascades in two classes and the equal-G minimum is a tie.
+        refusal (try (outer-select/select makeup base-state observation)
+                     (catch clojure.lang.ExceptionInfo e (ex-data e)))]
     (is (= :tie-at-minimum (:kind refusal)))
-    (is (= 2 (count (:classes refusal))))))
+    (is (= 2 (count (:classes refusal))))
+    (is (not= (get-in refusal [:selection-evidence :classes 0 :prediction-digest])
+              (get-in refusal [:selection-evidence :classes 1 :prediction-digest])))))
 
 (deftest unknown-graph-member-stays-in-the-field
   (let [obs (assoc-in base-observation [:facts "M-unknown" :cone] nil)
@@ -330,23 +329,24 @@
     (is (= "M-unknown" (:target error)))))
 
 (deftest every-policy-retains-terms-prediction-and-separate-stop
-  (let [r (outer-select/select base-makeup base-state base-observation)
-        input {:ending-counts (:c base-state) :gain-counts (:gain-counts base-state)}]
+  (let [r (outer-select/select base-makeup base-state base-observation)]
     (is (= 2 (count (:cascades r))))
     (doseq [c (:cascades r)]
       (let [{:keys [risk ambiguity novelty altitude]} (:terms c)]
         (is (< (Math/abs (- (:G c) (+ (- (+ risk ambiguity) novelty) (or altitude 0)))) 1.0e-9)))
-      (is (< (Math/abs (- 1.0 (reduce + (vals (get-in c [:prediction :outcomes]))))) 1.0e-9))
+      (is (= :ok (get-in c [:prediction :trajectory :status])))
+      (is (seq (get-in c [:prediction :trajectory :trajectory])))
       (is (= :default-reach (get-in c [:reach :source])))
       (is (re-matches #"[0-9a-f]{64}" (:digest c))))
     (is (= (:cascade-scores r) (mapv :G (:cascades r))))
     (is (= (:cascade-picks r) (mapv :pick (:cascades r))))
     (is (= (:prediction r) (:prediction (nth (:cascades r) (:cascade-index r)))))
     ;; G over cascades (Joe, 2026-11-13): stopping is the empty policy scored by
-    ;; the canonical cascade G; the pick-only abstention terms are retained.
+    ;; the canonical cascade G. (Step 2a: the pick-only abstention terms are
+    ;; gone with outer-score; the abstention's :terms are the canonical
+    ;; stopping entry's.)
     (is (= :selection-cascade-grain-g (get-in r [:abstention :g-law])))
-    (is (= (:terms (outer-score/abstention-score input))
-           (get-in r [:abstention :pick-only-terms])))
+    (is (= :ok (get-in r [:abstention :prediction :trajectory :status])))
     (is (< (nth (:cascade-scores r) (:cascade-index r)) (get-in r [:abstention :G])))
     (is (= :pinned (get-in r [:library :status])))))
 
@@ -394,9 +394,12 @@
                       base-state obs)
                      (catch clojure.lang.ExceptionInfo e (ex-data e)))]
     (is (= 2 @calls))
-    ;; A cascade with no patterns is the empty policy: its G is the stopping G,
-    ;; so with one class compared against stopping it is not below it.
-    (is (= :pick-not-below-abstention (:kind refusal)))))
+    ;; A cascade with no patterns is the empty policy: under the shared
+    ;; prediction (step 2a) its trajectory is exactly stopping's, so it is
+    ;; stopping-equivalent and the menu abstains -- it never reaches the
+    ;; pick-not-below-abstention comparison.
+    (is (= {:status :abstained :case :all-policies-predict-stopping}
+           (:outcome refusal)))))
 
 (deftest forbidden-picks-stay-scored-but-cannot-win
   (let [before (outer-select/select base-makeup base-state base-observation)
@@ -435,8 +438,8 @@
     (is (= ["M-unknown"] (mapv :target (:outer-score/excluded r))))
     (is (= 2 (count (:cascades r))))
     (is (< (get-in r [:classes 0 :G]) (get-in r [:abstention :G])))
-    (is (every? #(not= (get-in % [:prediction :outcomes])
-                       (get-in r [:abstention :prediction :outcomes])) (:classes r)))))
+    (is (every? #(not= (get-in % [:prediction :trajectory :trajectory])
+                       (get-in r [:abstention :prediction :trajectory :trajectory])) (:classes r)))))
 
 
 (deftest comparison-projects-progressing-policy-and-altitude
@@ -455,7 +458,7 @@
            (get-in f ["targetConstruction" 0 "policies"])))
     (is (= 1 (count (f "policyG")) (count (f "policyPrediction"))))
     (is (every? #(not= (get % "digest") (f "abstentionPrediction")) (f "policyPrediction")))
-    (is (= (identity/digest (get-in r [:abstention :prediction :outcomes])) (f "abstentionPrediction")))
+    (is (= (identity/digest (get-in r [:abstention :prediction :trajectory :trajectory])) (f "abstentionPrediction")))
     (is (= (:stopping-equivalent r) (get-in export [:diagnostics :stoppingEquivalent])))
     (is (= (get-in r [:abstention :terms]) (get-in export [:diagnostics :abstentionTerms :terms])))
     (is (.startsWith (checker/evidence f :q11) ".known"))
@@ -494,26 +497,6 @@
       (spit f "# Nothing here\n\nprose only\n")
       (is (= {:date :absent :status :absent :timebox :absent}
              (:header (outer-select/source-header {:path (.getPath f) :sha256 "00"})))))))
-
-(deftest per-task-ratings-are-retained-without-changing-the-choice
-  (let [s (outer-select/select base-makeup base-state base-observation)
-        rows (:per-task-rating s)
-        by-id (into {} (map (juxt :target identity)) rows)]
-    (is (= (count (:field base-observation)) (count rows)))
-    (is (= (:top-ten s) (outer-select/rating-top-ten rows)))
-    (is (= (dissoc s :per-task-rating :top-ten)
-           (dissoc (with-redefs [outer-select/per-task-ratings (constantly [])]
-                     (outer-select/select base-makeup base-state base-observation))
-                   :per-task-rating :top-ten)))
-    ;; Ratings are pick-level and stay the pick-only G of each class's
-    ;; representative; the class G is the cascade-level canonical G and need not
-    ;; equal them (G over cascades, Joe 2026-11-13).
-    (doseq [c (:classes s)
-            :let [rep (first (filter #(= (:id %) (:representative c)) (:cascades s)))
-                  {:keys [risk ambiguity novelty altitude]} (:pick-only-terms rep)]]
-      (is (= :selection-cascade-grain-g (:g-law rep)))
-      (is (< (Math/abs (- (+ (- (+ risk ambiguity) novelty) (or altitude 0))
-                          (:G (by-id (:pick c))))) 1.0e-9)))))
 
 (deftest two-ready-tasks-give-a-chain-in-giraffe-order
   ;; Lucy 2026-11-13 clicks 2-3 abstained :insufficient-comparison on ladder 08

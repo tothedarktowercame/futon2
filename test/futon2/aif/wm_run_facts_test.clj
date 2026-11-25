@@ -860,7 +860,7 @@
     (is (= (set (f "comparedPolicies")) (set (map #(get % "policy") (f "policyG")))))
     (is (= (:chosen-class s) (get-in f ["currentChoice" "cascade"])))
     (is (= (facts/exact-g (get-in s [:abstention :G])) (f "abstentionG")))
-    (is (= (action-identity/digest (get-in s [:abstention :prediction :outcomes])) (f "abstentionPrediction")))
+    (is (= (action-identity/digest (get-in s [:abstention :prediction :trajectory :trajectory])) (f "abstentionPrediction")))
     (is (= (:giraffe/input-sha256 obs) (c "graph")))
     (is (false? (get-in (export (assoc-in r [:outer/selection :construction :cascades 0 :units 0 :sha256] "bad"))
                        ["targetConstruction" 0 "sliceFromWholeLibrary"])))
