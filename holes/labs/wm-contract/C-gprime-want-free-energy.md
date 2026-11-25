@@ -146,3 +146,107 @@ Baseline after every revert: 0 failures.
 - **Nothing could not be transcribed exactly.** All six rational numerals
   transcribe; only `log` is floating, by the C521 rule, and is reported at
   1e-12 with delta 0.0.
+
+## 6. Wiring (E-kimi-task-438, 2026-11-25): G′ is now the canonical G's pragmatic term
+
+Part A (E-kimi-task-437, futon2 `18fff967a`) discovered the canonical G
+path; part B (this section) wired G′ into it under Joe's ruling: run G′,
+aligned with Lean, one implementation for selection and execution, no shadow
+scorer. Commits: `1056896c6` (stale-test repairs), `b53f7ec88` (the wiring),
+`ee81aebf4` (pins, planted case, mutant check), `4145d2ed2` (readback
+wiring section), plus this document and the registry row.
+
+**What changed.**
+
+- `observation_model.clj` (class-emission `:score`): computes, from the same
+  predicted outcome distribution and the same step C, the EXACT rational
+  chance `Σ_o Q(o|π)·c(o)` (C read as a want effect, decision 4), the want
+  term `−log chance` as a double (decision 1: doubles and the existing
+  strict-minimum/`:tie-at-minimum` ranking are unchanged), and
+  `cascade-g/log-bounds`' rational enclosure of the want term for audit.
+  Risk is computed in the same pass and reported, never ranked on.
+- `cascade_observation_scoring.clj`: under `:g-law :want-free-energy/v1`
+  the entry G is `Σ want-term + Σ ambiguity − information-gain`.
+  `:g-terms` keeps `:risk` (reported) and gains `:want-term`; `:raw` keeps
+  exactly the three `normalize-g-terms` inputs so q4's recompute-equality
+  still holds.
+- `cascade_coapply_g.clj` (`score-one`): forces the want law, so BOTH lanes
+  (selection: `shape/terminal-class-preference` schedule; family:
+  preference-registry terminal distribution) score by G′, with the Beta
+  novelty subtraction exactly as before. Entries carry `:g-law
+  :want-free-energy/v1` and `:g-per-step = G′/H` (decision 3; ranking stays
+  on the raw total, the same order at one shared H). Certificate steps
+  carry `:chance` (ratio), `:want-term`, `:want-term-enclosure`, `:risk`,
+  `:ambiguity`, `:expected-information-gain`, `:g`.
+- `family_canonical_g.clj`: the record and the certified receipt carry
+  `:want-term` (on the receipt's `:normalization` as a sibling of
+  `:terms`/`:raw`); `certify-score`'s recompute-equality pins the want term
+  too.
+- `q4_preference.clj`: when the receipt declares a want term, the compared
+  G recomputes as `want-term + ambiguity − information-gain`; legacy
+  receipts (no want term) keep the risk composition.
+
+**Which pins moved.** None of the named numeric pins moved: every fixture
+in `cascade_coapply_g_test`, `cascade_pattern_counts_test`,
+`family_theta_coherence_test`, `family_selection_canonical_g_test` and the
+selection integration tests (`outer_select`, `selection_certificate`,
+`selection_discrimination`, `native_currency_discrimination`,
+`selection_canonical_g`) whose G value is pinned uses deterministic
+(theta = 1) transitions, i.e. point predictions, where
+`stepG'_eq_stepG_of_point` gives want-term = risk exactly (verified by
+`gprime-point-predictions-keep-the-old-g`). Stochastic fixtures in those
+namespaces pin orderings, beliefs and novelty, not G values, and the
+orderings are unchanged. Two NEW pins were added, derived from the
+certified reference port: chance exactly 1/2 for bern(9/10) under the ruled
+C (same shape as `WantFreeEnergyWitness.chance_nine_in_ten`), and the
+risk-order/G′-order disagreement fixture (mutant check).
+
+**Baseline repairs (pre-existing reds, not caused by the wiring).**
+`cascade_coapply_g_test` was red at HEAD on two tests stale against the
+deliberate 2026-10-29 commits `980b78939` (`:f` retention) and `0be247a91`
+(explicit `:class-free-energy` history); `family_selection_canonical_g_test`
+was red alone because the class-F history index (`a8a4caec6`) only existed
+as a side effect of other namespaces in full-suite runs (its fixture now
+creates the empty index and removes it again). `class_observation_scoring_test`
+and `q4_preference_route_test` have further pre-existing environmental
+failures (43 failures / 5 errors), byte-identical with and without this
+packet.
+
+**Planted bad case and mutant check.** A C with 0 mass on a predicted
+outcome refuses with the existing `:inadmissible-risk` shape — never
+`−log 0` (`gprime-hard-want-refuses-never-minus-log-zero`; hard wants stay
+deferred). `gprime-ranking-mutant-check-risk-order-disagrees` constructs two
+candidates where the KL order and the G′ order genuinely disagree (chance
+11/20 vs exactly 1/2) and asserts the G′ winner: ranking on the reported
+`:risk` instead of `:G-efe` fails that test.
+
+**Readback.** `want_free_energy_readback.clj` gained a wiring section that
+runs the production `compare-at-horizon`: bern(9/10) under C 9/10:1/10
+gives chance exactly 41/50 (`chance_nine_in_ten`), the point prediction
+gives 9/10 (`chance_certain`), and the agreement case shows the wired
+`:G-efe` equal to the old risk-based G recomputed from the reported fields
+of the same entry (`stepG'_eq_stepG_of_point`), with the bern contrast
+alongside (the delta is exactly the nine-in-ten want term). Output
+reproduces byte for byte; sha256
+`74ee7f444153f5b420147b6322bfca6ebedcf4cc6dcd7963aaca207c19def1f3`.
+
+**Gates.** clj-kondo clean on the changed files (0 errors; one pre-existing
+redundant-let warning in `observation_model.clj`); check-parens OK on every
+changed `.clj`; only the named namespaces (plus adjacent consumers) were
+run, all green (94 tests / 552 assertions / 0 failures across the nine
+named namespaces). Nothing was hot-loaded into the serving JVM; the WM
+stays held.
+
+**What is NOT claimed (in addition to §5).**
+
+- **No interval ranking.** Ranking uses the double want term exactly as it
+  used the double risk (decision 1); the rational enclosure is audit-only.
+- **No hard wants.** c(o) = 0 on a predicted outcome refuses; it is never
+  clamped or scored.
+- **No re-derivation of C.** The want effect IS each lane's existing C mass
+  read as an effect (recorded in the certificate as
+  `:c-reading :C-read-as-want-effect`); whether C should instead be derived
+  from declared wants is out of scope.
+- **Legacy paths unchanged.** Callers of `rank-cascade-actions` without
+  `:g-law :want-free-energy/v1` (e.g. `cascade-shape-g/score-policy`'s
+  progress channel) keep risk-based G, as do the token-model paths.
