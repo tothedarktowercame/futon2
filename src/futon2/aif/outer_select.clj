@@ -7,7 +7,8 @@
             [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-observation :as observation]
             [futon2.aif.outer-score :as outer-score]
-            [futon2.aif.selection-canonical-g :as selection-g]))
+            [futon2.aif.selection-canonical-g :as selection-g]
+            [futon2.aif.selection-shared-prediction :as shared-prediction]))
 
 (declare value-of)
 
@@ -594,7 +595,13 @@
                                       :relations legacy-relations
                                       :per-task-rating ratings
                                       :library-root library-root})
-            evidence (assoc evidence :why why :argument argument)]
+            evidence (assoc evidence :why why :argument argument)
+            ;; Shadow only (Joe 2026-11-25 19:34, retirement-plan.md C1/C2/C4/C5):
+            ;; the same grouping computed from the SHARED scorer's own per-step
+            ;; prediction. No decision reads this; every key above is unchanged.
+            shadow (shared-prediction/shadow cascades canonical classes stopping
+                                             (:id prospective) g-units parameters-digest)
+            evidence (assoc evidence :shared-prediction-shadow shadow)]
         ;; Stopping is the other side of every comparison (Joe, 2026-11-13, on a
         ;; field holding only ladder 10: \"the choice is between doing 10 and
         ;; stopping, and stopping should be worse at this stage\"). One class
