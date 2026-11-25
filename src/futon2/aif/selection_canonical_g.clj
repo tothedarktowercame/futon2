@@ -208,7 +208,9 @@
                (let [q (:below (r1-by-pick p))]
                  (into {}
                        (mapcat (fn [[state mass]]
-                                 (cond-> [[(conj state (benefit-below-token p)) (*' mass q)]]
+                                 (cond-> []
+                                   (pos? q)
+                                   (conj [(conj state (benefit-below-token p)) (*' mass q)])
                                    (pos? (-' 1 q))
                                    (conj [state (*' mass (-' 1 q))]))))
                        belief)))

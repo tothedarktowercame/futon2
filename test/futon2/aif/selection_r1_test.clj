@@ -129,3 +129,9 @@
                                               outer-select-test/base-observation)
                          (catch clojure.lang.ExceptionInfo e (ex-data e)))]
         (is (= :r1-unavailable (:kind refusal)))))))
+
+(deftest q-zero-drops-the-with-token-state
+  (testing "claude-14 review: at q = 0 no zero-mass state is carried (symmetric with q = 1)"
+    (let [r1 (#'futon2.aif.selection-canonical-g/r1-belief
+              [:p] (constantly {:status :linked :below 0}) #{[:p :ready]})]
+      (is (= {#{[:p :ready]} 1} (:belief r1))))))
