@@ -261,7 +261,7 @@
               (if (contains? grounded (:id w)) ", which is the record's decision." ", which is NOT the record's decision."))]))))
 
 (def what-G-read
-  (str "What G read: the pick's Giraffe status (reach prior), its relation to the focus (a known relation lands on that ending; an unknown one lands on the pinned prior 11/19 focused, 7/19 related, 1/19 unrelated) and its unblocks as gain (outer_score.clj kernel-parameters). It did not read the placement, so the winning cascade's own gate contributed nothing to the number that made it win."
+  (str "What G read: the pick's Giraffe status (reach prior), its relation to the focus (a known relation lands on that ending; an unknown one lands on the pinned prior 11/19 focused, 7/19 related, 1/19 unrelated) and its unblocks as gain (selection_cascade.clj kernel-parameters). It did not read the placement, so the winning cascade's own gate contributed nothing to the number that made it win."
        (when-let [l (first (filter #(= "associated" (get-in % [:facts :relation])) losers))]
          (when (= "unknown" (get-in winner [:facts :relation]))
            (str " Here " (:pick l) " is known to be associated with the focus and lands on the related ending; " (:pick winner)
