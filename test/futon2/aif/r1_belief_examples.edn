@@ -1,0 +1,67 @@
+{:b17
+ {:doc "B17 as a cookie-jar case, futon3c holes/missions/M-cascade-live-causal.md
+        lines 174-238 (read 2026-11-25). Observations o1-o7: dated, sourced
+        records, not rungs. The trace-channel likelihoods are placeholders
+        for Joe to calibrate (same numbers as R1DeepTemporalB17.lean)."
+  :records
+  [{:id :o1 :date "2026-05-23"
+    :source "xtdb/xtdb issue #5637 (GitHub public API)"
+    :kind :issue-opened
+    :note "jarohen (XTDB) opens #5637, \"Text indexing\", with design notes."}
+   {:id :o2 :date "2026-07"
+    :source "futon1b ea696ce..706f16d; M-text-sidecar D1"
+    :kind :sidecar-built
+    :note "An FTS5 text-index sidecar for futon1b is built and accepted."}
+   {:id :o3 :date "2026-07-16"
+    :source "xtdb/xtdb issue #5637 (GitHub public API)"
+    :kind :design-comment
+    :note "Joe's account comments on #5637 describing the sidecar design."}
+   {:id :o4 :date "2026-07-20"
+    :source "xtdb/xtdb issue #5637 (GitHub public API)"
+    :kind :maintainer-agrees
+    :note "jarohen replies: \"I broadly agree with the decisions you've made here\"."}
+   {:id :o5 :date ["2026-08-24" "2026-09-03"]
+    :source "hyperreal blog post; tothedarktowercame/mathse-xtdb-benchmark; #5637"
+    :kind :benchmark-published
+    :note "The benchmark is published and Joe's account links it on #5637."}
+   {:id :o6 :date "2026-09-03"
+    :source "xtdb/xtdb issue #5637; benchmark repo (GitHub public API)"
+    :kind :no-trace
+    :note "Since 2026-09-03: no further comment on #5637; the benchmark repo has
+           0 stars, 0 forks, 0 issues; no xtdb/xtdb code mentions it; the only
+           xtdb issue that mentions it is #5637 itself."}
+   {:id :o7 :date "2026-11-24"
+    :source "xtdb/xtdb issue #5637 (GitHub public API)"
+    :kind :unexplained-update
+    :note "The issue's \"updated\" time is 2026-11-24, but its timeline shows no
+           event after 09-03. Something changed that we cannot see."}]
+  ;; R1DeepTemporalB17.uniform
+  :uniform-prior {:none 1/5 :available 1/5 :used 1/5 :witnessed 1/5 :realised 1/5}
+  ;; R1DeepTemporalB17.traceProb: probability a trace of use is seen, per rung.
+  :trace-prob {:none 1/10 :available 1/10 :used 3/10 :witnessed 2/5 :realised 7/10}
+  ;; Expected numbers transcribed from the Lean theorems evid_noTrace and
+  ;; noTrace_realised.
+  :expected {:evid-no-trace 17/25 :realised-after-no-trace 3/34}}
+
+ :wm-loop-want
+ {:doc "The WM-loop want's six clauses, M-cascade-live-causal.md lines 283-291
+        (\"Wants as sentences\"), as {:clause :source :verdict} data."
+  :clauses
+  [{:clause "every click ends in a selection or a typed stop, none in silence"
+    :source "run records"
+    :verdict :no-channel}
+   {:clause "every selection carries its reason and its G"
+    :source "the trace"
+    :verdict :no-channel}
+   {:clause "no tie is broken except by G"
+    :source "selection records"
+    :verdict :no-channel}
+   {:clause "a stop-the-line halts the loop until it is explained"
+    :source "stop records and their explanations"
+    :verdict :channel-to-be-checked}
+   {:clause "R1 is no older than the latest change to its inputs"
+    :source "entity events and input hashes"
+    :verdict :channel-to-be-built}
+   {:clause "spend stays within the guard"
+    :source "quota records"
+    :verdict :no-channel}]}}
