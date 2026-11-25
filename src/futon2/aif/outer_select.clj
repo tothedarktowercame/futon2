@@ -6,7 +6,7 @@
             [futon2.aif.outer-argue :as outer-argue]
             [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-observation :as observation]
-            [futon2.aif.outer-score :as outer-score]
+            [futon2.aif.selection-cascade :as selection-cascade]
             [futon2.aif.selection-canonical-g :as selection-g]
             [futon2.aif.selection-shared-prediction :as shared-prediction]))
 
@@ -138,7 +138,7 @@
                          class-rows)
         abstention (assoc abstention :altitude-source
                           (assoc (:altitude-source abstention)
-                                 :resource outer-score/abstention-altitude-resource))
+                                 :resource selection-cascade/abstention-altitude-resource))
         abstention (assoc abstention :rendered (render-selection-why :abstention abstention))
         chosen (some #(when (= chosen-class (:class %)) %) class-rows)
         decision (when chosen
@@ -264,7 +264,7 @@
         receipt (get-in (value-of (:facts observation) target) [:relation :receipt])]
     (when (and receipt (not= class (:class receipt)))
       (refuse! :relation-receipt-class-mismatch {:target target :class class :receipt receipt}))
-    (merge (update cascade :steps #(mapv (fn [i step] (outer-score/typed-step step (str (name (:id cascade)) "/step-" i))) (range) %))
+    (merge (update cascade :steps #(mapv (fn [i step] (selection-cascade/typed-step step (str (name (:id cascade)) "/step-" i))) (range) %))
            {:pick (or target :no-pick)
             :pick-facts (when candidate
                           (select-keys (value-of (:facts observation) target)
@@ -362,7 +362,7 @@
              ;; over, and are applied exactly once by contract.
              :when (not-any? #(and (map? %) (or (contains? % :gate) (contains? % :order)))
                              (:steps c))
-             :let [order (try (mapv :target (outer-score/apply-selection-cascade
+             :let [order (try (mapv :target (selection-cascade/apply-selection-cascade
                                              (:steps c) facts field selection-context))
                               (catch clojure.lang.ExceptionInfo _ []))]
              k (range 2 (inc (min max-chain-depth (count order))))]
@@ -417,7 +417,7 @@
                                ;; Apply the cascade once, including any function
                                ;; steps. The canonical scorer receives that
                                ;; exact pick.
-                               (let [candidate (outer-score/cascade-pick (:steps cascade)
+                               (let [candidate (selection-cascade/cascade-pick (:steps cascade)
                                                                         (:facts observation)
                                                                         (:field observation)
                                                                         selection-context)]
@@ -434,7 +434,7 @@
                                                   (or (contains? % :gate) (contains? % :order)))
                                             (:steps cascade))
                                     []
-                                    (:trace (outer-score/apply-selection-cascade-traced
+                                    (:trace (selection-cascade/apply-selection-cascade-traced
                                              (:steps cascade) (:facts observation)
                                              (:field observation) selection-context)))]) menu))
           library (:library construction)
@@ -485,7 +485,7 @@
                             :fired-patterns []
                             ;; Retained for the why renderer's altitude pin
                             ;; (the resource, not the outer-score model).
-                            :altitude-source (outer-score/abstention-altitude)
+                            :altitude-source (selection-cascade/abstention-altitude)
                             :prediction {:trajectory (shared-prediction/shared-prediction
                                                       (:stopping canonical))
                                          :parameters {}})

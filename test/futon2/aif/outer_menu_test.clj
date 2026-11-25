@@ -4,7 +4,7 @@
             [clojure.test :refer [deftest is]]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.outer-menu :as menu]
-            [futon2.aif.outer-score :as score]
+            [futon2.aif.selection-cascade :as score]
             [futon2.aif.outer-observation :as observation]
             [futon2.aif.outer-state :as state])
   (:import [java.nio.file Files]))
@@ -90,19 +90,13 @@
     (is (= {:status :absent :reason :kernel-parameters-unretained} (:kernel c)))))
 
 (deftest kernel-carrier-describes-consumed-constants
+  ;; Step 2b: the outer-model/score-model halves of this test are deleted
+  ;; with outer-score; what remains is the kernel carrier itself.
   (let [m (makeup)
-        model (score/outer-model {:focus "x" :relation (fn [_ _] :focus)
-                                 :facts {"x" {:status :ready :unblocks 1}}
-                                 :field [{:target "x" :reach 1/2}]
-                                 :state-counts (:state-kit m) :cascade [:ready-gate]})
-        input {:ending-counts (:c (state/init-state m)) :gain-counts (:gain-kit m)}
-        g (:G (score/score-model input model))
         carrier (score/kernel-parameters m)]
     (with-redefs [score/kernel-definition (assoc score/kernel-definition :novelty-coefficient 0.0)]
-      (is (not= carrier (score/kernel-parameters m)))
-      (is (not= g (:G (score/score-model input model)))))
+      (is (not= carrier (score/kernel-parameters m))))
     (let [changed (assoc-in m [:gain-kit :one] 20)]
-      (is (not= (score/kernel-parameters m) (score/kernel-parameters changed)))
-      (is (not= g (:G (score/score-model (assoc input :gain-counts (:gain-kit changed)) model)))))
+      (is (not= (score/kernel-parameters m) (score/kernel-parameters changed))))
     (with-redefs [score/kernel-definition (assoc-in score/kernel-definition [:readiness-reach-prior :ready] 2/3)]
       (is (= 2/3 (:value (observation/task-reach {:status :ready :dependency-reading {:record-pin {:sha256 pass-sha}}})))))))

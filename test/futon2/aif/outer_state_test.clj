@@ -27,15 +27,13 @@
   file)
 
 (deftest init-from-kits
-  (testing "Lean init shape has c = kappa * kit"
+  (testing "step 2b: init carries no counts (the kits stay in the makeup)"
     (let [dir (temp-dir)
           makeup (state/load-makeup (write-edn! (io/file dir "makeup.edn") valid-makeup))
           initialized (state/init-state makeup)]
-      (is (= {:focused 55 :related 35 :unrelated 5 :stop-the-line 5
-              :not-yet-evaluated 0}
-             (:c initialized)))
-      (is (= (:state-kit valid-makeup) (:state-counts initialized)))
-      (is (= (:gain-kit valid-makeup) (:gain-counts initialized)))
+      (is (not (contains? initialized :c)))
+      (is (not (contains? initialized :state-counts)))
+      (is (not (contains? initialized :gain-counts)))
       (is (= 0 (:click-count initialized))))))
 
 (deftest write-read-round-trip

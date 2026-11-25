@@ -1,7 +1,5 @@
 (ns futon2.aif.repair-cascade-g-test
-  (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.finite-step-g :as finite]
-            [futon2.aif.outer-score :as outer]
+  (:require [clojure.test :refer [deftest is]]
             [futon2.aif.repair-cascade-g :as repair]))
 
 (def preference
@@ -99,23 +97,3 @@
     (is (= :tie (:status result)))
     (is (nil? (:chosen-id result)))
     (is (= [:genuine-repair :genuine-copy] (:tied-ids result)))))
-
-(deftest finite-step-g-matches-outer-private-sums
-  (let [input {:focus :t1
-               :relation (fn [focus target] (when (= focus target) :focus))
-               :facts {:t1 {:status :ready :unblocks 1}}
-               :field [{:target :t1 :reach 3/4}]
-               :state-counts {:ready {:doable 3 :blocked 1}}
-               :cascade []
-               :ending-counts {:focused 4 :related 1 :unrelated 1
-                               :stop-the-line 1 :not-yet-evaluated 1}
-               :gain-counts {:none 1 :one 3 :several 1}}
-        model (outer/outer-model input)
-        c (outer/outer-preference (:ending-counts input) (:gain-counts input))
-        direct (finite/step-g {:q (:q model) :kernel (:kernel model) :preference c})
-        outer-risk ((deref #'futon2.aif.outer-score/risk) (outer/push model) c)
-        outer-ambiguity ((deref #'futon2.aif.outer-score/ambiguity) model)]
-    (testing "the shared finite sums equal outer-score's existing private sums"
-      (is (< (Math/abs (- (:risk direct) outer-risk)) 1e-12))
-      (is (< (Math/abs (- (:ambiguity direct) outer-ambiguity)) 1e-12))
-      (is (< (Math/abs (- (:g direct) (+ outer-risk outer-ambiguity))) 1e-12)))))

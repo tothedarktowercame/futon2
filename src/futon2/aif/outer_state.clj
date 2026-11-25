@@ -6,7 +6,6 @@
   (:require [futon2.data-paths :as data-paths]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [futon2.aif.outer-score :as outer-score]
             [futon2.aif.action-identity :as identity])
   (:import [java.nio.file Files StandardCopyOption]
            [java.security MessageDigest]
@@ -115,66 +114,15 @@
        (assoc makeup :makeup/sha256 (sha256 bytes) :makeup/path (.getCanonicalPath file))))))
 
 (defn init-state
-  "Lean `R20Step.init`: initialize c to κ·kit and copy state/gain kits."
+  "The durable state's initializer. Since M-cascade-live-causal step 2b the
+  state carries no counts: the selection decision runs on the shared scorer
+  (futon2.aif.selection-cascade + selection-canonical-g), and the old
+  :c/:state-counts/:gain-counts keys are retired (existing durable files
+  that still carry them are read and the keys ignored)."
   [makeup]
   {:schema state-schema
    :makeup/sha256 (:makeup/sha256 makeup)
-   :click-count 0
-   :c (update-vals (:c-kit makeup) #(* (:kappa makeup) %))
-   :state-counts (:state-kit makeup)
-   :gain-counts (:gain-kit makeup)})
-
-(defn advance-c
-  "Lean `R20Step.advanceC`: decay every ending count, then learn a terminal ending.
-
-  `:not-yet-evaluated` is not terminal, so observing it performs decay only."
-  [eta omega before ending]
-  (let [decayed (update-vals before #(* omega %))]
-    (if (= :not-yet-evaluated ending)
-      decayed
-      (update decayed ending (fnil + 0) eta))))
-
-(defn advance-gain-counts
-  "Lean `R20Step.advanceGainCounts`: decay all gain counts and learn the
-  observed gain exactly when a task was selected."
-  [eta omega before observed selected?]
-  (cond-> (update-vals before #(* omega %))
-    selected? (update observed (fnil + 0) eta)))
-
-(defn outer-state-likelihood
-  "Lean `R20Step.outerStateLikelihood`, read from `outer-score/outer-model`'s
-  scoring kernel so scoring and learning use the identical bounded reach and
-  landing construction."
-  [model observed task-state]
-  (get-in model [:kernel task-state observed] 0.0))
-
-(defn outer-state-posterior
-  "Lean `R20Step.outerStatePosterior`: Bayes posterior over doable/blocked.
-
-  An observation with zero total likelihood contributes zero evidence."
-  [model observed task-state]
-  (let [states [:doable :blocked]
-        weight (fn [state]
-                 (* (double (get-in model [:counts state] 0))
-                    (outer-state-likelihood model observed state)))
-        total (reduce + 0.0 (map weight states))]
-    (if (zero? total) 0.0 (/ (weight task-state) total))))
-
-(defn advance-state-counts
-  "Lean `R20Step.advanceStateCounts`: decay every readiness row, then add
-  the picked task's posterior to the row for its current Giraffe status."
-  [eta omega before model observed]
-  (let [decayed (update-vals before
-                             (fn [row]
-                               (update-vals row #(* omega %))))]
-    (if (:pick model)
-      (let [status (:status model)]
-        (reduce (fn [counts task-state]
-                  (update-in counts [status task-state] (fnil + 0)
-                             (* eta (outer-state-posterior model observed task-state))))
-                decayed
-                [:doable :blocked]))
-      decayed)))
+   :click-count 0})
 
 (defn replayed-cascade-digest
   "The digest this namespace recomputes when replaying a pinned cascade: the
@@ -213,30 +161,16 @@
 (declare valid-state? check-pending-makeup!)
 
 (defn next-state
-  "The learned-state part of Lean `R20Step.step`.
-
-  Builds the chosen cascade's exact `outer-score/outer-model`, advances C,
-  gain and readiness-state counts with makeup rates, and increments the click
-  count.  It performs no I/O."
-  [makeup state selection-result observation {:keys [ending-class observed-gain]}]
+  "The learned-state part of Lean `R20Step.step`, minus the retired counts
+  (step 2b): the pinned cascade's steps are still replay-checked (the
+  :pending-steps-unrecoverable refusal is a discharge kind), the click count
+  advances, and the retired :c/:state-counts/:gain-counts keys are dropped
+  from the learned state. It performs no I/O."
+  [makeup state selection-result _observation _ending]
   (check-pending-makeup! makeup state selection-result)
-  (let [cascade (chosen-cascade makeup selection-result)
-        model (outer-score/outer-model
-               (assoc observation
-                      :state-counts (:state-counts state)
-                      :cascade cascade))
-        selected? (some? (:selection selection-result))
-        observed [ending-class observed-gain]]
+  (let [_cascade (chosen-cascade makeup selection-result)]
     (-> state
-        (dissoc :source)
-        (assoc :c (advance-c (:eta-c makeup) (:omega-c makeup)
-                             (:c state) ending-class)
-               :gain-counts (advance-gain-counts
-                             (:eta-gain makeup) (:omega-gain makeup)
-                             (:gain-counts state) observed-gain selected?)
-               :state-counts (advance-state-counts
-                              (:eta-state makeup) (:omega-state makeup)
-                              (:state-counts state) model observed))
+        (dissoc :source :c :state-counts :gain-counts)
         (update :click-count inc))))
 
 (defn consume-observation
@@ -293,21 +227,16 @@
     (refuse! :pending-observation-unconsumed {:run-id (get-in state [:pending :run-id])}))
   (assoc state :pending pending))
 
-(defn- valid-state? [state]
+(defn- valid-state?
+  "The durable state's own invariants. The retired count keys
+  (:c/:state-counts/:gain-counts) are ignored either way: a pre-2b file
+  still carrying them is read, a post-2b file does not have them."
+  [state]
   (and (= state-schema (:schema state))
        (string? (:makeup/sha256 state))
        (boolean (re-matches #"[0-9a-f]{64}" (:makeup/sha256 state)))
        (int? (:click-count state))
-       (not (neg? (:click-count state)))
-       (= #{:focused :related :unrelated :stop-the-line :not-yet-evaluated}
-          (set (keys (:c state))))
-       (every? #(and (number? %) (not (neg? %))) (vals (:c state)))
-       (= #{:ready :not-ready :undetermined} (set (keys (:state-counts state))))
-       (every? #(and (= #{:doable :blocked} (set (keys %)))
-                     (every? positive-number? (vals %)))
-               (vals (:state-counts state)))
-       (= #{:none :one :several} (set (keys (:gain-counts state))))
-       (every? positive-number? (vals (:gain-counts state)))))
+       (not (neg? (:click-count state)))))
 
 (defn- state-bytes [state]
   (.getBytes (str (pr-str (dissoc state :source)) "\n") "UTF-8"))

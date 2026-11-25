@@ -1,9 +1,19 @@
-(ns futon2.aif.outer-score
-  "Pure task-selection cascade application and expected-free-energy scoring.
+(ns futon2.aif.selection-cascade
+  "Task-selection cascade application, moved unchanged from the deleted
+  futon2.aif.outer-score (M-cascade-live-causal step 2b, Joe 2026-11-25
+  19:34): the outer-score model/push/score-model track is retired; what
+  remains live is the cascade machinery the click still uses -- the gates
+  and orderings (apply-selection-step/-cascade/-traced, cascade-pick), the
+  serializable step descriptions (typed-step), the placement gate
+  (placed-workable?), the versioned kernel constants the reach producer and
+  the menu's kernel-input read (kernel-definition, kernel-parameters), and
+  the pinned stopping altitude (abstention-altitude) that the selection
+  why-renderer pins.
 
-  This namespace follows DarkTower.WarMachine.R20Step. It constructs no field
-  and carries no state between clicks; the ruled stopping altitude is read from
-  its pinned resource."
+  Behaviour is unchanged: every function body is byte-identical to the
+  outer-score original. The refused-kind keywords keep their historical
+  :outer-score/... names so existing refusal receipts and tests are
+  untouched."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -55,7 +65,6 @@
   [:focused :related :unrelated :stop-the-line :not-yet-evaluated])
 (def ^:private gains [:none :one :several])
 (def ^:private states [:doable :blocked])
-(def ^:private outcomes (vec (for [ending endings gain gains] [ending gain])))
 
 (def kernel-definition
   "Versioned constants consumed by the scorer (and task reach producer).
@@ -207,54 +216,6 @@
   ([cascade facts field selection-context]
    (first (apply-selection-cascade cascade facts field selection-context))))
 
-(defn- normalize [counts support]
-  (let [total (reduce + 0 (map #(double (or (value-of counts %) 0)) support))]
-    (when-not (pos? total)
-      (throw (ex-info "Outer count row has no positive mass"
-                      {:kind :outer-score/nonpositive-count-total})))
-    (into {} (map (fn [x] [x (/ (double (or (value-of counts x) 0)) total)]) support))))
-
-(defn- bounded-reach [reach]
-  (let [[lo hi] (get-in kernel-definition [:transition-kernel :reach-bounds])]
-    (max lo (min hi (double reach)))))
-
-(defn- ready-gain [unblocks]
-  (cond (zero? unblocks) :none (= 1 unblocks) :one :else :several))
-
-(defn- stopped-kernel []
-  (into {} (for [state states]
-             [state (assoc (zipmap outcomes (repeat 0.0))
-                           (get-in kernel-definition [:transition-kernel :stopped])
-                           (get-in kernel-definition [:transition-kernel :stopped-mass]))])))
-
-(defn- picked-kernel [landing raw-reach]
-  (let [reach (bounded-reach raw-reach)
-        stopped (get-in kernel-definition [:transition-kernel :stopped])
-        row0 (zipmap outcomes (repeat 0.0))
-        blocked (assoc row0 stopped (get-in kernel-definition [:transition-kernel :stopped-mass]))
-        doable (if (= landing stopped)
-                 blocked
-                 (assoc row0 landing reach stopped (- 1.0 reach)))]
-    {:doable doable :blocked blocked}))
-
-(defn- unknown-relation-kernel [gain raw-reach]
-  (let [reach (bounded-reach raw-reach)
-        stopped (get-in kernel-definition [:transition-kernel :stopped])
-        prior (get-in kernel-definition [:unknown-relation :prior])
-        row0 (zipmap outcomes (repeat 0.0))
-        doable (reduce-kv (fn [row ending mass]
-                            (assoc row [ending gain] (* reach (double mass))))
-                          (assoc row0 stopped (- 1.0 reach)) prior)
-        blocked (assoc row0 stopped 1.0)]
-    {:doable doable :blocked blocked}))
-
-(defn stopped-model
-  "The explicit abstention model, independent of any menu cascade."
-  []
-  {:pick nil :status nil :counts {:doable 0 :blocked 1}
-   :q {:doable 0.0 :blocked 1.0} :kernel (stopped-kernel)
-   :landing (get-in kernel-definition [:transition-kernel :stopped])})
-
 (defn typed-step
   "Serializable description of the actual interpreter step. Function steps
   remain named/unverifiable; their printed JVM object identity is not evidence.
@@ -269,127 +230,3 @@
     (and (map? step) (contains? step :status-gate)) step
     (contains? #{:placed-gate :by-cone :by-unblocks :by-rank} step) step
     :else {:named (if (string? step) step (pr-str step))})))
-
-(defn outer-model
-  "Lean `outerModel`: construct the doable/blocked prior and picked-task kernel.
-
-  Input is `{:focus :relation :facts :field :state-counts :cascade}`."
-  [{:keys [focus relation facts field state-counts cascade]}]
-  (if-let [candidate (cascade-pick cascade facts field)]
-    (let [fact (value-of facts (:target candidate))
-          status (:status fact)
-          relation-class (relation focus (:target candidate))
-          ending (get (:retraction kernel-definition) relation-class)
-          prior? (= :unknown relation-class)
-          discovery? (= status (get-in kernel-definition [:discovery-gain :status]))
-          gain (when (or ending prior?)
-                 (if discovery?
-                   (get-in kernel-definition [:discovery-gain :gain])
-                   (ready-gain (graph-term facts (:target candidate) :unblocks))))
-          landing (cond
-                    ending [ending gain]
-                    prior? (assoc (get kernel-definition :unknown-relation) :gain gain)
-                    :else (get-in kernel-definition [:transition-kernel :stopped]))]
-      (cond-> {:pick candidate
-       :status status
-       :gain-source (if discovery? (get-in kernel-definition [:discovery-gain :source])
-                        :giraffe-unblocks)
-       :counts (value-of state-counts status)
-       :q (normalize (value-of state-counts status) states)
-       :kernel (if prior?
-                 (unknown-relation-kernel gain (:reach candidate))
-                 (picked-kernel landing (:reach candidate)))
-       :landing landing}
-        prior? (assoc :relation-basis :prior)))
-    (stopped-model)))
-
-(defn outer-preference
-  "Lean `outerPreferenceKernel`: product of normalized ending and gain counts."
-  [ending-counts gain-counts]
-  (let [ending (normalize ending-counts endings)
-        gain (normalize gain-counts gains)]
-    (into {} (for [[e g :as outcome] outcomes]
-               [outcome (* (ending e) (gain g))]))))
-
-(defn outer-novelty
-  "Lean `outerKernelNovelty` / `outerNovelty`: Fisher-information novelty.
-
-  A model with no pick has zero novelty."
-  [{:keys [pick counts kernel]}]
-  (if-not pick
-    0.0
-    (let [a (double (value-of counts :doable))
-          b (double (value-of counts :blocked))
-          total (+ a b)]
-      (when-not (and (pos? a) (pos? b))
-        (throw (ex-info "Outer novelty requires positive Beta counts"
-                        {:kind :outer-score/nonpositive-state-counts :counts counts})))
-      (let [variance (/ (* a b) (* total total (inc total)))
-            fisher (reduce + 0.0
-                           (for [outcome outcomes
-                                 :let [ad (get-in kernel [:doable outcome] 0.0)
-                                       ab (get-in kernel [:blocked outcome] 0.0)
-                                       prediction (/ (+ (* a ad) (* b ab)) total)]
-                                 :when (pos? prediction)]
-                             (/ (* (- ad ab) (- ad ab)) prediction)))]
-        (* (:novelty-coefficient kernel-definition) variance fisher)))))
-
-(defn push
-  "Lean `push q a`: marginalize an outer model's state prior through its kernel."
-  [{:keys [q kernel]}]
-  (into {} (for [outcome outcomes]
-             [outcome (reduce + 0.0
-                              (for [state states]
-                                (* (q state) (get-in kernel [state outcome] 0.0))))])))
-
-(defn- risk [prediction preference]
-  (if (some (fn [[outcome mass]]
-              (and (pos? mass) (not (pos? (get preference outcome 0.0)))))
-            prediction)
-    :inadmissible
-    (reduce + 0.0
-            (for [[outcome mass] prediction :when (pos? mass)]
-              (* mass (Math/log (/ mass (preference outcome))))))))
-
-(defn- entropy [row]
-  (- (reduce + 0.0 (for [[_ mass] row :when (pos? mass)]
-                         (* mass (Math/log mass))))))
-
-(defn- ambiguity [{:keys [q kernel]}]
-  (reduce + 0.0 (for [state states] (* (q state) (entropy (kernel state))))))
-
-(defn score-model
-  "Retain the finite-sum terms and prediction for one already-computed model.
-  No rounding: G is the same risk + ambiguity - novelty used by outer-score."
-  [{:keys [ending-counts gain-counts]} model]
-  (let [prediction (push model)
-        r (risk prediction (outer-preference ending-counts gain-counts))
-        a (ambiguity model)
-        n (outer-novelty model)
-        stopping? (= prediction (push (stopped-model)))
-        altitude-source (when stopping? (abstention-altitude))
-        altitude (or (:nats altitude-source) 0)]
-    (cond-> {:terms (cond-> {:risk r :ambiguity a :novelty n}
-              stopping? (assoc :altitude altitude))
-     :altitude-source altitude-source
-     :G (if (= :inadmissible r) :inadmissible (+ (- (+ r a) n) altitude))
-     :gain-source (:gain-source model)
-     :prediction (assoc (select-keys model [:q :landing :status :gain-source])
-                        :outcomes prediction)}
-      (:relation-basis model)
-      (assoc :relation-basis (:relation-basis model)
-             :prediction (assoc (select-keys model [:q :landing :status :gain-source
-                                                     :relation-basis])
-                                :outcomes prediction)))))
-
-(defn abstention-score
-  "Score stopping separately over the same preference and ruled altitude;
-  never a menu member."
-  [input]
-  (score-model input (stopped-model)))
-
-(defn outer-score
-  "Lean outerScore: risk + ambiguity - novelty, or :inadmissible for positive
-  predicted mass at zero preference. Kept as the scalar compatibility API."
-  [input]
-  (:G (score-model input (outer-model input))))

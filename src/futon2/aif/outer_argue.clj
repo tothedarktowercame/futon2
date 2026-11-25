@@ -3,8 +3,7 @@
 
   The executable semantics conform to
   DarkTower.WarMachine.SelectionArgument (commit dda98c192)."
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
 (defn- word [x]
@@ -132,85 +131,6 @@
 (defn- order-term [step facts]
   (get facts (case step :by-cone :cone :by-unblocks :unblocks :by-rank :rank)))
 
-(defn- fact-value [facts field]
-  (let [value (case field
-                "giraffe.cone" (:cone facts)
-                "giraffe.unblocks" (:unblocks facts)
-                "giraffe.rank" (:rank facts)
-                "placement.status" (get-in facts [:placement :status])
-                "placement.action" (get-in facts [:placement :action])
-                "placement.way" (first (get-in facts [:placement :ways]))
-                ::unrecorded)]
-    (if (nil? value) ::unrecorded value)))
-
-(def ^:private comparison-re
-  #"^([^ ]+)\s*(>|<|=)\s*([^ ]+)(?:\s+\(other is any other ready candidate in the field\))?$")
-
-(defn- compare-values [op left right]
-  (case op
-    ">" (and (number? left) (number? right) (> left right))
-    "<" (and (number? left) (number? right) (< left right))
-    "=" (= left right)
-    false))
-
-(defn- parse-literal [s]
-  (if (re-matches #"-?\d+(?:\.\d+)?" s)
-    (edn/read-string s)
-    ::not-literal))
-
-(defn- ready-other-values [per-task-rating pick field]
-  (let [k (keyword (last (str/split field #"\.")))]
-    (when (seq per-task-rating)
-      (->> per-task-rating
-           (filter #(and (= :ready (:status %)) (not= pick (:target %))))
-           (keep #(get % k))
-           vec))))
-
-(defn- comparison-result [per-task-rating facts pick expression]
-  (if-let [[_ left-field op right-token] (re-matches comparison-re expression)]
-    (let [left (fact-value facts left-field)]
-      (cond
-        (= ::unrecorded left)
-        {:shown false :why (str left-field " is not recorded")}
-
-        (str/starts-with? right-token "other.giraffe.")
-        (let [values (ready-other-values per-task-rating pick right-token)]
-          (cond
-            (nil? values)
-            {:shown false :why "other ready-candidate field facts are unrecorded"}
-
-            (empty? values)
-            {:shown false
-             :why (str right-token " is unrecorded for every other ready candidate")}
-
-            :else
-            (let [shown (boolean (some #(compare-values op left %) values))]
-              {:shown shown
-               :why (str left-field " is " left ", other ready values "
-                         (pr-str values) " (comparison "
-                         (if shown "holds" "is false") ")")})))
-
-        :else
-        (let [literal (parse-literal right-token)
-              right (if (= ::not-literal literal)
-                      (fact-value facts right-token)
-                      literal)]
-          (if (= ::unrecorded right)
-            {:shown false :why (str right-token " is not recorded")}
-            (let [shown (boolean (compare-values op left right))]
-              {:shown shown
-               :why (str left-field " is " left " (comparison " op " " right " "
-                         (if shown "holds" "is false") ")")})))))
-    {:shown false :why (str "predicate cannot be evaluated: " expression)}))
-
-(defn- predicate-result [per-task-rating facts pick predicate]
-  (if (= "unrecorded" predicate)
-    {:shown false :why "predicate is unrecorded"}
-    (let [parts (str/split predicate #"\s+and\s+")
-          results (mapv #(comparison-result per-task-rating facts pick %) parts)]
-      {:shown (every? :shown results)
-       :why (str/join "; " (map :why results))})))
-
 (defn- attacks-between [x y]
   (if-let [gate (some #(gate-fails % (:facts y)) (:steps x))]
     [(assoc gate :from (:id x) :to (:id y)
@@ -237,30 +157,6 @@
                      (:pick y) " (" (:vy decision) ") over its pick " (:pick x)
                      " (" (:vx decision) ")")}]))))
 
-(defn- undercuts-between [per-task-rating x y]
-  (let [y-patterns (set (map :pattern (:warrants y)))]
-    (for [w (:warrants x)
-          undercut (:undercuts w)
-          :when (and (contains? y-patterns (:target undercut))
-                     (not (contains? y-patterns (:pattern w))))
-          :let [result (predicate-result per-task-rating (:facts y) (:pick y)
-                                         (:predicate undercut))
-                shown (:shown result)]]
-      {:kind (if shown :undercut :undercut-unshown)
-       :from (:id x)
-       :to (:id y)
-       :pattern (:pattern w)
-       :target-pattern (:target undercut)
-       :predicate (:predicate undercut)
-       :quote (:quote undercut)
-       :shown shown
-       :why (:why result)
-       :text (str (:pattern w) " undercuts " (:target undercut) ": '"
-                  (:quote undercut) "' — "
-                  (if shown
-                    (str "shown by " (:predicate undercut))
-                    (str "not shown (" (:why result) ")")))})))
-
 (defn defeats?
   "Mirror Lean `defeats`: self-attacks and unknown IDs fail; otherwise the
   attack succeeds unless the target has strictly lower G than the source."
@@ -272,9 +168,10 @@
                   (not (< (:G target) (:G source)))))))
 
 (defn attacks
-  "Compute gate, absence, order, and stopping attacks, then annotate defeat."
-  ([arguments] (attacks arguments nil))
-  ([arguments per-task-rating]
+  "Compute gate, absence, order, and stopping attacks, then annotate defeat.
+  (Step 2b: the rating-based undercuts are deleted -- the per-task ratings
+  they scored are gone with outer-score, and no ratings reach this ns.)"
+  [arguments]
   (let [picks (filterv #(not= :stopping (:id %)) arguments)
         raw (vec
              (distinct
@@ -288,13 +185,8 @@
                       (for [x picks]
                         {:kind :stopping :from :stopping :to (:id x)
                          :text (str "stopping: no pick is worth more than abstaining, against "
-                                    (:pick x))})
-                      (for [x picks y picks :when (not= x y)
-                            attack (undercuts-between per-task-rating x y)]
-                        attack))))]
-    (mapv #(assoc % :succeeds
-                  (and (not= :undercut-unshown (:kind %))
-                       (defeats? arguments %))) raw))))
+                                    (:pick x))}))))]
+    (mapv #(assoc % :succeeds (defeats? arguments %)) raw)))
 
 (defn defeaters
   "Mirror Lean `defeaters`: successful incoming attack sources, in attack order."
@@ -397,7 +289,7 @@
   (let [picks (remove #(= :stopping (:id %)) arguments)
         winner (first (filter #(= (:pick decision) (:pick %)) arguments))
         losers (remove #(= (:id winner) (:id %)) picks)]
-    (str "What G read: the pick's Giraffe status (reach prior), its relation to the focus (a known relation lands on that ending; an unknown one lands on the pinned prior 11/19 focused, 7/19 related, 1/19 unrelated) and its unblocks as gain (outer_score.clj kernel-parameters). It did not read the placement, so the winning cascade's own gate contributed nothing to the number that made it win."
+    (str "What G read: the pick's Giraffe status (reach prior), its relation to the focus (a known relation lands on that ending; an unknown one lands on the pinned prior 11/19 focused, 7/19 related, 1/19 unrelated) and its unblocks as gain (selection_cascade.clj kernel-parameters). It did not read the placement, so the winning cascade's own gate contributed nothing to the number that made it win."
          (when-let [loser (and (not= :stopping (:id winner))
                                (first (filter #(= "associated"
                                                   (get-in % [:facts :relation]))
@@ -410,9 +302,9 @@
 
 (defn frame
   "Build the retained argument reading for an outer selection."
-  [{:keys [why cascades relations library-root per-task-rating]}]
+  [{:keys [why cascades relations library-root]}]
   (let [arguments (arguments why cascades relations (or library-root (default-library-root)))
-        attacks (attacks arguments per-task-rating)
+        attacks (attacks arguments)
         shown-attacks (filterv #(not= :undercut-unshown (:kind %)) attacks)
         grounded (grounded arguments shown-attacks)
         decision (:decision why)

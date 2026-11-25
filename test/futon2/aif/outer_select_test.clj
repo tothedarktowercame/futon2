@@ -4,7 +4,7 @@
             [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-menu-fixture :as menu-fixture]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.outer-score :as outer-score]
+            [futon2.aif.selection-cascade :as outer-score]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.outer-state :as outer-state]
             [futon2.aif.action-identity :as identity]

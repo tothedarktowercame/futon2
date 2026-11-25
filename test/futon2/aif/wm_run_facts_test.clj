@@ -8,7 +8,6 @@
             [futon2.aif.load-identity :as load-identity]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.outer-menu :as outer-menu]
-            [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.preference-registry :as preference-registry]
             [futon2.aif.policy :as policy]
@@ -1221,26 +1220,11 @@
                      :previous-selection (:previous retained)
                      :giraffe/pass-sha256 (:giraffe/pass-sha256 retained)
                      :giraffe/input-sha256 (get-in retained [:construction :graph])}
-        altitude-source (outer-score/abstention-altitude)
-        stopping-outcomes (get-in retained [:abstention :prediction :outcomes])
-        with-altitude (fn [score]
-                        (if (= stopping-outcomes (get-in score [:prediction :outcomes]))
-                          (-> score
-                              (update :G + (:nats altitude-source))
-                              (assoc-in [:terms :altitude] (:nats altitude-source))
-                              (assoc :altitude-source altitude-source))
-                          score))
-        retained-scores (atom (:cascades retained))
+        ;; Step 2b: the score-model / abstention-score redefs are deleted
+        ;; with outer-score. The reselection now runs on the shared scorer
+        ;; alone, over the retained construction.
         reselection (with-redefs [outer-menu/construct
-                                  (fn [_ _ _] (dissoc (:construction retained) :policy-count))
-                                  outer-score/score-model
-                                  (fn [_ _]
-                                    (let [score (first @retained-scores)]
-                                      (swap! retained-scores subvec 1)
-                                      (with-altitude
-                                        (select-keys score [:G :terms :prediction :gain-source]))))
-                                  outer-score/abstention-score
-                                  (fn [_] (with-altitude (:abstention retained)))]
+                                  (fn [_ _ _] (dissoc (:construction retained) :policy-count))]
                       (outer-select/select params state observation))
         reselection (assoc reselection :q6 (:q6 retained))
         export (facts/selection-facts-for-record

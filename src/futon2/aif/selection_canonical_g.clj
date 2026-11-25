@@ -5,7 +5,7 @@
 
   Joe, 2026-11-13: \"it is G over policies, so a different cascade (including a
   different pattern) should have a different G even if it chooses the same
-  ticket\"; class route. The pick is unchanged (outer-score/cascade-pick); what
+  ticket\"; class route. The pick is unchanged (selection-cascade/cascade-pick, moved from the deleted outer-score); what
   changes is that each cascade's patterns, interpreted from their @guard and
   @predicts, drive a token trajectory that the shared class-emission channel
   (cascade-shape-g/class-emission-model) observes: the pick's ending class once

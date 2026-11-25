@@ -1,7 +1,14 @@
 (ns futon2.aif.outer-state-update-test
+  "What remains of the durable state update after M-cascade-live-causal
+  step 2b: the carried counts (advance-c, advance-gain-counts,
+  advance-state-counts, the outer-state likelihood/posterior) are deleted
+  with outer-score. Deleted tests: gain-counts-stay-positive,
+  selected-status-learns-and-other-status-decays,
+  state-learning-moves-belief, learned-c-matches-slice-3b (their subjects
+  are deleted). What remains is the click count, the pinned-cascade replay
+  check, and the retirement of the count keys."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.action-identity :as identity]
-            [futon2.aif.outer-score :as outer-score]
             [futon2.aif.outer-state :as state]))
 
 (def makeup
@@ -35,84 +42,27 @@
    :cascade-scores [0.0]
    :selection {:candidates [candidate] :selected candidate}})
 
-(defn approx= [expected actual]
-  (< (Math/abs (- (double expected) (double actual))) 1.0e-12))
+(deftest init-state-carries-no-counts
+  (testing "step 2b: the initializer writes no count keys"
+    (let [init (state/init-state makeup)]
+      (is (= 0 (:click-count init)))
+      (is (not (contains? init :c)))
+      (is (not (contains? init :state-counts)))
+      (is (not (contains? init :gain-counts))))))
 
-(deftest gain-counts-stay-positive
-  (testing "Lean advanceGainCounts_pos"
-    (let [advanced (state/advance-gain-counts 1 9/10
-                                              {:none 1 :one 2 :several 3}
-                                              :one true)]
-      (is (every? pos? (vals advanced)))
-      (is (= {:none 9/10 :one 14/5 :several 27/10} advanced))))
-  (testing "no selection decays every gain and adds no observation"
-    (is (= {:none 1/2 :one 1 :several 3/2}
-           (state/advance-gain-counts 7 1/2
-                                      {:none 1 :one 2 :several 3}
-                                      :several false)))))
-
-(deftest selected-status-learns-and-other-status-decays
-  (testing "Lean advanceStateCounts selected-status closed form"
-    (let [before (:state-kit makeup)
-          model (outer-score/outer-model
-                 (assoc observation :state-counts before :cascade [:ready-gate]))
-          advanced (state/advance-state-counts 1 9/10 before model
-                                                [:stop-the-line :none])]
-      ;; With ready counts (1,1), reach 1/2 and a stop observation, the
-      ;; posterior is (1/3,2/3).
-      (is (approx= (+ 9/10 1/3) (get-in advanced [:ready :doable])))
-      (is (approx= (+ 9/10 2/3) (get-in advanced [:ready :blocked])))
-      (is (= {:doable 9/10 :blocked 27/10} (:not-ready advanced)))
-      (is (= {:doable 9/10 :blocked 9/10} (:undetermined advanced))))))
-
-(deftest state-learning-moves-belief
-  (testing "Lean state_learning_moves_belief"
-    (let [before (:state-kit makeup)
-          model (outer-score/outer-model
-                 (assoc observation :state-counts before :cascade [:ready-gate]))
-          stop (state/advance-state-counts 1 1 before model
-                                           [:stop-the-line :none])
-          landing (state/advance-state-counts 1 1 before model
-                                              [:related :one])]
-      ;; Lean compares the normalised share before and after, strictly.
-      (letfn [(share [counts s] (/ (get-in counts [:ready s])
-                                   (+ (get-in counts [:ready :doable])
-                                      (get-in counts [:ready :blocked]))))]
-        (is (> (share stop :blocked) (share before :blocked)))
-        (is (> (share landing :doable) (share before :doable))))))
-  (testing "an impossible observation has zero posterior evidence"
-    (let [before (:state-kit makeup)
-          model (outer-score/outer-model
-                 (assoc observation :state-counts before :cascade [:ready-gate]))
-          advanced (state/advance-state-counts 1 9/10 before model
-                                               [:unrelated :several])]
-      (is (every? true?
-                  (for [status [:ready :not-ready :undetermined]
-                        task-state [:doable :blocked]]
-                    (approx= (* 9/10 (get-in before [status task-state]))
-                             (get-in advanced [status task-state]))))))))
-
-(deftest learned-c-matches-slice-3b
-  (testing "Lean learned_selection_click_one C update"
-    (let [before (:c (state/init-state makeup))
-          after (state/advance-c 1 9/10 before :related)
-          total (reduce + (vals after))
-          normalized (update-vals after #(/ % total))]
-      (is (= {:focused 99/380 :related 263/380 :unrelated 9/380
-              :stop-the-line 9/380 :not-yet-evaluated 0}
-             normalized)))))
-
-(deftest next-state-combines-the-updates
-  (testing "the state part of Lean step"
-    (let [before (assoc (state/init-state makeup) :source :init)
+(deftest next-state-advances-the-click-count-and-drops-counts
+  (testing "the state part of Lean step, minus the retired counts"
+    (let [before (assoc (state/init-state makeup) :source :init
+                        ;; a pre-2b durable state still carries these; the
+                        ;; learned update drops them
+                        :c {:focused 1} :state-counts {} :gain-counts {})
           after (state/next-state makeup before selection observation
                                   {:ending-class :related :observed-gain :one})]
       (is (= 1 (:click-count after)))
       (is (not (contains? after :source)))
-      (is (= 14/5 (get-in after [:gain-counts :one])))
-      (is (= 263/200 (get-in after [:c :related])))
-      (is (> (get-in after [:state-counts :ready :doable])
-             (get-in after [:state-counts :ready :blocked]))))))
+      (is (not (contains? after :c)))
+      (is (not (contains? after :state-counts)))
+      (is (not (contains? after :gain-counts))))))
 
 (deftest chain-variant-selection-replays-through-chosen-cascade
   ;; wm-click-loop-repair-bb1de665: held run 2026-11-13-ea3be8a8 stopped at

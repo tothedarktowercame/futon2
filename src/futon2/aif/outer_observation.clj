@@ -13,7 +13,7 @@
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.outer-state :as outer-state]
-            [futon2.aif.outer-score :as outer-score]
+            [futon2.aif.selection-cascade :as selection-cascade]
             [futon2.aif.task-requisition :as task-requisition]
             [futon2.aif.wm.construction-inputs :as construction-inputs])
   (:import [java.nio.file Files]
@@ -154,7 +154,7 @@
   run. Unknown status or missing row evidence stays explicitly absent."
   [row]
   (let [pin (get-in row [:dependency-reading :record-pin :sha256])
-        value (get (:readiness-reach-prior outer-score/kernel-definition) (:status row))
+        value (get (:readiness-reach-prior selection-cascade/kernel-definition) (:status row))
         inputs {:status (:status row) :pin pin}]
     (if (and value (string? pin) (seq pin))
       {:value value :kind :prior :source :giraffe-status-readiness-prior-v1
@@ -382,7 +382,7 @@
           :giraffe/manifest-sha256 manifest-sha})))))
 
 (defn outer-observation
-  "Build the input read by `outer-score`, aligned with Lean `R20Step.Observation`.
+  "Build the input read by `selection-cascade` (formerly `outer-score`), aligned with Lean `R20Step.Observation`.
 
   Required keys are `:run-dir`, `:makeup`, `:focus-inputs`, and
   `:decision-as-of`.  Optional `:previous-focus` and `:relation-context` are

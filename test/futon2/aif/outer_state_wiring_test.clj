@@ -93,10 +93,10 @@
                                   (fn [opts] (reset! second-opts opts) {:ran true})))
           (let [after-second (outer-state/read-state makeup state-file)]
             (is (= 1 (:click-count after-second)))
-            (is (= 263/200 (get-in after-second [:c :related])))
-            (is (= 19/10 (get-in after-second [:gain-counts :none])))
-            (is (approx= 9/10 (get-in after-second [:state-counts :ready :doable])))
-            (is (approx= 9/10 (get-in after-second [:state-counts :ready :blocked])))
+            ;; Step 2b: the learned state no longer carries counts.
+            (is (not (contains? after-second :c)))
+            (is (not (contains? after-second :gain-counts)))
+            (is (not (contains? after-second :state-counts)))
             (is (= :applied
                    (get-in @second-opts [:outer/selection :outer/learning :status])))
             (is (= (:run-id @second-opts) (get-in after-second [:pending :run-id])))))))))

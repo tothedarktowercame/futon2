@@ -6,7 +6,7 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.load-identity :as identity]
-            [futon2.aif.outer-score :as score]
+            [futon2.aif.selection-cascade :as score]
             [futon2.aif.q2-construction :as q2])
   (:import [java.nio.file Files]))
 

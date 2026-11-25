@@ -8,7 +8,7 @@
             [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-observation :as observation]
             [futon2.aif.outer-menu-test :as pins]
-            [futon2.aif.outer-score :as score]
+            [futon2.aif.selection-cascade :as score]
             [futon2.aif.outer-select :as select]
             [futon2.aif.outer-state :as state]))
 
@@ -135,18 +135,6 @@
     (is (= :giraffe-input-missing (:reason (observation/verified-input-pin dir))))
     (spit input "corrupt")
     (is (= :giraffe-input-pin-mismatch (kind #(observation/verified-input-pin dir))))))
-
-(deftest discovery-never-reads-numeric-gain-terms
-  (let [input {:focus "x" :relation (fn [_ _] :associated)
-               :facts {"x" {:status :undetermined :cone :unavailable :unblocks :unavailable}}
-               :field [{:target "x" :reach 1/2}] :state-counts (:state-kit (makeup))
-               :cascade [{:status-gate :undetermined}]}
-        m (score/outer-model input)]
-    (is (= [:related :none] (:landing m)))
-    (with-redefs [score/kernel-definition (assoc-in score/kernel-definition [:discovery-gain :gain] :one)]
-      (is (= [:related :one] (:landing (score/outer-model input)))))
-    (is (= :outer-score/graph-term-unavailable
-           (kind #(score/outer-model (assoc input :cascade [{:status-gate :undetermined} :by-cone])))))))
 
 (deftest real-giraffe-field-selects-through-the-constructed-menu
   ;; Moved from outer-select-test on 2026-11-01 (claude-2, L5-4j review): that
