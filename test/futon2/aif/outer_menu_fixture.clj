@@ -2,14 +2,19 @@
   "Small-menu scoring fixtures only. Production library construction is tested
   without this redefinition in outer-menu-test and outer-menu-wiring-test.
   E4: selections through this fixture read R1 from the bound
-  outer-select/*r1-of* (unlinked: the pre-E4 point mass), never futon3c."
+  outer-select/*r1-of*. Joe 2026-11-27 (admission by benefit path): the
+  fixture's picks are LINKED, so they remain choosable; tests that exercise
+  unlinked picks bind their own r1-of."
   (:require [futon2.aif.outer-menu :as menu]
             [futon2.aif.outer-select :as outer-select]
             [futon2.aif.q2-construction :as q2]
             [futon2.aif.selection-canonical-g :as selection-g]))
 
 (defn with-fixture-constructor [f]
-  (binding [outer-select/*r1-of* (constantly {:status :unlinked})]
+  (binding [outer-select/*r1-of* (constantly {:status :linked :below 1
+                                              :benefits ["B-fixture"]
+                                              :log-hash "fixture"
+                                              :calibration #{:placeholder}})]
     (with-redefs [menu/construct
                   (fn [root makeup _]
                     (let [library (q2/library-manifest root)]

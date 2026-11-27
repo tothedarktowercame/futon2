@@ -145,3 +145,99 @@
           (let [f (futon2.aif.outer-select/selection-r1-of {})]
             (is (fn? f))
             (is (= {:status :unlinked} (f "M-x")))))))))
+
+;;; ## Admission by benefit (Joe 2026-11-27)
+
+(def admission-observation
+  {:focus "M-ready"
+   :relation (fn [_ target]
+               (cond (= "M-ready" target) :associated
+                     (= "M-unknown" target) :useful-elsewhere
+                     :else :unknown))
+   :field [{:target "M-ready" :reach 1/2 :reach-source :default-reach}
+           {:target "M-unknown" :reach 1/2 :reach-source :default-reach}]
+   :facts {"M-ready" {:status :ready :unblocks 3 :cone 3}
+           "M-unknown" {:status :ready :unblocks 0 :cone 0}}})
+
+(def admission-makeup
+  {:cascades [{:id :a :patterns ["test"] :steps [{:gate #(= "M-ready" (:target %))}]}
+              {:id :b :patterns ["test"] :steps [{:gate #(= "M-unknown" (:target %))}]}]})
+
+(deftest unlinked-pick-never-chosen-even-at-lower-g
+  (testing "a's pick is unlinked, b's is linked; a has the lower G (its
+  class :related outranks b's :unrelated 35/100 vs 5/100), so without
+  benefit admission a would win -- the linked b is chosen instead"
+    (binding [outer-select/*r1-of*
+              (fn [pick]
+                (if (= "M-ready" pick)
+                  {:status :unlinked :why {:reason "stale"}}
+                  {:status :linked :below 1 :benefits ["B17"]
+                   :log-hash "h" :calibration #{:joe}}))]
+      (let [r (outer-select/select admission-makeup
+                                   outer-select-test/base-state
+                                   admission-observation)
+            a (first (filter #(= :a (:id %)) (:cascades r)))
+            b (first (filter #(= :b (:id %)) (:cascades r)))]
+        (is (< (:G a) (:G b)) "fixture check: the unlinked pick really has the lower G")
+        (is (= {:status :chosen} (:outcome r)))
+        (is (= "M-unknown" (get-in r [:selection :selected :target])))
+        (is (= {:kind :no-benefit-path :why {:reason "stale"}}
+               (:inadmissible-reason a)))
+        (is (nil? (:inadmissible-reason b)))
+        (is (= [{:pick "M-ready" :why {:reason "stale"}}]
+               (:unlinked-picks r)))))))
+
+(deftest all-unlinked-menu-refuses-typed
+  (testing "no admissible class remains -> :no-benefit-linked-pick with
+  each pick's :why; never a silent abstain, never an unlinked choice"
+    (binding [outer-select/*r1-of*
+              (constantly {:status :unlinked :why {:reason "stale"}})]
+      (let [refusal (try (outer-select/select admission-makeup
+                                              outer-select-test/base-state
+                                              admission-observation)
+                         (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        (is (= :no-benefit-linked-pick (:kind refusal)))
+        (is (= #{"M-ready" "M-unknown"}
+               (set (map :pick (:unlinked-picks refusal)))))
+        (is (every? #(= {:reason "stale"} (:why %))
+                    (:unlinked-picks refusal)))
+        (is (every? :inadmissible-reason
+                    (get-in refusal [:selection-evidence :cascades])))))))
+
+(deftest why-and-via-ride-in-r1
+  (testing "the per-pick :r1 record keeps :why (unlinked) and :via (linked)"
+    (binding [outer-select/*r1-of*
+              (fn [pick]
+                (if (= "M-ready" pick)
+                  {:status :unlinked :why {:reason "stale"}}
+                  {:status :linked :below 1 :benefits ["B17"]
+                   :via [{:via :link :target "B17"}]
+                   :log-hash "h" :calibration #{:joe}}))]
+      (let [r (outer-select/select admission-makeup
+                                   outer-select-test/base-state
+                                   admission-observation)]
+        (is (= {:status :unlinked :why {:reason "stale"}}
+               (get-in r [:r1 "M-ready"])))
+        (is (= {:status :linked :below 1 :benefits ["B17"]
+                :via [{:via :link :target "B17"}]
+                :log-hash "h" :calibration #{:joe}}
+               (get-in r [:r1 "M-unknown"])))))))
+
+(deftest mutant-unlinked-admissible-fails
+  (testing "PLANTED MUTANT: treat :unlinked as admissible (drop the
+  :inadmissible-reason marking). Run against the source: then
+  unlinked-pick-never-chosen-even-at-lower-g fails because a wins on its
+  lower G. Here the admission check is pinned directly: the class filter
+  sees a's :inadmissible-reason"
+    (binding [outer-select/*r1-of*
+              (fn [pick]
+                (if (= "M-ready" pick)
+                  {:status :unlinked :why {:reason "stale"}}
+                  {:status :linked :below 1 :benefits ["B17"]}))]
+      (let [r (outer-select/select admission-makeup
+                                   outer-select-test/base-state
+                                   admission-observation)]
+        ;; if the marking is dropped, this record is absent and a is chosen
+        (is (some #(= :no-benefit-path (get-in % [:inadmissible-reason :kind]))
+                  (:cascades r))
+            "under the mutant no cascade carries :inadmissible-reason, so the filter admits a")))))

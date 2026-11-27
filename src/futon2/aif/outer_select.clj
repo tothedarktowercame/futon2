@@ -505,7 +505,6 @@
                                         :parameters (selection-g/predicted-parameters
                                                      (map first (get-in canonical [:fired-units (:id %)])))})))
                          cascades)
-          scores (mapv :G cascades)
           abstention (assoc (canonical-g {} (:stopping canonical))
                             :fired-patterns []
                             ;; Retained for the why renderer's altitude pin
@@ -517,6 +516,29 @@
           legacy-relations (mapv (fn [c] {:target (:pick c) :relation (get-in c [:relation :class])
                                          :relation-known? (when-not (= :no-pick (:pick c))
                                                             (known-relation? (get-in c [:relation :class])))}) cascades)
+          ;; Admission by benefit (Joe 2026-11-27: "clear assurances that
+          ;; work is linked to identified benefits"): a cascade whose pick --
+          ;; or any pick of its chain -- item-r1 reports :unlinked is scored
+          ;; and retained but never chosen (exactly as a :forbidden pick).
+          r1-map (:r1 canonical)
+          unlinked? (fn [pick]
+                      (and pick (not= :no-pick pick)
+                           (= :unlinked (:status (get r1-map pick)))))
+          cascades (mapv (fn [c]
+                           (let [picks (or (get-in c [:chain :picks]) [(:pick c)])
+                                 bad (first (filter unlinked? picks))]
+                             (if bad
+                               (assoc c :inadmissible-reason
+                                      {:kind :no-benefit-path
+                                       :why (:why (get r1-map bad))})
+                               c)))
+                         cascades)
+          unlinked-picks (vec (distinct
+                               (for [c cascades
+                                     p (or (get-in c [:chain :picks]) [(:pick c)])
+                                     :when (unlinked? p)]
+                                 {:pick p :why (:why (get r1-map p))})))
+          scores (mapv :G cascades)
           evidence (cond-> {:outer-score/admitted (mapv :target (:field partition))
                     :outer-score/excluded (:excluded partition)
                     :knowledge-producer-requests (:requests partition)
@@ -527,7 +549,8 @@
                     :cascade-pick-relations legacy-relations
                     ;; SelectionR1 (E4): what selection read for each pick, so
                     ;; it shows at [:after :selection-world] in the stepper.
-                    :r1 (:r1 canonical)}
+                    :r1 (:r1 canonical)
+                    :unlinked-picks unlinked-picks}
                      field-facts (assoc :field-facts field-facts
                                         :giraffe/pass-sha256 (:giraffe/pass-sha256 observation)
                                         :default-reach-ignored (:default-reach-ignored observation)))
@@ -563,13 +586,24 @@
                          (update-in [:construction :cascades]
                                     #(mapv (fn [c] (assoc c :class (class-of (:id c)))) %)))
             evidence (assoc evidence :choice-input-digest (choice-input-digest evidence (:focus observation)))
-            ;; Never choose a forbidden representative. Every arrangement remains
-            ;; scored and retained; refusal cannot disappear through grouping.
-            admissible (filterv #(not (contains? forbidden (:pick %))) classes)
+            ;; Never choose a forbidden or benefit-unlinked representative.
+            ;; Every arrangement remains scored and retained; refusal cannot
+            ;; disappear through grouping. A class is benefit-admissible only
+            ;; when every member cascade is.
+            admissible (filterv (fn [class]
+                                  (and (not (contains? forbidden (:pick class)))
+                                       (every? #(not (:inadmissible-reason (by-id %)))
+                                               (:members class))))
+                                classes)
             _ (when (and (seq classes) (empty? admissible))
-                (refuse! :no-admissible-pick
-                         {:cascades (mapv :id cascades) :forbidden forbidden-evidence
-                          :selection-evidence evidence}))
+                (if (seq unlinked-picks)
+                  (refuse! :no-benefit-linked-pick
+                           {:unlinked-picks unlinked-picks
+                            :forbidden forbidden-evidence
+                            :selection-evidence evidence})
+                  (refuse! :no-admissible-pick
+                           {:cascades (mapv :id cascades) :forbidden forbidden-evidence
+                            :selection-evidence evidence})))
             minimum (when (seq admissible) (reduce min (map :G admissible)))
             tied (filterv #(= minimum (:G %)) admissible)
             prospective (when (= 1 (count tied)) (first tied))

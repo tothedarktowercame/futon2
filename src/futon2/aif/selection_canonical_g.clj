@@ -217,7 +217,8 @@
              {base 1}
              linked)
      :r1 (into {} (map (fn [[p r]]
-                         [p (select-keys r [:status :benefits :below :log-hash :calibration])]))
+                         [p (select-keys r [:status :benefits :below :log-hash
+                                            :calibration :via :why])]))
                r1-by-pick)}))
 
 (defn score
