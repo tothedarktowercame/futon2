@@ -398,6 +398,34 @@
                    {:reason "futon3c.cascade.live-r1/item-r1 is not resolvable and no :r1-of was supplied"}))
         f)))
 
+(defn- benefit-partition
+  "Admission by benefit at the FIELD (Joe 2026-11-27, follow-up: most open
+  Giraffe items are unlinked, so the pick-level backstop alone would refuse
+  most real clicks). Each admitted candidate's item-r1 result:
+
+    :linked    stays in :field
+    :unlinked  moves to :excluded as {:target t :reason :no-benefit-path
+                                      :why <item-r1 :why>}
+    :refused   refuses the selection typed :r1-refused with the target and
+               reason -- never silently dropped
+    anything else  the same refusal (a malformed result is not a link)."
+  [partition r1-of]
+  (reduce
+   (fn [partition candidate]
+     (let [target (:target candidate)
+           r (r1-of target)]
+       (case (:status r)
+         :linked partition
+         :unlinked (-> partition
+                       (update :field (fn [field]
+                                        (vec (remove (fn [c] (= target (:target c))) field))))
+                       (update :excluded conj {:target target
+                                               :reason :no-benefit-path
+                                               :why (:why r)}))
+         (refuse! :r1-refused {:target target :detail (:reason r)}))))
+   partition
+   (:field partition)))
+
 (defn select
   "Score every cascade and stopping; only a unique minimum strictly below
   abstention can select. Refusals retain the same evidence as successful selection.
@@ -409,9 +437,12 @@
                                    (configured-task-selection-library-root))))
         construction (menu/construct library-root makeup observation)
         menu (:cascades construction)
-        partition (apply-c1-exclusions
-                   (known-term-field observation) (:field observation)
-                   (vec (:c1-exclusions observation)))
+        r1-of (selection-r1-of makeup)
+        partition (benefit-partition
+                   (apply-c1-exclusions
+                    (known-term-field observation) (:field observation)
+                    (vec (:c1-exclusions observation)))
+                   r1-of)
         field-facts (:field-facts observation)
         forbidden (or (:forbidden observation) #{})
         forbidden-evidence (vec (:forbidden-evidence observation))]
@@ -434,7 +465,9 @@
     (when (empty? (:field partition))
       (refuse! :outer-score/no-admitted-tasks
                {:field-facts field-facts :outer-score/admitted []
-                :outer-score/excluded (:excluded partition)}))
+                :outer-score/excluded (:excluded partition)
+                :no-benefit-path (count (filter #(= :no-benefit-path (:reason %))
+                                                (:excluded partition)))}))
     (when-not (seq menu) (refuse! :empty-cascade-menu {}))
     (let [candidates (mapv (fn [cascade]
                              (try
@@ -479,7 +512,7 @@
                                 [t (value-of (:facts observation) t)]))
                      (merge selection-g/interpretations
                             (:task-selection-interpretations makeup))
-                     (selection-r1-of makeup))
+                     r1-of)
           canonical-terms (fn [e] (let [t (get-in e [:certificate :g-terms])]
                                     {:risk (:risk t) :ambiguity (:ambiguity t)
                                      :novelty (:expected-information-gain t)}))
